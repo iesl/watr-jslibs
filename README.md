@@ -1,2 +1,3 @@
-d3.js based blocks
+Various bits of javascript to support watr-works
+
 ===
