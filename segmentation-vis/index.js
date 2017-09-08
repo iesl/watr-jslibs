@@ -1,8 +1,100 @@
 
 
 var svg = d3.select('#main') ;
-    // .on("mousemove", mousemove)
 
+var DrawingMethods = drawingMethods();
+
+function selectShapes(dataBlock) {
+    return svg.selectAll("rect")
+        .data(dataBlock.shapes, getId) ;
+}
+
+function drawingMethods() {
+
+    function OutlineMethod(dataBlock) {
+
+        console.log("Running OutlineMethod" );
+
+        var rects = selectShapes(dataBlock);
+
+        printlog(dataBlock.desc);
+
+        return rects.enter()
+            .append("rect")
+            .call(setRectAttrs)
+            .transition()
+            .duration(400)
+            .attr("fill-opacity", 0.0)
+        ;
+
+    }
+
+    function MorphMethod(dataBlock) {
+        console.log("Running MorphMethod" );
+
+        var rects = selectShapes(dataBlock);
+        printlog(dataBlock.desc);
+
+        return rects.enter()
+            .append("rect")
+            .call(setRectAttrs)
+            .transition()
+            .delay(function(d, i) { return i * 200; })
+            .attr("fill", "#EEE")
+            .duration(1000)
+            .transition()
+            .duration(1000)
+            .attr("fill", "#222")
+        ;
+
+    }
+
+    function DrawMethod(dataBlock) {
+        console.log("Running DrawMethod" );
+
+        var rects = selectShapes(dataBlock);
+
+        printlog(dataBlock.desc);
+
+        return rects.enter()
+            .append("rect")
+            .call(setRectAttrs)
+            .transition()
+            .delay(function(d, i) { return i * 200; })
+            .attr("fill", "#EEE")
+            .duration(1000)
+            .transition()
+            .duration(1000)
+            .attr("fill", "#222")
+        ;
+
+
+    }
+
+    function RemoveMethod (dataBlock) {
+        console.log("Running RemoveMethod" );
+
+        printlog(dataBlock.desc);
+
+        _.each(dataBlock.shapes, function(shape){
+            svg.selectAll("#" + shape.id )
+                .attr('class', 'trash');
+        });
+
+        return svg.selectAll(".trash")
+            .remove() ;
+    }
+
+    return {
+        'ZipFlash' : RemoveMethod,
+        'Morph'    : MorphMethod,
+        'Draw'     : DrawMethod,
+        'Outline'  : OutlineMethod,
+        'Emboss'   : DrawMethod,
+        'Remove'   : RemoveMethod,
+        'Clear'    : RemoveMethod
+    };
+}
 
 var messages = ["Logs"];
 
@@ -25,100 +117,78 @@ function printlog(msg) {
     return 0;
 }
 
+function getId(data) {
+    if (typeof data.id == 'undefined') {
+        var id = (
+            data.x + "_" + data.y + "_" +
+            data.width + "_" + data.height
+        );
+        return id;
+    } else {
+        return data.id;
+    }
+
+}
+function getCls(data) {
+    if (typeof data.class != undefined) {
+        return data.class;
+    } else {
+        return "";
+    }
+
+}
 function setRectAttrs(r) {
     return r.attr("x", function(d){ return d.x; })
         .attr("y", function(d){ return d.y; })
         .attr("width", function(d){ return d.width; })
         .attr("height", function(d){ return d.height; })
+        .attr("id", getId)
+        .attr("class", getCls)
+        .attr("fill-opacity", 0.4)
         .attr("fill", "yellow")
         .attr("stroke-width", 2)
         .attr("stroke", "#2233ff")
     ;
 }
 
-function chainfunc (dataArray, index) {
-    if (index < dataArray.length) {
-        var data = dataArray[index];
+function endAll (transition, callback) {
 
-        var method = showRegions;
-
-        switch (data.Method) {
-        case 'Persistent':
-            method = showAllAtOnce;
-            break;
-        case 'ZipFlash':
-            method = showRegions;
-            break;
-        };
-
-
-        method(dataArray[index])
-            .on("end", function (dataBlock, endIndex, c) {
-                if (index < dataArray.length) {
-                    return chainfunc(dataArray, index + 1);
-                } else {
-                    return 0;
-                }
-            });
+    if (transition.empty()) {
+        callback();
     }
+    else {
+        var n = transition.size();
+        transition.on("end", function () {
+            n--;
+            if (n === 0) {
+                callback();
+            }
+        });
+    }
+}
 
-    return 0;
-};
+function stepper (steps) {
+    if (steps.length > 0) {
+        var step = steps[0];
 
-function showAllAtOnce (dataBlock) {
+        console.log("stepper:"+step.Method, step);
 
-    var rects = svg.selectAll("rect")
-        .data(dataBlock.shapes)
-    ;
+        var method = DrawingMethods[step.Method];
 
-    printlog(dataBlock.desc);
-
-    return rects.enter()
-        .append("rect")
-        .call(setRectAttrs)
-        .transition()
-        .delay(function(d, i) { return i * 200; })
-        .attr("fill", "#EEE")
-        .duration(1000)
-        .transition()
-        .duration(1000)
-        .attr("fill", "#222")
-        .transition()
-        .delay(function(d, i) { return i * 200; })
-        .remove()
-    ;
-
-};
-function showRegions (dataBlock) {
-
-    var rects = svg.selectAll("rect")
-        .data(dataBlock.shapes)
-    ;
-
-    printlog(dataBlock.desc);
-
-    return rects.enter()
-        .append("rect")
-          .call(setRectAttrs)
-        .transition()
-          .delay(function(d, i) { return i * 200; })
-          .attr("fill", "#EEE")
-          .duration(1000)
-        .transition()
-          .duration(1000)
-          .attr("fill", "#222")
-        .transition()
-          .delay(function(d, i) { return i * 200; })
-          .remove()
-    ;
-
-};
+        method(step)
+            .transition()
+            .call(endAll, function(){
+                stepper(steps.slice(1));
+            });
+        // console.log("stepper:end:"+step.Method, dataBlock, endIndex, nodes);
+    }
+}
 
 function runLog(logData) {
+    console.log("runLog", logData.steps);
 
-    chainfunc(logData.steps, 0);
+    stepper(logData.steps);
 
-    return;
 }
 
 function parseMultilog(multilog) {
@@ -143,10 +213,9 @@ function parseMultilog(multilog) {
 }
 
 
-d3.json("multilog2.json", function(error, jsval) {
+d3.json("multilog.json", function(error, jsval) {
     if (error) throw error;
 
-    // chainfunc(showRegions, jsval, 0);
     parseMultilog(jsval);
 
     return;

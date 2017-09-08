@@ -1,0 +1,728 @@
+[ {
+  "name" : "findCandidateWhitespaceCols",
+  "steps" : [ {
+    "desc" : "Page Bounds",
+    "Method" : "Outline",
+    "shapes" : [ {
+      "x" : 0,
+      "y" : 0,
+      "width" : 595.54,
+      "height" : 794.4
+    } ]
+  }, {
+    "desc" : "Left-aligned Char Cols",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3911",
+      "class" : "LeftAlignedCharCol",
+      "x" : 47.3,
+      "y" : 160,
+      "width" : 12.11,
+      "height" : 398.43
+    }, {
+      "id" : "shape-3912",
+      "class" : "LeftAlignedCharCol",
+      "x" : 47.3,
+      "y" : 582.96,
+      "width" : 5.3,
+      "height" : 170.89
+    }, {
+      "id" : "shape-3913",
+      "class" : "LeftAlignedCharCol",
+      "x" : 211.89,
+      "y" : 322.51,
+      "width" : 5.67,
+      "height" : 167.19
+    }, {
+      "id" : "shape-3914",
+      "class" : "LeftAlignedCharCol",
+      "x" : 304.39,
+      "y" : 560.27,
+      "width" : 5.3,
+      "height" : 77.03
+    }, {
+      "id" : "shape-3915",
+      "class" : "LeftAlignedCharCol",
+      "x" : 304.4,
+      "y" : 640.55,
+      "width" : 4.72,
+      "height" : 31.14
+    }, {
+      "id" : "shape-3916",
+      "class" : "LeftAlignedCharCol",
+      "x" : 304.39,
+      "y" : 674.94,
+      "width" : 4.14,
+      "height" : 19.67
+    } ]
+  }, {
+    "desc" : "Delete candidate col (too narrow)",
+    "Method" : "Remove",
+    "shapes" : [ {
+      "id" : "shape-3911",
+      "class" : "LeftAlignedCharCol",
+      "x" : 47.3,
+      "y" : 160,
+      "width" : 12.11,
+      "height" : 398.43
+    } ]
+  }, {
+    "desc" : "Delete candidate col (too narrow)",
+    "Method" : "Remove",
+    "shapes" : [ {
+      "id" : "shape-3912",
+      "class" : "LeftAlignedCharCol",
+      "x" : 47.3,
+      "y" : 582.96,
+      "width" : 5.3,
+      "height" : 170.89
+    } ]
+  }, {
+    "desc" : "Final WS Col Candidates WhitespaceColCandidate",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3917",
+      "class" : "WhitespaceColCandidate",
+      "x" : 180.64,
+      "y" : 305.35,
+      "width" : 31.16,
+      "height" : 194.63
+    }, {
+      "id" : "shape-3918",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.58,
+      "y" : 506.62,
+      "width" : 17.71,
+      "height" : 204.39
+    }, {
+      "id" : "shape-3919",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.53,
+      "y" : 614.16,
+      "width" : 17.77,
+      "height" : 96.85
+    }, {
+      "id" : "shape-3920",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.57,
+      "y" : 506.62,
+      "width" : 17.72,
+      "height" : 204.39
+    } ]
+  } ]
+}, {
+  "name" : "combineCandidateWhitespaceCols",
+  "steps" : [ {
+    "desc" : "Whitespace Col Candidates",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3920",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.57,
+      "y" : 506.62,
+      "width" : 17.72,
+      "height" : 204.39
+    }, {
+      "id" : "shape-3918",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.58,
+      "y" : 506.62,
+      "width" : 17.71,
+      "height" : 204.39
+    }, {
+      "id" : "shape-3919",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.53,
+      "y" : 614.16,
+      "width" : 17.77,
+      "height" : 96.85
+    }, {
+      "id" : "shape-3917",
+      "class" : "WhitespaceColCandidate",
+      "x" : 180.64,
+      "y" : 305.35,
+      "width" : 31.16,
+      "height" : 194.63
+    } ]
+  }, {
+    "desc" : "Target Cols",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3920",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.57,
+      "y" : 506.62,
+      "width" : 17.72,
+      "height" : 204.39
+    } ]
+  }, {
+    "desc" : "Overlapped Cols",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3918",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.58,
+      "y" : 506.62,
+      "width" : 17.71,
+      "height" : 204.39
+    }, {
+      "id" : "shape-3919",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.53,
+      "y" : 614.16,
+      "width" : 17.77,
+      "height" : 96.85
+    } ]
+  }, {
+    "desc" : "Target Cols",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3919",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.53,
+      "y" : 614.16,
+      "width" : 17.77,
+      "height" : 96.85
+    } ]
+  }, {
+    "desc" : "Overlapped Cols",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3921",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.59,
+      "y" : 506.63,
+      "width" : 17.69,
+      "height" : 204.37
+    } ]
+  }, {
+    "desc" : "Target Cols",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3917",
+      "class" : "WhitespaceColCandidate",
+      "x" : 180.64,
+      "y" : 305.35,
+      "width" : 31.16,
+      "height" : 194.63
+    } ]
+  }, {
+    "desc" : "Overlapped Cols",
+    "Method" : "Draw",
+    "shapes" : [ ]
+  }, {
+    "desc" : "Target Cols",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3923",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.6,
+      "y" : 506.64,
+      "width" : 17.67,
+      "height" : 107.5
+    } ]
+  }, {
+    "desc" : "Overlapped Cols",
+    "Method" : "Draw",
+    "shapes" : [ ]
+  }, {
+    "desc" : "Target Cols",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "id" : "shape-3922",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.6,
+      "y" : 614.17,
+      "width" : 17.67,
+      "height" : 96.82
+    } ]
+  }, {
+    "desc" : "Overlapped Cols",
+    "Method" : "Draw",
+    "shapes" : [ ]
+  } ]
+}, {
+  "name" : "ShowAllWSColumns",
+  "steps" : [ {
+    "desc" : "W.S. Columns",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "x" : 180.64,
+      "y" : 305.35,
+      "width" : 31.16,
+      "height" : 194.63
+    }, {
+      "x" : 286.6,
+      "y" : 506.64,
+      "width" : 17.67,
+      "height" : 107.5
+    }, {
+      "x" : 286.6,
+      "y" : 614.17,
+      "width" : 17.67,
+      "height" : 96.82
+    } ]
+  } ]
+}, {
+  "name" : "approximateLineBins",
+  "steps" : [ {
+    "desc" : "Hashed Lines",
+    "Method" : "Draw",
+    "shapes" : [ {
+      "x" : 47.3,
+      "y" : 203.91,
+      "width" : 307.8,
+      "height" : 16.44
+    }, {
+      "x" : 47.3,
+      "y" : 181.96,
+      "width" : 423.67,
+      "height" : 16.44
+    }, {
+      "x" : 296.35,
+      "y" : 347.56,
+      "width" : 11.87,
+      "height" : 5.13
+    }, {
+      "x" : 211.89,
+      "y" : 344.4,
+      "width" : 331.73,
+      "height" : 7.7
+    }, {
+      "x" : 47.3,
+      "y" : 344.4,
+      "width" : 49.92,
+      "height" : 7.61
+    }, {
+      "x" : 47.3,
+      "y" : 322.57,
+      "width" : 86.19,
+      "height" : 7.61
+    }, {
+      "x" : 211.89,
+      "y" : 322.51,
+      "width" : 63.89,
+      "height" : 7.61
+    }, {
+      "x" : 47.3,
+      "y" : 288.24,
+      "width" : 79.7,
+      "height" : 8.12
+    }, {
+      "x" : 47.3,
+      "y" : 276.78,
+      "width" : 471.84,
+      "height" : 8.12
+    }, {
+      "x" : 47.3,
+      "y" : 255.83,
+      "width" : 46.47,
+      "height" : 12.27
+    }, {
+      "x" : 47.3,
+      "y" : 240.86,
+      "width" : 464.02,
+      "height" : 12.27
+    }, {
+      "x" : 260.78,
+      "y" : 240.97,
+      "width" : 3.17,
+      "height" : 8.21
+    }, {
+      "x" : 211.89,
+      "y" : 390.25,
+      "width" : 331.77,
+      "height" : 7.7
+    }, {
+      "x" : 211.89,
+      "y" : 401.77,
+      "width" : 331.68,
+      "height" : 7.7
+    }, {
+      "x" : 211.89,
+      "y" : 355.86,
+      "width" : 331.71,
+      "height" : 7.7
+    }, {
+      "x" : 211.89,
+      "y" : 367.33,
+      "width" : 331.74,
+      "height" : 7.7
+    }, {
+      "x" : 47.3,
+      "y" : 367.1,
+      "width" : 93.97,
+      "height" : 7.7
+    }, {
+      "x" : 47.3,
+      "y" : 355.75,
+      "width" : 98.17,
+      "height" : 7.7
+    }, {
+      "x" : 211.89,
+      "y" : 378.79,
+      "width" : 331.69,
+      "height" : 7.7
+    }, {
+      "x" : 47.3,
+      "y" : 378.5,
+      "width" : 119.21,
+      "height" : 7.7
+    }, {
+      "x" : 432.98,
+      "y" : 393.41,
+      "width" : 11.88,
+      "height" : 5.13
+    }, {
+      "x" : 211.89,
+      "y" : 482,
+      "width" : 209.73,
+      "height" : 7.7
+    }, {
+      "x" : 211.89,
+      "y" : 470.54,
+      "width" : 331.78,
+      "height" : 7.7
+    }, {
+      "x" : 211.89,
+      "y" : 447.62,
+      "width" : 331.73,
+      "height" : 7.7
+    }, {
+      "x" : 211.89,
+      "y" : 459.08,
+      "width" : 331.71,
+      "height" : 7.7
+    }, {
+      "x" : 211.89,
+      "y" : 413.23,
+      "width" : 331.7,
+      "height" : 7.7
+    }, {
+      "x" : 431.79,
+      "y" : 439.32,
+      "width" : 11.82,
+      "height" : 5.13
+    }, {
+      "x" : 211.89,
+      "y" : 436.15,
+      "width" : 331.73,
+      "height" : 7.7
+    }, {
+      "x" : 211.89,
+      "y" : 424.69,
+      "width" : 331.75,
+      "height" : 7.7
+    }, {
+      "x" : 407.63,
+      "y" : 493.41,
+      "width" : 135.97,
+      "height" : 7.7
+    }, {
+      "x" : 494.97,
+      "y" : 548.8,
+      "width" : 48.67,
+      "height" : 8.21
+    }, {
+      "x" : 304.4,
+      "y" : 548.81,
+      "width" : 187.3,
+      "height" : 8.21
+    }, {
+      "x" : 491.69,
+      "y" : 552.15,
+      "width" : 12.64,
+      "height" : 5.47
+    }, {
+      "x" : 304.39,
+      "y" : 583.19,
+      "width" : 239.22,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 548.67,
+      "width" : 90.78,
+      "height" : 9.75
+    }, {
+      "x" : 47.07,
+      "y" : 571.5,
+      "width" : 239.39,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 582.96,
+      "width" : 239.16,
+      "height" : 8.21
+    }, {
+      "x" : 304.39,
+      "y" : 571.73,
+      "width" : 239.19,
+      "height" : 8.21
+    }, {
+      "x" : 304.39,
+      "y" : 560.27,
+      "width" : 239.28,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 651.74,
+      "width" : 239.18,
+      "height" : 8.21
+    }, {
+      "x" : 304.4,
+      "y" : 652.02,
+      "width" : 239.25,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 674.72,
+      "width" : 239.21,
+      "height" : 8.21
+    }, {
+      "x" : 304.39,
+      "y" : 674.94,
+      "width" : 239.27,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 686.18,
+      "width" : 239.22,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 663.2,
+      "width" : 239.18,
+      "height" : 8.21
+    }, {
+      "x" : 304.4,
+      "y" : 663.48,
+      "width" : 239.22,
+      "height" : 8.21
+    }, {
+      "x" : 512.22,
+      "y" : 666.83,
+      "width" : 12.59,
+      "height" : 5.47
+    }, {
+      "x" : 47.3,
+      "y" : 617.35,
+      "width" : 239.15,
+      "height" : 8.21
+    }, {
+      "x" : 304.39,
+      "y" : 617.58,
+      "width" : 8.65,
+      "height" : 8.21
+    }, {
+      "x" : 316.31,
+      "y" : 617.57,
+      "width" : 227.34,
+      "height" : 8.21
+    }, {
+      "x" : 313.02,
+      "y" : 620.98,
+      "width" : 192.9,
+      "height" : 5.47
+    }, {
+      "x" : 482.77,
+      "y" : 632.44,
+      "width" : 12.65,
+      "height" : 5.47
+    }, {
+      "x" : 304.39,
+      "y" : 629.09,
+      "width" : 239.31,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 640.27,
+      "width" : 239.18,
+      "height" : 8.21
+    }, {
+      "x" : 304.4,
+      "y" : 640.55,
+      "width" : 239.27,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 628.81,
+      "width" : 239.18,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 605.89,
+      "width" : 239.23,
+      "height" : 8.21
+    }, {
+      "x" : 304.39,
+      "y" : 594.65,
+      "width" : 239.23,
+      "height" : 8.21
+    }, {
+      "x" : 47.3,
+      "y" : 594.42,
+      "width" : 239.18,
+      "height" : 8.21
+    }, {
+      "x" : 304.39,
+      "y" : 606.11,
+      "width" : 239.22,
+      "height" : 8.21
+    }, {
+      "x" : 58.86,
+      "y" : 726.23,
+      "width" : 157.26,
+      "height" : 7.7
+    }, {
+      "x" : 47.3,
+      "y" : 746.14,
+      "width" : 165.23,
+      "height" : 7.7
+    }, {
+      "x" : 47.3,
+      "y" : 736.15,
+      "width" : 259.25,
+      "height" : 7.7
+    }, {
+      "x" : 304.39,
+      "y" : 686.4,
+      "width" : 200.98,
+      "height" : 8.21
+    }, {
+      "x" : 52.8,
+      "y" : 716.24,
+      "width" : 161.86,
+      "height" : 7.7
+    }, {
+      "x" : 58.86,
+      "y" : 716.24,
+      "width" : 74.99,
+      "height" : 7.61
+    }, {
+      "x" : 309.96,
+      "y" : 166.75,
+      "width" : 26.31,
+      "height" : 10.95
+    }, {
+      "x" : 334.35,
+      "y" : 34.45,
+      "width" : 3.67,
+      "height" : 6.81
+    }, {
+      "x" : 175.08,
+      "y" : 128.66,
+      "width" : 240.74,
+      "height" : 7.34
+    }, {
+      "x" : 208.03,
+      "y" : 64.78,
+      "width" : 174.82,
+      "height" : 8.29
+    }, {
+      "x" : 236.67,
+      "y" : 36.62,
+      "width" : 31.38,
+      "height" : 3.14
+    }, {
+      "x" : 272.01,
+      "y" : 35.72,
+      "width" : 82.26,
+      "height" : 4.06
+    }, {
+      "x" : 47.3,
+      "y" : 160,
+      "width" : 397.66,
+      "height" : 16.44
+    } ]
+  } ]
+}, {
+  "name" : "ShowReadingOrder",
+  "steps" : [ {
+    "desc" : "WS.Col + Adjacent Regions (0)",
+    "Method" : "ZipFlash",
+    "shapes" : [ {
+      "x" : 180.64,
+      "y" : 305.35,
+      "width" : 31.16,
+      "height" : 194.63
+    }, {
+      "x" : 0,
+      "y" : 0,
+      "width" : 595.54,
+      "height" : 305.35
+    }, {
+      "x" : 0,
+      "y" : 305.35,
+      "width" : 180.64,
+      "height" : 194.63
+    }, {
+      "x" : 211.8,
+      "y" : 305.35,
+      "width" : 383.73,
+      "height" : 194.63
+    }, {
+      "x" : 0,
+      "y" : 499.99,
+      "width" : 595.54,
+      "height" : 294.4
+    } ]
+  }, {
+    "desc" : "WS.Col + Adjacent Regions (1)",
+    "Method" : "ZipFlash",
+    "shapes" : [ {
+      "x" : 286.6,
+      "y" : 506.64,
+      "width" : 17.67,
+      "height" : 107.5
+    }, {
+      "x" : 0,
+      "y" : 499.99,
+      "width" : 595.54,
+      "height" : 6.65
+    }, {
+      "x" : 0,
+      "y" : 506.64,
+      "width" : 286.6,
+      "height" : 107.5
+    }, {
+      "x" : 304.28,
+      "y" : 506.64,
+      "width" : 291.25,
+      "height" : 107.5
+    }, {
+      "x" : 0,
+      "y" : 614.15,
+      "width" : 595.54,
+      "height" : 180.24
+    } ]
+  }, {
+    "desc" : "WS.Col + Adjacent Regions (2)",
+    "Method" : "ZipFlash",
+    "shapes" : [ {
+      "x" : 286.6,
+      "y" : 614.17,
+      "width" : 17.67,
+      "height" : 96.82
+    }, {
+      "x" : 0,
+      "y" : 614.15,
+      "width" : 595.54,
+      "height" : 0.02
+    }, {
+      "x" : 0,
+      "y" : 614.17,
+      "width" : 286.6,
+      "height" : 96.82
+    }, {
+      "x" : 304.28,
+      "y" : 614.17,
+      "width" : 291.25,
+      "height" : 96.82
+    }, {
+      "x" : 0,
+      "y" : 710.99,
+      "width" : 595.54,
+      "height" : 83.4
+    } ]
+  } ]
+} ]

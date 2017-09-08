@@ -51,3 +51,55 @@ logLinks.selectAll('text.loglinks')
         ;
     })
 ;
+
+// function chainfunc (dataArray, index) {
+//     if (index < dataArray.length) {
+//         var data = dataArray[index];
+
+//         console.log(index, data);
+
+//         var method = DrawingMethods[data.Method];
+
+
+//         method(data)
+//             .on("end", function (dataBlock, endIndex, c) {
+//                 console.log("chainfunc:end", dataBlock, endIndex, c);
+
+//                 return chainfunc(dataArray, index + 1);
+//                 // if (index < dataArray.length) {
+//                 // } else {
+//                 //     return 0;
+//                 // }
+//             });
+//     }
+
+//     return;
+// };
+
+// var taskQ = d3.queue(1);
+
+// _.each(logData.steps, function (step) {
+//     var method = DrawingMethods[step.Method];
+
+//     console.log("taskQ enqueue " + step.Method);
+//     // taskQ.defer(method, step);
+
+//     taskQ.defer(function() {
+//         method(step)
+//             .on("end", function (dataBlock, endIndex, c) {
+//                 console.log("chainfunc:end", dataBlock, endIndex, c);
+
+//                 return chainfunc(dataArray, index + 1);
+//                 // if (index < dataArray.length) {
+//                 // } else {
+//                 //     return 0;
+//                 // }
+//             });
+
+
+//     });
+// });
+
+// taskQ.awaitAll(function(error) {
+//     console.log("taskQ done " + error );
+// });
