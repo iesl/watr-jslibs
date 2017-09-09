@@ -223,8 +223,9 @@ function parseMultilog(multilog) {
 
     logLinks.enter()
         .append("text").classed('loglink', true)
-        .attr("y", function(d, i){ return 100 + (i * 30); })
+        .attr("y", function(d, i){ return 20 + (i * 20); })
         .attr("x", function(d, i){ return 100 ; })
+        .attr("style", "font: normal normal normal 14px/normal Helvetica, Arial;")
         .text(function(d, i){ return i + ": " + d.name; })
         .on("click", function(pdata, pi, nodes) {
             svg.selectAll('text.loglink').remove();
