@@ -10,8 +10,8 @@
       "height" : 794.4
     } ]
   }, {
-    "desc" : "Left-aligned Char Cols",
-    "Method" : "Draw",
+    "desc" : "Left-aligned Char Cols(6)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3911",
       "class" : "LeftAlignedCharCol",
@@ -56,7 +56,7 @@
       "height" : 19.67
     } ]
   }, {
-    "desc" : "Delete candidate col (too narrow)",
+    "desc" : "Removing Left-aligned Col(1)",
     "Method" : "Remove",
     "shapes" : [ {
       "id" : "shape-3911",
@@ -67,7 +67,21 @@
       "height" : 398.43
     } ]
   }, {
-    "desc" : "Delete candidate col (too narrow)",
+    "desc" : "Expanding (l:47.18, t:159.86, w:0.01, h:398.08) To Max=(l:47.18, t:0.00, w:0.01, h:570.95)",
+    "Method" : "Morph",
+    "shapes" : [ {
+      "x" : 47.2,
+      "y" : 160,
+      "width" : 0.01,
+      "height" : 398.43
+    }, {
+      "x" : 47.2,
+      "y" : 0,
+      "width" : 0.01,
+      "height" : 571.45
+    } ]
+  }, {
+    "desc" : "Removing Left-aligned Col(1)",
     "Method" : "Remove",
     "shapes" : [ {
       "id" : "shape-3912",
@@ -78,8 +92,166 @@
       "height" : 170.89
     } ]
   }, {
-    "desc" : "Final WS Col Candidates WhitespaceColCandidate",
-    "Method" : "Draw",
+    "desc" : "Expanding (l:47.18, t:582.45, w:0.01, h:170.74) To Max=(l:47.18, t:579.26, w:0.01, h:214.44)",
+    "Method" : "Morph",
+    "shapes" : [ {
+      "x" : 47.2,
+      "y" : 582.96,
+      "width" : 0.01,
+      "height" : 170.89
+    }, {
+      "x" : 47.2,
+      "y" : 579.77,
+      "width" : 0.01,
+      "height" : 214.62
+    } ]
+  }, {
+    "desc" : "Removing Left-aligned Col(1)",
+    "Method" : "Remove",
+    "shapes" : [ {
+      "id" : "shape-3913",
+      "class" : "LeftAlignedCharCol",
+      "x" : 211.89,
+      "y" : 322.51,
+      "width" : 5.67,
+      "height" : 167.19
+    } ]
+  }, {
+    "desc" : "Expanding (l:211.70, t:322.23, w:0.01, h:167.05) To Max=(l:180.56, t:305.09, w:31.15, h:194.46)",
+    "Method" : "Morph",
+    "shapes" : [ {
+      "x" : 211.79,
+      "y" : 322.51,
+      "width" : 0.01,
+      "height" : 167.19
+    }, {
+      "x" : 180.64,
+      "y" : 305.35,
+      "width" : 31.16,
+      "height" : 194.63
+    } ]
+  }, {
+    "desc" : "Creating Candidate(1)",
+    "Method" : "ZipFlash",
+    "shapes" : [ {
+      "id" : "shape-3917",
+      "class" : "WhitespaceColCandidate",
+      "x" : 180.64,
+      "y" : 305.35,
+      "width" : 31.16,
+      "height" : 194.63
+    } ]
+  }, {
+    "desc" : "Removing Left-aligned Col(1)",
+    "Method" : "Remove",
+    "shapes" : [ {
+      "id" : "shape-3914",
+      "class" : "LeftAlignedCharCol",
+      "x" : 304.39,
+      "y" : 560.27,
+      "width" : 5.3,
+      "height" : 77.03
+    } ]
+  }, {
+    "desc" : "Expanding (l:304.16, t:559.78, w:0.01, h:76.97) To Max=(l:286.46, t:506.18, w:17.71, h:204.21)",
+    "Method" : "Morph",
+    "shapes" : [ {
+      "x" : 304.29,
+      "y" : 560.27,
+      "width" : 0.01,
+      "height" : 77.03
+    }, {
+      "x" : 286.58,
+      "y" : 506.62,
+      "width" : 17.71,
+      "height" : 204.39
+    } ]
+  }, {
+    "desc" : "Creating Candidate(1)",
+    "Method" : "ZipFlash",
+    "shapes" : [ {
+      "id" : "shape-3918",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.58,
+      "y" : 506.62,
+      "width" : 17.71,
+      "height" : 204.39
+    } ]
+  }, {
+    "desc" : "Removing Left-aligned Col(1)",
+    "Method" : "Remove",
+    "shapes" : [ {
+      "id" : "shape-3915",
+      "class" : "LeftAlignedCharCol",
+      "x" : 304.4,
+      "y" : 640.55,
+      "width" : 4.72,
+      "height" : 31.14
+    } ]
+  }, {
+    "desc" : "Expanding (l:304.17, t:639.99, w:0.01, h:31.12) To Max=(l:286.41, t:613.62, w:17.77, h:96.77)",
+    "Method" : "Morph",
+    "shapes" : [ {
+      "x" : 304.3,
+      "y" : 640.55,
+      "width" : 0.01,
+      "height" : 31.14
+    }, {
+      "x" : 286.53,
+      "y" : 614.16,
+      "width" : 17.77,
+      "height" : 96.85
+    } ]
+  }, {
+    "desc" : "Creating Candidate(1)",
+    "Method" : "ZipFlash",
+    "shapes" : [ {
+      "id" : "shape-3919",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.53,
+      "y" : 614.16,
+      "width" : 17.77,
+      "height" : 96.85
+    } ]
+  }, {
+    "desc" : "Removing Left-aligned Col(1)",
+    "Method" : "Remove",
+    "shapes" : [ {
+      "id" : "shape-3916",
+      "class" : "LeftAlignedCharCol",
+      "x" : 304.39,
+      "y" : 674.94,
+      "width" : 4.14,
+      "height" : 19.67
+    } ]
+  }, {
+    "desc" : "Expanding (l:304.16, t:674.35, w:0.01, h:19.66) To Max=(l:286.45, t:506.18, w:17.72, h:204.21)",
+    "Method" : "Morph",
+    "shapes" : [ {
+      "x" : 304.29,
+      "y" : 674.94,
+      "width" : 0.01,
+      "height" : 19.67
+    }, {
+      "x" : 286.57,
+      "y" : 506.62,
+      "width" : 17.72,
+      "height" : 204.39
+    } ]
+  }, {
+    "desc" : "Creating Candidate(1)",
+    "Method" : "ZipFlash",
+    "shapes" : [ {
+      "id" : "shape-3920",
+      "class" : "WhitespaceColCandidate",
+      "x" : 286.57,
+      "y" : 506.62,
+      "width" : 17.72,
+      "height" : 204.39
+    } ]
+  }, {
+    "desc" : "Final WS Col Candidates WhitespaceColCandidate(4)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3917",
       "class" : "WhitespaceColCandidate",
@@ -113,8 +285,8 @@
 }, {
   "name" : "combineCandidateWhitespaceCols",
   "steps" : [ {
-    "desc" : "Whitespace Col Candidates",
-    "Method" : "Draw",
+    "desc" : "Whitespace Col Candidates(4)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3920",
       "class" : "WhitespaceColCandidate",
@@ -145,8 +317,8 @@
       "height" : 194.63
     } ]
   }, {
-    "desc" : "Target Cols",
-    "Method" : "Draw",
+    "desc" : "Target Cols(1)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3920",
       "class" : "WhitespaceColCandidate",
@@ -156,8 +328,8 @@
       "height" : 204.39
     } ]
   }, {
-    "desc" : "Overlapped Cols",
-    "Method" : "Draw",
+    "desc" : "Overlapped Cols(2)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3918",
       "class" : "WhitespaceColCandidate",
@@ -174,8 +346,8 @@
       "height" : 96.85
     } ]
   }, {
-    "desc" : "Target Cols",
-    "Method" : "Draw",
+    "desc" : "Target Cols(1)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3919",
       "class" : "WhitespaceColCandidate",
@@ -185,8 +357,8 @@
       "height" : 96.85
     } ]
   }, {
-    "desc" : "Overlapped Cols",
-    "Method" : "Draw",
+    "desc" : "Overlapped Cols(1)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3921",
       "class" : "WhitespaceColCandidate",
@@ -196,8 +368,8 @@
       "height" : 204.37
     } ]
   }, {
-    "desc" : "Target Cols",
-    "Method" : "Draw",
+    "desc" : "Target Cols(1)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3917",
       "class" : "WhitespaceColCandidate",
@@ -207,12 +379,12 @@
       "height" : 194.63
     } ]
   }, {
-    "desc" : "Overlapped Cols",
-    "Method" : "Draw",
+    "desc" : "Overlapped Cols(0)",
+    "Method" : "ZipFlash",
     "shapes" : [ ]
   }, {
-    "desc" : "Target Cols",
-    "Method" : "Draw",
+    "desc" : "Target Cols(1)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3923",
       "class" : "WhitespaceColCandidate",
@@ -222,12 +394,12 @@
       "height" : 107.5
     } ]
   }, {
-    "desc" : "Overlapped Cols",
-    "Method" : "Draw",
+    "desc" : "Overlapped Cols(0)",
+    "Method" : "ZipFlash",
     "shapes" : [ ]
   }, {
-    "desc" : "Target Cols",
-    "Method" : "Draw",
+    "desc" : "Target Cols(1)",
+    "Method" : "ZipFlash",
     "shapes" : [ {
       "id" : "shape-3922",
       "class" : "WhitespaceColCandidate",
@@ -237,8 +409,8 @@
       "height" : 96.82
     } ]
   }, {
-    "desc" : "Overlapped Cols",
-    "Method" : "Draw",
+    "desc" : "Overlapped Cols(0)",
+    "Method" : "ZipFlash",
     "shapes" : [ ]
   } ]
 }, {

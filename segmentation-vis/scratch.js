@@ -103,3 +103,15 @@ logLinks.selectAll('text.loglinks')
 // taskQ.awaitAll(function(error) {
 //     console.log("taskQ done " + error );
 // });
+
+// console.log("stepper:end:"+step.Method, dataBlock, endIndex, nodes);
+    .on("hover", function(pdata, pi, nodes) {
+        d3.select(this)
+            .transition()
+            .duration(20)
+            .attr('fill', 'blue')
+            .duration(20)
+            .attr('fill', 'black')
+        ;
+
+    })

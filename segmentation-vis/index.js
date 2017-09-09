@@ -31,21 +31,24 @@ function drawingMethods() {
 
     function MorphMethod(dataBlock) {
         console.log("Running MorphMethod" );
+        var shape0 = dataBlock.shapes[0];
+        var shapesTail = dataBlock.shapes.slice(1);
 
-        var rects = selectShapes(dataBlock);
-        printlog(dataBlock.desc);
+        var select0 = svg.select("#" + shape0.id);
 
-        return rects.enter()
-            .append("rect")
-            .call(setRectAttrs)
-            .transition()
-            .delay(function(d, i) { return i * 200; })
-            .attr("fill", "#EEE")
-            .duration(1000)
-            .transition()
-            .duration(1000)
-            .attr("fill", "#222")
-        ;
+        _.each(shapesTail, function (sh) {
+            select0 = select0
+                .transition()
+                .duration(1000)
+                .attr("x",     sh.x)
+                .attr("y",     sh.y)
+                .attr("width", sh.width)
+                .attr("height",sh.height)
+            ;
+
+        });
+
+        return select0;
 
     }
 
@@ -70,6 +73,30 @@ function drawingMethods() {
 
 
     }
+    function ZipFlashMethod(dataBlock) {
+
+        var rects = selectShapes(dataBlock);
+
+        printlog(dataBlock.desc);
+
+        return rects.enter()
+            .append("rect")
+              .call(setRectAttrs)
+            .transition()
+              .duration(100)
+              .attr("opacity", 0.0)
+            .transition()
+              .duration(1000)
+              .delay(function(d, i) { return i * 400; })
+              .attr("opacity", 1.0)
+            .transition()
+              .duration(1000)
+              .delay(function(d, i) { return i * 400; })
+              .attr("opacity", 0.4)
+        ;
+
+
+    }
 
     function RemoveMethod (dataBlock) {
         console.log("Running RemoveMethod" );
@@ -86,7 +113,7 @@ function drawingMethods() {
     }
 
     return {
-        'ZipFlash' : RemoveMethod,
+        'ZipFlash' : ZipFlashMethod,
         'Morph'    : MorphMethod,
         'Draw'     : DrawMethod,
         'Outline'  : OutlineMethod,
@@ -98,7 +125,7 @@ function drawingMethods() {
 
 var messages = ["Logs"];
 
-
+// style="text-anchor: middle; font: normal normal normal 12px/normal Helvetica, Arial; " font="12px Helvetica, Arial"
 function printlog(msg) {
     messages.push(msg);
     console.log(msg);
@@ -108,9 +135,11 @@ function printlog(msg) {
         .data(messages)
         .enter()
         .append("text").classed('log', true)
-        .attr("y", function(d, i){ return 100 + (i * 30); })
-        .attr("x", function(d, i){ return 1000 ; })
-        .text(function(d, i){ return i + ": " + d; })
+        .attr("y", function(d, i){ return 100 + (i * 20); })
+        .attr("x", function(d, i){ return 700; })
+        // .attr("font", "12px Helvetica, Arial")
+        .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
+        .text(function(d, i){ return "> " + d; })
     ;
 
 
@@ -151,7 +180,7 @@ function setRectAttrs(r) {
     ;
 }
 
-function endAll (transition, callback) {
+function onEndAll (transition, callback) {
 
     if (transition.empty()) {
         callback();
@@ -171,24 +200,20 @@ function stepper (steps) {
     if (steps.length > 0) {
         var step = steps[0];
 
-        console.log("stepper:"+step.Method, step);
-
         var method = DrawingMethods[step.Method];
 
         method(step)
             .transition()
-            .call(endAll, function(){
+            .delay(500)
+            .call(onEndAll, function(){
                 stepper(steps.slice(1));
             });
-        // console.log("stepper:end:"+step.Method, dataBlock, endIndex, nodes);
     }
 }
 
 function runLog(logData) {
     console.log("runLog", logData.steps);
-
     stepper(logData.steps);
-
 }
 
 function parseMultilog(multilog) {
@@ -202,9 +227,7 @@ function parseMultilog(multilog) {
         .attr("x", function(d, i){ return 100 ; })
         .text(function(d, i){ return i + ": " + d.name; })
         .on("click", function(pdata, pi, nodes) {
-            console.log("d", pdata);
             svg.selectAll('text.loglink').remove();
-
             runLog(pdata);
         })
     ;
