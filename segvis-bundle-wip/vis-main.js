@@ -1,5 +1,36 @@
 
 
+var d3 = require('d3');
+var _ = require('underscore');
+var fs = require('fs');
+
+// var TreeWalker = nfu.TreeWalker;
+// var TreeWalker = require('node-file-utils/index').TreeWalker;
+
+// var TreeWalker = require('node-file-utils').TreeWalker;
+
+// var TreeWalker = require('node-file-utils').TreeWalker,
+//     log = require('simple-node-logger').createSimpleLogger(),
+//     walker = new TreeWalker({ log:log }),
+//     callback;
+
+//     callback = function(err, files) {
+//         if (err) throw err;
+
+//         files.forEach(function(file) {
+//             log.info( file );
+//         });
+
+//         log.info( 'file list length: ', files.length );
+//     };
+
+//     // return all the files
+//     walker.walk( 'myfolder', callback );
+
+//     // find and return just the javascript files
+//     walker.find( 'myfolder', /.js$/, callback );
+
+
 var svg = d3.select('#main') ;
 
 var DrawingMethods = drawingMethods();
@@ -236,12 +267,14 @@ function parseMultilog(multilog) {
     return;
 }
 
-
-d3.json("multilog.json", function(error, jsval) {
+d3.json("file://./multilog.json", function(error, jsval) {
+    console.log('error', error);
+    console.log(jsval);
     if (error) throw error;
 
     parseMultilog(jsval);
 
     return;
 });
+
 
