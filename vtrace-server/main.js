@@ -1,34 +1,30 @@
+const options = require('commander');
+const fs = require('fs');
+const path = require('path');
 
-if (typeof define !== 'function') {
-    var define = require('amdefine')(module);
+
+options
+    .version('1.0')
+    .option('-f, --file [vtrace-log]', 'vtrace log to view')
+    .parse(process.argv);
+
+
+
+if (options.file == undefined) {
+    options.help();
 }
 
-define(function(require) {
+var cwd = process.cwd();
 
-    var options = require('commander');
-    var fs = require('fs');
+var file = cwd + '/' + options.file;
+var realFile = fs.realpathSync(file);
+var dirname = path.dirname(realFile);
+var basename = path.basename(realFile);
+options.basename = basename;
+options.dirname = dirname;
 
-    require('./server.js');
+console.log('serving file', basename);
+console.log('   in ', dirname);
 
-    // options
-    //     .version('1.0')
-    //     .option('-f, --file [pdf]', 'pdf input filename')
-    //     .parse(process.argv);
+require('./server.js').run(options);
 
-
-    // if (options.file == undefined) {
-    //     options.help();
-    // }
-
-    // Loading file from file system into typed array
-    // var pdfPath = options.file;
-    // var data = new Uint8Array(fs.readFileSync(pdfPath));
-
-    // var p2x;
-    // if (options.meta) {
-    // } else if (options.svg) {
-    // } else {
-    //     options.help();
-    // }
-
-});
