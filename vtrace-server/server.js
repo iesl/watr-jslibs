@@ -1,12 +1,12 @@
 
 
 const Koa = require('koa');
-var Router = require('koa-router');
+const Router = require('koa-router');
 const render = require('koa-ejs');
 const path = require('path');
 const send = require('koa-send');
 const fs = require('fs');
-var router = new Router();
+const router = new Router();
 const app = new Koa();
 
 render(app, {

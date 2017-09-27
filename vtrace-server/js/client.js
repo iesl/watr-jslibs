@@ -1,3 +1,8 @@
+var colors = [
+  "aliceblue", "antiquewhite", "aqua", "aquamarine", "azure", "beige", "bisque", "black", "blanchedalmond", "blue", "blueviolet",
+  "brown", "burlywood", "cadetblue", "chartreuse", "chocolate", "coral", "cornflowerblue", "cornsilk", "crimson", "cyan", "darkblue", "darkcyan", "darkgoldenrod", "darkgray", "darkgreen", "darkgrey", "darkkhaki", "darkmagenta", "darkolivegreen", "darkorange", "darkorchid", "darkred", "darksalmon", "darkseagreen", "darkslateblue", "darkslategray",
+  "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod", "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo", "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral",  "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey", "lightpink"
+];
 
 var svg = d3.select('#main') ;
 
@@ -9,6 +14,37 @@ function selectShapes(dataBlock) {
 }
 
 function drawingMethods() {
+
+    function DrawMethod(dataBlock) {
+        console.log("Running DrawMethod" );
+
+        var rects = selectShapes(dataBlock);
+
+        printlog(dataBlock.desc);
+
+        return rects.enter()
+            .each(function (d){
+                var self = d3.select(this);
+                var shape = "???";
+                if (d.type != undefined) {
+                    shape = d.type;
+                } else {
+                    d.type = "rect";
+                }
+                self.append(shape)
+                    .call(initShapeAttrs) ;
+                return self;
+            })
+            .merge(rects)
+            // .transition()
+            // .attr("opacity", 0.1)
+
+        ;
+
+
+        // .attr("fill-opacity", 0.2)
+
+    }
 
     function OutlineMethod(dataBlock) {
 
@@ -27,11 +63,11 @@ function drawingMethods() {
                 } else {
                     d.type = "rect";
                 }
-                self.append(shape)
+                return self.append(shape)
                     .call(initShapeAttrs) ;
             })
-            .attr("opacity", 0.0)
         ;
+
 
     }
 
@@ -57,39 +93,6 @@ function drawingMethods() {
         return select0;
 
     }
-    function DrawMethod(dataBlock) {
-        console.log("Running DrawMethod" );
-
-        var rects = selectShapes(dataBlock);
-
-        printlog(dataBlock.desc);
-
-        return rects.enter()
-            .each(function (d){
-                var self = d3.select(this);
-                var shape = "rect";
-                if (d.type != undefined) {
-                    shape = d.type;
-                } else {
-                    d.type = "rect";
-                }
-                self.append(shape)
-                    .call(initShapeAttrs) ;
-            })
-            .transition()
-            .delay(function(d, i) { return i * 200; })
-            .attr("fill", "#EEE")
-            .duration(1000)
-            .transition()
-            .duration(1000)
-            .attr("fill", "#222")
-        ;
-
-
-    }
-
-    // var shapeNode = document.createElementNS(d3.namespaces.svg, shape);
-    // shapeNode.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
     function ZipFlashMethod(dataBlock) {
 
         var rects = selectShapes(dataBlock);
@@ -99,7 +102,7 @@ function drawingMethods() {
         return rects.enter()
             .append(function (d, i){
                 var shape = "rect";
-                if (d.type != 'undefined') {
+                if (d.type != undefined) {
                     shape = d.type;
                 }
                 return document.createElement(shape);
@@ -160,7 +163,6 @@ function printlog(msg) {
         .append("text").classed('log', true)
         .attr("y", function(d, i){ return 100 + (i * 20); })
         .attr("x", function(d, i){ return 700; })
-    // .attr("font", "12px Helvetica, Arial")
         .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
         .text(function(d, i){ return "> " + d; })
     ;
@@ -169,20 +171,56 @@ function printlog(msg) {
     return 0;
 }
 
-function getId(data) {
-    if (typeof data.id == 'undefined') {
-        var id = (
-            data.x + "_" + data.y + "_" +
-                data.width + "_" + data.height
-        );
-        return id;
+function dataToColor(d) {
+    if (d.class === undefined) {
+        return "black";
     } else {
-        return data.id;
-    }
+        var sum = 0;
+        for(var i = 0; i < d.class.length; i++) {
+            sum += d.class.charCodeAt(i);
+        }
+        // console.log("sum = ", sum);
 
+        var ci = sum % colors.length;
+        // var rval = ((sum * 7) % 128) + 64;
+        // var gval = ((sum * 13) % 64) + 32;
+        // var bval = (sum * 17) % 128 + 80;
+        // var h1 = rval.toString(16);
+        // var h2 = gval.toString(16);
+        // var h3 = bval.toString(16);
+        // return "#"+h1+h2+h3;
+        console.log("color = ", colors[ci]);
+        return colors[ci];
+    }
 }
+
+function setDefaultStrokeColor(d) {
+    return dataToColor(d);
+}
+function setDefaultFillColor(d) {
+    return dataToColor(d);
+}
+
+function getId(data) {
+    var shape = data.type;
+
+    if (data.id != undefined) {
+        return data.id;
+    } else {
+        switch (shape) {
+        case "rect":
+            return "r_" + data.x + "_" + data.y + "_" + data.width + "_" + data.height;
+        case "circle":
+            return "c_" + data.cx + "_" + data.cy + "_" + data.r ;
+        case "line":
+            return "l_" + data.x1 + "_" + data.y1 + "_" + data.x2 + "_" + data.y2 ;
+        }
+    }
+    return "";
+}
+
 function getCls(data) {
-    if (typeof data.class != 'undefined') {
+    if (data.class != undefined) {
         return "shape " + data.class;
     } else {
         return "shape";
@@ -191,8 +229,9 @@ function getCls(data) {
 }
 
 function initShapeAttrs(r) {
-    console.log("initShapeAttrs: r=", r);
+    // console.log("initShapeAttrs: r=", r);
     var shape = r.node().nodeName.toLowerCase();
+    console.log("initShapeAttrs: shape", shape);
 
     switch (shape) {
     case "rect":
@@ -204,53 +243,39 @@ function initShapeAttrs(r) {
             .attr("class", getCls)
             .attr("opacity", 0.3)
             .attr("fill-opacity", 0.1)
-            .attr("fill", "yellow")
             .attr("stroke-width", 1)
-            .attr("stroke", "#223388")
+            .attr("fill",  setDefaultFillColor)
+            .attr("stroke", setDefaultStrokeColor)
         ;
-        break;
+
     case "circle":
-        r.attr("cx", function(d){ return d.x; })
-            .attr("cy", function(d){ return d.y; })
+        return r.attr("cx", function(d){ return d.cx; })
+            .attr("cy", function(d){ return d.cy; })
             .attr("r", function(d){ return d.r; })
             .attr("id", getId)
             .attr("class", getCls)
-            .attr("fill-opacity", 0.4)
+            .attr("fill-opacity", 0.2)
             .attr("fill", "blue")
-            .attr("stroke-width", 3)
+            .attr("stroke-width", 1)
             .attr("stroke", "blue")
         ;
-        break;
+
     case "line":
-        r.attr("x1", function(d){ return d.x1; })
+        return r.attr("x1", function(d){ return d.x1; })
             .attr("y1", function(d){ return d.y1; })
             .attr("x2", function(d){ return d.x2; })
             .attr("y2", function(d){ return d.y2; })
             .attr("id", getId)
             .attr("class", getCls)
             .attr("fill-opacity", 0.2)
-            .attr("fill", "red")
-            .attr("stroke-width", 1)
-            .attr("stroke", "red")
+            .attr("stroke-width", 2)
+            .attr("fill",  setDefaultFillColor)
+            .attr("stroke", setDefaultStrokeColor)
         ;
-        break;
     };
+    // console.log("done initShapeAttrs: r=");
 
     return r;
-}
-
-function setRectAttrs(r) {
-    return r.attr("x", function(d){ return d.x; })
-        .attr("y", function(d){ return d.y; })
-        .attr("width", function(d){ return d.width; })
-        .attr("height", function(d){ return d.height; })
-        .attr("id", getId)
-        .attr("class", getCls)
-        .attr("fill-opacity", 0.4)
-        .attr("fill", "yellow")
-        .attr("stroke-width", 2)
-        .attr("stroke", "#2233ff")
-    ;
 }
 
 function onEndAll (transition, callback) {
@@ -277,7 +302,7 @@ function stepper (steps) {
 
         method(step)
             .transition()
-            .delay(500)
+            .delay(300)
             .call(onEndAll, function(){
                 stepper(steps.slice(1));
             });
