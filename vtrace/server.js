@@ -26,7 +26,7 @@ function run (options) {
             await send(ctx, options.basename, { root: options.dirname });
         })
         .get('/js/:file', async function(ctx, next) {
-            await send(ctx, ctx.params.file, { root: __dirname + '/js' });
+            await send(ctx, ctx.params.file, { root: __dirname + '/www' });
         })
         .get('/lib/:file', async function(ctx, next) {
             await send(ctx, ctx.params.file, { root: __dirname + '/lib' });
