@@ -4,6 +4,9 @@ var colors = [
   "darkslategrey", "darkturquoise", "darkviolet", "deeppink", "deepskyblue", "dimgray", "dimgrey", "dodgerblue", "firebrick", "floralwhite", "forestgreen", "fuchsia", "gainsboro", "ghostwhite", "gold", "goldenrod", "gray", "green", "greenyellow", "grey", "honeydew", "hotpink", "indianred", "indigo", "ivory", "khaki", "lavender", "lavenderblush", "lawngreen", "lemonchiffon", "lightblue", "lightcoral",  "lightgoldenrodyellow", "lightgray", "lightgreen", "lightgrey", "lightpink"
 ];
 
+var d3 = define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, _){
+
+
 var svg = d3.select('#main') ;
 
 var DrawingMethods = drawingMethods();
@@ -358,15 +361,24 @@ function parseMultilog(multilog) {
 
 
 
-d3.json("/vtrace", function(error, jsval) {
+function runTrace() {
+    d3.json("/vtrace", function(error, jsval) {
 
-    if (error) {
-        console.log('error', error);
-        console.log('error', error.target.responseText);
-        throw error;
-    }
+        if (error) {
+            console.log('error', error);
+            console.log('error', error.target.responseText);
+            throw error;
+        }
 
-    parseMultilog(jsval);
+        parseMultilog(jsval);
 
-    return;
+        return;
+    });
+
+}
+
+return {
+    run: runTrace
+};
+
 });
