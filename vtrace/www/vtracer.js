@@ -49,11 +49,11 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
 
             console.log("Running OutlineMethod" );
 
-            var rects = selectShapes(dataBlock);
+            var shapes = selectShapes(dataBlock);
 
             printlog(dataBlock.desc);
 
-            return rects.enter()
+            return shapes.enter()
                 .each(function (d){
                     var self = d3.select(this);
                     var shape = "rect";
@@ -171,7 +171,9 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
     }
 
     function dataToColor(d) {
-        if (d.class === undefined) {
+        if (d.stroke !== undefined) {
+            return d.stroke;
+        } else if (d.class === undefined) {
             return "black";
         } else {
             var sum = 0;
@@ -179,7 +181,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
                 sum += d.class.charCodeAt(i);
             }
             var ci = sum % colornames.length;
-            console.log("color = ", colornames[ci]);
+            // console.log("color = ", colornames[ci]);
             return colornames[ci];
         }
     }
@@ -239,6 +241,8 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
             .on("mouseout", function(d) {
                 if (d.class != undefined) {
                     tooltipDiv.transition()
+                        .transition()
+                        .delay(3000)
                        .duration(1000)
                        .style("opacity", 0);
                 }
@@ -248,9 +252,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
 
 
     function initShapeAttrs(r) {
-        // console.log("initShapeAttrs: r=", r);
         var shape = r.node().nodeName.toLowerCase();
-        console.log("initShapeAttrs: shape", shape);
 
         switch (shape) {
         case "rect":
@@ -262,7 +264,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
                 .attr("class", getCls)
                 .attr("opacity", 0.3)
                 .attr("fill-opacity", 0.1)
-                .attr("stroke-width", 2)
+                .attr("stroke-width", 1)
                 .attr("fill",  setDefaultFillColor)
                 .attr("stroke", setDefaultStrokeColor)
                 .call(addTooltip)
@@ -275,7 +277,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
                 .attr("id", getId)
                 .attr("class", getCls)
                 .attr("fill-opacity", 0.2)
-                .attr("stroke-width", 2)
+                .attr("stroke-width", 1)
                 .attr("fill",  setDefaultFillColor)
                 .attr("stroke", setDefaultStrokeColor)
                 .call(addTooltip)
@@ -289,11 +291,33 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
                 .attr("id", getId)
                 .attr("class", getCls)
                 .attr("fill-opacity", 0.2)
-                .attr("stroke-width", 2)
+                .attr("stroke-width", 1)
                 .attr("fill",  setDefaultFillColor)
                 .attr("stroke", setDefaultStrokeColor)
                 .call(addTooltip)
             ;
+        case "image":
+            return r.attr("x", function(d){ return d.x; })
+                .attr("y", function(d){ return d.y; })
+                .attr("width", function(d){ return d.width; })
+                .attr("height", function(d){ return d.height; })
+                .attr("href", function(d){ return '/entry/'+corpusEntry()+'/image/page/'+d.page; })
+                .attr("stroke-width", 1)
+                .attr("stroke", "black")
+                .attr("opacity", 0.3)
+            ;
+            // var entry = corpusEntry();
+
+            // svg.append('image')
+            //     .attr('href', '/entry/'+entry+'/image/page/'+1)
+            //     .attr('x', 0)
+            //     .attr('y', 0)
+            //     .attr('width', 600)
+            //     .attr('height', 800)
+            // ;
+            // .attr("fill-opacity", 0.4)
+            // .attr("id", getId)
+            // .attr("class", getCls)
         };
 
         return r;
@@ -330,6 +354,11 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
         }
     }
 
+    function corpusEntry() {
+        let entry = location.href.split('/').reverse()[0];
+        return entry;
+    }
+
     function runLog(logData) {
         console.log("runLog", logData.steps);
         stepper(logData.steps);
@@ -356,7 +385,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
     }
 
     function runTrace() {
-        var entry = location.href.split('/').reverse()[0];
+        var entry = corpusEntry();
         console.log('entry', entry);
         d3.json("/vtrace/json/"+entry, function(error, jsval) {
 

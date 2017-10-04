@@ -19,8 +19,8 @@ render(app, {
     debug: false
 });
 
-
 // Serve public assets
+
 router
     .get('/js/:file', async function(ctx, next) {
         await send(ctx, ctx.params.file, { root: __dirname + '/www' });
@@ -29,10 +29,9 @@ router
         await send(ctx, ctx.params.file, { root: __dirname + '/lib' });
     }) ;
 
-function run (options) {
+function buildCorpusEntryTable(options) {
 
     let dirEntries = fs.readdirSync(options.corpusRoot);
-
 
     let corpusEntries = _.filter(dirEntries, function(entry) {
         let path = options.corpusRoot + '/' + entry;
@@ -40,8 +39,10 @@ function run (options) {
         return stats.isDirectory() && entry.endsWith(".d");
     });
 
-    console.log("corpusEntries", corpusEntries);
+    return corpusEntries;
+}
 
+function buildMenu(options, corpusEntries) {
     let menu = _.map(corpusEntries, (entry) => {
         let path = options.corpusRoot + '/' + entry + '/tracelogs/tracelog.json' ;
         let stats = fs.statSync(path);
@@ -54,10 +55,23 @@ function run (options) {
         }
         return menuEntry;
     });
+    return menu;
+}
 
+function run (options) {
+
+    let corpusEntries = buildCorpusEntryTable(options);
+
+    let menu = buildMenu(options, corpusEntries);
+
+    // /page-images/page-5.opt.png
     router
-        .get('/vtrace/:entry', async function(ctx, next) {
-            await ctx.render('vtracer');
+        .get('/entry/:entry/image/page/:page', async function(ctx, next) {
+            let entry = ctx.params.entry;
+            let page = ctx.params.page;
+            let file = 'page-'+page+'.opt.png';
+            let basepath = options.corpusRoot + '/'+ ctx.params.entry + '/page-images/';
+            await send(ctx, file, { root: basepath });
         })
         .get('/vtrace/json/:entry', async function(ctx, next) {
             let basepath = options.corpusRoot + '/'+ ctx.params.entry + '/tracelogs';
@@ -65,6 +79,9 @@ function run (options) {
             await send(ctx, 'tracelog.json', {
                 root: basepath
             });
+        })
+        .get('/vtrace/:entry', async function(ctx, next) {
+            await ctx.render('vtracer');
         })
         .get('/menu', async function(ctx, next) {
             ctx.body = await JSON.stringify(menu);
@@ -85,26 +102,5 @@ function run (options) {
     });
 }
 
-function runSingleLog (options) {
-
-
-    router
-        .get('/vtrace', async function(ctx, next) {
-            console.log("/vtrace sending", options.basename);
-            await send(ctx, options.basename, { root: options.dirname });
-        })
-        .get('/', async function (ctx, next) {
-            await ctx.render('index');
-        })
-    ;
-
-    app.use(router.routes())
-        .use(router.allowedMethods());
-
-
-    var server = app.listen(3000, function() {
-        console.log('Koa is listening to http://localhost:3000');
-    });
-}
 
 exports.run = run;
