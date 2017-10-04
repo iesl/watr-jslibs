@@ -1,9 +1,7 @@
 
-
 define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, _, colors){
 
     var colornames = colors.contrasting;
-
 
     var svg = d3.select('#main') ;
 
@@ -357,10 +355,10 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
         return;
     }
 
-
-
     function runTrace() {
-        d3.json("/vtrace", function(error, jsval) {
+        var entry = location.href.split('/').reverse()[0];
+        console.log('entry', entry);
+        d3.json("/vtrace/json/"+entry, function(error, jsval) {
 
             if (error) {
                 console.log('error', error);

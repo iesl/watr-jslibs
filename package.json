@@ -7,6 +7,7 @@
     "commander": "^2.11.0",
     "koa": "^2.3.0",
     "koa-ejs": "^4.1.0",
+    "koa-json": "^2.0.2",
     "koa-router": "^7.2.1",
     "koa-send": "^4.1.0",
     "node-file-utils": "^0.91.20",

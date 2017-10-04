@@ -3,28 +3,22 @@ const fs = require('fs');
 const path = require('path');
 
 
+// .option('-f, --file [vtrace-log]', 'vtrace log to view')
+
 options
     .version('1.0')
-    .option('-f, --file [vtrace-log]', 'vtrace log to view')
+    .option('--corpus [corpus root]', 'root path of corpus')
     .parse(process.argv);
 
-
-
-if (options.file == undefined) {
+if (options.corpus == undefined) {
     options.help();
 }
 
 var cwd = process.cwd();
 
-var file = cwd + '/' + options.file;
-var realFile = fs.realpathSync(file);
-var dirname = path.dirname(realFile);
-var basename = path.basename(realFile);
-options.basename = basename;
-options.dirname = dirname;
+var root = cwd + '/' + options.corpus;
+options.corpusRoot = root;
 
-console.log('serving file', basename);
-console.log('   in ', dirname);
+console.log('starting in corpus', root);
 
 require('./server.js').run(options);
-
