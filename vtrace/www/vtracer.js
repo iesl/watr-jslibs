@@ -1,5 +1,8 @@
 
-define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, _, colors){
+define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
+
+    console.log('d3', d3);
+    console.log('us', _);
 
     let colorMap = {
         "Caption"                : "blue",
@@ -126,6 +129,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
                 .attr("x", function(d, i){ return 700; })
                 .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
                 .text(function(d, i){ return d.text; })
+                .call(textGridLocationIndicator)
             ;
 
         }
@@ -137,6 +141,45 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
             'Remove'   : RemoveMethod,
             'Clear'    : RemoveMethod
         };
+    }
+
+    function textGridLocationIndicator(r) {
+        return r
+            .on("mouseover", function(d) {
+                let loci = _.filter(d.loci, function (loc) {
+                    return typeof loc !== "string";
+                });
+
+                svg.selectAll('.textloc')
+                    .data(loci)
+                    .enter()
+                    .append('circle')
+                    .classed('textloc', true)
+                    .attr("cx", function(d){
+                        let cx = d[0][1][0] / 100.0;
+                        return cx;
+                    })
+                    .attr("cy", function(d){
+                        let cy = d[0][1][1] / 100.0;
+                        return cy;
+                    })
+                    .attr("r", function(d){ return 1; })
+                    .attr("fill-opacity", 0.5)
+                    .attr("stroke-width", 1)
+                    .attr("fill",  'blue')
+                    .attr("stroke", 'blue')
+                    .transition()
+                    .delay(1000)
+                    .duration(100)
+                    .remove()
+                ;
+
+            })
+            .on("mouseout", function(d) {
+                return svg.selectAll('.textloc')
+                    .remove();
+            });
+
     }
 
     var messages = [];
