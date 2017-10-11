@@ -1,7 +1,25 @@
 
 define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, _, colors){
 
-    var colornames = colors.contrasting;
+    let colorMap = {
+        "Caption"                : "blue",
+        "Image"                  : "brown",
+        "CharRun"                : "chocolate",
+        "CharRunBegin"           : "purple",
+        "CharRunBaseline"        : "purple",
+        "VisualBaseline"         : "blue",
+        "LeftAlignedCharCol"     : "crimson",
+        "RightAlignedCharCol"    : "darkorchid",
+        "LeftAlignedColEnd"      : "darkred",
+        "HPageDivider"           : "darksalmon",
+        "ColLeftEvidence"        : "darkturquoise",
+        "ColRightEvidence"       : "firebrick",
+        "PageLines"              : "green",
+        "HLinePath"              : "indianred",
+        "VLinePath"              : "khaki",
+        "LinePath"               : "lavender",
+        "OutlineBox"             : "magenta"
+    } ;
 
     var svg = d3.select('#main') ;
 
@@ -35,8 +53,8 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
                     return self;
                 })
                 .merge(rects)
-                // .transition()
-                // .attr("opacity", 0.1)
+            // .transition()
+            // .attr("opacity", 0.1)
 
             ;
 
@@ -176,13 +194,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
         } else if (d.class === undefined) {
             return "black";
         } else {
-            var sum = 0;
-            for(var i = 0; i < d.class.length; i++) {
-                sum += d.class.charCodeAt(i);
-            }
-            var ci = sum % colornames.length;
-            // console.log("color = ", colornames[ci]);
-            return colornames[ci];
+            return colorMap[d.class];
         }
     }
 

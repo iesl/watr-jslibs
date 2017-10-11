@@ -45,15 +45,25 @@ function buildCorpusEntryTable(options) {
 function buildMenu(options, corpusEntries) {
     let menu = _.map(corpusEntries, (entry) => {
         let path = options.corpusRoot + '/' + entry + '/tracelogs/tracelog.json' ;
-        let stats = fs.statSync(path);
-        let menuEntry = {
-            'entry': entry
-        };
+        if (fs.exists(path)) {
+            let stats = fs.statSync(path);
+            let menuEntry = {
+                'entry': entry
+            };
 
-        if(stats.isFile()) {
-            menuEntry.logfile =  path;
+            if(stats.isFile()) {
+                menuEntry.logfile =  path;
+            }
+            return menuEntry;
+        } else {
+            let menuEntry = {
+                'entry': entry,
+                'logfile': ""
+            };
+
+            return menuEntry;
+
         }
-        return menuEntry;
     });
     return menu;
 }
