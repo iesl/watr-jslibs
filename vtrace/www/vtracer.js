@@ -23,6 +23,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
 
     var svg = d3.select('#main') ;
 
+
     var DrawingMethods = drawingMethods();
 
     function selectShapes(dataBlock) {
@@ -53,13 +54,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
                     return self;
                 })
                 .merge(rects)
-            // .transition()
-            // .attr("opacity", 0.1)
-
             ;
-
-
-            // .attr("fill-opacity", 0.2)
 
         }
 
@@ -88,59 +83,6 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
 
         }
 
-        function MorphMethod(dataBlock) {
-            console.log("Running MorphMethod" );
-            var shape0 = dataBlock.shapes[0];
-            var shapesTail = dataBlock.shapes.slice(1);
-
-            var select0 = svg.select("#" + shape0.id);
-
-            _.each(shapesTail, function (sh) {
-                select0 = select0
-                    .transition()
-                    .duration(1000)
-                    .attr("x",     sh.x)
-                    .attr("y",     sh.y)
-                    .attr("width", sh.width)
-                    .attr("height",sh.height)
-                ;
-
-            });
-
-            return select0;
-
-        }
-        function ZipFlashMethod(dataBlock) {
-
-            var rects = selectShapes(dataBlock);
-
-            printlog(dataBlock.desc);
-
-            return rects.enter()
-                .append(function (d, i){
-                    var shape = "rect";
-                    if (d.type != undefined) {
-                        shape = d.type;
-                    }
-                    return document.createElement(shape);
-                })
-                .call(initShapeAttrs)
-                .transition()
-                .duration(100)
-                .attr("opacity", 0.0)
-                .transition()
-                .duration(1000)
-                .delay(function(d, i) { return i * 400; })
-                .attr("opacity", 1.0)
-                .transition()
-                .duration(1000)
-                .delay(function(d, i) { return i * 400; })
-                .attr("opacity", 0.4)
-            ;
-
-
-        }
-
         function RemoveMethod (dataBlock) {
             console.log("Running RemoveMethod" );
 
@@ -155,25 +97,56 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
                 .remove() ;
         }
 
+        function TextGridMethod (dataBlock) {
+            console.log("Running TextGridMethod" );
+
+            let gridRows = dataBlock.grid.rows;
+            let gridShapes = dataBlock.shapes;
+
+            svg.selectAll(".shape")
+                .data(gridShapes, getId)
+                .enter()
+                .each(function (d){
+                    var self = d3.select(this);
+                    let shape = d.type;
+                    return self.append(shape)
+                        .call(initShapeAttrs);
+                })
+            ;
+            svg.selectAll("image")
+                .attr("opacity", 1.0)
+            ;
+
+            return svg.selectAll('.gridrow')
+                .data(gridRows)
+                .enter()
+                .append('text')
+                .classed('gridrow', true)
+                .attr("y", function(d, i){ return 20 + (i * 20); })
+                .attr("x", function(d, i){ return 700; })
+                .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
+                .text(function(d, i){ return d.text; })
+            ;
+
+        }
+
         return {
-            'ZipFlash' : ZipFlashMethod,
-            'Morph'    : MorphMethod,
+            'TextGrid' : TextGridMethod,
             'Draw'     : DrawMethod,
             'Outline'  : OutlineMethod,
-            'Emboss'   : DrawMethod,
             'Remove'   : RemoveMethod,
             'Clear'    : RemoveMethod
         };
     }
 
-    var messages = ["Logs"];
+    var messages = [];
 
     // style="text-anchor: middle; font: normal normal normal 12px/normal Helvetica, Arial; " font="12px Helvetica, Arial"
     function printlog(msg) {
         messages.push(msg);
         console.log(msg);
-        svg
-            .select('g.log')
+
+        svg.select('g.log')
             .selectAll('text.log')
             .data(messages)
             .enter()
@@ -318,18 +291,6 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
                 .attr("stroke", "black")
                 .attr("opacity", 0.3)
             ;
-            // var entry = corpusEntry();
-
-            // svg.append('image')
-            //     .attr('href', '/entry/'+entry+'/image/page/'+1)
-            //     .attr('x', 0)
-            //     .attr('y', 0)
-            //     .attr('width', 600)
-            //     .attr('height', 800)
-            // ;
-            // .attr("fill-opacity", 0.4)
-            // .attr("id", getId)
-            // .attr("class", getCls)
         };
 
         return r;
@@ -367,6 +328,11 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
     }
 
     function corpusEntry() {
+        let entry = location.href.split('/').reverse()[1];
+        return entry;
+    }
+
+    function corpusLogfile() {
         let entry = location.href.split('/').reverse()[0];
         return entry;
     }
@@ -397,9 +363,11 @@ define(['/lib/d3.js', '/lib/underscore-min.js', '/js/colors.js'], function (d3, 
     }
 
     function runTrace() {
-        var entry = corpusEntry();
+        let entry = corpusEntry();
+        let log = corpusLogfile();
         console.log('entry', entry);
-        d3.json("/vtrace/json/"+entry, function(error, jsval) {
+        console.log('log', log);
+        d3.json("/vtrace/json/"+entry+"/"+log, function(error, jsval) {
 
             if (error) {
                 console.log('error', error);

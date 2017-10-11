@@ -42,9 +42,10 @@ function buildCorpusEntryTable(options) {
     return corpusEntries;
 }
 
-function buildMenu(options, corpusEntries) {
+function buildMenuOrig(options, corpusEntries) {
     let menu = _.map(corpusEntries, (entry) => {
         let path = options.corpusRoot + '/' + entry + '/tracelogs/tracelog.json' ;
+
         if (fs.exists(path)) {
             let stats = fs.statSync(path);
             let menuEntry = {
@@ -67,6 +68,32 @@ function buildMenu(options, corpusEntries) {
     });
     return menu;
 }
+function buildMenu(options, corpusEntries) {
+    let menu = _.map(corpusEntries, (entry) => {
+        let tracelogDir = options.corpusRoot + '/' + entry + '/tracelogs' ;
+
+        let dirEntries = fs.readdirSync(tracelogDir);
+
+        let logEntries = _.filter(dirEntries, function(entry) {
+            let path = tracelogDir + '/' + entry;
+            let stats = fs.statSync(path);
+            return stats.isFile() && entry.endsWith(".json");
+        });
+
+        let fqLogPaths = _.map(logEntries, (e) => {
+            return entry + '/' + e;
+        });
+
+        let menuEntry = {
+            'entry': entry,
+            'logfiles': fqLogPaths
+        };
+
+        return menuEntry;
+
+    });
+    return menu;
+}
 
 function run (options) {
 
@@ -74,7 +101,6 @@ function run (options) {
 
     let menu = buildMenu(options, corpusEntries);
 
-    // /page-images/page-5.opt.png
     router
         .get('/entry/:entry/image/page/:page', async function(ctx, next) {
             let entry = ctx.params.entry;
@@ -83,14 +109,15 @@ function run (options) {
             let basepath = options.corpusRoot + '/'+ ctx.params.entry + '/page-images/';
             await send(ctx, file, { root: basepath });
         })
-        .get('/vtrace/json/:entry', async function(ctx, next) {
+        .get('/vtrace/json/:entry/:log', async function(ctx, next) {
             let basepath = options.corpusRoot + '/'+ ctx.params.entry + '/tracelogs';
-            console.log("/vtrace/json root ", basepath);
-            await send(ctx, 'tracelog.json', {
+            let logfile = ctx.params.log;
+            console.log("/vtrace/json root ", basepath, '/', logfile);
+            await send(ctx, logfile, {
                 root: basepath
             });
         })
-        .get('/vtrace/:entry', async function(ctx, next) {
+        .get('/vtrace/:entry/:logfile', async function(ctx, next) {
             await ctx.render('vtracer');
         })
         .get('/menu', async function(ctx, next) {
