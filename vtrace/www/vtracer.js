@@ -125,7 +125,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
                 .enter()
                 .append('text')
                 .classed('gridrow', true)
-                .attr("y", function(d, i){ return 20 + (i * 20); })
+                .attr("y", function(d, i){ return 20 + (i * 16); })
                 .attr("x", function(d, i){ return 700; })
                 .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
                 .text(function(d, i){ return d.text; })
@@ -143,35 +143,28 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
         };
     }
 
+    let getX = d => d[0][1][0] / 100.0;
+    let getY = d => d[0][1][1] / 100.0;
+
     function textGridLocationIndicator(r) {
         return r
             .on("mouseover", function(d) {
-                let loci = _.filter(d.loci, function (loc) {
+                let loci = _.filter(d.loci,  loc => {
                     return typeof loc !== "string";
                 });
 
                 svg.selectAll('.textloc')
                     .data(loci)
                     .enter()
-                    .append('circle')
+                    .append('line')
                     .classed('textloc', true)
-                    .attr("cx", function(d){
-                        let cx = d[0][1][0] / 100.0;
-                        return cx;
-                    })
-                    .attr("cy", function(d){
-                        let cy = d[0][1][1] / 100.0;
-                        return cy;
-                    })
-                    .attr("r", function(d){ return 1; })
-                    .attr("fill-opacity", 0.5)
+                    .attr("x1", getX)
+                    .attr("y1", getY)
+                    .attr("x2", getX)
+                    .attr("y2", function(d) {return getY(d) + 2;})
+                    .attr("opacity", 0.9)
                     .attr("stroke-width", 1)
-                    .attr("fill",  'blue')
                     .attr("stroke", 'blue')
-                    .transition()
-                    .delay(1000)
-                    .duration(100)
-                    .remove()
                 ;
 
             })
@@ -184,7 +177,6 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
 
     var messages = [];
 
-    // style="text-anchor: middle; font: normal normal normal 12px/normal Helvetica, Arial; " font="12px Helvetica, Arial"
     function printlog(msg) {
         messages.push(msg);
         console.log(msg);
@@ -386,22 +378,28 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
     }
 
     function parseMultilog(multilog) {
-        var logLinks = svg.selectAll("text.loglink")
-            .data(multilog)
-        ;
+        if (multilog.length == 1) {
+            svg.selectAll('text.loglink').remove();
+            runLog(multilog[0]);
+        } else {
+            var logLinks = svg.selectAll("text.loglink")
+                .data(multilog)
+            ;
 
-        logLinks.enter()
-            .append("text").classed('loglink', true)
-            .attr("y", function(d, i){ return 20 + (i * 20); })
-            .attr("x", function(d, i){ return 100 ; })
-            .attr("style", "font: normal normal normal 14px/normal Helvetica, Arial;")
-            .text(function(d, i){ return i + ": " + d.name; })
-            .on("click", function(pdata, pi, nodes) {
-                svg.selectAll('text.loglink').remove();
-                runLog(pdata);
-            })
-        ;
+            logLinks.enter()
+                .append("text").classed('loglink', true)
+                .attr("y", function(d, i){ return 20 + (i * 20); })
+                .attr("x", function(d, i){ return 100 ; })
+                .attr("style", "font: normal normal normal 14px/normal Helvetica, Arial;")
+                .text(function(d, i){ return i + ": " + d.name; })
+                .on("click", function(pdata, pi, nodes) {
+                    svg.selectAll('text.loglink').remove();
+                    runLog(pdata);
+                })
+            ;
 
+
+        }
         return;
     }
 
