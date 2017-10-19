@@ -49,9 +49,9 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
 
             let menuItems = [];
 
-            _.each(jsval, (entry) =>{
+            _.each(jsval, (entry, i) =>{
                 menuItems.push(
-                    {'name': entry.entry, 'level': 1}
+                    {'name': entry.entry, 'level': 1, 'num': i}
                 );
                 _.each(entry.logfiles, (logfile) =>{
                     menuItems.push(
@@ -60,15 +60,17 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
                 });
             });
 
-            console.log('menuItems', menuItems);
+            console.log('menuItems', menuItems.length, ':', menuItems);
 
-            let currTop = 20;
+            let height = (menuItems.length * 20 ) + 50;
+
+            console.log('height', height);
 
             var menu = d3.select('#menu') ;
             var menuSvg = menu.append('svg')
                 .classed('menu', true)
                 .attr('width', 1000)
-                .attr('height', 1000)
+                .attr('height', height)
             ;
 
             d3.select('svg.menu')
@@ -80,9 +82,9 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
                 .append("a")
                 .attr("xlink:href", function(d){ return '/vtrace/'+d.url; })
                 .append("text")
-                .text(function(d, i){ return d.name; })
-                .attr("x", function(d, i){ return 40 + (d.level*20); })
-                .attr("y", function(d, i){ return 40 + (i*16); })
+                .text(function(d, i){ return d.num ?  '(' + d.num + ')    ' + d.name : d.name; })
+                .attr("x", function(d, i){ return 40 + (d.level*25); })
+                .attr("y", function(d, i){ return  40 + (i*16);})
                 .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
             ;
         });

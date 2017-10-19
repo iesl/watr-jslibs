@@ -4,6 +4,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
     console.log('d3', d3);
     console.log('us', _);
 
+
     let colorMap = {
         "Caption"                : "blue",
         "Image"                  : "brown",
@@ -24,8 +25,9 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
         "OutlineBox"             : "magenta"
     } ;
 
-    var svg = d3.select('#main') ;
+    colorMap
 
+    var svg = d3.select('#main') ;
 
     var DrawingMethods = drawingMethods();
 
@@ -33,6 +35,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
         return svg.selectAll(".shape")
             .data(dataBlock.shapes, getId) ;
     }
+
 
     function drawingMethods() {
 
@@ -145,6 +148,8 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
 
     let getX = d => d[0][1][0] / 100.0;
     let getY = d => d[0][1][1] / 100.0;
+    let getW = d => d[0][1][2] / 100.0;
+    let getH = d => d[0][1][3] / 100.0;
 
     function textGridLocationIndicator(r) {
         return r
@@ -153,22 +158,24 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
                     return typeof loc !== "string";
                 });
 
+                // #d3-chain-indent#
                 svg.selectAll('.textloc')
-                    .data(loci)
+                      .data(loci)
                     .enter()
-                    .append('line')
-                    .classed('textloc', true)
-                    .attr("x1", getX)
-                    .attr("y1", getY)
-                    .attr("x2", getX)
-                    .attr("y2", function(d) {return getY(d) + 2;})
-                    .attr("opacity", 0.9)
-                    .attr("stroke-width", 1)
-                    .attr("stroke", 'blue')
+                      .append('rect')
+                      .classed('textloc', true)
+                      .attr("x", getX)
+                      .attr("y", (d) => {return getY(d)-getH(d);})
+                      .attr("width", getW)
+                      .attr("height", getH)
+                      .attr("opacity", 0.4)
+                      .attr("fill-opacity", 0.5)
+                      .attr("stroke-width", 0)
+                      .attr("stroke", 'blue')
+                      .attr("fill", 'blue')
                 ;
 
-            })
-            .on("mouseout", function(d) {
+            }).on("mouseout", function(d) {
                 return svg.selectAll('.textloc')
                     .remove();
             });
