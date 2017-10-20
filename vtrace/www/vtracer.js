@@ -1,9 +1,15 @@
+/* global define _ */
 
 define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
-
-    console.log('d3', d3);
-    console.log('us', _);
-
+    function getSelectionText() {
+        var text = "";
+        if (window.getSelection) {
+            text = window.getSelection().toString();
+        } else if (document.selection && document.selection.type != "Control") {
+            text = document.selection.createRange().text;
+        }
+        return text;
+    }
 
     let colorMap = {
         "Caption"                : "blue",
@@ -11,7 +17,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
         "CharRun"                : "chocolate",
         "CharRunBegin"           : "purple",
         "CharRunBaseline"        : "purple",
-        "VisualBaseline"         : "blue",
+        "FontBaseline"           : "blue",
         "LeftAlignedCharCol"     : "crimson",
         "RightAlignedCharCol"    : "darkorchid",
         "LeftAlignedColEnd"      : "darkred",
@@ -25,17 +31,28 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
         "OutlineBox"             : "magenta"
     } ;
 
-    colorMap
 
+
+    // (javascript-standard javascript-jscs javascript-jshint javascript-eslint)
     var svg = d3.select('#main') ;
 
     var DrawingMethods = drawingMethods();
+
+
 
     function selectShapes(dataBlock) {
         return svg.selectAll(".shape")
             .data(dataBlock.shapes, getId) ;
     }
 
+    let getX = d => d[0][1][0] / 100.0;
+    let getY = d => d[0][1][1] / 100.0;
+    let getW = d => d[0][1][2] / 100.0;
+    let getH = d => d[0][1][3] / 100.0;
+
+    let filterLoci = loci => _.filter(loci,  loc => {
+        return typeof loc !== "string";
+    });
 
     function drawingMethods() {
 
@@ -122,7 +139,6 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
             svg.selectAll("image")
                 .attr("opacity", 1.0)
             ;
-
             return svg.selectAll('.gridrow')
                 .data(gridRows)
                 .enter()
@@ -131,7 +147,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
                 .attr("y", function(d, i){ return 20 + (i * 16); })
                 .attr("x", function(d, i){ return 700; })
                 .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
-                .text(function(d, i){ return d.text; })
+                .text(function(d, i){ return "∙  " + d.text + "  ↲"; })
                 .call(textGridLocationIndicator)
             ;
 
@@ -146,17 +162,19 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
         };
     }
 
-    let getX = d => d[0][1][0] / 100.0;
-    let getY = d => d[0][1][1] / 100.0;
-    let getW = d => d[0][1][2] / 100.0;
-    let getH = d => d[0][1][3] / 100.0;
 
     function textGridLocationIndicator(r) {
         return r
+            .on("mousedown", function(d) {
+                console.log('mousedown', d);
+            })
+            .on("mouseup", function(d) {
+                let selection = getSelectionText();
+                console.log('selected: ', d,  selection);
+                let loci = filterLoci(d.loci);
+            })
             .on("mouseover", function(d) {
-                let loci = _.filter(d.loci,  loc => {
-                    return typeof loc !== "string";
-                });
+                let loci = filterLoci(d.loci);
 
                 // #d3-chain-indent#
                 svg.selectAll('.textloc')
@@ -182,7 +200,7 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
 
     }
 
-    var messages = [];
+    let messages = [""];
 
     function printlog(msg) {
         messages.push(msg);
@@ -238,12 +256,17 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
         return "";
     }
 
+
     function getCls(data) {
+        let cls = "shape";
         if (data.class != undefined) {
-            return "shape " + data.class;
-        } else {
-            return "shape";
+            cls = cls + " " + data.class;
         }
+        if (data.hover) {
+            cls = cls + " hover";
+        }
+
+        return cls;
 
     }
 
@@ -289,11 +312,12 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
                 .attr("height", function(d){ return d.height; })
                 .attr("id", getId)
                 .attr("class", getCls)
-                .attr("opacity", 0.3)
+                .attr("opacity", 0.1)
                 .attr("fill-opacity", 0.1)
+                .attr("stroke-opacity", 0.9)
                 .attr("stroke-width", 1)
                 .attr("fill",  setDefaultFillColor)
-                .attr("stroke", setDefaultStrokeColor)
+                .attr("stroke", "green")
                 .call(addTooltip)
             ;
 
