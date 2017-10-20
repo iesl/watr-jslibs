@@ -1,6 +1,6 @@
 /* global define _ */
 
-define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
+define(['/js/d3.js', '/js/underscore-min.js'], function (d3, us) {
 
     function makeMenuOrig() {
         d3.json("/menu", function(error, jsval) {

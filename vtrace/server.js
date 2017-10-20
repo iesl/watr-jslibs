@@ -23,11 +23,15 @@ render(app, {
 
 router
     .get('/js/:file', async function(ctx, next) {
-        await send(ctx, ctx.params.file, { root: __dirname + '/www' });
+        await send(ctx, ctx.params.file, { root: __dirname + '/public/js' });
     })
-    .get('/lib/:file', async function(ctx, next) {
-        await send(ctx, ctx.params.file, { root: __dirname + '/lib' });
-    }) ;
+    .get('/style/:file', async function(ctx, next) {
+        await send(ctx, ctx.params.file, { root: __dirname + '/public/style' });
+    })
+    .get('/app/:file', async function(ctx, next) {
+        await send(ctx, ctx.params.file, { root: __dirname + '/app' });
+    })
+;
 
 function buildCorpusEntryTable(options) {
 
