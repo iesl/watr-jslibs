@@ -95,7 +95,11 @@ function buildMenu(options, corpusEntries) {
     return menu;
 }
 
+
 function run (options) {
+
+    let entryRoot = entry => `${options.corpusRoot}/${entry}`;
+
 
     let corpusEntries = buildCorpusEntryTable(options);
 
@@ -103,10 +107,16 @@ function run (options) {
 
     router
         .get('/entry/:entry/image/page/:page', async function(ctx, next) {
-            let entry = ctx.params.entry;
-            let page = ctx.params.page;
-            let file = 'page-'+page+'.opt.png';
-            let basepath = options.corpusRoot + '/'+ ctx.params.entry + '/page-images/';
+            let { entry: entry, page: page } = ctx.params;
+            let file = `page-${page}.opt.png`;
+            let basepath = `${entryRoot(entry)}/page-images/`;
+            await send(ctx, file, { root: basepath });
+        })
+        .get('/entry/:entry/image/thumb/:page', async function(ctx, next) {
+            let { entry: entry, page: page } = ctx.params;
+            let file = `page-${page}.png`;
+            let basepath = `${entryRoot(entry)}/page-thumbs/`;
+            console.log('thumb', basepath, file);
             await send(ctx, file, { root: basepath });
         })
         .get('/vtrace/json/:entry/:log', async function(ctx, next) {
@@ -117,9 +127,25 @@ function run (options) {
                 root: basepath
             });
         })
-        .get('/vtrace/:entry/:logfile', async function(ctx, next) {
-            await ctx.render('vtracer');
+        .get('/vtrace/:entry/', async function(ctx, next) {
+            let { entry: entry } = ctx.params;
+            ctx.redirect(`/vtrace/${entry}/page-0-textgrid.json`);
+            ctx.status = 301;
+
+            // let { entry: entry } = ctx.params;
+            // await ctx.render('vtracer', {
+            //     locals: {context: {entry: entry, logfile: `${entry}/tracelogs/page-0-textgrid.json`}}
+            // });
         })
+        .get('/vtrace/:entry/:logfile', async function(ctx, next) {
+            let { entry: entry, logfile: logfile } = ctx.params;
+            await ctx.render('vtracer', {
+                locals: {ctx: {entry: entry, logfile: logfile}}
+            });
+        })
+        // .get('/vtrace/:entry/:logfile', async function(ctx, next) {
+        //     await ctx.render('vtracer');
+        // })
         .get('/menu', async function(ctx, next) {
             ctx.body = await JSON.stringify(menu);
         })

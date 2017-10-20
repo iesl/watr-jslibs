@@ -393,15 +393,6 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
         }
     }
 
-    function corpusEntry() {
-        let entry = location.href.split('/').reverse()[1];
-        return entry;
-    }
-
-    function corpusLogfile() {
-        let entry = location.href.split('/').reverse()[0];
-        return entry;
-    }
 
     function runLog(logData) {
         console.log("runLog", logData.steps);
@@ -432,6 +423,16 @@ define(['/lib/d3.js', '/lib/underscore-min.js'], function (d3, us) {
 
         }
         return;
+    }
+
+    function corpusEntry() {
+        let entry = location.href.split('/').reverse()[1];
+        return entry;
+    }
+
+    function corpusLogfile() {
+        let entry = location.href.split('/').reverse()[0];
+        return entry;
     }
 
     function runTrace() {
