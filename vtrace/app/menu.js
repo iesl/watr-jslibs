@@ -77,7 +77,7 @@ define(['/js/d3.js', '/js/underscore-min.js'], function (d3, us) {
             .data(menuItems)
             .enter()
             .append("li").classed('menuItem', true)
-            .append("a").attr("href", d  => `/vtrace/${d.name}/`)
+            .append("a").attr("href", d  => `/vtrace/${d.name}?show=textgrid.json`)
             .append('div')
             .classed('menuEntry', true)
         ;

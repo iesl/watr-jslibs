@@ -174,20 +174,31 @@ define(['/js/d3.js', '/js/underscore-min.js'], function (d3) {
     }
 
     function corpusEntry() {
-        let entry = location.href.split('/').reverse()[1];
+        let entry = location.href.split('/').reverse()[0].split('?')[0];
         return entry;
     }
 
-    function corpusLogfile() {
-        let entry = location.href.split('/').reverse()[0];
-        return entry;
-    }
+    // function corpusLogfile() {
+    //     let entry = location.href.split('/').reverse()[0];
+    //     return entry;
+    // }
+
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[[]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
 
     return {
         getSelectionText: getSelectionText,
         initShapeAttrs: initShapeAttrs,
         corpusEntry: corpusEntry,
-        corpusLogfile: corpusLogfile
+        // corpusLogfile: corpusLogfile,
+        getParameterByName: getParameterByName
     };
 
 

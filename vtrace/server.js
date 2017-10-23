@@ -124,22 +124,21 @@ function run (options) {
             await send(ctx, file, { root: basepath });
         })
         .get('/vtrace/json/:entry/:log', async function(ctx, next) {
-            let basepath = options.corpusRoot + '/'+ ctx.params.entry + '/tracelogs';
-            let logfile = ctx.params.log;
-            console.log("/vtrace/json root ", basepath, '/', logfile);
-            await send(ctx, logfile, {
+            // let basepath = options.corpusRoot + '/'+ ctx.params.entry + '/tracelogs';
+            let entry  = ctx.params.entry;
+            let log  = ctx.params.log;
+            let basepath = `${entryRoot(entry)}/tracelogs`;
+            console.log("GET /vtrace/json/:entry/:log", basepath, '/', log);
+            console.log("GET /vtrace/json/:entry/:log", basepath, '/', log, 'entry=', entry);
+            await send(ctx, log, {
                 root: basepath
             });
         })
         .get('/vtrace/:entry/', async function(ctx, next) {
             let { entry: entry } = ctx.params;
-            ctx.redirect(`/vtrace/${entry}/page-0-textgrid.json`);
-            ctx.status = 301;
-
-            // let { entry: entry } = ctx.params;
-            // await ctx.render('vtracer', {
-            //     locals: {context: {entry: entry, logfile: `${entry}/tracelogs/page-0-textgrid.json`}}
-            // });
+            // ctx.redirect(`/vtrace/${entry}/textgrid.json`);
+            // ctx.status = 301;
+            await ctx.render('vtracer');
         })
         .get('/vtrace/:entry/:logfile', async function(ctx, next) {
             let { entry: entry, logfile: logfile } = ctx.params;

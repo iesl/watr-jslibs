@@ -1,7 +1,7 @@
 /* global require define $ _ */
 
 
-define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './textgrid.js', '/js/split-pane.js', '/js/jquery.min.js'], function (d3, us, util, tg, splitPane, jq) {
+define(['/js/d3.js', './commons.js', './textgrid.js', '/js/split-pane.js'], function (d3, util, tg, splitPane) {
 
 
     let DrawingMethods = drawingMethods();
@@ -74,6 +74,7 @@ define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './textgrid.js', '
 
         return {
             'TextGrid' : tg.RenderTextGrid,
+            'DocumentTextGrid' : tg.RenderTextGrid,
             'Draw'     : DrawMethod,
             'Outline'  : OutlineMethod,
             'Remove'   : RemoveMethod,
@@ -104,15 +105,11 @@ define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './textgrid.js', '
     }
 
 
-
-
-
     function onEndAll (transition, callback) {
 
         if (transition.empty()) {
             callback();
-        }
-        else {
+        } else {
             let n = transition.size();
             transition.on("end", function () {
                 n--;
@@ -173,30 +170,26 @@ define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './textgrid.js', '
 
     function runTrace() {
         let entry = util.corpusEntry();
-        let log = util.corpusLogfile();
-        console.log('entry', entry);
-        console.log('log', log);
-        d3.json("/vtrace/json/"+entry+"/"+log, function(error, jsval) {
+        // let log = util.corpusLogfile();
+        let show = util.getParameterByName('show');
+        d3.json(`/vtrace/json/${entry}/${show}`, function(error, jsval) {
 
             if (error) {
                 console.log('error', error);
                 console.log('error', error.target.responseText);
-                throw error;
+                // throw error;
+            }  else {
+                parseMultilog(jsval);
             }
-
-            parseMultilog(jsval);
-
-            $('div.split-pane').splitPane();
 
             return;
         });
 
     }
 
-    // $('.split-pane-divider').on('click', function () {});
 
     return {
         run: runTrace
-    }
+    };
 
 });

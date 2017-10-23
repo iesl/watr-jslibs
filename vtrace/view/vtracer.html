@@ -1,9 +1,15 @@
 <html>
     <head>
-        <script data-main="/app/vtracer-main.js" src="/js/require.js"></script>
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/underscore-min.js"></script>
+        <script src="/js/split-pane.js"></script>
+        <script src="/js/d3.js"></script>
         <link rel="stylesheet" href="/style/split-pane.css" />
         <link rel="stylesheet" href="/style/pretty-split-pane.css" />
-        <style>
+
+        <script data-main="/app/vtracer-main.js" src="/js/require.js"></script>
+
+        <style type="text/css">
          div.tooltip {
              position: absolute;
              text-align: center;
@@ -37,66 +43,31 @@
              width: 100%;
          }
          #left-pane {
-             width: 30em;
+             width: 600px;
              background: #aaa;
          }
          #lr-divider {
-             left: 30em; /* same as left component width */
+             left: 600px; /* same as left component width */
              width: 5px;
          }
+
          #right-pane {
-             left: 20em;
+             left: : 600px;
              margin-left: 5px; /* same as divider width */
          }
+
+
+
         </style>
+
 
     </head>
 
     <body>
 
+        <div id="content" class="content">
 
-
-        <div class="content">
-            <div class="pretty-split-pane-frame"><!-- This div is added for styling purposes only. It's not part of the split-pane plugin. -->
-                <div class="split-pane fixed-top">
-                    <div class="split-pane-component" id="top-pane">
-                        <div class="pretty-split-pane-component-inner"><!-- This div is added for styling purposes only. It's not part of the split-pane plugin. -->
-                            <span> <a href="/">Home</a> </span>
-                        </div>
-                    </div>
-                    <div class="split-pane-divider" id="top-divider"></div>
-                    <div class="split-pane-component" id="bottom-pane">
-                        <div class="pretty-split-pane-component-inner"><!-- This div is added for styling purposes only. It's not part of the split-pane plugin. -->
-
-                            <div id="split-pane-1" class="split-pane fixed-left">
-                                <div class="split-pane-component" id="left-pane">
-                                    <div id="left-content" ></div>
-                                </div>
-
-                                <div class="split-pane-divider" id="lr-divider"></div>
-
-                                <div class="split-pane-component" id="right-pane">
-                                    <div id="right-content" ></div>
-                                </div>
-                            </div>
-
-
-
-						            </div>
-					          </div>
-				        </div>
-			      </div>
 		    </div>
-
-
-
-
-
-
-
-
-
-
 
     </body>
 </html>
