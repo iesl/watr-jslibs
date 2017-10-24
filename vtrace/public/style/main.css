@@ -19,7 +19,12 @@ div.tooltip {
 }
 
 
-.page-image {
+div.page-image {
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+svg.page-image {
     padding-bottom: 5px;
     margin-left: auto;
     margin-right: auto;
@@ -35,10 +40,10 @@ div.tooltip {
     background-color:lightsteelblue;
 }
 
-.page-textgrid {
+div.page-textgrid {
     padding-bottom: 5px;
-    margin-left: auto;
-    margin-right: auto;
+    /* margin-left: auto; */
+    /* margin-right: auto; */
     border: 2px;
     border-style: solid;
     border-color:lightsteelblue;

@@ -1,9 +1,10 @@
-/* global require define _ */
+/* global require define _ $ */
 
 define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
     let d3 = require('/js/d3.js');
 
     let svgs = () => d3.selectAll('svg');
+    let pageImageSelector = () => d3.select('div.page-images').selectAll('svg.page-image');
 
     let getX = d => d[0][1][0] / 100.0;
     let getY = d => d[0][1][1] / 100.0;
@@ -19,10 +20,51 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
             .data(dataBlock.shapes, util.getId) ;
     }
 
+    function syncScrollPageImages(coords, loci) {
+        // console.log('mousedown', coords);
+
+        // Use first location as sync point
+        let headLoc = loci[0];
+        let pageNum = headLoc[0][0];
+        let pdfTextY = getY(headLoc);
+        let pdfTextH = getH(headLoc);
+        // console.log('pdf text y', pdfTextY);
+
+        // Get visible abs Y-position of user click:
+        let pageTextTop = $(`#page-textgrid-${pageNum}`).parent().position().top;
+        let pageTextClickY = coords[1];
+        let pageTextsOffset = $('div.page-textgrids').position().top;
+        let userAbsY = pageTextTop + pageTextClickY + pageTextsOffset;
+        // console.log('userAbsY', userAbsY);
+
+        // let clickY = textgridPos.top + coords[1];
+        // let clickedTextOffset = clickY;
+        // console.log('textgridsPos', textgridsPos);
+        // console.log('textgridPos', textgridPos);
+        // console.log('clickY', clickY);
+        // console.log('clickedTextOffset', clickedTextOffset);
+
+
+        // Get offset of clicked text on page
+        // let pageImagesOffset = $('div.page-images').position().top;
+        let pageImageTop = $(`#page-image-${pageNum}`).parent().position().top;
+        // console.log('pageImageTop', pageImageTop);
+
+        let scrollTo = pageImageTop + pdfTextY - pdfTextH - 10 - userAbsY;
+        // let scrollTo = pageImageTop + pdfTextY - pdfTextH - 10 ;
+        // console.log('pageSvgId', pageSvgId);
+        // console.log('page image top', pageTop, 'images top', imagesTop, 'scrolling to', scrollTo, 'pageY', pageY);
+        // console.log('scrolling to', scrollTo);
+
+        $('#splitpane_root__bottom__left').scrollTop(scrollTo);
+    }
+
     function textGridLocationIndicator(r) {
         return r
             .on("mousedown", function(d) {
-                console.log('mousedown', d);
+                let loci = filterLoci(d.loci);
+                let coords = d3.mouse(this);
+                syncScrollPageImages(coords, loci);
             })
             .on("mouseup", function(d) {
                 let selection = util.getSelectionText();
@@ -31,9 +73,10 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
             })
             .on("mouseover", function(d) {
                 let loci = filterLoci(d.loci);
+                // console.log('mouseover: ', d.loci);
 
                 // #d3-chain-indent#
-                svgs().selectAll('.textloc')
+                pageImageSelector().selectAll('.textloc')
                       .data(loci)
                     .enter()
                       .append('rect')
@@ -50,7 +93,7 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
                 ;
 
             }).on("mouseout", function(d) {
-                return svgs().selectAll('.textloc')
+                return pageImageSelector().selectAll('.textloc')
                     .remove();
             });
 
@@ -65,6 +108,7 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
             .enter()
             .append('div').classed('page-textgrid', true)
             .append('svg').classed('textgrid', true)
+            .attr('id', (d, i) => `page-textgrid-${i}`)
             .attr('width', 600)
             .attr('height', grid => {
                 return grid.rows.length * 18;
@@ -97,8 +141,9 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
         d3.select(contentId).selectAll(".page-image")
             .data(pageImageShapes, util.getId)
             .enter()
-            .append('div')
+            .append('div').classed('page-image', true)
             .append('svg').classed('page-image', true)
+            .attr('id', (d, i) => `page-image-${i}`)
             .attr('width', (d) => d[0].width)
             .attr('height', (d) => d[0].height)
             .selectAll(".shape")
