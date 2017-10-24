@@ -21,7 +21,6 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
     }
 
     function syncScrollPageImages(coords, loci) {
-        // console.log('mousedown', coords);
 
         // Use first location as sync point
         let headLoc = loci[0];
@@ -35,28 +34,32 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
         let pageTextClickY = coords[1];
         let pageTextsOffset = $('div.page-textgrids').position().top;
         let userAbsY = pageTextTop + pageTextClickY + pageTextsOffset;
-        // console.log('userAbsY', userAbsY);
-
-        // let clickY = textgridPos.top + coords[1];
-        // let clickedTextOffset = clickY;
-        // console.log('textgridsPos', textgridsPos);
-        // console.log('textgridPos', textgridPos);
-        // console.log('clickY', clickY);
-        // console.log('clickedTextOffset', clickedTextOffset);
-
 
         // Get offset of clicked text on page
-        // let pageImagesOffset = $('div.page-images').position().top;
-        let pageImageTop = $(`#page-image-${pageNum}`).parent().position().top;
-        // console.log('pageImageTop', pageImageTop);
+        let pageImageSvgId = `#page-image-${pageNum}`;
+        let pageImageTop = $(pageImageSvgId).parent().position().top;
 
         let scrollTo = pageImageTop + pdfTextY - pdfTextH - 10 - userAbsY;
-        // let scrollTo = pageImageTop + pdfTextY - pdfTextH - 10 ;
-        // console.log('pageSvgId', pageSvgId);
-        // console.log('page image top', pageTop, 'images top', imagesTop, 'scrolling to', scrollTo, 'pageY', pageY);
-        // console.log('scrolling to', scrollTo);
 
         $('#splitpane_root__bottom__left').scrollTop(scrollTo);
+
+        d3.select(pageImageSvgId)
+            .append('circle')
+            .attr("cx", function(d){ return getX(headLoc); })
+            .attr("cy", function(d){ return getY(headLoc); })
+            .attr("r", function(d){ return 20; })
+            .attr("fill-opacity", 1)
+            .attr("stroke-opacity", 0)
+            .attr("fill",  "yellow")
+            .attr("stroke",  "black")
+            .transition()
+            .duration(300)
+            .attr("r", 1)
+            .attr("fill-opacity", 0)
+            .attr("stroke-opacity", 1)
+            .delay(10)
+            .remove()
+        ;
     }
 
     function textGridLocationIndicator(r) {
