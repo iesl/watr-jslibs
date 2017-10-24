@@ -1,6 +1,7 @@
 /* global require define _ */
 
-define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './splitpane-utils.js'], function (d3, us, util, panes) {
+define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
+    let d3 = require('/js/d3.js');
 
     let svgs = () => d3.selectAll('svg');
 
@@ -57,8 +58,8 @@ define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './splitpane-utils
 
 
 
-    function setupPageTexts(pane, textgrids) {
-        let qwer = pane.selectAll(".textgrid")
+    function setupPageTexts(pane, contentDiv, textgrids) {
+        let textgridsel = contentDiv.selectAll(".textgrid")
             .data(textgrids, util.getId)
             .enter()
             .append('div')
@@ -67,28 +68,41 @@ define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './splitpane-utils
             .attr('height', 1400)
         ;
 
-        return qwer.selectAll('.gridrow')
-            .data(d => {console.log('grid data', d); return d.rows;})
+        return textgridsel.selectAll('.gridrow')
+            .data(d => d.rows)
             .enter()
             .append('text') .classed('gridrow', true)
-            .attr("y", function(d, i){ return 20 + (i * 16); })
-            .attr("x", function(d, i){ return 70; })
+            .attr("y", (d, i) => 20 + (i * 16))
+            .attr("x", () => 40)
             .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
             .text(function(d, i){ return "∙  " + d.text + "  ↲"; })
             .call(textGridLocationIndicator)
         ;
     }
-    function setupPageImages(pane, pageImageShapes) {
+
+    function setupPageImages(pane, contentDiv, pageImageShapes) {
         console.log('setupPageImages', pageImageShapes);
-        pane.selectAll(".page-image")
+
+        let ctx = {maxh: 0, maxw: 0};
+
+        _.map(pageImageShapes, (sh) =>{
+            ctx.maxh = Math.max(ctx.maxh, sh[0].height);
+            ctx.maxw = Math.max(ctx.maxw, sh[0].width);
+        });
+
+
+        console.log('maxw', ctx);
+        panes.setWidth(pane, ctx.maxw);
+
+        contentDiv.selectAll(".page-image")
             .data(pageImageShapes, util.getId)
             .enter()
             .append('div')
             .append('svg').classed('page-image', true)
-            .attr('width', 600)
-            .attr('height', 1400)
+            .attr('width', (d) => d[0].width)
+            .attr('height', (d) => d[0].height)
             .selectAll(".shape")
-            .data(d => {console.log('shape data', d); return d;})
+            .data(d => d)
             .enter()
             .each(function (d){
                 let self = d3.select(this);
@@ -100,14 +114,13 @@ define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './splitpane-utils
     }
 
     function MockupMultiPageTextGrid(dataBlock) {
-        console.log('MockupMultiPageTextGrid');
         let pages = dataBlock.pages;
         let textgrids = _.map(pages, p => p.textgrid);
         let pageShapes = _.map(pages, p => p.shapes);
 
         // let gridRows = dataBlock.grid.rows;
         // let gridShapes = dataBlock.shapes;
-        let {left: l, right: r} = panes.splitVertical('#content', panes.atFixedLeft(600));
+        let {left: l, right: r} = panes.splitVertical('#content', panes.withFixedLeft(200));
 
         let leftPane = d3.select('#content_left')
             .append('div').classed('page-images', true)
@@ -117,8 +130,8 @@ define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './splitpane-utils
             .append('div').classed('page-textgrids', true)
         ;
 
-        setupPageImages(leftPane, pageShapes);
-        setupPageTexts(rightPane, textgrids);
+        setupPageImages(l, leftPane, pageShapes);
+        setupPageTexts(r, rightPane, textgrids);
 
         // leftPane.selectAll(".shape")
         //     .data(gridShapes, util.getId)
@@ -157,7 +170,6 @@ define(['/js/d3.js', '/js/underscore-min.js', './commons.js', './splitpane-utils
     return {
         RenderTextGrid: MockupMultiPageTextGrid,
         DocumentTextGrid: MockupMultiPageTextGrid,
-
         selectShapes: selectShapes
     };
 

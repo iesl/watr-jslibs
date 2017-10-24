@@ -1,6 +1,9 @@
 
-require(["/app/vtracer.js", '/js/jquery.min.js'], function(trace, jQuery) {
-    trace.run();
-    // $(window).onload(function() {
-    // });
+require([
+    '/app/vtracer.js',
+    '/js/d3.js',
+    '/js/underscore-min.js',
+    '/js/jquery.min.js'
+], function (vtrace, d3) {
+    vtrace.run();
 });

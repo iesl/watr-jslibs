@@ -22,19 +22,39 @@ define(['./commons.js'], function (util) {
         return $("<div class='split-pane'></div>");
     }
 
-    function atFixedLeft(leftWidth) {
+    function withFixedLeft(leftWidth) {
         return {
-            fixedLeft: true ,
+            fixedLeft: true,
             splitAt: leftWidth
         };
     }
 
+    function setWidth(pane, width) {
+        let id = $(pane).attr('id');
+        let idParts = id.split('_').reverse();
+        let parentId = idParts[1];
+        let leftId = `#${parentId}_left`;
+        let rightId = `#${parentId}_right`;
+        let dividerId = `#${parentId}_divider`;
+
+        console.log('id', id);
+        console.log('idparts', idParts);
+        console.log('l', leftId);
+        console.log('r', rightId);
+
+        $(leftId).css({width: width});
+        $(rightId).css({left: width});
+        $(dividerId).css({left: width});
+        $('div.split-pane').splitPane();
+    }
+
     function splitVertical(parentDiv, splitAt) {
-        let {splitAt: splitVal}= splitAt;
+        let {splitAt: splitVal} = splitAt;
 
         let id = $(parentDiv).attr('id');
         let leftId = `${id}_left` ;
         let rightId = `${id}_right` ;
+        let dividerId = `${id}_divider` ;
         let lpane = mkComponent()
             .attr('id', leftId)
             .css({width: splitVal})
@@ -44,8 +64,9 @@ define(['./commons.js'], function (util) {
             .css({left: splitVal})
         ;
         let divider = mkDivider()
+            .attr('id', dividerId)
             .addClass('v-divider')
-            .css({left: splitVal, width: 5})
+            .css({left: splitVal+4, width: 4})
         ;
 
         $(parentDiv).append(
@@ -65,8 +86,8 @@ define(['./commons.js'], function (util) {
 
     return {
         splitVertical: splitVertical,
-        atFixedLeft: atFixedLeft
-
+        withFixedLeft: withFixedLeft,
+        setWidth: setWidth
     };
 
 });
