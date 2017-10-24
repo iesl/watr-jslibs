@@ -194,17 +194,14 @@ define(['/js/d3.js', './commons.js', './textgrid.js', './splitpane-utils.js'], f
         setupMenubar();
 
         let entry = util.corpusEntry();
-        // let log = util.corpusLogfile();
         let show = util.getParameterByName('show');
+
         d3.json(`/vtrace/json/${entry}/${show}`, function(error, jsval) {
             if (error) {
                 $('.content-pane').append(`<div><p>ERROR: ${error}: ${error.target.responseText}</p></div>`);
-                // throw error;
+            } else {
+                parseMultilog(jsval);
             }
-
-            // split frame into topbar/sidebar/main
-
-            parseMultilog(jsval);
 
             return;
         });
