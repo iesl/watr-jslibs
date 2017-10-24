@@ -1,6 +1,7 @@
-/* global define  location */
+/* global define location $ */
 
 define(['/js/d3.js', '/js/underscore-min.js'], function (d3) {
+    let exports = {};
 
     let colorMap = {
         "Caption"                : "blue",
@@ -191,14 +192,17 @@ define(['/js/d3.js', '/js/underscore-min.js'], function (d3) {
         if (!results) return null;
         if (!results[2]) return '';
         return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
+    }
+
+    let selectId = id => $(`#${id}`);
+    // exports.selectId = selectId;
 
     return {
         getSelectionText: getSelectionText,
         initShapeAttrs: initShapeAttrs,
         corpusEntry: corpusEntry,
-        // corpusLogfile: corpusLogfile,
-        getParameterByName: getParameterByName
+        getParameterByName: getParameterByName,
+        selectId: selectId
     };
 
 

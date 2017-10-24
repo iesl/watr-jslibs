@@ -57,15 +57,18 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
     }
 
 
+    function setupPageTexts(contentId, textgrids) {
 
-    function setupPageTexts(pane, contentDiv, textgrids) {
-        let textgridsel = contentDiv.selectAll(".textgrid")
+        let textgridsel = d3.select(contentId)
+            .selectAll(".textgrid")
             .data(textgrids, util.getId)
             .enter()
-            .append('div')
-            .append('svg').classed('page-image', true)
+            .append('div').classed('page-textgrid', true)
+            .append('svg').classed('textgrid', true)
             .attr('width', 600)
-            .attr('height', 1400)
+            .attr('height', grid => {
+                return grid.rows.length * 18;
+            })
         ;
 
         return textgridsel.selectAll('.gridrow')
@@ -80,8 +83,7 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
         ;
     }
 
-    function setupPageImages(pane, contentDiv, pageImageShapes) {
-        console.log('setupPageImages', pageImageShapes);
+    function setupPageImages(contentId, pageImageShapes) {
 
         let ctx = {maxh: 0, maxw: 0};
 
@@ -90,11 +92,9 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
             ctx.maxw = Math.max(ctx.maxw, sh[0].width);
         });
 
+        panes.setParentPaneWidth(contentId, ctx.maxw+30);
 
-        console.log('maxw', ctx);
-        panes.setWidth(pane, ctx.maxw);
-
-        contentDiv.selectAll(".page-image")
+        d3.select(contentId).selectAll(".page-image")
             .data(pageImageShapes, util.getId)
             .enter()
             .append('div')
@@ -118,20 +118,20 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
         let textgrids = _.map(pages, p => p.textgrid);
         let pageShapes = _.map(pages, p => p.shapes);
 
-        // let gridRows = dataBlock.grid.rows;
-        // let gridShapes = dataBlock.shapes;
-        let {left: l, right: r} = panes.splitVertical('#content', panes.withFixedLeft(200));
+        let {leftPaneId: leftPaneId, rightPaneId: rightPaneId} =
+            panes.splitVertical('.content-pane', {fixedLeft: 200});
 
-        let leftPane = d3.select('#content_left')
+
+        let leftContent = d3.select(`#${leftPaneId}`)
             .append('div').classed('page-images', true)
         ;
 
-        let rightPane = d3.select('#content_right')
+        let rightContent = d3.select(`#${rightPaneId}`)
             .append('div').classed('page-textgrids', true)
         ;
 
-        setupPageImages(l, leftPane, pageShapes);
-        setupPageTexts(r, rightPane, textgrids);
+        setupPageImages('div.page-images', pageShapes);
+        setupPageTexts('div.page-textgrids', textgrids);
 
         // leftPane.selectAll(".shape")
         //     .data(gridShapes, util.getId)
@@ -144,7 +144,7 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
         //     })
         // ;
 
-        leftPane.selectAll("image")
+        leftContent.selectAll("image")
             .attr("opacity", 1.0)
         ;
 
@@ -175,35 +175,6 @@ define(['./commons.js', './splitpane-utils.js'], function (util, panes) {
 
 });
 
-// <div class="pretty-split-pane-frame"><!-- This div is added for styling purposes only. It's not part of the split-pane plugin. -->
-//     <div class="split-pane fixed-top">
-//         <div class="split-pane-component" id="top-pane">
-//             <div class="pretty-split-pane-component-inner"><!-- This div is added for styling purposes only. It's not part of the split-pane plugin. -->
-//                 <span> <a href="/">Home</a> </span>
-//             </div>
-//         </div>
-//         <div class="split-pane-divider" id="top-divider"></div>
-//         <div class="split-pane-component" id="bottom-pane">
-//             <div class="pretty-split-pane-component-inner"><!-- This div is added for styling purposes only. It's not part of the split-pane plugin. -->
-
-//                 <div id="split-pane-1" class="split-pane fixed-left">
-//                     <div class="split-pane-component" id="left-pane">
-//                         <div id="left-content" ></div>
-//                     </div>
-
-//                     <div class="split-pane-divider" id="lr-divider"></div>
-
-//                     <div class="split-pane-component" id="right-pane">
-//                         <div id="right-content" ></div>
-//                     </div>
-//                 </div>
-
-
-
-//             </div>
-//         </div>
-//     </div>
-// </div>
 
     // function RenderTextGridPerLine (dataBlock) {
     //     console.log("Running TextGridMethod" );

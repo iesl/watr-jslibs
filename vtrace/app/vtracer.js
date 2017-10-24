@@ -1,8 +1,9 @@
 /* global require define $ _ */
 
 
-define(['/js/d3.js', './commons.js', './textgrid.js', '/js/split-pane.js'], function (d3, util, tg, splitPane) {
+define(['/js/d3.js', './commons.js', './textgrid.js', './splitpane-utils.js'], function (d3, util, tg, panes) {
 
+    let selectId = util.selectId;
 
     let DrawingMethods = drawingMethods();
 
@@ -167,20 +168,43 @@ define(['/js/d3.js', './commons.js', './textgrid.js', '/js/split-pane.js'], func
         return;
     }
 
+    function setupMenubar() {
+        let menuBarList = d3.select('.menu-pane')
+            .append('ul').classed('menubar', true);
+
+        menuBarList
+            .append('li')
+            .append('a')
+            .attr('href', '/')
+            .text('Browse')
+        ;
+
+    }
+
 
     function runTrace() {
+        let splitPaneRootId = panes.createSplitPaneRoot("#content");
+
+        let {topPaneId: topPaneId, bottomPaneId: bottomPaneId} =
+            panes.splitHorizontal(splitPaneRootId, {fixedTop: 40});
+
+        selectId(topPaneId).addClass('menu-pane');
+        selectId(bottomPaneId).addClass('content-pane');
+
+        setupMenubar();
+
         let entry = util.corpusEntry();
         // let log = util.corpusLogfile();
         let show = util.getParameterByName('show');
         d3.json(`/vtrace/json/${entry}/${show}`, function(error, jsval) {
-
             if (error) {
-                console.log('error', error);
-                console.log('error', error.target.responseText);
+                $('.content-pane').append(`<div><p>ERROR: ${error}: ${error.target.responseText}</p></div>`);
                 // throw error;
-            }  else {
-                parseMultilog(jsval);
             }
+
+            // split frame into topbar/sidebar/main
+
+            parseMultilog(jsval);
 
             return;
         });
