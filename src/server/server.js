@@ -22,6 +22,9 @@ render(app, {
 // Serve public assets
 
 router
+    .get('/dist/:file', async function(ctx, next) {
+        await send(ctx, ctx.params.file, { root: __dirname + '/dist' });
+    })
     .get('/js/:file', async function(ctx, next) {
         await send(ctx, ctx.params.file, { root: __dirname + '/public/js' });
     })

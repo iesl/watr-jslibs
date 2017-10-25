@@ -34,3 +34,5 @@ node_modules
 log-data.d
 
 *log.json
+
+/dist
