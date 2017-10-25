@@ -179,6 +179,37 @@ function setupPageTexts(contentId, textgrids) {
 }
 
 
+function createLabelingPanel(annotation) {
+
+    // let sortedHits = _.sortBy(hits, hit => hit.minX);
+    // let hitStr = _.map(sortedHits, n => n.char).join('');
+    // console.log('selectRect', selectRect, 'hit:', hitStr);
+    // console.log('selectRect', selectRect, 'minRect:', [minX, minY, maxX-minX, maxY-minY]);
+    // Create visual feedback for selection
+    let svgPageSelector = `svg#page-image-${annotation.page}`;
+
+    d3.select(svgPageSelector)
+        .append('rect')
+        .classed('label', true)
+        .attr("x", annotation.userBounds[0])
+        .attr("y", annotation.userBounds[1])
+        .attr("width", annotation.userBounds[2])
+        .attr("height", annotation.userBounds[3])
+        .attr("opacity", 0.5)
+        .attr("fill-opacity", 0.3)
+        .attr("stroke-width", 1)
+        .attr("stroke", 'blue')
+        .attr("fill", 'yellow')
+        .transition()
+        .duration(300)
+        .attr("x", annotation.minBounds[0])
+        .attr("y", annotation.minBounds[1])
+        .attr("width", annotation.minBounds[2])
+        .attr("height", annotation.minBounds[3])
+    ;
+
+}
+
 function setupPageImages(contentId, pageImageShapes) {
 
     let ctx = {maxh: 0, maxw: 0};
@@ -207,24 +238,64 @@ function setupPageImages(contentId, pageImageShapes) {
 
             initD3DragSelect(svg.attr('id'), (pointOrRect) => {
                 if (pointOrRect.point != undefined) {
+                    // Point click handler
                     let clickPt = pointOrRect.point;
                     let pageStr = clickPt.svgSelector.split('-').pop();
                     let page =  +pageStr;
 
                     let pageRTree = pageImageRTrees[page];
-                    let x = pointOrRect.point.x,
-                        y = pointOrRect.point.y,
-                        num = 4;
+                    let x = clickPt.x,
+                    y = clickPt.y,
+                    num = 4;
 
                     let neighbors = knn(pageRTree, x, y, num);
                     if (neighbors.length > 0) {
                         let nearestNeighbor = neighbors[0];
                         let ns = _.map(neighbors, (n) => n.char).join('');
-                        console.log('pointOrRect: ', pointOrRect, 'page', page, 'neighbors', ns);
-                        console.log('neighbors', neighbors);
                         syncScrollTextGrid(clickPt, nearestNeighbor);
                     }
 
+                } else if (pointOrRect.rect != undefined) {
+                    // Rectangular selection handler
+                    let selectRect = pointOrRect.rect;
+                    let pageStr = selectRect.svgSelector.split('-').pop();
+                    let page =  +pageStr;
+
+                    let pageRTree = pageImageRTrees[page];
+
+                    let userX1 = selectRect.x1,
+                    userY1 = selectRect.y1,
+                    userX2 = selectRect.x2,
+                    userY2 = selectRect.y2,
+                    userWidth = userX2-userX1,
+                    userHeight = userY2-userY1
+                    ;
+
+                    let hits = pageRTree.search({
+                        minX: userX1,
+                        minY: userY1,
+                        maxX: userX2,
+                        maxY: userY2
+                    });
+
+                    let minX = _.min(_.pluck(hits, 'minX')),
+                        maxX = _.max(_.pluck(hits, 'maxX')),
+                        minY = _.min(_.pluck(hits, 'minY')),
+                        maxY = _.max(_.pluck(hits, 'maxY')),
+                        width = maxX - minX,
+                        height = maxY - minY
+                    ;
+
+                    let annotation = {
+                        page: page,
+                        userBounds: [userX1, userY1, userWidth, userHeight],
+                        minBounds: [minX, minY, width, height]
+                    };
+
+                    createLabelingPanel(annotation);
+                } else {
+
+                    // Move handler
                 }
             });
         })
