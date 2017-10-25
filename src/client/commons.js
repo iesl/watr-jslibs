@@ -1,7 +1,7 @@
 /* global require location $ */
 
-let d3 = require('d3');
-let $ = require('jquery');
+import * as d3 from  'd3';
+import * as $ from  'jquery';
 
 let colorMap = {
     "Caption"                : "blue",
@@ -52,7 +52,7 @@ function addTooltip(r) {
 }
 
 
-function getSelectionText() {
+export function getSelectionText() {
     let text = "";
     if (window.getSelection) {
         text = window.getSelection().toString();
@@ -79,7 +79,7 @@ function setDefaultFillColor(d) {
     return dataToColor(d);
 }
 
-function getId(data) {
+export function getId(data) {
     let shape = data.type;
 
     if (data.id != undefined) {

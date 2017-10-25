@@ -1,9 +1,12 @@
 /* global require define _ $ */
 
-let d3 = require('d3');
+import * as d3 from  'd3';
+import * as $ from  'jquery';
 import * as _ from  'underscore';
+
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
+import {initD3DragSelect} from  './dragselect.js';
 
 let svgs = () => d3.selectAll('svg');
 let pageImageSelector = () => d3.select('div.page-images').selectAll('svg.page-image');
@@ -143,7 +146,8 @@ function setupPageImages(contentId, pageImageShapes) {
 
     panes.setParentPaneWidth(contentId, ctx.maxw+30);
 
-    d3.select(contentId).selectAll(".page-image")
+    let imageSvgs = d3.select(contentId)
+        .selectAll(".page-image")
         .data(pageImageShapes, util.getId)
         .enter()
         .append('div').classed('page-image', true)
@@ -151,7 +155,20 @@ function setupPageImages(contentId, pageImageShapes) {
         .attr('id', (d, i) => `page-image-${i}`)
         .attr('width', (d) => d[0].width)
         .attr('height', (d) => d[0].height)
-        .selectAll(".shape")
+    ;
+
+    d3.selectAll('svg.page-image')
+        .each(function (d){
+            let svg = d3.select(this);
+
+            initD3DragSelect(svg.attr('id'), (r) => {
+                // console.log('r: ', r);
+            });
+        })
+    ;
+
+
+    imageSvgs.selectAll(".shape")
         .data(d => d)
         .enter()
         .each(function (d){
@@ -214,106 +231,3 @@ export function RenderTextGrid(dataBlock) {
     return d3;
 
 }
-
-
-
-//     return {
-//         RenderTextGrid: MockupMultiPageTextGrid,
-//         DocumentTextGrid: MockupMultiPageTextGrid,
-//         selectShapes: selectShapes
-//     };
-
-// });
-
-
-// function RenderTextGridPerLine (dataBlock) {
-//     console.log("Running TextGridMethod" );
-
-//     let gridRows = dataBlock.grid.rows;
-//     let gridShapes = dataBlock.shapes;
-
-//     svgs().selectAll(".shape")
-//         .data(gridShapes, util.getId)
-//         .enter()
-//         .each(function (d){
-//             let self = d3.select(this);
-//             let shape = d.type;
-//             return self.append(shape)
-//                 .call(util.initShapeAttrs);
-//         })
-//     ;
-//     svgs().selectAll("image")
-//         .attr("opacity", 1.0)
-//     ;
-//     return svgs().selectAll('.gridrow')
-//         .data(gridRows)
-//         .enter()
-//         .append('text')
-//         .classed('gridrow', true)
-//         .attr("y", function(d, i){ return 20 + (i * 16); })
-//         .attr("x", function(d, i){ return 700; })
-//         .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
-//         .text(function(d, i){ return "∙  " + d.text + "  ↲"; })
-//         .call(textGridLocationIndicator)
-//     ;
-
-// }
-
-
-// function RenderTextGridPerCell (dataBlock) {
-//     console.log("Running TextGridMethod" );
-
-//     let gridRows = dataBlock.grid.rows;
-//     let gridShapes = dataBlock.shapes;
-
-//     svgs().selectAll(".shape")
-//         .data(gridShapes, util.getId)
-//         .enter()
-//         .each(function (d){
-//             var self = d3.select(this);
-//             let shape = d.type;
-//             return self.append(shape)
-//                 .call(util.initShapeAttrs);
-//         })
-//     ;
-//     svgs().selectAll("image")
-//         .attr("opacity", 1.0)
-//     ;
-
-//     // RenderTextGridPerLine version:
-//     // return svgs().selectAll('.gridrow')
-//     //     .data(gridRows)
-//     //     .enter()
-//     //     .append('text')
-//     //     .classed('gridrow', true)
-//     //     .attr("y", function(d, i){ return 20 + (i * 16); })
-//     //     .attr("x", function(d, i){ return 700; })
-//     //     .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
-//     //     .text(function(d, i){ return d.text; })
-//     //     .call(textGridLocationIndicator)
-//     // ;
-
-//     // RenderTextGridPerCell version:
-//     let gridrowSel = svgs().selectAll('.gridrow')
-//           .data(gridRows)
-//         .enter()
-//           .append('text').classed('gridrow', true)
-//           .attr("y", function(d, i){ return 20 + (i * 15); })
-//           .attr("x", function(d, i){ return 700; })
-//     ;
-
-//     let getChar = d => d[0][2];
-
-//     let gridcellSel = gridrowSel.selectAll('.gridcell')
-//         .data(function(d, i) { return d.loci; })
-//         .enter()
-//         .append('tspan').classed('gridcell', true)
-//         .attr("x", function(d, i){ return 700 + (7*i); })
-//         .attr("style", "font-family: Courier, monospace; font-size: 12px;")
-//         .text(function(d, i){ return getChar(d); })
-//         .call(textGridLocationIndicator)
-//     ;
-
-//     return gridcellSel;
-
-// }
