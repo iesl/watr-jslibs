@@ -1,6 +1,9 @@
 /* global require define _ $ */
 
 let d3 = require('d3');
+import * as _ from  'underscore';
+import * as panes from  './splitpane-utils.js';
+import * as util from  './commons.js';
 
 let svgs = () => d3.selectAll('svg');
 let pageImageSelector = () => d3.select('div.page-images').selectAll('svg.page-image');
@@ -14,7 +17,7 @@ let filterLoci = loci => _.filter(loci,  loc => {
     return typeof loc !== "string";
 });
 
-function selectShapes(dataBlock) {
+export function selectShapes(dataBlock) {
     return svgs().selectAll(".shape")
         .data(dataBlock.shapes, util.getId) ;
 }
@@ -160,7 +163,7 @@ function setupPageImages(contentId, pageImageShapes) {
     ;
 }
 
-function MockupMultiPageTextGrid(dataBlock) {
+export function RenderTextGrid(dataBlock) {
     let pages = dataBlock.pages;
     let textgrids = _.map(pages, p => p.textgrid);
     let pageShapes = _.map(pages, p => p.shapes);

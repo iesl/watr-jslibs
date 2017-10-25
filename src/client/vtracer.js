@@ -1,8 +1,15 @@
 /* global require define $ _ */
 
-let d3 = require('d3'),
-    util = require('./commons.js')
-;
+
+import * as d3 from  'd3';
+import * as panes from  './splitpane-utils.js';
+import * as util from  './commons.js';
+import * as tg from  './textgrid.js';
+
+import '../style/main.css';
+import '../style/split-pane.css';
+import '../style/pretty-split-pane.css';
+import '../style/selection.css';
 
 let selectId = util.selectId;
 
@@ -75,7 +82,6 @@ function drawingMethods() {
     }
 
     return {
-        'TextGrid' : tg.RenderTextGrid,
         'DocumentTextGrid' : tg.RenderTextGrid,
         'Draw'     : DrawMethod,
         'Outline'  : OutlineMethod,
@@ -183,11 +189,13 @@ function setupMenubar() {
 }
 
 
-function runTrace() {
+export function runTrace() {
     let splitPaneRootId = panes.createSplitPaneRoot("#content");
 
     let {topPaneId: topPaneId, bottomPaneId: bottomPaneId} =
         panes.splitHorizontal(splitPaneRootId, {fixedTop: 40});
+
+    console.log('topPaneId', topPaneId);
 
     selectId(topPaneId).addClass('menu-pane');
     selectId(bottomPaneId).addClass('content-pane');
@@ -208,3 +216,5 @@ function runTrace() {
     });
 
 }
+
+runTrace();

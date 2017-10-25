@@ -1,6 +1,7 @@
 /* global require location $ */
 
-var d3 = require('d3');
+let d3 = require('d3');
+let $ = require('jquery');
 
 let colorMap = {
     "Caption"                : "blue",
@@ -49,7 +50,6 @@ function addTooltip(r) {
         });
 
 }
-
 
 
 function getSelectionText() {
@@ -112,7 +112,7 @@ function getCls(data) {
 }
 
 
-function initShapeAttrs(r) {
+export function initShapeAttrs(r) {
     let shape = r.node().nodeName.toLowerCase();
 
     switch (shape) {
@@ -173,7 +173,7 @@ function initShapeAttrs(r) {
     return r;
 }
 
-function corpusEntry() {
+export function corpusEntry() {
     let entry = location.href.split('/').reverse()[0].split('?')[0];
     return entry;
 }
@@ -183,7 +183,7 @@ function corpusEntry() {
 //     return entry;
 // }
 
-function getParameterByName(name, url) {
+export function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[[]]/g, "\\$&");
     var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
@@ -193,4 +193,4 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-let selectId = id => $(`#${id}`);
+export let selectId = id => $(`#${id}`);

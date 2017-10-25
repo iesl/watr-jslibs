@@ -11,8 +11,13 @@ const _ = require('underscore');
 const router = new Router();
 const app = new Koa();
 
+let serverRoot = path.resolve(__dirname, '..');
+let distRoot = path.resolve(serverRoot, '..');
+
+console.log('serverRoot', serverRoot);
+
 render(app, {
-    root: path.join(__dirname, 'view'),
+    root: path.join(serverRoot, 'view'),
     layout: 'template',
     viewExt: 'html',
     cache: false,
@@ -23,18 +28,19 @@ render(app, {
 
 router
     .get('/dist/:file', async function(ctx, next) {
-        await send(ctx, ctx.params.file, { root: __dirname + '/dist' });
-    })
-    .get('/js/:file', async function(ctx, next) {
-        await send(ctx, ctx.params.file, { root: __dirname + '/public/js' });
+        await send(ctx, ctx.params.file, { root: distRoot + '/dist' });
     })
     .get('/style/:file', async function(ctx, next) {
-        await send(ctx, ctx.params.file, { root: __dirname + '/public/style' });
-    })
-    .get('/app/:file', async function(ctx, next) {
-        await send(ctx, ctx.params.file, { root: __dirname + '/app' });
+        await send(ctx, ctx.params.file, { root: serverRoot + '/style' });
     })
 ;
+
+// .get('/js/:file', async function(ctx, next) {
+//     await send(ctx, ctx.params.file, { root: serverRoot + '/public/js' });
+// })
+// .get('/app/:file', async function(ctx, next) {
+//     await send(ctx, ctx.params.file, { root: serverRoot + '/app' });
+// })
 
 function buildCorpusEntryTable(options) {
 
