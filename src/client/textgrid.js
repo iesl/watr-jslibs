@@ -4,8 +4,12 @@ import * as d3 from  'd3';
 import * as $ from  'jquery';
 import * as _ from  'underscore';
 
+let rtree = require('rbush');
+let knn = require('rbush-knn');
+
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
+
 import {initD3DragSelect} from  './dragselect.js';
 
 let svgs = () => d3.selectAll('svg');
@@ -24,6 +28,45 @@ export function selectShapes(dataBlock) {
     return svgs().selectAll(".shape")
         .data(dataBlock.shapes, util.getId) ;
 }
+
+let pageImageRTrees = [];
+
+function syncScrollTextGrid(clickPt, neighbor) {
+
+    let { minX: x, minY: y, page: pageNum, row: row, col: col } = neighbor;
+
+    let pageTextgridSvgId = `#page-textgrid-${pageNum}`;
+    let pageTextTop = $(pageTextgridSvgId).parent().position().top;
+
+    let pageImageTop = $(`#page-image-${pageNum}`).parent().position().top;
+    let pageTextClickY = clickPt.y;
+    let pageImagesOffset = $('div.page-images').position().top;
+    let userAbsY = pageImageTop + pageTextClickY + pageImagesOffset;
+    // let pageRelativeClickedY = clickPt.y;
+
+    let scrollTo = pageTextTop + (row * 16) - userAbsY;
+
+    $('#splitpane_root__bottom__right').scrollTop(scrollTo);
+
+    d3.select(pageTextgridSvgId)
+        .append('circle')
+        .attr("cx", function(d){ return 10; })
+        .attr("cy", function(d){ return (row*16)+10; })
+        .attr("r", function(d){ return 20; })
+        .attr("fill-opacity", 1)
+        .attr("stroke-opacity", 0)
+        .attr("fill",  "yellow")
+        .attr("stroke",  "black")
+        .transition()
+        .duration(300)
+        .attr("r", 1)
+        .attr("fill-opacity", 0)
+        .attr("stroke-opacity", 1)
+        .delay(10)
+        .remove()
+    ;
+}
+
 
 function syncScrollPageImages(coords, loci) {
 
@@ -135,6 +178,7 @@ function setupPageTexts(contentId, textgrids) {
     ;
 }
 
+
 function setupPageImages(contentId, pageImageShapes) {
 
     let ctx = {maxh: 0, maxw: 0};
@@ -161,8 +205,27 @@ function setupPageImages(contentId, pageImageShapes) {
         .each(function (d){
             let svg = d3.select(this);
 
-            initD3DragSelect(svg.attr('id'), (r) => {
-                // console.log('r: ', r);
+            initD3DragSelect(svg.attr('id'), (pointOrRect) => {
+                if (pointOrRect.point != undefined) {
+                    let clickPt = pointOrRect.point;
+                    let pageStr = clickPt.svgSelector.split('-').pop();
+                    let page =  +pageStr;
+
+                    let pageRTree = pageImageRTrees[page];
+                    let x = pointOrRect.point.x,
+                        y = pointOrRect.point.y,
+                        num = 4;
+
+                    let neighbors = knn(pageRTree, x, y, num);
+                    if (neighbors.length > 0) {
+                        let nearestNeighbor = neighbors[0];
+                        let ns = _.map(neighbors, (n) => n.char).join('');
+                        console.log('pointOrRect: ', pointOrRect, 'page', page, 'neighbors', ns);
+                        console.log('neighbors', neighbors);
+                        syncScrollTextGrid(clickPt, nearestNeighbor);
+                    }
+
+                }
             });
         })
     ;
@@ -180,10 +243,52 @@ function setupPageImages(contentId, pageImageShapes) {
     ;
 }
 
+
+
+function initRTrees(textgrids) {
+
+    pageImageSelector() .each((d, i) =>   {
+        let pageRTree = rtree();
+        pageImageRTrees[i] = pageRTree;
+
+        _.each(textgrids[i].rows, (row, ri) => {
+            let loci = filterLoci(row.loci);
+
+            let points = _.map(loci, (loc, ci) =>{
+                let headLoc = loc;
+                // let pageNum = loc[0][0];
+                let x = getX(headLoc);
+                let y = getY(headLoc);
+                let width  = getW(headLoc);
+                let height  = getH(headLoc);
+                let d = {
+                    minX: x,
+                    minY: y-height,
+                    maxX: x+width,
+                    maxY: y,
+                    page: headLoc[0][0],
+                    row: ri,
+                    col: ci,
+                    char: headLoc[0][2]
+                };
+
+                return d;
+            });
+
+            pageRTree.load(points);
+
+        });
+
+    });
+
+}
+
 export function RenderTextGrid(dataBlock) {
     let pages = dataBlock.pages;
     let textgrids = _.map(pages, p => p.textgrid);
     let pageShapes = _.map(pages, p => p.shapes);
+
+
 
     let {leftPaneId: leftPaneId, rightPaneId: rightPaneId} =
         panes.splitVertical('.content-pane', {fixedLeft: 200});
@@ -199,6 +304,8 @@ export function RenderTextGrid(dataBlock) {
 
     setupPageImages('div.page-images', pageShapes);
     setupPageTexts('div.page-textgrids', textgrids);
+
+    initRTrees(textgrids);
 
     // leftPane.selectAll(".shape")
     //     .data(gridShapes, util.getId)

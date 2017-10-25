@@ -17,6 +17,7 @@ export function initD3DragSelect(svgSelector, callback) {
     let selectionRect = {
         element: null,
         previousElement: null,
+        svgSelector: svgSelector,
         currentY: 0,
         currentX: 0,
         originX: 0,
@@ -50,6 +51,7 @@ export function initD3DragSelect(svgSelector, callback) {
         let width = +sel.element.attr("width");
         let height = +sel.element.attr("height");
         return {
+            svgSelector: sel.svgSelector,
             x1: x,
             y1: y,
             x2: x + width,
@@ -137,11 +139,9 @@ export function initD3DragSelect(svgSelector, callback) {
 
     function dragEnd() {
         if (sel.element != null) {
-            // console.log("dragEnd");
             let finalAttributes = getCurrentAttributes();
-            console.dir(finalAttributes);
+
             if (finalAttributes.x2 - finalAttributes.x1 > 1 && finalAttributes.y2 - finalAttributes.y1 > 1) {
-                console.log("range selected");
                 d3.event.sourceEvent.preventDefault();
                 // sel.focus();
                 remove();
@@ -149,10 +149,10 @@ export function initD3DragSelect(svgSelector, callback) {
                     rect: finalAttributes
                 });
             } else {
-                console.log("single point");
                 remove();
                 callback({
                     point: {
+                        svgSelector: finalAttributes.svgSelector,
                         x: finalAttributes.x1,
                         y: finalAttributes.y1
                     }
