@@ -15,7 +15,8 @@
     "underscore": "^1.7.0"
   },
   "devDependencies": {
-    "d3": "^4.11.0"
+    "d3": "^4.11.0",
+    "webpack": "^3.8.1"
   },
   "scripts": {}
 }
