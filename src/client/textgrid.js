@@ -1,8 +1,9 @@
 /* global require define _ $ */
 
-import * as d3 from  'd3';
-import * as $ from  'jquery';
-import * as _ from  'underscore';
+import * as d3 from 'd3';
+import * as $ from 'jquery';
+import * as _ from 'underscore';
+import * as lbl from './labeling';
 
 let rtree = require('rbush');
 let knn = require('rbush-knn');
@@ -177,6 +178,13 @@ function setupPageTexts(contentId, textgrids) {
         .call(textGridLocationIndicator)
     ;
 }
+let currentMousePos = { x: -1, y: -1 };
+
+$(document).mousemove(function(event) {
+    currentMousePos.x = event.pageX;
+    currentMousePos.y = event.pageY;
+});
+
 
 
 function createLabelingPanel(annotation) {
@@ -195,18 +203,36 @@ function createLabelingPanel(annotation) {
         .attr("y", annotation.userBounds[1])
         .attr("width", annotation.userBounds[2])
         .attr("height", annotation.userBounds[3])
-        .attr("opacity", 0.5)
-        .attr("fill-opacity", 0.3)
+        .attr("fill-opacity", 0.7)
         .attr("stroke-width", 1)
         .attr("stroke", 'blue')
         .attr("fill", 'yellow')
-        .transition()
-        .duration(300)
+        .transition().duration(200)
         .attr("x", annotation.minBounds[0])
         .attr("y", annotation.minBounds[1])
         .attr("width", annotation.minBounds[2])
         .attr("height", annotation.minBounds[3])
+        .attr("fill-opacity", 0.3)
     ;
+
+
+    let headerLabeler = lbl.createHeaderLabelUI();
+
+    let divPageImages = `div.page-images`;
+
+    // console.log(headerLabeler);
+
+    $(headerLabeler).css({
+        left: currentMousePos.x,
+        top: currentMousePos.y
+    });
+
+    $(headerLabeler).css({
+        left: annotation.userBounds[0],
+        top: annotation.userBounds[1]
+    });
+
+    $(divPageImages).append(headerLabeler);
 
 }
 

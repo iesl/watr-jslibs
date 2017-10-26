@@ -10,6 +10,7 @@ import '../style/main.css';
 import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
 import '../style/selection.css';
+import '../style/bootstrap.css';
 
 let selectId = util.selectId;
 

@@ -1,0 +1,6 @@
+lib
+*.svg.react.js
+coverage
+flow-typed
+node_modules
+example/public/
