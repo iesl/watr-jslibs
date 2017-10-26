@@ -1,7 +1,29 @@
-/* global require location $ */
+/* global require location */
 
-import * as d3 from  'd3';
-import * as $ from  'jquery';
+import * as d3 from 'd3';
+import * as $ from 'jquery';
+import * as _ from 'underscore';
+// import * as coords from './coord-sys.js';
+import * as util from './commons.js';
+
+
+export let d3select = {
+    pageImages: () => {
+        return d3.select('div.page-images').selectAll('svg.page-image');
+    },
+    allSvgs: () => {
+        return d3.select('svg');
+    }
+};
+
+export let filterLoci = loci => _.filter(loci,  loc => {
+    return typeof loc !== "string";
+});
+
+export function selectShapes(dataBlock) {
+    return d3select.allSvgs().selectAll(".shape")
+        .data(dataBlock.shapes, util.getId) ;
+}
 
 let colorMap = {
     "Caption"                : "blue",
@@ -168,7 +190,7 @@ export function initShapeAttrs(r) {
             .attr("stroke", "black")
             .attr("opacity", 0.3)
         ;
-    };
+    }
 
     return r;
 }

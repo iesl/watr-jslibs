@@ -1,40 +1,38 @@
-/* global require define _ $ */
+/* global require  */
 
 import * as d3 from 'd3';
 import * as $ from 'jquery';
 import * as _ from 'underscore';
 import * as lbl from './labeling';
-
-let rtree = require('rbush');
-let knn = require('rbush-knn');
-
+import * as coords from './coord-sys.js';
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
+import * as rtrees from  './rtrees.js';
 
 import {initD3DragSelect} from  './dragselect.js';
 
-let svgs = () => d3.selectAll('svg');
-let pageImageSelector = () => d3.select('div.page-images').selectAll('svg.page-image');
+import { globals } from './globals';
+
+let knn = require('rbush-knn');
+
+// let svgs = () => d3.selectAll('svg');
+// let pageImageSelector = () => d3.select('div.page-images').selectAll('svg.page-image');
 
 let getX = d => d[0][1][0] / 100.0;
 let getY = d => d[0][1][1] / 100.0;
 let getW = d => d[0][1][2] / 100.0;
 let getH = d => d[0][1][3] / 100.0;
 
-let filterLoci = loci => _.filter(loci,  loc => {
-    return typeof loc !== "string";
-});
 
-export function selectShapes(dataBlock) {
-    return svgs().selectAll(".shape")
-        .data(dataBlock.shapes, util.getId) ;
-}
 
-let pageImageRTrees = [];
-
+/**
+ *  Capture a click on the textgrid-side and scroll the corresponding page image into
+ *  view, flashing an indicator on the image point corresponding to the text
+ */
 function syncScrollTextGrid(clickPt, neighbor) {
 
-    let { minX: x, minY: y, page: pageNum, row: row, col: col } = neighbor;
+    // let { minX: x, minY: y, page: pageNum, row: row, col: col } = neighbor;
+    let { page: pageNum, row: row } = neighbor;
 
     let pageTextgridSvgId = `#page-textgrid-${pageNum}`;
     let pageTextTop = $(pageTextgridSvgId).parent().position().top;
@@ -51,9 +49,9 @@ function syncScrollTextGrid(clickPt, neighbor) {
 
     d3.select(pageTextgridSvgId)
         .append('circle')
-        .attr("cx", function(d){ return 10; })
-        .attr("cy", function(d){ return (row*16)+10; })
-        .attr("r", function(d){ return 20; })
+        .attr("cx", 10)
+        .attr("cy", (row*16)+10)
+        .attr("r", 20)
         .attr("fill-opacity", 1)
         .attr("stroke-opacity", 0)
         .attr("fill",  "yellow")
@@ -94,9 +92,9 @@ function syncScrollPageImages(coords, loci) {
 
     d3.select(pageImageSvgId)
         .append('circle')
-        .attr("cx", function(d){ return getX(headLoc); })
-        .attr("cy", function(d){ return getY(headLoc); })
-        .attr("r", function(d){ return 20; })
+        .attr("cx",  getX(headLoc))
+        .attr("cy", getY(headLoc))
+        .attr("r", 20)
         .attr("fill-opacity", 1)
         .attr("stroke-opacity", 0)
         .attr("fill",  "yellow")
@@ -114,7 +112,7 @@ function syncScrollPageImages(coords, loci) {
 function textGridLocationIndicator(r) {
     return r
         .on("mousedown", function(d) {
-            let loci = filterLoci(d.loci);
+            let loci = util.filterLoci(d.loci);
             let coords = d3.mouse(this);
             syncScrollPageImages(coords, loci);
         })
@@ -124,11 +122,12 @@ function textGridLocationIndicator(r) {
             // let loci = filterLoci(d.loci);
         })
         .on("mouseover", function(d) {
-            let loci = filterLoci(d.loci);
+            let loci = util.filterLoci(d.loci);
             // console.log('mouseover: ', d.loci);
 
-            // #d3-chain-indent#
-            pageImageSelector().selectAll('.textloc')
+            // pageImageSelector()
+            util.d3select.pageImages()
+                .selectAll('.textloc')
                 .data(loci)
                 .enter()
                 .append('rect')
@@ -144,8 +143,10 @@ function textGridLocationIndicator(r) {
                 .attr("fill", 'blue')
             ;
 
-        }).on("mouseout", function(d) {
-            return pageImageSelector().selectAll('.textloc')
+        }).on("mouseout", function() {
+            // return pageImageSelector().selectAll('.textloc')
+            return util.d3select.pageImages()
+                .selectAll('.textloc')
                 .remove();
         });
 
@@ -174,20 +175,17 @@ function setupPageTexts(contentId, textgrids) {
         .attr("y", (d, i) => 20 + (i * 16))
         .attr("x", () => 40)
         .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
-        .text(function(d, i){ return "∙  " + d.text + "  ↲"; })
+        .text(function(d){ return "∙  " + d.text + "  ↲"; })
         .call(textGridLocationIndicator)
     ;
 }
-let currentMousePos = { x: -1, y: -1 };
 
-$(document).mousemove(function(event) {
-    currentMousePos.x = event.pageX;
-    currentMousePos.y = event.pageY;
-});
 
 
 
 function createLabelingPanel(annotation) {
+    console.log('createLabelingPanel', annotation);
+
 
     // let sortedHits = _.sortBy(hits, hit => hit.minX);
     // let hitStr = _.map(sortedHits, n => n.char).join('');
@@ -198,20 +196,20 @@ function createLabelingPanel(annotation) {
 
     d3.select(svgPageSelector)
         .append('rect')
-        .classed('label', true)
-        .attr("x", annotation.userBounds[0])
-        .attr("y", annotation.userBounds[1])
-        .attr("width", annotation.userBounds[2])
-        .attr("height", annotation.userBounds[3])
+        .classed('label-selection-rect', true)
+        .attr("x", annotation.userBounds.left)
+        .attr("y", annotation.userBounds.top)
+        .attr("width", annotation.userBounds.width)
+        .attr("height", annotation.userBounds.height)
         .attr("fill-opacity", 0.7)
         .attr("stroke-width", 1)
         .attr("stroke", 'blue')
         .attr("fill", 'yellow')
         .transition().duration(200)
-        .attr("x", annotation.minBounds[0])
-        .attr("y", annotation.minBounds[1])
-        .attr("width", annotation.minBounds[2])
-        .attr("height", annotation.minBounds[3])
+        .attr("x", annotation.minBounds.left)
+        .attr("y", annotation.minBounds.top)
+        .attr("width", annotation.minBounds.width)
+        .attr("height", annotation.minBounds.height)
         .attr("fill-opacity", 0.3)
     ;
 
@@ -222,19 +220,23 @@ function createLabelingPanel(annotation) {
 
     // console.log(headerLabeler);
 
-    $(headerLabeler).css({
-        left: currentMousePos.x,
-        top: currentMousePos.y
-    });
+    // let [leftX, llY] = bboxLowLeftPt(annotation.userBounds);
+
+    // let labelSelectionBottom = llY > coords.currentMousePos.y ? llY : coords.currentMousePos.y;
+    // let top = Math.max(
+    //     currentMousePos.y
+    // );
+    // // currentMousePos.y + bboxHeight(annotation.userBounds),
 
     $(headerLabeler).css({
-        left: annotation.userBounds[0],
-        top: annotation.userBounds[1]
+        left: globals.currentMousePos.x,
+        top: globals.currentMousePos.y
     });
 
     $(divPageImages).append(headerLabeler);
 
 }
+
 
 function setupPageImages(contentId, pageImageShapes) {
 
@@ -259,7 +261,7 @@ function setupPageImages(contentId, pageImageShapes) {
     ;
 
     d3.selectAll('svg.page-image')
-        .each(function (d){
+        .each(function (){
             let svg = d3.select(this);
 
             initD3DragSelect(svg.attr('id'), (pointOrRect) => {
@@ -269,53 +271,35 @@ function setupPageImages(contentId, pageImageShapes) {
                     let pageStr = clickPt.svgSelector.split('-').pop();
                     let page =  +pageStr;
 
-                    let pageRTree = pageImageRTrees[page];
+                    let pageRTree = globals.pageImageRTrees[page];
+
                     let x = clickPt.x,
-                    y = clickPt.y,
-                    num = 4;
+                        y = clickPt.y,
+                        num = 4;
 
                     let neighbors = knn(pageRTree, x, y, num);
                     if (neighbors.length > 0) {
                         let nearestNeighbor = neighbors[0];
-                        let ns = _.map(neighbors, (n) => n.char).join('');
+                        // let ns = _.map(neighbors, (n) => n.char).join('');
                         syncScrollTextGrid(clickPt, nearestNeighbor);
                     }
 
                 } else if (pointOrRect.rect != undefined) {
                     // Rectangular selection handler
                     let selectRect = pointOrRect.rect;
+                    let pdfImageRect = coords.mk.fromXy12(pointOrRect.rect, coords.coordSys.pdf);
+
                     let pageStr = selectRect.svgSelector.split('-').pop();
                     let page =  +pageStr;
 
-                    let pageRTree = pageImageRTrees[page];
+                    let hits = rtrees.searchPage(page, pdfImageRect);
 
-                    let userX1 = selectRect.x1,
-                    userY1 = selectRect.y1,
-                    userX2 = selectRect.x2,
-                    userY2 = selectRect.y2,
-                    userWidth = userX2-userX1,
-                    userHeight = userY2-userY1
-                    ;
-
-                    let hits = pageRTree.search({
-                        minX: userX1,
-                        minY: userY1,
-                        maxX: userX2,
-                        maxY: userY2
-                    });
-
-                    let minX = _.min(_.pluck(hits, 'minX')),
-                        maxX = _.max(_.pluck(hits, 'maxX')),
-                        minY = _.min(_.pluck(hits, 'minY')),
-                        maxY = _.max(_.pluck(hits, 'maxY')),
-                        width = maxX - minX,
-                        height = maxY - minY
-                    ;
+                    let minBoundSelection = rtrees.queryHitsMBR(hits);
 
                     let annotation = {
                         page: page,
-                        userBounds: [userX1, userY1, userWidth, userHeight],
-                        minBounds: [minX, minY, width, height]
+                        userBounds: pdfImageRect,
+                        minBounds: minBoundSelection
                     };
 
                     createLabelingPanel(annotation);
@@ -342,44 +326,6 @@ function setupPageImages(contentId, pageImageShapes) {
 
 
 
-function initRTrees(textgrids) {
-
-    pageImageSelector() .each((d, i) =>   {
-        let pageRTree = rtree();
-        pageImageRTrees[i] = pageRTree;
-
-        _.each(textgrids[i].rows, (row, ri) => {
-            let loci = filterLoci(row.loci);
-
-            let points = _.map(loci, (loc, ci) =>{
-                let headLoc = loc;
-                // let pageNum = loc[0][0];
-                let x = getX(headLoc);
-                let y = getY(headLoc);
-                let width  = getW(headLoc);
-                let height  = getH(headLoc);
-                let d = {
-                    minX: x,
-                    minY: y-height,
-                    maxX: x+width,
-                    maxY: y,
-                    page: headLoc[0][0],
-                    row: ri,
-                    col: ci,
-                    char: headLoc[0][2]
-                };
-
-                return d;
-            });
-
-            pageRTree.load(points);
-
-        });
-
-    });
-
-}
-
 export function RenderTextGrid(dataBlock) {
     let pages = dataBlock.pages;
     let textgrids = _.map(pages, p => p.textgrid);
@@ -402,7 +348,7 @@ export function RenderTextGrid(dataBlock) {
     setupPageImages('div.page-images', pageShapes);
     setupPageTexts('div.page-textgrids', textgrids);
 
-    initRTrees(textgrids);
+    rtrees.initRTrees(textgrids);
 
     // leftPane.selectAll(".shape")
     //     .data(gridShapes, util.getId)

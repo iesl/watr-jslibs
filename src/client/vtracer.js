@@ -1,4 +1,4 @@
-/* global require define $ _ */
+/* global require $ */
 
 
 import * as d3 from  'd3';
@@ -18,100 +18,98 @@ let DrawingMethods = drawingMethods();
 
 function drawingMethods() {
 
-    function DrawMethod(dataBlock) {
-        console.log("Running DrawMethod" );
+    // function DrawMethod(dataBlock) {
+    //     console.log("Running DrawMethod" );
 
-        let rects = tg.selectShapes(dataBlock);
+    //     let rects = tg.selectShapes(dataBlock);
 
-        printlog(dataBlock.desc);
+    //     printlog(dataBlock.desc);
 
-        return rects.enter()
-            .each(function (d){
-                let self = d3.select(this);
-                let shape = "???";
-                if (d.type != undefined) {
-                    shape = d.type;
-                } else {
-                    d.type = "rect";
-                }
-                self.append(shape)
-                    .call(util.initShapeAttrs) ;
-                return self;
-            })
-            .merge(rects)
-        ;
+    //     return rects.enter()
+    //         .each(function (d){
+    //             let self = d3.select(this);
+    //             let shape = "???";
+    //             if (d.type != undefined) {
+    //                 shape = d.type;
+    //             } else {
+    //                 d.type = "rect";
+    //             }
+    //             self.append(shape)
+    //                 .call(util.initShapeAttrs) ;
+    //             return self;
+    //         })
+    //         .merge(rects)
+    //     ;
 
-    }
+    // }
 
-    function OutlineMethod(dataBlock) {
+    // function OutlineMethod(dataBlock) {
 
-        console.log("Running OutlineMethod" );
+    //     console.log("Running OutlineMethod" );
 
-        let shapes = tg.selectShapes(dataBlock);
+    //     let shapes = tg.selectShapes(dataBlock);
 
-        printlog(dataBlock.desc);
+    //     printlog(dataBlock.desc);
 
-        return shapes.enter()
-            .each(function (d){
-                let self = d3.select(this);
-                let shape = "rect";
-                if (d.type != undefined) {
-                    shape = d.type;
-                } else {
-                    d.type = "rect";
-                }
-                return self.append(shape)
-                    .call(util.initShapeAttrs) ;
-            })
-        ;
+    //     return shapes.enter()
+    //         .each(function (d){
+    //             let self = d3.select(this);
+    //             let shape = "rect";
+    //             if (d.type != undefined) {
+    //                 shape = d.type;
+    //             } else {
+    //                 d.type = "rect";
+    //             }
+    //             return self.append(shape)
+    //                 .call(util.initShapeAttrs) ;
+    //         })
+    //     ;
 
 
-    }
+    // }
 
-    function RemoveMethod (dataBlock) {
-        console.log("Running RemoveMethod" );
+    // function RemoveMethod (dataBlock) {
+    //     console.log("Running RemoveMethod" );
 
-        printlog(dataBlock.desc);
+    //     printlog(dataBlock.desc);
 
-        _.each(dataBlock.shapes, function(shape){
-            svg.selectAll("#" + shape.id )
-                .attr('class', 'trash');
-        });
+    //     _.each(dataBlock.shapes, function(shape){
+    //         svg.selectAll("#" + shape.id )
+    //             .attr('class', 'trash');
+    //     });
 
-        return svg.selectAll(".trash")
-            .remove() ;
-    }
+    //     return svg.selectAll(".trash")
+    //         .remove() ;
+    // }
 
     return {
-        'DocumentTextGrid' : tg.RenderTextGrid,
-        'Draw'     : DrawMethod,
-        'Outline'  : OutlineMethod,
-        'Remove'   : RemoveMethod,
-        'Clear'    : RemoveMethod
+        'DocumentTextGrid' : tg.RenderTextGrid
+        // 'Draw'     : DrawMethod,
+        // 'Outline'  : OutlineMethod,
+        // 'Remove'   : RemoveMethod,
+        // 'Clear'    : RemoveMethod
     };
 }
 
 
-let messages = [""];
+// let messages = [""];
 
-function printlog(msg) {
-    messages.push(msg);
-    console.log(msg);
+// function printlog(msg) {
+//     messages.push(msg);
+//     console.log(msg);
 
-    svg.select('g.log')
-        .selectAll('text.log')
-        .data(messages)
-        .enter()
-        .append("text").classed('log', true)
-        .attr("y", function(d, i){ return 100 + (i * 20); })
-        .attr("x", function(d){ return 700; })
-        .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
-        .text(function(d, i){ return "> " + d; })
-    ;
-
-
-    return 0;
-}
+//     svg.select('g.log')
+//         .selectAll('text.log')
+//         .data(messages)
+//         .enter()
+//         .append("text").classed('log', true)
+//         .attr("y", function(d, i){ return 100 + (i * 20); })
+//         .attr("x", function(d){ return 700; })
+//         .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
+//         .text(function(d, i){ return "> " + d; })
+//     ;
+//     return 0;
+// }
 
 
 function onEndAll (transition, callback) {
@@ -146,7 +144,6 @@ function stepper (steps) {
 
 
 function runLog(logData) {
-    console.log("runLog", logData.steps);
     stepper(logData.steps);
 }
 
@@ -196,7 +193,6 @@ export function runTrace() {
     let {topPaneId: topPaneId, bottomPaneId: bottomPaneId} =
         panes.splitHorizontal(splitPaneRootId, {fixedTop: 40});
 
-    console.log('topPaneId', topPaneId);
 
     selectId(topPaneId).addClass('menu-pane');
     selectId(bottomPaneId).addClass('content-pane');
