@@ -1,8 +1,14 @@
+
 // import * as d3 from  'd3';
 import * as $ from  'jquery';
 import * as _ from  'underscore';
 
-
+// function div(attrs) {
+//     return $('<div>', attrs).append;
+// }
+// function form(attrs) {
+//     return $('<div>', attrs).append;
+// }
 export function createHeaderLabelUI() {
     let labelNames = [
         'Title',
@@ -12,16 +18,55 @@ export function createHeaderLabelUI() {
         'References'
     ];
 
-    let formFrame = $('<div class="form-frame"></div>');
-    let form = $('<form class="labeling-form"></form>');
-    let btngrp = $('<div class="btn-group-xs"></div>');
+    let $labelFormTemplate = $('#templates > #label-form');
+    let $labelButton = $labelFormTemplate.find('button#label-type');
 
 
-    _.each(labelNames, label => {
-        let r = $(`<button class="btn btn-xs btn-block btn-default" type="radio" name="labelName" value="${label}" ><small><span class="glyphicon glyphicon-arrow-left" />${label}</small> </button>`);
-        btngrp.append(r);
+    console.log('labelButton', $labelButton);
+    let $labelButtons = $labelFormTemplate.find('div#label-buttons');
+    $labelButtons.empty();
+    // $labelButton.detach();
+
+
+    $($labelFormTemplate).submit(function (event) {
+        var jqxhr = $.post( "/api/v1/label", function() {
+            alert( "success" );
+        }).done(function() {
+            alert( "second success" );
+        }).fail(function() {
+            alert( "error" );
+        }).always(function() {
+            alert( "finished" );
+        });
+
+        event.preventDefault();
     });
 
-    return $(formFrame).append(form.append(btngrp));
+
+    _.each(labelNames, (label, i) => {
+        // let r = $(`<button class="btn btn-xs btn-block btn-default" type="radio" name="labelName" value="${label}" ><small><span class="glyphicon glyphicon-arrow-left" />${label}</small> </button>`);
+        let $l = $labelButton.clone();
+        $l.empty();
+        $l.append($(`<small>(${i+1}) ${label}</small>`)) ;
+        $labelButtons.append($l);
+    });
+
+    // return $(formFrame).append(form.append(btngrp));
+    console.log($labelFormTemplate);
+    return $labelFormTemplate;
 
 }
+// // Assign handlers immediately after making the request,
+// // and remember the jqxhr object for this request
+// var jqxhr = $.post( "/api/v1/label", function() {
+//     alert( "success" );
+// })
+//     .done(function() {
+//         alert( "second success" );
+//     })
+//     .fail(function() {
+//         alert( "error" );
+//     })
+//     .always(function() {
+//         alert( "finished" );
+//     });

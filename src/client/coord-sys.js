@@ -1,4 +1,3 @@
-
 /**
   * Define and translate between the various coordinate systems used:
   *
@@ -8,7 +7,6 @@
   *    Screen event coords - e.g., where a user clicks on a page
   *    Client Pages View  - Absolute coords within the vertical scroll list of page svgs/images (regardless of scroll position)
   *    Client Text View  - coords within the vertical scroll list of page text blocks  (regardless of scroll position)
-  *
   *
   **/
 
@@ -31,6 +29,24 @@ export let coordSys = {
     pdf: Symbol('pdf')
 };
 
+class Point {
+    constructor (x, y, sys) {
+        this.x = x;
+        this.y = y;
+        this._system = sys? sys : coordSys.unknown;
+    }
+}
+
+export let mkPoint = {
+    fromXy: (x, y, sys) => {
+        return new Point(x, y, sys);
+    }
+};
+
+/**
+   General purpose bounding box data that meets the interface requirements
+   for the various libraries in use
+   */
 class BBox {
     constructor (l, t, w, h, sys) {
         this.left = l;
@@ -53,21 +69,33 @@ class BBox {
     get bottom() { return this.top + this.height; }
     get right()  { return this.left + this.width; }
 
+    get topLeft()  { return mkPoint.fromXy(this.left,  this.top, this.system); }
+
     set system(s)  { this._system = s; }
     get system()   { return this._system; }
 }
+
+// export let locus = {
+//     left   : lbwh => lbwh[0][1][0] / 100.0,
+//     bottom : lbwh => lbwh[0][1][1] / 100.0,
+//     width  : lbwh => lbwh[0][1][2] / 100.0,
+//     height : lbwh => lbwh[0][1][3] / 100.0
+// };
 
 
 export let mk = {
     fromLtwh: (l, t, w, h) => {
         return new BBox(l, t, w, h);
     },
-    fromArray: (ltwh) => {
+    fromArray: (lbwh) => {
+        let left   = lbwh[0] / 100.0;
+        let bottom = lbwh[1] / 100.0;
+        let width  = lbwh[2] / 100.0;
+        let height = lbwh[3] / 100.0;
+        let top    = bottom - height;
         return new BBox(
-            ltwh[0] / 100.0,
-            ltwh[1] / 100.0,
-            ltwh[2] / 100.0,
-            ltwh[3] / 100.0
+            left, top, width, height,
+            coordSys.pdf
         );
     },
     fromXy12: (xy12) => {
@@ -76,9 +104,7 @@ export let mk = {
             xy12.y1,
             xy12.x2 - xy12.x1,
             xy12.y2 - xy12.y1,
+            coordSys.unknown
         );
     }
 };
-
-
-

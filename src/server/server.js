@@ -35,12 +35,6 @@ router
     })
 ;
 
-// .get('/js/:file', async function(ctx, next) {
-//     await send(ctx, ctx.params.file, { root: serverRoot + '/public/js' });
-// })
-// .get('/app/:file', async function(ctx, next) {
-//     await send(ctx, ctx.params.file, { root: serverRoot + '/app' });
-// })
 
 function buildCorpusEntryTable(options) {
 
@@ -55,32 +49,6 @@ function buildCorpusEntryTable(options) {
     return corpusEntries;
 }
 
-function buildMenuOrig(options, corpusEntries) {
-    let menu = _.map(corpusEntries, (entry) => {
-        let path = options.corpusRoot + '/' + entry + '/tracelogs/tracelog.json' ;
-
-        if (fs.exists(path)) {
-            let stats = fs.statSync(path);
-            let menuEntry = {
-                'entry': entry
-            };
-
-            if(stats.isFile()) {
-                menuEntry.logfile =  path;
-            }
-            return menuEntry;
-        } else {
-            let menuEntry = {
-                'entry': entry,
-                'logfile': ""
-            };
-
-            return menuEntry;
-
-        }
-    });
-    return menu;
-}
 function buildMenu(options, corpusEntries) {
     let menu = _.map(corpusEntries, (entry) => {
         let tracelogDir = options.corpusRoot + '/' + entry + '/tracelogs' ;
@@ -119,6 +87,10 @@ function run (options) {
     let menu = buildMenu(options, corpusEntries);
 
     router
+        .post('/api/v1/label', async function(ctx, next) {
+            console.log(`POST: ${ctx.params}`);
+
+        })
         .get('/entry/:entry/image/page/:page', async function(ctx, next) {
             let { entry: entry, page: page } = ctx.params;
             let file = `page-${page}.opt.png`;
@@ -155,9 +127,6 @@ function run (options) {
                 locals: {ctx: {entry: entry, logfile: logfile}}
             });
         })
-        // .get('/vtrace/:entry/:logfile', async function(ctx, next) {
-        //     await ctx.render('vtracer');
-        // })
         .get('/menu', async function(ctx, next) {
             ctx.body = await JSON.stringify(menu);
         })

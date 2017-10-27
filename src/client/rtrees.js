@@ -6,7 +6,7 @@ import * as _ from 'underscore';
 import * as coords from './coord-sys.js';
 import * as common from './commons.js';
 let rtree = require('rbush');
-// let knn = require('rbush-knn');
+let knn = require('rbush-knn');
 
 globals.pageImageRTrees = [];
 
@@ -16,6 +16,11 @@ export function searchPage(pageNum, queryBox) {
     return pageRTree.search(queryBox);
 }
 
+export function knnQueryPage(pageNum, queryPoint, k) {
+    let pageRTree = globals.pageImageRTrees[pageNum];
+    return knn(pageRTree, queryPoint.x, queryPoint.y, k);
+
+}
 
 /** return min-bounding rect for rtree search hits */
 export function queryHitsMBR(hits) {
@@ -58,5 +63,4 @@ export function initRTrees(textgrids) {
         });
 
     });
-
 }

@@ -11,6 +11,9 @@ export let d3select = {
     pageImages: () => {
         return d3.select('div.page-images').selectAll('svg.page-image');
     },
+    pageImage: (n) => {
+        return d3.select('div.page-images').selectAll(`svg#page-image-${n}`);
+    },
     allSvgs: () => {
         return d3.select('svg');
     }
@@ -199,11 +202,6 @@ export function corpusEntry() {
     let entry = location.href.split('/').reverse()[0].split('?')[0];
     return entry;
 }
-
-// function corpusLogfile() {
-//     let entry = location.href.split('/').reverse()[0];
-//     return entry;
-// }
 
 export function getParameterByName(name, url) {
     if (!url) url = window.location.href;
