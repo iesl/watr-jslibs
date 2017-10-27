@@ -5,8 +5,13 @@ const render = require('koa-ejs');
 const path = require('path');
 const send = require('koa-send');
 const json = require('koa-json');
+const bodyParser = require('koa-bodyparser');
+const koaBody = require('koa-body');
+
 const fs = require('fs');
+
 const _ = require('underscore');
+
 
 const router = new Router();
 const app = new Koa();
@@ -87,8 +92,10 @@ function run (options) {
     let menu = buildMenu(options, corpusEntries);
 
     router
-        .post('/api/v1/label', async function(ctx, next) {
-            console.log(`POST: ${ctx.params}`);
+        .post('/api/v1/label', koaBody(), async function(ctx) {
+            console.log(ctx.request.body);
+            ctx.body = JSON.stringify(ctx.request.body);
+            // this.body = {};
 
         })
         .get('/entry/:entry/image/page/:page', async function(ctx, next) {
@@ -135,10 +142,22 @@ function run (options) {
         })
     ;
 
+
     app.use(router.routes())
         .use(router.allowedMethods())
         .use(json())
+        // .use(bodyParser())
     ;
+    // app.use(async (ctx, next) => {
+    //     // the parsed body will store in ctx.request.body
+    //     // if nothing was parsed, body will be an empty object {}
+    //     ctx.body = ctx.request.body;
+    //     await next();
+    // });
+    // app.use(koaBody());
+    // app.use(ctx => {
+    //     ctx.body = `Request Body: ${JSON.stringify(ctx.request.body)}`;
+    // });
 
 
     var server = app.listen(3000, function() {

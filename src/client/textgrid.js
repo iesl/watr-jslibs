@@ -184,9 +184,10 @@ function createLabelingPanel(annotation) {
     // console.log('selectRect', selectRect, 'hit:', hitStr);
     // console.log('selectRect', selectRect, 'minRect:', [minX, minY, maxX-minX, maxY-minY]);
     // Create visual feedback for selection
+
     let svgPageSelector = `svg#page-image-${annotation.page}`;
 
-    d3.select(svgPageSelector)
+    let labelSelection = d3.select(svgPageSelector)
         .append('rect')
         .classed('label-selection-rect', true)
         .attr("x", annotation.userBounds.left)
@@ -204,35 +205,17 @@ function createLabelingPanel(annotation) {
         .attr("height", annotation.minBounds.height)
         .attr("fill-opacity", 0.3)
     ;
-    
-    let headerLabeler = lbl.createHeaderLabelUI();
 
-    let divPageImages = `div.page-images`;
-
-    // console.log(headerLabeler);
-
-    // let [leftX, llY] = bboxLowLeftPt(annotation.userBounds);
-
-    // let labelSelectionBottom = llY > coords.currentMousePos.y ? llY : coords.currentMousePos.y;
-    // let top = Math.max(
-    //     currentMousePos.y
-    // );
-    // // currentMousePos.y + bboxHeight(annotation.userBounds),
-
-    // $(headerLabeler).css({
-    //     left: globals.currentMousePos.x,
-    //     top: globals.currentMousePos.y
-    // });
+    lbl.createHeaderLabelUI();
 
     $('.modal-content').css({
         'margin-left': globals.currentMousePos.x,
         'margin-top': globals.currentMousePos.y
     });
 
-    $('#label-form').css({
+    $('#label-form.modal').css({
         display: 'block'
     });
-    // $(divPageImages).append(headerLabeler);
 
 }
 

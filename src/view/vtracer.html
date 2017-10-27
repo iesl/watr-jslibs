@@ -5,41 +5,41 @@
 
     <body>
 
-        <div id="templates" style="display: block;">
 
-            <!-- Template for labeling form -->
-            <div id="label-form" class="modal" style="display: none;">
-                <span onclick="document.getElementById('label-form').style.display='none'" class="close" title="Close Modal">&times;</span>
-
-
-                <!-- Modal Content -->
-                <form class="modal-content animate" action="/api/v1/label" method="post">
-                    <div id="label-buttons" class="btn-group-xs">
-                        <button id="label-type" class="btn btn-xs btn-block btn-default" type="submit" name="labelName" value="" >
-                            <small>(1) Title</small>
-                        </button>
-
-                        <button class="btn btn-xs btn-block btn-default" type="submit" name="labelName" value="" >
-                            <small>(2) Authors</small>
-                        </button>
-                        <button class="btn btn-xs btn-block btn-default" type="submit" name="labelName" value="" >
-                            <small>(3) Abstract</small>
-                        </button>
-                        <button onclick="document.getElementById('label-form').style.display='none'" class="btn btn-xs btn-block btn-warn cancelbtn" type="button">
-                            Cancel
-                        </button>
-
-                    </div>
+        <!-- Labeling form -->
+        <div id="label-form" class="modal" style="display: none;">
+            <span onclick="document.getElementById('label-form').style.display='none'" class="close" title="Close Modal">&times;</span>
 
 
-                </form>
-            </div>
+            <!-- <form class="modal-content animate" action="/api/v1/label" method="POST"> -->
+            <form class="modal-content animate" method="POST">
+                <input id="labelType" name="labelType" value="" type="hidden"> </input>
+
+                <div id="label-buttons" class="btn-group-xs">
+                    <button id="label-type" class="btn btn-xs btn-block btn-default" type="submit" >
+                        <small>(1) Title</small>
+                    </button>
+
+                    <button class="btn btn-xs btn-block btn-default" type="submit" name="labelName" value="" >
+                        <small>(2) Authors</small>
+                    </button>
 
 
-            <!-- <div id="content" class="content" style="display: none;"> </div> -->
-            <div id="content" class="content" style=""> </div>
+                </div>
+                <div class="btn-group-xs">
+                    <button id="cancel-button" onclick="document.getElementById('label-form').style.display='none'" class="btn btn-xs btn-block btn-warn cancelbtn" type="button">
+                        Cancel
+                    </button>
+                </div>
 
-            <script src="/dist/vtrace.bundle.js"></script>
+
+            </form>
+        </div>
+
+
+        <div id="content" class="content" style="display: block;"> </div>
+
+        <script src="/dist/vtrace.bundle.js"></script>
 
     </body>
 </html>

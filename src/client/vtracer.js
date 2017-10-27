@@ -5,6 +5,7 @@ import * as d3 from  'd3';
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
 import * as tg from  './textgrid.js';
+import * as $ from 'jquery';
 
 import '../style/main.css';
 import '../style/split-pane.css';
