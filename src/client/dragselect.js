@@ -9,12 +9,14 @@ import 'd3-dispatch';
 import 'd3-selection';
 import 'd3-drag';
 import * as _ from  'underscore';
+import {globals} from './globals';
+import * as $ from 'jquery';
 
 
 export function initD3DragSelect(svgSelector, callback) {
     let selfSvg = () => d3.select("#" + svgSelector);
 
-    let selectionRect = {
+    let selState = {
         element: null,
         previousElement: null,
         svgSelector: svgSelector,
@@ -24,18 +26,16 @@ export function initD3DragSelect(svgSelector, callback) {
         originY: 0
     };
 
-    let sel = selectionRect;
-
     function setElement(ele) {
-        sel.previousElement = sel.element;
-        sel.element = ele;
+        selState.previousElement = selState.element;
+        selState.element = ele;
     }
 
     function getNewAttributes() {
-        let x = sel.currentX < sel.originX ? sel.currentX : sel.originX;
-        let y = sel.currentY < sel.originY ? sel.currentY : sel.originY;
-        let width = Math.abs(sel.currentX - sel.originX);
-        let height = Math.abs(sel.currentY - sel.originY);
+        let x = selState.currentX < selState.originX ? selState.currentX : selState.originX;
+        let y = selState.currentY < selState.originY ? selState.currentY : selState.originY;
+        let width = Math.abs(selState.currentX - selState.originX);
+        let height = Math.abs(selState.currentY - selState.originY);
         return {
             x: x,
             y: y,
@@ -46,22 +46,17 @@ export function initD3DragSelect(svgSelector, callback) {
 
     function getCurrentAttributes() {
         // use plus sign to convert string into number
-        let x = +sel.element.attr("x");
-        let y = +sel.element.attr("y");
-        let width = +sel.element.attr("width");
-        let height = +sel.element.attr("height");
+        let x = +selState.element.attr("x");
+        let y = +selState.element.attr("y");
+        let width = +selState.element.attr("width");
+        let height = +selState.element.attr("height");
         return {
-            svgSelector: sel.svgSelector,
+            svgSelector: selState.svgSelector,
             x1: x,
             y1: y,
             x2: x + width,
             y2: y + height
         };
-    }
-
-    function getCurrentAttributesAsText() {
-        let attrs = getCurrentAttributes();
-        return "x1: " + attrs.x1 + " x2: " + attrs.x2 + " y1: " + attrs.y1 + " y2: " + attrs.y2;
     }
 
     function init(newX, newY) {
@@ -77,43 +72,40 @@ export function initD3DragSelect(svgSelector, callback) {
         ;
 
         setElement(rectElement);
-        sel.originX = newX;
-        sel.originY = newY;
+        selState.originX = newX;
+        selState.originY = newY;
         update(newX, newY);
     }
 
     function update(newX, newY) {
-        sel.currentX = newX;
-        sel.currentY = newY;
+        globals.currentMousePos.x = newX;
+        globals.currentMousePos.y = newY;
+        $("li > span#mousepos").text(
+            `x: ${newX}, y: ${newY}`
+        );
+
+        selState.currentX = newX;
+        selState.currentY = newY;
         _.each(getNewAttributes(), (v, k) => {
-            sel.element.attr(k, v);
+            selState.element.attr(k, v);
         });
     }
 
-    function focus() {
-        sel.element
-            .style("stroke", "#DE695B")
-            .style("stroke-width", "2.5");
-    }
-
     function remove() {
-        sel.element.remove();
-        sel.element = null;
+        selState.element.remove();
+        selState.element = null;
     }
 
     function removePrevious() {
-        if (sel.previousElement) {
-            sel.previousElement.remove();
+        if (selState.previousElement) {
+            selState.previousElement.remove();
         }
     }
 
 
 
     function dragStart() {
-        console.log("dragStart");
         let mouseEvent = d3.event.sourceEvent;
-        console.log("mouse event:", mouseEvent);
-        // console.dir('svg', svgSelection);
 
         // 0=left, 1=middle, 2=right
         let b = mouseEvent.button;
@@ -122,11 +114,12 @@ export function initD3DragSelect(svgSelector, callback) {
             init(p[0], p[1]);
             removePrevious();
             d3.event.sourceEvent.stopPropagation(); // silence other listeners
+            // console.log('sourceEvent', d3.event.sourceEvent);
         }
     }
 
     function dragMove() {
-        if (sel.element != null) {
+        if (selState.element != null) {
             // console.log("dragMove");
             let p = d3.mouse(this);
             update(p[0], p[1]);
@@ -138,12 +131,12 @@ export function initD3DragSelect(svgSelector, callback) {
     }
 
     function dragEnd() {
-        if (sel.element != null) {
+        if (selState.element != null) {
             let finalAttributes = getCurrentAttributes();
 
             if (finalAttributes.x2 - finalAttributes.x1 > 1 && finalAttributes.y2 - finalAttributes.y1 > 1) {
                 d3.event.sourceEvent.preventDefault();
-                // sel.focus();
+                // selState.focus();
                 remove();
                 callback({
                     rect: finalAttributes

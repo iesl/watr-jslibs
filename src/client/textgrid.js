@@ -160,7 +160,25 @@ function setupPageTexts(contentId, textgrids) {
         })
     ;
 
-    return textgridsel.selectAll('.gridrow')
+    // let d3$gridrows = textgridsel.selectAll('.gridrow')
+    //     .data(d => d.rows)
+    //     .enter()
+    //     .append('text') .classed('gridrow', true)
+    //     .attr("y", (d, i) => 20 + (i * 16))
+    //     .attr("x", () => 40)
+    //     .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
+    // ;
+
+
+    // d3$gridrows
+    //     .selectAll('.gridcell')
+    //     .data(d => d.text.split(''))
+    //     .enter()
+    //     .append('tspan').classed('.gridcell', true)
+    //     .text(d => { return d; })
+    // ;
+
+    textgridsel.selectAll('.gridrow')
         .data(d => d.rows)
         .enter()
         .append('text') .classed('gridrow', true)
@@ -170,14 +188,31 @@ function setupPageTexts(contentId, textgrids) {
         .text(function(d){ return "∙  " + d.text + "  ↲"; })
         .call(textGridLocationIndicator)
     ;
+
+
+    // d3.selectAll('svg.textgrid')
+    //     .each(function (){
+    //         let svg = d3.select(this);
+
+    //         initD3DragSelect(svg.attr('id'), (pointOrRect) => {
+    //             if (pointOrRect.point != undefined) {
+    //                 console.log('textgrid click');
+    //                 // clickHandler(pointOrRect.point);
+    //             } else if (pointOrRect.rect != undefined) {
+    //                 console.log('textgrid select');
+    //                 // selectionHandler(pointOrRect.rect);
+    //             } else {
+    //                 // Move handler
+    //             }
+    //         });
+    //     })
+    // ;
 }
 
 
 
 
 function createLabelingPanel(annotation) {
-    console.log('createLabelingPanel', annotation);
-
 
     // let sortedHits = _.sortBy(hits, hit => hit.minX);
     // let hitStr = _.map(sortedHits, n => n.char).join('');
@@ -186,8 +221,13 @@ function createLabelingPanel(annotation) {
     // Create visual feedback for selection
 
     let svgPageSelector = `svg#page-image-${annotation.page}`;
+    let pageImageTop = $(svgPageSelector).parent().position().top;
+    let pageImagesOffset = $('div.page-images').position().top;
+    let screenY = pageImageTop + pageImagesOffset;
 
-    let labelSelection = d3.select(svgPageSelector)
+    console.log('pageImageTop', screenY);
+
+    d3.select(svgPageSelector)
         .append('rect')
         .classed('label-selection-rect', true)
         .attr("x", annotation.userBounds.left)
@@ -208,9 +248,10 @@ function createLabelingPanel(annotation) {
 
     lbl.createHeaderLabelUI();
 
+
     $('.modal-content').css({
         'margin-left': globals.currentMousePos.x,
-        'margin-top': globals.currentMousePos.y
+        'margin-top': globals.currentMousePos.y + screenY
     });
 
     $('#label-form.modal').css({

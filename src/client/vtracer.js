@@ -182,8 +182,13 @@ function setupMenubar() {
         .append('li')
         .append('a')
         .attr('href', '/')
-        .text('Browse')
-    ;
+        .text('Browse');
+
+    menuBarList
+        .append('li')
+        .append('span')
+        .attr('id', 'mousepos')
+        .text('??');
 
 }
 

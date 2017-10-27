@@ -19,6 +19,10 @@ globals.currentMousePos = { x: -1, y: -1 };
 $(document).mousemove(function(event) {
     globals.currentMousePos.x = event.pageX;
     globals.currentMousePos.y = event.pageY;
+    $("li > span#mousepos").text(
+        `x: ${event.pageX}, y: ${event.pageY}`
+    );
+
 });
 
 

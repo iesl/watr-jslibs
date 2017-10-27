@@ -128,10 +128,9 @@ ul.menubar > li a:hover {
 
 /* Modal Content/Box */
 .modal-content {
-    background-color: #fefefe;
-    /* margin: 5px auto; /\* 15% from the top and centered *\/ */
-    border: 1px solid #888;
-    width: 10%; /* Could be more or less, depending on screen size */
+    display: inline-block;
+    background-color: #2e2e2e;
+    border: 2px solid black;
 }
 
 /* The Close Button */

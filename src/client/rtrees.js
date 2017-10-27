@@ -38,7 +38,6 @@ export function queryHitsMBR(hits) {
 
 
 export function initRTrees(textgrids) {
-    console.log('initRTrees??');
 
     common.d3select.pageImages().each((d, i) =>   {
         let pageRTree = rtree();
