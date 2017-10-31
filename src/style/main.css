@@ -40,7 +40,19 @@ svg.page-image {
     background-color:lightsteelblue;
 }
 
-div.page-textgrid {
+
+div.page-textgrids {
+    /* width: 100%; /\*can be in percentage also.*\/ */
+    /* height: auto; */
+    margin: 0 auto;
+    padding: 10px;
+    position: relative;
+}
+
+
+div.textgrid {
+    position: relative;
+
     padding-bottom: 5px;
     /* margin-left: auto; */
     /* margin-right: auto; */
@@ -48,15 +60,27 @@ div.page-textgrid {
     border-style: solid;
     border-color:lightsteelblue;
     /* width: 50px; */
+
 }
 
-.page-textgrids {
-    /* width: 100%; /\*can be in percentage also.*\/ */
-    /* height: auto; */
-    margin: 0 auto;
-    padding: 10px;
-    position: relative;
+canvas.textgrid {
+    position: absolute;
+    width: "100%";
+    height: "100%";
+
+    z-index: -10;
 }
+
+svg.textgrid {
+    position: absolute;
+    width: "100%";
+    height: "100%";
+
+    z-index: 10;
+}
+
+
+
 
 .menu-pane {
     margin: 0 auto;

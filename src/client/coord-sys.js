@@ -31,6 +31,9 @@ class Point {
 export let mkPoint = {
     fromXy: (x, y, sys) => {
         return new Point(x, y, sys);
+    },
+    fromD3Mouse: (d3Mouse) => {
+        return new Point(d3Mouse[0], d3Mouse[1]);
     }
 };
 
@@ -71,6 +74,7 @@ export let mk = {
     fromLtwh: (l, t, w, h) => {
         return new BBox(l, t, w, h);
     },
+
     fromArray: (lbwh) => {
         let left   = lbwh[0] / 100.0;
         let bottom = lbwh[1] / 100.0;

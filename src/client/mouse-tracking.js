@@ -9,6 +9,16 @@ import * as $ from 'jquery';
 import * as _ from 'underscore';
 import {globals} from './globals';
 
+
+function updateMouseStatus() {
+    let x = globals.currentMousePos.x;
+    let y = globals.currentMousePos.y;
+    $("li > span#mousepos").text(
+        `x: ${x}, y: ${y}`
+    );
+
+}
+
 export function initGlobalMouseTracking(elemIds) {
     // let locs = {};
     // _.each(elemIds, (elemId) =>{
@@ -23,8 +33,6 @@ export function initGlobalMouseTracking(elemIds) {
 
     // });
 
-    // Constantly track the mouse location
-    // $(document).mousemove(function(event) {
     $(document).on('mousemove', function(event) {
         globals.currentMousePos.x = event.pageX;
         globals.currentMousePos.y = event.pageY;
@@ -34,18 +42,7 @@ export function initGlobalMouseTracking(elemIds) {
         // }).join("; ");
 
 
-        // console.log('event', event);
-        // console.log('page', event.pageY);
-        // console.log('client', event.clientY);
-        // console.log('screen', event.screenY);
-        // console.log('offset', event.offsetY);
-
-        $("li > span#mousepos").text(
-            `x: ${event.pageX}, y: ${event.pageY}`
-            // `x: ${event.clientX}, y: ${event.clientY} ${info}`
-        );
-
+        updateMouseStatus();
     });
 
 }
-
