@@ -78,10 +78,11 @@ export function initD3DragSelect(svgSelector, callback) {
     }
 
     function update(newX, newY) {
+        // let selfPos = $(selfSvg()).parent().position();
         globals.currentMousePos.x = newX;
         globals.currentMousePos.y = newY;
         $("li > span#mousepos").text(
-            `x: ${newX}, y: ${newY}`
+            `x: ${newX}, y: ${newY} : ${svgSelector}`
         );
 
         selState.currentX = newX;
@@ -114,7 +115,6 @@ export function initD3DragSelect(svgSelector, callback) {
             init(p[0], p[1]);
             removePrevious();
             d3.event.sourceEvent.stopPropagation(); // silence other listeners
-            // console.log('sourceEvent', d3.event.sourceEvent);
         }
     }
 
@@ -136,7 +136,6 @@ export function initD3DragSelect(svgSelector, callback) {
 
             if (finalAttributes.x2 - finalAttributes.x1 > 1 && finalAttributes.y2 - finalAttributes.y1 > 1) {
                 d3.event.sourceEvent.preventDefault();
-                // selState.focus();
                 remove();
                 callback({
                     rect: finalAttributes

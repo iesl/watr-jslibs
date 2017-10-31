@@ -4,8 +4,9 @@
 import * as d3 from  'd3';
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
-import * as tg from  './textgrid.js';
+import * as tg from  './textgrid-interp.js';
 import * as $ from 'jquery';
+import * as mouseTracking from './mouse-tracking.js';
 
 import '../style/main.css';
 import '../style/split-pane.css';
@@ -182,9 +183,15 @@ function setupMenubar() {
         .append('li')
         .append('a')
         .attr('href', '/')
-        .text('Browse');
+        .text('Browse  :: ');
 
-    menuBarList
+    // let rightMenuBarList = d3.select('.menu-pane')
+    //     .append('ul')
+    //     .classed('menubar', true)
+    //     .classed('pull-right', true)
+    // ;
+
+   menuBarList
         .append('li')
         .append('span')
         .attr('id', 'mousepos')
@@ -204,6 +211,8 @@ export function runTrace() {
     selectId(bottomPaneId).addClass('content-pane');
 
     setupMenubar();
+
+    mouseTracking.initGlobalMouseTracking([]);
 
     let entry = util.corpusEntry();
     let show = util.getParameterByName('show');

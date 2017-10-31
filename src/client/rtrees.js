@@ -1,6 +1,7 @@
 /* global require  */
 
-// import * as d3 from 'd3';
+import * as d3 from 'd3';
+import * as $ from 'jquery';
 import { globals } from './globals';
 import * as _ from 'underscore';
 import * as coords from './coord-sys.js';
@@ -9,6 +10,7 @@ let rtree = require('rbush');
 let knn = require('rbush-knn');
 
 globals.pageImageRTrees = [];
+globals.textgridRTrees = [];
 
 
 export function searchPage(pageNum, queryBox) {
@@ -38,6 +40,68 @@ export function queryHitsMBR(hits) {
 
 
 export function initRTrees(textgrids) {
+
+    // common.d3select.pageTextgrids().each(function (textGridData, gridIndex) {
+    //     let d3$textgrid = d3.select(this);
+
+    //     let textgridRTree = rtree();
+    //     globals.textgridRTrees[gridIndex] = textgridRTree;
+
+    //     // console.log('d3$textgrid, i:', i, d3$textgrid);
+    //     // console.log('textGridData', textGridData);
+    //     // console.log('node', node);
+    //     // console.log('textgrid pos', pos);
+
+    //     let textgridSvgPos = $(d3$textgrid.node()).position();
+    //     let data = [];
+
+    //     console.log('init-ing page', gridIndex, ', rows', textGridData.rows.length);
+    //     d3$textgrid.selectAll('.gridrow').each(function (rowdata, rowIndex) {
+    //         // let d3$gridrow = d3.select(this);
+    //         // let rowdata = textGridData[rowIndex];
+
+    //         let rowLoci = common.filterLoci(rowdata.loci);
+    //         let thisRow = $(this);
+
+    //         // thisRow.children('tspan').each(function (charIndex, asdf) {
+    //         //     // console.log('charIndex', charIndex, 'asdf', asdf);
+    //         //     let $thisChar = $(asdf);
+    //         //     let celldata = rowLoci[charIndex];
+    //         //     let charPos = $thisChar.position();
+
+    //         //     //     let $node = $(d3$tspan.node());
+    //         //     let left = charPos.left - textgridSvgPos.left;
+    //         //     let top = charPos.top + textgridSvgPos.top;
+    //         //     let datum = coords.mk.fromLtwh(
+    //         //         left, top, $thisChar.width(), $thisChar.height()
+    //         //     );
+    //         //     datum.loci = celldata;
+    //         //     datum.text = $thisChar.text();
+    //         //     datum.charIndex = charIndex;
+    //         //     data.push(datum);
+
+    //         // });
+
+    //         // console.log('init-ing page', gridIndex, ', row', rowIndex);
+
+
+    //         // d3$gridrow.selectAll('tspan').each(function (chData, charIndex) {
+    //         //     let d3$tspan = d3.select(this);
+    //         //     let celldata = rowLoci[charIndex];
+
+    //         //     let $node = $(d3$tspan.node());
+    //         //     let charPos = $($node).position();
+    //         //     let datum = coords.mk.fromLtwh(
+    //         //         charPos.left, charPos.top, $node.width(), $node.height()
+    //         //     );
+
+    //         //     datum.loci = celldata;
+    //         //     data.push(datum);
+    //         // });
+    //     });
+    //     console.log('init data', data);
+    //     textgridRTree.load(data);
+    // });
 
     common.d3select.pageImages().each((d, i) =>   {
         let pageRTree = rtree();

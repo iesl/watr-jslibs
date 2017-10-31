@@ -11,6 +11,9 @@ export let d3select = {
     pageImages: () => {
         return d3.select('div.page-images').selectAll('svg.page-image');
     },
+    pageTextgrids: () => {
+        return d3.select('div.page-textgrids').selectAll('svg.textgrid');
+    },
     pageImage: (n) => {
         return d3.select('div.page-images').selectAll(`svg#page-image-${n}`);
     },
@@ -80,8 +83,10 @@ function addTooltip(r) {
 export function getSelectionText() {
     let text = "";
     if (window.getSelection) {
+        console.log('getSelection', window.getSelection());
         text = window.getSelection().toString();
     } else if (document.selection && document.selection.type != "Control") {
+        console.log('.selection', document.selection());
         text = document.selection.createRange().text;
     }
     return text;

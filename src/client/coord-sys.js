@@ -8,29 +8,16 @@
   *    Client Pages View  - Absolute coords within the vertical scroll list of page svgs/images (regardless of scroll position)
   *    Client Text View  - coords within the vertical scroll list of page text blocks  (regardless of scroll position)
   *
+  *    event page/client/screen/offset explanations:
+  *       https://stackoverflow.com/questions/6073505/what-is-the-difference-between-screenx-y-clientx-y-and-pagex-y
   **/
-
-import * as $ from 'jquery';
-import {globals} from './globals';
-
-// track the mouse location
-globals.currentMousePos = { x: -1, y: -1 };
-
-$(document).mousemove(function(event) {
-    globals.currentMousePos.x = event.pageX;
-    globals.currentMousePos.y = event.pageY;
-    $("li > span#mousepos").text(
-        `x: ${event.pageX}, y: ${event.pageY}`
-    );
-
-});
 
 
 export let coordSys = {
     unknown: Symbol('unknown'),
     screen: Symbol('screen'),
     div: Symbol('div'),
-    pdf: Symbol('pdf')
+    pdfMedia: Symbol('pdf-media')
 };
 
 class Point {
@@ -78,13 +65,6 @@ class BBox {
     set system(s)  { this._system = s; }
     get system()   { return this._system; }
 }
-
-// export let locus = {
-//     left   : lbwh => lbwh[0][1][0] / 100.0,
-//     bottom : lbwh => lbwh[0][1][1] / 100.0,
-//     width  : lbwh => lbwh[0][1][2] / 100.0,
-//     height : lbwh => lbwh[0][1][3] / 100.0
-// };
 
 
 export let mk = {
