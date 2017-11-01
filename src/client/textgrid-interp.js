@@ -228,18 +228,21 @@ function textgridSvgHandlers(d3$textgridSvg) {
 
         })
         .on("mouseup", function(d) {
+            let annotBoxes = _.map(gridSelection, (pt) =>{
+                return [pt.page, pt.locus];
+            });
+
+            let annotation = {
+                page: pageNum,
+                boxes: annotBoxes
+            };
+
             gridSelection = [];
             selectionStartId = undefined;
             selectionEndId = undefined;
             d3$textgridSvg
                 .selectAll("rect.glyph-selects")
                 .remove() ;
-
-            let annotation = {
-                page: pageNum,
-                userBounds: coords.mk.fromLtwh(0, 0, 0, 0),
-                minBounds: coords.mk.fromLtwh(0, 0, 0, 0)
-            };
 
             createTextGridLabelingPanel(annotation);
 
@@ -321,7 +324,7 @@ function initGridText(d3$canvas, gridData, gridNum) {
             let charBBox = charLocus[0][1];
             let pdfTextBox = charBBox? coords.mk.fromArray(charLocus[0][1]) : undefined;
             dataPt.pdfBounds = pdfTextBox ;
-            // dataPt.locus = gridRow.loci[chi];
+            dataPt.locus = gridRow.loci[chi];
             dataPt.page = charBBox? charLocus[0][0] : undefined;
             dataPt.gridRow = gridRow;
             dataPt.id = nextId();
@@ -393,7 +396,7 @@ function createTextGridLabelingPanel(annotation) {
     let pageImagesOffset = $('div.page-textgrids').position().top;
     let screenY = pageImageTop + pageImagesOffset;
 
-    lbl.createHeaderLabelUI();
+    lbl.createTextGridLabeler(annotation);
 
     $('.modal-content').css({
         'margin-left': globals.currentMousePos.x,

@@ -67,6 +67,15 @@ class BBox {
 
     set system(s)  { this._system = s; }
     get system()   { return this._system; }
+
+    get intRep () {
+        return [
+            Math.trunc(this.left * 100.0),
+            Math.trunc(this.bottom * 100.0),
+            Math.trunc(this.width * 100.0),
+            Math.trunc(this.height * 100.0)
+        ];
+    }
 }
 
 
