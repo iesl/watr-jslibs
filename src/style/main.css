@@ -30,6 +30,9 @@ svg.page-image {
     margin-right: auto;
     /* width: 50px; */
 }
+svg rect {
+    pointer-events: none;
+}
 
 .page-images {
     /* width: 100%; /\*can be in percentage also.*\/ */

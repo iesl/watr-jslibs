@@ -5,6 +5,8 @@
 
 export let globals = {
 
-    currentMousePos: {x: -1, y: -1}
+    currentMousePos: {x: -1, y: -1},
+
+    dataPts: []
 
 };
