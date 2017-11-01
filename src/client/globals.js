@@ -5,8 +5,14 @@
 
 export let globals = {
 
+    currentDocument: undefined,
+
     currentMousePos: {x: -1, y: -1},
 
-    dataPts: []
+    dataPts: [],
+
+    documentAnnotations: {},
+
+    annotationLabels: {}
 
 };

@@ -7,6 +7,7 @@ import * as util from  './commons.js';
 import * as tg from  './textgrid-interp.js';
 import * as $ from 'jquery';
 import * as mouseTracking from './mouse-tracking.js';
+import {globals} from './globals';
 
 import '../style/main.css';
 import '../style/split-pane.css';
@@ -215,6 +216,10 @@ export function runTrace() {
     mouseTracking.initGlobalMouseTracking([]);
 
     let entry = util.corpusEntry();
+
+    globals.currentDocument = entry;
+    console.log('globals', globals);
+
     let show = util.getParameterByName('show');
 
     d3.json(`/vtrace/json/${entry}/${show}`, function(error, jsval) {

@@ -27,6 +27,7 @@ const TextGridLineSpacing = 16;
 const TextGridLineHeight  = 16;
 const TextGridOriginPt = coords.mkPoint.fromXy(20, 20);
 
+
 /** Page sync flashing indicator dot */
 function scrollSyncIndicator(parentSelection, indicatorPoint) {
     d3.select(parentSelection)
@@ -81,7 +82,17 @@ function initHoverReticles(d3$textgridSvg) {
         .append('g')
         .classed('reticles', true);
 
-    let queryReticle = reticleGroup
+    // reticleGroup
+    //     .append('line')
+    //     .attr('x1', 10)
+    //     .attr('x2', 90)
+    //     .attr('y1', 30)
+    //     .attr('y2', 400)
+    //     .attr("stroke-width", 2)
+    //     .attr('stroke', 'black')
+    // ;
+
+    reticleGroup
         .append('rect')
         .classed('query-reticle', true)
         .attr("opacity", 0.4)
@@ -203,6 +214,11 @@ function showSelectionHighlight(d3$textgridSvg, selections) {
 
     sel.exit().remove() ;
 }
+
+let nextAnnotId = util.IdGenerator();
+function mkAnnotation(props) {
+    return Object.assign({id: nextAnnotId()}, props);
+}
 function textgridSvgHandlers(d3$textgridSvg) {
     let pageNum = parseInt(d3$textgridSvg.attr('page'));
     let reticleGroup = initHoverReticles(d3$textgridSvg);
@@ -216,37 +232,47 @@ function textgridSvgHandlers(d3$textgridSvg) {
 
     d3$textgridSvg
         .on("mousedown", function(d) {
+            // let d3mouse = d3.mouse(this);
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
+            let mouseEvent = d3.event;
 
 
             if (neighborHits.length > 0) {
-                let firstNeighbor = neighborHits[0];
-                syncScrollPageImages(userPt, firstNeighbor);
+                let firstHit = neighborHits[neighborHits.length-1];
+                // let firstNeighbor = neighborHits[0];
+                syncScrollPageImages(userPt, firstHit);
 
-                selectionEndId = selectionStartId = parseInt(firstNeighbor.id);
+                if (mouseEvent.shiftKey) {
+                    selectionEndId = selectionStartId = parseInt(firstHit.id);
+                }
             }
 
         })
         .on("mouseup", function(d) {
-            let annotBoxes = _.map(gridSelection, (pt) =>{
-                return [pt.page, pt.locus];
-            });
+            if (selectionStartId) {
 
-            let annotation = {
-                page: pageNum,
-                boxes: annotBoxes
-            };
+                let annotBoxes = _.map(gridSelection, pt => pt.locus[0]);
 
-            gridSelection = [];
-            selectionStartId = undefined;
-            selectionEndId = undefined;
-            d3$textgridSvg
-                .selectAll("rect.glyph-selects")
-                .remove() ;
+                // _.each(gridSelection, (g) =>{
+                //     console.log('gridsel: ', g);
+                // });
 
-            createTextGridLabelingPanel(annotation);
+                let annotation = mkAnnotation({
+                    type: 'char-boxes',
+                    page: pageNum,
+                    targets: annotBoxes
+                });
 
-            // showSelectionHighlight(d3$textgridSvg, gridSelection);
+                gridSelection = [];
+                selectionStartId = undefined;
+                selectionEndId = undefined;
+                d3$textgridSvg
+                    .selectAll("rect.glyph-selects")
+                    .remove() ;
+
+                createTextGridLabelingPanel(annotation);
+            }
+
         })
         .on("mouseover", function(d) {
             reticleGroup
@@ -257,10 +283,10 @@ function textgridSvgHandlers(d3$textgridSvg) {
             let textgridRTree = globals.textgridRTrees[pageNum] ;
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
-            let queryBoxHeight = TextGridLineHeight / 4;
-            let queryLeft = userPt.x-10;
+            let queryBoxHeight = TextGridLineHeight / 2; //  / 4;
+            let queryLeft = userPt.x-30;
             let queryTop = userPt.y-queryBoxHeight;
-            let queryWidth = 10;
+            let queryWidth = 30;
             let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
 
             let hits = neighborHits = textgridRTree.search(queryBox);
@@ -273,7 +299,7 @@ function textgridSvgHandlers(d3$textgridSvg) {
             showGlyphHoverReticles(d3$textgridSvg, queryBox, neighborHits);
 
             if (selectionStartId && neighborHits.length > 0) {
-                let firstHit = neighborHits[0];
+                let firstHit = neighborHits[neighborHits.length-1];
                 let hitId = parseInt(firstHit.id);
                 if (selectionEndId != hitId) {
                     selectionEndId = hitId;
@@ -345,17 +371,21 @@ function initGridText(d3$canvas, gridData, gridNum) {
 
 
 function setupPageTextGrids(contentId, textgrids) {
+
+    let computeGridHeight = (grid) => {
+        return (grid.rows.length * TextGridLineSpacing) + TextGridOriginPt.y + 10;
+    };
     let pagegridDivs = d3.select(contentId)
         .selectAll(".textgrid")
         .data(textgrids, util.getId)
         .enter()
         .append('div').classed('textgrid', true)
         .attr('id', (d, i) => `textgrid-frame-${i}`)
-        // .attr('width', 600)
+        // .attr('width', 900)
         // .attr('height', grid => grid.rows.length * TextGridLineSpacing)
         .attr('style', grid => {
-            let height = grid.rows.length * TextGridLineSpacing;
-            return `width: 600; height: ${height};`;
+            let height = computeGridHeight(grid);
+            return `width: 900; height: ${height};`;
         })
     ;
 
@@ -363,16 +393,16 @@ function setupPageTextGrids(contentId, textgrids) {
         .append('canvas').classed('textgrid', true)
         .attr('id', (d, i) => `textgrid-canvas-${i}`)
         .attr('page', (d, i) => i)
-        .attr('width', 600)
-        .attr('height', grid => grid.rows.length * TextGridLineSpacing)
+        .attr('width', 900)
+        .attr('height', grid => computeGridHeight(grid))
     ;
 
     pagegridDivs
         .append('svg').classed('textgrid', true)
         .attr('id', (d, i) => `textgrid-svg-${i}`)
         .attr('page', (d, i) => i)
-        .attr('width', 600)
-        .attr('height', grid => grid.rows.length * TextGridLineSpacing)
+        .attr('width', 900)
+        .attr('height', grid => computeGridHeight(grid))
     ;
 
     d3.selectAll('canvas.textgrid')
@@ -391,16 +421,20 @@ function setupPageTextGrids(contentId, textgrids) {
 
 function createTextGridLabelingPanel(annotation) {
 
-    let svgPageSelector = `svg#textgrid-svg-${annotation.page}`;
-    let pageImageTop = $(svgPageSelector).parent().position().top;
-    let pageImagesOffset = $('div.page-textgrids').position().top;
-    let screenY = pageImageTop + pageImagesOffset;
+    let svgPageSelector = `#textgrid-frame-${annotation.page}`;
+    // let pageImageTop = $(svgPageSelector).parent().position().top;
+    let pageImageTop = $(svgPageSelector).position().top;
+    let textGridsTop = $('div.page-textgrids').position().top;
+    let screenY = pageImageTop + textGridsTop;
 
+    console.log('svgPageSelector', svgPageSelector);
+    console.log('position()', $(svgPageSelector).position());
+    console.log('position()', $(svgPageSelector).parent().position());
     lbl.createTextGridLabeler(annotation);
 
     $('.modal-content').css({
         'margin-left': globals.currentMousePos.x,
-        'margin-top': globals.currentMousePos.y + screenY
+        'margin-top': globals.currentMousePos.y // + screenY
     });
 
     $('#label-form.modal').css({
@@ -409,41 +443,44 @@ function createTextGridLabelingPanel(annotation) {
 
 }
 
-function createLabelingPanel(annotation) {
+function createImageLabelingPanel(initSelection, annotation) {
 
     // let sortedHits = _.sortBy(hits, hit => hit.minX);
     // let hitStr = _.map(sortedHits, n => n.char).join('');
     // console.log('selectRect', selectRect, 'hit:', hitStr);
     // console.log('selectRect', selectRect, 'minRect:', [minX, minY, maxX-minX, maxY-minY]);
     // Create visual feedback for selection
+    // _.each(annotation.targets, (target) => {
+    let target = annotation.targets[0];
 
-    let svgPageSelector = `svg#page-image-${annotation.page}`;
+    let [page, mbr] = target;
+    let svgPageSelector = `svg#page-image-${page}`;
     let pageImageTop = $(svgPageSelector).parent().position().top;
     let pageImagesOffset = $('div.page-images').position().top;
     let screenY = pageImageTop + pageImagesOffset;
 
-    console.log('pageImageTop', screenY);
 
     d3.select(svgPageSelector)
         .append('rect')
         .classed('label-selection-rect', true)
-        .attr("x", annotation.userBounds.left)
-        .attr("y", annotation.userBounds.top)
-        .attr("width", annotation.userBounds.width)
-        .attr("height", annotation.userBounds.height)
+        .attr("x", initSelection.left)
+        .attr("y", initSelection.top)
+        .attr("width", initSelection.width)
+        .attr("height", initSelection.height)
         .attr("fill-opacity", 0.7)
         .attr("stroke-width", 1)
         .attr("stroke", 'blue')
         .attr("fill", 'yellow')
         .transition().duration(200)
-        .attr("x", annotation.minBounds.left)
-        .attr("y", annotation.minBounds.top)
-        .attr("width", annotation.minBounds.width)
-        .attr("height", annotation.minBounds.height)
+        .attr("x", mbr.left)
+        .attr("y", mbr.top)
+        .attr("width", mbr.width)
+        .attr("height", mbr.height)
         .attr("fill-opacity", 0.3)
     ;
 
-    lbl.createHeaderLabelUI();
+
+    lbl.createHeaderLabelUI(annotation);
 
 
     $('.modal-content').css({
@@ -503,13 +540,13 @@ function setupPageImages(contentId, pageImageShapes) {
 
         let minBoundSelection = rtrees.queryHitsMBR(hits);
 
-        let annotation = {
+        let annotation = mkAnnotation({
+            type: 'bounding-boxes',
             page: page,
-            userBounds: pdfImageRect,
-            minBounds: minBoundSelection
-        };
+            targets: [[page, minBoundSelection]] //  TODO should be another level of nesting here
+        });
 
-        createLabelingPanel(annotation);
+        createImageLabelingPanel(pdfImageRect, annotation);
     }
 
     d3.selectAll('svg.page-image')
@@ -573,6 +610,9 @@ export function RenderTextGrid(dataBlock) {
     leftContent.selectAll("image")
         .attr("opacity", 1.0)
     ;
+
+    console.log('global', globals);
+    lbl.updateAnnotationShapes();
 
     return d3;
 

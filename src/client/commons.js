@@ -219,3 +219,12 @@ export function getParameterByName(name, url) {
 }
 
 export let selectId = id => $(`#${id}`);
+
+export function IdGenerator() {
+    let currId = -1;
+    let nextId = () => {
+        currId +=1;
+        return currId;
+    };
+    return nextId;
+}
