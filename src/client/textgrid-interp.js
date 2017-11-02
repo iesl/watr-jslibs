@@ -9,7 +9,7 @@
 
 import * as d3 from 'd3';
 import * as $ from 'jquery';
-import * as _ from 'underscore';
+import * as _ from 'lodash';
 import * as lbl from './labeling';
 import * as coords from './coord-sys.js';
 import * as panes from  './splitpane-utils.js';
@@ -216,9 +216,11 @@ function showSelectionHighlight(d3$textgridSvg, selections) {
 }
 
 let nextAnnotId = util.IdGenerator();
+
 function mkAnnotation(props) {
     return Object.assign({id: nextAnnotId()}, props);
 }
+
 function textgridSvgHandlers(d3$textgridSvg) {
     let pageNum = parseInt(d3$textgridSvg.attr('page'));
     let reticleGroup = initHoverReticles(d3$textgridSvg);
@@ -370,54 +372,6 @@ function initGridText(d3$canvas, gridData, gridNum) {
 }
 
 
-function setupPageTextGrids(contentId, textgrids) {
-
-    let computeGridHeight = (grid) => {
-        return (grid.rows.length * TextGridLineSpacing) + TextGridOriginPt.y + 10;
-    };
-    let pagegridDivs = d3.select(contentId)
-        .selectAll(".textgrid")
-        .data(textgrids, util.getId)
-        .enter()
-        .append('div').classed('textgrid', true)
-        .attr('id', (d, i) => `textgrid-frame-${i}`)
-        // .attr('width', 900)
-        // .attr('height', grid => grid.rows.length * TextGridLineSpacing)
-        .attr('style', grid => {
-            let height = computeGridHeight(grid);
-            return `width: 900; height: ${height};`;
-        })
-    ;
-
-    pagegridDivs
-        .append('canvas').classed('textgrid', true)
-        .attr('id', (d, i) => `textgrid-canvas-${i}`)
-        .attr('page', (d, i) => i)
-        .attr('width', 900)
-        .attr('height', grid => computeGridHeight(grid))
-    ;
-
-    pagegridDivs
-        .append('svg').classed('textgrid', true)
-        .attr('id', (d, i) => `textgrid-svg-${i}`)
-        .attr('page', (d, i) => i)
-        .attr('width', 900)
-        .attr('height', grid => computeGridHeight(grid))
-    ;
-
-    d3.selectAll('canvas.textgrid')
-        .each(function (gridData, gridNum){
-            let d3$canvas = d3.select(this);
-            initGridText(d3$canvas, gridData, gridNum);
-        });
-
-    d3.selectAll('svg.textgrid')
-        .each(function (gridData, gridNum){
-            let d3$svg = d3.select(this);
-            textgridSvgHandlers(d3$svg);
-        });
-}
-
 
 function createTextGridLabelingPanel(annotation) {
 
@@ -499,22 +453,28 @@ function setupPageImages(contentId, pageImageShapes) {
 
     let ctx = {maxh: 0, maxw: 0};
 
+    console.log('pageImageShapes', pageImageShapes);
+
     _.map(pageImageShapes, (sh) =>{
-        ctx.maxh = Math.max(ctx.maxh, sh[0].height);
-        ctx.maxw = Math.max(ctx.maxw, sh[0].width);
+        ctx.maxh = Math.max(ctx.maxh, sh[0].y + sh[0].height);
+        ctx.maxw = Math.max(ctx.maxw, sh[0].x + sh[0].width);
     });
 
-    panes.setParentPaneWidth(contentId, ctx.maxw+30);
+
+    panes.setParentPaneWidth(contentId, ctx.maxw + 80);
 
     let imageSvgs = d3.select(contentId)
         .selectAll(".page-image")
         .data(pageImageShapes, util.getId)
         .enter()
         .append('div').classed('page-image', true)
+        .attr('id', (d, i) => `page-image-frame-${i}`)
+        .attr('width', d => d[0].x + d[0].width)
+        .attr('height', (d) => d[0].y + d[0].height )
         .append('svg').classed('page-image', true)
         .attr('id', (d, i) => `page-image-${i}`)
-        .attr('width', (d) => d[0].width)
-        .attr('height', (d) => d[0].height)
+        .attr('width', d => d[0].x + d[0].width)
+        .attr('height', (d) => d[0].y + d[0].height )
     ;
 
     function clickHandler(clickPt) {
@@ -573,19 +533,61 @@ function setupPageImages(contentId, pageImageShapes) {
             let self = d3.select(this);
             let shape = d.type;
             return self.append(shape)
-                .call(util.initShapeAttrs);
+                .call(util.initShapeDimensions);
         })
     ;
 }
 
+function setupPageTextGrids(contentId, textgrids) {
+
+    let computeGridHeight = (grid) => {
+        return (grid.rows.length * TextGridLineSpacing) + TextGridOriginPt.y + 10;
+    };
+    let pagegridDivs = d3.select(contentId)
+        .selectAll(".textgrid")
+        .data(textgrids, util.getId)
+        .enter()
+        .append('div').classed('textgrid', true)
+        .attr('id', (d, i) => `textgrid-frame-${i}`)
+        // .attr('width', 900)
+        // .attr('height', grid => grid.rows.length * TextGridLineSpacing)
+        .attr('style', grid => {
+            let height = computeGridHeight(grid);
+            return `width: 900; height: ${height};`;
+        })
+    ;
+
+    pagegridDivs
+        .append('canvas').classed('textgrid', true)
+        .attr('id', (d, i) => `textgrid-canvas-${i}`)
+        .attr('page', (d, i) => i)
+        .attr('width', 900)
+        .attr('height', grid => computeGridHeight(grid))
+    ;
+
+    pagegridDivs
+        .append('svg').classed('textgrid', true)
+        .attr('id', (d, i) => `textgrid-svg-${i}`)
+        .attr('page', (d, i) => i)
+        .attr('width', 900)
+        .attr('height', grid => computeGridHeight(grid))
+    ;
+
+    d3.selectAll('canvas.textgrid')
+        .each(function (gridData, gridNum){
+            let d3$canvas = d3.select(this);
+            initGridText(d3$canvas, gridData, gridNum);
+        });
+
+    d3.selectAll('svg.textgrid')
+        .each(function (gridData, gridNum){
+            let d3$svg = d3.select(this);
+            textgridSvgHandlers(d3$svg);
+        });
+}
 
 
-export function RenderTextGrid(dataBlock) {
-    let pages = dataBlock.pages;
-    let textgrids = _.map(pages, p => p.textgrid);
-    let pageShapes = _.map(pages, p => p.shapes);
-
-
+function setupFrameLayout() {
 
     let {leftPaneId: leftPaneId, rightPaneId: rightPaneId} =
         panes.splitVertical('.content-pane', {fixedLeft: 200});
@@ -599,6 +601,16 @@ export function RenderTextGrid(dataBlock) {
         .append('div').classed('page-textgrids', true)
     ;
 
+}
+
+export function RenderTextGrid(dataBlock) {
+    let pages = dataBlock.pages;
+    let textgrids = _.map(pages, p => p.textgrid);
+    let pageShapes = _.map(pages, p => p.shapes);
+
+    setupFrameLayout();
+
+
     setupPageImages('div.page-images', pageShapes);
     setupPageTextGrids('div.page-textgrids', textgrids);
 
@@ -607,9 +619,9 @@ export function RenderTextGrid(dataBlock) {
     }, 0);
 
 
-    leftContent.selectAll("image")
-        .attr("opacity", 1.0)
-    ;
+    // leftContent.selectAll("image")
+    //     .attr("opacity", 1.0)
+    // ;
 
     console.log('global', globals);
     lbl.updateAnnotationShapes();

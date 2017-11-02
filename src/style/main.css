@@ -19,28 +19,38 @@ div.tooltip {
 }
 
 
+
+div.page-images {
+    width: 100%; /*can be in percentage also.*/
+    text-align: center;
+    padding: 0;
+    border: 0;
+    background-color:lightsteelblue;
+}
+
 div.page-image {
+    /* padding-bottom: 5px; */
+    /* margin-left: auto; */
+    /* margin-right: auto; */
+    /* width: 50px; */
     padding: 0;
     margin: 0;
     border: 0;
+    display: inline-block;
 }
 svg.page-image {
-    padding-bottom: 5px;
-    margin-left: auto;
-    margin-right: auto;
+    /* padding-bottom: 5px; */
+    /* margin-left: auto; */
+    /* margin-right: auto; */
     /* width: 50px; */
+    padding: 0;
+    margin: 0;
+    border: 0;
+    display: block;
+    display: block;
 }
 svg rect {
     pointer-events: none;
-}
-
-.page-images {
-    /* width: 100%; /\*can be in percentage also.*\/ */
-    /* height: auto; */
-    margin: 0 auto;
-    padding: 10px;
-    position: relative;
-    background-color:lightsteelblue;
 }
 
 
@@ -83,34 +93,11 @@ svg.textgrid {
 }
 
 
-
-
 .menu-pane {
     margin: 0 auto;
     position: relative;
 }
 
-ul.menubar {
-    list-style: none;
-    margin-top: 10px;
-}
-
-ul.menubar > li {
-    float: left;
-    /* display: inline; */
-}
-
-ul.menubar > li a {
-    display: block;
-    /* color: white; */
-    text-align: center;
-    padding-left: 10px;
-    text-decoration: none;
-}
-
-ul.menubar > li a:hover {
-    /* background-color: #; */
-}
 
 .labeling-form {
 }
@@ -132,8 +119,6 @@ ul.menubar > li a:hover {
     pointer-events: none;
     opacity: 0.9;
 }
-
-
 
 
 
@@ -192,4 +177,39 @@ ul.menubar > li a:hover {
 @keyframes animatezoom {
     from {transform: scale(0.8)}
     to {transform: scale(1)}
+}
+
+
+
+table.menu-table {
+
+}
+
+tr.menu-row{
+
+}
+
+td.menu-item {
+    padding: 2px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: "blue";
+}
+
+td.menu-item div.menu-entry {
+    text-align: center;
+}
+td.menu-item div.menu-entry {
+    font: 'normal normal normal 12px/normal Helvetica, Arial';
+    /* text-align: center; */
+    align: center;
+    /* width: 100px; */
+    /* height: 128px; */
+    /* display: inline-block; */
+
+    /* border: 1px; */
+    /* border-style: solid; */
+    /* border-width: 1px; */
+    border-color: "blue";
+    padding: 2px;
 }

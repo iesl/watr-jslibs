@@ -11,11 +11,11 @@
     "koa-json": "^2.0.2",
     "koa-router": "^7.2.1",
     "koa-send": "^4.1.0",
+    "lodash": "^4.17.4",
     "node-file-utils": "^0.91.20",
     "rbush": "^2.0.1",
     "rbush-knn": "^2.0.0",
-    "requirejs": "^2.1.15",
-    "underscore": "^1.7.0"
+    "requirejs": "^2.1.15"
   },
   "devDependencies": {
     "css-loader": "^0.28.7",

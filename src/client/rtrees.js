@@ -3,7 +3,7 @@
 import * as d3 from 'd3';
 import * as $ from 'jquery';
 import { globals } from './globals';
-import * as _ from 'underscore';
+import * as _ from 'lodash';
 import * as coords from './coord-sys.js';
 import * as common from './commons.js';
 let rtree = require('rbush');

@@ -10,7 +10,7 @@ const koaBody = require('koa-body');
 
 const fs = require('fs');
 
-const _ = require('underscore');
+const _ = require('lodash');
 
 
 const router = new Router();
@@ -126,11 +126,11 @@ function run (options) {
             let { entry: entry } = ctx.params;
             // ctx.redirect(`/vtrace/${entry}/textgrid.json`);
             // ctx.status = 301;
-            await ctx.render('vtracer');
+            await ctx.render('annot-main');
         })
         .get('/vtrace/:entry/:logfile', async function(ctx, next) {
             let { entry: entry, logfile: logfile } = ctx.params;
-            await ctx.render('vtracer', {
+            await ctx.render('annot-main', {
                 locals: {ctx: {entry: entry, logfile: logfile}}
             });
         })
@@ -138,7 +138,7 @@ function run (options) {
             ctx.body = await JSON.stringify(menu);
         })
         .get('/', async function (ctx, next) {
-            await ctx.render('menu');
+            await ctx.render('menu-main');
         })
     ;
 

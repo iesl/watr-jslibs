@@ -2,7 +2,7 @@
 
 import * as d3 from 'd3';
 import * as $ from 'jquery';
-import * as _ from 'underscore';
+import * as _ from 'lodash';
 // import * as coords from './coord-sys.js';
 import * as util from './commons.js';
 
@@ -141,7 +141,49 @@ function getCls(data) {
 
 }
 
+export function initShapeDimensions(r) {
+    let shape = r.node().nodeName.toLowerCase();
+    switch (shape) {
+    case "rect":
+        return r.attr("x", function(d){ return d.x; })
+            .attr("y", function(d){ return d.y; })
+            .attr("width", function(d){ return d.width; })
+            .attr("height", function(d){ return d.height; })
+            .attr("id", getId)
+            .attr("class", getCls)
+            .attr("fill-opacity", 0)
+            .attr("stroke-opacity", 1)
+            .attr("stroke-width", 1)
+            .attr("stroke", 'black')
+        ;
 
+    case "circle":
+        return r.attr("cx", function(d){ return d.cx; })
+            .attr("cy", function(d){ return d.cy; })
+            .attr("r", function(d){ return d.r; })
+            .attr("id", getId)
+            .attr("class", getCls)
+        ;
+
+    case "line":
+        return r.attr("x1", function(d){ return d.x1; })
+            .attr("y1", function(d){ return d.y1; })
+            .attr("x2", function(d){ return d.x2; })
+            .attr("y2", function(d){ return d.y2; })
+            .attr("id", getId)
+        ;
+    case "image":
+        return r.attr("x", function(d){ return d.x; })
+            .attr("y", function(d){ return d.y; })
+            .attr("width", function(d){ return d.width; })
+            .attr("height", function(d){ return d.height; })
+            .attr("href", function(d){ return '/entry/'+corpusEntry()+'/image/page/'+d.page; })
+        ;
+    }
+
+    return r;
+
+}
 export function initShapeAttrs(r) {
     let shape = r.node().nodeName.toLowerCase();
 

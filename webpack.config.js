@@ -2,8 +2,8 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        vtrace: './src/client/vtracer.js',
-        menu: './src/client/menu.js'
+        vtrace: './src/client/annot-main.js',
+        menu: './src/client/menu-main.js'
     },
 
     devtool: 'inline-source-map',

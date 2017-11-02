@@ -6,7 +6,7 @@
 
 import * as d3 from  'd3';
 import * as $ from  'jquery';
-import * as _ from  'underscore';
+import * as _ from  'lodash';
 import {globals} from './globals';
 
 // Globals:

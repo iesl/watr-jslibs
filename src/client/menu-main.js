@@ -1,10 +1,8 @@
-/* global define _ */
+/* global  */
 
 import * as d3 from  'd3';
-import * as $ from  'jquery';
-import * as _ from  'underscore';
-// import {globals} from './globals';
-
+import * as _ from  'lodash';
+import '../style/main.css';
 
 function buildMenuList(entryData) {
 
@@ -19,42 +17,48 @@ function buildMenuList(entryData) {
     return menuItems;
 }
 
-let svgMenuList = () => d3.select('.menuItems');
 
 function renderMenuItems(menuItems) {
+    let menu = d3.select('#menu') ;
 
+    let menuTable = menu.append('table')
+        .classed('menu-table', true)
+    ;
 
-    let anchor = svgMenuList()
-        .selectAll('.menuItem')
-        .data(menuItems)
+    let menuItemChunks = _.chunk(menuItems, 4);
+
+    let tableRows = menuTable
+        .selectAll('tr')
+        .data(menuItemChunks)
         .enter()
-        .append("li").classed('menuItem', true)
+        .append('tr').classed('menu-row', true)
+    ;
+
+    let menuEntryDivs = tableRows
+        .selectAll('tr.menu-row')
+        .data(d => d)
+        .enter()
+        .append("td").classed('menu-item', true)
         .append("a").attr("href", d  => `/vtrace/${d.name}?show=textgrid.json`)
-        .append('div')
-        .classed('menuEntry', true)
+        .append('div').classed('menu-entry', true)
     ;
 
-    anchor.append("caption")
+
+
+    menuEntryDivs
+        .append("caption")
         .text(function(d){ return d.name; })
-        .attr("style", "font: normal normal normal 12px/normal Helvetica, Arial;")
     ;
 
-    anchor.append('img')
+    menuEntryDivs.append('img')
         .attr("src", d => `/entry/${d.name}/image/thumb/1` )
     ;
-
 
 }
 
 
 function makeMenu() {
     d3.json("/menu", function(error, menuData) {
-
-        var menu = d3.select('#menu') ;
-
-        menu.append('div').classed('menu', true)
-            .append('ul').classed('menuItems', true)
-        ;
 
         let menuItems = buildMenuList(menuData);
         renderMenuItems(menuItems);

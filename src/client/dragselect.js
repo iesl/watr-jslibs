@@ -8,7 +8,7 @@ import * as d3 from 'd3';
 import 'd3-dispatch';
 import 'd3-selection';
 import 'd3-drag';
-import * as _ from  'underscore';
+import * as _ from  'lodash';
 import {globals} from './globals';
 import * as $ from 'jquery';
 
