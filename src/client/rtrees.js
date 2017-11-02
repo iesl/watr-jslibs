@@ -1,13 +1,12 @@
 /* global require  */
 
-import * as d3 from 'd3';
-import * as $ from 'jquery';
 import { globals } from './globals';
 import * as _ from 'lodash';
 import * as coords from './coord-sys.js';
 import * as common from './commons.js';
 let rtree = require('rbush');
 let knn = require('rbush-knn');
+import * as util from  './commons.js';
 
 globals.pageImageRTrees = [];
 globals.textgridRTrees = [];
@@ -34,12 +33,12 @@ export function queryHitsMBR(hits) {
         height = maxY - minY
     ;
 
-    // TODO return Option[...]
     return coords.mk.fromLtwh(minX, minY, width, height);
 }
 
 
 export function initRTrees(textgrids) {
+    let idGen = util.IdGenerator();
 
     _.each(textgrids, (textgrid, gridi) => {
         let pageRTree = rtree();
@@ -55,6 +54,7 @@ export function initRTrees(textgrids) {
                 data.col = ci;
                 data.char = headLoc[2];
                 data.page = headLoc[0];
+                data.id = idGen();
 
                 return data;
             });

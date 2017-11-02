@@ -82,26 +82,43 @@ function initHoverReticles(d3$textgridSvg) {
         .append('g')
         .classed('reticles', true);
 
-    // reticleGroup
-    //     .append('line')
-    //     .attr('x1', 10)
-    //     .attr('x2', 90)
-    //     .attr('y1', 30)
-    //     .attr('y2', 400)
-    //     .attr("stroke-width", 2)
-    //     .attr('stroke', 'black')
-    // ;
 
     reticleGroup
         .append('rect')
         .classed('query-reticle', true)
-        .attr("opacity", 0.4)
-        .attr("fill-opacity", 0.3)
+        .attr("fill-opacity", 0.2)
+        .attr("stroke-opacity", 0.6)
         .attr("fill", 'blue')
+        .attr("stroke", 'blue')
     ;
     return reticleGroup;
 }
 
+function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits, queryBoxOrUndef) {
+    let d3$imageHitReticles = d3$pageImageSvg
+        .selectAll('.textloc')
+        .data(queryHits, d => d.id)
+    ;
+
+    d3$imageHitReticles
+        .enter()
+        .append('rect')
+        .datum(d => d.pdfBounds? d.pdfBounds : d)
+        .classed('textloc', true)
+        .attr("x", d => d.left)
+        .attr("y", d => d.top)
+        .attr("width", d => d.width)
+        .attr("height", d => d.height)
+        .attr("stroke-opacity", 0.2)
+        .attr("fill-opacity", 0.5)
+        .attr("stroke-width", 1)
+        .attr("stroke", 'blue')
+        .attr("fill", 'blue') ;
+
+    d3$imageHitReticles
+        .exit()
+        .remove() ;
+}
 function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
     let pageNum = parseInt(d3$textgridSvg.attr('page'));
 
@@ -114,7 +131,7 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
     ;
 
 
-    let d3$hitReticles = d3.select('g.reticles')
+    let d3$hitReticles = d3$textgridSvg.select('g.reticles')
         .selectAll('.hit-reticle')
         .data(queryHits, (d) => d.id)
     ;
@@ -142,29 +159,33 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
         return hit.pdfBounds !== undefined;
     });
 
-    let d3$imageHitReticles = util.d3select.pageImage(pageNum)
-        .selectAll('.textloc')
-        .data(ns, (d) => d.id)
-    ;
+    showPageImageGlyphHoverReticles(
+        util.d3select.pageImage(pageNum),
+        ns
+    );
+    // let d3$imageHitReticles = util.d3select.pageImage(pageNum)
+    //     .selectAll('.textloc')
+    //     .data(ns, (d) => d.id)
+    // ;
 
-    d3$imageHitReticles
-        .enter()
-        .append('rect')
-        .datum(d => d.pdfBounds)
-        .classed('textloc', true)
-        .attr("x", d => d.left)
-        .attr("y", d => d.top)
-        .attr("width", d => d.width)
-        .attr("height", d => d.height)
-        .attr("stroke-opacity", 0.2)
-        .attr("fill-opacity", 0.5)
-        .attr("stroke-width", 1)
-        .attr("stroke", 'blue')
-        .attr("fill", 'blue') ;
+    // d3$imageHitReticles
+    //     .enter()
+    //     .append('rect')
+    //     .datum(d => d.pdfBounds)
+    //     .classed('textloc', true)
+    //     .attr("x", d => d.left)
+    //     .attr("y", d => d.top)
+    //     .attr("width", d => d.width)
+    //     .attr("height", d => d.height)
+    //     .attr("stroke-opacity", 0.2)
+    //     .attr("fill-opacity", 0.5)
+    //     .attr("stroke-width", 1)
+    //     .attr("stroke", 'blue')
+    //     .attr("fill", 'blue') ;
 
-    d3$imageHitReticles
-        .exit()
-        .remove() ;
+    // d3$imageHitReticles
+    //     .exit()
+    //     .remove() ;
 }
 
 /**
@@ -175,16 +196,23 @@ function syncScrollPageImages(userPt, dataPt) {
 
     let pageNum = dataPt.page;
     let pdfTextBox = dataPt.pdfBounds;
-    // Get visible abs Y-position of user click:
-    let pageTextTop = $(`#textgrid-svg-${pageNum}`).parent().position().top;
-    let pageTextsOffset = $('div.page-textgrids').position().top;
-    let userPageY = pageTextTop + userPt.y + pageTextsOffset;
+    // // Get visible abs Y-position of user click:
+    // let topOfClickedTextGrid = $(`#textgrid-svg-${pageNum}`).parent().position().top;
+    // let pageTextGridsTop = $('div.page-textgrids').position().top;
+    // let userPageY = topOfClickedTextGrid + pageTextGridsTop;
 
     // Get offset of clicked text on page
-    let pageImageSvgId = `#page-image-${pageNum}`;
+    let pageImageSvgId = `svg#page-image-${pageNum}`;
     let pageImageTop = $(pageImageSvgId).parent().position().top;
+    let pageImagesTop = $('div.page-images').position().top;
+    console.log('pageImagesTop', pageImagesTop);
+    console.log('pageImageTop', pageImageTop);
+    console.log('pdfTextBox.top', pdfTextBox.top);
+    console.log('userPt', userPt);
+    let currScroll = $('#splitpane_root__bottom__left').scrollTop();
+    console.log('currScroll', currScroll);
 
-    let scrollTo = pageImageTop + pdfTextBox.top - 10 - userPageY;
+    let scrollTo = pageImagesTop + pageImageTop + pdfTextBox.top - userPt.y;
 
     $('#splitpane_root__bottom__left').scrollTop(scrollTo);
 
@@ -285,17 +313,17 @@ function textgridSvgHandlers(d3$textgridSvg) {
             let textgridRTree = globals.textgridRTrees[pageNum] ;
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
-            let queryBoxHeight = TextGridLineHeight / 2; //  / 4;
-            let queryLeft = userPt.x-30;
+            let queryWidth = 50;
+            let queryBoxHeight = TextGridLineHeight * 3;
+            let queryLeft = userPt.x-queryWidth;
             let queryTop = userPt.y-queryBoxHeight;
-            let queryWidth = 30;
             let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
 
             let hits = neighborHits = textgridRTree.search(queryBox);
             // neighborHits = textgridRTree.search(queryBox);
             neighborHits = _.sortBy(
                 _.filter(hits, hit => hit.pdfBounds),
-                hit => [hit.top, hit.left]
+                hit => [hit.bottom, hit.right]
             );
 
             showGlyphHoverReticles(d3$textgridSvg, queryBox, neighborHits);
@@ -320,6 +348,8 @@ function textgridSvgHandlers(d3$textgridSvg) {
         .on("mouseout", function() {
             reticleGroup.attr("opacity", 0);
 
+            util.d3select.pageImage(pageNum)
+                .selectAll('.textloc').remove();
         });
 
 }
@@ -330,11 +360,7 @@ function initGridText(d3$canvas, gridData, gridNum) {
     // context.font = 'normal normal normal 12px/normal Helvetica, Arial';
     context.font = `normal normal normal ${TextGridLineHeight}px/normal Times New Roman`;
     // context.font = `${TextGridLineHeight}px Helvetica, Arial`;
-    let ptId = -1;
-    let nextId = () => {
-        ptId +=1;
-        return ptId;
-    };
+    let idGen = util.IdGenerator();
 
     let rowDataPts = _.map(gridData.rows, (gridRow, rowNum) => {
 
@@ -357,7 +383,7 @@ function initGridText(d3$canvas, gridData, gridNum) {
             dataPt.locus = gridRow.loci[chi];
             dataPt.page = charBBox? charLocus[0][0] : undefined;
             dataPt.gridRow = gridRow;
-            dataPt.id = nextId();
+            dataPt.id = idGen();
             currLeft += chWidth;
             return dataPt;
         });
@@ -510,8 +536,34 @@ function setupPageImages(contentId, pageImageShapes) {
     }
 
     d3.selectAll('svg.page-image')
-        .each(function (){
+    ;
+
+    d3.selectAll('svg.page-image')
+        .each(function (pageData, pageNum){
             let svg = d3.select(this);
+
+
+            svg.on("mousemove", function(d) {
+                let textgridRTree = globals.pageImageRTrees[pageNum] ;
+                let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
+
+                let queryWidth = 50;
+                let queryBoxHeight = TextGridLineHeight * 3;
+                let queryLeft = userPt.x-queryWidth;
+                let queryTop = userPt.y-queryBoxHeight;
+                let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
+
+                let searchHits = textgridRTree.search(queryBox);
+                // neighborHits = textgridRTree.search(queryBox);
+                let hits = _.sortBy(
+                    searchHits,
+                    hit => [hit.bottom, hit.right]
+                );
+
+                // console.log('hits', hits);
+
+                showPageImageGlyphHoverReticles(svg, hits, queryBox);
+            });
 
             initD3DragSelect(svg.attr('id'), (pointOrRect) => {
                 if (pointOrRect.point != undefined) {
@@ -549,8 +601,8 @@ function setupPageTextGrids(contentId, textgrids) {
         .enter()
         .append('div').classed('textgrid', true)
         .attr('id', (d, i) => `textgrid-frame-${i}`)
-        // .attr('width', 900)
-        // .attr('height', grid => grid.rows.length * TextGridLineSpacing)
+    // .attr('width', 900)
+    // .attr('height', grid => grid.rows.length * TextGridLineSpacing)
         .attr('style', grid => {
             let height = computeGridHeight(grid);
             return `width: 900; height: ${height};`;
