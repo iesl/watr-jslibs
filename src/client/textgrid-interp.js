@@ -344,13 +344,15 @@ function initGridText(d3$canvas, gridData, gridNum) {
         let currLeft = x;
         let dataPts = _.map(text.split(''), (ch, chi) => {
             let chWidth = context.measureText(ch).width;
+
             let dataPt = coords.mk.fromLtwh(
                 currLeft, y-TextGridLineHeight, chWidth, TextGridLineHeight
             );
 
             let charLocus = gridRow.loci[chi];
             let charBBox = charLocus[0][1];
-            let pdfTextBox = charBBox? coords.mk.fromArray(charLocus[0][1]) : undefined;
+            let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
+
             dataPt.pdfBounds = pdfTextBox ;
             dataPt.locus = gridRow.loci[chi];
             dataPt.page = charBBox? charLocus[0][0] : undefined;
@@ -452,8 +454,6 @@ function createImageLabelingPanel(initSelection, annotation) {
 function setupPageImages(contentId, pageImageShapes) {
 
     let ctx = {maxh: 0, maxw: 0};
-
-    console.log('pageImageShapes', pageImageShapes);
 
     _.map(pageImageShapes, (sh) =>{
         ctx.maxh = Math.max(ctx.maxh, sh[0].y + sh[0].height);
