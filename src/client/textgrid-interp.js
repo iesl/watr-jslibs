@@ -1,6 +1,6 @@
 /**
  *
- *  Renderer/Interpreter for extracted text display
+ *  Render for extracted text display (TextGrid)
  *  Canvas based implementation.  d3+svg was too sluggish.
  *
  */
@@ -27,7 +27,25 @@ const TextGridLineSpacing = 16;
 const TextGridLineHeight  = 16;
 const TextGridOriginPt = coords.mkPoint.fromXy(20, 20);
 
+function appendCircle(sel, cx, cy, r) {
+    return sel.append('circle')
+        .attr("cx", cx)
+        .attr("cy", cy)
+        .attr("r", r);
+}
 
+function fill(sel, clr, opacity) {
+    return sel
+        .attr("fill",  clr)
+        .attr("fill-opacity", opacity);
+}
+
+function stroke(sel, clr, opacity) {
+    return sel
+        .attr("stroke",  clr)
+        .attr("stroke-opacity", opacity);
+
+}
 /** Page sync flashing indicator dot */
 function scrollSyncIndicator(parentSelection, indicatorPoint) {
     d3.select(parentSelection)
@@ -49,33 +67,22 @@ function scrollSyncIndicator(parentSelection, indicatorPoint) {
     ;
 }
 
-/**
- *  Capture a click on the page image side and scroll the corresponding page text into
- *  view, flashing an indicator on the text point
- */
-function syncScrollTextGrid(clickPt, neighbor) {
+// function scrollSyncIndicator(parentSelection, indicatorPoint) {
+//     d3.select(parentSelection)
+//         .call(appendCircle, indicatorPoint.x, indicatorPoint.y, 20)
+//         .call(fill, "yellow", 1)
+//         .call(stroke, "black", 0)
+//         .attr("stroke-width", 1)
+//         .transition()
+//         .duration(300)
+//         .attr("fill-opacity", 0)
+//         .attr("stroke-opacity", 1)
+//         .attr("r", 2)
+//         .delay(10)
+//         .remove()
+//     ;
+// }
 
-    let { page: pageNum, row: row } = neighbor;
-
-    let pageTextgridSvgId = `#textgrid-svg-${pageNum}`;
-    let pageTextTop = $(pageTextgridSvgId).parent().position().top;
-
-    let pageImageTop = $(`#page-image-${pageNum}`).parent().position().top;
-    let pageTextClickY = clickPt.y;
-    let pageImagesOffset = $('div.page-images').position().top;
-    let userAbsY = pageImageTop + pageTextClickY + pageImagesOffset;
-    // let pageRelativeClickedY = clickPt.y;
-
-    let scrollTo = pageTextTop + (row * TextGridLineHeight) - userAbsY;
-
-    $('#splitpane_root__bottom__right').scrollTop(scrollTo);
-
-    scrollSyncIndicator(
-        pageTextgridSvgId,
-        coords.mkPoint.fromXy(10, (row*TextGridLineHeight)+10)
-    );
-
-}
 
 function initHoverReticles(d3$textgridSvg) {
     let reticleGroup = d3$textgridSvg
@@ -192,31 +199,54 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
  *  Capture a click on the textgrid-side and scroll the corresponding page image into
  *  view, flashing an indicator on the image point corresponding to the text
  */
-function syncScrollPageImages(userPt, dataPt) {
+function syncScrollPageImages(clientPt, dataPt) {
 
     let pageNum = dataPt.page;
-    let pdfTextBox = dataPt.pdfBounds;
-    // // Get visible abs Y-position of user click:
-    // let topOfClickedTextGrid = $(`#textgrid-svg-${pageNum}`).parent().position().top;
-    // let pageTextGridsTop = $('div.page-textgrids').position().top;
-    // let userPageY = topOfClickedTextGrid + pageTextGridsTop;
 
     // Get offset of clicked text on page
-    let pageImageSvgId = `svg#page-image-${pageNum}`;
-    let pageImageTop = $(pageImageSvgId).parent().position().top;
-    let pageImagesTop = $('div.page-images').position().top;
-    console.log('pageImagesTop', pageImagesTop);
-    console.log('pageImageTop', pageImageTop);
-    console.log('pdfTextBox.top', pdfTextBox.top);
-    console.log('userPt', userPt);
-    let currScroll = $('#splitpane_root__bottom__left').scrollTop();
-    console.log('currScroll', currScroll);
-
-    let scrollTo = pageImagesTop + pageImageTop + pdfTextBox.top - userPt.y;
+    let pageImageFrameId = `div#page-image-frame-${pageNum}`;
+    let pageImageFrame = $(pageImageFrameId);
+    let pageImageFramePosition = pageImageFrame.position();
+    let frameTop = pageImageFramePosition.top;
+    let containerTop = $('div.page-images').position().top;
+    let userPtY = clientPt.y;
+    let hitGlyphTop = dataPt.pdfBounds.top;
+    let absFrameTop = frameTop - containerTop ;
+    let scrollTo = absFrameTop + (hitGlyphTop - userPtY);
 
     $('#splitpane_root__bottom__left').scrollTop(scrollTo);
 
-    scrollSyncIndicator(pageImageSvgId, pdfTextBox.topLeft);
+    scrollSyncIndicator(
+        `svg#page-image-${pageNum}`,
+        dataPt.pdfBounds.topLeft
+    );
+
+}
+/**
+ *  Capture a click on the page image side and scroll the corresponding page text into
+ *  view, flashing an indicator on the text point
+ */
+function syncScrollTextGrid(clickPt, neighbor) {
+
+    let { page: pageNum, row: row } = neighbor;
+
+    let pageTextgridSvgId = `#textgrid-svg-${pageNum}`;
+    let pageTextTop = $(pageTextgridSvgId).parent().position().top;
+
+    let pageImageTop = $(`#page-image-${pageNum}`).parent().position().top;
+    let pageTextClickY = clickPt.y;
+    let pageImagesOffset = $('div.page-images').position().top;
+    let userAbsY = pageImageTop + pageTextClickY + pageImagesOffset;
+    // let pageRelativeClickedY = clickPt.y;
+
+    let scrollTo = pageTextTop + (row * TextGridLineHeight) - userAbsY;
+
+    $('#splitpane_root__bottom__right').scrollTop(scrollTo);
+
+    scrollSyncIndicator(
+        pageTextgridSvgId,
+        coords.mkPoint.fromXy(10, (row*TextGridLineHeight)+10)
+    );
 
 }
 
@@ -262,15 +292,14 @@ function textgridSvgHandlers(d3$textgridSvg) {
 
     d3$textgridSvg
         .on("mousedown", function(d) {
-            // let d3mouse = d3.mouse(this);
-            let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
             let mouseEvent = d3.event;
 
+            let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
 
             if (neighborHits.length > 0) {
                 let firstHit = neighborHits[neighborHits.length-1];
-                // let firstNeighbor = neighborHits[0];
-                syncScrollPageImages(userPt, firstHit);
+
+                syncScrollPageImages(clientPt, firstHit);
 
                 if (mouseEvent.shiftKey) {
                     selectionEndId = selectionStartId = parseInt(firstHit.id);
@@ -536,9 +565,6 @@ function setupPageImages(contentId, pageImageShapes) {
     }
 
     d3.selectAll('svg.page-image')
-    ;
-
-    d3.selectAll('svg.page-image')
         .each(function (pageData, pageNum){
             let svg = d3.select(this);
 
@@ -559,8 +585,6 @@ function setupPageImages(contentId, pageImageShapes) {
                     searchHits,
                     hit => [hit.bottom, hit.right]
                 );
-
-                // console.log('hits', hits);
 
                 showPageImageGlyphHoverReticles(svg, hits, queryBox);
             });
@@ -666,14 +690,12 @@ export function RenderTextGrid(dataBlock) {
     setupPageImages('div.page-images', pageShapes);
     setupPageTextGrids('div.page-textgrids', textgrids);
 
-    setTimeout(() => {
-        rtrees.initRTrees(textgrids);
-    }, 0);
+    rtrees.initRTrees(textgrids);
+    // setTimeout(() => {
+    //     rtrees.initRTrees(textgrids);
+    // }, 0);
 
 
-    // leftContent.selectAll("image")
-    //     .attr("opacity", 1.0)
-    // ;
 
     console.log('global', globals);
     lbl.updateAnnotationShapes();
