@@ -195,57 +195,57 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
     //     .remove() ;
 }
 
+function syncScrollFrame(clientPt, dataPt, pageNum, whichSide, paneId) {
+
+    // Get offset of clicked text on page
+    let pageImageFrameId = `div#${whichSide}-frame-${pageNum}`;
+    let pageImageFrame = $(pageImageFrameId);
+    let pageImageFramePosition = pageImageFrame.position();
+    let frameTop = pageImageFramePosition.top;
+    let containerTop = $(`div.${whichSide}s`).position().top;
+    let userPtY = clientPt.y;
+    let hitGlyphTop = dataPt.top;
+    let absFrameTop = frameTop - containerTop ;
+    let scrollTo = absFrameTop + (hitGlyphTop - userPtY - 10);
+
+    $(paneId).scrollTop(scrollTo);
+
+    scrollSyncIndicator(
+        `svg#${whichSide}-${pageNum}`,
+        dataPt.topLeft
+    );
+
+}
 /**
  *  Capture a click on the textgrid-side and scroll the corresponding page image into
  *  view, flashing an indicator on the image point corresponding to the text
  */
 function syncScrollPageImages(clientPt, dataPt) {
-
-    let pageNum = dataPt.page;
-
-    // Get offset of clicked text on page
-    let pageImageFrameId = `div#page-image-frame-${pageNum}`;
-    let pageImageFrame = $(pageImageFrameId);
-    let pageImageFramePosition = pageImageFrame.position();
-    let frameTop = pageImageFramePosition.top;
-    let containerTop = $('div.page-images').position().top;
-    let userPtY = clientPt.y;
-    let hitGlyphTop = dataPt.pdfBounds.top;
-    let absFrameTop = frameTop - containerTop ;
-    let scrollTo = absFrameTop + (hitGlyphTop - userPtY);
-
-    $('#splitpane_root__bottom__left').scrollTop(scrollTo);
-
-    scrollSyncIndicator(
-        `svg#page-image-${pageNum}`,
-        dataPt.pdfBounds.topLeft
-    );
-
+    syncScrollFrame(clientPt, dataPt.pdfBounds, dataPt.page, 'page-image', '#splitpane_root__bottom__left');
 }
+
 /**
  *  Capture a click on the page image side and scroll the corresponding page text into
  *  view, flashing an indicator on the text point
  */
-function syncScrollTextGrid(clickPt, neighbor) {
+function syncScrollTextGrid(clientPt, neighbor) {
 
     let { page: pageNum, row: row } = neighbor;
 
-    let pageTextgridSvgId = `#textgrid-svg-${pageNum}`;
-    let pageTextTop = $(pageTextgridSvgId).parent().position().top;
+    let pageTextgridSvgId = `div#textgrid-frame-${pageNum}`;
+    let frameTop = $(pageTextgridSvgId).position().top;
 
-    let pageImageTop = $(`#page-image-${pageNum}`).parent().position().top;
-    let pageTextClickY = clickPt.y;
-    let pageImagesOffset = $('div.page-images').position().top;
-    let userAbsY = pageImageTop + pageTextClickY + pageImagesOffset;
-    // let pageRelativeClickedY = clickPt.y;
+    // let containerTop = $(`div.page-textgrids`).position().top;
+    let absFrameTop = frameTop; //  - containerTop ;
 
-    let scrollTo = pageTextTop + (row * TextGridLineHeight) - userAbsY;
+    let textGridNeighborY = row * TextGridLineHeight;
+    let scrollTo = absFrameTop + (textGridNeighborY - clientPt.y - 10);
 
     $('#splitpane_root__bottom__right').scrollTop(scrollTo);
 
     scrollSyncIndicator(
-        pageTextgridSvgId,
-        coords.mkPoint.fromXy(10, (row*TextGridLineHeight)+10)
+        `svg#textgrid-svg-${pageNum}`,
+        coords.mkPoint.fromXy(10, textGridNeighborY+10)
     );
 
 }
