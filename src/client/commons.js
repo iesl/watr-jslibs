@@ -270,3 +270,24 @@ export function IdGenerator() {
     };
     return nextId;
 }
+
+// TODO these don't work properly...
+function appendCircle(sel, cx, cy, r) {
+    return sel.append('circle')
+        .attr("cx", cx)
+        .attr("cy", cy)
+        .attr("r", r);
+}
+
+function fill(sel, clr, opacity) {
+    return sel
+        .attr("fill",  clr)
+        .attr("fill-opacity", opacity);
+}
+
+function stroke(sel, clr, opacity) {
+    return sel
+        .attr("stroke",  clr)
+        .attr("stroke-opacity", opacity);
+
+}

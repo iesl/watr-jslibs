@@ -27,25 +27,6 @@ const TextGridLineSpacing = 16;
 const TextGridLineHeight  = 16;
 const TextGridOriginPt = coords.mkPoint.fromXy(20, 20);
 
-function appendCircle(sel, cx, cy, r) {
-    return sel.append('circle')
-        .attr("cx", cx)
-        .attr("cy", cy)
-        .attr("r", r);
-}
-
-function fill(sel, clr, opacity) {
-    return sel
-        .attr("fill",  clr)
-        .attr("fill-opacity", opacity);
-}
-
-function stroke(sel, clr, opacity) {
-    return sel
-        .attr("stroke",  clr)
-        .attr("stroke-opacity", opacity);
-
-}
 /** Page sync flashing indicator dot */
 function scrollSyncIndicator(parentSelection, indicatorPoint) {
     d3.select(parentSelection)
@@ -66,22 +47,6 @@ function scrollSyncIndicator(parentSelection, indicatorPoint) {
         .remove()
     ;
 }
-
-// function scrollSyncIndicator(parentSelection, indicatorPoint) {
-//     d3.select(parentSelection)
-//         .call(appendCircle, indicatorPoint.x, indicatorPoint.y, 20)
-//         .call(fill, "yellow", 1)
-//         .call(stroke, "black", 0)
-//         .attr("stroke-width", 1)
-//         .transition()
-//         .duration(300)
-//         .attr("fill-opacity", 0)
-//         .attr("stroke-opacity", 1)
-//         .attr("r", 2)
-//         .delay(10)
-//         .remove()
-//     ;
-// }
 
 
 function initHoverReticles(d3$textgridSvg) {
@@ -195,6 +160,17 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
     //     .remove() ;
 }
 
+function getFrameTopClientPos(pageNum) {
+    // Get offset of clicked text on page
+    let pageImageFrameId = `div#page-image-frame-${pageNum}`;
+    let pageImageFrame = $(pageImageFrameId);
+    let pageImageFramePosition = pageImageFrame.position();
+    let frameTop = pageImageFramePosition.top;
+    let containerTop = $(`div.page-images`).position().top;
+    let absFrameTop = frameTop - containerTop ;
+    return absFrameTop;
+}
+
 function syncScrollFrame(clientPt, dataPt, pageNum, whichSide, paneId) {
 
     // Get offset of clicked text on page
@@ -279,6 +255,15 @@ function mkAnnotation(props) {
     return Object.assign({id: nextAnnotId()}, props);
 }
 
+// class TextSelectionState {
+//     constructor(selectionStartId , selectionEndId) {
+//         this.selectionStartId = selectionStartId;
+//         this.selectionEndId = selectionEndId;
+//     }
+
+// }
+
+
 function textgridSvgHandlers(d3$textgridSvg) {
     let pageNum = parseInt(d3$textgridSvg.attr('page'));
     let reticleGroup = initHoverReticles(d3$textgridSvg);
@@ -287,7 +272,6 @@ function textgridSvgHandlers(d3$textgridSvg) {
     let gridSelection = [];
     let selectionStartId = undefined;
     let selectionEndId = undefined;
-
 
 
     d3$textgridSvg
@@ -302,6 +286,8 @@ function textgridSvgHandlers(d3$textgridSvg) {
                 syncScrollPageImages(clientPt, firstHit);
 
                 if (mouseEvent.shiftKey) {
+                    // Switch to text selection cursor
+                    // Start text selection
                     selectionEndId = selectionStartId = parseInt(firstHit.id);
                 }
             }
@@ -342,8 +328,8 @@ function textgridSvgHandlers(d3$textgridSvg) {
             let textgridRTree = globals.textgridRTrees[pageNum] ;
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
-            let queryWidth = 50;
-            let queryBoxHeight = TextGridLineHeight * 3;
+            let queryWidth = 20;
+            let queryBoxHeight = TextGridLineHeight * 2;
             let queryLeft = userPt.x-queryWidth;
             let queryTop = userPt.y-queryBoxHeight;
             let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
@@ -438,9 +424,6 @@ function createTextGridLabelingPanel(annotation) {
     let textGridsTop = $('div.page-textgrids').position().top;
     let screenY = pageImageTop + textGridsTop;
 
-    console.log('svgPageSelector', svgPageSelector);
-    console.log('position()', $(svgPageSelector).position());
-    console.log('position()', $(svgPageSelector).parent().position());
     lbl.createTextGridLabeler(annotation);
 
     $('.modal-content').css({
@@ -456,21 +439,19 @@ function createTextGridLabelingPanel(annotation) {
 
 function createImageLabelingPanel(initSelection, annotation) {
 
-    // let sortedHits = _.sortBy(hits, hit => hit.minX);
-    // let hitStr = _.map(sortedHits, n => n.char).join('');
-    // console.log('selectRect', selectRect, 'hit:', hitStr);
-    // console.log('selectRect', selectRect, 'minRect:', [minX, minY, maxX-minX, maxY-minY]);
-    // Create visual feedback for selection
-    // _.each(annotation.targets, (target) => {
     let target = annotation.targets[0];
 
     let [page, mbr] = target;
+    // let pageImageFrameId = `div#page-image-frame-${page}`;
+    // let pageImageFrame = $(pageImageFrameId);
+    // let pageImageFramePosition = pageImageFrame.position();
+    // let frameTop = pageImageFramePosition.top;
+    // let pageImageTop = $(svgPageSelector).parent().position().top;
+    // let pageImagesOffset = $('div.page-images').position().top;
+    // let screenY = pageImageTop + pageImagesOffset;
+
+
     let svgPageSelector = `svg#page-image-${page}`;
-    let pageImageTop = $(svgPageSelector).parent().position().top;
-    let pageImagesOffset = $('div.page-images').position().top;
-    let screenY = pageImageTop + pageImagesOffset;
-
-
     d3.select(svgPageSelector)
         .append('rect')
         .classed('label-selection-rect', true)
@@ -493,10 +474,9 @@ function createImageLabelingPanel(initSelection, annotation) {
 
     lbl.createHeaderLabelUI(annotation);
 
-
     $('.modal-content').css({
-        'margin-left': globals.currentMousePos.x,
-        'margin-top': globals.currentMousePos.y + screenY
+        'margin-left': globals.currentMousePos.x + "px",
+        'margin-top': globals.currentMousePos.y + "px"
     });
 
     $('#label-form.modal').css({
@@ -573,8 +553,8 @@ function setupPageImages(contentId, pageImageShapes) {
                 let textgridRTree = globals.pageImageRTrees[pageNum] ;
                 let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
-                let queryWidth = 50;
-                let queryBoxHeight = TextGridLineHeight * 3;
+                let queryWidth = 20;
+                let queryBoxHeight = TextGridLineHeight * 2;
                 let queryLeft = userPt.x-queryWidth;
                 let queryTop = userPt.y-queryBoxHeight;
                 let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);

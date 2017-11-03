@@ -11,6 +11,7 @@ import 'd3-drag';
 import * as _ from  'lodash';
 import {globals} from './globals';
 import * as $ from 'jquery';
+import * as coords from './coord-sys.js';
 
 
 export function initD3DragSelect(svgSelector, callback) {
@@ -59,7 +60,7 @@ export function initD3DragSelect(svgSelector, callback) {
         };
     }
 
-    function init(newX, newY) {
+    function init(newX, newY, clientPt) {
 
         let rectElement = selfSvg().append("rect")
             .classed("selection", true)
@@ -74,15 +75,14 @@ export function initD3DragSelect(svgSelector, callback) {
         setElement(rectElement);
         selState.originX = newX;
         selState.originY = newY;
-        update(newX, newY);
+        update(newX, newY, clientPt);
     }
 
-    function update(newX, newY) {
-        // let selfPos = $(selfSvg()).parent().position();
-        globals.currentMousePos.x = newX;
-        globals.currentMousePos.y = newY;
+    function update(newX, newY, clientPt) {
+        globals.currentMousePos.x = clientPt.x;
+        globals.currentMousePos.y = clientPt.y;
         $("li > span#mousepos").text(
-            `x: ${newX}, y: ${newY} : ${svgSelector}`
+            `x: ${clientPt.x}, y: ${clientPt.y} / ${svgSelector} @  ${newX},${newY} `
         );
 
         selState.currentX = newX;
@@ -112,7 +112,9 @@ export function initD3DragSelect(svgSelector, callback) {
         let b = mouseEvent.button;
         if (b == 0) {
             let p = d3.mouse(this);
-            init(p[0], p[1]);
+            let mouseEvent = d3.event.sourceEvent;
+            let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
+            init(p[0], p[1], clientPt);
             removePrevious();
             d3.event.sourceEvent.stopPropagation(); // silence other listeners
         }
@@ -122,7 +124,11 @@ export function initD3DragSelect(svgSelector, callback) {
         if (selState.element != null) {
             // console.log("dragMove");
             let p = d3.mouse(this);
-            update(p[0], p[1]);
+            // let mouseEvent = d3.event;
+            let mouseEvent = d3.event.sourceEvent;
+            let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
+            // console.log('mouseEvent', mouseEvent);
+            update(p[0], p[1], clientPt);
             let currAttrs = getCurrentAttributes();
             callback({
                 move: currAttrs

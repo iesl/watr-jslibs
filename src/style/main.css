@@ -198,9 +198,8 @@ td.menu-item {
 
 td.menu-item div.menu-entry {
     text-align: center;
-}
-td.menu-item div.menu-entry {
-    font: 'normal normal normal 12px/normal Helvetica, Arial';
+    font-size: 80%;
+    /* font: 'normal normal normal 12px/normal Helvetica, Arial'; */
     /* text-align: center; */
     align: center;
     /* width: 100px; */
