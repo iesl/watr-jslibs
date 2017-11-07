@@ -19,7 +19,11 @@ function buildMenuList(entryData) {
 
 
 function renderMenuItems(menuItems) {
-    let menu = d3.select('#menu') ;
+    let menu = d3.select('body')
+        .append('div') 
+        .attr('id', 'menu')
+    ;
+    // let menu = d3.select('#menu') ;
 
     let menuTable = menu.append('table')
         .classed('menu-table', true)
@@ -39,7 +43,7 @@ function renderMenuItems(menuItems) {
         .data(d => d)
         .enter()
         .append("td").classed('menu-item', true)
-        .append("a").attr("href", d  => `/vtrace/${d.name}?show=textgrid.json`)
+        .append("a").attr("href", d  => `/document/${d.name}?show=textgrid.json`)
         .append('div').classed('menu-entry', true)
     ;
 

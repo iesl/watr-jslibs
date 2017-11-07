@@ -190,8 +190,8 @@ function syncScrollFrame(clientPt, dataPt, pageNum, whichSide, paneId) {
         `svg#${whichSide}-${pageNum}`,
         dataPt.topLeft
     );
-
 }
+
 /**
  *  Capture a click on the textgrid-side and scroll the corresponding page image into
  *  view, flashing an indicator on the image point corresponding to the text
@@ -664,17 +664,20 @@ export function RenderTextGrid(dataBlock) {
     let textgrids = _.map(pages, p => p.textgrid);
     let pageShapes = _.map(pages, p => p.shapes);
 
-    setupFrameLayout();
+    // <div id="content" class="content" style="display: block;"> </div>
 
+    d3.select('body')
+        .append('div')
+        .attr('id', 'content')
+        .classed('content', true)
+    ;
+
+    setupFrameLayout();
 
     setupPageImages('div.page-images', pageShapes);
     setupPageTextGrids('div.page-textgrids', textgrids);
 
     rtrees.initRTrees(textgrids);
-    // setTimeout(() => {
-    //     rtrees.initRTrees(textgrids);
-    // }, 0);
-
 
 
     console.log('global', globals);

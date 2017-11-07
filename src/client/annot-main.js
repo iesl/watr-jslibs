@@ -1,6 +1,5 @@
 /* global require $ */
 
-
 import * as d3 from  'd3';
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
