@@ -439,6 +439,7 @@ function createTextGridLabelingPanel(annotation) {
 
 function createImageLabelingPanel(initSelection, annotation) {
 
+
     let target = annotation.targets[0];
 
     let [page, mbr] = target;
@@ -474,14 +475,11 @@ function createImageLabelingPanel(initSelection, annotation) {
 
     lbl.createHeaderLabelUI(annotation);
 
-    $('.modal-content').css({
-        'margin-left': globals.currentMousePos.x + "px",
-        'margin-top': globals.currentMousePos.y + "px"
-    });
+    // $('.modal-content').css({
 
-    $('#label-form.modal').css({
-        display: 'block'
-    });
+    // $('#label-form.modal').css({
+    //     display: 'block'
+    // });
 
 }
 
@@ -664,13 +662,6 @@ export function RenderTextGrid(dataBlock) {
     let textgrids = _.map(pages, p => p.textgrid);
     let pageShapes = _.map(pages, p => p.shapes);
 
-    // <div id="content" class="content" style="display: block;"> </div>
-
-    d3.select('body')
-        .append('div')
-        .attr('id', 'content')
-        .classed('content', true)
-    ;
 
     setupFrameLayout();
 
@@ -679,8 +670,6 @@ export function RenderTextGrid(dataBlock) {
 
     rtrees.initRTrees(textgrids);
 
-
-    console.log('global', globals);
     lbl.updateAnnotationShapes();
 
     return d3;

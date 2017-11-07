@@ -2,7 +2,7 @@
  *
  **/
 
-/* global  */
+/* global  FormData */
 
 import * as d3 from  'd3';
 import * as $ from  'jquery';
@@ -10,10 +10,10 @@ import * as _ from  'lodash';
 import {globals} from './globals';
 
 // Globals:
-let $labelForm = $('#label-form > form');
-let $labelButton = $labelForm.find('button#label-type');
-let $cancelButton = $labelForm.find('button#cancel-button');
-$cancelButton.click(cancel);
+// let $labelForm = $('#label-form > form');
+// let $labelButton = $labelForm.find('button#label-type');
+// let $cancelButton = $labelForm.find('button#cancel-button');
+// $cancelButton.click(cancel);
 
 export function updateAnnotationShapes() {
     _.each(getAnnotations(), (annotation) => {
@@ -77,93 +77,119 @@ export function getAnnotations() {
 }
 
 
-let $labelButtons = $labelForm.find('div#label-buttons');
+// let $labelButtons = $labelForm.find('div#label-buttons');
 
-$labelButtons.empty();
+// $labelButtons.empty();
 
-function cancel() {
-    d3.selectAll('.label-selection-rect').remove();
-    hideForm();
-}
-function hideForm() {
-    $('#label-form').css({
-        display: 'none'
-    });
-    $labelButtons.empty();
-}
+// function cancel() {
+//     d3.selectAll('.label-selection-rect').remove();
+//     hideForm();
+// }
+// function hideForm() {
+//     $('#label-form').css({
+//         display: 'none'
+//     });
+//     $labelButtons.empty();
+// }
 
-function setLabelType(label) {
-    return () => {
-        $labelForm.find('input#labelType')
-            .attr('value', label);
+// function setLabelType(label) {
+//     return () => {
+//         $labelForm.find('input#labelType')
+//             .attr('value', label);
 
-    };
-}
+//     };
+// }
 
 export function createHeaderLabelUI(annotation) {
     let labelNames = [
         'Title',
         'Authors',
         'Abstract',
-            'Affiliations',
-            'References'
-        ];
+        'Affiliations',
+        'References'
+    ];
 
+    let reqData = {
+        labels: labelNames,
+        description: "Some Desc"
+    };
 
-        $labelForm.submit(function (event) {
+    $.post({
+        url: "/api/v1/labeling/ui/labeler",
+        data: JSON.stringify(reqData),
+        contentType: 'application/json',
+        method: "POST"
+    }, function(labelerHtml) {
+        let $labeler = $(labelerHtml);
+
+        console.log($labeler);
+
+        $('body').append($labeler);
+
+        $labeler.submit(function (event) {
+            let $form = $(this);
+
             event.preventDefault();
+            let f = document.forms[$form.attr('id')];
 
-        let ldata = $('#label-form > form').serialize();
+            let formData = new FormData(f);
 
-        let ser = _.map(annotation.targets, t => [t[0], t[1].intRep]);
+            // let ser = _.map(annotation.targets, t => [t[0], t[1].intRep]);
+            let ser = _.map(annotation.targets, t => {
+                return {
+                    page: t[0],
+                    bbox: t[1].intRep
+                };
+            });
 
-        let postData = {
-            form: ldata,
-            selection: {
-                type: annotation.type,
-                targets: ser
-            }
-        };
+            let postData = {
+                // form: formData,
+                selection: {
+                    annotType: annotation.type,
+                    targets: ser
+                }
+            };
 
-        console.log('posting', postData);
-        addAnnotation(annotation);
+            addAnnotation(annotation);
 
-        $.post( "/api/v1/label", {
-            data: postData,
-            datatype: 'json'
-        }, function(res) {
+            $.post({
+                url: "/api/v1/labeling/label",
+                data: JSON.stringify(postData),
+                datatype: 'json',
+                contentType: 'application/json',
+                method: "POST"
+            }, function(res) {
 
-            console.log('success', res);
-            d3.selectAll('.label-selection-rect')
-                .classed('label-selection-rect', false)
-                .transition().duration(200)
-                .attr("fill", 'green') ;
+                console.log('success', res);
+                d3.selectAll('.label-selection-rect')
+                    .classed('label-selection-rect', false)
+                    .transition().duration(200)
+                    .attr("fill", 'green') ;
 
-        }).done(function() {
-            // alert( "second success" );
-        }).fail(function() {
-        }).always(function() {
-            hideForm();
-            // cleanup
+            }) ;
         });
 
+
+        // _.each(labelNames, (label, i) => {
+        //     let $l = $labelButton.clone();
+        //     $l.empty();
+        //     $l.click(setLabelType(label));
+        //     $l.append($(`<small>(${i+1}) ${label}</small>`)) ;
+
+        //     $l.attr('name', 'labelType');
+        //     $l.attr('value', label) ;
+        //     $l.attr('id', label);
+
+        //     $labelButtons.append($l);
+        // });
+
+        $labeler.modal();
+
+        $labeler.css({
+            'margin-left': globals.currentMousePos.x + "px",
+            'margin-top': globals.currentMousePos.y + "px"
+        });
     });
-
-
-    _.each(labelNames, (label, i) => {
-        let $l = $labelButton.clone();
-        $l.empty();
-        $l.click(setLabelType(label));
-        $l.append($(`<small>(${i+1}) ${label}</small>`)) ;
-
-        $l.attr('name', 'labelType');
-        $l.attr('value', label) ;
-        $l.attr('id', label);
-
-        $labelButtons.append($l);
-    });
-
-    return $labelForm;
 }
 
 export function createTextGridLabeler(boxes) {
@@ -175,47 +201,47 @@ export function createTextGridLabeler(boxes) {
         'Address'
     ];
 
-    $labelForm.submit(function (event) {
-        event.preventDefault();
+    // $labelForm.submit(function (event) {
+    //     event.preventDefault();
 
-        let ldata = $('#label-form > form').serialize();
+    //     let ldata = $('#label-form > form').serialize();
 
-        let postData = {
-            form: ldata,
-            selection: boxes
-        };
+    //     let postData = {
+    //         form: ldata,
+    //         selection: boxes
+    //     };
 
-        // let postData = Object.assign(ldata, selData);
-        console.log('posting', postData);
+    //     // let postData = Object.assign(ldata, selData);
+    //     console.log('posting', postData);
 
-        $.post( "/api/v1/label", {
-            data: postData,
-            datatype: 'json'
-        }, function(res) {
+    //     $.post( "/api/v1/label", {
+    //         data: postData,
+    //         datatype: 'json'
+    //     }, function(res) {
 
-            console.log('success', res);
+    //         console.log('success', res);
 
-        }).done(function() {
-        }).fail(function() {
-        }).always(function() {
-            hideForm();
-        });
+    //     }).done(function() {
+    //     }).fail(function() {
+    //     }).always(function() {
+    //         hideForm();
+    //     });
 
-    });
+    // });
 
 
-    _.each(labelNames, (label, i) => {
-        let $l = $labelButton.clone();
-        $l.empty();
-        $l.click(setLabelType(label));
-        $l.append($(`<small>(${i+1}) ${label}</small>`)) ;
+    // _.each(labelNames, (label, i) => {
+    //     let $l = $labelButton.clone();
+    //     $l.empty();
+    //     $l.click(setLabelType(label));
+    //     $l.append($(`<small>(${i+1}) ${label}</small>`)) ;
 
-        $l.attr('name', 'labelType');
-        $l.attr('value', label) ;
-        $l.attr('id', label);
+    //     $l.attr('name', 'labelType');
+    //     $l.attr('value', label) ;
+    //     $l.attr('id', label);
 
-        $labelButtons.append($l);
-    });
+    //     $labelButtons.append($l);
+    // });
 
-    return $labelForm;
+    // return $labelForm;
 }

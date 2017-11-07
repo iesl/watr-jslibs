@@ -14,6 +14,8 @@ import '../style/pretty-split-pane.css';
 import '../style/selection.css';
 import '../style/bootstrap.css';
 
+import 'bootstrap';
+
 let selectId = util.selectId;
 
 let DrawingMethods = drawingMethods();
@@ -104,6 +106,10 @@ function setupFrameLayout() {
 }
 
 export function runTrace() {
+    d3.select('body')
+        .append('div')
+        .attr('id', 'content')
+    ;
     setupFrameLayout();
 
 
