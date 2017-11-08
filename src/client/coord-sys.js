@@ -71,7 +71,7 @@ class BBox {
     get intRep () {
         return [
             Math.trunc(this.left * 100.0),
-            Math.trunc(this.bottom * 100.0),
+            Math.trunc(this.top * 100.0),
             Math.trunc(this.width * 100.0),
             Math.trunc(this.height * 100.0)
         ];
@@ -80,16 +80,25 @@ class BBox {
 
 
 export let mk = {
+    fromLtwhObj: (o) => {
+        return new BBox(
+            o.left / 100.0,
+            o.top  / 100.0,
+            o.width  / 100.0,
+            o.height / 100.0
+        );
+
+    },
     fromLtwh: (l, t, w, h) => {
         return new BBox(l, t, w, h);
     },
 
-    fromArray: (lbwh) => {
-        let left   = lbwh[0] / 100.0;
-        let bottom = lbwh[1] / 100.0;
-        let width  = lbwh[2] / 100.0;
-        let height = lbwh[3] / 100.0;
-        let top    = bottom - height;
+    fromArray: (ltwh) => {
+        let left   = ltwh[0] / 100.0;
+        let top    = ltwh[1] / 100.0;
+        let width  = ltwh[2] / 100.0;
+        let height = ltwh[3] / 100.0;
+        // let top    = bottom - height;
         return new BBox(
             left, top, width, height,
             coordSys.pdf

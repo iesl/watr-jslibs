@@ -439,20 +439,12 @@ function createTextGridLabelingPanel(annotation) {
 
 function createImageLabelingPanel(initSelection, annotation) {
 
-
     let target = annotation.targets[0];
 
     let [page, mbr] = target;
-    // let pageImageFrameId = `div#page-image-frame-${page}`;
-    // let pageImageFrame = $(pageImageFrameId);
-    // let pageImageFramePosition = pageImageFrame.position();
-    // let frameTop = pageImageFramePosition.top;
-    // let pageImageTop = $(svgPageSelector).parent().position().top;
-    // let pageImagesOffset = $('div.page-images').position().top;
-    // let screenY = pageImageTop + pageImagesOffset;
-
 
     let svgPageSelector = `svg#page-image-${page}`;
+
     d3.select(svgPageSelector)
         .append('rect')
         .classed('label-selection-rect', true)
@@ -474,12 +466,6 @@ function createImageLabelingPanel(initSelection, annotation) {
 
 
     lbl.createHeaderLabelUI(annotation);
-
-    // $('.modal-content').css({
-
-    // $('#label-form.modal').css({
-    //     display: 'block'
-    // });
 
 }
 
@@ -536,7 +522,7 @@ function setupPageImages(contentId, pageImageShapes) {
         let annotation = mkAnnotation({
             type: 'bounding-boxes',
             page: page,
-            targets: [[page, minBoundSelection]] //  TODO should be another level of nesting here
+            targets: [[page, minBoundSelection]] // TODO should be another level of nesting here
         });
 
         createImageLabelingPanel(pdfImageRect, annotation);
