@@ -9,24 +9,27 @@ import * as $ from  'jquery';
 import * as _ from  'lodash';
 import {globals} from './globals';
 import * as dt from './datatypes';
+import * as rtrees from './rtrees';
 
 
 export function updateAnnotationShapes() {
     getAnnotations().then(annotations =>{
         let zones = _.map(annotations.zones, (z) => dt.zoneFromJson(z));
         // console.log('zones: ', zones);
+        rtrees.initPageLabelRTrees(zones);
         _.each(zones, zone => {
             _.each(
                 zone.regions, region => {
                     let svgPageSelector = `svg#page-image-${region.pageNum}`;
 
-                    let annotRect = d3.select(svgPageSelector)
-                        .selectAll(`.ann${zone.zoneId}_${region.regionId}`)
+                    d3.select(svgPageSelector)
+                        .selectAll(`#ann${zone.zoneId}_${region.regionId}`)
                         .data([region])
                         .enter()
                         .append('rect')
                         .classed('annotation-rect', true)
-                        .classed(`.ann${zone.zoneId}_${region.regionId}`, true)
+                        .classed(`ann${zone.zoneId}`, true)
+                        .attr('id', `ann${zone.zoneId}_${region.regionId}`)
                         .attr("x", region.bbox.left)
                         .attr("y", region.bbox.top)
                         .attr("width", region.bbox.width)
@@ -38,6 +41,7 @@ export function updateAnnotationShapes() {
                         .exit()
                         .remove()
                     ;
+
 
 
                 });
@@ -60,14 +64,10 @@ export function updateAnnotationShapes() {
 
 export function getAnnotations() {
     return new Promise((resolve, reject) => {
+        let url = `/api/v1/labeling/labels/${globals.currentDocument}`;
         $.getJSON(
-            `/api/v1/labeling/labels/${globals.currentDocument}`,
-            function success(response) {
-                resolve(response);
-            })
-            .fail(function() {
-                reject("Server Error");
-            }) ;
+            url, (response) => resolve(response)
+        ).fail((xhr, status, err) => reject("Server Error:" + status + err.message));
     });
 }
 

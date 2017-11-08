@@ -15,6 +15,7 @@ import * as coords from './coord-sys.js';
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
+import Tooltip from 'tooltip.js';
 
 import {initD3DragSelect} from  './dragselect.js';
 
@@ -544,13 +545,38 @@ function setupPageImages(contentId, pageImageShapes) {
                 let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
 
                 let searchHits = textgridRTree.search(queryBox);
-                // neighborHits = textgridRTree.search(queryBox);
                 let hits = _.sortBy(
                     searchHits,
                     hit => [hit.bottom, hit.right]
                 );
 
                 showPageImageGlyphHoverReticles(svg, hits, queryBox);
+
+                // Label hover tooltips
+                let hoveredLabels = rtrees.searchPageLabels(pageNum, queryBox);
+                if (hoveredLabels.length > 0) {
+                    _.each(hoveredLabels, hoverHit => {
+                        let $hit = $(hoverHit.selector);
+                        // console.log('hovering over', $hit);
+                        if (! $hit.hasClass('tooltipped')) {
+                            let pageImageFrameId = `div#page-image-frame-${pageNum}`;
+                            const tt = new Tooltip($hit, {
+                                title: hoverHit.label,
+                                trigger: 'manual',
+                                container: pageImageFrameId
+                            });
+                            tt.show();
+                            $hit.addClass('tooltipped');
+                            $hit.prop('tooltip', tt);
+                        }
+                    });
+                } else {
+                    $('.tooltipped').each(function() {
+                        let tt = $(this).prop('tooltip');
+                        tt.dispose();
+                        $(this).removeClass('tooltipped');
+                    });
+                }
             });
 
             initD3DragSelect(svg.attr('id'), (pointOrRect) => {

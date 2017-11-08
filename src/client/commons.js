@@ -51,34 +51,6 @@ let colorMap = {
     "OutlineBox"             : "magenta"
 } ;
 
-// Define the div for the tooltip
-let tooltipDiv = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
-
-function addTooltip(r) {
-    return r.on("mouseover", function(d) {
-        if (d.class != undefined) {
-            tooltipDiv.transition()
-                .duration(100)
-                .style("opacity", .9);
-            tooltipDiv.html( d.class + "::" + getId(d) )
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
-        }
-    })
-        .on("mouseout", function(d) {
-            if (d.class != undefined) {
-                tooltipDiv.transition()
-                    .transition()
-                    .delay(3000)
-                    .duration(1000)
-                    .style("opacity", 0);
-            }
-        });
-
-}
-
 
 export function getSelectionText() {
     let text = "";
@@ -201,7 +173,7 @@ export function initShapeAttrs(r) {
             .attr("stroke-width", 1)
             .attr("fill",  setDefaultFillColor)
             .attr("stroke", "green")
-            .call(addTooltip)
+            // .call(addTooltip)
         ;
 
     case "circle":
@@ -214,7 +186,7 @@ export function initShapeAttrs(r) {
             .attr("stroke-width", 1)
             .attr("fill",  setDefaultFillColor)
             .attr("stroke", setDefaultStrokeColor)
-            .call(addTooltip)
+            // .call(addTooltip)
         ;
 
     case "line":
@@ -228,7 +200,7 @@ export function initShapeAttrs(r) {
             .attr("stroke-width", 1)
             .attr("fill",  setDefaultFillColor)
             .attr("stroke", setDefaultStrokeColor)
-            .call(addTooltip)
+            // .call(addTooltip)
         ;
     case "image":
         return r.attr("x", function(d){ return d.x; })

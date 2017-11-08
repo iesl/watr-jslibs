@@ -9,6 +9,8 @@ let knn = require('rbush-knn');
 import * as util from  './commons.js';
 
 globals.pageImageRTrees = [];
+globals.pageImageLabelRTrees = [];
+
 globals.textgridRTrees = [];
 
 
@@ -36,7 +38,44 @@ export function queryHitsMBR(hits) {
     return coords.mk.fromLtwh(minX, minY, width, height);
 }
 
+export function searchPageLabels(pageNum, queryBox) {
+    if (globals.pageImageLabelRTrees[pageNum]) {
+        let pageRtree = globals.pageImageLabelRTrees[pageNum];
+        return pageRtree.search(queryBox);
+    } else {
+        return [];
+    }
+}
 
+
+export function initPageLabelRTrees(zones) {
+    let dataPts = _.flatMap(zones, zone => {
+        return _.map(zone.regions, region => {
+            let data = region.bbox;
+            let selector = `#ann${zone.zoneId}_${region.regionId}`;
+            data.id = region.regionId;
+            data.pageNum = region.pageNum;
+            data.label = zone.label;
+            data.title = zone.label;
+            data.selector = selector;
+            return data;
+        });
+    });
+
+    // console.log('dataPts', dataPts);
+
+    let groups = _.groupBy(dataPts, p => p.pageNum);
+
+    _.each(groups, pageGroup => {
+        let pageNum = pageGroup[0].pageNum;
+        if (! globals.pageImageLabelRTrees[pageNum]) {
+            globals.pageImageLabelRTrees[pageNum] = rtree();
+        }
+        let pageRtree = globals.pageImageLabelRTrees[pageNum];
+
+        pageRtree.load(pageGroup);
+    });
+}
 export function initRTrees(textgrids) {
     let idGen = util.IdGenerator();
 
