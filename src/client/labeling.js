@@ -11,6 +11,8 @@ import {globals} from './globals';
 import * as dt from './datatypes';
 import * as rtrees from './rtrees';
 
+import Popper from 'popper.js';
+
 
 export function updateAnnotationShapes() {
     getAnnotations().then(annotations =>{
@@ -107,11 +109,12 @@ export function createHeaderLabelUI(annotation) {
             let $labeler = $(labelerHtml);
 
 
-            $('body').append($labeler);
+            // $('body').append($labeler);
 
             $labeler.on('hidden.bs.modal', function () {
                 $(this).remove();
             });
+
 
             $labeler.find('button.labelChoice').click(function() {
                 let $button = $(this);
@@ -161,12 +164,26 @@ export function createHeaderLabelUI(annotation) {
                 }) ;
             });
 
+            // let popper = new Popper(
+            //     $('.label-selection-rect'),
+            //     $labeler, {
+            //         placement: 'right-end'
+            //     }
+            // );
+
+            // popper.show();
+            $labeler.find('.modal-dialog').css({
+                'position': 'absolute',
+                'left': globals.currentMousePos.x + "px",
+                'top': globals.currentMousePos.y + "px"
+            });
+            // $labeler.find('.modal-content').css({
+            //     'position': 'relative',
+            //     'left': globals.currentMousePos.x + "px",
+            //     'top': globals.currentMousePos.y + "px"
+            // });
             $labeler.modal();
 
-            $labeler.css({
-                'margin-left': globals.currentMousePos.x + "px",
-                'margin-top': globals.currentMousePos.y + "px"
-            });
 
         })
     ;
