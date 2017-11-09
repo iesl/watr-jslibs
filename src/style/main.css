@@ -38,6 +38,9 @@ svg.page-image {
 svg rect {
     pointer-events: none;
 }
+svg image {
+    pointer-events: none;
+}
 
 
 div.page-textgrids {
