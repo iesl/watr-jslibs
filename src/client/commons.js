@@ -243,23 +243,30 @@ export function IdGenerator() {
     return nextId;
 }
 
-// TODO these don't work properly...
 function appendCircle(sel, cx, cy, r) {
-    return sel.append('circle')
+    sel.append('circle')
         .attr("cx", cx)
         .attr("cy", cy)
         .attr("r", r);
 }
 
-function fill(sel, clr, opacity) {
-    return sel
-        .attr("fill",  clr)
-        .attr("fill-opacity", opacity);
+
+export function initRect(sel, fbbox) {
+    sel .attr("x"      , d => fbbox(d).left)
+        .attr("y"      , d => fbbox(d).top)
+        .attr("width"  , d => fbbox(d).width)
+        .attr("height" , d => fbbox(d).height)
+    ;
 }
 
-function stroke(sel, clr, opacity) {
-    return sel
-        .attr("stroke",  clr)
-        .attr("stroke-opacity", opacity);
-
+export function initStroke(sel, stroke, strokeWidth, strokeOpacity) {
+    sel .attr("stroke", stroke)
+        .attr("stroke-width", strokeWidth)
+        .attr("stroke-opacity", strokeOpacity)
+    ;
+}
+export function initFill(sel, fill, fillOpacity) {
+    sel .attr("fill", fill)
+        .attr("fill-opacity", fillOpacity)
+    ;
 }

@@ -59,10 +59,8 @@ function initHoverReticles(d3$textgridSvg) {
     reticleGroup
         .append('rect')
         .classed('query-reticle', true)
-        .attr("fill-opacity", 0.2)
-        .attr("stroke-opacity", 0.6)
-        .attr("fill", 'blue')
-        .attr("stroke", 'blue')
+        .call(util.initStroke, 'blue', 1, 0.6)
+        .call(util.initFill, 'blue', 0.2)
     ;
     return reticleGroup;
 }
@@ -78,15 +76,10 @@ function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits, queryBoxOrU
         .append('rect')
         .datum(d => d.pdfBounds? d.pdfBounds : d)
         .classed('textloc', true)
-        .attr("x", d => d.left)
-        .attr("y", d => d.top)
-        .attr("width", d => d.width)
-        .attr("height", d => d.height)
-        .attr("stroke-opacity", 0.2)
-        .attr("fill-opacity", 0.5)
-        .attr("stroke-width", 1)
-        .attr("stroke", 'blue')
-        .attr("fill", 'blue') ;
+        .call(util.initRect, d => d)
+        .call(util.initStroke, 'blue', 1, 0.2)
+        .call(util.initFill, 'blue', 0.5)
+    ;
 
     d3$imageHitReticles
         .exit()
@@ -97,10 +90,7 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
 
     d3$textgridSvg.select('g.reticles')
         .select('rect.query-reticle')
-        .attr("x", queryBox.left)
-        .attr("y", queryBox.top)
-        .attr("width", queryBox.width)
-        .attr("height", queryBox.height)
+        .call(util.initRect, () => queryBox)
     ;
 
 
@@ -114,14 +104,9 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
         .append('rect')
         .classed('hit-reticle', true)
         .attr('id', d => d.id)
-        .attr("x", d => d.left)
-        .attr("y", d => d.top)
-        .attr("width", d => d.width)
-        .attr("height", d => d.height)
-        .attr("stroke-opacity", 0.2)
-        .attr("fill-opacity", 0.8)
-        .attr("fill", 'yellow')
-        .attr("stroke", 'green')
+        .call(util.initRect, d => d)
+        .call(util.initStroke, 'green', 1, 0.2)
+        .call(util.initFill, 'yellow', 0.7)
     ;
 
     d3$hitReticles
@@ -237,14 +222,9 @@ function showSelectionHighlight(d3$textgridSvg, selections) {
         .append('rect')
         .classed("selects", true)
         .attr('id', d => d.id)
-        .attr("x", d => d.left)
-        .attr("y", d => d.top)
-        .attr("width", d => d.width)
-        .attr("height", d => d.height)
-        .attr("fill-opacity", 0.4)
-        .attr("stroke-opacity", 0.1)
-        .attr("stroke", 'black')
-        .attr("fill", 'blue')
+        .call(util.initRect, d => d)
+        .call(util.initStroke, 'black', 1, 0.1)
+        .call(util.initFill, 'blue', 0.4)
     ;
 
     sel.exit().remove() ;
@@ -256,13 +236,6 @@ function mkAnnotation(props) {
     return Object.assign({id: nextAnnotId()}, props);
 }
 
-// class TextSelectionState {
-//     constructor(selectionStartId , selectionEndId) {
-//         this.selectionStartId = selectionStartId;
-//         this.selectionEndId = selectionEndId;
-//     }
-
-// }
 
 
 function textgridSvgHandlers(d3$textgridSvg) {
@@ -448,21 +421,13 @@ function createImageLabelingPanel(initSelection, annotation) {
 
     d3.select(svgPageSelector)
         .append('rect')
+        .call(util.initRect, () => initSelection)
         .classed('label-selection-rect', true)
-        .attr("x", initSelection.left)
-        .attr("y", initSelection.top)
-        .attr("width", initSelection.width)
-        .attr("height", initSelection.height)
-        .attr("fill-opacity", 0.7)
-        .attr("stroke-width", 1)
-        .attr("stroke", 'blue')
-        .attr("fill", 'yellow')
+        .call(util.initStroke, 'blue', 1, 1.0)
+        .call(util.initFill, 'yellow', 0.7)
         .transition().duration(200)
-        .attr("x", mbr.left)
-        .attr("y", mbr.top)
-        .attr("width", mbr.width)
-        .attr("height", mbr.height)
-        .attr("fill-opacity", 0.3)
+        .call(util.initRect, () => mbr)
+        .call(util.initFill, 'yellow', 0.3)
     ;
 
 
@@ -470,6 +435,24 @@ function createImageLabelingPanel(initSelection, annotation) {
 
 }
 
+function toggleLabelSelection(pageNum, hitItems) {
+    let svgPageSelector = `svg#page-image-${pageNum}`;
+    d3.select(svgPageSelector)
+        .selectAll('.select-highlight')
+        .data(hitItems, d => d.id)
+        .enter()
+        .append('rect')
+        .classed('select-highlight', true)
+        .attr('id', d => d.id)
+        .call(util.initRect, d => d)
+        .call(util.initStroke, 'black', 1, 0.9)
+        .call(util.initFill, 'red', 0.2)
+    ;
+    // _.each(hoveredLabels, hoverHit => {
+    //     let $hit = $(hoverHit.selector);
+    // });
+
+}
 
 function setupPageImages(contentId, pageImageShapes) {
 
@@ -497,18 +480,28 @@ function setupPageImages(contentId, pageImageShapes) {
         .attr('height', (d) => d[0].y + d[0].height )
     ;
 
-    function clickHandler(clickPt) {
-        let pageStr = clickPt.svgSelector.split('-').pop();
-        let page =  parseInt(pageStr);
+    function clickHandler(pageNum, clickPt) {
 
-        let neighbors = rtrees.knnQueryPage(page, clickPt, 4);
+        let queryBox = coords.mk.fromLtwh(clickPt.x, clickPt.y, 1, 1);
+        let hoveredLabels = rtrees.searchPageLabels(pageNum, queryBox);
+        if (hoveredLabels.length > 0) {
 
-        if (neighbors.length > 0) {
-            let nearestNeighbor = neighbors[0];
-            // let ns = _.map(neighbors, (n) => n.char).join('');
-            syncScrollTextGrid(clickPt, nearestNeighbor);
+            toggleLabelSelection(pageNum, hoveredLabels);
+
+        } else {
+
+            let pageStr = clickPt.svgSelector.split('-').pop();
+            let page =  parseInt(pageStr);
+
+            let neighbors = rtrees.knnQueryPage(page, clickPt, 4);
+
+            if (neighbors.length > 0) {
+                let nearestNeighbor = neighbors[0];
+                // let ns = _.map(neighbors, (n) => n.char).join('');
+                syncScrollTextGrid(clickPt, nearestNeighbor);
+            }
+
         }
-
     }
     function selectionHandler(selectionRect) {
         let pdfImageRect = coords.mk.fromXy12(selectionRect, coords.coordSys.pdf);
@@ -581,7 +574,7 @@ function setupPageImages(contentId, pageImageShapes) {
 
             initD3DragSelect(svg.attr('id'), (pointOrRect) => {
                 if (pointOrRect.point != undefined) {
-                    clickHandler(pointOrRect.point);
+                    clickHandler(pageNum, pointOrRect.point);
                 } else if (pointOrRect.rect != undefined) {
                     selectionHandler(pointOrRect.rect);
                 } else {

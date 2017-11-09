@@ -20,27 +20,10 @@ function updateMouseStatus() {
 }
 
 export function initGlobalMouseTracking(elemIds) {
-    // let locs = {};
-    // _.each(elemIds, (elemId) =>{
-    //     // Constantly track the mouse location
-    //     $(elemId).mousemove(function(event) {
-    //         locs[elemId] = {
-    //             pageLoc: [event.pageX, event.pageY],
-    //             clientLoc: [event.clientX, event.clientY]
-    //         };
-
-    //     });
-
-    // });
 
     $(document).on('mousemove', function(event) {
         globals.currentMousePos.x = event.pageX;
         globals.currentMousePos.y = event.pageY;
-
-        // let info = _.map(_.pairs(locs), ([elemId, loc]) => {
-        //     return `${elemId}: ${loc.pageLoc}`;
-        // }).join("; ");
-
 
         updateMouseStatus();
     });

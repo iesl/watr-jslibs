@@ -10,104 +10,47 @@ import * as _ from  'lodash';
 import {globals} from './globals';
 import * as dt from './datatypes';
 import * as rtrees from './rtrees';
+import * as util from './commons.js';
+import * as server from './serverApi.js';
 
-import Popper from 'popper.js';
-
+// import Popper from 'popper.js';
 
 export function updateAnnotationShapes() {
-    getAnnotations().then(annotations =>{
+    server.getAnnotations().then(annotations =>{
         let zones = _.map(annotations.zones, (z) => dt.zoneFromJson(z));
         // console.log('zones: ', zones);
         rtrees.initPageLabelRTrees(zones);
         _.each(zones, zone => {
-            _.each(
-                zone.regions, region => {
-                    let svgPageSelector = `svg#page-image-${region.pageNum}`;
+            _.each(zone.regions, region => {
+                let svgPageSelector = `svg#page-image-${region.pageNum}`;
 
-                    d3.select(svgPageSelector)
-                        .selectAll(`#ann${zone.zoneId}_${region.regionId}`)
-                        .data([region])
-                        .enter()
-                        .append('rect')
-                        .classed('annotation-rect', true)
-                        .classed(`ann${zone.zoneId}`, true)
-                        .attr('id', `ann${zone.zoneId}_${region.regionId}`)
-                        .attr("x", region.bbox.left)
-                        .attr("y", region.bbox.top)
-                        .attr("width", region.bbox.width)
-                        .attr("height", region.bbox.height)
-                        .attr("fill-opacity", 0.3)
-                        .attr("stroke-width", 1)
-                        .attr("stroke", 'blue')
-                        .attr("fill", 'purple')
-                        .exit()
-                        .remove()
-                    ;
+                d3.select(svgPageSelector)
+                    .selectAll(`#ann${zone.zoneId}_${region.regionId}`)
+                    .data([region])
+                    .enter()
+                    .append('rect')
+                    .call(util.initRect, r => r.bbox)
+                    .call(util.initStroke, 'blue', 1, 0.8)
+                    .call(util.initFill, 'purple', 0.3)
+                    .attr('id', `ann${zone.zoneId}_${region.regionId}`)
+                    .classed('annotation-rect', true)
+                    .classed(`ann${zone.zoneId}`, true)
+                    .exit()
+                    .remove()
+                ;
 
-
-
-                });
+            });
         });
 
     });
 }
 
-// export function addAnnotation(annotation) {
-//     let doc = globals.currentDocument;
 
-//     if (globals.documentAnnotations[doc] === undefined) {
-//         globals.documentAnnotations[doc] = [];
-//     }
-//     let docAnnots = globals.documentAnnotations[doc];
-//     docAnnots.push(annotation);
-//     console.log('global', globals);
-//     updateAnnotationShapes();
-// }
-
-export function getAnnotations() {
-    return new Promise((resolve, reject) => {
-        let url = `/api/v1/labeling/labels/${globals.currentDocument}`;
-        $.getJSON(
-            url, (response) => resolve(response)
-        ).fail((xhr, status, err) => reject("Server Error:" + status + err.message));
-    });
-}
-
-function getLabelingPanelWidget() {
-
-    let labelNames = [
-        'Title',
-        'Authors',
-        'Abstract',
-        'Affiliations',
-        'References'
-    ];
-
-    let reqData = {
-        labels: labelNames,
-        description: "Some Desc"
-    };
-
-    return new Promise((resolve, reject) => {
-        $.post({
-            url: "/api/v1/labeling/ui/labeler",
-            data: JSON.stringify(reqData),
-            contentType: 'application/json',
-            method: "POST"
-        }, function success (labelerHtml) {
-            resolve(labelerHtml);
-
-        }).fail(function() {
-            reject("Server Error");
-        });
-    });
-}
 
 export function createHeaderLabelUI(annotation) {
-    getLabelingPanelWidget()
+    server.getLabelingPanelWidget()
         .then(labelerHtml => {
             let $labeler = $(labelerHtml);
-
 
             // $('body').append($labeler);
 
@@ -136,7 +79,7 @@ export function createHeaderLabelUI(annotation) {
 
                 let labelChoice = $('#selectedLabel').attr('value');
 
-                let postData = {
+                let labelData = {
                     stableId: globals.currentDocument,
                     labelChoice: labelChoice,
                     selection: {
@@ -145,45 +88,23 @@ export function createHeaderLabelUI(annotation) {
                     }
                 };
 
+                server.postNewLabel(labelData)
+                    .then(res => {
+                        $labeler.modal('hide');
 
-                $.post({
-                    url: "/api/v1/labeling/label",
-                    data: JSON.stringify(postData),
-                    datatype: 'json',
-                    contentType: 'application/json',
-                    method: "POST"
-                }, function(res) {
-                    console.log('success', res);
+                        d3.selectAll('.label-selection-rect').remove();
 
-                    $labeler.modal('hide');
-
-                    d3.selectAll('.label-selection-rect').remove();
-
-                    updateAnnotationShapes();
-
-                }) ;
+                        updateAnnotationShapes();
+                    });
             });
 
-            // let popper = new Popper(
-            //     $('.label-selection-rect'),
-            //     $labeler, {
-            //         placement: 'right-end'
-            //     }
-            // );
-
-            // popper.show();
             $labeler.find('.modal-dialog').css({
                 'position': 'absolute',
                 'left': globals.currentMousePos.x + "px",
                 'top': globals.currentMousePos.y + "px"
             });
-            // $labeler.find('.modal-content').css({
-            //     'position': 'relative',
-            //     'left': globals.currentMousePos.x + "px",
-            //     'top': globals.currentMousePos.y + "px"
-            // });
-            $labeler.modal();
 
+            $labeler.modal();
 
         })
     ;

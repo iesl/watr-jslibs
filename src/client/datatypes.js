@@ -1,8 +1,7 @@
 /**
- *
+ * Server interop datatypes
  **/
 
-/* global */
 
 import * as coords from './coord-sys.js';
 import * as _ from  'lodash';

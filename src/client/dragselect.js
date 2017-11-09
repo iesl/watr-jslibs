@@ -1,8 +1,8 @@
-/* global */
-
 /**
-   Credit to : http://bl.ocks.org/paradite/71869a0f30592ade5246
-**/
+ * d3-driven drag/click handling
+ *
+ *  Credit to : http://bl.ocks.org/paradite/71869a0f30592ade5246
+ **/
 
 import * as d3 from 'd3';
 import 'd3-dispatch';
