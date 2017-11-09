@@ -14,6 +14,10 @@ import * as util from './commons.js';
 import * as server from './serverApi.js';
 
 // import Popper from 'popper.js';
+let nextAnnotId = util.IdGenerator();
+export function mkAnnotation(props) {
+    return Object.assign({id: nextAnnotId()}, props);
+}
 
 export function updateAnnotationShapes() {
     server.getAnnotations().then(annotations =>{
