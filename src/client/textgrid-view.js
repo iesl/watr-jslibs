@@ -18,6 +18,7 @@ import * as rtrees from  './rtrees.js';
 import * as pageview from  './pdf-pageview.js';
 
 import { globals } from './globals';
+import * as global from './globals';
 
 // let knn = require('rbush-knn');
 let rtree = require('rbush');
@@ -458,6 +459,7 @@ export function RenderTextGrid(dataBlock) {
     let textgrids = _.map(pages, p => p.textgrid);
     let pageShapes = _.map(pages, p => p.shapes);
 
+    global.initGlobalMouseTracking();
 
     setupFrameLayout();
 

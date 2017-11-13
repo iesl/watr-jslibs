@@ -18,7 +18,7 @@ import * as textview from  './textgrid-view.js';
 
 import { globals } from './globals';
 
-let selectId = util.selectId;
+import 'font-awesome/css/font-awesome.css';
 
 function defaultModeMouseHandlers(d3$svg, pageNum) {
     d3$svg.on("mousedown", function() {
@@ -110,6 +110,12 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
 function initPageImageMouseHandlers(d3$svg, pageNum) {
     defaultModeMouseHandlers(d3$svg, pageNum);
 }
+// svg.append("text")
+//   .attr("x",0)
+//   .attr("y",70)
+//   .attr("font-family","FontAwesome")
+//   .attr('font-size', function(d) { return '70px';} )
+//   .text(function(d) { return '\uf083'; });
 
 function toggleLabelSelection(pageNum, clickedItems) {
     let svgPageSelector = `svg#page-image-${pageNum}`;
@@ -122,12 +128,18 @@ function toggleLabelSelection(pageNum, clickedItems) {
         .selectAll('.select-highlight')
         .data(globals.currentSelections, d => d.id);
 
-    sel.enter()
+    let enterSel = sel.enter()
+        .append('g')
+        .classed('select-highlight', true)
+    ;
+
+    enterSel
         .append('rect')
         .classed('select-highlight', true)
         .call(util.initRect, d => d)
         .call(util.initStroke, 'black', 1, 0.9)
-        .call(util.initFill, 'red', 0.3) ;
+        .call(util.initFill, 'red', 0.3)
+    ;
 
     sel.exit()
         .remove() ;
@@ -236,6 +248,48 @@ export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
         .remove() ;
 }
 
+// import Rx from 'rxjs/Rx';
+// Rx.Observable.of(1,2,3)
+
+function setupStatusBar(statusBarId) {
+
+
+    $("#"+statusBarId)
+        .addClass('statusbar')
+        .css({overflow: 'hidden'});
+
+    let $container  = $('<div />').addClass('container-fluid');
+
+    $("#"+statusBarId)
+        .append($container);
+
+
+    let $row = $('<div />').addClass('row');
+
+    $container.append($row);
+
+    let c1 = $('<div />').addClass('col-lg-3');
+    let c2 = $('<div />').addClass('col-lg-2');
+    let c3 = $('<div />').addClass('col-lg-4');
+
+    $row.append(c1);
+    $row.append(c2);
+    $row.append(c3);
+
+    c1.text('col1');
+    c2.text('and 2');
+    c3.text('third');
+
+    globals.rx.clientPt.subscribe(clientPt => {
+        c3.text(`x:${clientPt.x} y:${clientPt.y}`);
+    });
+
+    // Page Num (based on mouse hover)
+    // Cursor location info
+    // Current Selections + Delete button
+
+}
+
 export function setupPageImages(contentSelector, pageImageShapes) {
 
     let ctx = {maxh: 0, maxw: 0};
@@ -248,14 +302,9 @@ export function setupPageImages(contentSelector, pageImageShapes) {
     panes.setParentPaneWidth(contentSelector, ctx.maxw + 80);
 
     let {topPaneId: statusBar, bottomPaneId: pageImageDivId} =
-        panes.splitHorizontal(contentSelector, {fixedTop: 20});
+        panes.splitHorizontal(contentSelector, {fixedTop: 30});
 
-    console.log('topPaneId', statusBar);
-    console.log('bottomPaneId', pageImageDivId);
-
-    $("#"+statusBar)
-        .addClass('statusbar')
-        .css({overflow: 'hidden'});
+    setupStatusBar(statusBar);
 
     $("#"+pageImageDivId)
         .addClass('page-images')

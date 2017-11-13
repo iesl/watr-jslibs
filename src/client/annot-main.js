@@ -16,6 +16,10 @@ import '../style/bootstrap.css';
 
 import 'bootstrap';
 
+// import "font-awesome";
+
+import 'font-awesome/css/font-awesome.css';
+
 let selectId = util.selectId;
 
 

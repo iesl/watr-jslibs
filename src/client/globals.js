@@ -21,7 +21,10 @@ export let globals = {
 
     annotationLabels: {},
 
-    currentSelections: []
+    currentSelections: [],
+
+    rx: {}
+
 };
 
 
@@ -34,7 +37,19 @@ function updateMouseStatus() {
 
 }
 
+import Rx from 'rxjs/Rx';
+import * as coords from './coord-sys.js';
+
 export function initGlobalMouseTracking() {
+    // var button = document.querySelector('button');
+    globals.rx.clientPt = Rx.Observable
+        .fromEvent(document, 'mousemove')
+        .map(event => {return coords.mkPoint.fromXy(event.clientX, event.clientY); })
+    ;
+        // .throttleTime(1000)
+        // .map(event => event.clientX)
+        // .scan((count, clientX) => count + clientX, 0)
+        // .subscribe(count => console.log(count));
 
     $(document).on('mousemove', function(event) {
         globals.currMouseClientPt.x = event.pageX;

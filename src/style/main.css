@@ -82,6 +82,10 @@ svg.textgrid {
     z-index: 10;
 }
 
+.statusbar {
+    font-size: 20px;
+}
+
 .menu-pane {
     margin: 0 auto;
     background: #ccd9ff;
