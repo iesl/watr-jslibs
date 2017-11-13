@@ -14,42 +14,35 @@ import * as rtrees from  './rtrees.js';
 import Tooltip from 'tooltip.js';
 
 import * as textview from  './textgrid-view.js';
-import {initD3DragSelect} from  './dragselect.js';
 
 import { globals } from './globals';
 
-
-// function awaitUserSelection(d3$svg, pageNum, initd3Event) {
 function awaitUserSelection(d3$svg, pageNum, initSvgPt, initClientPt) {
 
     return new Promise((resolve, reject) => {
 
         let selState = {
             element: null,
-            previousElement: null,
             svgSelector: d3$svg.attr('id'),
             originPt: initSvgPt,
             currentPt: initSvgPt
         };
 
-        console.log('selState', selState);
         init(initSvgPt, initClientPt);
 
         function init(svgPt, clientPt) {
+            let emptyRect  = { x: 0, y: 0, width: 0, height: 0 };
 
             let rectElement = d3$svg.append("rect")
+                .call(util.initRect, () => emptyRect)
                 .classed("selection", true)
                 .attr("rx", 4)
                 .attr("ry", 4)
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width",0)
-                .attr("height", 0)
             ;
 
-            setElement(rectElement);
-            selState.originPt.x = svgPt.x;
-            selState.originPt.y = svgPt.y;
+            selState.element = rectElement;
+            console.log('selState', selState);
+            selState.originPt = svgPt;
             update(svgPt, clientPt);
         }
 
@@ -61,28 +54,24 @@ function awaitUserSelection(d3$svg, pageNum, initSvgPt, initClientPt) {
             );
 
             selState.currentPt = svgPt;
-            _.each(getNewAttributes(), (v, k) => {
-                selState.element.attr(k, v);
-            });
+            adjustSelectionRect();
+            // _.each(getNewAttributes(), (v, k) => {
+            //     selState.element.attr(k, v);
+            // });
         }
 
 
-        function setElement(ele) {
-            selState.previousElement = selState.element;
-            selState.element = ele;
-        }
+        function adjustSelectionRect() {
+            console.log('selState', selState);
+            let ny = Math.min(selState.currentPt.y, selState.originPt.y);
+            let nx = Math.min(selState.currentPt.x, selState.originPt.x);
+            let nwidth = Math.abs(selState.currentPt.x - selState.originPt.x);
+            let nheight = Math.abs(selState.currentPt.y - selState.originPt.y);
 
-        function getNewAttributes() {
-            let x = selState.currentPt.x < selState.originPt.x ? selState.currentPt.x : selState.originPt.x;
-            let y = selState.currentPt.y < selState.originPt.y ? selState.currentPt.y : selState.originPt.y;
-            let width = Math.abs(selState.currentPt.x - selState.originPt.x);
-            let height = Math.abs(selState.currentPt.y - selState.originPt.y);
-            return {
-                x: x,
-                y: y,
-                width: width,
-                height: height
-            };
+            let adjusted  = {x: nx, y: ny, width: nwidth, height: nheight};
+
+            selState.element
+                .call(util.initRect, () => adjusted);
         }
 
         function getCurrentAttributes() {
@@ -102,31 +91,8 @@ function awaitUserSelection(d3$svg, pageNum, initSvgPt, initClientPt) {
 
         function remove() {
             selState.element.remove();
-            selState.element = null;
+            // selState.element = null;
         }
-
-        function removePrevious() {
-            if (selState.previousElement) {
-                selState.previousElement.remove();
-            }
-        }
-
-
-
-        // function dragStart() {
-        //     let mouseEvent = d3.event.sourceEvent;
-
-        //     // 0=left, 1=middle, 2=right
-        //     let b = mouseEvent.button;
-        //     if (b == 0) {
-        //         let p = d3.mouse(this);
-        //         let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
-        //         init(p[0], p[1], clientPt);
-        //         removePrevious();
-        //         mouseEvent.stopPropagation(); // silence other listeners
-        //     }
-        // }
-
 
         d3$svg.on("mouseup", function() {
             // return either point or rect
@@ -150,7 +116,7 @@ function awaitUserSelection(d3$svg, pageNum, initSvgPt, initClientPt) {
                     });
                 }
             } else {
-                reject("???");
+                reject("Error");
             }
         });
         d3$svg.on("mousemove", function() {
@@ -185,7 +151,6 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
         } else {
 
             let neighbors = rtrees.knnQueryPage(pageNum, clickPt, 4);
-
             if (neighbors.length > 0) {
                 let nearestNeighbor = neighbors[0];
                 // let ns = _.map(neighbors, (n) => n.char).join('');
@@ -196,17 +161,15 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
     });
 
 
-    d3$svg.on("mousemove", function(underlings) {
+    d3$svg.on("mousemove", function() {
         let mouseEvent = d3.event;
         let svgUserPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
-        // button: 0=left, 1=middle, 2=right
         // buttons: 0=none, 1=left, 3=middle, 2=right
         let b = mouseEvent.buttons;
         if (b == 1) {
             let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
-            //         init(p[0], p[1], clientPt);
-            //         removePrevious();
+
             mouseEvent.stopPropagation(); // silence other listeners
             awaitUserSelection(d3$svg, pageNum, svgUserPt, clientPt)
                 .then(pointOrRect => {
@@ -265,65 +228,9 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
     d3$svg.on("mouseover", function() {});
     d3$svg.on("mouseout", function() {});
 }
+
 function initPageImageMouseHandlers(d3$svg, pageNum) {
     defaultModeMouseHandlers(d3$svg, pageNum);
-    // function clickHandler(pageNum, clickPt) {
-
-    //     let queryBox = coords.mk.fromLtwh(clickPt.x, clickPt.y, 1, 1);
-    //     let hoveredLabels = rtrees.searchPageLabels(pageNum, queryBox);
-    //     if (hoveredLabels.length > 0) {
-
-    //         toggleLabelSelection(pageNum, hoveredLabels);
-
-    //     } else {
-
-    //         let pageStr = clickPt.svgSelector.split('-').pop();
-    //         let page =  parseInt(pageStr);
-
-    //         let neighbors = rtrees.knnQueryPage(page, clickPt, 4);
-
-    //         if (neighbors.length > 0) {
-    //             let nearestNeighbor = neighbors[0];
-    //             // let ns = _.map(neighbors, (n) => n.char).join('');
-    //             textview.syncScrollTextGrid(clickPt, nearestNeighbor);
-    //         }
-
-    //     }
-    // }
-    // function selectionHandler(selectionRect) {
-    //     let pdfImageRect = coords.mk.fromXy12(selectionRect, coords.coordSys.pdf);
-
-    //     let pageStr = selectionRect.svgSelector.split('-').pop();
-    //     let page = parseInt(pageStr);
-
-    //     let hits = rtrees.searchPage(page, pdfImageRect);
-
-    //     let minBoundSelection = rtrees.queryHitsMBR(hits);
-
-    //     let annotation = lbl.mkAnnotation({
-    //         type: 'bounding-boxes',
-    //         page: page,
-    //         targets: [[page, minBoundSelection]] // TODO should be another level of nesting here
-    //     });
-
-    //     createImageLabelingPanel(pdfImageRect, annotation);
-    // }
-
-    // d3$svg.on("mousemove", function(d) {
-    //     let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
-    //     displayCharHoverReticles(d3$svg, pageNum, userPt);
-    //     displayLabelHovers(pageNum, userPt);
-    // });
-
-    // initD3DragSelect(d3$svg.attr('id'), (pointOrRect) => {
-    //     if (pointOrRect.point != undefined) {
-    //         clickHandler(pageNum, pointOrRect.point);
-    //     } else if (pointOrRect.rect != undefined) {
-    //         selectionHandler(pointOrRect.rect);
-    //     } else {
-    //         // Move handler
-    //     }
-    // });
 }
 
 // let currentSelections = [];
@@ -341,9 +248,6 @@ function toggleLabelSelection(pageNum, hitItems) {
         .call(util.initStroke, 'black', 1, 0.9)
         .call(util.initFill, 'red', 0.2)
     ;
-    // _.each(hoveredLabels, hoverHit => {
-    //     let $hit = $(hoverHit.selector);
-    // });
 
 }
 
