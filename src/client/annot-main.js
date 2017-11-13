@@ -50,7 +50,7 @@ function setupFrameLayout() {
 
     setupMenubar();
 
-    mouseTracking.initGlobalMouseTracking([]);
+    // mouseTracking.initGlobalMouseTracking([]);
 
 }
 

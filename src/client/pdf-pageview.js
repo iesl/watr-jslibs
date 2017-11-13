@@ -31,7 +31,7 @@ function awaitUserSelection(d3$svg, pageNum, initSvgPt, initClientPt) {
         init(initSvgPt, initClientPt);
 
         function init(svgPt, clientPt) {
-            let emptyRect  = { x: 0, y: 0, width: 0, height: 0 };
+            let emptyRect  = { left: svgPt.x, top: svgPt.y, width: 0, height: 0 };
 
             let rectElement = d3$svg.append("rect")
                 .call(util.initRect, () => emptyRect)
@@ -41,34 +41,29 @@ function awaitUserSelection(d3$svg, pageNum, initSvgPt, initClientPt) {
             ;
 
             selState.element = rectElement;
-            console.log('selState', selState);
+            // console.log('selState', selState);
             selState.originPt = svgPt;
             update(svgPt, clientPt);
         }
 
         function update(svgPt, clientPt) {
-            globals.currentMousePos.x = clientPt.x;
-            globals.currentMousePos.y = clientPt.y;
             $("li > span#mousepos").text(
                 `x: ${clientPt.x}, y: ${clientPt.y} / ${selState.svgSelector} @  ${svgPt.x},${svgPt.y} `
             );
 
             selState.currentPt = svgPt;
             adjustSelectionRect();
-            // _.each(getNewAttributes(), (v, k) => {
-            //     selState.element.attr(k, v);
-            // });
         }
 
 
         function adjustSelectionRect() {
-            console.log('selState', selState);
+            // console.log('selState', selState);
             let ny = Math.min(selState.currentPt.y, selState.originPt.y);
             let nx = Math.min(selState.currentPt.x, selState.originPt.x);
             let nwidth = Math.abs(selState.currentPt.x - selState.originPt.x);
             let nheight = Math.abs(selState.currentPt.y - selState.originPt.y);
 
-            let adjusted  = {x: nx, y: ny, width: nwidth, height: nheight};
+            let adjusted  = {left: nx, top: ny, width: nwidth, height: nheight};
 
             selState.element
                 .call(util.initRect, () => adjusted);
