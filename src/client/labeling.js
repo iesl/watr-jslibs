@@ -13,7 +13,8 @@ import * as rtrees from './rtrees';
 import * as util from './commons.js';
 import * as server from './serverApi.js';
 
-// import Popper from 'popper.js';
+import Popper from 'popper.js';
+
 let nextAnnotId = util.IdGenerator();
 export function mkAnnotation(props) {
     return Object.assign({id: nextAnnotId()}, props);
@@ -72,8 +73,6 @@ export function createHeaderLabelUI(annotation) {
             $labeler.submit(function (event) {
                 event.preventDefault();
 
-                // let $form = $(this);
-
                 let ser = _.map(annotation.targets, t => {
                     return {
                         page: t[0],
@@ -104,12 +103,11 @@ export function createHeaderLabelUI(annotation) {
 
             $labeler.find('.modal-dialog').css({
                 'position': 'absolute',
-                'left': globals.currentMousePos.x + "px",
-                'top': globals.currentMousePos.y + "px"
+                'left': globals.currMouseClientPt.x + "px",
+                'top': globals.currMouseClientPt.y + "px"
             });
 
             $labeler.modal();
-
         })
     ;
 

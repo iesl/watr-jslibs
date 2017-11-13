@@ -11,124 +11,14 @@ import * as coords from './coord-sys.js';
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
+import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
 
 import * as textview from  './textgrid-view.js';
 
 import { globals } from './globals';
 
-function awaitUserSelection(d3$svg, pageNum, initSvgPt, initClientPt) {
-
-    return new Promise((resolve, reject) => {
-
-        let selState = {
-            element: null,
-            svgSelector: d3$svg.attr('id'),
-            originPt: initSvgPt,
-            currentPt: initSvgPt
-        };
-
-        init(initSvgPt, initClientPt);
-
-        function init(svgPt, clientPt) {
-            let emptyRect  = { left: svgPt.x, top: svgPt.y, width: 0, height: 0 };
-
-            let rectElement = d3$svg.append("rect")
-                .call(util.initRect, () => emptyRect)
-                .classed("selection", true)
-                .attr("rx", 4)
-                .attr("ry", 4)
-            ;
-
-            selState.element = rectElement;
-            // console.log('selState', selState);
-            selState.originPt = svgPt;
-            update(svgPt, clientPt);
-        }
-
-        function update(svgPt, clientPt) {
-            $("li > span#mousepos").text(
-                `x: ${clientPt.x}, y: ${clientPt.y} / ${selState.svgSelector} @  ${svgPt.x},${svgPt.y} `
-            );
-
-            selState.currentPt = svgPt;
-            adjustSelectionRect();
-        }
-
-
-        function adjustSelectionRect() {
-            // console.log('selState', selState);
-            let ny = Math.min(selState.currentPt.y, selState.originPt.y);
-            let nx = Math.min(selState.currentPt.x, selState.originPt.x);
-            let nwidth = Math.abs(selState.currentPt.x - selState.originPt.x);
-            let nheight = Math.abs(selState.currentPt.y - selState.originPt.y);
-
-            let adjusted  = {left: nx, top: ny, width: nwidth, height: nheight};
-
-            selState.element
-                .call(util.initRect, () => adjusted);
-        }
-
-        function getCurrentAttributes() {
-            let x = parseInt(selState.element.attr("x"));
-            let y = parseInt(selState.element.attr("y"));
-            let width = parseInt(selState.element.attr("width"));
-            let height = parseInt(selState.element.attr("height"));
-            return {
-                svgSelector: selState.svgSelector,
-                x1: x,
-                y1: y,
-                x2: x + width,
-                y2: y + height
-            };
-        }
-
-
-        function remove() {
-            selState.element.remove();
-            // selState.element = null;
-        }
-
-        d3$svg.on("mouseup", function() {
-            // return either point or rect
-            if (selState.element != null) {
-                let finalAttributes = getCurrentAttributes();
-
-                if (finalAttributes.x2 - finalAttributes.x1 > 1 && finalAttributes.y2 - finalAttributes.y1 > 1) {
-                    d3.event.preventDefault();
-                    remove();
-                    resolve({
-                        rect: finalAttributes
-                    });
-                } else {
-                    remove();
-                    resolve({
-                        point: {
-                            svgSelector: finalAttributes.svgSelector,
-                            x: finalAttributes.x1,
-                            y: finalAttributes.y1
-                        }
-                    });
-                }
-            } else {
-                reject("Error");
-            }
-        });
-        d3$svg.on("mousemove", function() {
-            if (selState.element != null) {
-                let p = d3.mouse(this);
-                let mouseEvent = d3.event;
-                let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
-                let clickPt = coords.mkPoint.fromD3Mouse(p);
-                update(clickPt, clientPt);
-            }
-        });
-
-        d3$svg.on("mousedown", function() {});
-        d3$svg.on("mouseover", function() {});
-        d3$svg.on("mouseout", function() {});
-    });
-}
+let selectId = util.selectId;
 
 function defaultModeMouseHandlers(d3$svg, pageNum) {
     d3$svg.on("mousedown", function() {
@@ -166,23 +56,19 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
             let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
 
             mouseEvent.stopPropagation(); // silence other listeners
-            awaitUserSelection(d3$svg, pageNum, svgUserPt, clientPt)
+
+            awaitUserSelection(d3$svg, svgUserPt, clientPt)
                 .then(pointOrRect => {
                     defaultModeMouseHandlers(d3$svg, pageNum);
-                    if (pointOrRect.point != undefined) {
+                    if (pointOrRect.point) {
                         let clickPt = pointOrRect.point;
                         let queryBox = coords.mk.fromLtwh(clickPt.x, clickPt.y, 1, 1);
                         let hoveredLabels = rtrees.searchPageLabels(pageNum, queryBox);
                         if (hoveredLabels.length > 0) {
-
                             toggleLabelSelection(pageNum, hoveredLabels);
-
                         } else {
 
-                            let pageStr = clickPt.svgSelector.split('-').pop();
-                            let page =  parseInt(pageStr);
-
-                            let neighbors = rtrees.knnQueryPage(page, clickPt, 4);
+                            let neighbors = rtrees.knnQueryPage(pageNum, clickPt, 4);
 
                             if (neighbors.length > 0) {
                                 let nearestNeighbor = neighbors[0];
@@ -190,21 +76,18 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
                                 textview.syncScrollTextGrid(clickPt, nearestNeighbor);
                             }
                         }
-                    } else if (pointOrRect.rect != undefined) {
+                    } else if (pointOrRect.rect) {
                         let selectionRect = pointOrRect.rect;
-                        let pdfImageRect = coords.mk.fromXy12(selectionRect, coords.coordSys.pdf);
+                        let pdfImageRect = coords.mk.fromLtwhObj(selectionRect, coords.coordSys.pdf);
 
-                        let pageStr = selectionRect.svgSelector.split('-').pop();
-                        let page = parseInt(pageStr);
-
-                        let hits = rtrees.searchPage(page, pdfImageRect);
+                        let hits = rtrees.searchPage(pageNum, pdfImageRect);
 
                         let minBoundSelection = rtrees.queryHitsMBR(hits);
 
                         let annotation = lbl.mkAnnotation({
                             type: 'bounding-boxes',
-                            page: page,
-                            targets: [[page, minBoundSelection]] // TODO should be another level of nesting here
+                            page: pageNum,
+                            targets: [[pageNum, minBoundSelection]] // TODO should be another level of nesting here
                         });
 
                         createImageLabelingPanel(pdfImageRect, annotation);
@@ -228,21 +111,26 @@ function initPageImageMouseHandlers(d3$svg, pageNum) {
     defaultModeMouseHandlers(d3$svg, pageNum);
 }
 
-// let currentSelections = [];
-
-function toggleLabelSelection(pageNum, hitItems) {
+function toggleLabelSelection(pageNum, clickedItems) {
     let svgPageSelector = `svg#page-image-${pageNum}`;
-    d3.select(svgPageSelector)
+
+    let nonintersectingItems = _.differenceBy(clickedItems,  globals.currentSelections, s => s.id);
+    globals.currentSelections = nonintersectingItems;
+
+
+    let sel = d3.select(svgPageSelector)
         .selectAll('.select-highlight')
-        .data(hitItems, d => d.id)
-        .enter()
+        .data(globals.currentSelections, d => d.id);
+
+    sel.enter()
         .append('rect')
         .classed('select-highlight', true)
-        .attr('id', d => d.id)
         .call(util.initRect, d => d)
         .call(util.initStroke, 'black', 1, 0.9)
-        .call(util.initFill, 'red', 0.2)
-    ;
+        .call(util.initFill, 'red', 0.3) ;
+
+    sel.exit()
+        .remove() ;
 
 }
 
@@ -348,7 +236,7 @@ export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
         .remove() ;
 }
 
-export function setupPageImages(contentId, pageImageShapes) {
+export function setupPageImages(contentSelector, pageImageShapes) {
 
     let ctx = {maxh: 0, maxw: 0};
 
@@ -357,10 +245,23 @@ export function setupPageImages(contentId, pageImageShapes) {
         ctx.maxw = Math.max(ctx.maxw, sh[0].x + sh[0].width);
     });
 
+    panes.setParentPaneWidth(contentSelector, ctx.maxw + 80);
 
-    panes.setParentPaneWidth(contentId, ctx.maxw + 80);
+    let {topPaneId: statusBar, bottomPaneId: pageImageDivId} =
+        panes.splitHorizontal(contentSelector, {fixedTop: 20});
 
-    let imageSvgs = d3.select(contentId)
+    console.log('topPaneId', statusBar);
+    console.log('bottomPaneId', pageImageDivId);
+
+    $("#"+statusBar)
+        .addClass('statusbar')
+        .css({overflow: 'hidden'});
+
+    $("#"+pageImageDivId)
+        .addClass('page-images')
+    ;
+
+    let imageSvgs = d3.select("#"+pageImageDivId)
         .selectAll(".page-image")
         .data(pageImageShapes, util.getId)
         .enter()

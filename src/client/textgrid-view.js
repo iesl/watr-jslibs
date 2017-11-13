@@ -26,6 +26,8 @@ export const TextGridLineSpacing = 16;
 export const TextGridLineHeight  = 16;
 const TextGridOriginPt = coords.mkPoint.fromXy(20, 20);
 
+let selectId = util.selectId;
+
 /** Page sync flashing indicator dot */
 function scrollSyncIndicator(parentSelection, indicatorPoint) {
     d3.select(parentSelection)
@@ -377,8 +379,8 @@ function createTextGridLabelingPanel(annotation) {
     lbl.createTextGridLabeler(annotation);
 
     $('.modal-content').css({
-        'margin-left': globals.currentMousePos.x,
-        'margin-top': globals.currentMousePos.y // + screenY
+        'margin-left': globals.currMouseClientPt.x,
+        'margin-top': globals.currMouseClientPt.y // + screenY
     });
 
     $('#label-form.modal').css({
@@ -444,13 +446,10 @@ function setupFrameLayout() {
         panes.splitVertical('.content-pane', {fixedLeft: 200});
 
 
-    d3.select(`#${leftPaneId}`)
-        .append('div').classed('page-images', true)
-    ;
-
-    d3.select(`#${rightPaneId}`)
-        .append('div').classed('page-textgrids', true)
-    ;
+    selectId(leftPaneId).addClass('pdf-pageview');
+    selectId(rightPaneId).addClass('page-textgrids');
+    // $(`#${leftPaneId}`).append($('<div></div>')).addClass('pdf-pageview');
+    // $(`#${rightPaneId}`).append($('<div></div>')).addClass('page-textgrids') ;
 
 }
 
@@ -462,7 +461,7 @@ export function RenderTextGrid(dataBlock) {
 
     setupFrameLayout();
 
-    pageview.setupPageImages('div.page-images', pageShapes);
+    pageview.setupPageImages('div.pdf-pageview', pageShapes);
     setupPageTextGrids('div.page-textgrids', textgrids);
 
     rtrees.initRTrees(textgrids);

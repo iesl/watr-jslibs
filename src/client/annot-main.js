@@ -6,7 +6,6 @@ import * as util from  './commons.js';
 import * as tg from  './textgrid-view.js';
 import * as stepper from  './d3-stepper.js';
 import * as $ from 'jquery';
-import * as mouseTracking from './mouse-tracking.js';
 import {globals} from './globals';
 
 import '../style/main.css';
@@ -43,14 +42,17 @@ function setupFrameLayout() {
     let splitPaneRootId = panes.createSplitPaneRoot("#content");
 
     let {topPaneId: topPaneId, bottomPaneId: bottomPaneId} =
-        panes.splitHorizontal(splitPaneRootId, {fixedTop: 40});
+        panes.splitHorizontal("#"+splitPaneRootId, {fixedTop: 40});
 
-    selectId(topPaneId).addClass('menu-pane');
+    selectId(topPaneId)
+        .addClass('menu-pane')
+        .css({
+            overflow: 'hidden'
+        });
+
     selectId(bottomPaneId).addClass('content-pane');
 
     setupMenubar();
-
-    // mouseTracking.initGlobalMouseTracking([]);
 
 }
 

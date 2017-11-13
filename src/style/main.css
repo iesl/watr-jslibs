@@ -60,7 +60,8 @@ div.textgrid {
     /* margin-right: auto; */
     border: 2px;
     border-style: solid;
-    border-color:lightsteelblue;
+    /* border-color:lightsteelblue; */
+    border-color: #668cff;
     /* width: 50px; */
 
 }
@@ -81,15 +82,10 @@ svg.textgrid {
     z-index: 10;
 }
 
-
 .menu-pane {
     margin: 0 auto;
-    position: relative;
+    background: #ccd9ff;
 }
-
-
-/* .labeling-form { */
-/* } */
 
 .block {
     display: block;

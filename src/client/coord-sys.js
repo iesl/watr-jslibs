@@ -55,6 +55,9 @@ class BBox {
     get maxX() { return this.left + this.width; }
     get maxY() { return this.top + this.height; }
 
+    // get x() { return this.left; }
+    // get y() { return this.top; }
+
     get x1() { return this.left; }
     get x2() { return this.left + this.width; }
     get y1() { return this.top; }
@@ -80,7 +83,7 @@ class BBox {
 
 
 export let mk = {
-    fromLtwhObj: (o) => {
+    fromLtwhFloatReps: (o) => {
         return new BBox(
             o.left / 100.0,
             o.top  / 100.0,
@@ -91,6 +94,10 @@ export let mk = {
     },
     fromLtwh: (l, t, w, h) => {
         return new BBox(l, t, w, h);
+    },
+
+    fromLtwhObj: (o) => {
+        return new BBox(o.left, o.top, o.width, o.height);
     },
 
     fromArray: (ltwh) => {

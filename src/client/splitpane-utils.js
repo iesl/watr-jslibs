@@ -1,18 +1,11 @@
-/* global require define $ */
-
-
-// let $ = require('jquery'),
-//     // util = require('./commons.js'),
-//     // splitpane = require('./split-pane.js')
-// ;
 
 import * as $ from 'jquery';
-import {selectId} from './commons.js';
 import './split-pane.js';
 
 export let idSelector = s => `#${s}`;
 
 let splitPaneRootId = 'splitpane_root';
+let defaultDividerWidth = 1;
 
 function mkComponent() {
     return $("<div class='split-pane-component'></div>");
@@ -46,8 +39,8 @@ function makeChildIds(parentId){
 export function setParentPaneWidth (elem, width)  {
     let pane = $(elem).closest('.split-pane-component');
     let id = $(pane).attr('id');
-    console.log('elem', elem);
-    console.log('pane', pane);
+    // console.log('elem', elem);
+    // console.log('pane', pane);
     let idParts = id.split('__');
     idParts.pop();
     let parentId = idParts.join('__');
@@ -62,7 +55,7 @@ export function setParentPaneWidth (elem, width)  {
 
 export function createSplitPaneRoot (containerId)  {
     $(containerId).append(
-        $(`<div id="${splitPaneRootId}"> </div>`)
+        $(`<div id="${splitPaneRootId}" class="split-pane-component"> </div>`)
     );
     return splitPaneRootId;
 }
@@ -74,7 +67,7 @@ function getSplitProps(splitProps) {
     ;
 }
 
-export function splitVertical (containerSelector, splitProps) {
+export function splitVertical(containerSelector, splitProps) {
     let parentSelection  = $(containerSelector).closest('.split-pane-component');
 
     let parentId = parentSelection.length > 0 ? $(parentSelection).attr('id') : splitPaneRootId;
@@ -89,14 +82,14 @@ export function splitVertical (containerSelector, splitProps) {
         .attr('id', leftId)
         .css({width: splitAt})
     ;
-    let rpane = mkComponent()
-        .attr('id', rightId)
-        .css({left: splitAt})
-    ;
     let divider = mkDivider()
         .attr('id', dividerId)
         .addClass('v-divider')
-        .css({left: splitAt+4, width: 4})
+        .css({left: splitAt, width: defaultDividerWidth})
+    ;
+    let rpane = mkComponent()
+        .attr('id', rightId)
+        .css({left: splitAt+defaultDividerWidth})
     ;
 
     let split = mkSplitPlane().addClass(splitClass);
@@ -128,19 +121,21 @@ export function splitHorizontal(containerSelector, splitProps) {
         .attr('id', topId)
         .css({height: splitAt})
     ;
-    let bottomPane = mkComponent()
-        .attr('id', bottomId)
-        .css({top: splitAt})
-    ;
+
     let divider = mkDivider()
         .attr('id', dividerId)
-        .addClass('v-divider')
-        .css({top: splitAt+4, height: 4})
+        .addClass('h-divider')
+        .css({top: splitAt, height: defaultDividerWidth})
+    ;
+    let bottomPane = mkComponent()
+        .attr('id', bottomId)
+        .css({top: splitAt+defaultDividerWidth})
     ;
 
 
     let split = mkSplitPlane().addClass(splitClass);
-    selectId(containerSelector).append(
+
+    $(containerSelector).append(
         composePanes(split, topPane, divider, bottomPane)
     );
 

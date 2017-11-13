@@ -37,7 +37,7 @@ export function zoneFromJson(jsonRep) {
 export function pageRegionFromJson(jsonRep) {
     return new PageRegion(
         jsonRep.regionId,
-        coords.mk.fromLtwhObj(jsonRep.bbox),
+        coords.mk.fromLtwhFloatReps(jsonRep.bbox),
         jsonRep.page.pageId,
         jsonRep.page.pageNum
     );
