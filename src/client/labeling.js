@@ -34,18 +34,6 @@ export function refreshZoneHightlights(zonesJs) {
     d3 .selectAll('.annotation-rect')
        .remove();
 
-    // let regionSel = d3.selectAll('svg.page-image')
-    //     .selectAll('.annotation-rect')
-    //     .data(regions, d => d.id);
-
-    // regionSel .enter()
-    //     .append('rect')
-    //     .call(util.initRect, r => r.bbox)
-    //     .call(util.initStroke, 'blue', 1, 0.8)
-    //     .call(util.initFill, 'purple', 0.3)
-    //     .classed('annotation-rect', true)
-    //     .attr('id', region => `ann${region.zoneId}_${region.regionId}`)
-    // ;
     _.each(zones, zone => {
         _.each(zone.regions, region => {
             let svgPageSelector = `svg#page-image-${region.pageNum}`;

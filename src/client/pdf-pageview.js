@@ -119,19 +119,29 @@ function setupSelectionHighlighting() {
 
     globals.rx.selections.subscribe(currSelects=> {
 
-        let sel = d3.select('svg.page-image')
-            .selectAll('.select-highlight')
-            .data(currSelects, d => d.id);
+        d3.selectAll('.select-highlight')
+            .remove();
 
-        sel.enter()
-            .append('rect')
-            .classed('select-highlight', true)
-            .call(util.initRect, d => d)
-            .call(util.initStroke, 'black', 1, 0.9)
-            .call(util.initFill, 'red', 0.3)
-        ;
+        let groups = _.groupBy(currSelects, p => p.pageNum);
 
-        sel.exit().remove();
+        _.each(groups, pageGroup => {
+            let pageNum = pageGroup[0].pageNum;
+            let svgPageSelector = `svg#page-image-${pageNum}`;
+            d3.select(svgPageSelector)
+                .selectAll('.select-highlight')
+                .data(pageGroup)
+                .enter()
+                .append('rect')
+                .classed('select-highlight', true)
+                .call(util.initRect, d => d)
+                .call(util.initStroke, 'black', 1, 0.9)
+                .call(util.initFill, 'red', 0.3)
+            ;
+
+        });
+
+
+
 
     });
 
