@@ -16,11 +16,12 @@ class Zone {
 }
 
 class PageRegion {
-    constructor (regionId, bbox, pageId, pageNum) {
+    constructor (regionId, bbox, pageId, pageNum, zoneId) {
         this.regionId = regionId;
         this.bbox = bbox;
         this.pageId = pageId;
         this.pageNum = pageNum;
+        this.zoneId = zoneId;
     }
 }
 
@@ -30,17 +31,18 @@ export function zoneFromJson(jsonRep) {
         jsonRep.id,
         jsonRep.label,
         jsonRep.order,
-        _.map(jsonRep.regions, (r) => pageRegionFromJson(r))
+        _.map(jsonRep.regions, (r) => pageRegionFromJson(r, jsonRep.id))
     );
 
 }
 
-export function pageRegionFromJson(jsonRep) {
+export function pageRegionFromJson(jsonRep, zoneId) {
     return new PageRegion(
         jsonRep.regionId,
         coords.mk.fromLtwhFloatReps(jsonRep.bbox),
         jsonRep.page.pageId,
-        jsonRep.page.pageNum
+        jsonRep.page.pageNum,
+        zoneId
     );
 
 }

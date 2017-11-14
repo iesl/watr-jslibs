@@ -21,29 +21,48 @@ export function mkAnnotation(props) {
 
 export function updateAnnotationShapes() {
     server.getAnnotations().then(annotations =>{
-        let zones = _.map(annotations.zones, (z) => dt.zoneFromJson(z));
-        // console.log('zones: ', zones);
-        rtrees.initPageLabelRTrees(zones);
-        _.each(zones, zone => {
-            _.each(zone.regions, region => {
-                let svgPageSelector = `svg#page-image-${region.pageNum}`;
+        refreshZoneHightlights(annotations.zones);
+    });
+}
+export function refreshZoneHightlights(zonesJs) {
+    let zones = _.map(zonesJs, (z) => dt.zoneFromJson(z));
+    rtrees.initPageLabelRTrees(zones);
+    let regions = _.flatMap(zones, zone => zone.regions);
 
-                d3.select(svgPageSelector)
-                    .selectAll(`#ann${zone.zoneId}_${region.regionId}`)
-                    .data([region])
-                    .enter()
-                    .append('rect')
-                    .call(util.initRect, r => r.bbox)
-                    .call(util.initStroke, 'blue', 1, 0.8)
-                    .call(util.initFill, 'purple', 0.3)
-                    .attr('id', `ann${zone.zoneId}_${region.regionId}`)
-                    .classed('annotation-rect', true)
-                    .classed(`ann${zone.zoneId}`, true)
-                    .exit()
-                    .remove()
-                ;
+    console.log('regions', regions);
 
-            });
+    d3 .selectAll('.annotation-rect')
+       .remove();
+
+    // let regionSel = d3.selectAll('svg.page-image')
+    //     .selectAll('.annotation-rect')
+    //     .data(regions, d => d.id);
+
+    // regionSel .enter()
+    //     .append('rect')
+    //     .call(util.initRect, r => r.bbox)
+    //     .call(util.initStroke, 'blue', 1, 0.8)
+    //     .call(util.initFill, 'purple', 0.3)
+    //     .classed('annotation-rect', true)
+    //     .attr('id', region => `ann${region.zoneId}_${region.regionId}`)
+    // ;
+    _.each(zones, zone => {
+        _.each(zone.regions, region => {
+            let svgPageSelector = `svg#page-image-${region.pageNum}`;
+
+            d3.select(svgPageSelector)
+                .selectAll(`#ann${zone.zoneId}_${region.regionId}`)
+                .data([region])
+                .enter()
+                .append('rect')
+                .call(util.initRect, r => r.bbox)
+                .call(util.initStroke, 'blue', 1, 0.8)
+                .call(util.initFill, 'purple', 0.3)
+                .attr('id', `ann${zone.zoneId}_${region.regionId}`)
+                .classed('annotation-rect', true)
+                .classed(`ann${zone.zoneId}`, true)
+            ;
+
         });
 
     });

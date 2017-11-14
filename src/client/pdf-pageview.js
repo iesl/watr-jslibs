@@ -144,7 +144,7 @@ function toggleLabelSelection(pageNum, clickedItems) {
 }
 
 
-// function displayLabelHovers(d3$svg, pageNum, hoverPt) {
+
 function displayLabelHovers(pageNum, hoverPt) {
     let queryBox = coords.mk.fromLtwh(hoverPt.x, hoverPt.y, 1, 1);
 
@@ -152,7 +152,6 @@ function displayLabelHovers(pageNum, hoverPt) {
     if (hoveredLabels.length > 0) {
         _.each(hoveredLabels, hoverHit => {
             let $hit = $(hoverHit.selector);
-            // console.log('hovering over', $hit);
             if (! $hit.hasClass('tooltipped')) {
                 let pageImageFrameId = `div#page-image-frame-${pageNum}`;
                 const tt = new Tooltip($hit, {
@@ -258,10 +257,15 @@ function setupStatusBar(statusBarId) {
             var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
             clicks.subscribe(() => {
                 let zoneIds = _.map(currSelects, (sel) => sel.zoneId);
-                let delReq = {zoneIds: zoneIds};
+                let delReq = {
+                    stableId: globals.currentDocument,
+                    zoneIds: zoneIds
+                };
                 server.deleteLabels(delReq).then(resp => {
                     console.log("deleted labels!", resp);
                     global.setSelections([]);
+
+                    lbl.refreshZoneHightlights(resp.zones);
                 }).catch(err => {
                     console.log("ERROR deleted labels!", err);
                     global.setSelections([]);

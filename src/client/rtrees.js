@@ -63,15 +63,14 @@ export function initPageLabelRTrees(zones) {
         });
     });
 
-    // console.log('dataPts', dataPts);
 
     let groups = _.groupBy(dataPts, p => p.pageNum);
 
     _.each(groups, pageGroup => {
         let pageNum = pageGroup[0].pageNum;
-        if (! globals.pageImageLabelRTrees[pageNum]) {
+        // if (! globals.pageImageLabelRTrees[pageNum]) {
             globals.pageImageLabelRTrees[pageNum] = rtree();
-        }
+        // }
         let pageRtree = globals.pageImageLabelRTrees[pageNum];
 
         pageRtree.load(pageGroup);
