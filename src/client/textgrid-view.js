@@ -19,6 +19,7 @@ import * as pageview from  './pdf-pageview.js';
 
 import { globals } from './globals';
 import * as global from './globals';
+import {$id} from './jstags.js';
 
 // let knn = require('rbush-knn');
 let rtree = require('rbush');
@@ -27,7 +28,7 @@ export const TextGridLineSpacing = 16;
 export const TextGridLineHeight  = 16;
 const TextGridOriginPt = coords.mkPoint.fromXy(20, 20);
 
-let selectId = util.selectId;
+
 
 /** Page sync flashing indicator dot */
 function scrollSyncIndicator(parentSelection, indicatorPoint) {
@@ -447,10 +448,8 @@ function setupFrameLayout() {
         panes.splitVertical('.content-pane', {fixedLeft: 200});
 
 
-    selectId(leftPaneId).addClass('pdf-pageview');
-    selectId(rightPaneId).addClass('page-textgrids');
-    // $(`#${leftPaneId}`).append($('<div></div>')).addClass('pdf-pageview');
-    // $(`#${rightPaneId}`).append($('<div></div>')).addClass('page-textgrids') ;
+    $id(leftPaneId).addClass('pdf-pageview');
+    $id(rightPaneId).addClass('page-textgrids');
 
 }
 

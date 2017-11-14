@@ -11,10 +11,10 @@ import 'd3-drag';
 import * as $ from 'jquery';
 import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
-import { globals } from './globals';
+// import { globals } from './globals';
 
 
-export default function awaitUserSelection(d3$svg, initSvgPt, initClientPt) {
+export default function awaitUserSelection(d3$svg, initSvgPt) {
 
     return new Promise((resolve, reject) => {
 
@@ -30,14 +30,14 @@ export default function awaitUserSelection(d3$svg, initSvgPt, initClientPt) {
             .attr("ry", 4)
         ;
 
-        update(initSvgPt, initClientPt);
+        update(initSvgPt);
 
-        function update(svgPt, clientPt) {
-            globals.currMouseClientPt.x = clientPt.x;
-            globals.currMouseClientPt.y = clientPt.y;
-            $("li > span#mousepos").text(
-                `x: ${clientPt.x}, y: ${clientPt.y} / ${svgSelector} @  ${svgPt.x},${svgPt.y} `
-            );
+        function update(svgPt) {
+            // globals.currMouseClientPt.x = clientPt.x;
+            // globals.currMouseClientPt.y = clientPt.y;
+            // $("li > span#mousepos").text(
+            //     `x: ${clientPt.x}, y: ${clientPt.y} / ${svgSelector} @  ${svgPt.x},${svgPt.y} `
+            // );
 
             currentPt = svgPt;
             adjustSelectionRect();
@@ -93,10 +93,10 @@ export default function awaitUserSelection(d3$svg, initSvgPt, initClientPt) {
         d3$svg.on("mousemove", function() {
             if (selectionRect != null) {
                 let p = d3.mouse(this);
-                let mouseEvent = d3.event;
-                let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
+                // let mouseEvent = d3.event;
+                // let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
                 let clickPt = coords.mkPoint.fromD3Mouse(p);
-                update(clickPt, clientPt);
+                update(clickPt);
             }
         });
 

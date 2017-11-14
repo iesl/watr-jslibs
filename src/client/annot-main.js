@@ -7,6 +7,7 @@ import * as tg from  './textgrid-view.js';
 import * as stepper from  './d3-stepper.js';
 import * as $ from 'jquery';
 import {globals} from './globals';
+import {$id, div, a} from './jstags.js';
 
 import '../style/main.css';
 import '../style/split-pane.css';
@@ -16,31 +17,27 @@ import '../style/bootstrap.css';
 
 import 'bootstrap';
 
-// import "font-awesome";
-
 import 'font-awesome/css/font-awesome.css';
 
-let selectId = util.selectId;
+function setupMenubar(menuBarId) {
+
+    $id(menuBarId)
+        .addClass('menubar')
+        .css({overflow: 'hidden'});
+
+    let statusBar =
+        div('.container-fluid', [
+            div('.row', [
+                div('.col-lg-3', [
+                    a({href: '/'}, "Browse")
+                ])
+            ])
+        ]);
 
 
-function setupMenubar() {
-    let menuBarList = d3.select('.menu-pane')
-        .append('ul').classed('menubar', true);
-
-    menuBarList
-        .append('li')
-        .append('a')
-        .attr('href', '/')
-        .text('Browse  :: ');
-
-   menuBarList
-        .append('li')
-        .append('span')
-        .attr('id', 'mousepos')
-        .text('??');
-
+    $id(menuBarId)
+        .append(statusBar);
 }
-
 
 function setupFrameLayout() {
     let splitPaneRootId = panes.createSplitPaneRoot("#content");
@@ -48,17 +45,18 @@ function setupFrameLayout() {
     let {topPaneId: topPaneId, bottomPaneId: bottomPaneId} =
         panes.splitHorizontal("#"+splitPaneRootId, {fixedTop: 40});
 
-    selectId(topPaneId)
+    $id(topPaneId)
         .addClass('menu-pane')
         .css({
             overflow: 'hidden'
         });
 
-    selectId(bottomPaneId).addClass('content-pane');
+    $id(bottomPaneId).addClass('content-pane');
 
-    setupMenubar();
+    setupMenubar(topPaneId);
 
 }
+
 
 function runMain() {
     d3.select('body')

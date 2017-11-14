@@ -13,6 +13,7 @@ import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
+import {$id, div, a} from './jstags.js';
 
 import * as textview from  './textgrid-view.js';
 
@@ -53,11 +54,11 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
         // buttons: 0=none, 1=left, 3=middle, 2=right
         let b = mouseEvent.buttons;
         if (b == 1) {
-            let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
+            // let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
 
             mouseEvent.stopPropagation(); // silence other listeners
 
-            awaitUserSelection(d3$svg, svgUserPt, clientPt)
+            awaitUserSelection(d3$svg, svgUserPt)
                 .then(pointOrRect => {
                     defaultModeMouseHandlers(d3$svg, pageNum);
                     if (pointOrRect.point) {
@@ -110,12 +111,6 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
 function initPageImageMouseHandlers(d3$svg, pageNum) {
     defaultModeMouseHandlers(d3$svg, pageNum);
 }
-// svg.append("text")
-//   .attr("x",0)
-//   .attr("y",70)
-//   .attr("font-family","FontAwesome")
-//   .attr('font-size', function(d) { return '70px';} )
-//   .text(function(d) { return '\uf083'; });
 
 function toggleLabelSelection(pageNum, clickedItems) {
     let svgPageSelector = `svg#page-image-${pageNum}`;
@@ -253,40 +248,25 @@ export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
 
 function setupStatusBar(statusBarId) {
 
-
-    $("#"+statusBarId)
+    $id(statusBarId)
         .addClass('statusbar')
         .css({overflow: 'hidden'});
 
-    let $container  = $('<div />').addClass('container-fluid');
-
-    $("#"+statusBarId)
-        .append($container);
-
-
-    let $row = $('<div />').addClass('row');
-
-    $container.append($row);
-
-    let c1 = $('<div />').addClass('col-lg-3');
-    let c2 = $('<div />').addClass('col-lg-2');
-    let c3 = $('<div />').addClass('col-lg-4');
-
-    $row.append(c1);
-    $row.append(c2);
-    $row.append(c3);
-
-    c1.text('col1');
-    c2.text('and 2');
-    c3.text('third');
+    let $mouseCoords = div('.col-lg-offset-9', '.col-lg-3');
 
     globals.rx.clientPt.subscribe(clientPt => {
-        c3.text(`x:${clientPt.x} y:${clientPt.y}`);
+        $mouseCoords.text(`x:${clientPt.x} y:${clientPt.y}`);
     });
 
-    // Page Num (based on mouse hover)
-    // Cursor location info
-    // Current Selections + Delete button
+    let statusBar =
+        div('.container-fluid', [
+            div('.row', [
+                $mouseCoords
+            ])
+        ]);
+
+    $id(statusBarId)
+        .append(statusBar);
 
 }
 

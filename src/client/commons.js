@@ -232,7 +232,6 @@ export function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-export let selectId = id => $(`#${id}`);
 
 export function IdGenerator() {
     let currId = -1;

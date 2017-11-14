@@ -34,6 +34,7 @@ export function zoneFromJson(jsonRep) {
     );
 
 }
+
 export function pageRegionFromJson(jsonRep) {
     return new PageRegion(
         jsonRep.regionId,
@@ -43,3 +44,4 @@ export function pageRegionFromJson(jsonRep) {
     );
 
 }
+

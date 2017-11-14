@@ -12,7 +12,7 @@ div.page-images {
     text-align: center;
     padding: 0;
     border: 0;
-    background-color:lightsteelblue;
+    background: #dee0ad;
 }
 
 div.page-image {
@@ -49,6 +49,7 @@ div.page-textgrids {
     margin: 0 auto;
     padding: 10px;
     position: relative;
+    /* background: #dee0ad; */
 }
 
 
@@ -58,10 +59,11 @@ div.textgrid {
     padding-bottom: 5px;
     /* margin-left: auto; */
     /* margin-right: auto; */
-    border: 2px;
+    border: 1px;
     border-style: solid;
     /* border-color:lightsteelblue; */
-    border-color: #668cff;
+    /* border-color: #668cff; */
+    border-color: #dee0ad;
     /* width: 50px; */
 
 }
@@ -82,8 +84,13 @@ svg.textgrid {
     z-index: 10;
 }
 
+.menubar {
+    font-size: 24px;
+}
+
 .statusbar {
-    font-size: 20px;
+    font-size: 18px;
+    background: #aaa9ff;
 }
 
 .menu-pane {

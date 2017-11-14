@@ -7,7 +7,9 @@
  **/
 
 import * as $ from 'jquery';
-import * as _ from 'lodash';
+// import * as _ from 'lodash';
+import Rx from 'rxjs/Rx';
+import * as coords from './coord-sys.js';
 
 export let globals = {
 
@@ -28,34 +30,13 @@ export let globals = {
 };
 
 
-function updateMouseStatus() {
-    let x = globals.currMouseClientPt.x;
-    let y = globals.currMouseClientPt.y;
-    $("li > span#mousepos").text(
-        `x: ${x}, y: ${y}`
-    );
-
-}
-
-import Rx from 'rxjs/Rx';
-import * as coords from './coord-sys.js';
-
 export function initGlobalMouseTracking() {
-    // var button = document.querySelector('button');
     globals.rx.clientPt = Rx.Observable
         .fromEvent(document, 'mousemove')
-        .map(event => {return coords.mkPoint.fromXy(event.clientX, event.clientY); })
-    ;
-        // .throttleTime(1000)
-        // .map(event => event.clientX)
-        // .scan((count, clientX) => count + clientX, 0)
-        // .subscribe(count => console.log(count));
-
-    $(document).on('mousemove', function(event) {
-        globals.currMouseClientPt.x = event.pageX;
-        globals.currMouseClientPt.y = event.pageY;
-
-        updateMouseStatus();
-    });
+        .map(event => {
+            let clientPt = coords.mkPoint.fromXy(event.clientX, event.clientY);
+            globals.currMouseClientPt = clientPt;
+            return clientPt;
+        }) ;
 
 }

@@ -19,7 +19,8 @@ const config = {
         rules: [
             { test: /\.(css|scss)$/,                   use: ['style-loader', 'css-loader']},
             { test: /\.less$/,                         use: ['less-loader']},
-            { test: /\.(woff|woff2|eot|ttf|otf|svg)$/, use: ['url-loader']}
+            { test: /\.(woff|woff2|eot|ttf|otf|svg)$/, use: ['url-loader']},
+            { test: /test\.js$/,                       use: ['mocha-loader'], exclude: /node_modules/}
         ]
     },
 
@@ -40,3 +41,5 @@ const config = {
 
 module.exports = config;
 
+rules: [
+]

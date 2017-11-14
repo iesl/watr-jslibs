@@ -101,11 +101,21 @@ export function createHeaderLabelUI(annotation) {
                     });
             });
 
+            // let subs = globals.rx.clientPt.subscribe(clientPt => {
+            //     $labeler.find('.modal-dialog').css({
+            //         'position': 'absolute',
+            //         'left': clientPt.x + "px",
+            //         'top': clientPt.y + "px"
+            //     });
+            // });
+            // subs.unsubscribe();
+
             $labeler.find('.modal-dialog').css({
                 'position': 'absolute',
                 'left': globals.currMouseClientPt.x + "px",
                 'top': globals.currMouseClientPt.y + "px"
             });
+
 
             $labeler.modal();
         })
