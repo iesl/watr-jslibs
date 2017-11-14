@@ -1,11 +1,4 @@
 
-/* .hover:hover { */
-/*     stroke: black; */
-/*     opacity: 0.9; */
-/*     fill: blue; */
-/* } */
-
-
 
 div.page-images {
     width: 100%; /*can be in percentage also.*/
@@ -89,14 +82,22 @@ svg.textgrid {
 }
 
 .statusbar {
+    display: inline-flex;
+    align-items:  center; /* flex-start | flex-end | center */
+    justify-content: space-between; /* flex-start | flex-end | center | space-between | space-around | space-evenly; */
     font-size: 18px;
     background: #aaa9ff;
+    height: 30px;
+}
+.statusitem {
+    flex: 0 1 auto;
 }
 
 .menu-pane {
     margin: 0 auto;
     background: #ccd9ff;
 }
+
 
 .block {
     display: block;
@@ -105,54 +106,6 @@ svg.textgrid {
 .inline {
     display: inline;
 }
-
-/* .form-frame { */
-/*     position: absolute; */
-/*     padding: 2px; */
-/*     font: 12px sans-serif; */
-/*     background: lightsteelblue; */
-/*     border: 0px; */
-/*     border-radius: 8px; */
-/*     pointer-events: none; */
-/*     opacity: 0.9; */
-/* } */
-
-
-/* /\* The Close Button *\/ */
-/* .close { */
-/*     /\* Position it in the top right corner outside of the modal *\/ */
-/*     position: absolute; */
-/*     right: 25px; */
-/*     top: 0; */
-/*     color: #000; */
-/*     font-size: 35px; */
-/*     font-weight: bold; */
-/* } */
-
-/* /\* Close button on hover *\/ */
-/* .close:hover, */
-/* .close:focus { */
-/*     color: red; */
-/*     cursor: pointer; */
-/* } */
-
-/* /\* Add Zoom Animation *\/ */
-/* .animate { */
-/*     -webkit-animation: animatezoom 0.3s; */
-/*     animation: animatezoom 0.3s */
-/* } */
-
-/* @-webkit-keyframes animatezoom { */
-/*     from {-webkit-transform: scale(0.8)} */
-/*     to {-webkit-transform: scale(1)} */
-/* } */
-
-/* @keyframes animatezoom { */
-/*     from {transform: scale(0.8)} */
-/*     to {transform: scale(1)} */
-/* } */
-
-
 
 table.menu-table {
 

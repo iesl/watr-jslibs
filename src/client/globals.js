@@ -25,9 +25,16 @@ export let globals = {
 
     currentSelections: [],
 
-    rx: {}
+    rx: {
+        selections: new Rx.Subject()
+    }
 
 };
+
+export function setSelections(sels) {
+    globals.currentSelections = sels;
+    globals.rx.selections.next(sels);
+}
 
 
 export function initGlobalMouseTracking() {

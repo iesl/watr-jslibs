@@ -12,6 +12,17 @@ export function $id(selector) {
 
 export let a = (...args) => elem('a', ...args);
 export let div = (...args) => elem('div', ...args);
+export let span = (...args) => elem('span', ...args);
+export let btn = (...args) => elem('button', ...args);
+
+let i = (...args) => elem('i', ...args);
+export let fa = (icon) => i('.fa', `.fa-${icon}`, {'aria-hidden': true});
+export let faTrash = fa('trash');
+
+export let icon = {
+    trash: fa('trash')
+};
+
 
 export function elem(tag, ...args) {
     let $tag = $(`<${tag}></${tag}>`);

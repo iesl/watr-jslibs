@@ -13,11 +13,14 @@ import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
-import {$id, div, a} from './jstags.js';
+import {$id, div, a, btn, span, icon} from './jstags.js';
+import Rx from 'rxjs/Rx';
+import * as server from './serverApi.js';
 
 import * as textview from  './textgrid-view.js';
 
 import { globals } from './globals';
+import * as global from './globals';
 
 import 'font-awesome/css/font-awesome.css';
 
@@ -112,33 +115,32 @@ function initPageImageMouseHandlers(d3$svg, pageNum) {
     defaultModeMouseHandlers(d3$svg, pageNum);
 }
 
+function setupSelectionHighlighting() {
+
+    globals.rx.selections.subscribe(currSelects=> {
+
+        let sel = d3.select('svg.page-image')
+            .selectAll('.select-highlight')
+            .data(currSelects, d => d.id);
+
+        sel.enter()
+            .append('rect')
+            .classed('select-highlight', true)
+            .call(util.initRect, d => d)
+            .call(util.initStroke, 'black', 1, 0.9)
+            .call(util.initFill, 'red', 0.3)
+        ;
+
+        sel.exit().remove();
+
+    });
+
+}
 function toggleLabelSelection(pageNum, clickedItems) {
-    let svgPageSelector = `svg#page-image-${pageNum}`;
 
     let nonintersectingItems = _.differenceBy(clickedItems,  globals.currentSelections, s => s.id);
-    globals.currentSelections = nonintersectingItems;
 
-
-    let sel = d3.select(svgPageSelector)
-        .selectAll('.select-highlight')
-        .data(globals.currentSelections, d => d.id);
-
-    let enterSel = sel.enter()
-        .append('g')
-        .classed('select-highlight', true)
-    ;
-
-    enterSel
-        .append('rect')
-        .classed('select-highlight', true)
-        .call(util.initRect, d => d)
-        .call(util.initStroke, 'black', 1, 0.9)
-        .call(util.initFill, 'red', 0.3)
-    ;
-
-    sel.exit()
-        .remove() ;
-
+    global.setSelections(nonintersectingItems);
 }
 
 
@@ -243,30 +245,47 @@ export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
         .remove() ;
 }
 
-// import Rx from 'rxjs/Rx';
-// Rx.Observable.of(1,2,3)
-
 function setupStatusBar(statusBarId) {
 
     $id(statusBarId)
-        .addClass('statusbar')
-        .css({overflow: 'hidden'});
+        .addClass('statusbar');
 
-    let $mouseCoords = div('.col-lg-offset-9', '.col-lg-3');
+    let $selectStatus = div('.statusitem', "Selections");
 
+    globals.rx.selections.subscribe(currSelects=> {
+        if (currSelects.length > 0) {
+            let deleteBtn = btn('.btn', '.btn-sm', '.btn-default', [icon.trash]);
+            var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
+            clicks.subscribe(() => {
+                let zoneIds = _.map(currSelects, (sel) => sel.zoneId);
+                let delReq = {zoneIds: zoneIds};
+                server.deleteLabels(delReq).then(resp => {
+                    console.log("deleted labels!", resp);
+                    global.setSelections([]);
+                }).catch(err => {
+                    console.log("ERROR deleted labels!", err);
+                    global.setSelections([]);
+
+                })
+                ;
+            });
+
+            $selectStatus.empty();
+            $selectStatus.append(span(`Selected:${currSelects.length} del: `));
+            $selectStatus.append(deleteBtn);
+        } else {
+            $selectStatus.text(``);
+        }
+    });
+
+    let $mouseCoords = div('.statusitem', 'Mouse');
     globals.rx.clientPt.subscribe(clientPt => {
         $mouseCoords.text(`x:${clientPt.x} y:${clientPt.y}`);
     });
 
-    let statusBar =
-        div('.container-fluid', [
-            div('.row', [
-                $mouseCoords
-            ])
-        ]);
-
     $id(statusBarId)
-        .append(statusBar);
+        .append($selectStatus)
+        .append($mouseCoords);
 
 }
 
@@ -286,9 +305,8 @@ export function setupPageImages(contentSelector, pageImageShapes) {
 
     setupStatusBar(statusBar);
 
-    $("#"+pageImageDivId)
-        .addClass('page-images')
-    ;
+    $id(pageImageDivId)
+        .addClass('page-images');
 
     let imageSvgs = d3.select("#"+pageImageDivId)
         .selectAll(".page-image")
@@ -311,6 +329,7 @@ export function setupPageImages(contentSelector, pageImageShapes) {
             initPageImageMouseHandlers(d3$svg, pageNum);
         }) ;
 
+    setupSelectionHighlighting();
 
     imageSvgs.selectAll(".shape")
         .data(d => d)

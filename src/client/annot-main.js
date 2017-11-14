@@ -34,7 +34,6 @@ function setupMenubar(menuBarId) {
             ])
         ]);
 
-
     $id(menuBarId)
         .append(statusBar);
 }

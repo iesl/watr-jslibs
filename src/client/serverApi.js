@@ -58,3 +58,23 @@ export function postNewLabel(labelData) {
         }).fail((xhr, status, err) => reject("Server Error:" + status + err.message));
     });
 }
+
+export function deleteLabels(labelData) {
+    return new Promise((resolve, reject) => {
+        console.log('labelData', labelData);
+        $.ajax({
+            url: "/api/v1/labeling/label",
+            data: JSON.stringify(labelData),
+            datatype: 'json',
+            contentType: 'application/json',
+            method: "DELETE",
+            success: function(res) {
+                console.log('deleteLabels: succ', res);
+                resolve(res);
+            },
+            error: function(xhr, status, err) {
+                reject("Server Error:" + status + err.message);
+            }
+        });
+    });
+}

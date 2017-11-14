@@ -58,6 +58,7 @@ export function initPageLabelRTrees(zones) {
             data.label = zone.label;
             data.title = zone.label;
             data.selector = selector;
+            data.zoneId = zone.zoneId;
             return data;
         });
     });
