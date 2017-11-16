@@ -9,17 +9,35 @@ export function $id(selector) {
     return $('#' + selector);
 }
 
-export let a    = (...args) => elem('a', ...args);
-export let div  = (...args) => elem('div', ...args);
-export let span = (...args) => elem('span', ...args);
-export let img  = (...args) => elem('img', ...args);
-export let btn  = (...args) => elem('button', ...args);
+let allHtmlTags = [
+    'a', 'abbr', 'acronym', 'address', 'applet', 'area', 'article', 'aside', 'audio', 'b', 'base',
+    'basefont', 'bdi', 'bdo', 'big', 'blockquote', 'body', 'br', 'button', 'canvas', 'caption', 'center',
+    'cite', 'code', 'col', 'colgroup', 'data', 'datalist', 'dd', 'del', 'details', 'dfn', 'dialog',
+    'dir', 'div', 'dl', 'dt', 'em', 'embed', 'fieldset', 'figcaption', 'figure', 'font', 'footer',
+    'form', 'frame', 'frameset', 'h1', - 'h6', 'head', 'header', 'hr', 'html', 'i', 'iframe', 'img',
+    'input', 'ins', 'kbd', 'label', 'legend', 'li', 'link', 'main', 'map', 'mark', 'menu',
+    'menuitem', 'meta', 'meter', 'nav', 'noframes', 'noscript', 'object', 'ol', 'optgroup', 'option', 'output',
+    'p', 'param', 'picture', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp',
+    'script', 'section', 'select', 'small', 'source', 'span', 'strike', 'strong', 'style', 'sub', 'summary',
+    'sup', 'table', 'tbody', 'td', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr',
+    'track', 'tt', 'u', 'ul', 'var', 'video', 'wbr'
+];
+
+export let t = {
+};
+
+_.each(allHtmlTags, tag => {
+    t[tag] = (...args) => elem(tag, ...args);
+});
+
 let i           = (...args) => elem('i', ...args);
 
-export let fa = (icon) => i('.fa', `.fa-${icon}`, {'aria-hidden': true});
+let fa = (icon) => i('.fa', `.fa-${icon}`, {'aria-hidden': true});
 
 export let icon = {
+    fa           : fa,
     trash        : fa('trash'),
+    hashtag      : fa('hashtag'),
     chevronRight : fa('chevron-right'),
     chevronLeft  : fa('chevron-left')
 };
@@ -54,4 +72,3 @@ function elem(tag, ...args) {
 
     return $tag;
 }
-

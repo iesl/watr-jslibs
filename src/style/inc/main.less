@@ -1,0 +1,21 @@
+// these imports are local to openreview-webui 
+@import "_document";
+@import "_logo";
+@import "_splash";
+
+// these we would like to inherit from various places, e.g. iesl-frame and iesl-forms.
+// however doing this would be a hassle involving a patch to the play sbt plugin
+// (i.e., adding search paths to the less parser configuration).
+// for now, we just copy them explicitly.
+
+// this producs a danges of desynchronization and consequent confusion!
+
+@import "_badges";
+@import "_gradientfade";
+@import "_util";
+@import "_alignment";
+@import "_forms";
+@import "_buttons";
+@import "_flash";
+
+

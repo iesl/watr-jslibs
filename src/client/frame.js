@@ -7,7 +7,7 @@ import * as tg from  './textgrid-view.js';
 import * as stepper from  './d3-stepper.js';
 import * as $ from 'jquery';
 import {globals} from './globals';
-import {$id, div, a} from './jstags.js';
+import {$id, t} from './jstags.js';
 
 import '../style/main.css';
 import '../style/split-pane.css';
@@ -26,10 +26,10 @@ function setupMenubar(menuBarId) {
         .css({overflow: 'hidden'});
 
     let statusBar =
-        div('.container-fluid', [
-            div('.row', [
-                div('.col-lg-3', [
-                    a({href: '/'}, "Browse")
+        t.div('.container-fluid', [
+            t.div('.row', [
+                t.div('.col-lg-3', [
+                    t.a({href: '/'}, "Browse")
                 ])
             ])
         ]);
@@ -39,7 +39,7 @@ function setupMenubar(menuBarId) {
 }
 
 export function setupFrameLayout() {
-    $('body').append(div('#content')) ;
+    $('body').append(t.div('#content')) ;
 
     let splitPaneRootId = panes.createSplitPaneRoot("#content");
 

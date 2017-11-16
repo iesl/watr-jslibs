@@ -13,7 +13,8 @@ import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
-import {$id, div, a, btn, span, icon} from './jstags.js';
+// import {$id, div, a, btn, span, icon} from './jstags.js';
+import {$id, t, icon} from './jstags.js';
 import Rx from 'rxjs/Rx';
 import * as server from './serverApi.js';
 
@@ -259,11 +260,11 @@ function setupStatusBar(statusBarId) {
     $id(statusBarId)
         .addClass('statusbar');
 
-    let $selectStatus = div('.statusitem', "Selections");
+    let $selectStatus = t.div('.statusitem', "Selections");
 
     globals.rx.selections.subscribe(currSelects=> {
         if (currSelects.length > 0) {
-            let deleteBtn = btn('.btn', '.btn-sm', '.btn-default', [icon.trash]);
+            let deleteBtn = t.btn('.btn', '.btn-sm', '.btn-default', [icon.trash]);
             var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
             clicks.subscribe(() => {
                 let zoneIds = _.map(currSelects, (sel) => sel.zoneId);
@@ -285,14 +286,14 @@ function setupStatusBar(statusBarId) {
             });
 
             $selectStatus.empty();
-            $selectStatus.append(span(`Selected:${currSelects.length} del: `));
+            $selectStatus.append(t.span(`Selected:${currSelects.length} del: `));
             $selectStatus.append(deleteBtn);
         } else {
             $selectStatus.text(``);
         }
     });
 
-    let $mouseCoords = div('.statusitem', 'Mouse');
+    let $mouseCoords = t.div('.statusitem', 'Mouse');
     globals.rx.clientPt.subscribe(clientPt => {
         $mouseCoords.text(`x:${clientPt.x} y:${clientPt.y}`);
     });

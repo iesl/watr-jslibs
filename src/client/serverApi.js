@@ -15,6 +15,14 @@ export function getAnnotations() {
     });
 }
 
+export function getCorpusListing(start, len) {
+    return new Promise((resolve, reject) => {
+        let url = `/api/v1/corpus/entries?start=${start}&len=${len}`;
+        $.getJSON(url, (response) => resolve(response))
+            .fail((xhr, status, err) => reject("Server Error:" + status + err.message));
+    });
+}
+
 export function getLabelingPanelWidget() {
 
     let labelNames = [

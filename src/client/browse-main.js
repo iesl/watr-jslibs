@@ -3,111 +3,43 @@ import * as d3 from  'd3';
 import * as _ from  'lodash';
 import '../style/main.css';
 import * as frame from './frame.js';
-import * as t from './jstags.js';
+import {t, icon} from './jstags.js';
 import * as $ from 'jquery';
+
+import Rx from 'rxjs/Rx';
+import * as server from './serverApi.js';
 
 import '../style/browse.less';
 
-function buildMenuList(entryData) {
-    // console.log(entryData);
+function createEntryItem(entry) {
+    let interestingLabels = _.filter(entry.labels[0], l => l !== 'DocumentPages');
+    let labelList = _.map(interestingLabels, l => t.li(` ${l}`));
 
-    let menuItems = [];
+    let entryPanel =
+        t.div('.listing-entry', [
+            t.div('.listing-entry-grid', [
+                t.div('.listing-title', [
+                    t.span(` #${entry.num}; `),
+                    t.span(`file:${entry.stableId}`)
+                ]),
+                t.div('.listing-image', [
+                    t.a({href: `/document/${entry.stableId}?show=textgrid.json`},[
+                        t.img({src: `/api/v1/corpus/artifacts/entry/${entry.stableId}/image/thumb/1` })
+                    ])
+                ]),
+                t.div('.listing-info', [
+                    t.ul('.h-indent-ul', [t.li("Labels")], labelList)
+                ])
+            ])
+        ])
+    ;
 
-    _.each(entryData.entries, (entry) =>{
-        menuItems.push({
-            'name': entry.stableId,
-            'num': entry.num,
-            'labels': entry.labels
-        });
-    });
-
-    return menuItems;
+    return entryPanel;
 }
 
-
-function renderMenuItems(menuItems) {
-    // let menu = d3.select('.content-pane')
-    $('.content-pane')
-        .append(t.div('#menu')) ;
-
-    let menu = d3.select('#menu') ;
-
-    let menuTable = menu.append('table')
-        .classed('menu-table', true)
-    ;
-
-    let menuItemChunks = _.chunk(menuItems, 4);
-
-    let tableRows = menuTable
-        .selectAll('tr.menu-row')
-        .data(menuItemChunks)
-        .enter()
-        .append('tr').classed('menu-row', true)
-    ;
-
-    let menuEntryTD = tableRows
-        .selectAll('tr.menu-row')
-        .data(d => d)
-        .enter()
-        .append("td").classed('menu-item', true)
-    ;
-
-    let menuEntryAnchor = menuEntryTD
-        .append('div').classed('inline-block', true)
-        .classed('pull-left', true)
-        .append("a").attr("href", d  => `/document/${d.name}?show=textgrid.json`)
-    ;
-
-    let menuEntryDiv = menuEntryTD
-        .append('div')
-        .classed('menu-entry', true)
-    ;
-
-    menuEntryAnchor
-        .append('div') // .classed('inline-block', true)
-        .append('img')
-        .attr("src", d => `/api/v1/corpus/artifacts/entry/${d.name}/image/thumb/1` )
-    ;
-
-    let entryInfo = menuEntryDiv
-        .append('div')  // .classed('inline-block', true)
-    ;
-
-    let labelList = entryInfo
-        .append('ul').classed('dlabels', true)
-    ;
-
-    // .text(d => `${d.num}: ${d.name}`)
-
-    labelList
-        .selectAll('li.dlabel')
-        .data(d => d.labels)
-        .enter()
-        .append("li").classed('dlabel', true)
-        .append('span')
-        .text(d => `${d}`)
-    ;
-
-   // entryInfo
-   //      .append("caption")
-   //      .text(d => `${d.labels}`)
-   //  ;
-
-    // entryInfo
-    //     .append("caption")
-    //     .text(d => `${d.labels}`)
-    // ;
-
-}
 
 function createEntryItems(corpusEntries) {
-    return _.map(corpusEntries, entry => {
-        return t.div('.listing-entry', [
-            t.a({href: `/document/${entry.stableId}?show=textgrid.json`},[
-                t.img({src: `/api/v1/corpus/artifacts/entry/${entry.stableId}/image/thumb/1` })
-            ])
-        ]);
-    });
+    return _.map(corpusEntries, entry => createEntryItem(entry));
 }
 
 function createPaginationDiv(corpusEntries) {
@@ -117,14 +49,72 @@ function createPaginationDiv(corpusEntries) {
 
     let paginationControls = t.div([
         t.span(`Displaying ${start} to ${last} of ${count};`),
-        t.icon.chevronLeft,
-        t.icon.chevronLeft,
-        t.span("--"),
-        t.icon.chevronRight,
-        t.icon.chevronRight
+        t.span('.pagination-controls', [
+            t.button('.prev-page', [
+                icon.fa('chevron-left'),
+                icon.fa('chevron-left'),
+            ]),
+            t.input('.set-page', {value: start}),
+            t.button('.next-page', [
+                icon.fa('chevron-right'),
+                icon.fa('chevron-right')
+            ])
+        ])
     ]) ;
 
+
     return paginationControls;
+}
+function setupPaginationRx(corpusEntries) {
+    let currStart = corpusEntries.start;
+    let pageLen = 4;
+
+    let prevPageRx = Rx.Observable.fromEvent($('.prev-page'), 'click');
+    let nextPageRx = Rx.Observable.fromEvent($('.next-page'), 'click');
+    let setPageRx = Rx.Observable.fromEvent($('.set-page'), 'change');
+    prevPageRx.subscribe(() => {
+        let newStart = _.clamp(currStart-pageLen, 0, corpusEntries.corpusSize-pageLen);
+        server.getCorpusListing(newStart, pageLen)
+            .then(resp => {
+                // console.log('prev', resp);
+                updatePage(resp);
+            });
+    });
+    nextPageRx.subscribe(() => {
+        let newStart = _.clamp(currStart+pageLen, 0, corpusEntries.corpusSize-pageLen);
+        server.getCorpusListing(newStart, pageLen)
+            .then(resp => {
+                // console.log('next', resp);
+                updatePage(resp);
+            });
+    });
+    setPageRx.subscribe((e) => {
+        let value = $('.set-page').prop('value');
+        let newStart = _.clamp(+value, 0, corpusEntries.corpusSize-pageLen);
+        server.getCorpusListing(newStart, pageLen)
+            .then(resp => {
+                updatePage(resp);
+            });
+    });
+}
+
+function updatePage(corpusEntries) {
+    let entryItems = createEntryItems(corpusEntries.entries);
+
+    $('.listing-main').empty();
+    $('.listing-main').append(
+        entryItems
+    );
+
+    let paginationControls = createPaginationDiv(corpusEntries);
+
+    $('.listing-control-upper').empty();
+
+    $('.listing-control-upper').append(
+        paginationControls
+    );
+
+    setupPaginationRx(corpusEntries);
 }
 function renderPage(corpusEntries) {
 
@@ -132,48 +122,33 @@ function renderPage(corpusEntries) {
         t.div('.entry-listing-frame', [
             t.div('.listing-sidebar'),
             t.div('.listing-control-upper'),
-            t.div('.listing-control-lower'),
             t.div('.listing-main')
         ]) ;
 
     $('.content-pane')
         .append(listingFrame) ;
 
-    // let sampleEntries = _.times(100, _.constant(t.div('.listing-entry')));
-    // let sampleEntries = _.map(_.range(100),  () => t.div('.listing-entry'));
-    let entryItems = createEntryItems(corpusEntries.entries);
-    console.log(entryItems);
 
-    $('.listing-main').append(
-        entryItems
-    );
+    updatePage(corpusEntries);
+
+    // $('.listing-main').append(
+    //     entryItems
+    // );
 
 
-    let paginationControls = createPaginationDiv(corpusEntries);
+    // let paginationControls = createPaginationDiv(corpusEntries);
 
-    $('.listing-control-upper').append(
-        paginationControls
-    );
+    // $('.listing-control-upper').append(
+    //     paginationControls
+    // );
 
-
-    // obj(
-    //     ("num", Json.fromInt(skip+i)),
-    //     ("stableId", Json.fromString(stableId.unwrap)),
-    //     ("labels", docLabels)
-    // )
-    // obj(
-    //     ("corpusSize", Json.fromInt(docCount)),
-    //     ("entries", entries),
-    //     ("start", Json.fromInt(skip))
-    // )
-
+    // setupPaginationRx(corpusEntries);
 }
 
 function makeMenu() {
     frame.setupFrameLayout();
     d3.json("/api/v1/corpus/entries", function(error, corpusEntries) {
-        let menuItems = renderPage(corpusEntries);
-        renderMenuItems(menuItems);
+        renderPage(corpusEntries);
     });
 }
 
