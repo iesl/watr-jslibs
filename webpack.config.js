@@ -2,10 +2,25 @@ const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+
+// const extractLess = new ExtractTextPlugin('[name].bundle.css');
+// filename: "[name].[contenthash].css",
+
+// const extractLess = new ExtractTextPlugin({
+//     filename: "[name].bundle.css",
+//     disable: process.env.NODE_ENV === "development"
+// });
+
+const jQueryProvider = new webpack.ProvidePlugin({
+    $: 'jquery',
+    jQuery: 'jquery',
+    'window.jQuery': 'jquery'
+});
+
 const config = {
     entry: {
         document: './src/client/annot-main.js',
-        menu: './src/client/menu-main.js'
+        browse: './src/client/browse-main.js'
     },
 
     devtool: 'inline-source-map',
@@ -18,28 +33,28 @@ const config = {
     module: {
         rules: [
             { test: /\.(css|scss)$/,                   use: ['style-loader', 'css-loader']},
-            { test: /\.less$/,                         use: ['less-loader']},
+            { test: /\.less$/,                         use: ["style-loader", "css-loader", "less-loader"]},
             { test: /\.(woff|woff2|eot|ttf|otf|svg)$/, use: ['url-loader']},
             { test: /test\.js$/,                       use: ['mocha-loader'], exclude: /node_modules/}
         ]
     },
 
-
     plugins: [
-        new ExtractTextPlugin('[name].bundle.css'),
-        new webpack.ProvidePlugin({
-            $: 'jquery',
-            jQuery: 'jquery',
-            'window.jQuery': 'jquery',
-            Popper: ['popper.js', 'default']
-            // In case you imported plugins individually, you must also require them here:
-            // Util: "exports-loader?Util!bootstrap/js/dist/util",
-            // Dropdown: "exports-loader?Dropdown!bootstrap/js/dist/dropdown",
-        })
+        // extractLess,
+        jQueryProvider
     ]
 };
 
 module.exports = config;
 
-rules: [
-]
+// { test: /\.less$/,
+//   use: extractLess.extract({
+//       use: [{
+//           loader: "css-loader"
+//       }, {
+//           loader: "less-loader"
+//       }],
+//       // use style-loader in development
+//       fallback: "style-loader"
+//   })
+// },

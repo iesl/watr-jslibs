@@ -14,6 +14,8 @@ import '../style/pretty-split-pane.css';
 import '../style/selection.css';
 import '../style/bootstrap.css';
 
+import '../style/browse.less';
+
 import 'bootstrap';
 
 import 'font-awesome/css/font-awesome.css';

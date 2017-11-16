@@ -5,26 +5,26 @@
 import * as $ from 'jquery';
 import * as _ from  'lodash';
 
-
 export function $id(selector) {
     return $('#' + selector);
 }
 
-export let a = (...args) => elem('a', ...args);
-export let div = (...args) => elem('div', ...args);
+export let a    = (...args) => elem('a', ...args);
+export let div  = (...args) => elem('div', ...args);
 export let span = (...args) => elem('span', ...args);
-export let btn = (...args) => elem('button', ...args);
+export let img  = (...args) => elem('img', ...args);
+export let btn  = (...args) => elem('button', ...args);
+let i           = (...args) => elem('i', ...args);
 
-let i = (...args) => elem('i', ...args);
 export let fa = (icon) => i('.fa', `.fa-${icon}`, {'aria-hidden': true});
-export let faTrash = fa('trash');
 
 export let icon = {
-    trash: fa('trash')
+    trash        : fa('trash'),
+    chevronRight : fa('chevron-right'),
+    chevronLeft  : fa('chevron-left')
 };
 
-
-export function elem(tag, ...args) {
+function elem(tag, ...args) {
     let $tag = $(`<${tag}></${tag}>`);
     _.each(args, arg => {
         if (typeof arg === 'string') {
@@ -54,3 +54,4 @@ export function elem(tag, ...args) {
 
     return $tag;
 }
+
