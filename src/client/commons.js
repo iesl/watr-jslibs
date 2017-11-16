@@ -149,7 +149,7 @@ export function initShapeDimensions(r) {
             .attr("y", function(d){ return d.y; })
             .attr("width", function(d){ return d.width; })
             .attr("height", function(d){ return d.height; })
-            .attr("href", function(d){ return '/entry/'+corpusEntry()+'/image/page/'+d.page; })
+            .attr("href", function(d){ return '/api/v1/corpus/artifacts/entry/'+corpusEntry()+'/image/page/'+d.page; })
         ;
     }
 
@@ -207,7 +207,7 @@ export function initShapeAttrs(r) {
             .attr("y", function(d){ return d.y; })
             .attr("width", function(d){ return d.width; })
             .attr("height", function(d){ return d.height; })
-            .attr("href", function(d){ return '/entry/'+corpusEntry()+'/image/page/'+d.page; })
+            .attr("href", function(d){ return '/api/v1/corpus/artifacts/entry/'+corpusEntry()+'/image/page/'+d.page; })
             .attr("stroke-width", 1)
             .attr("stroke", "black")
             .attr("opacity", 0.3)
