@@ -46,7 +46,8 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
             if (neighbors.length > 0) {
                 let nearestNeighbor = neighbors[0];
                 // let ns = _.map(neighbors, (n) => n.char).join('');
-                textview.syncScrollTextGrid(clickPt, nearestNeighbor);
+                textview.syncScrollTextGridToImageClick(clickPt, nearestNeighbor);
+
             }
 
         }
@@ -80,7 +81,7 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
                             if (neighbors.length > 0) {
                                 let nearestNeighbor = neighbors[0];
                                 // let ns = _.map(neighbors, (n) => n.char).join('');
-                                textview.syncScrollTextGrid(clickPt, nearestNeighbor);
+                                textview.syncScrollTextGridToImageClick(clickPt, nearestNeighbor);
                             }
                         }
                     } else if (pointOrRect.rect) {
@@ -275,12 +276,10 @@ function setupStatusBar(statusBarId) {
                     zoneIds: zoneIds
                 };
                 server.deleteLabels(delReq).then(resp => {
-                    console.log("deleted labels!", resp);
                     global.setSelections([]);
 
                     lbl.refreshZoneHightlights(resp.zones);
-                }).catch(err => {
-                    console.log("ERROR deleted labels!", err);
+                }).catch(() => {
                     global.setSelections([]);
 
                 })

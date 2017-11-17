@@ -11,6 +11,7 @@ import * as server from './serverApi.js';
 import * as panes from  './splitpane-utils.js';
 import {$id} from './jstags.js';
 import * as _ from  'lodash';
+import keyboardJS from 'keyboardjs';
 
 import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
@@ -60,9 +61,10 @@ function runMain() {
             pageview.setupPageImages('div.view-pdf-pages', pageShapes);
             textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
+
         })
         .catch(error => {
-            $('.content-pane').append(`<div><p>ERROR: ${error}: ${error.target.responseText}</p></div>`);
+            $('.content-pane').append(`<div><p>ERROR: ${error}: ${error}</p></div>`);
         })
     ;
 }

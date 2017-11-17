@@ -15,6 +15,7 @@ import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
 import * as pageview from  './view-pdf-pages.js';
+import keyboardJS from 'keyboardjs';
 
 import { globals } from './globals';
 let rtree = require('rbush');
@@ -35,7 +36,7 @@ function scrollSyncIndicator(parentSelection, indicatorPoint) {
         .call(util.initFill, 'red', 1)
         .transition()
         .duration(300)
-        .attr("r", 3)
+        .attr("r", 2)
         .attr("fill-opacity", 0)
         .attr("stroke-opacity", 1)
         .delay(10)
@@ -120,69 +121,64 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
     //     .remove() ;
 }
 
-// function getFrameTopClientPos(pageNum) {
-//     // Get offset of clicked text on page
-//     let pageImageFrameId = `div#page-image-frame-${pageNum}`;
-//     let pageImageFrame = $(pageImageFrameId);
-//     let pageImageFramePosition = pageImageFrame.position();
-//     let frameTop = pageImageFramePosition.top;
-//     let containerTop = $(`div.page-images`).position().top;
-//     let absFrameTop = frameTop - containerTop ;
-//     return absFrameTop;
-// }
 
-function syncScrollFrame(clientPt, dataPt, pageNum, whichSide, paneId) {
-
-    // Get offset of clicked text on page
-    let pageImageFrameId = `div#${whichSide}-frame-${pageNum}`;
-    let pageImageFrame = $(pageImageFrameId);
-    let pageImageFramePosition = pageImageFrame.position();
-    let frameTop = pageImageFramePosition.top;
-    let containerTop = $(`div.${whichSide}s`).position().top;
-    let userPtY = clientPt.y;
-    let hitGlyphTop = dataPt.top;
-    let absFrameTop = frameTop - containerTop ;
-    let scrollTo = absFrameTop + (hitGlyphTop - userPtY - 10);
-
-    $(paneId).scrollTop(scrollTo);
-
-    scrollSyncIndicator(
-        `svg#${whichSide}-${pageNum}`,
-        dataPt.topLeft
-    );
-}
 
 /**
  *  Capture a click on the textgrid-side and scroll the corresponding page image into
  *  view, flashing an indicator on the image point corresponding to the text
  */
-function syncScrollPageImages(clientPt, dataPt) {
-    syncScrollFrame(clientPt, dataPt.pdfBounds, dataPt.page, 'page-image', '#splitpane_root__bottom__left');
+function syncScrollPageImageToTextClick(clientPt, dataPt) {
+    // syncScrollFrame(clientPt, dataPt.pdfBounds, dataPt.page, 'page-image', '.page-images');
+    let pageNum = dataPt.page;
+    let whichSide = 'page-image';
+    let pageImageFrameId = `div#${whichSide}-frame-${pageNum}`;
+
+    let scrollTo = $(pageImageFrameId).position().top + $('.page-images').scrollTop(); // Value to scroll page top-edge to top of view pane
+    scrollTo -= globals.currMouseClientPt.y;  // adjust so that  page top is at same client-y as user's mouse
+    scrollTo += 75; // fudge factor to adjust for topbar+statusbar heights
+    scrollTo += dataPt.top;  // adjust so that clicked text is even w/user's mouse
+
+    $('.page-images').scrollTop(scrollTo);
+
+    scrollSyncIndicator(
+        `svg#${whichSide}-${pageNum}`,
+        dataPt.pdfBounds.topLeft
+    );
 }
 
 /**
  *  Capture a click on the page image side and scroll the corresponding page text into
  *  view, flashing an indicator on the text point
  */
-export function syncScrollTextGrid(clientPt, neighbor) {
+export function syncScrollTextGridToImageClick(clientPt, txtDataPt) {
 
-    let { page: pageNum, row: row } = neighbor;
+    let { page: pageNum, row: row } = txtDataPt;
 
-    // TODO: this looks wrong:
-    let pageTextgridSvgId = `div#textgrid-frame-${pageNum}`;
-    let frameTop = $(pageTextgridSvgId).position().top;
+    // // TODO: this looks wrong:
+    // let pageTextgridSvgId = `div#textgrid-frame-${pageNum}`;
+    // let frameTop = $(pageTextgridSvgId).position().top;
 
-    // let containerTop = $(`div.page-textgrids`).position().top;
-    let absFrameTop = frameTop; //  - containerTop ;
+    // // let containerTop = $(`div.page-textgrids`).position().top;
+    // let absFrameTop = frameTop; //  - containerTop ;
 
     let textGridNeighborY = row * TextGridLineHeight;
-    let scrollTo = absFrameTop + (textGridNeighborY - clientPt.y - 10);
+    // let scrollTo = absFrameTop + (textGridNeighborY - clientPt.y - 10);
 
-    $('#splitpane_root__bottom__right').scrollTop(scrollTo);
+    // $('#splitpane_root__bottom__right').scrollTop(scrollTo);
+
+    let whichSide = 'textgrid';
+    let pageFrameId = `div#${whichSide}-frame-${pageNum}`;
+
+    let scrollTo = $(pageFrameId).position().top + $('.page-textgrids').scrollTop(); // Value to scroll page top-edge to top of view pane
+    scrollTo -= globals.currMouseClientPt.y;  // adjust so that  page top is at same client-y as user's mouse
+    scrollTo += 50; // fudge factor to adjust for topbar+statusbar heights
+    scrollTo += textGridNeighborY;  // adjust so that clicked text is even w/user's mouse
+
+    $('.page-textgrids').scrollTop(scrollTo);
 
     scrollSyncIndicator(
         `svg#textgrid-svg-${pageNum}`,
-        coords.mkPoint.fromXy(10, textGridNeighborY+10)
+        coords.mkPoint.fromXy(txtDataPt.left-20, textGridNeighborY+10)
     );
 
 }
@@ -206,10 +202,29 @@ function showSelectionHighlight(d3$textgridSvg, selections) {
 }
 
 
+// Setup keyboard watcher
+// function initKeyboardHandlers() {
+//     function rebind(domNode) {
+//         keyboardJS.reset();
+//         keyboardJS.watch(domNode);
+//         keyboardJS.bind('a', function(kdownEvent) {
+//             console.log('kdown', kdownEvent);
+//             kdownEvent.preventRepeat();
+//         }, function(kupEvent) {
+//         });
 
-/*
+//     }
 
-  */
+//     $('svg.textgrid').each(function() {
+//         console.log('watch', this);
+//         $(this)
+//             .on("mouseover", () => rebind(this))
+//             .on("mouseout", () => keyboardJS.watch())
+//         ;
+//     });
+
+// }
+
 
 function textgridSvgHandlers(d3$textgridSvg) {
     let pageNum = parseInt(d3$textgridSvg.attr('page'));
@@ -220,13 +235,23 @@ function textgridSvgHandlers(d3$textgridSvg) {
     let selectionStartId = undefined;
     let selectionEndId = undefined;
 
+    d3$textgridSvg
+        .on("mouseover", function() {
+            reticleGroup.attr("opacity", 0.4);
 
-    console.log('init', d3$textgridSvg);
+            // Set statusbar page num
+        })
+        .on("mouseout", function() {
+            // remove key handlers
+            // clear statusbar
 
+            reticleGroup.attr("opacity", 0);
 
+            d3.selectAll('.textloc').remove();
+
+        });
 
     d3$textgridSvg.on("mousedown",  function() {
-        console.log("here???????????");
         let mouseEvent = d3.event;
 
         let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
@@ -234,7 +259,8 @@ function textgridSvgHandlers(d3$textgridSvg) {
         if (neighborHits.length > 0) {
             let firstHit = neighborHits[neighborHits.length-1];
 
-            syncScrollPageImages(clientPt, firstHit);
+
+            syncScrollPageImageToTextClick(clientPt, firstHit);
 
             if (mouseEvent.shiftKey) {
                 // Switch to text selection cursor
@@ -267,10 +293,6 @@ function textgridSvgHandlers(d3$textgridSvg) {
                 createTextGridLabelingPanel(annotation);
             }
 
-        })
-        .on("mouseover", function() {
-            reticleGroup
-                .attr("opacity", 0.4);
         })
         .on("mousemove", function() {
             // show the grid-side bbox
@@ -309,12 +331,7 @@ function textgridSvgHandlers(d3$textgridSvg) {
             }
 
         })
-        .on("mouseout", function() {
-            reticleGroup.attr("opacity", 0);
-
-            util.d3select.pageImage(pageNum)
-                .selectAll('.textloc').remove();
-        });
+    ;
 
 }
 
@@ -432,5 +449,6 @@ export function setupPageTextGrids(contentId, textgrids) {
             textgridSvgHandlers(d3$svg);
         });
 
-}
 
+    // initKeyboardHandlers();
+}

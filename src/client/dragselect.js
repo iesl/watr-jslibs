@@ -1,7 +1,5 @@
 /**
- * d3-driven drag/click handling
  *
- *  Credit to : http://bl.ocks.org/paradite/71869a0f30592ade5246
  **/
 
 import * as d3 from 'd3';
@@ -33,11 +31,6 @@ export default function awaitUserSelection(d3$svg, initSvgPt) {
         update(initSvgPt);
 
         function update(svgPt) {
-            // globals.currMouseClientPt.x = clientPt.x;
-            // globals.currMouseClientPt.y = clientPt.y;
-            // $("li > span#mousepos").text(
-            //     `x: ${clientPt.x}, y: ${clientPt.y} / ${svgSelector} @  ${svgPt.x},${svgPt.y} `
-            // );
 
             currentPt = svgPt;
             adjustSelectionRect();
@@ -93,8 +86,6 @@ export default function awaitUserSelection(d3$svg, initSvgPt) {
         d3$svg.on("mousemove", function() {
             if (selectionRect != null) {
                 let p = d3.mouse(this);
-                // let mouseEvent = d3.event;
-                // let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
                 let clickPt = coords.mkPoint.fromD3Mouse(p);
                 update(clickPt);
             }
