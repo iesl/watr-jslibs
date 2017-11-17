@@ -1,14 +1,17 @@
-/* global require  */
+/**
+ *
+ **/
 
-import * as d3 from  'd3';
 import * as util from  './commons.js';
-import * as tg from  './textgrid-view.js';
-import * as stepper from  './d3-stepper.js';
 import * as $ from 'jquery';
 import * as frame from './frame.js';
 import {globals} from './globals';
+import * as global from './globals';
+import * as server from './serverApi.js';
+import * as panes from  './splitpane-utils.js';
+import {$id} from './jstags.js';
+import * as _ from  'lodash';
 
-import '../style/main.css';
 import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
 import '../style/selection.css';
@@ -20,6 +23,18 @@ import 'bootstrap';
 
 import 'font-awesome/css/font-awesome.css';
 
+import * as pageview from  './view-pdf-pages.js';
+import * as textview from  './view-pdf-text.js';
+
+function setupFrameLayout() {
+
+    let {leftPaneId: leftPaneId, rightPaneId: rightPaneId} =
+        panes.splitVertical('.content-pane', {fixedLeft: 200});
+
+    $id(leftPaneId).addClass('view-pdf-pages');
+    $id(rightPaneId).addClass('page-textgrids');
+
+}
 
 function runMain() {
 
@@ -29,18 +44,27 @@ function runMain() {
 
     globals.currentDocument = entry;
 
-    let show = util.getParameterByName('show');
+    // let show = util.getParameterByName('show');
 
-    d3.json(`/api/v1/corpus/artifacts/vtrace/json/${entry}/${show}`, function(error, jsdata) {
-        if (error) {
+    server.getCorpusArtifactTextgrid(entry)
+        .then(jsdata => {
+            let dataBlock = jsdata[0].steps[0];
+            let pages = dataBlock.pages;
+            let textgrids = _.map(pages, p => p.textgrid);
+            let pageShapes = _.map(pages, p => p.shapes);
+
+            global.initGlobalMouseTracking();
+
+            setupFrameLayout();
+
+            pageview.setupPageImages('div.view-pdf-pages', pageShapes);
+            textview.setupPageTextGrids('div.page-textgrids', textgrids);
+
+        })
+        .catch(error => {
             $('.content-pane').append(`<div><p>ERROR: ${error}: ${error.target.responseText}</p></div>`);
-        } else {
-            stepper.stepThrough(tg.RenderTextGrid, jsdata[0].steps);
-        }
-
-        return;
-    });
-
+        })
+    ;
 }
 
 runMain();

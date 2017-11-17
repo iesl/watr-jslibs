@@ -12,23 +12,17 @@ import * as $ from 'jquery';
 import * as _ from 'lodash';
 import * as lbl from './labeling';
 import * as coords from './coord-sys.js';
-import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
-import * as pageview from  './pdf-pageview.js';
+import * as pageview from  './view-pdf-pages.js';
 
 import { globals } from './globals';
-import * as global from './globals';
-import {$id} from './jstags.js';
-
-// let knn = require('rbush-knn');
 let rtree = require('rbush');
 
 export const TextGridLineSpacing = 16;
 export const TextGridLineHeight  = 16;
+
 const TextGridOriginPt = coords.mkPoint.fromXy(20, 20);
-
-
 
 /** Page sync flashing indicator dot */
 function scrollSyncIndicator(parentSelection, indicatorPoint) {
@@ -37,13 +31,11 @@ function scrollSyncIndicator(parentSelection, indicatorPoint) {
         .attr("cx", indicatorPoint.x)
         .attr("cy", indicatorPoint.y)
         .attr("r", 20)
-        .attr("fill-opacity", 1)
-        .attr("stroke-opacity", 0)
-        .attr("fill",  "yellow")
-        .attr("stroke",  "black")
+        .call(util.initStroke, 'black', 1, 0)
+        .call(util.initFill, 'red', 1)
         .transition()
         .duration(300)
-        .attr("r", 1)
+        .attr("r", 3)
         .attr("fill-opacity", 0)
         .attr("stroke-opacity", 1)
         .delay(10)
@@ -176,6 +168,7 @@ export function syncScrollTextGrid(clientPt, neighbor) {
 
     let { page: pageNum, row: row } = neighbor;
 
+    // TODO: this looks wrong:
     let pageTextgridSvgId = `div#textgrid-frame-${pageNum}`;
     let frameTop = $(pageTextgridSvgId).position().top;
 
@@ -228,25 +221,27 @@ function textgridSvgHandlers(d3$textgridSvg) {
     let selectionEndId = undefined;
 
 
-    d3$textgridSvg
-        .on("mousedown", function() {
-            let mouseEvent = d3.event;
+    console.log('init', d3$textgridSvg);
 
-            let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
 
-            if (neighborHits.length > 0) {
-                let firstHit = neighborHits[neighborHits.length-1];
 
-                syncScrollPageImages(clientPt, firstHit);
+    d3$textgridSvg.on("mousedown",  function() {
+        console.log("here???????????");
+        let mouseEvent = d3.event;
 
-                if (mouseEvent.shiftKey) {
-                    // Switch to text selection cursor
-                    // Start text selection
-                    selectionEndId = selectionStartId = parseInt(firstHit.id);
-                }
+        let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
+
+        if (neighborHits.length > 0) {
+            let firstHit = neighborHits[neighborHits.length-1];
+
+            syncScrollPageImages(clientPt, firstHit);
+
+            if (mouseEvent.shiftKey) {
+                // Switch to text selection cursor
+                // Start text selection
+                selectionEndId = selectionStartId = parseInt(firstHit.id);
             }
-
-        })
+        }})
         .on("mouseup", function() {
             if (selectionStartId) {
 
@@ -372,12 +367,6 @@ function initGridText(d3$canvas, gridData, gridNum) {
 
 function createTextGridLabelingPanel(annotation) {
 
-    // let svgPageSelector = `#textgrid-frame-${annotation.page}`;
-    // let pageImageTop = $(svgPageSelector).parent().position().top;
-    // let pageImageTop = $(svgPageSelector).position().top;
-    // let textGridsTop = $('div.page-textgrids').position().top;
-    // let screenY = pageImageTop + textGridsTop;
-
     lbl.createTextGridLabeler(annotation);
 
     $('.modal-content').css({
@@ -393,24 +382,27 @@ function createTextGridLabelingPanel(annotation) {
 
 
 
-function setupPageTextGrids(contentId, textgrids) {
+export function setupPageTextGrids(contentId, textgrids) {
+    rtrees.initRTrees(textgrids);
 
     let computeGridHeight = (grid) => {
         return (grid.rows.length * TextGridLineSpacing) + TextGridOriginPt.y + 10;
     };
-    let pagegridDivs = d3.select(contentId)
+    let pagegridEnter = d3.select(contentId)
         .selectAll(".textgrid")
         .data(textgrids, util.getId)
         .enter()
+    ;
+
+    let pagegridDivs = pagegridEnter
         .append('div').classed('textgrid', true)
         .attr('id', (d, i) => `textgrid-frame-${i}`)
-    // .attr('width', 900)
-    // .attr('height', grid => grid.rows.length * TextGridLineSpacing)
         .attr('style', grid => {
             let height = computeGridHeight(grid);
             return `width: 900; height: ${height};`;
         })
     ;
+
 
     pagegridDivs
         .append('canvas').classed('textgrid', true)
@@ -435,40 +427,10 @@ function setupPageTextGrids(contentId, textgrids) {
         });
 
     d3.selectAll('svg.textgrid')
-        .each(function (gridData, gridNum){
+        .each(function (){
             let d3$svg = d3.select(this);
             textgridSvgHandlers(d3$svg);
         });
-}
-
-
-function setupFrameLayout() {
-
-    let {leftPaneId: leftPaneId, rightPaneId: rightPaneId} =
-        panes.splitVertical('.content-pane', {fixedLeft: 200});
-
-
-    $id(leftPaneId).addClass('pdf-pageview');
-    $id(rightPaneId).addClass('page-textgrids');
 
 }
 
-export function RenderTextGrid(dataBlock) {
-    let pages = dataBlock.pages;
-    let textgrids = _.map(pages, p => p.textgrid);
-    let pageShapes = _.map(pages, p => p.shapes);
-
-    global.initGlobalMouseTracking();
-
-    setupFrameLayout();
-
-    pageview.setupPageImages('div.pdf-pageview', pageShapes);
-    setupPageTextGrids('div.page-textgrids', textgrids);
-
-    rtrees.initRTrees(textgrids);
-
-    lbl.updateAnnotationShapes();
-
-    return d3;
-
-}

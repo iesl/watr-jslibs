@@ -5,7 +5,6 @@
  */
 
 function onEndAll (transition, callback) {
-
     if (transition.empty()) {
         callback();
     } else {
@@ -22,8 +21,6 @@ function onEndAll (transition, callback) {
 export function stepThrough(interpFunc, steps) {
     if (steps.length > 0) {
         let step = steps[0];
-
-        // let method = DrawingMethods[step.Method];
 
         interpFunc(step)
             .transition()

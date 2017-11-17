@@ -18,12 +18,14 @@ import {$id, t, icon} from './jstags.js';
 import Rx from 'rxjs/Rx';
 import * as server from './serverApi.js';
 
-import * as textview from  './textgrid-view.js';
+import * as textview from  './view-pdf-text.js';
 
 import { globals } from './globals';
 import * as global from './globals';
 
 import 'font-awesome/css/font-awesome.css';
+
+import '../style/view-pdf-text.less';
 
 function defaultModeMouseHandlers(d3$svg, pageNum) {
     d3$svg.on("mousedown", function() {
@@ -356,4 +358,6 @@ export function setupPageImages(contentSelector, pageImageShapes) {
                 .call(util.initShapeDimensions);
         })
     ;
+
+    lbl.updateAnnotationShapes();
 }

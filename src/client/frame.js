@@ -3,13 +3,13 @@
 import * as d3 from  'd3';
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
-import * as tg from  './textgrid-view.js';
+import * as tg from  './view-pdf-text.js';
 import * as stepper from  './d3-stepper.js';
 import * as $ from 'jquery';
 import {globals} from './globals';
 import {$id, t} from './jstags.js';
 
-import '../style/main.css';
+import '../style/frame.less';
 import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
 import '../style/selection.css';

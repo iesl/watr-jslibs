@@ -1,8 +1,7 @@
 
 @import "inc/_util";
 @import "inc/_buttons";
-
-@frame-bg: #fadefa;
+@import "inc/_solarized";
 
 
 div.entry-listing-frame {
@@ -23,17 +22,20 @@ div.entry-listing-frame {
 
     .listing-sidebar {
         grid-area: sd;
-        background: @frame-bg;
+        background: @base01;
     }
 
     .listing-control-upper {
         grid-area: hd;
-        background: @frame-bg;
-        font-size: 140%;
+        background: @base2;
+        font-size: 150%;
+        font-weight: bold;
+
+        padding-top: 8;
+        padding-left: 20;
 
         .pagination-controls {
             margin-left: 20;
-
 
             button {
                 .btn-lightlink;
@@ -49,12 +51,12 @@ div.entry-listing-frame {
 
     .listing-main {
         grid-area: xx;
-        background: @frame-bg;
+        background: @base3;
 
         display: grid;
 
         grid-template-columns : repeat(auto-fill, minmax(250px, 350px));
-        grid-template-rows    : repeat(auto-fill, minmax(200px, 1fr));
+        grid-template-rows    : repeat(auto-fill, minmax(220px, 240px));
         grid-auto-flow        : row;
         grid-column-gap       : 10px;
         grid-row-gap          : 20px;
@@ -66,42 +68,41 @@ div.entry-listing-frame {
                 display: grid;
 
                 grid-template-areas:
-                "ttl ttl"
+                    "ttl ttl"
                     "img inf"
                     "img inf"
                 ;
 
-                grid-template-columns : 1fr 1fr;
-                grid-template-rows    : 2em 1fr 1fr;
+                grid-template-columns  : 1fr 1fr;
+                grid-template-rows     : 2em 1fr 1fr;
                 grid-column-gap        : 2px;
+                grid-row-gap           : 2px;
 
                 background: #aabbcc;
 
 
                 .listing-title {
                     grid-area: ttl;
-                    color: #fff;
-                    background-color: #444;
+                    color: black;
+                    background-color: @base1;
                     font-size: 120%;
+                    font-weight: bold;
                     text-align: center;
                 }
 
                 .listing-image {
                     grid-area: img;
-                    background: #230890;
+                    background: @base2;
                     a {
-
                         img {
                             display: block;
-
                         }
                     }
-
                 }
 
                 .listing-info {
                     grid-area: inf;
-                    background: #fefafe;
+                    background: @base2;
                 }
             }
         }

@@ -2,7 +2,6 @@
  *
  **/
 
-/* global  FormData */
 
 import * as d3 from  'd3';
 import * as $ from  'jquery';
@@ -24,12 +23,10 @@ export function updateAnnotationShapes() {
         refreshZoneHightlights(annotations.zones);
     });
 }
+
 export function refreshZoneHightlights(zonesJs) {
     let zones = _.map(zonesJs, (z) => dt.zoneFromJson(z));
     rtrees.initPageLabelRTrees(zones);
-    let regions = _.flatMap(zones, zone => zone.regions);
-
-    console.log('regions', regions);
 
     d3 .selectAll('.annotation-rect')
        .remove();

@@ -68,9 +68,9 @@ export function initPageLabelRTrees(zones) {
 
     _.each(groups, pageGroup => {
         let pageNum = pageGroup[0].pageNum;
-        // if (! globals.pageImageLabelRTrees[pageNum]) {
-            globals.pageImageLabelRTrees[pageNum] = rtree();
-        // }
+
+        globals.pageImageLabelRTrees[pageNum] = rtree();
+
         let pageRtree = globals.pageImageLabelRTrees[pageNum];
 
         pageRtree.load(pageGroup);

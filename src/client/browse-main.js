@@ -1,7 +1,6 @@
 
 import * as d3 from  'd3';
 import * as _ from  'lodash';
-import '../style/main.css';
 import * as frame from './frame.js';
 import {t, icon} from './jstags.js';
 import * as $ from 'jquery';
@@ -11,6 +10,8 @@ import * as server from './serverApi.js';
 
 import '../style/browse.less';
 
+let pageLen = 50;
+
 function createEntryItem(entry) {
     let interestingLabels = _.filter(entry.labels[0], l => l !== 'DocumentPages');
     let labelList = _.map(interestingLabels, l => t.li(` ${l}`));
@@ -19,8 +20,7 @@ function createEntryItem(entry) {
         t.div('.listing-entry', [
             t.div('.listing-entry-grid', [
                 t.div('.listing-title', [
-                    t.span(` #${entry.num}; `),
-                    t.span(`file:${entry.stableId}`)
+                    t.span(` #${entry.num} : ${entry.stableId}`)
                 ]),
                 t.div('.listing-image', [
                     t.a({href: `/document/${entry.stableId}?show=textgrid.json`},[
@@ -67,7 +67,6 @@ function createPaginationDiv(corpusEntries) {
 }
 function setupPaginationRx(corpusEntries) {
     let currStart = corpusEntries.start;
-    let pageLen = 4;
 
     let prevPageRx = Rx.Observable.fromEvent($('.prev-page'), 'click');
     let nextPageRx = Rx.Observable.fromEvent($('.next-page'), 'click');
@@ -116,7 +115,8 @@ function updatePage(corpusEntries) {
 
     setupPaginationRx(corpusEntries);
 }
-function renderPage(corpusEntries) {
+
+function createEntryListingFrame() {
 
     let listingFrame =
         t.div('.entry-listing-frame', [
@@ -128,28 +128,14 @@ function renderPage(corpusEntries) {
     $('.content-pane')
         .append(listingFrame) ;
 
-
-    updatePage(corpusEntries);
-
-    // $('.listing-main').append(
-    //     entryItems
-    // );
-
-
-    // let paginationControls = createPaginationDiv(corpusEntries);
-
-    // $('.listing-control-upper').append(
-    //     paginationControls
-    // );
-
-    // setupPaginationRx(corpusEntries);
 }
 
-function makeMenu() {
+function runMain() {
     frame.setupFrameLayout();
-    d3.json("/api/v1/corpus/entries", function(error, corpusEntries) {
-        renderPage(corpusEntries);
-    });
+    createEntryListingFrame();
+
+    server.getCorpusListing(0, pageLen)
+        .then(resp => updatePage(resp));
 }
 
-makeMenu();
+runMain();
