@@ -265,7 +265,8 @@ function textgridSvgHandlers(d3$textgridSvg) {
             if (mouseEvent.shiftKey) {
                 // Switch to text selection cursor
                 // Start text selection
-                selectionEndId = selectionStartId = parseInt(firstHit.id);
+                selectionStartId = parseInt(firstHit.id);
+                selectionEndId = selectionStartId + 1;
             }
         }})
         .on("mouseup", function() {
@@ -295,10 +296,8 @@ function textgridSvgHandlers(d3$textgridSvg) {
 
         })
         .on("mousemove", function() {
-            // show the grid-side bbox
             let textgridRTree = globals.textgridRTrees[pageNum] ;
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
-
             let queryWidth = 20;
             let queryBoxHeight = TextGridLineHeight * 2;
             let queryLeft = userPt.x-queryWidth;
@@ -312,24 +311,30 @@ function textgridSvgHandlers(d3$textgridSvg) {
                 hit => [hit.bottom, hit.right]
             );
 
-            showGlyphHoverReticles(d3$textgridSvg, queryBox, neighborHits);
+            if (selectionStartId) {
+                let selectQuery = coords.mk.fromLtwh(userPt.x, userPt.y, 1, 1);
+                let selectHits = textgridRTree.search(selectQuery);
+                // console.log('selectHits', selectHits);
 
-            if (selectionStartId && neighborHits.length > 0) {
-                let firstHit = neighborHits[neighborHits.length-1];
-                let hitId = parseInt(firstHit.id);
-                if (selectionEndId != hitId) {
+                let hitId = selectHits[0] ? parseInt(selectHits[0].id) : undefined;
+                if (selectHits.length>0 && selectionEndId != hitId) {
                     selectionEndId = hitId;
-                    let id1 = selectionStartId;
-                    let id2 = selectionEndId;
-                    if (selectionStartId > selectionEndId) {
-                        id1 = selectionEndId;
-                        id2 = selectionStartId;
+                    // console.log('sel:', selectionStartId, selectionEndId );
+                    if (selectionStartId <= selectionEndId) {
+                        gridSelection = globals.dataPts[pageNum].slice(selectionStartId, selectionEndId+1);
+                    } else {
+                        // console.log('0', globals.dataPts[pageNum][0]);
+                        // console.log('1', globals.dataPts[pageNum][1]);
+
+                        gridSelection = globals.dataPts[pageNum].slice(selectionEndId, selectionStartId);
                     }
-                    gridSelection = globals.dataPts[pageNum].slice(id1, id2);
+
+
                     showSelectionHighlight(d3$textgridSvg, gridSelection);
                 }
+            } else if (neighborHits.length > 0) {
+                showGlyphHoverReticles(d3$textgridSvg, queryBox, neighborHits);
             }
-
         })
     ;
 
@@ -361,7 +366,7 @@ function initGridText(d3$canvas, gridData, gridNum) {
             let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
 
             dataPt.pdfBounds = pdfTextBox ;
-            dataPt.locus = gridRow.loci[chi];
+            dataPt.locus = charLocus;
             dataPt.page = charBBox? charLocus[0][0] : undefined;
             dataPt.gridRow = gridRow;
             dataPt.id = idGen();
