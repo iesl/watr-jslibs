@@ -12,6 +12,8 @@ import * as rtrees from './rtrees';
 import * as util from './commons.js';
 import * as server from './serverApi.js';
 
+import {$id, t, icon} from './jstags.js';
+
 let nextAnnotId = util.IdGenerator();
 
 export function mkAnnotation(props) {
@@ -60,8 +62,6 @@ export function createHeaderLabelUI(annotation) {
         .then(labelerHtml => {
             let $labeler = $(labelerHtml);
 
-            // $('body').append($labeler);
-
             $labeler.on('hidden.bs.modal', function () {
                 $(this).remove();
             });
@@ -104,15 +104,6 @@ export function createHeaderLabelUI(annotation) {
                     });
             });
 
-            // let subs = globals.rx.clientPt.subscribe(clientPt => {
-            //     $labeler.find('.modal-dialog').css({
-            //         'position': 'absolute',
-            //         'left': clientPt.x + "px",
-            //         'top': clientPt.y + "px"
-            //     });
-            // });
-            // subs.unsubscribe();
-
             $labeler.find('.modal-dialog').css({
                 'position': 'absolute',
                 'left': globals.currMouseClientPt.x + "px",
@@ -126,56 +117,100 @@ export function createHeaderLabelUI(annotation) {
 
 }
 
+
+   let labelButton = (label) => {
+       return (
+           t.button(
+               `#${label}`, '.labelChoice .btn .btn-xs .btn-block .btn-default',
+               "@labelChoice", ':submit', `=${label}`, [
+                   t.small(label)
+               ])
+       );
+   };
+
+
+
+
+
 export function createTextGridLabeler(boxes) {
     let labelNames = [
-        'Author',
-        'University',
-        'Date',
-        'Journal',
-        'Address'
+        'Title',
+        'Authors',
+        'Abstract',
+        'Affiliations',
+        'References'
     ];
 
-    // $labelForm.submit(function (event) {
-    //     event.preventDefault();
+    let idAttr = "unset";
+    let buttons = _.map(labelNames, labelButton);
+    console.log('buttons', buttons);
 
-    //     let ldata = $('#label-form > form').serialize();
+    let form =
+        t.form({action: '/api/v1/label', method: 'POST', enctype:'multipart/form-data'}, [
+            t.input(':hidden', '@selectedLabel', '#selectedLabel'),
+            t.div(".form-group", buttons)
+        ]);
 
-    //     let postData = {
-    //         form: ldata,
-    //         selection: boxes
-    //     };
+    console.log('form', form);
 
-    //     // let postData = Object.assign(ldata, selData);
-    //     console.log('posting', postData);
+    let $labeler =
+        t.div('.modal', '.fade', `#${idAttr}`, {tabindex:"-1", role: "dialog", "aria-labelledby":  `${idAttr}Label`, 'aria-hidden': true}, [
+            t.div(".modal-dialog",{role: "document"}, [
+                t.div(".modal-content", [
+                    t.div(".modal-header", [
+                        t.span("Choose Label")
+                    ]),
+                    t.div(".modal-body", [
+                        form
+                    ])
+                ])
+            ])
+        ])
+    ;
 
-    //     $.post( "/api/v1/label", {
-    //         data: postData,
-    //         datatype: 'json'
-    //     }, function(res) {
-
-    //         console.log('success', res);
-
-    //     }).done(function() {
-    //     }).fail(function() {
-    //     }).always(function() {
-    //         hideForm();
-    //     });
-
-    // });
+    $labeler.on('hidden.bs.modal', function () {
+        $(this).remove();
+    });
 
 
-    // _.each(labelNames, (label, i) => {
-    //     let $l = $labelButton.clone();
-    //     $l.empty();
-    //     $l.click(setLabelType(label));
-    //     $l.append($(`<small>(${i+1}) ${label}</small>`)) ;
+    $labeler.find('button.labelChoice').click(function() {
+        let $button = $(this);
+        $labeler.find('#selectedLabel')
+            .attr('value', $button.attr('value'));
+    });
 
-    //     $l.attr('name', 'labelType');
-    //     $l.attr('value', label) ;
-    //     $l.attr('id', label);
+    $labeler.submit(function (event) {
+        event.preventDefault();
 
-    //     $labelButtons.append($l);
-    // });
+        // let ser = _.map(annotation.targets, t => {
+        //     return {
+        //         page: t[0],
+        //         bbox: t[1].intRep
+        //     };
+        // });
 
-    // return $labelForm;
+        let labelChoice = $('#selectedLabel').attr('value');
+
+        let labelData = {
+            stableId: globals.currentDocument,
+            labelChoice: labelChoice,
+            selection: {
+                annotType: "TODO",
+                targets: []
+            }
+        };
+
+        server.postNewLabel(labelData)
+            .then((res) => {
+
+                console.log('posted char label',  res);
+
+                $labeler.modal('hide');
+
+                d3.selectAll('.label-selection-rect').remove();
+
+                updateAnnotationShapes();
+            });
+    });
+    return $labeler;
 }

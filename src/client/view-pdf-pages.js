@@ -267,7 +267,7 @@ function setupStatusBar(statusBarId) {
 
     globals.rx.selections.subscribe(currSelects=> {
         if (currSelects.length > 0) {
-            let deleteBtn = t.btn('.btn', '.btn-sm', '.btn-default', [icon.trash]);
+            let deleteBtn = t.button('.btn', '.btn-sm', '.btn-default', [icon.trash]);
             var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
             clicks.subscribe(() => {
                 let zoneIds = _.map(currSelects, (sel) => sel.zoneId);

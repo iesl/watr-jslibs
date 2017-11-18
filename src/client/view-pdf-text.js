@@ -186,16 +186,16 @@ export function syncScrollTextGridToImageClick(clientPt, txtDataPt) {
 function showSelectionHighlight(d3$textgridSvg, selections) {
 
     let sel = d3$textgridSvg
-        .selectAll("rect.selects")
-        .data(selections, d=> d.id )
+        .selectAll("rect.glyph-selection")
+        .data(selections, d=> d.id)
     ;
     sel.enter()
         .append('rect')
-        .classed("selects", true)
+        .classed("glyph-selection", true)
         .attr('id', d => d.id)
         .call(util.initRect, d => d)
         .call(util.initStroke, 'black', 1, 0.1)
-        .call(util.initFill, 'blue', 0.4)
+        .call(util.initFill, 'blue', 0.1)
     ;
 
     sel.exit().remove() ;
@@ -259,24 +259,18 @@ function textgridSvgHandlers(d3$textgridSvg) {
         if (neighborHits.length > 0) {
             let firstHit = neighborHits[neighborHits.length-1];
 
-
             syncScrollPageImageToTextClick(clientPt, firstHit);
 
             if (mouseEvent.shiftKey) {
-                // Switch to text selection cursor
                 // Start text selection
-                selectionStartId = parseInt(firstHit.id);
-                selectionEndId = selectionStartId + 1;
+                selectionEndId = selectionStartId = parseInt(firstHit.id);
             }
         }})
         .on("mouseup", function() {
-            if (selectionStartId) {
+            if (selectionStartId !== undefined) {
 
                 let annotBoxes = _.map(gridSelection, pt => pt.locus[0]);
 
-                // _.each(gridSelection, (g) =>{
-                //     console.log('gridsel: ', g);
-                // });
 
                 let annotation = lbl.mkAnnotation({
                     type: 'char-boxes',
@@ -284,11 +278,13 @@ function textgridSvgHandlers(d3$textgridSvg) {
                     targets: annotBoxes
                 });
 
+                console.log('annotating', annotation);
+
                 gridSelection = [];
                 selectionStartId = undefined;
                 selectionEndId = undefined;
                 d3$textgridSvg
-                    .selectAll("rect.glyph-selects")
+                    .selectAll("rect.glyph-selection")
                     .remove() ;
 
                 createTextGridLabelingPanel(annotation);
@@ -305,7 +301,7 @@ function textgridSvgHandlers(d3$textgridSvg) {
             let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
 
             let hits = neighborHits = textgridRTree.search(queryBox);
-            // neighborHits = textgridRTree.search(queryBox);
+
             neighborHits = _.sortBy(
                 _.filter(hits, hit => hit.pdfBounds),
                 hit => [hit.bottom, hit.right]
@@ -314,21 +310,15 @@ function textgridSvgHandlers(d3$textgridSvg) {
             if (selectionStartId) {
                 let selectQuery = coords.mk.fromLtwh(userPt.x, userPt.y, 1, 1);
                 let selectHits = textgridRTree.search(selectQuery);
-                // console.log('selectHits', selectHits);
 
                 let hitId = selectHits[0] ? parseInt(selectHits[0].id) : undefined;
                 if (selectHits.length>0 && selectionEndId != hitId) {
                     selectionEndId = hitId;
-                    // console.log('sel:', selectionStartId, selectionEndId );
                     if (selectionStartId <= selectionEndId) {
                         gridSelection = globals.dataPts[pageNum].slice(selectionStartId, selectionEndId+1);
                     } else {
-                        // console.log('0', globals.dataPts[pageNum][0]);
-                        // console.log('1', globals.dataPts[pageNum][1]);
-
                         gridSelection = globals.dataPts[pageNum].slice(selectionEndId, selectionStartId);
                     }
-
 
                     showSelectionHighlight(d3$textgridSvg, gridSelection);
                 }
@@ -389,17 +379,15 @@ function initGridText(d3$canvas, gridData, gridNum) {
 
 function createTextGridLabelingPanel(annotation) {
 
-    lbl.createTextGridLabeler(annotation);
+    let $labeler = lbl.createTextGridLabeler(annotation);
 
-    $('.modal-content').css({
-        'margin-left': globals.currMouseClientPt.x,
-        'margin-top': globals.currMouseClientPt.y // + screenY
+    $labeler.find('.modal-dialog').css({
+        'position': 'absolute',
+        'left': globals.currMouseClientPt.x + "px",
+        'top': globals.currMouseClientPt.y + "px"
     });
 
-    $('#label-form.modal').css({
-        display: 'block'
-    });
-
+    $labeler.modal();
 }
 
 

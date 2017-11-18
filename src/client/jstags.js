@@ -47,9 +47,17 @@ function elem(tag, ...args) {
     _.each(args, arg => {
         if (typeof arg === 'string') {
             if (_.startsWith(arg, '.')) {
-                $tag.addClass(arg.slice(1));
+                arg.split(' ').forEach(c => {
+                    $tag.addClass(c.slice(1));
+                });
             } else if (_.startsWith(arg, '#')) {
                 $tag.attr('id', arg.slice(1));
+            } else if (_.startsWith(arg, ':')) {
+                $tag.attr('type', arg.slice(1));
+            } else if (_.startsWith(arg, '@')) {
+                $tag.attr('name', arg.slice(1));
+            } else if (_.startsWith(arg, '=')) {
+                $tag.attr('value', arg.slice(1));
             } else {
                 $tag.text(arg);
             }
