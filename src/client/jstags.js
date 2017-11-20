@@ -62,7 +62,9 @@ function elem(tag, ...args) {
                 $tag.text(arg);
             }
         } else if (typeof arg === 'object') {
-            if (Array.isArray(arg)) {
+            if (arg instanceof $) {
+                $tag.append(arg);
+            } else if (Array.isArray(arg)) {
                 _.each(arg, a0 => {
                     $tag.append(a0);
                 });

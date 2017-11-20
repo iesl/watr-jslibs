@@ -14,10 +14,11 @@ import * as server from './serverApi.js';
 
 import {$id, t, icon} from './jstags.js';
 
-let nextAnnotId = util.IdGenerator();
+// let nextAnnotId = util.IdGenerator();
+import * as coords from './coord-sys.js';
 
 export function mkAnnotation(props) {
-    return Object.assign({id: nextAnnotId()}, props);
+    return props; // Object.assign({id: nextAnnotId()}, props);
 }
 
 export function updateAnnotationShapes() {
@@ -34,23 +35,54 @@ export function refreshZoneHightlights(zonesJs) {
        .remove();
 
     _.each(zones, zone => {
-        _.each(zone.regions, region => {
-            let svgPageSelector = `svg#page-image-${region.pageNum}`;
+        if (zone.glyphDefs != null) {
+            let glyphsLoci = _.flatMap(zone.glyphDefs.rows, r => r.loci);
 
-            d3.select(svgPageSelector)
-                .selectAll(`#ann${zone.zoneId}_${region.regionId}`)
-                .data([region])
-                .enter()
-                .append('rect')
-                .call(util.initRect, r => r.bbox)
-                .call(util.initStroke, 'blue', 1, 0.8)
-                .call(util.initFill, 'purple', 0.3)
-                .attr('id', `ann${zone.zoneId}_${region.regionId}`)
-                .classed('annotation-rect', true)
-                .classed(`ann${zone.zoneId}`, true)
-            ;
+            console.log('glyphsLoci', zone.glyphDefs);
+            console.log('glyphsLoci', glyphsLoci);
 
-        });
+            _.each(glyphsLoci, (glyph) => {
+                // let glyphBbox = coords.mk.fromArray(glyph[1]);
+                let glyphBbox = coords.mk.fromArray(glyph[0][1]);
+                let pageNum = glyph[0][0];
+                console.log('glyphBbox', glyphBbox);
+                console.log('pageNum', pageNum);
+                let svgSelector = `svg#textgrid-svg-${pageNum}`;
+                d3.select(svgSelector)
+                    .selectAll(`.span${zone.zoneId}`)
+                    .data([glyph[0]])
+                    .enter()
+                    .append('rect')
+                    .call(util.initRect, () => glyphBbox)
+                    .call(util.initStroke, 'cyan', 1, 0.8)
+                    .call(util.initFill, 'green', 0.3)
+                    // .attr('id', `ann${zone.zoneId}_${region.regionId}`)
+                    // .classed('annotation-rect', true)
+                    .classed(`span${zone.zoneId}`, true)
+                ;
+
+            });
+
+        } else {
+            _.each(zone.regions, region => {
+                let svgPageSelector = `svg#page-image-${region.pageNum}`;
+
+                d3.select(svgPageSelector)
+                    .selectAll(`#ann${zone.zoneId}_${region.regionId}`)
+                    .data([region])
+                    .enter()
+                    .append('rect')
+                    .call(util.initRect, r => r.bbox)
+                    .call(util.initStroke, 'blue', 1, 0.8)
+                    .call(util.initFill, 'purple', 0.3)
+                    .attr('id', `ann${zone.zoneId}_${region.regionId}`)
+                    .classed('annotation-rect', true)
+                    .classed(`ann${zone.zoneId}`, true)
+                ;
+
+            });
+
+        }
 
     });
 }
@@ -90,11 +122,12 @@ export function createHeaderLabelUI(annotation) {
                     labelChoice: labelChoice,
                     selection: {
                         annotType: annotation.type,
+                        page: annotation.page,
                         targets: ser
                     }
                 };
 
-                server.postNewLabel(labelData)
+                server.postNewRegionLabel(labelData)
                     .then(res => {
                         $labeler.modal('hide');
 
@@ -132,7 +165,7 @@ export function createHeaderLabelUI(annotation) {
 
 
 
-export function createTextGridLabeler(boxes) {
+export function createTextGridLabeler(annotation) {
     let labelNames = [
         'Title',
         'Authors',
@@ -143,23 +176,21 @@ export function createTextGridLabeler(boxes) {
 
     let idAttr = "unset";
     let buttons = _.map(labelNames, labelButton);
-    console.log('buttons', buttons);
 
     let form =
-        t.form({action: '/api/v1/label', method: 'POST', enctype:'multipart/form-data'}, [
+        t.form({action: '/api/v1/label/span', method: 'POST', enctype:'multipart/form-data'}, [
             t.input(':hidden', '@selectedLabel', '#selectedLabel'),
             t.div(".form-group", buttons)
         ]);
 
-    console.log('form', form);
 
     let $labeler =
         t.div('.modal', '.fade', `#${idAttr}`, {tabindex:"-1", role: "dialog", "aria-labelledby":  `${idAttr}Label`, 'aria-hidden': true}, [
             t.div(".modal-dialog",{role: "document"}, [
                 t.div(".modal-content", [
-                    t.div(".modal-header", [
-                        t.span("Choose Label")
-                    ]),
+                    t.div(".modal-header",
+                          t.span("Choose Label")
+                    ),
                     t.div(".modal-body", [
                         form
                     ])
@@ -182,29 +213,20 @@ export function createTextGridLabeler(boxes) {
     $labeler.submit(function (event) {
         event.preventDefault();
 
-        // let ser = _.map(annotation.targets, t => {
-        //     return {
-        //         page: t[0],
-        //         bbox: t[1].intRep
-        //     };
-        // });
-
         let labelChoice = $('#selectedLabel').attr('value');
+
+        let filteredTargets = util.filterLoci(annotation.targets);
 
         let labelData = {
             stableId: globals.currentDocument,
             labelChoice: labelChoice,
-            selection: {
-                annotType: "TODO",
-                targets: []
-            }
+            targets: filteredTargets
         };
 
-        server.postNewLabel(labelData)
+        server.postNewSpanLabel(labelData)
             .then((res) => {
 
-                console.log('posted char label',  res);
-
+                console.log('postNewLabel: ', res);
                 $labeler.modal('hide');
 
                 d3.selectAll('.label-selection-rect').remove();

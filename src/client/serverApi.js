@@ -63,10 +63,10 @@ export function getLabelingPanelWidget() {
     });
 }
 
-export function postNewLabel(labelData) {
+export function postNewRegionLabel(labelData) {
     return new Promise((resolve, reject) => {
         $.post({
-            url: "/api/v1/labeling/label",
+            url: "/api/v1/labeling/label/region",
             data: JSON.stringify(labelData),
             datatype: 'json',
             contentType: 'application/json',
@@ -77,6 +77,19 @@ export function postNewLabel(labelData) {
     });
 }
 
+export function postNewSpanLabel(labelData) {
+    return new Promise((resolve, reject) => {
+        $.post({
+            url: "/api/v1/labeling/label/span",
+            data: JSON.stringify(labelData),
+            datatype: 'json',
+            contentType: 'application/json',
+            method: "POST"
+        }, function(res) {
+            resolve(res);
+        }).fail((xhr, status, err) => reject("Server Error:" + status + err.message));
+    });
+}
 export function deleteLabels(labelData) {
     return new Promise((resolve, reject) => {
         console.log('labelData', labelData);

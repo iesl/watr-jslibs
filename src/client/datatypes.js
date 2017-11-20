@@ -7,12 +7,15 @@ import * as coords from './coord-sys.js';
 import * as _ from  'lodash';
 
 class Zone {
-    constructor (zoneId, label, order, regions) {
+    constructor (zoneId, label, order, regions, glyphDefs) {
         this.zoneId = zoneId;
         this.label = label;
         this.order = order;
         this.regions = regions;
+        this.glyphDefs = glyphDefs;
     }
+
+    // function hasGlyphDefs() { return this.glyphDefs!=null; }
 }
 
 class PageRegion {
@@ -27,11 +30,16 @@ class PageRegion {
 
 
 export function zoneFromJson(jsonRep) {
+    let glyphDefs = null;
+    if (jsonRep.glyphDefs !== null) {
+        glyphDefs = JSON.parse(jsonRep.glyphDefs);
+    }
     return new Zone(
         jsonRep.id,
         jsonRep.label,
         jsonRep.order,
-        _.map(jsonRep.regions, (r) => pageRegionFromJson(r, jsonRep.id))
+        _.map(jsonRep.regions, (r) => pageRegionFromJson(r, jsonRep.id)),
+        glyphDefs
     );
 
 }
@@ -46,4 +54,3 @@ export function pageRegionFromJson(jsonRep, zoneId) {
     );
 
 }
-
