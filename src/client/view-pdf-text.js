@@ -5,7 +5,6 @@
  *
  */
 
-/* global require setTimeout */
 
 import * as d3 from 'd3';
 import * as $ from 'jquery';
@@ -13,22 +12,13 @@ import * as _ from 'lodash';
 import * as lbl from './labeling';
 import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
-// import * as rtrees from  './rtrees.js';
 import * as pageview from  './view-pdf-pages.js';
 import {t} from './jstags.js';
 
 import '../style/view-pdf-text.less';
-// import '../style/view-pdf-pages.less';
-
 // import keyboardJS from 'keyboardjs';
 
 import { globals } from './globals';
-// let rtree = require('rbush');
-
-export const TextGridLineSpacing = 16;
-export const TextGridLineHeight  = 16;
-
-const TextGridOriginPt = coords.mkPoint.fromXy(20, 20);
 
 /** Page sync flashing indicator dot */
 function scrollSyncIndicator(parentSelection, indicatorPoint) {
@@ -73,9 +63,23 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
         .call(util.initRect, () => queryBox)
     ;
 
+    showTexgridHoverReticles(d3$textgridSvg, queryHits);
+
+    let ns = _.filter(queryHits, (hit) => {
+        return hit.glyphDataPt !== undefined;
+    });
+
+    pageview.showPageImageGlyphHoverReticles(
+        util.d3select.pageImage(pageNum),
+        ns
+    );
+}
+
+export function showTexgridHoverReticles(d3$textgridSvg, gridDataPts) {
+
     let d3$hitReticles = d3$textgridSvg.select('g.reticles')
         .selectAll('.hit-reticle')
-        .data(queryHits, (d) => d.id)
+        .data(gridDataPts, (d) => d.id)
     ;
 
     d3$hitReticles
@@ -91,40 +95,7 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
     d3$hitReticles
         .exit()
         .remove() ;
-
-    let ns = _.filter(queryHits, (hit) => {
-        return hit.glyphDataPt !== undefined;
-    });
-
-    pageview.showPageImageGlyphHoverReticles(
-        util.d3select.pageImage(pageNum),
-        ns
-    );
-    // let d3$imageHitReticles = util.d3select.pageImage(pageNum)
-    //     .selectAll('.textloc')
-    //     .data(ns, (d) => d.id)
-    // ;
-
-    // d3$imageHitReticles
-    //     .enter()
-    //     .append('rect')
-    //     .datum(d => d.pdfBounds)
-    //     .classed('textloc', true)
-    //     .attr("x", d => d.left)
-    //     .attr("y", d => d.top)
-    //     .attr("width", d => d.width)
-    //     .attr("height", d => d.height)
-    //     .attr("stroke-opacity", 0.2)
-    //     .attr("fill-opacity", 0.5)
-    //     .attr("stroke-width", 1)
-    //     .attr("stroke", 'blue')
-    //     .attr("fill", 'blue') ;
-
-    // d3$imageHitReticles
-    //     .exit()
-    //     .remove() ;
 }
-
 
 
 /**
@@ -132,7 +103,6 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
  *  view, flashing an indicator on the image point corresponding to the text
  */
 function syncScrollPageImageToTextClick(clientPt, dataPt) {
-    // syncScrollFrame(clientPt, dataPt.pdfBounds, dataPt.page, 'page-image', '.page-images');
     let pageNum = dataPt.page;
     let whichSide = 'page-image';
     let pageImageFrameId = `div#${whichSide}-frame-${pageNum}`;
@@ -158,21 +128,10 @@ export function syncScrollTextGridToImageClick(clientPt, txtDataPt) {
 
     let { page: pageNum, row: row } = txtDataPt;
 
-    // // TODO: this looks wrong:
-    // let pageTextgridSvgId = `div#textgrid-frame-${pageNum}`;
-    // let frameTop = $(pageTextgridSvgId).position().top;
-
-    // // let containerTop = $(`div.page-textgrids`).position().top;
-    // let absFrameTop = frameTop; //  - containerTop ;
-
-    let textGridNeighborY = row * TextGridLineHeight;
-    // let scrollTo = absFrameTop + (textGridNeighborY - clientPt.y - 10);
-
-    // $('#splitpane_root__bottom__right').scrollTop(scrollTo);
+    let textGridNeighborY = row * globals.TextGridLineHeight;
 
     let whichSide = 'textgrid';
     let pageFrameId = `div#${whichSide}-frame-${pageNum}`;
-    console.log('pageFrameId', pageFrameId);
 
     let scrollTo = $(pageFrameId).position().top + $('.page-textgrids').scrollTop(); // Value to scroll page top-edge to top of view pane
     scrollTo -= globals.currMouseClientPt.y;  // adjust so that  page top is at same client-y as user's mouse
@@ -300,7 +259,7 @@ export function textgridSvgHandlers(d3$textgridSvg) {
             let textgridRTree = globals.textgridRTrees[pageNum] ;
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
             let queryWidth = 20;
-            let queryBoxHeight = TextGridLineHeight * 2;
+            let queryBoxHeight = globals.TextGridLineHeight * 2;
             let queryLeft = userPt.x-queryWidth;
             let queryTop = userPt.y-queryBoxHeight;
             let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
@@ -309,7 +268,7 @@ export function textgridSvgHandlers(d3$textgridSvg) {
 
             neighborHits = _.sortBy(
                 _.filter(hits, hit => hit.glyphDataPt != undefined),
-                hit => [hit.bottom, hit.right]
+                hit => [hit.bottom, hit.left]
             );
 
             // console.log('neighborHits', neighborHits);
@@ -338,7 +297,6 @@ export function textgridSvgHandlers(d3$textgridSvg) {
 }
 
 
-
 function createTextGridLabelingPanel(annotation) {
 
     let $labeler = lbl.createTextGridLabeler(annotation);
@@ -357,7 +315,7 @@ export function setupPageTextGrids(contentId, textgrids) {
     let fixedTextgridWidth = 900;
 
     let computeGridHeight = (grid) => {
-        return (grid.rows.length * TextGridLineSpacing) + TextGridOriginPt.y + 10;
+        return (grid.rows.length * globals.TextGridLineSpacing) + globals.TextGridOriginPt.y + 10;
     };
 
     _.each(textgrids, (textgrid, gridNum) => {

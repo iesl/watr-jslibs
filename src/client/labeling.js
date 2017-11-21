@@ -27,23 +27,21 @@ export function updateAnnotationShapes() {
     });
 }
 
-function mapLociToDataPts(gridRows) {
-    let rowDataPts = _.map(gridRows.rows, (gridRow) => {
-        let glyphsLoci = gridRow.loci;
-        let dataPts = _.map(glyphsLoci, (charLocus) => {
-            let pageNum = charLocus[0][0];
-            let charBBox = charLocus[0][1];
-            let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
+function mapGlyphLociToGridDataPts(glyphsLoci) {
 
-            let pageRTree = globals.pageImageRTrees[pageNum] ;
-            let hit = pageRTree.search(pdfTextBox);
-            // let gridPt = hit.textgridDataPt;
-            return dataPt;
-        });
-        return dataPts;
+    let dataPts = _.map(glyphsLoci, (charLocus) => {
+        let pageNum = charLocus[0][0];
+        let charBBox = charLocus[0][1];
+        let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
+        // coords.mk.fromArray(charBBox) : undefined;
+
+        let pageRTree = globals.pageImageRTrees[pageNum] ;
+        let glyphDataPts = pageRTree.search(pdfTextBox);
+        let gridDataPt = glyphDataPts[0].gridDataPt;
+        return gridDataPt;
     });
 
-    return _.flatten(rowDataPts);
+    return dataPts;
 }
 
 export function refreshZoneHightlights(zonesJs) {
@@ -57,48 +55,44 @@ export function refreshZoneHightlights(zonesJs) {
         if (zone.glyphDefs != null) {
             let glyphsLoci = _.flatMap(zone.glyphDefs.rows, r => r.loci);
 
-            _.each(glyphsLoci, (glyph) => {
-                // let glyphBbox = coords.mk.fromArray(glyph[1]);
-                let glyphBbox = coords.mk.fromArray(glyph[0][1]);
-                let pageNum = glyph[0][0];
-                // console.log('glyphBbox', glyphBbox);
-                // console.log('pageNum', pageNum);
-                let svgSelector = `svg#textgrid-svg-${pageNum}`;
-                d3.select(svgSelector)
-                    .selectAll(`.span${zone.zoneId}`)
-                    .data([glyph[0]])
-                    .enter()
-                    .append('rect')
-                    .call(util.initRect, () => glyphBbox)
-                    .call(util.initStroke, 'cyan', 1, 0.8)
-                    .call(util.initFill, 'green', 0.3)
-                    // .attr('id', `ann${zone.zoneId}_${region.regionId}`)
-                    // .classed('annotation-rect', true)
-                    .classed(`span${zone.zoneId}`, true)
-                ;
+            let gridDataPts = mapGlyphLociToGridDataPts(glyphsLoci);
+            let gridDataByPage = _.groupBy(gridDataPts, p => p.page);
+            _.each(gridDataByPage, pageGridData => {
+                let pageNum = pageGridData[0].page;
+                let textgridSvg = util.d3select.pageTextgridSvg(pageNum);
+
+                textgridSvg
+                        .selectAll(`.span${zone.zoneId}`)
+                        .data(pageGridData)
+                        .enter()
+                        .append('rect')
+                        .call(util.initRect, d => d)
+                        .call(util.initStroke, 'cyan', 1, 0.1)
+                        .call(util.initFill, 'green', 0.2)
+                        .classed(`span${zone.zoneId}`, true)
+                    ;
 
             });
-
-        } else {
-            _.each(zone.regions, region => {
-                let svgPageSelector = `svg#page-image-${region.pageNum}`;
-
-                d3.select(svgPageSelector)
-                    .selectAll(`#ann${zone.zoneId}_${region.regionId}`)
-                    .data([region])
-                    .enter()
-                    .append('rect')
-                    .call(util.initRect, r => r.bbox)
-                    .call(util.initStroke, 'blue', 1, 0.8)
-                    .call(util.initFill, 'purple', 0.3)
-                    .attr('id', `ann${zone.zoneId}_${region.regionId}`)
-                    .classed('annotation-rect', true)
-                    .classed(`ann${zone.zoneId}`, true)
-                ;
-
-            });
-
         }
+
+        _.each(zone.regions, region => {
+            let svgPageSelector = `svg#page-image-${region.pageNum}`;
+
+            d3.select(svgPageSelector)
+                .selectAll(`#ann${zone.zoneId}_${region.regionId}`)
+                .data([region])
+                .enter()
+                .append('rect')
+                .call(util.initRect, r => r.bbox)
+                .call(util.initStroke, 'blue', 1, 0.8)
+                .call(util.initFill, 'purple', 0.3)
+                .attr('id', `ann${zone.zoneId}_${region.regionId}`)
+                .classed('annotation-rect', true)
+                .classed(`ann${zone.zoneId}`, true)
+            ;
+
+        });
+
 
     });
 }
@@ -167,11 +161,11 @@ export function createHeaderLabelUI(annotation) {
 }
 
 
-   let labelButton = (label) => {
-       return (
-           t.button(
-               `#${label}`, '.labelChoice .btn .btn-xs .btn-block .btn-default',
-               "@labelChoice", ':submit', `=${label}`, [
+let labelButton = (label) => {
+    return (
+        t.button(
+            `#${label}`, '.labelChoice .btn .btn-xs .btn-block .btn-default',
+            "@labelChoice", ':submit', `=${label}`, [
                    t.small(label)
                ])
        );

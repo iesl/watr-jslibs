@@ -67,7 +67,6 @@ function runMain() {
 
             d3.selectAll('svg.textgrid')
                 .each(function (){
-                    // console.log('setting up textgrid');
                     let d3$svg = d3.select(this);
                     textview.textgridSvgHandlers(d3$svg);
                 });

@@ -6,12 +6,13 @@
  *       https://stackoverflow.com/questions/6073505/what-is-the-difference-between-screenx-y-clientx-y-and-pagex-y
  **/
 
-import * as $ from 'jquery';
-// import * as _ from 'lodash';
 import Rx from 'rxjs/Rx';
 import * as coords from './coord-sys.js';
 
 export let globals = {
+    TextGridLineSpacing: 16,
+    TextGridLineHeight:  16,
+    TextGridOriginPt: coords.mkPoint.fromXy(20, 20),
 
     currentDocument: undefined,
 

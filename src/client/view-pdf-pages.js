@@ -13,7 +13,6 @@ import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
-// import {$id, div, a, btn, span, icon} from './jstags.js';
 import {$id, t, icon} from './jstags.js';
 import Rx from 'rxjs/Rx';
 import * as server from './serverApi.js';
@@ -46,7 +45,7 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
             if (neighbors.length > 0) {
                 let nearestNeighbor = neighbors[0];
                 // let ns = _.map(neighbors, (n) => n.char).join('');
-                textview.syncScrollTextGridToImageClick(clickPt, nearestNeighbor);
+                textview.syncScrollTextGridToImageClick(clickPt, nearestNeighbor.gridDataPt);
 
             }
 
@@ -81,7 +80,7 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
                             if (neighbors.length > 0) {
                                 let nearestNeighbor = neighbors[0];
                                 // let ns = _.map(neighbors, (n) => n.char).join('');
-                                textview.syncScrollTextGridToImageClick(clickPt, nearestNeighbor);
+                                textview.syncScrollTextGridToImageClick(clickPt, nearestNeighbor.gridDataPt);
                             }
                         }
                     } else if (pointOrRect.rect) {
@@ -192,25 +191,44 @@ function displayLabelHovers(pageNum, hoverPt) {
 
 function displayCharHoverReticles(d3$svg, pageNum, userPt) {
 
-    let textgridRTree = globals.pageImageRTrees[pageNum] ;
+    let pageImageRTree  = globals.pageImageRTrees[pageNum] ;
     // let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
     let queryWidth = 20;
-    let queryBoxHeight = textview.TextGridLineHeight * 2;
+    let queryBoxHeight = globals.TextGridLineHeight * 2;
     let queryLeft = userPt.x-queryWidth;
     let queryTop = userPt.y-queryBoxHeight;
     let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
 
-    let searchHits = textgridRTree.search(queryBox);
+    let searchHits = pageImageRTree.search(queryBox);
     let hits = _.sortBy(
         searchHits,
         hit => [hit.bottom, hit.right]
     );
 
     showPageImageGlyphHoverReticles(d3$svg, hits, queryBox);
+    let textgridSvg = util.d3select.pageTextgridSvg(pageNum);
+    textview.showTexgridHoverReticles(textgridSvg, _.map(hits, h => h.gridDataPt));
 }
 
 
+export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
+    let d3$imageHitReticles = d3$pageImageSvg
+        .selectAll('.textloc')
+        .data(queryHits, d => d.id)
+    ;
+
+    d3$imageHitReticles .enter()
+        .append('rect')
+        .datum(d => d.glyphDataPt? d.glyphDataPt : d)
+        .classed('textloc', true)
+        .call(util.initRect, d => d)
+        .call(util.initStroke, 'blue', 1, 0.2)
+        .call(util.initFill, 'blue', 0.5)
+    ;
+
+    d3$imageHitReticles .exit() .remove() ;
+}
 
 
 
@@ -240,26 +258,6 @@ function createImageLabelingPanel(initSelection, annotation) {
 
 
 
-export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
-    let d3$imageHitReticles = d3$pageImageSvg
-        .selectAll('.textloc')
-        .data(queryHits, d => d.id)
-    ;
-
-    d3$imageHitReticles
-        .enter()
-        .append('rect')
-        .datum(d => d.glyphDataPt? d.glyphDataPt : d)
-        .classed('textloc', true)
-        .call(util.initRect, d => d)
-        .call(util.initStroke, 'blue', 1, 0.2)
-        .call(util.initFill, 'blue', 0.5)
-    ;
-
-    d3$imageHitReticles
-        .exit()
-        .remove() ;
-}
 
 function setupStatusBar(statusBarId) {
 

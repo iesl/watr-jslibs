@@ -14,6 +14,9 @@ export let d3select = {
     pageTextgrids: () => {
         return d3.select('div.page-textgrids').selectAll('svg.textgrid');
     },
+    pageTextgridSvg: (n) => {
+        return d3.select('div.page-textgrids').select(`svg#textgrid-svg-${n}`);
+    },
     pageImage: (n) => {
         return d3.select('div.page-images').selectAll(`svg#page-image-${n}`);
     },
