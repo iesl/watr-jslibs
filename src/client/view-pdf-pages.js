@@ -168,6 +168,9 @@ function displayLabelHovers(pageNum, hoverPt) {
             let $hit = $(hoverHit.selector);
             if (! $hit.hasClass('tooltipped')) {
                 let pageImageFrameId = `div#page-image-frame-${pageNum}`;
+
+                $hit.attr('title', hoverHit.label);
+
                 const tt = new Tooltip($hit, {
                     title: hoverHit.label,
                     trigger: 'manual',

@@ -10,7 +10,7 @@ import * as server from './serverApi.js';
 
 import '../style/browse.less';
 
-let pageLen = 50;
+let pageLen = 20;
 
 function createEntryItem(entry) {
     let interestingLabels = _.filter(entry.labels[0], l => l !== 'DocumentPages');

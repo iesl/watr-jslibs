@@ -73,7 +73,6 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
         .call(util.initRect, () => queryBox)
     ;
 
-
     let d3$hitReticles = d3$textgridSvg.select('g.reticles')
         .selectAll('.hit-reticle')
         .data(queryHits, (d) => d.id)
@@ -357,68 +356,32 @@ function createTextGridLabelingPanel(annotation) {
 export function setupPageTextGrids(contentId, textgrids) {
     let fixedTextgridWidth = 900;
 
-
     let computeGridHeight = (grid) => {
         return (grid.rows.length * TextGridLineSpacing) + TextGridOriginPt.y + 10;
     };
 
     _.each(textgrids, (textgrid, gridNum) => {
         let gridHeight = computeGridHeight(textgrid);
+        let frameIdSelector = `#textgrid-frame-${gridNum}`;
         let gridNodes =
-            t.div('.textgrid', `#textgrid-frame-${gridNum}`,
-                  {style: `width: 900; height:${gridHeight}`}, [
-                      t.canvas('.textgrid', `#textgrid-canvas-${gridNum}`,
-                               {page: gridNum, width: `${fixedTextgridWidth}px`, height: `${gridHeight}px`}),
-                      t.svg('.textgrid', `#textgrid-svg-${gridNum}`,
-                            {page: gridNum, width: fixedTextgridWidth, height: gridHeight})
-                  ]) ;
+            t.div('.textgrid', frameIdSelector, {
+                style: `width: 900; height:${gridHeight}`}, [
+                    t.canvas('.textgrid', `#textgrid-canvas-${gridNum}`,
+                             {page: gridNum, width: fixedTextgridWidth, height: gridHeight})
+                ]) ;
 
         $(contentId).append(gridNodes);
 
-        d3.select(contentId)
+        d3.select(frameIdSelector)
+            .append('svg').classed('textgrid', true)
+            .datum(textgrid)
+            .attr('id', `textgrid-svg-${gridNum}`)
+            .attr('page', gridNum)
             .attr('width', fixedTextgridWidth)
-            .attr('height', gridHeight );
+            .attr('height', gridHeight)
+        ;
+
     });
-
-    // {style: `width: 900; height:${gridHeight}`},
-
-    // let pagegridEnter = d3.select(contentId)
-    //     .selectAll(".textgrid")
-    //     .data(textgrids, util.getId)
-    //     .enter()
-    // ;
-
-    // let pagegridDivs = pagegridEnter
-    //     .append('div').classed('textgrid', true)
-    //     .attr('id', (d, i) => `textgrid-frame-${i}`)
-    //     .attr('style', grid => {
-    //         let height = computeGridHeight(grid);
-    //         return `width: 900; height: ${height};`;
-    //     })
-    // ;
-
-
-    // pagegridDivs
-    //     .append('canvas').classed('textgrid', true)
-    //     .attr('id', (d, i) => `textgrid-canvas-${i}`)
-    //     .attr('page', (d, i) => i)
-    //     .attr('width', 900)
-    //     .attr('height', grid => computeGridHeight(grid))
-    // ;
-
-    // pagegridDivs
-    //     .append('svg').classed('textgrid', true)
-    //     .attr('id', (d, i) => `textgrid-svg-${i}`)
-    //     .attr('page', (d, i) => i)
-    //     .attr('width', 900)
-    //     .attr('height', grid => computeGridHeight(grid))
-
-    // d3.selectAll('canvas.textgrid')
-    //     .each(function (gridData, gridNum){
-    //         let d3$canvas = d3.select(this);
-    //         rtrees.initGridText(d3$canvas, gridData, gridNum);
-    //     });
-
 
     // initKeyboardHandlers();
 }
