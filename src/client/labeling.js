@@ -27,6 +27,25 @@ export function updateAnnotationShapes() {
     });
 }
 
+function mapLociToDataPts(gridRows) {
+    let rowDataPts = _.map(gridRows.rows, (gridRow) => {
+        let glyphsLoci = gridRow.loci;
+        let dataPts = _.map(glyphsLoci, (charLocus) => {
+            let pageNum = charLocus[0][0];
+            let charBBox = charLocus[0][1];
+            let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
+
+            let pageRTree = globals.pageImageRTrees[pageNum] ;
+            let hit = pageRTree.search(pdfTextBox);
+            // let gridPt = hit.textgridDataPt;
+            return dataPt;
+        });
+        return dataPts;
+    });
+
+    return _.flatten(rowDataPts);
+}
+
 export function refreshZoneHightlights(zonesJs) {
     let zones = _.map(zonesJs, (z) => dt.zoneFromJson(z));
     rtrees.initPageLabelRTrees(zones);
@@ -38,15 +57,12 @@ export function refreshZoneHightlights(zonesJs) {
         if (zone.glyphDefs != null) {
             let glyphsLoci = _.flatMap(zone.glyphDefs.rows, r => r.loci);
 
-            console.log('glyphsLoci', zone.glyphDefs);
-            console.log('glyphsLoci', glyphsLoci);
-
             _.each(glyphsLoci, (glyph) => {
                 // let glyphBbox = coords.mk.fromArray(glyph[1]);
                 let glyphBbox = coords.mk.fromArray(glyph[0][1]);
                 let pageNum = glyph[0][0];
-                console.log('glyphBbox', glyphBbox);
-                console.log('pageNum', pageNum);
+                // console.log('glyphBbox', glyphBbox);
+                // console.log('pageNum', pageNum);
                 let svgSelector = `svg#textgrid-svg-${pageNum}`;
                 d3.select(svgSelector)
                     .selectAll(`.span${zone.zoneId}`)

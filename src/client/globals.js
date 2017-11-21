@@ -27,8 +27,11 @@ export let globals = {
 
     rx: {
         selections: new Rx.Subject()
-    }
+    },
 
+    pageImageRTrees: [],
+    pageImageLabelRTrees: [],
+    textgridRTrees: []
 };
 
 export function setSelections(sels) {

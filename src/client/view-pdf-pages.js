@@ -246,7 +246,7 @@ export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
     d3$imageHitReticles
         .enter()
         .append('rect')
-        .datum(d => d.pdfBounds? d.pdfBounds : d)
+        .datum(d => d.glyphDataPt? d.glyphDataPt : d)
         .classed('textloc', true)
         .call(util.initRect, d => d)
         .call(util.initStroke, 'blue', 1, 0.2)

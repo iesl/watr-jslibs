@@ -13,12 +13,17 @@ import * as _ from 'lodash';
 import * as lbl from './labeling';
 import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
-import * as rtrees from  './rtrees.js';
+// import * as rtrees from  './rtrees.js';
 import * as pageview from  './view-pdf-pages.js';
-import keyboardJS from 'keyboardjs';
+import {t} from './jstags.js';
+
+import '../style/view-pdf-text.less';
+// import '../style/view-pdf-pages.less';
+
+// import keyboardJS from 'keyboardjs';
 
 import { globals } from './globals';
-let rtree = require('rbush');
+// let rtree = require('rbush');
 
 export const TextGridLineSpacing = 16;
 export const TextGridLineHeight  = 16;
@@ -89,7 +94,7 @@ function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
         .remove() ;
 
     let ns = _.filter(queryHits, (hit) => {
-        return hit.pdfBounds !== undefined;
+        return hit.glyphDataPt !== undefined;
     });
 
     pageview.showPageImageGlyphHoverReticles(
@@ -142,7 +147,7 @@ function syncScrollPageImageToTextClick(clientPt, dataPt) {
 
     scrollSyncIndicator(
         `svg#${whichSide}-${pageNum}`,
-        dataPt.pdfBounds.topLeft
+        dataPt.glyphDataPt.topLeft
     );
 }
 
@@ -168,6 +173,7 @@ export function syncScrollTextGridToImageClick(clientPt, txtDataPt) {
 
     let whichSide = 'textgrid';
     let pageFrameId = `div#${whichSide}-frame-${pageNum}`;
+    console.log('pageFrameId', pageFrameId);
 
     let scrollTo = $(pageFrameId).position().top + $('.page-textgrids').scrollTop(); // Value to scroll page top-edge to top of view pane
     scrollTo -= globals.currMouseClientPt.y;  // adjust so that  page top is at same client-y as user's mouse
@@ -226,7 +232,7 @@ function showSelectionHighlight(d3$textgridSvg, selections) {
 // }
 
 
-function textgridSvgHandlers(d3$textgridSvg) {
+export function textgridSvgHandlers(d3$textgridSvg) {
     let pageNum = parseInt(d3$textgridSvg.attr('page'));
     let reticleGroup = initHoverReticles(d3$textgridSvg);
 
@@ -303,9 +309,11 @@ function textgridSvgHandlers(d3$textgridSvg) {
             let hits = neighborHits = textgridRTree.search(queryBox);
 
             neighborHits = _.sortBy(
-                _.filter(hits, hit => hit.pdfBounds),
+                _.filter(hits, hit => hit.glyphDataPt != undefined),
                 hit => [hit.bottom, hit.right]
             );
+
+            // console.log('neighborHits', neighborHits);
 
             if (selectionStartId) {
                 let selectQuery = coords.mk.fromLtwh(userPt.x, userPt.y, 1, 1);
@@ -331,51 +339,6 @@ function textgridSvgHandlers(d3$textgridSvg) {
 }
 
 
-function initGridText(d3$canvas, gridData, gridNum) {
-    let context = d3$canvas.node().getContext('2d');
-    // context.font = 'normal normal normal 12px/normal Helvetica, Arial';
-    context.font = `normal normal normal ${TextGridLineHeight}px/normal Times New Roman`;
-    // context.font = `${TextGridLineHeight}px Helvetica, Arial`;
-    let idGen = util.IdGenerator();
-
-    let rowDataPts = _.map(gridData.rows, (gridRow, rowNum) => {
-
-        let y = TextGridOriginPt.y + (rowNum * TextGridLineHeight);
-        let x = TextGridOriginPt.x;
-        let text = gridRow.text;
-        let currLeft = x;
-        let dataPts = _.map(text.split(''), (ch, chi) => {
-            let chWidth = context.measureText(ch).width;
-
-            let dataPt = coords.mk.fromLtwh(
-                currLeft, y-TextGridLineHeight, chWidth, TextGridLineHeight
-            );
-
-            let charLocus = gridRow.loci[chi];
-            let charBBox = charLocus[0][1];
-            let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
-
-            dataPt.pdfBounds = pdfTextBox ;
-            dataPt.locus = charLocus;
-            dataPt.page = charBBox? charLocus[0][0] : undefined;
-            dataPt.gridRow = gridRow;
-            dataPt.id = idGen();
-            currLeft += chWidth;
-            return dataPt;
-        });
-        // context.strokeText(text, x, y);
-        context.fillText(text, x, y);
-        return dataPts;
-    });
-
-    let allDataPts = _.flatten(rowDataPts);
-    globals.dataPts[gridNum] = allDataPts;
-    let textgridRTree = rtree();
-    globals.textgridRTrees[gridNum] = textgridRTree;
-    textgridRTree.load(allDataPts);
-}
-
-
 
 function createTextGridLabelingPanel(annotation) {
 
@@ -391,56 +354,70 @@ function createTextGridLabelingPanel(annotation) {
 }
 
 
-
 export function setupPageTextGrids(contentId, textgrids) {
-    rtrees.initRTrees(textgrids);
+    let fixedTextgridWidth = 900;
+
 
     let computeGridHeight = (grid) => {
         return (grid.rows.length * TextGridLineSpacing) + TextGridOriginPt.y + 10;
     };
-    let pagegridEnter = d3.select(contentId)
-        .selectAll(".textgrid")
-        .data(textgrids, util.getId)
-        .enter()
-    ;
 
-    let pagegridDivs = pagegridEnter
-        .append('div').classed('textgrid', true)
-        .attr('id', (d, i) => `textgrid-frame-${i}`)
-        .attr('style', grid => {
-            let height = computeGridHeight(grid);
-            return `width: 900; height: ${height};`;
-        })
-    ;
+    _.each(textgrids, (textgrid, gridNum) => {
+        let gridHeight = computeGridHeight(textgrid);
+        let gridNodes =
+            t.div('.textgrid', `#textgrid-frame-${gridNum}`,
+                  {style: `width: 900; height:${gridHeight}`}, [
+                      t.canvas('.textgrid', `#textgrid-canvas-${gridNum}`,
+                               {page: gridNum, width: `${fixedTextgridWidth}px`, height: `${gridHeight}px`}),
+                      t.svg('.textgrid', `#textgrid-svg-${gridNum}`,
+                            {page: gridNum, width: fixedTextgridWidth, height: gridHeight})
+                  ]) ;
+
+        $(contentId).append(gridNodes);
+
+        d3.select(contentId)
+            .attr('width', fixedTextgridWidth)
+            .attr('height', gridHeight );
+    });
+
+    // {style: `width: 900; height:${gridHeight}`},
+
+    // let pagegridEnter = d3.select(contentId)
+    //     .selectAll(".textgrid")
+    //     .data(textgrids, util.getId)
+    //     .enter()
+    // ;
+
+    // let pagegridDivs = pagegridEnter
+    //     .append('div').classed('textgrid', true)
+    //     .attr('id', (d, i) => `textgrid-frame-${i}`)
+    //     .attr('style', grid => {
+    //         let height = computeGridHeight(grid);
+    //         return `width: 900; height: ${height};`;
+    //     })
+    // ;
 
 
-    pagegridDivs
-        .append('canvas').classed('textgrid', true)
-        .attr('id', (d, i) => `textgrid-canvas-${i}`)
-        .attr('page', (d, i) => i)
-        .attr('width', 900)
-        .attr('height', grid => computeGridHeight(grid))
-    ;
+    // pagegridDivs
+    //     .append('canvas').classed('textgrid', true)
+    //     .attr('id', (d, i) => `textgrid-canvas-${i}`)
+    //     .attr('page', (d, i) => i)
+    //     .attr('width', 900)
+    //     .attr('height', grid => computeGridHeight(grid))
+    // ;
 
-    pagegridDivs
-        .append('svg').classed('textgrid', true)
-        .attr('id', (d, i) => `textgrid-svg-${i}`)
-        .attr('page', (d, i) => i)
-        .attr('width', 900)
-        .attr('height', grid => computeGridHeight(grid))
-    ;
+    // pagegridDivs
+    //     .append('svg').classed('textgrid', true)
+    //     .attr('id', (d, i) => `textgrid-svg-${i}`)
+    //     .attr('page', (d, i) => i)
+    //     .attr('width', 900)
+    //     .attr('height', grid => computeGridHeight(grid))
 
-    d3.selectAll('canvas.textgrid')
-        .each(function (gridData, gridNum){
-            let d3$canvas = d3.select(this);
-            initGridText(d3$canvas, gridData, gridNum);
-        });
-
-    d3.selectAll('svg.textgrid')
-        .each(function (){
-            let d3$svg = d3.select(this);
-            textgridSvgHandlers(d3$svg);
-        });
+    // d3.selectAll('canvas.textgrid')
+    //     .each(function (gridData, gridNum){
+    //         let d3$canvas = d3.select(this);
+    //         rtrees.initGridText(d3$canvas, gridData, gridNum);
+    //     });
 
 
     // initKeyboardHandlers();

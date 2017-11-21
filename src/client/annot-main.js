@@ -9,9 +9,11 @@ import {globals} from './globals';
 import * as global from './globals';
 import * as server from './serverApi.js';
 import * as panes from  './splitpane-utils.js';
+import * as rtrees from  './rtrees.js';
 import {$id} from './jstags.js';
 import * as _ from  'lodash';
-import keyboardJS from 'keyboardjs';
+import * as d3 from 'd3';
+// import keyboardJS from 'keyboardjs';
 
 import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
@@ -61,6 +63,14 @@ function runMain() {
             pageview.setupPageImages('div.view-pdf-pages', pageShapes);
             textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
+            rtrees.initPageAndGridRTrees(textgrids);
+
+            d3.selectAll('svg.textgrid')
+                .each(function (){
+                    // console.log('setting up textgrid');
+                    let d3$svg = d3.select(this);
+                    textview.textgridSvgHandlers(d3$svg);
+                });
 
         })
         .catch(error => {
