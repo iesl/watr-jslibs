@@ -12,7 +12,7 @@ import * as rtrees from './rtrees';
 import * as util from './commons.js';
 import * as server from './serverApi.js';
 
-import {$id, t, icon} from './jstags.js';
+import {t} from './jstags.js';
 
 // let nextAnnotId = util.IdGenerator();
 import * as coords from './coord-sys.js';
@@ -33,7 +33,6 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
         let pageNum = charLocus[0][0];
         let charBBox = charLocus[0][1];
         let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
-        // coords.mk.fromArray(charBBox) : undefined;
 
         let pageRTree = globals.pageImageRTrees[pageNum] ;
         let glyphDataPts = pageRTree.search(pdfTextBox);
@@ -170,8 +169,6 @@ let labelButton = (label) => {
                ])
        );
    };
-
-
 
 
 

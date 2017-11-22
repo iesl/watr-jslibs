@@ -1,12 +1,7 @@
 /* global require  */
 
-import * as d3 from  'd3';
 import * as panes from  './splitpane-utils.js';
-import * as util from  './commons.js';
-import * as tg from  './view-pdf-text.js';
-import * as stepper from  './d3-stepper.js';
 import * as $ from 'jquery';
-import {globals} from './globals';
 import {$id, t} from './jstags.js';
 
 import '../style/frame.less';
@@ -16,6 +11,8 @@ import '../style/selection.css';
 import '../style/bootstrap.css';
 
 import 'bootstrap';
+
+import * as lbl from './labeling';
 
 import 'font-awesome/css/font-awesome.css';
 

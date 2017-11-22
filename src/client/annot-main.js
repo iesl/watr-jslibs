@@ -28,6 +28,7 @@ import 'font-awesome/css/font-awesome.css';
 
 import * as pageview from  './view-pdf-pages.js';
 import * as textview from  './view-pdf-text.js';
+import * as auth from './auth.js';
 
 function setupFrameLayout() {
 
@@ -40,42 +41,44 @@ function setupFrameLayout() {
 }
 
 function runMain() {
+    auth.doLogin().then( loginInfo => {
 
-    frame.setupFrameLayout();
+        frame.setupFrameLayout();
 
-    let entry = util.corpusEntry();
+        let entry = util.corpusEntry();
 
-    globals.currentDocument = entry;
+        globals.currentDocument = entry;
 
-    // let show = util.getParameterByName('show');
 
-    server.getCorpusArtifactTextgrid(entry)
-        .then(jsdata => {
-            let dataBlock = jsdata[0].steps[0];
-            let pages = dataBlock.pages;
-            let textgrids = _.map(pages, p => p.textgrid);
-            let pageShapes = _.map(pages, p => p.shapes);
+        server.getCorpusArtifactTextgrid(entry)
+            .then(jsdata => {
+                let dataBlock = jsdata[0].steps[0];
+                let pages = dataBlock.pages;
+                let textgrids = _.map(pages, p => p.textgrid);
+                let pageShapes = _.map(pages, p => p.shapes);
 
-            global.initGlobalMouseTracking();
+                global.initGlobalMouseTracking();
 
-            setupFrameLayout();
+                setupFrameLayout();
 
-            pageview.setupPageImages('div.view-pdf-pages', pageShapes);
-            textview.setupPageTextGrids('div.page-textgrids', textgrids);
+                pageview.setupPageImages('div.view-pdf-pages', pageShapes);
+                textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
-            rtrees.initPageAndGridRTrees(textgrids);
+                rtrees.initPageAndGridRTrees(textgrids);
 
-            d3.selectAll('svg.textgrid')
-                .each(function (){
-                    let d3$svg = d3.select(this);
-                    textview.textgridSvgHandlers(d3$svg);
-                });
+                d3.selectAll('svg.textgrid')
+                    .each(function (){
+                        let d3$svg = d3.select(this);
+                        textview.textgridSvgHandlers(d3$svg);
+                    });
 
-        })
-        .catch(error => {
-            $('.content-pane').append(`<div><p>ERROR: ${error}: ${error}</p></div>`);
-        })
-    ;
+            })
+            .catch(error => {
+                $('.content-pane').append(`<div><p>ERROR: ${error}: ${error}</p></div>`);
+            }) ;
+
+    });
+
 }
 
 runMain();

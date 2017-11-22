@@ -95,3 +95,19 @@ function elem(tag, ...args) {
 
     return $tag;
 }
+
+export function makeModal(form) {
+    let modal =
+        t.div('.modal', '.fade', {tabindex:"-1", role: "dialog", 'aria-hidden': true}, [
+            t.div(".modal-dialog",{role: "document"}, [
+                t.div(".modal-content", [
+                    t.div(".modal-body", [
+                        form
+                    ])
+                ])
+            ])
+        ])
+    ;
+
+    return modal;
+}

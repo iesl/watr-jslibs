@@ -9,7 +9,6 @@ import 'd3-drag';
 import * as $ from 'jquery';
 import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
-// import { globals } from './globals';
 
 
 export default function awaitUserSelection(d3$svg, initSvgPt) {

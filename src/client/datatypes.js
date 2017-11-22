@@ -15,7 +15,6 @@ class Zone {
         this.glyphDefs = glyphDefs;
     }
 
-    // function hasGlyphDefs() { return this.glyphDefs!=null; }
 }
 
 class PageRegion {

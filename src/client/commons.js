@@ -245,14 +245,6 @@ export function IdGenerator() {
     return nextId;
 }
 
-function appendCircle(sel, cx, cy, r) {
-    sel.append('circle')
-        .attr("cx", cx)
-        .attr("cy", cy)
-        .attr("r", r);
-}
-
-
 export function initRect(sel, fbbox) {
     sel .attr("x"      , d => fbbox(d).left)
         .attr("y"      , d => fbbox(d).top)
