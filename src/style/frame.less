@@ -1,7 +1,28 @@
 
+@import "inc/_solarized";
 
 .menubar {
     font-size: 24px;
+    display: grid;
+
+    grid-column-gap     : 10px;
+    grid-template-columns  : 20px 1fr 1fr 1fr 20px;
+    grid-template-areas: "x1 head middle last x2";
+
+    background: @base2;
+
+    .menuitem {
+
+    }
+
+    .menuitem-head {
+        grid-area: head;
+        justify-self: start;
+    }
+    .menuitem-last {
+        grid-area: last;
+        justify-self: end;
+    }
 }
 
 .statusbar {
@@ -14,11 +35,6 @@
 }
 .statusitem {
     flex: 0 1 auto;
-}
-
-.menu-pane {
-    margin: 0 auto;
-    background: #ccd9ff;
 }
 
 
