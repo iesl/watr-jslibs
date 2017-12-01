@@ -30,8 +30,8 @@ export function updateAnnotationShapes() {
 function mapGlyphLociToGridDataPts(glyphsLoci) {
 
     let dataPts = _.map(glyphsLoci, (charLocus) => {
-        let pageNum = charLocus[0][0];
-        let charBBox = charLocus[0][1];
+        let pageNum = charLocus[0][1];
+        let charBBox = charLocus[0][2];
         let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
 
         let pageRTree = globals.pageImageRTrees[pageNum] ;

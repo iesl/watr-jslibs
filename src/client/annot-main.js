@@ -51,7 +51,7 @@ function runMain() {
 
     server.getCorpusArtifactTextgrid(entry)
         .then(jsdata => {
-            let dataBlock = jsdata[0].steps[0];
+            let dataBlock = jsdata[0];
             let pages = dataBlock.pages;
             let textgrids = _.map(pages, p => p.textgrid);
             let pageShapes = _.map(pages, p => p.shapes);

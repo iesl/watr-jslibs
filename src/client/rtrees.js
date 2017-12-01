@@ -76,6 +76,7 @@ export function initPageLabelRTrees(zones) {
 export function initPageAndGridRTrees(textgrids) {
     // Assumes that the divs+canvas+svgs are all in place in the DOM
     // initPageImageGlyphRTrees(textgrids);
+    // console.log('textgrids', textgrids);
     _.each(textgrids, (textgrid, gridNum) => {
         let idGen = util.IdGenerator();
         let pageImageRTree = rtree();
@@ -83,6 +84,9 @@ export function initPageAndGridRTrees(textgrids) {
         globals.pageImageRTrees[gridNum] = pageImageRTree;
         globals.textgridRTrees[gridNum] = textGridRTree;
         let textgridCanvas = $(`#textgrid-canvas-${gridNum}`)[0];
+        // console.log('initing', gridNum, textgrid);
+        // console.log('curr pageImageRTrees', globals.pageImageRTrees);
+        // console.log('curr textGridRTrees', globals.textgridRTrees);
         let context = textgridCanvas.getContext('2d');
 
         context.font = `normal normal normal ${globals.TextGridLineHeight}px/normal Times New Roman`;
@@ -100,24 +104,27 @@ export function initPageAndGridRTrees(textgrids) {
                     currLeft, y-globals.TextGridLineHeight, chWidth, globals.TextGridLineHeight
                 );
 
-                let charLocus = gridRow.loci[chi];
-                let charBBox = charLocus[0][1];
                 gridDataPt.id = idGen();
-                if (charBBox != undefined) {
-                    let glyphDataPt = coords.mk.fromArray(charBBox);
-                    glyphDataPt.id = gridDataPt.id;
-                    glyphDataPt.gridDataPt = gridDataPt;
-                    glyphDataPt.page = gridNum;
-                    gridDataPt.glyphDataPt = glyphDataPt ;
-                }
-
-                // gridDataPt.gridDataPt = gridDataPt;
-                gridDataPt.locus = charLocus;
                 gridDataPt.gridRow = gridRow;
                 gridDataPt.row = rowNum;
                 gridDataPt.col = chi;
                 gridDataPt.char = ch;
                 gridDataPt.page = gridNum;
+
+                let charDef = gridRow.loci[chi];
+                let isGlyphData = typeof charDef[0] == typeof [];
+                if (isGlyphData) {
+                    let charBBox = charDef[0][2];
+                    let glyphDataPt = coords.mk.fromArray(charBBox);
+                    glyphDataPt.id = gridDataPt.id;
+                    glyphDataPt.gridDataPt = gridDataPt;
+                    glyphDataPt.page = gridNum;
+                    gridDataPt.glyphDataPt = glyphDataPt ;
+
+                    gridDataPt.locus = charBBox;
+
+                }
+
                 currLeft += chWidth;
 
                 return gridDataPt;
@@ -140,4 +147,3 @@ export function initPageAndGridRTrees(textgrids) {
     });
 
 }
-

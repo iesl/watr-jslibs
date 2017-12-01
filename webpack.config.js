@@ -3,14 +3,6 @@ const webpack = require('webpack'); //to access built-in plugins
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 
-// const extractLess = new ExtractTextPlugin('[name].bundle.css');
-// filename: "[name].[contenthash].css",
-
-// const extractLess = new ExtractTextPlugin({
-//     filename: "[name].bundle.css",
-//     disable: process.env.NODE_ENV === "development"
-// });
-
 const jQueryProvider = new webpack.ProvidePlugin({
     $: 'jquery',
     jQuery: 'jquery',
@@ -40,21 +32,9 @@ const config = {
     },
 
     plugins: [
-        // extractLess,
         jQueryProvider
     ]
 };
 
 module.exports = config;
 
-// { test: /\.less$/,
-//   use: extractLess.extract({
-//       use: [{
-//           loader: "css-loader"
-//       }, {
-//           loader: "less-loader"
-//       }],
-//       // use style-loader in development
-//       fallback: "style-loader"
-//   })
-// },
