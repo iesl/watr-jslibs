@@ -100,7 +100,8 @@ export function refreshZoneHightlights(zonesJs) {
 
 export function createHeaderLabelUI(annotation) {
     server.getLabelingPanelWidget()
-        .then(labelerHtml => {
+        .then(resp => {
+            let labelerHtml = resp.ui.labeler;
             let $labeler = $(labelerHtml);
 
             $labeler.on('hidden.bs.modal', function () {
