@@ -1,6 +1,6 @@
 /* global require  */
 
-import { globals } from './globals';
+import { shared } from './shared-state';
 import * as _ from 'lodash';
 import * as coords from './coord-sys.js';
 import * as $ from 'jquery';
@@ -10,12 +10,12 @@ import * as util from  './commons.js';
 
 
 export function searchPage(pageNum, queryBox) {
-    let pageRTree = globals.pageImageRTrees[pageNum];
+    let pageRTree = shared.pageImageRTrees[pageNum];
     return pageRTree.search(queryBox);
 }
 
 export function knnQueryPage(pageNum, queryPoint, k) {
-    let pageRTree = globals.pageImageRTrees[pageNum];
+    let pageRTree = shared.pageImageRTrees[pageNum];
     return knn(pageRTree, queryPoint.x, queryPoint.y, k);
 
 }
@@ -34,8 +34,8 @@ export function queryHitsMBR(hits) {
 }
 
 export function searchPageLabels(pageNum, queryBox) {
-    if (globals.pageImageLabelRTrees[pageNum]) {
-        let pageRtree = globals.pageImageLabelRTrees[pageNum];
+    if (shared.pageImageLabelRTrees[pageNum]) {
+        let pageRtree = shared.pageImageLabelRTrees[pageNum];
         return pageRtree.search(queryBox);
     } else {
         return [];
@@ -44,7 +44,7 @@ export function searchPageLabels(pageNum, queryBox) {
 
 
 export function initPageLabelRTrees(zones) {
-    globals.pageImageLabelRTrees = [];
+    shared.pageImageLabelRTrees = [];
 
     let dataPts = _.flatMap(zones, zone => {
         return _.map(zone.regions, region => {
@@ -67,7 +67,7 @@ export function initPageLabelRTrees(zones) {
         let pageNum = pageGroup[0].pageNum;
         let pageRtree = rtree();
 
-        globals.pageImageLabelRTrees[pageNum] = pageRtree;
+        shared.pageImageLabelRTrees[pageNum] = pageRtree;
         pageRtree.load(pageGroup);
     });
 }
@@ -81,27 +81,27 @@ export function initPageAndGridRTrees(textgrids) {
         let idGen = util.IdGenerator();
         let pageImageRTree = rtree();
         let textGridRTree = rtree();
-        globals.pageImageRTrees[gridNum] = pageImageRTree;
-        globals.textgridRTrees[gridNum] = textGridRTree;
+        shared.pageImageRTrees[gridNum] = pageImageRTree;
+        shared.textgridRTrees[gridNum] = textGridRTree;
         let textgridCanvas = $(`#textgrid-canvas-${gridNum}`)[0];
         // console.log('initing', gridNum, textgrid);
-        // console.log('curr pageImageRTrees', globals.pageImageRTrees);
-        // console.log('curr textGridRTrees', globals.textgridRTrees);
+        // console.log('curr pageImageRTrees', shared.pageImageRTrees);
+        // console.log('curr textGridRTrees', shared.textgridRTrees);
         let context = textgridCanvas.getContext('2d');
 
-        context.font = `normal normal normal ${globals.TextGridLineHeight}px/normal Times New Roman`;
+        context.font = `normal normal normal ${shared.TextGridLineHeight}px/normal Times New Roman`;
 
         let gridRowsDataPts = _.map(textgrid.rows, (gridRow, rowNum) => {
 
-            let y = globals.TextGridOriginPt.y + (rowNum * globals.TextGridLineHeight);
-            let x = globals.TextGridOriginPt.x;
+            let y = shared.TextGridOriginPt.y + (rowNum * shared.TextGridLineHeight);
+            let x = shared.TextGridOriginPt.x;
             let text = gridRow.text;
             let currLeft = x;
             let gridDataPts = _.map(text.split(''), (ch, chi) => {
                 let chWidth = context.measureText(ch).width;
 
                 let gridDataPt = coords.mk.fromLtwh(
-                    currLeft, y-globals.TextGridLineHeight, chWidth, globals.TextGridLineHeight
+                    currLeft, y-shared.TextGridLineHeight, chWidth, shared.TextGridLineHeight
                 );
 
                 gridDataPt.id = idGen();
@@ -135,7 +135,7 @@ export function initPageAndGridRTrees(textgrids) {
         });
 
         let pageDataPts = _.flatten(gridRowsDataPts);
-        globals.dataPts[gridNum] = pageDataPts;
+        shared.dataPts[gridNum] = pageDataPts;
         textGridRTree.load(pageDataPts);
         let glyphDataPts = _.filter(
             _.map(pageDataPts, p => p.glyphDataPt),

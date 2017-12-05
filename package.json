@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "bootstrap": "^3.3.7",
     "d3": "^4.11.0",
     "font-awesome": "^4.7.0",
     "form-serializer": "^2.5.0",
+    "jquery": "^3.2.1",
     "js-cookie": "^2.2.0",
     "jwt-client": "^0.2.1",
     "keyboardjs": "^2.4.1",
+    "less": "^2.7.3",
     "lodash": "^4.17.4",
     "rbush": "^2.0.1",
     "rbush-knn": "^2.0.0",
@@ -31,6 +32,7 @@
   },
   "scripts": {
     "build": "webpack",
+    "build-v": "webpack --display-modules",
     "watch": "webpack --watch",
     "test": "jest"
   }

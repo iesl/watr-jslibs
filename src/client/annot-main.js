@@ -5,24 +5,25 @@
 import * as util from  './commons.js';
 import * as $ from 'jquery';
 import * as frame from './frame.js';
-import {globals} from './globals';
-import * as global from './globals';
+import {shared} from './shared-state';
+import * as global from './shared-state';
 import * as server from './serverApi.js';
 import * as panes from  './splitpane-utils.js';
 import * as rtrees from  './rtrees.js';
 import {$id} from './jstags.js';
 import * as _ from  'lodash';
-import * as d3 from 'd3';
+import d3 from './d3-loader.js';
 // import keyboardJS from 'keyboardjs';
 
 import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
 import '../style/selection.css';
-import '../style/bootstrap.css';
+
+// import '../style/bootstrap.css';
+// import 'bootstrap';
 
 import '../style/browse.less';
 
-import 'bootstrap';
 
 import 'font-awesome/css/font-awesome.css';
 
@@ -40,13 +41,13 @@ function setupFrameLayout() {
 
 }
 
-function runMain() {
+export function runMain() {
 
     frame.setupFrameLayout();
 
     let entry = util.corpusEntry();
 
-    globals.currentDocument = entry;
+    shared.currentDocument = entry;
 
 
     server.getCorpusArtifactTextgrid(entry)
@@ -78,4 +79,3 @@ function runMain() {
 
 }
 
-runMain();

@@ -11,8 +11,7 @@ const jQueryProvider = new webpack.ProvidePlugin({
 
 const config = {
     entry: {
-        document: './src/client/annot-main.js',
-        browse: './src/client/browse-main.js'
+        app: './src/client/app-main.js'
     },
 
     devtool: 'inline-source-map',

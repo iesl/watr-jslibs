@@ -2,13 +2,11 @@
  *
  **/
 
-import * as d3 from 'd3';
-import 'd3-dispatch';
-import 'd3-selection';
-import 'd3-drag';
-import * as $ from 'jquery';
+import d3 from './d3-loader.js';
+// import * as $ from 'jquery';
 import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
+
 
 
 export default function awaitUserSelection(d3$svg, initSvgPt) {

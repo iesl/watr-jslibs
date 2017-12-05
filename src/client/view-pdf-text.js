@@ -6,7 +6,7 @@
  */
 
 
-import * as d3 from 'd3';
+import d3 from './d3-loader.js';
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 import * as lbl from './labeling';
@@ -18,7 +18,7 @@ import {t} from './jstags.js';
 import '../style/view-pdf-text.less';
 // import keyboardJS from 'keyboardjs';
 
-import { globals } from './globals';
+import { shared } from './shared-state';
 
 /** Page sync flashing indicator dot */
 function scrollSyncIndicator(parentSelection, indicatorPoint) {
@@ -108,7 +108,7 @@ function syncScrollPageImageToTextClick(clientPt, dataPt) {
     let pageImageFrameId = `div#${whichSide}-frame-${pageNum}`;
 
     let scrollTo = $(pageImageFrameId).position().top + $('.page-images').scrollTop(); // Value to scroll page top-edge to top of view pane
-    scrollTo -= globals.currMouseClientPt.y;  // adjust so that  page top is at same client-y as user's mouse
+    scrollTo -= shared.currMouseClientPt.y;  // adjust so that  page top is at same client-y as user's mouse
     scrollTo += 75; // fudge factor to adjust for topbar+statusbar heights
     scrollTo += dataPt.top;  // adjust so that clicked text is even w/user's mouse
 
@@ -128,13 +128,13 @@ export function syncScrollTextGridToImageClick(clientPt, txtDataPt) {
 
     let { page: pageNum, row: row } = txtDataPt;
 
-    let textGridNeighborY = row * globals.TextGridLineHeight;
+    let textGridNeighborY = row * shared.TextGridLineHeight;
 
     let whichSide = 'textgrid';
     let pageFrameId = `div#${whichSide}-frame-${pageNum}`;
 
     let scrollTo = $(pageFrameId).position().top + $('.page-textgrids').scrollTop(); // Value to scroll page top-edge to top of view pane
-    scrollTo -= globals.currMouseClientPt.y;  // adjust so that  page top is at same client-y as user's mouse
+    scrollTo -= shared.currMouseClientPt.y;  // adjust so that  page top is at same client-y as user's mouse
     scrollTo += 50; // fudge factor to adjust for topbar+statusbar heights
     scrollTo += textGridNeighborY;  // adjust so that clicked text is even w/user's mouse
 
@@ -256,10 +256,10 @@ export function textgridSvgHandlers(d3$textgridSvg) {
 
         })
         .on("mousemove", function() {
-            let textgridRTree = globals.textgridRTrees[pageNum] ;
+            let textgridRTree = shared.textgridRTrees[pageNum] ;
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
             let queryWidth = 20;
-            let queryBoxHeight = globals.TextGridLineHeight * 2;
+            let queryBoxHeight = shared.TextGridLineHeight * 2;
             let queryLeft = userPt.x-queryWidth;
             let queryTop = userPt.y-queryBoxHeight;
             let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
@@ -281,9 +281,9 @@ export function textgridSvgHandlers(d3$textgridSvg) {
                 if (selectHits.length>0 && selectionEndId != hitId) {
                     selectionEndId = hitId;
                     if (selectionStartId <= selectionEndId) {
-                        gridSelection = globals.dataPts[pageNum].slice(selectionStartId, selectionEndId+1);
+                        gridSelection = shared.dataPts[pageNum].slice(selectionStartId, selectionEndId+1);
                     } else {
-                        gridSelection = globals.dataPts[pageNum].slice(selectionEndId, selectionStartId);
+                        gridSelection = shared.dataPts[pageNum].slice(selectionEndId, selectionStartId);
                     }
 
                     showSelectionHighlight(d3$textgridSvg, gridSelection);
@@ -303,8 +303,8 @@ function createTextGridLabelingPanel(annotation) {
 
     $labeler.find('.modal-dialog').css({
         'position': 'absolute',
-        'left': globals.currMouseClientPt.x + "px",
-        'top': globals.currMouseClientPt.y + "px"
+        'left': shared.currMouseClientPt.x + "px",
+        'top': shared.currMouseClientPt.y + "px"
     });
 
     $labeler.modal();
@@ -315,7 +315,7 @@ export function setupPageTextGrids(contentId, textgrids) {
     let fixedTextgridWidth = 900;
 
     let computeGridHeight = (grid) => {
-        return (grid.rows.length * globals.TextGridLineSpacing) + globals.TextGridOriginPt.y + 10;
+        return (grid.rows.length * shared.TextGridLineSpacing) + shared.TextGridOriginPt.y + 10;
     };
 
     _.each(textgrids, (textgrid, gridNum) => {

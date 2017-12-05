@@ -6,10 +6,13 @@
  *       https://stackoverflow.com/questions/6073505/what-is-the-difference-between-screenx-y-clientx-y-and-pagex-y
  **/
 
-import Rx from 'rxjs/Rx';
+// import * as Rx from 'rxjs/Rx';
+import { Subject } from 'rxjs/Subject';
+import { Observable } from 'rxjs/Observable';
 import * as coords from './coord-sys.js';
 
-export let globals = {
+
+export let shared = {
     TextGridLineSpacing: 16,
     TextGridLineHeight:  16,
     TextGridOriginPt: coords.mkPoint.fromXy(20, 20),
@@ -27,7 +30,7 @@ export let globals = {
     currentSelections: [],
 
     rx: {
-        selections: new Rx.Subject()
+        selections: new Subject()
     },
 
     pageImageRTrees: [],
@@ -36,17 +39,17 @@ export let globals = {
 };
 
 export function setSelections(sels) {
-    globals.currentSelections = sels;
-    globals.rx.selections.next(sels);
+    shared.currentSelections = sels;
+    shared.rx.selections.next(sels);
 }
 
 
 export function initGlobalMouseTracking() {
-    globals.rx.clientPt = Rx.Observable
+    shared.rx.clientPt = Observable
         .fromEvent(document, 'mousemove')
         .map(event => {
             let clientPt = coords.mkPoint.fromXy(event.clientX, event.clientY);
-            globals.currMouseClientPt = clientPt;
+            shared.currMouseClientPt = clientPt;
             return clientPt;
         }) ;
 

@@ -164,54 +164,23 @@ export function getAuthedJson(url) {
 
 export function getLoginStatus() {
     let authStatus = new Promise((resolve, reject) => {
+        let result = { login: false };
+
         $.ajax({
             url: '/api/v1/auth/status',
-            method: "POST",
-            dataFilter: function(data) {
-                console.log('dataFilter', data);
-                return data;
-            }
-            // success: (res, status, xhr) => {
-            //     // console.log('success', res, status, xhr);
-            //     // resolve(res);
-            // },
-            // error: function(xhr, status, err) {
-            //     resolve( { status: 'Unauthorized' } );
-            //     // reject("Server Error:" + status + err.message);
-            // }
-        }).done(function(res, status) {
-            console.log('success', res, status);
-            resolve(res);
-
-            return '<i />';
+            method: "POST"
+        }).done(function(res) {
+            result.info = res;
+            result.login = true;
+            // resolve(result);
         }).fail(function(res) {
-            if (res.status == 401) {
-               reject ( { status: 'Unauthorized' } );
-            } {
-                reject ( { status: res.statusText } );
-            }
-            console.log('fail', res);
-            return '<i />';
+            result = { status: res.statusText } ;
+        }).always(() => {
+            resolve(result);
         }) ;
     });
-    // return getAuthedJson('/api/v1/auth/status')
-    return authStatus
-        .then( loginInfo => {
-            return new Promise((resolve) => {
-                resolve(
-                    {login: true, info: loginInfo}
-                );
-            });
-        })
-        .catch(() =>  {
-            return new Promise((resolve) => {
-                console.log('failed login');
-                resolve(
-                    {login: false}
-                );
-            });
-        })
-    ;
+
+    return authStatus ;
 }
 
 export function getCorpusArtifactTextgrid(entryName) {

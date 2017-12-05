@@ -3,7 +3,7 @@
  *
  **/
 
-import * as d3 from 'd3';
+import d3 from './d3-loader.js';
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 import * as lbl from './labeling';
@@ -14,13 +14,13 @@ import * as rtrees from  './rtrees.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
 import {$id, t, icon} from './jstags.js';
-import Rx from 'rxjs/Rx';
+import { Observable } from 'rxjs/Observable';
 import * as server from './serverApi.js';
 
 import * as textview from  './view-pdf-text.js';
 
-import { globals } from './globals';
-import * as global from './globals';
+import { shared } from './shared-state';
+import * as global from './shared-state';
 
 import 'font-awesome/css/font-awesome.css';
 
@@ -120,7 +120,7 @@ function initPageImageMouseHandlers(d3$svg, pageNum) {
 
 function setupSelectionHighlighting() {
 
-    globals.rx.selections.subscribe(currSelects=> {
+    shared.rx.selections.subscribe(currSelects=> {
 
         d3.selectAll('.select-highlight')
             .remove();
@@ -151,7 +151,7 @@ function setupSelectionHighlighting() {
 }
 function toggleLabelSelection(pageNum, clickedItems) {
 
-    let nonintersectingItems = _.differenceBy(clickedItems,  globals.currentSelections, s => s.id);
+    let nonintersectingItems = _.differenceBy(clickedItems,  shared.currentSelections, s => s.id);
 
     global.setSelections(nonintersectingItems);
 }
@@ -191,11 +191,11 @@ function displayLabelHovers(pageNum, hoverPt) {
 
 function displayCharHoverReticles(d3$svg, pageNum, userPt) {
 
-    let pageImageRTree  = globals.pageImageRTrees[pageNum] ;
+    let pageImageRTree  = shared.pageImageRTrees[pageNum] ;
     // let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
     let queryWidth = 20;
-    let queryBoxHeight = globals.TextGridLineHeight * 2;
+    let queryBoxHeight = shared.TextGridLineHeight * 2;
     let queryLeft = userPt.x-queryWidth;
     let queryTop = userPt.y-queryBoxHeight;
     let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
@@ -266,14 +266,14 @@ function setupStatusBar(statusBarId) {
 
     let $selectStatus = t.div('.statusitem', "Selections");
 
-    globals.rx.selections.subscribe(currSelects=> {
+    shared.rx.selections.subscribe(currSelects=> {
         if (currSelects.length > 0) {
             let deleteBtn = t.button('.btn', '.btn-sm', '.btn-default', [icon.trash]);
-            var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
+            var clicks = Observable.fromEvent(deleteBtn, 'click');
             clicks.subscribe(() => {
                 let zoneIds = _.map(currSelects, (sel) => sel.zoneId);
                 let delReq = {
-                    stableId: globals.currentDocument,
+                    stableId: shared.currentDocument,
                     zoneIds: zoneIds
                 };
                 server.deleteLabels(delReq).then(resp => {
@@ -296,7 +296,7 @@ function setupStatusBar(statusBarId) {
     });
 
     let $mouseCoords = t.div('.statusitem', 'Mouse');
-    globals.rx.clientPt.subscribe(clientPt => {
+    shared.rx.clientPt.subscribe(clientPt => {
         $mouseCoords.text(`x:${clientPt.x} y:${clientPt.y}`);
     });
 

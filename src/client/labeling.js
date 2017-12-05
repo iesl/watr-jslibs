@@ -3,10 +3,10 @@
  **/
 
 
-import * as d3 from  'd3';
+import d3 from './d3-loader.js';
 import * as $ from  'jquery';
 import * as _ from  'lodash';
-import {globals} from './globals';
+import {shared} from './shared-state';
 import * as dt from './datatypes';
 import * as rtrees from './rtrees';
 import * as util from './commons.js';
@@ -34,7 +34,7 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
         let charBBox = charLocus[0][2];
         let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
 
-        let pageRTree = globals.pageImageRTrees[pageNum] ;
+        let pageRTree = shared.pageImageRTrees[pageNum] ;
         let glyphDataPts = pageRTree.search(pdfTextBox);
         let gridDataPt = glyphDataPts[0].gridDataPt;
         return gridDataPt;
@@ -128,7 +128,7 @@ export function createHeaderLabelUI(annotation) {
                 let labelChoice = $('#selectedLabel').attr('value');
 
                 let labelData = {
-                    stableId: globals.currentDocument,
+                    stableId: shared.currentDocument,
                     labelChoice: labelChoice,
                     selection: {
                         annotType: annotation.type,
@@ -149,8 +149,8 @@ export function createHeaderLabelUI(annotation) {
 
             $labeler.find('.modal-dialog').css({
                 'position': 'absolute',
-                'left': globals.currMouseClientPt.x + "px",
-                'top': globals.currMouseClientPt.y + "px"
+                'left': shared.currMouseClientPt.x + "px",
+                'top': shared.currMouseClientPt.y + "px"
             });
 
 
@@ -226,7 +226,7 @@ export function createTextGridLabeler(annotation) {
         let filteredTargets = util.filterLoci(annotation.targets);
 
         let labelData = {
-            stableId: globals.currentDocument,
+            stableId: shared.currentDocument,
             labelChoice: labelChoice,
             targets: filteredTargets
         };

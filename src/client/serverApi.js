@@ -4,11 +4,11 @@
 
 import * as $ from  'jquery';
 
-import {globals} from './globals';
+import {shared} from './shared-state';
 
 export function getAnnotations() {
     return new Promise((resolve, reject) => {
-        let url = `/api/v1/labeling/labels/${globals.currentDocument}`;
+        let url = `/api/v1/labeling/labels/${shared.currentDocument}`;
         $.getJSON(
             url, (response) => resolve(response)
         ).fail((xhr, status, err) => reject("Server Error:" + status + err.message));

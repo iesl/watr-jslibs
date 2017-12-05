@@ -9,11 +9,10 @@ import '../style/frame.less';
 import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
 import '../style/selection.css';
-import '../style/bootstrap.css';
 
-import 'bootstrap';
-
-import 'font-awesome/css/font-awesome.css';
+// import '../style/bootstrap.css';
+// import 'bootstrap';
+// import 'font-awesome/css/font-awesome.css';
 
 
 function setupMenubar($menubar) {

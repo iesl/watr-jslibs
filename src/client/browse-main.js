@@ -1,11 +1,10 @@
 
-import * as d3 from  'd3';
 import * as _ from  'lodash';
 import * as frame from './frame.js';
 import {t, icon} from './jstags.js';
 import * as $ from 'jquery';
 
-import Rx from 'rxjs/Rx';
+import { Observable} from 'rxjs/Observable';
 import * as server from './serverApi.js';
 
 import '../style/browse.less';
@@ -68,9 +67,9 @@ function createPaginationDiv(corpusEntries) {
 function setupPaginationRx(corpusEntries) {
     let currStart = corpusEntries.start;
 
-    let prevPageRx = Rx.Observable.fromEvent($('.prev-page'), 'click');
-    let nextPageRx = Rx.Observable.fromEvent($('.next-page'), 'click');
-    let setPageRx = Rx.Observable.fromEvent($('.set-page'), 'change');
+    let prevPageRx = Observable.fromEvent($('.prev-page'), 'click');
+    let nextPageRx = Observable.fromEvent($('.next-page'), 'click');
+    let setPageRx = Observable.fromEvent($('.set-page'), 'change');
     prevPageRx.subscribe(() => {
         let newStart = _.clamp(currStart-pageLen, 0, corpusEntries.corpusSize-pageLen);
         server.getCorpusListing(newStart, pageLen)
@@ -130,7 +129,7 @@ function createEntryListingFrame() {
 
 }
 
-function runMain() {
+export function runMain() {
     frame.setupFrameLayout();
     createEntryListingFrame();
 
@@ -138,4 +137,3 @@ function runMain() {
         .then(resp => updatePage(resp));
 }
 
-runMain();
