@@ -13,14 +13,10 @@ import * as rtrees from  './rtrees.js';
 import {$id} from './jstags.js';
 import * as _ from  'lodash';
 import d3 from './d3-loader.js';
-// import keyboardJS from 'keyboardjs';
 
 import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
 import '../style/selection.css';
-
-// import '../style/bootstrap.css';
-// import 'bootstrap';
 
 import '../style/browse.less';
 
@@ -29,7 +25,6 @@ import 'font-awesome/css/font-awesome.css';
 
 import * as pageview from  './view-pdf-pages.js';
 import * as textview from  './view-pdf-text.js';
-import * as auth from './auth.js';
 
 function setupFrameLayout() {
 

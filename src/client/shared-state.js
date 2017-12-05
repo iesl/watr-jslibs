@@ -6,9 +6,7 @@
  *       https://stackoverflow.com/questions/6073505/what-is-the-difference-between-screenx-y-clientx-y-and-pagex-y
  **/
 
-// import * as Rx from 'rxjs/Rx';
-import { Subject } from 'rxjs/Subject';
-import { Observable } from 'rxjs/Observable';
+import * as Rx from 'rxjs/Rx';
 import * as coords from './coord-sys.js';
 
 
@@ -30,7 +28,7 @@ export let shared = {
     currentSelections: [],
 
     rx: {
-        selections: new Subject()
+        selections: new Rx.Subject()
     },
 
     pageImageRTrees: [],
@@ -45,7 +43,7 @@ export function setSelections(sels) {
 
 
 export function initGlobalMouseTracking() {
-    shared.rx.clientPt = Observable
+    shared.rx.clientPt = Rx.Observable
         .fromEvent(document, 'mousemove')
         .map(event => {
             let clientPt = coords.mkPoint.fromXy(event.clientX, event.clientY);

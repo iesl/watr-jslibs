@@ -109,3 +109,30 @@ export function deleteLabels(labelData) {
         });
     });
 }
+
+export function apiGet(url) {
+    return new Promise((resolve, reject) => {
+        $.getJSON(url, (response) => resolve(response))
+            .fail((xhr, status, err) => reject("Server Error:" + status + err.message));
+    });
+}
+
+export function apiPost(url, data) {
+    return new Promise((resolve, reject) => {
+        $.post({
+            url: url,
+            data: JSON.stringify(data),
+            datatype: 'json',
+            contentType: 'application/json',
+            method: "POST"
+        }, function success (response) {
+            resolve(response);
+        }).fail(function() {
+            reject("Server Error");
+        });
+    });
+}
+
+export function apiUri(path) {
+    return `/api/v1/${path}`;
+}

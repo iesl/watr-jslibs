@@ -4,11 +4,10 @@ import * as frame from './frame.js';
 import {t, icon} from './jstags.js';
 import * as $ from 'jquery';
 
-import { Observable} from 'rxjs/Observable';
+import * as Rx from 'rxjs/Rx';
 import * as server from './serverApi.js';
 
 import '../style/browse.less';
-
 let pageLen = 20;
 
 function createEntryItem(entry) {
@@ -67,9 +66,9 @@ function createPaginationDiv(corpusEntries) {
 function setupPaginationRx(corpusEntries) {
     let currStart = corpusEntries.start;
 
-    let prevPageRx = Observable.fromEvent($('.prev-page'), 'click');
-    let nextPageRx = Observable.fromEvent($('.next-page'), 'click');
-    let setPageRx = Observable.fromEvent($('.set-page'), 'change');
+    let prevPageRx = Rx.Observable.fromEvent($('.prev-page'), 'click');
+    let nextPageRx = Rx.Observable.fromEvent($('.next-page'), 'click');
+    let setPageRx = Rx.Observable.fromEvent($('.set-page'), 'change');
     prevPageRx.subscribe(() => {
         let newStart = _.clamp(currStart-pageLen, 0, corpusEntries.corpusSize-pageLen);
         server.getCorpusListing(newStart, pageLen)

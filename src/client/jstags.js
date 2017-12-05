@@ -20,7 +20,7 @@ let allHtmlTags = [
     'p', 'param', 'picture', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp',
     'script', 'section', 'select', 'small', 'source', 'span', 'strike', 'strong', 'style', 'sub', 'summary',
     'sup', 'table', 'tbody', 'td', 'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr',
-    'track', 'tt', 'u', 'ul', 'var', 'video', 'wbr'
+    'track', 'tt', 'u', 'ul', 'var', 'video', 'wbr', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
 ];
 
 

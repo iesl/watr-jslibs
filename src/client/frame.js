@@ -75,7 +75,8 @@ function setUserLoginInfo(loginInfo) {
         );
     }
 }
-export function setupFrameLayout() {
+
+export function setupSplitFrame() {
     $('body').append(t.div('#content')) ;
 
     let splitPaneRootId = panes.createSplitPaneRoot("#content");
@@ -90,6 +91,10 @@ export function setupFrameLayout() {
     $id(bottomPaneId).addClass('content-pane');
 
     setupMenubar($menubar);
+
+}
+export function setupFrameLayout() {
+    setupSplitFrame();
 
     auth.getLoginStatus()
         .then(setUserLoginInfo) ;

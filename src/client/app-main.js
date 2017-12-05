@@ -5,24 +5,30 @@
 import * as annot from  './annot-main.js';
 import * as browse from  './browse-main.js';
 import * as login from  './login-main.js';
+import * as curate from  './curate-main.js';
 
 
 function dispatch() {
 
     let path = window.location.pathname;
+    let root = path.split("/")[1];
 
-    switch (path) {
+    switch (root) {
 
-    case "/":
+    case "":
         browse.runMain();
         break;
 
-    case "/document":
+    case "document":
         annot.runMain();
         break;
 
-    case "/login":
+    case "login":
         login.runMain();
+        break;
+
+    case "curate":
+        curate.runMain();
         break;
 
     }

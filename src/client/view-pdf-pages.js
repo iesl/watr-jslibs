@@ -14,7 +14,9 @@ import * as rtrees from  './rtrees.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
 import {$id, t, icon} from './jstags.js';
-import { Observable } from 'rxjs/Observable';
+
+import * as Rx from 'rxjs/Rx';
+
 import * as server from './serverApi.js';
 
 import * as textview from  './view-pdf-text.js';
@@ -269,7 +271,7 @@ function setupStatusBar(statusBarId) {
     shared.rx.selections.subscribe(currSelects=> {
         if (currSelects.length > 0) {
             let deleteBtn = t.button('.btn', '.btn-sm', '.btn-default', [icon.trash]);
-            var clicks = Observable.fromEvent(deleteBtn, 'click');
+            var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
             clicks.subscribe(() => {
                 let zoneIds = _.map(currSelects, (sel) => sel.zoneId);
                 let delReq = {

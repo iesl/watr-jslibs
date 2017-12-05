@@ -1,8 +1,14 @@
 /**
  * Load only the parts of d3 actually being used, so that webpack can cull out the remainder
+ * Note: doesn't seem to work the way I expected... Just including everything for now.
  **/
 
-// d3-combined.js
+import * as d3 from 'd3';
+
+export default d3;
+
+
+// // d3-combined.js
 // import * as array       from "d3-array";
 // import * as axis        from "d3-axis";
 // import * as brush       from "d3-brush";
@@ -25,47 +31,47 @@
 // import * as random      from "d3-random";
 // import * as request     from "d3-request";
 // import * as scale       from "d3-scale";
-import * as selection   from "d3-selection";
+// import * as selection   from "d3-selection";
 // import * as shape       from "d3-shape";
 // import * as time        from "d3-time";
 // import * as timeformat  from "d3-time-format";
 // import * as timer       from "d3-timer";
-import * as transition  from "d3-transition";
+// import * as transition  from "d3-transition";
 // import * as voronoi     from "d3-voronoi";
 // import * as zoom        from "d3-zoom";
 
-export default Object.assign({},
-                             // array,
-                             // axis,
-                             // brush,
-                             // chord,
-                             // collection,
-                             // color,
-                             // dispatch,
-                             // drag,
-                             // dsv,
-                             // ease,
-                             // force,
-                             // format,
-                             // geo,
-                             // hierarchy,
-                             // interpolate,
-                             // path,
-                             // polygon,
-                             // quadtree,
-                             // queue,
-                             // random,
-                             // request,
-                             // scale,
-                             selection,
-                             // shape,
-                             // time,
-                             // timeformat,
-                             // timer,
-                             transition,
-                             // voronoi,
-                             // zoom
-                            );
+// export default Object.assign({},
+//                              array,
+//                              axis,
+//                              brush,
+//                              chord,
+//                              collection,
+//                              color,
+//                              dispatch,
+//                              drag,
+//                              dsv,
+//                              ease,
+//                              force,
+//                              format,
+//                              geo,
+//                              hierarchy,
+//                              interpolate,
+//                              path,
+//                              polygon,
+//                              quadtree,
+//                              queue,
+//                              random,
+//                              request,
+//                              scale,
+//                              selection,
+//                              shape,
+//                              time,
+//                              timeformat,
+//                              timer,
+//                              transition,
+//                              voronoi,
+//                              zoom
+//                             );
 
 
 
