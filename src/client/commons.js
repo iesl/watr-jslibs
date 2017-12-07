@@ -1,11 +1,6 @@
-/* global require location */
+/* global require location _ d3 */
 
-import d3 from './d3-loader.js';
-import * as $ from 'jquery';
-import * as _ from 'lodash';
-// import * as coords from './coord-sys.js';
 import * as util from './commons.js';
-
 
 export let d3select = {
     pageImages: () => {

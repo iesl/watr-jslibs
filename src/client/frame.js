@@ -1,7 +1,6 @@
-/* global require  */
+/* global require $ */
 
 import * as panes from  './splitpane-utils.js';
-import * as $ from 'jquery';
 import {$id, t} from './jstags.js';
 import * as auth from './auth.js';
 
@@ -10,17 +9,14 @@ import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
 import '../style/selection.css';
 
-// import '../style/bootstrap.css';
-// import 'bootstrap';
-// import 'font-awesome/css/font-awesome.css';
-
 
 function setupMenubar($menubar) {
 
-    let $home = t.a('.menuitem-head', {href: '/'}, "Home");
+    let $home = t.a('.topbar-item-head', {href: '/'}, "Home");
 
     $menubar.append($home);
-    $menubar.append(t.span('.user-info .menuitem-last'));
+    $menubar.append(t.span('.topbar-item-middle'));
+    $menubar.append(t.span('.user-info .topbar-item-last'));
 
     return $menubar;
 }
@@ -43,7 +39,7 @@ function setUserInfoError() {
     );
 }
 function loginButton() {
-    let link = t.a('.menuitem-last', {href: '/login'}, "Login");
+    let link = t.a('.topbar-item-last', {href: '/login'}, "Login");
     link.on('click', function(e){
         e.stopPropagation();
         e.preventDefault();
@@ -55,7 +51,7 @@ function loginButton() {
     return link;
 }
 function logoutButton() {
-    let link = t.a('.menuitem-last', {href: '/logout'}, "Logout");
+    let link = t.a('.topbar-item-last', {href: '/logout'}, "Logout");
     link.on('click', function(e){
         e.stopPropagation();
         e.preventDefault();
@@ -85,8 +81,9 @@ export function setupSplitFrame() {
         panes.splitHorizontal($id(splitPaneRootId), {fixedTop: 40});
 
     let $menubar = $id(topPaneId)
-        .addClass('menubar')
+        .addClass('topbar')
         .css({overflow: 'hidden'});
+
 
     $id(bottomPaneId).addClass('content-pane');
 

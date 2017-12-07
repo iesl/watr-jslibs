@@ -1,5 +1,6 @@
 
-import * as $ from 'jquery';
+// import  * as $ from 'jquery';
+/* global $ */
 import './split-pane.js';
 
 export let idSelector = s => `#${s}`;

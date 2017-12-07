@@ -1,11 +1,7 @@
 
-import * as frame from './frame.js';
+/* global $ */
 
-// import * as _ from  'lodash';
-// import {t, icon} from './jstags.js';
-import * as $ from 'jquery';
-// import * as server from './serverApi.js';
-// import '../style/browse.less';
+import * as frame from './frame.js';
 
 
 export function runMain() {

@@ -1,28 +1,40 @@
 
 @import "inc/_solarized";
 
-.menubar {
+.topbar {
     font-size: 24px;
     display: grid;
 
     grid-column-gap     : 10px;
-    grid-template-columns  : 20px 1fr 1fr 1fr 20px;
+    grid-template-columns  : 20px 1fr 4fr 1fr 20px;
     grid-template-areas: "x1 head middle last x2";
 
     background: @base2;
 
-    .menuitem {
+    align-items: last baseline;
 
+    .topbar-item-middle {
+        grid-area: middle;
+        justify-self: center;
     }
 
-    .menuitem-head {
+    .topbar-item-head {
         grid-area: head;
         justify-self: start;
     }
-    .menuitem-last {
+    .topbar-item-last {
         grid-area: last;
         justify-self: end;
     }
+
+}
+
+#curation-status-button {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    width: 8em;
+    font-size: 18px;
 }
 
 .statusbar {
@@ -44,4 +56,8 @@
 
 .inline {
     display: inline;
+}
+
+.ui-menu {
+    width: 200px;
 }

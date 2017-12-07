@@ -2,8 +2,7 @@
  * Some helper functions for working with client-side html
  **/
 
-import * as $ from 'jquery';
-import * as _ from  'lodash';
+/* global $ _ */
 
 export function $id(selector) {
     return $('#' + selector);
@@ -32,7 +31,14 @@ let allSvgTags = [
   'set', 'solidColor', 'solidcolor', 'stop', 'style', 'svg', 'switch', 'symbol', 'tbreak', 'text', 'textArea', 'textPath', 'title', 'tref', 'tspan', 'unknown', 'use', 'video', 'view', 'vkern'
 ];
 
+function mkNbsp (n) {
+    n = n || 1;
+    let nbsps = _.times(n, _.constant('\u00A0'));
+    return document.createTextNode(_.join(nbsps, ''));
+}
+
 export let t = {
+    nbsp: mkNbsp
 };
 
 _.each(allHtmlTags, tag => {
@@ -42,6 +48,7 @@ _.each(allHtmlTags, tag => {
 _.each(allSvgTags, tag => {
     t[tag] = (...args) => elem(tag, ...args);
 });
+
 
 let i           = (...args) => elem('i', ...args);
 
@@ -111,3 +118,13 @@ export function makeModal(form) {
 
     return modal;
 }
+
+export let htm = {
+    labeledTextInput: (label, key) => {
+        return t.div([
+            t.input(':text', `@${key}`, `#${key}`),
+            t.label({for: `$key`}, label)
+        ]);
+    }
+
+};

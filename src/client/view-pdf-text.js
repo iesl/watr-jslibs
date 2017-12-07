@@ -5,10 +5,8 @@
  *
  */
 
+/* global d3 _ $ */
 
-import d3 from './d3-loader.js';
-import * as $ from 'jquery';
-import * as _ from 'lodash';
 import * as lbl from './labeling';
 import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
@@ -16,7 +14,6 @@ import * as pageview from  './view-pdf-pages.js';
 import {t} from './jstags.js';
 
 import '../style/view-pdf-text.less';
-// import keyboardJS from 'keyboardjs';
 
 import { shared } from './shared-state';
 

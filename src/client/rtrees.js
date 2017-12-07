@@ -1,13 +1,10 @@
-/* global require  */
+/* global require _ $  */
 
 import { shared } from './shared-state';
-import * as _ from 'lodash';
 import * as coords from './coord-sys.js';
-import * as $ from 'jquery';
 let rtree = require('rbush');
 let knn = require('rbush-knn');
 import * as util from  './commons.js';
-
 
 export function searchPage(pageNum, queryBox) {
     let pageRTree = shared.pageImageRTrees[pageNum];

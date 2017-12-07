@@ -9,7 +9,8 @@ https://raw.github.com/shagstrom/split-pane/master/LICENSE
 
 */
 
-import * as jQuery from 'jquery';
+// import * as jQuery from 'jquery';
+/* global jQuery */
 
 (function ($) {
 

@@ -2,7 +2,7 @@
  *
  **/
 
-import * as $ from  'jquery';
+/* global $ */
 
 import {shared} from './shared-state';
 

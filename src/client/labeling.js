@@ -2,10 +2,8 @@
  *
  **/
 
+/* global $ _ d3 */
 
-import d3 from './d3-loader.js';
-import * as $ from  'jquery';
-import * as _ from  'lodash';
 import {shared} from './shared-state';
 import * as dt from './datatypes';
 import * as rtrees from './rtrees';

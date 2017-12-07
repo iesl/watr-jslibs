@@ -2,8 +2,8 @@
  *
  **/
 
-import d3 from './d3-loader.js';
-// import * as $ from 'jquery';
+/* global d3 */
+
 import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
 

@@ -2,16 +2,14 @@
  *
  **/
 
-/* global global */
+/* global $ */
 
-import * as $ from  'jquery';
 import 'form-serializer';
 
 import * as Cookies from  'js-cookie';
-// import Cookies from  'js-cookie';
 
 import {makeModal} from './jstags.js';
-import {t} from './jstags.js';
+import {t, htm} from './jstags.js';
 
 function labeledPasswordInput(label, key) {
     return t.div([
@@ -20,12 +18,6 @@ function labeledPasswordInput(label, key) {
     ]);
 }
 
-function labeledTextInput(label, key) {
-    return t.div([
-        t.input(':text', `@${key}`, `#${key}`),
-        t.label({for: `$key`}, label)
-    ]);
-}
 
 function loginForm() {
     let forms =
@@ -33,7 +25,7 @@ function loginForm() {
             "Login",
             t.form({action: '/api/v1/auth/login'}, [
                 t.div([
-                    labeledTextInput('Email', 'email'),
+                    htm.labeledTextInput('Email', 'email'),
                     labeledPasswordInput('Password', 'password'),
                     t.div([
                         t.button(':submit', '=Login', "Login")
@@ -43,8 +35,8 @@ function loginForm() {
             "Or Signup",
             t.form({action: '/api/v1/auth/signup'}, [
                 t.div([
-                    labeledTextInput('Email', 'email'),
-                    labeledTextInput('Username', 'username'),
+                    htm.labeledTextInput('Email', 'email'),
+                    htm.labeledTextInput('Username', 'username'),
                     labeledPasswordInput('Password', 'password'),
                     t.div([
                         t.button(':submit', '=Signup', "Signup")
@@ -114,6 +106,8 @@ export function doLogout() {
 
 function attemptLogin(loginData) {
     return new Promise((resolve, reject) => {
+        console.log('logindata', loginData);
+        console.log('asJson', loginData.asJson);
         $.post({
             url: loginData.action,
             data: loginData.asJson,

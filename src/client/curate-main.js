@@ -1,10 +1,11 @@
+/**
+ * Curation workflow overview
+ **/
 
+/* global $ _ */
 
-import * as _ from  'lodash';
 import * as frame from './frame.js';
-import {t} from './jstags.js';
-import * as $ from 'jquery';
-
+import {t, htm} from './jstags.js';
 import * as server from './serverApi.js';
 
 function curationUri(path) {
@@ -41,7 +42,10 @@ function assignmentButton(workflowSlug) {
     $button.on('click', function() {
         rest.create.assignment(workflowSlug)
             .then(response => {
-                navigateTo('/document');
+                if (response.length > 0) {
+                    let stableId = response[0].regions[0].page.stableId;
+                    navigateTo('/document/'+stableId);
+                }
             })
         ;
 
@@ -50,35 +54,75 @@ function assignmentButton(workflowSlug) {
     return $button;
 }
 
-export function runMain() {
-    frame.setupFrameLayout();
+function newWorkflowForm() {
+    let $form = t.div([
+        t.form([
+            t.div([
+                htm.labeledTextInput('Workflow', 'workflow'),
+                htm.labeledTextInput('Description', 'description'),
+                htm.labeledTextInput('Target Label', 'targetLabel'),
+                htm.labeledTextInput('Curated Labels', 'curatedLabels'),
+                t.div([
+                    t.button(':submit', '=Submit', "Submit")
+                ])
+            ])
+        ])
+    ]);
 
-    let $contentPane = $('#splitpane_root__bottom');
-    // rest.create.workflows('sample5-curation', 'Some other description of the task', 'Authors')
-    //     .then(created => {
-    $contentPane.append(t.ul("#workflows"));
+
+    $form.find('form').submit(function (event) {
+        event.preventDefault();
+
+        let $thisForm = $(this);
+        let payload = $thisForm.serializeObject();
+
+        let labels = payload.curatedLabels
+            .split(/( *, *)/).filter(x => x.match(/,/)==null)
+        ;
+
+        payload.curatedLabels = labels;
+
+        server.apiPost('/api/v1/workflow/workflows', payload)
+            .then(() => {
+                updateWorkflowList();
+            })
+        ;
+
+    });
+
+    return $form;
+}
+
+function updateWorkflowList() {
+    $('#new-workflow-form').empty();
+    $('#new-workflow-form').append(newWorkflowForm());
+
+    $('#workflows').empty();
 
     rest.read.workflows()
         .then(workflows => {
             console.log('workflows', workflows);
-            _.each(workflows, workflowDef => {
 
-                // statusCounts: Object { Assigned: 0, Completed: 0, Skipped: 0 }
-                // unassignedCount: 0
-                // userAssignmentCounts: Object {  }
+            _.each(workflows, workflowDef => {
                 rest.read.report(workflowDef.workflow)
                     .then(workflow => {
                         console.log('workflow', workflow);
                         let c = workflow.statusCounts;
+                        let lbls = _.join(
+                            _.map(workflowDef.curatedLabels, l => l.key),
+                            ", "
+                        );
                         let rec = t.li([
                             t.div([
                                 t.h4(`Workflow: ${workflowDef.workflow}`, [
                                     assignmentButton(workflowDef.workflow)
                                 ]),
                                 `Description: ${workflowDef.description}`,
-                                t.br(), `Assigned: ${c.Assigned}; Completed: ${c.Completed};  Skipped: ${c.Skipped}`,
-                                t.br(), `Remaining; ${workflow.unassignedCount}`,
-                                t.br(), `User Assignments; ${workflow.userAssignmentCounts}`
+                                t.br(), `Target label    : ${workflowDef.targetLabel.key}`,
+                                t.br(), `Curated labels  : ${lbls}`,
+                                t.br(), `Remaining       : ${workflow.unassignedCount}`,
+                                t.br(), `Assigned        : ${c.Assigned}; Completed: ${c.Completed};  Skipped: ${c.Skipped}`,
+                                t.br(), `User Assignments: ${workflow.userAssignmentCounts}`
                             ])
                         ])
                         ;
@@ -89,6 +133,34 @@ export function runMain() {
 
         }) ;
 
+}
 
+function sampleMenu() {
+    let $menu1 = t.ul("#menu-1", [
+        t.li([
+            t.a({href: '#'}, "Browse"),
+            t.ul([
+                t.li([t.a({href: '#'}, "Curations")]),
+                t.li([t.a({href: '#'}, "Workers")])
+            ])
+        ])
+    ]) ;
+
+    return $menu1;
+}
+export function runMain() {
+    frame.setupFrameLayout();
+
+    let $contentPane = $('#splitpane_root__bottom');
+    // let $topbarPane = $('#splitpane_root__top');
+
+    $contentPane.append(t.div("#new-workflow-form"));
+    $contentPane.append(t.ul("#workflows"));
+
+    let m1 = sampleMenu();
+    $contentPane.append(m1);
+    m1.menu();
+
+    updateWorkflowList();
 
 }

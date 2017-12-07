@@ -3,9 +3,8 @@
  *
  **/
 
-import d3 from './d3-loader.js';
-import * as $ from 'jquery';
-import * as _ from 'lodash';
+/* global Rx d3 _ $ */
+
 import * as lbl from './labeling';
 import * as coords from './coord-sys.js';
 import * as panes from  './splitpane-utils.js';
@@ -15,7 +14,6 @@ import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
 import {$id, t, icon} from './jstags.js';
 
-import * as Rx from 'rxjs/Rx';
 
 import * as server from './serverApi.js';
 
@@ -23,8 +21,6 @@ import * as textview from  './view-pdf-text.js';
 
 import { shared } from './shared-state';
 import * as global from './shared-state';
-
-import 'font-awesome/css/font-awesome.css';
 
 import '../style/view-pdf-text.less';
 

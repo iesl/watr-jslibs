@@ -1,10 +1,11 @@
 
-import * as _ from  'lodash';
+/* global _ $ Rx */
+// import  * as _ from  'lodash';
 import * as frame from './frame.js';
 import {t, icon} from './jstags.js';
-import * as $ from 'jquery';
+// import  * as $ from 'jquery';
 
-import * as Rx from 'rxjs/Rx';
+// import  * as Rx from 'rxjs/Rx';
 import * as server from './serverApi.js';
 
 import '../style/browse.less';
@@ -85,7 +86,7 @@ function setupPaginationRx(corpusEntries) {
                 updatePage(resp);
             });
     });
-    setPageRx.subscribe((e) => {
+    setPageRx.subscribe(() => {
         let value = $('.set-page').prop('value');
         let newStart = _.clamp(+value, 0, corpusEntries.corpusSize-pageLen);
         server.getCorpusListing(newStart, pageLen)

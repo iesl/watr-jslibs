@@ -2,12 +2,14 @@ const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+// const jQueryProvider = new webpack.ProvidePlugin({
+//     $: 'jquery',
+//     jQuery: 'jquery',
+//     'window.jQuery': 'jquery',
+//     'window.$': 'jquery'
+// });
 
-const jQueryProvider = new webpack.ProvidePlugin({
-    $: 'jquery',
-    jQuery: 'jquery',
-    'window.jQuery': 'jquery'
-});
+// const commonsPlugin = new webpack.optimize.CommonsChunkPlugin({});
 
 const config = {
     entry: {
@@ -26,14 +28,14 @@ const config = {
             { test: /\.(css|scss)$/,                   use: ['style-loader', 'css-loader']},
             { test: /\.less$/,                         use: ["style-loader", "css-loader", "less-loader"]},
             { test: /\.(woff|woff2|eot|ttf|otf|svg)$/, use: ['url-loader']},
-            { test: /test\.js$/,                       use: ['mocha-loader'], exclude: /node_modules/}
+            { test: /test\.js$/,                       use: ['mocha-loader'], exclude: /node_modules/},
+            { test: /\.(jpe?g|png|gif|svg)$/i,         use: ['url-loader?limit=10000', 'img-loader']}
         ]
     },
 
     plugins: [
-        jQueryProvider
+        // jQueryProvider
     ]
 };
 
 module.exports = config;
-
