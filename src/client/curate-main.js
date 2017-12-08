@@ -12,7 +12,7 @@ function curationUri(path) {
     return server.apiUri(`workflow/${path}`);
 }
 
-let rest = {
+export let rest = {
     create: {
         workflows: (slug, desc, label) => {
             let data = {
@@ -29,6 +29,15 @@ let rest = {
     read: {
         workflows: () => server.apiGet(curationUri('workflows')),
         report: (workflowId) => server.apiGet(curationUri(`workflows/${workflowId}/report`))
+    },
+    update: {
+        status: (slug, assignId, statusCode) => {
+            let data = {
+                update: { StatusUpdate: {status: statusCode} }
+            };
+
+            return server.apiPost(curationUri(`workflows/${slug}/assignments/${assignId}`), data);
+        }
     }
 };
 
@@ -36,14 +45,14 @@ function navigateTo(url) {
     window.location.pathname = url;
 }
 
-function assignmentButton(workflowSlug) {
-    let $button = t.button("Get Next Assignment");
+export function assignmentButton(workflowSlug) {
+    let $button = t.button('.btn-darklink', "Get Next Assignment");
 
     $button.on('click', function() {
         rest.create.assignment(workflowSlug)
             .then(response => {
                 if (response.length > 0) {
-                    let stableId = response[0].regions[0].page.stableId;
+                    let stableId = response[0].zone.regions[0].page.stableId;
                     navigateTo('/document/'+stableId);
                 }
             })
@@ -135,19 +144,6 @@ function updateWorkflowList() {
 
 }
 
-function sampleMenu() {
-    let $menu1 = t.ul("#menu-1", [
-        t.li([
-            t.a({href: '#'}, "Browse"),
-            t.ul([
-                t.li([t.a({href: '#'}, "Curations")]),
-                t.li([t.a({href: '#'}, "Workers")])
-            ])
-        ])
-    ]) ;
-
-    return $menu1;
-}
 export function runMain() {
     frame.setupFrameLayout();
 
@@ -157,9 +153,6 @@ export function runMain() {
     $contentPane.append(t.div("#new-workflow-form"));
     $contentPane.append(t.ul("#workflows"));
 
-    let m1 = sampleMenu();
-    $contentPane.append(m1);
-    m1.menu();
 
     updateWorkflowList();
 

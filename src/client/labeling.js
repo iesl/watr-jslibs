@@ -9,10 +9,10 @@ import * as dt from './datatypes';
 import * as rtrees from './rtrees';
 import * as util from './commons.js';
 import * as server from './serverApi.js';
+import * as modals from './modals.js';
 
 import {t} from './jstags.js';
 
-// let nextAnnotId = util.IdGenerator();
 import * as coords from './coord-sys.js';
 
 export function mkAnnotation(props) {
@@ -97,62 +97,21 @@ export function refreshZoneHightlights(zonesJs) {
 
 
 export function createHeaderLabelUI(annotation) {
-    server.getLabelingPanelWidget()
-        .then(resp => {
-            let labelerHtml = resp.ui.labeler;
-            let $labeler = $(labelerHtml);
+    let labelNames = [
+        'Title',
+        'Authors',
+        'Abstract',
+        'Affiliations',
+        'References'
+    ];
 
-            $labeler.on('hidden.bs.modal', function () {
-                $(this).remove();
-            });
-
-
-            $labeler.find('button.labelChoice').click(function() {
-                let $button = $(this);
-                $labeler.find('#selectedLabel')
-                    .attr('value', $button.attr('value'));
-            });
-
-            $labeler.submit(function (event) {
-                event.preventDefault();
-
-                let ser = _.map(annotation.targets, t => {
-                    return {
-                        page: t[0],
-                        bbox: t[1].intRep
-                    };
-                });
-
-                let labelChoice = $('#selectedLabel').attr('value');
-
-                let labelData = {
-                    stableId: shared.currentDocument,
-                    labelChoice: labelChoice,
-                    selection: {
-                        annotType: annotation.type,
-                        page: annotation.page,
-                        targets: ser
-                    }
-                };
-
-                server.postNewRegionLabel(labelData)
-                    .then(res => {
-                        $labeler.modal('hide');
-
-                        d3.selectAll('.label-selection-rect').remove();
-
-                        updateAnnotationShapes();
-                    });
-            });
-
-            $labeler.find('.modal-dialog').css({
-                'position': 'absolute',
-                'left': shared.currMouseClientPt.x + "px",
-                'top': shared.currMouseClientPt.y + "px"
-            });
-
-
-            $labeler.modal();
+    let labelChoicePromise = createLabelChoiceWidget(labelNames, null);
+    labelChoicePromise
+        .then(choice => {
+            console.log('choice', choice);
+        })
+        .catch(() => {
+            console.log('canceled');
         })
     ;
 
@@ -160,14 +119,11 @@ export function createHeaderLabelUI(annotation) {
 
 
 let labelButton = (label) => {
-    return (
-        t.button(
-            `#${label}`, '.labelChoice .btn .btn-xs .btn-block .btn-default',
-            "@labelChoice", ':submit', `=${label}`, [
-                   t.small(label)
-               ])
-       );
-   };
+    return t.button(
+        `#${label} =${label} .labelChoice @labelChoice .btn-lightlink :submit`, [
+            t.small(label)
+        ]) ;
+};
 
 
 
@@ -242,3 +198,116 @@ export function createTextGridLabeler(annotation) {
     });
     return $labeler;
 }
+
+function createLabelChoiceWidget(labelNames, annotation) {
+
+    let buttons = _.map(labelNames, labelButton);
+
+    let form =
+        t.form([
+            t.input(':hidden', '@selectedLabel', '#selectedLabel'),
+            t.div(".form-group", buttons)
+        ]);
+
+    let context = '#splitpane_root__bottom';
+    let innerPromise = modals.makeFormPromise(form);
+
+    form.find('button.labelChoice').click(function() {
+        let $button = $(this);
+        form.find('#selectedLabel')
+            .attr('value', $button.attr('value'));
+    });
+
+    let labelPromise = modals.makeModalPromise(
+        context, innerPromise,
+        form,
+        "Choose Label"
+    );
+    $('.b-modal-content').css({
+        'left': shared.currMouseClientPt.x,
+        'top': shared.currMouseClientPt.y
+    });
+    return labelPromise;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// export function createHeaderLabelUI(annotation) {
+//     server.getLabelingPanelWidget()
+//         .then(resp => {
+//             let labelerHtml = resp.ui.labeler;
+//             let $labeler = $(labelerHtml);
+
+//             $labeler.on('hidden.bs.modal', function () {
+//                 $(this).remove();
+//             });
+
+
+//             $labeler.find('button.labelChoice').click(function() {
+//                 let $button = $(this);
+//                 $labeler.find('#selectedLabel')
+//                     .attr('value', $button.attr('value'));
+//             });
+
+//             $labeler.submit(function (event) {
+//                 event.preventDefault();
+
+//                 let ser = _.map(annotation.targets, t => {
+//                     return {
+//                         page: t[0],
+//                         bbox: t[1].intRep
+//                     };
+//                 });
+
+//                 let labelChoice = $('#selectedLabel').attr('value');
+
+//                 let labelData = {
+//                     stableId: shared.currentDocument,
+//                     labelChoice: labelChoice,
+//                     selection: {
+//                         annotType: annotation.type,
+//                         page: annotation.page,
+//                         targets: ser
+//                     }
+//                 };
+
+//                 server.postNewRegionLabel(labelData)
+//                     .then(res => {
+//                         $labeler.modal('hide');
+
+//                         d3.selectAll('.label-selection-rect').remove();
+
+//                         updateAnnotationShapes();
+//                     });
+//             });
+
+//             $labeler.find('.modal-dialog').css({
+//                 'position': 'absolute',
+//                 'left': shared.currMouseClientPt.x + "px",
+//                 'top': shared.currMouseClientPt.y + "px"
+//             });
+
+
+//             $labeler.modal();
+//         })
+//     ;
+
+// }

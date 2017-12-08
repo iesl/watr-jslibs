@@ -19,6 +19,7 @@ export function assignmentsFromJson(jsonRep) {
         let x = workflowFromJson(assignmentJson.workflow);
         let y = zonelockFromJson(assignmentJson.zonelock);
         let z = zoneFromJson(assignmentJson.zone);
+        y.assignee = assignmentJson.assignee;
         return new Assignment(x, y, z);
     });
 }

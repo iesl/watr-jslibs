@@ -1,20 +1,50 @@
-/* global require $ */
+/* global require $ _ */
 
 import * as panes from  './splitpane-utils.js';
 import {$id, t} from './jstags.js';
 import * as auth from './auth.js';
+import {shared} from './shared-state';
 
 import '../style/frame.less';
 import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
 import '../style/selection.css';
 
+function siteNavMenu() {
+    let pages = [
+        ['Browse', '/'],
+        ['Curate', '/curate']
+    ];
+    let choices = _.map(
+        _.filter(pages, p => p[0] != shared.page),
+        p => {
+            return t.a({href: '/'}, p), t.a({href: p[1]}, p[0]);
+        });
+
+    let withSpaces = _.drop(
+        _.flatten(
+            _.zip(
+                _.times(choices.length, _.constant(t.nbsp(2))),
+                choices
+            )
+        )
+    );
+
+
+    let $menu = t.span("#nav-links", '.topbar-item-nav', withSpaces) ;
+
+    return $menu;
+}
 
 function setupMenubar($menubar) {
 
-    let $home = t.a('.topbar-item-head', {href: '/'}, "Home");
+    let page = shared.page;
+    let $page = t.span('.topbar-item-head', shared.page);
+    $menubar.append($page);
+    let $nav = siteNavMenu() ;
+    $menubar.append($nav);
+    // $('#nav-menu').menu();
 
-    $menubar.append($home);
     $menubar.append(t.span('.topbar-item-middle'));
     $menubar.append(t.span('.user-info .topbar-item-last'));
 
@@ -90,9 +120,11 @@ export function setupSplitFrame() {
     setupMenubar($menubar);
 
 }
+
 export function setupFrameLayout() {
     setupSplitFrame();
 
     auth.getLoginStatus()
         .then(setUserLoginInfo) ;
+
 }

@@ -4,8 +4,6 @@
 
 /* global $ */
 
-import 'form-serializer';
-
 import * as Cookies from  'js-cookie';
 
 import {makeModal} from './jstags.js';

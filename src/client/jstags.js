@@ -66,18 +66,24 @@ function elem(tag, ...args) {
     let $tag = $(`<${tag}></${tag}>`);
     _.each(args, arg => {
         if (typeof arg === 'string') {
-            if (_.startsWith(arg, '.')) {
-                arg.split(' ').forEach(c => {
-                    $tag.addClass(c.slice(1));
+            // let re = new RegExp('^[\\.,#::@=]');
+            let re = /^[\\.#:@=]/;
+            if (re.test(arg)) {
+                arg.split(/ +/).forEach(attr => {
+                    if (_.startsWith(attr, '.')) {
+                        $tag.addClass(attr.slice(1));
+                    } else if (_.startsWith(attr, '#')) {
+                        $tag.attr('id', attr.slice(1));
+                    } else if (_.startsWith(attr, ':')) {
+                        $tag.attr('type', attr.slice(1));
+                    } else if (_.startsWith(attr, '@')) {
+                        $tag.attr('name', attr.slice(1));
+                    } else if (_.startsWith(attr, '=')) {
+                        $tag.attr('value', attr.slice(1));
+                    } else {
+                        throw new Error('unexpected attribute type: ' + attr);
+                    }
                 });
-            } else if (_.startsWith(arg, '#')) {
-                $tag.attr('id', arg.slice(1));
-            } else if (_.startsWith(arg, ':')) {
-                $tag.attr('type', arg.slice(1));
-            } else if (_.startsWith(arg, '@')) {
-                $tag.attr('name', arg.slice(1));
-            } else if (_.startsWith(arg, '=')) {
-                $tag.attr('value', arg.slice(1));
             } else {
                 $tag.text(arg);
             }

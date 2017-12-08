@@ -12,6 +12,7 @@ import * as panes from  './splitpane-utils.js';
 import * as rtrees from  './rtrees.js';
 import {$id} from './jstags.js';
 
+import * as curate from './curate-main.js';
 import * as dt from './datatypes';
 
 import '../style/split-pane.css';
@@ -36,35 +37,49 @@ function setupFrameLayout() {
 }
 
 function curationStatusMenu(status) {
-    let $menu =
-        t.select("#curation-status", [
-            t.option('Assigned'),
-            t.option('Complete'),
-            t.option('Errors')
-        ]) ;
+    let codes = [
+        'Completed',
+        'Assigned',
+        'Skipped',
+        'NeedsReview'
+    ];
+    let choices = _.map(codes, code => {
+        return t.option({selected: status == code, code: code}, code);
+    });
+
+    let $menu = t.select("#curation-status", choices) ;
 
     return $menu;
 }
 
 function workflowControlPanel(assignment) {
-    // Status: Assigned; To: a@b.com [Complete] [ ]Flag: [(note)]; Labels: Title, Author; Workflow: slug
-    //   [Finish and Get Next Assignment]
-    let $button2 = t.button('.btn-darklink', "Get Next Assignment");
+    let btn = curate.assignmentButton(assignment.workflow.slug);
 
     // let labels = _.map(assignment.workflow.curatedLabels, l => l.key);
     // let labelString = _.join(', ', labels);
 
     let panel = t.span([
         t.strong(`Curating: `), assignment.workflow.slug,
-        t.nbsp(4),
+        t.nbsp(5),
         t.strong(`Status: `), curationStatusMenu(assignment.zonelock.status),
-        t.nbsp(3),
-        t.strong(`To: `), assignment.zonelock.assignee,
-        t.nbsp(2),
-        $button2
+        t.nbsp(5),
+        t.strong(`Assigned To: `), assignment.zonelock.assignee.email || '<unassigned>',
+        t.nbsp(4),
+        btn
     ]);
 
     return panel;
+}
+function curationStatusChange(event, ui) {
+    let assignment = shared.activeAssignment;
+
+    let newStatus = ui.item.value;
+
+    curate.rest.update.status(assignment.workflow.slug, assignment.zonelock.id, newStatus)
+        .then(response => {
+            console.log("status update", response);
+        });
+
 }
 export function runMain() {
 
@@ -112,9 +127,12 @@ export function runMain() {
 
                     console.log('filtered', filtered);
                     if (filtered.length > 0) {
+                        shared.activeAssignment = filtered[0];
                         let panel = workflowControlPanel(filtered[0]);
                         $('.topbar-item-middle').append(panel);
-                        $('#curation-status').selectmenu();
+                        $('#curation-status').selectmenu( {
+                            change: curationStatusChange
+                        });
                     }
                 })
             ;

@@ -6,6 +6,7 @@ import * as annot from  './annot-main.js';
 import * as browse from  './browse-main.js';
 import * as login from  './login-main.js';
 import * as curate from  './curate-main.js';
+import {shared} from './shared-state';
 
 
 function dispatch() {
@@ -16,21 +17,24 @@ function dispatch() {
     switch (root) {
 
     case "":
+        shared.page = "Browse";
         browse.runMain();
         break;
 
     case "document":
+        shared.page = "Document";
         annot.runMain();
         break;
 
     case "login":
+        shared.page = "Login";
         login.runMain();
         break;
 
     case "curate":
+        shared.page = "Curate";
         curate.runMain();
         break;
-
     }
 }
 

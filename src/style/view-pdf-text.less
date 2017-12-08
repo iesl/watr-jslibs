@@ -1,41 +1,29 @@
-@import "inc/_util";
+
+@import "inc/_list";
 @import "inc/_buttons";
 @import "inc/_solarized";
-@import "_svg";
+@import "inc/_svg";
 
 
 div.page-textgrids {
     margin: 0 auto;
     padding: 10px;
-    // position: relative;
-
-    // div.textgrid-sep {
-    //     width: 500px;
-    //     height: 5px;
-    //     background: @base1;
-    // }
 
     div.textgrid {
         position: relative;
-
-        // padding-bottom: 5px;
-        // border: 1px;
-        // border-style: solid;
-        // border-color: #dee0ad;
 
         // canvas.textgrid and svg.textgrid are superimposed
         canvas.textgrid {
             position: absolute;
             top: 0;
             left: 0;
-            // width: "100%";
-            // height: "100%";
 
             z-index: -10;
         }
 
         svg.textgrid {
             position: absolute;
+
             width: 100%;
             height: 100%;
 

@@ -6,27 +6,41 @@
     display: grid;
 
     grid-column-gap     : 10px;
-    grid-template-columns  : 20px 1fr 4fr 1fr 20px;
-    grid-template-areas: "x1 head middle last x2";
+    grid-template-columns  : 20px 7em 18em 2fr 1fr 20px;
+    grid-template-areas: "x1 head nav middle last x2";
 
     background: @base2;
 
     align-items: last baseline;
+
+
+    min-height: 0;  /* NEW */
+    min-width: 0;   /* NEW; needed for Firefox */
+
+    .topbar-item-head {
+        grid-area: head;
+        justify-self: start;
+    }
+    .topbar-item-nav {
+        grid-area: nav;
+        justify-self: start;
+    }
 
     .topbar-item-middle {
         grid-area: middle;
         justify-self: center;
     }
 
-    .topbar-item-head {
-        grid-area: head;
-        justify-self: start;
-    }
     .topbar-item-last {
         grid-area: last;
         justify-self: end;
+        white-space: nowrap;
+        min-height: 0;  /* NEW */
+        min-width: 0;   /* NEW; needed for Firefox */
     }
+}
 
+#nav-menu ul li span {
 }
 
 #curation-status-button {
