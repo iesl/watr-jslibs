@@ -20,10 +20,6 @@ export let d3select = {
     }
 };
 
-export let filterLoci = loci => _.filter(loci,  loc => {
-    return typeof loc !== "string";
-});
-
 export function selectShapes(dataBlock) {
     return d3select.allSvgs().selectAll(".shape")
         .data(dataBlock.shapes, util.getId) ;

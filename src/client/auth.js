@@ -174,13 +174,3 @@ export function getLoginStatus() {
 
     return authStatus ;
 }
-
-export function getCorpusArtifactTextgrid(entryName) {
-    return new Promise((resolve, reject) => {
-        // let url = `/api/v1/corpus/entries?start=${start}&len=${len}`;
-        let show = "textgrid.json";
-        let url = `/api/v1/corpus/artifacts/vtrace/json/${entryName}/${show}`;
-        $.getJSON(url, (response) => resolve(response))
-            .fail((xhr, status, err) => reject("Server Error:" + status + err.message));
-    });
-}

@@ -28,8 +28,9 @@ export function updateAnnotationShapes() {
 function mapGlyphLociToGridDataPts(glyphsLoci) {
 
     let dataPts = _.map(glyphsLoci, (charLocus) => {
-        let pageNum = charLocus[0][1];
-        let charBBox = charLocus[0][2];
+        let charDef = charLocus.g ? charLocus.g[0] : charLocus.i;
+        let pageNum = charDef[1];
+        let charBBox = charDef[2];
         let pdfTextBox = charBBox? coords.mk.fromArray(charBBox) : undefined;
 
         let pageRTree = shared.pageImageRTrees[pageNum] ;
@@ -105,13 +106,43 @@ export function createHeaderLabelUI(annotation) {
         'References'
     ];
 
-    let labelChoicePromise = createLabelChoiceWidget(labelNames, null);
-    labelChoicePromise
+    createLabelChoiceWidget(labelNames)
         .then(choice => {
             console.log('choice', choice);
+
+            let ser = _.map(annotation.targets, t => {
+                return {
+                    page: t[0],
+                    bbox: t[1].intRep
+                };
+            });
+
+            let labelChoice = choice.selectedLabel;
+
+            let labelData = {
+                stableId: shared.currentDocument,
+                labelChoice: labelChoice,
+                selection: {
+                    annotType: annotation.type,
+                    page: annotation.page,
+                    targets: ser
+                }
+            };
+
+            console.log('labelData', labelData);
+            server.postNewRegionLabel(labelData)
+                .then(res => {
+                    d3.selectAll('.label-selection-rect').remove();
+                    updateAnnotationShapes();
+                })
+                .catch(res => {
+                    d3.selectAll('.label-selection-rect').remove();
+                })
+            ;
+
         })
         .catch(() => {
-            console.log('canceled');
+            d3.selectAll('.label-selection-rect').remove();
         })
     ;
 
@@ -127,7 +158,7 @@ let labelButton = (label) => {
 
 
 
-export function createTextGridLabeler(annotation) {
+export function createTextGridLabeler(gridDataPts) {
     let labelNames = [
         'Title',
         'Authors',
@@ -136,70 +167,35 @@ export function createTextGridLabeler(annotation) {
         'References'
     ];
 
-    let idAttr = "unset";
-    let buttons = _.map(labelNames, labelButton);
+    createLabelChoiceWidget(labelNames)
+        .then(choice => {
 
-    let form =
-        t.form({action: '/api/v1/label/span', method: 'POST', enctype:'multipart/form-data'}, [
-            t.input(':hidden', '@selectedLabel', '#selectedLabel'),
-            t.div(".form-group", buttons)
-        ]);
+            let labelChoice = choice.selectedLabel;
 
+            let labelData = {
+                labelChoice: labelChoice,
+                gridJson: {
+                    stableId: shared.currentDocument,
+                    rows:[
+                        {loci: gridDataPts}
+                    ]
+                }
+            };
 
-    let $labeler =
-        t.div('.modal', '.fade', `#${idAttr}`, {tabindex:"-1", role: "dialog", "aria-labelledby":  `${idAttr}Label`, 'aria-hidden': true}, [
-            t.div(".modal-dialog",{role: "document"}, [
-                t.div(".modal-content", [
-                    t.div(".modal-header",
-                          t.span("Choose Label")
-                    ),
-                    t.div(".modal-body", [
-                        form
-                    ])
-                ])
-            ])
-        ])
+            server.postNewSpanLabel(labelData)
+                .then(() => {
+                    d3.selectAll('.label-selection-rect').remove();
+                    updateAnnotationShapes();
+                });
+
+        })
+        .catch(() => {
+            d3.selectAll('.label-selection-rect').remove();
+        })
     ;
-
-    $labeler.on('hidden.bs.modal', function () {
-        $(this).remove();
-    });
-
-
-    $labeler.find('button.labelChoice').click(function() {
-        let $button = $(this);
-        $labeler.find('#selectedLabel')
-            .attr('value', $button.attr('value'));
-    });
-
-    $labeler.submit(function (event) {
-        event.preventDefault();
-
-        let labelChoice = $('#selectedLabel').attr('value');
-
-        let filteredTargets = util.filterLoci(annotation.targets);
-
-        let labelData = {
-            stableId: shared.currentDocument,
-            labelChoice: labelChoice,
-            targets: filteredTargets
-        };
-
-        server.postNewSpanLabel(labelData)
-            .then((res) => {
-
-                console.log('postNewLabel: ', res);
-                $labeler.modal('hide');
-
-                d3.selectAll('.label-selection-rect').remove();
-
-                updateAnnotationShapes();
-            });
-    });
-    return $labeler;
 }
 
-function createLabelChoiceWidget(labelNames, annotation) {
+function createLabelChoiceWidget(labelNames) {
 
     let buttons = _.map(labelNames, labelButton);
 
@@ -223,91 +219,10 @@ function createLabelChoiceWidget(labelNames, annotation) {
         form,
         "Choose Label"
     );
+
     $('.b-modal-content').css({
         'left': shared.currMouseClientPt.x,
         'top': shared.currMouseClientPt.y
     });
     return labelPromise;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// export function createHeaderLabelUI(annotation) {
-//     server.getLabelingPanelWidget()
-//         .then(resp => {
-//             let labelerHtml = resp.ui.labeler;
-//             let $labeler = $(labelerHtml);
-
-//             $labeler.on('hidden.bs.modal', function () {
-//                 $(this).remove();
-//             });
-
-
-//             $labeler.find('button.labelChoice').click(function() {
-//                 let $button = $(this);
-//                 $labeler.find('#selectedLabel')
-//                     .attr('value', $button.attr('value'));
-//             });
-
-//             $labeler.submit(function (event) {
-//                 event.preventDefault();
-
-//                 let ser = _.map(annotation.targets, t => {
-//                     return {
-//                         page: t[0],
-//                         bbox: t[1].intRep
-//                     };
-//                 });
-
-//                 let labelChoice = $('#selectedLabel').attr('value');
-
-//                 let labelData = {
-//                     stableId: shared.currentDocument,
-//                     labelChoice: labelChoice,
-//                     selection: {
-//                         annotType: annotation.type,
-//                         page: annotation.page,
-//                         targets: ser
-//                     }
-//                 };
-
-//                 server.postNewRegionLabel(labelData)
-//                     .then(res => {
-//                         $labeler.modal('hide');
-
-//                         d3.selectAll('.label-selection-rect').remove();
-
-//                         updateAnnotationShapes();
-//                     });
-//             });
-
-//             $labeler.find('.modal-dialog').css({
-//                 'position': 'absolute',
-//                 'left': shared.currMouseClientPt.x + "px",
-//                 'top': shared.currMouseClientPt.y + "px"
-//             });
-
-
-//             $labeler.modal();
-//         })
-//     ;
-
-// }

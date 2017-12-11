@@ -229,17 +229,9 @@ export function textgridSvgHandlers(d3$textgridSvg) {
         }})
         .on("mouseup", function() {
             if (selectionStartId !== undefined) {
+                console.log('gridSelection', gridSelection);
 
-                let annotBoxes = _.map(gridSelection, pt => pt.locus[0]);
-
-
-                let annotation = lbl.mkAnnotation({
-                    type: 'char-boxes',
-                    page: pageNum,
-                    targets: annotBoxes
-                });
-
-                console.log('annotating', annotation);
+                let gridDataPts = _.map(gridSelection, pt => pt.locus);
 
                 gridSelection = [];
                 selectionStartId = undefined;
@@ -248,7 +240,9 @@ export function textgridSvgHandlers(d3$textgridSvg) {
                     .selectAll("rect.glyph-selection")
                     .remove() ;
 
-                createTextGridLabelingPanel(annotation);
+
+                lbl.createTextGridLabeler(gridDataPts);
+
             }
 
         })
@@ -294,18 +288,6 @@ export function textgridSvgHandlers(d3$textgridSvg) {
 }
 
 
-function createTextGridLabelingPanel(annotation) {
-
-    let $labeler = lbl.createTextGridLabeler(annotation);
-
-    $labeler.find('.modal-dialog').css({
-        'position': 'absolute',
-        'left': shared.currMouseClientPt.x + "px",
-        'top': shared.currMouseClientPt.y + "px"
-    });
-
-    $labeler.modal();
-}
 
 
 export function setupPageTextGrids(contentId, textgrids) {

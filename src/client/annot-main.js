@@ -103,6 +103,7 @@ export function runMain() {
             pageview.setupPageImages('div.view-pdf-pages', pageShapes);
             textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
+            console.log('textgrids', textgrids);
             rtrees.initPageAndGridRTrees(textgrids);
 
             d3.selectAll('svg.textgrid')
@@ -114,7 +115,6 @@ export function runMain() {
             // Figure out if this doc is assigned to the current user
             server.apiGet('/api/v1/workflow/workflows/assignments')
                 .then(response => {
-                    console.log('assignments jso', response);
 
                     let assignments = dt.assignmentsFromJson(response);
                     console.log('assignments', assignments);
@@ -125,7 +125,6 @@ export function runMain() {
                         });
                     });
 
-                    console.log('filtered', filtered);
                     if (filtered.length > 0) {
                         shared.activeAssignment = filtered[0];
                         let panel = workflowControlPanel(filtered[0]);

@@ -24,13 +24,8 @@ export function getCorpusListing(start, len) {
 }
 
 export function getCorpusArtifactTextgrid(entryName) {
-    return new Promise((resolve, reject) => {
-        // let url = `/api/v1/corpus/entries?start=${start}&len=${len}`;
-        let show = "textgrid.json";
-        let url = `/api/v1/corpus/artifacts/vtrace/json/${entryName}/${show}`;
-        $.getJSON(url, (response) => resolve(response))
-            .fail((xhr, status, err) => reject("Server Error:" + status + err.message));
-    });
+    let show = "textgrid.json";
+    return apiGet(`/api/v1/corpus/artifacts/vtrace/json/${entryName}/${show}`);
 }
 
 export function getLabelingPanelWidget() {
@@ -63,19 +58,6 @@ export function getLabelingPanelWidget() {
     });
 }
 
-export function postNewRegionLabel(labelData) {
-    return new Promise((resolve, reject) => {
-        $.post({
-            url: "/api/v1/labeling/label/region",
-            data: JSON.stringify(labelData),
-            datatype: 'json',
-            contentType: 'application/json',
-            method: "POST"
-        }, function(res) {
-            resolve(res);
-        }).fail((xhr, status, err) => reject("Server Error:" + status + err.message));
-    });
-}
 
 export function postNewSpanLabel(labelData) {
     return new Promise((resolve, reject) => {
@@ -135,4 +117,8 @@ export function apiPost(url, data) {
 
 export function apiUri(path) {
     return `/api/v1/${path}`;
+}
+
+export function postNewRegionLabel(labelData) {
+    return apiPost(apiUri("labeling/label/region"), labelData);
 }

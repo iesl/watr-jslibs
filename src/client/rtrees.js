@@ -96,6 +96,7 @@ export function initPageAndGridRTrees(textgrids) {
             let currLeft = x;
             let gridDataPts = _.map(text.split(''), (ch, chi) => {
                 let chWidth = context.measureText(ch).width;
+                let charDef = gridRow.loci[chi];
 
                 let gridDataPt = coords.mk.fromLtwh(
                     currLeft, y-shared.TextGridLineHeight, chWidth, shared.TextGridLineHeight
@@ -107,19 +108,18 @@ export function initPageAndGridRTrees(textgrids) {
                 gridDataPt.col = chi;
                 gridDataPt.char = ch;
                 gridDataPt.page = gridNum;
+                gridDataPt.locus = charDef;
 
-                let charDef = gridRow.loci[chi];
-                let isGlyphData = typeof charDef[0] == typeof [];
+                // let isGlyphData = typeof charDef[0] == typeof [];
+                let isGlyphData = charDef.g != undefined;
                 if (isGlyphData) {
-                    let charBBox = charDef[0][2];
+                    let charBBox = charDef.g[0][2];
                     let glyphDataPt = coords.mk.fromArray(charBBox);
                     glyphDataPt.id = gridDataPt.id;
                     glyphDataPt.gridDataPt = gridDataPt;
                     glyphDataPt.page = gridNum;
-                    gridDataPt.glyphDataPt = glyphDataPt ;
-
-                    gridDataPt.locus = charBBox;
-
+                    glyphDataPt.locus = charDef;
+                    gridDataPt.glyphDataPt = glyphDataPt;
                 }
 
                 currLeft += chWidth;
