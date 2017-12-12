@@ -37,7 +37,7 @@ function scrollSyncIndicator(parentSelection, indicatorPoint) {
 }
 
 
-function initHoverReticles(d3$textgridSvg) {
+export function initHoverReticles(d3$textgridSvg) {
     let reticleGroup = d3$textgridSvg
         .append('g')
         .classed('reticles', true);
@@ -52,7 +52,7 @@ function initHoverReticles(d3$textgridSvg) {
     return reticleGroup;
 }
 
-function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
+export function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
     let pageNum = parseInt(d3$textgridSvg.attr('page'));
 
     d3$textgridSvg.select('g.reticles')

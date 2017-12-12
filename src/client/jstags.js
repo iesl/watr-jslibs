@@ -134,3 +134,15 @@ export let htm = {
     }
 
 };
+
+export function resizeCanvas(canvasElem, width, height) {
+    let imgData = canvasElem.toDataURL();
+    canvasElem.width = width;
+    canvasElem.height = height;
+    let ctx = canvasElem.getContext('2d');
+    let img = new Image();
+    img.onload = function(){
+        ctx.drawImage(img,0,0);
+    };
+    img.src = imgData;
+}

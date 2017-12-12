@@ -12,7 +12,7 @@ import * as coords from './coord-sys.js';
 
 
 export let shared = {
-    TextGridLineHeight:  17,
+    TextGridLineHeight:  20,
     TextGridOriginPt: coords.mkPoint.fromXy(20, 20),
 
     currentDocument: undefined,
