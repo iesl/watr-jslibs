@@ -294,7 +294,7 @@ export function setupPageTextGrids(contentId, textgrids) {
     let fixedTextgridWidth = 900;
 
     let computeGridHeight = (grid) => {
-        return (grid.rows.length * shared.TextGridLineSpacing) + shared.TextGridOriginPt.y + 10;
+        return (grid.rows.length * shared.TextGridLineHeight) + shared.TextGridOriginPt.y + 10;
     };
 
     _.each(textgrids, (textgrid, gridNum) => {

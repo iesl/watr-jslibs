@@ -10,6 +10,7 @@ import * as coords from './coord-sys.js';
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
+import * as reflow from  './textreflow.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
 import {$id, t, icon} from './jstags.js';
@@ -92,12 +93,10 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
                         let annotation = lbl.mkAnnotation({
                             type: 'bounding-boxes',
                             page: pageNum,
-                            targets: [[pageNum, minBoundSelection]] // TODO should be another level of nesting here
+                            targets: [[pageNum, minBoundSelection]] 
                         });
 
                         createImageLabelingPanel(pdfImageRect, annotation);
-                    } else {
-                        // Move handler
                     }
 
                 });
@@ -118,7 +117,7 @@ function initPageImageMouseHandlers(d3$svg, pageNum) {
 
 function setupSelectionHighlighting() {
 
-    shared.rx.selections.subscribe(currSelects=> {
+    shared.rx.selections.subscribe(currSelects => {
 
         d3.selectAll('.select-highlight')
             .remove();
@@ -147,10 +146,9 @@ function setupSelectionHighlighting() {
     });
 
 }
+
 function toggleLabelSelection(pageNum, clickedItems) {
-
     let nonintersectingItems = _.differenceBy(clickedItems,  shared.currentSelections, s => s.id);
-
     global.setSelections(nonintersectingItems);
 }
 
@@ -266,7 +264,7 @@ function setupStatusBar(statusBarId) {
 
     shared.rx.selections.subscribe(currSelects=> {
         if (currSelects.length > 0) {
-            let deleteBtn = t.button('.btn', '.btn-sm', '.btn-default', [icon.trash]);
+            let deleteBtn = t.button([icon.trash]);
             var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
             clicks.subscribe(() => {
                 let zoneIds = _.map(currSelects, (sel) => sel.zoneId);
@@ -285,9 +283,16 @@ function setupStatusBar(statusBarId) {
                 ;
             });
 
+            let gridShaperBtn = t.button([icon.fa('indent')]);
+            gridShaperBtn.on('click', function(event) {
+                reflow.setupReflowControl();
+
+            });
+
             $selectStatus.empty();
             $selectStatus.append(t.span(`Selected:${currSelects.length} del: `));
             $selectStatus.append(deleteBtn);
+            $selectStatus.append(gridShaperBtn);
         } else {
             $selectStatus.text(``);
         }

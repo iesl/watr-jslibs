@@ -12,8 +12,7 @@ import * as coords from './coord-sys.js';
 
 
 export let shared = {
-    TextGridLineSpacing: 16,
-    TextGridLineHeight:  16,
+    TextGridLineHeight:  17,
     TextGridOriginPt: coords.mkPoint.fromXy(20, 20),
 
     currentDocument: undefined,
@@ -34,7 +33,9 @@ export let shared = {
 
     pageImageRTrees: [],
     pageImageLabelRTrees: [],
-    textgridRTrees: []
+    textgridRTrees: [],
+
+    pageCount: () => this.pageImageRTrees.length
 };
 
 export function setSelections(sels) {

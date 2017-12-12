@@ -19,7 +19,7 @@ import '../style/split-pane.css';
 import '../style/pretty-split-pane.css';
 import '../style/selection.css';
 
-import '../style/browse.less';
+import '../style/annot.less';
 
 import {t, htm} from './jstags.js';
 
@@ -31,8 +31,16 @@ function setupFrameLayout() {
     let {leftPaneId: leftPaneId, rightPaneId: rightPaneId} =
         panes.splitVertical('.content-pane', {fixedLeft: 200});
 
+    // let {topPaneId: reflowPane, bottomPaneId: textgridPane} =
+    //     panes.splitHorizontal($id(rightPaneId), {fixedTop: 100});
+
     $id(leftPaneId).addClass('view-pdf-pages');
-    $id(rightPaneId).addClass('page-textgrids');
+    $id(rightPaneId).addClass('textgrid-control-panes');
+
+    $id(rightPaneId).append(t.div('.reflow-controls #reflow-controls'));
+    $id(rightPaneId).append(t.div('.page-textgrids #page-textgrids'));
+    // $id(reflowPane).addClass('reflow-control');
+    // $id(textgridPane).addClass('page-textgrids');
 
 }
 
@@ -70,6 +78,7 @@ function workflowControlPanel(assignment) {
 
     return panel;
 }
+
 function curationStatusChange(event, ui) {
     let assignment = shared.activeAssignment;
 
@@ -79,8 +88,8 @@ function curationStatusChange(event, ui) {
         .then(response => {
             console.log("status update", response);
         });
-
 }
+
 export function runMain() {
 
     frame.setupFrameLayout();
@@ -103,7 +112,6 @@ export function runMain() {
             pageview.setupPageImages('div.view-pdf-pages', pageShapes);
             textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
-            console.log('textgrids', textgrids);
             rtrees.initPageAndGridRTrees(textgrids);
 
             d3.selectAll('svg.textgrid')
@@ -117,8 +125,6 @@ export function runMain() {
                 .then(response => {
 
                     let assignments = dt.assignmentsFromJson(response);
-                    console.log('assignments', assignments);
-                    console.log('entry', entry);
                     let filtered = _.filter(assignments, a => {
                         return _.some(a.zone.regions, r => {
                             return r.stableId === entry;

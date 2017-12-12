@@ -9,27 +9,28 @@ div.page-textgrids {
     margin: 0 auto;
     padding: 10px;
 
-    div.textgrid {
-        position: relative;
 
-        // canvas.textgrid and svg.textgrid are superimposed
-        canvas.textgrid {
-            position: absolute;
-            top: 0;
-            left: 0;
+}
 
-            z-index: -10;
-        }
+div.textgrid {
+    position: relative;
 
-        svg.textgrid {
-            position: absolute;
+    // canvas.textgrid and svg.textgrid are superimposed
+    canvas.textgrid {
+        position: absolute;
+        top: 0;
+        left: 0;
 
-            width: 100%;
-            height: 100%;
-
-            z-index: 1000;
-        }
+        z-index: -10;
     }
 
+    svg.textgrid {
+        position: absolute;
+
+        width: 100%;
+        height: 100%;
+
+        z-index: 1000;
+    }
 }
 
