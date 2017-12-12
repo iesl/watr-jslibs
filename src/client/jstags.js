@@ -3,6 +3,7 @@
  **/
 
 /* global $ _ */
+import { shared } from './shared-state';
 
 export function $id(selector) {
     return $('#' + selector);
@@ -141,6 +142,7 @@ export function resizeCanvas(canvasElem, width, height) {
     canvasElem.height = height;
     let ctx = canvasElem.getContext('2d');
     let img = new Image();
+    ctx.font = `normal normal normal ${shared.TextGridLineHeight}px/normal Times New Roman`;
     img.onload = function(){
         ctx.drawImage(img,0,0);
     };

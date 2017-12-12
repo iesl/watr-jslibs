@@ -111,46 +111,39 @@ class TextReflowWidget {
             ;
 
         }).then(() => {
-            let canvas = document.getElementById(this.canvasId);
-            return this.fillGridCanvas(this.gridData, canvas);
-
-        }).then(data => {
-            let canvas = document.getElementById(this.canvasId);
-
-            $id(this.frameId).css({width: canvas.width, height: canvas.height});
-
-            d3.select(`#${this.svgId}`)
-                .attr('width', canvas.width)
-                .attr('height', canvas.height);
-
-            console.log('loading', data.gridDataPts);
-            this.reflowRTree = rtree();
-            this.reflowRTree.load(data.gridDataPts);
-            this.initMouseHandlers();
-            return data;
-        }) ;
+            this.gridCanvas = document.getElementById(this.canvasId);
+            return this.redrawText();
+        });
 
     }
 
-    // initMouseHandlers(d3$textgridSvg, pageNum, pageRTree) {
-    initMouseHandlers() {
-        // let reticleGroup = viewtext.initHoverReticles(d3$textgridSvg);
+    redrawText() {
 
-        let reflowRTree = this.reflowRTree;
-        let neighborHits = [];
-        let gridSelection = [];
+        let data = this.fillGridCanvas();
+        $id(this.frameId).css({width: this.gridCanvas.width, height: this.gridCanvas.height});
+
+        d3.select(`#${this.svgId}`)
+            .attr('width', this.gridCanvas.width)
+            .attr('height', this.gridCanvas.height);
+
+        console.log('loading', data.gridDataPts);
+        this.reflowRTree = rtree();
+        this.reflowRTree.load(data.gridDataPts);
+        this.initMouseHandlers();
+        return data;
+
+    }
+
+    initMouseHandlers() {
         let widget = this;
-        // let selectionStartId = undefined;
-        // let selectionEndId = undefined;
+        let reflowRTree = widget.reflowRTree;
+        let neighborHits = [];
 
         this.d3$textgridSvg
-            .on("mouseover", function() {
-                // reticleGroup.attr("opacity", 0.4);
-            })
-            .on("mouseout", function() {
-                // reticleGroup.attr("opacity", 0);
-                // d3.selectAll('.textloc').remove();
-            });
+            .on("mouseover", function() {})
+            .on("mouseout", function() {})
+            .on("mouseup", function() {})
+        ;
 
         this.d3$textgridSvg.on("mousedown",  function() {
             let mouseEvent = d3.event;
@@ -164,23 +157,13 @@ class TextReflowWidget {
                 } else if (mouseEvent.ctrlKey) {
                     console.log('ctrl click on ', widget.focalPoint);
                     // Split the textgrid
+                    let splitData = widget.splitGridData(widget.focalPoint[0]);
+                    widget.gridData = splitData;
 
+                    console.log('split data', widget.gridData);
+                    widget.redrawText();
                 }
             }})
-            .on("mouseup", function() {
-                // if (selectionStartId !== undefined) {
-                //     console.log('gridSelection', gridSelection);
-                //     let gridDataPts = _.map(gridSelection, pt => pt.locus);
-                //     gridSelection = [];
-                //     selectionStartId = undefined;
-                //     selectionEndId = undefined;
-                //     d3$textgridSvg
-                //         .selectAll("rect.glyph-selection")
-                //         .remove() ;
-                //     lbl.createTextGridLabeler(gridDataPts);
-                // }
-
-            })
             .on("mousemove", function() {
                 let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
                 let queryWidth = 2;
@@ -191,13 +174,11 @@ class TextReflowWidget {
 
                 let hits = neighborHits = reflowRTree.search(queryBox);
 
-
                 neighborHits = _.sortBy(hits, hit => [hit.bottom, hit.left]);
 
                 widget.focalPoint = neighborHits.slice(0, 1);
 
                 widget.showHoverFocus();
-
             })
         ;
 
@@ -224,17 +205,47 @@ class TextReflowWidget {
             .remove() ;
     }
 
+    splitGridData(splitFocusPt) {
+        let focusRow = splitFocusPt.row;
+        let focusCol = splitFocusPt.col;
+        console.log('looking for row/col', focusRow, focusCol);
+        let splitRows = _.flatMap(this.gridData.rows, (gridRow, rowNum) => {
+            console.log(' row: ', rowNum);
+            if (focusRow == rowNum) {
+                let text0 = gridRow.text.slice(0, focusCol);
+                let loci0 = gridRow.loci.slice(0, focusCol);
+                let text1 = gridRow.text.slice(focusCol, gridRow.text.length);
+                let loci1 = gridRow.loci.slice(focusCol, gridRow.loci.length);
+                return [
+                    {text: text0, loci: loci0},
+                    {text: text1, loci: loci1}
+                ];
+            } else {
+                return [gridRow];
+            }
 
-    fillGridCanvas(textgridDef, gridCanvas) {
+        });
+
+        return {
+            rows: splitRows
+        };
+    }
+
+
+    fillGridCanvas() {
         let idGen = util.IdGenerator();
-        let context = gridCanvas.getContext('2d');
-        console.log('textgridDef ', textgridDef);
+        let context = this.gridCanvas.getContext('2d');
+        console.log('textgridDef ', this.gridData);
+
+        context.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
+        this.gridCanvas.width = 20;
+        this.gridCanvas.height = 20;
 
         context.font = `normal normal normal ${shared.TextGridLineHeight}px/normal Times New Roman`;
 
         let maxWidth = 0;
 
-        let gridData = _.flatMap(textgridDef.rows, (gridRow, rowNum) => {
+        let gridData = _.flatMap(this.gridData.rows, (gridRow, rowNum) => {
             console.log('init row', gridRow);
 
             let y = shared.TextGridOriginPt.y + (rowNum * shared.TextGridLineHeight);
@@ -274,8 +285,8 @@ class TextReflowWidget {
                 return gridDataPt;
             });
 
-            if (gridCanvas.width < currLeft) {
-                resizeCanvas(gridCanvas, currLeft, gridCanvas.height);
+            if (this.gridCanvas.width < currLeft+10 || this.gridCanvas.height <= y) {
+                resizeCanvas(this.gridCanvas, currLeft+10, y + (shared.TextGridLineHeight*3));
             }
 
             maxWidth = Math.max(maxWidth, currLeft);
