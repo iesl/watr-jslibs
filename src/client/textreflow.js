@@ -63,9 +63,9 @@ function getTextgridClippedToCurrentSelection() {
 export function setupReflowControl() {
     let gridData = getTextgridClippedToCurrentSelection();
 
-    let pageNum = shared.pageImageRTrees.length + 1;
+    let reflowWidget = new TextReflowWidget('reflow-controls', gridData);
 
-    let reflowWidget = new TextReflowWidget('reflow-controls', gridData, pageNum);
+    reflowWidget.textHeight = 20;
 
     reflowWidget.init().then(result => {
         return result;
@@ -74,7 +74,8 @@ export function setupReflowControl() {
 
 class TextReflowWidget {
 
-    constructor (containerId, gridData, gridNum) {
+    constructor (containerId, gridData) {
+        let gridNum = 1000;
         this.containerId = containerId;
         this.gridData = gridData;
         this.gridNum = gridNum;
@@ -83,17 +84,44 @@ class TextReflowWidget {
         this.canvasId = `textgrid-canvas-${gridNum}`;
         this.svgId    = `textgrid-svg-${gridNum}`;
         this.mouseHoverPts = [];
+
+        this._fringes = {
+            left: 20,
+            top: 0,
+            right: 20,
+            bottom: 10
+        };
     }
 
+
+    set textHeight (h) {
+        this._textHeight = h;
+        //       style  variant    wght size/line-height   family
+        // font="italic small-caps bold 12px               arial";
+        // this._textFont = 'normal normal normal '+h+'px/normal Times New Roman';
+        this._textFont = 'normal normal normal '+h+'px/normal Calibri';
+        // this._textFont = `normal normal normal ${shared.TextGridLineHeight}px/normal Times New Roman`;
+        // this._textFont = 'normal normal normal 20px/normal Times New Roman';
+        // this._textFont = '20px Calibri';
+    }
+
+    get fringes() { return this._fringes; }
+    get gridOrigin   () { return coords.mkPoint.fromXy(this.fringes.left, this.fringes.top); }
+    get fringeHeight   () { return this.fringes.top + this.fringes.bottom; }
+    get fringeWidth   () { return this.fringes.left + this.fringes.right; }
+
+    get textFont   () { return this._textFont; }
+    get textHeight () { return this._textHeight; }
+
+
     gridHeight()  {
-        return (this.gridData.rows.length * shared.TextGridLineHeight) + shared.TextGridOriginPt.y + 10;
+        return this.gridData.rows.length * this.textHeight + this.fringeHeight;
     }
 
     init () {
 
         return new Promise((resolve) => {
-            let initWidth = 500;
-
+            let initWidth = 100;
             let gridHeight = this.gridHeight();
 
             let gridNodes =
@@ -115,12 +143,15 @@ class TextReflowWidget {
 
         }).then(() => {
             this.gridCanvas = document.getElementById(this.canvasId);
+            this.context = this.gridCanvas.getContext('2d');
+            this.context.font = this.textFont;
             return this.redrawText();
         });
 
     }
 
     redrawText() {
+
 
         let data = this.fillGridCanvas();
         $id(this.frameId).css({width: this.gridCanvas.width, height: this.gridCanvas.height});
@@ -129,7 +160,6 @@ class TextReflowWidget {
             .attr('width', this.gridCanvas.width)
             .attr('height', this.gridCanvas.height);
 
-        console.log('loading', data.gridDataPts);
         this.reflowRTree = rtree();
         this.reflowRTree.load(data.gridDataPts);
         this.initMouseHandlers();
@@ -221,9 +251,7 @@ class TextReflowWidget {
     splitGridData(splitFocusPt) {
         let focusRow = splitFocusPt.row;
         let focusCol = splitFocusPt.col;
-        console.log('looking for row/col', focusRow, focusCol);
         let splitRows = _.flatMap(this.gridData.rows, (gridRow, rowNum) => {
-            console.log(' row: ', rowNum);
             if (focusRow == rowNum) {
                 let text0 = gridRow.text.slice(0, focusCol);
                 let loci0 = gridRow.loci.slice(0, focusCol);
@@ -272,33 +300,41 @@ class TextReflowWidget {
     }
 
 
+
     fillGridCanvas() {
         let idGen = util.IdGenerator();
-        let context = this.gridCanvas.getContext('2d');
-        console.log('textgridDef ', this.gridData);
+        let context = this.context;
+        context.font = this.textFont;
+
 
         context.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
-        this.gridCanvas.width = 20;
-        this.gridCanvas.height = 20;
 
-        context.font = `normal normal normal ${shared.TextGridLineHeight}px/normal Times New Roman`;
+        let maxLineLen = _.max(_.map(this.gridData.rows, row => row.text.length));
+
+        let initMaxWidth = maxLineLen * this.textHeight  + this.fringeWidth;
+        // let initHeight   = rowCount * this.textHeight + this.fringeHeight;
+        resizeCanvas(this.gridCanvas, initMaxWidth, this.gridHeight());
+
+        // context.font = this.textFont;
 
         let maxWidth = 0;
 
         let gridData = _.flatMap(this.gridData.rows, (gridRow, rowNum) => {
-            console.log('init row', gridRow);
 
-            let y = shared.TextGridOriginPt.y + (rowNum * shared.TextGridLineHeight);
-            let x = shared.TextGridOriginPt.x;
+            // let y = shared.TextGridOriginPt.y + (rowNum * shared.TextGridLineHeight);
+            let y = this.gridOrigin.y + ((rowNum+1) * this.textHeight);
+            let x = this.gridOrigin.x;
             let text = gridRow.text;
             let currLeft = x;
             let gridDataPts = _.map(text.split(''), (ch, chi) => {
                 let chWidth = context.measureText(ch).width;
+
+
                 let charDef = gridRow.loci[chi];
                 let charPage = charDef.g ? charDef.g[0][1] : charDef.i[1];
 
                 let gridDataPt = coords.mk.fromLtwh(
-                    currLeft, y-shared.TextGridLineHeight, chWidth, shared.TextGridLineHeight
+                    currLeft, y-this.textHeight, chWidth, this.textHeight
                 );
 
                 gridDataPt.id = idGen();
@@ -325,14 +361,16 @@ class TextReflowWidget {
                 return gridDataPt;
             });
 
-            if (this.gridCanvas.width < currLeft+10 || this.gridCanvas.height < y) {
-                resizeCanvas(this.gridCanvas, currLeft+10, y + (shared.TextGridLineHeight*3));
-            }
-
             maxWidth = Math.max(maxWidth, currLeft);
+
+            // context.font = this.textFont;
+            context.fillStyle = 'blue';
             context.fillText(text, x, y);
             return gridDataPts;
         });
+
+        let finalWidth = maxWidth + this.fringeWidth;
+        resizeCanvas(this.gridCanvas, finalWidth, this.gridHeight());
 
         let glyphDataPts = _.filter(
             _.map(gridData, p => p.glyphDataPt),

@@ -2,7 +2,7 @@
  * Some helper functions for working with client-side html
  **/
 
-/* global $ _ */
+/* global $ _ Image */
 import { shared } from './shared-state';
 
 export function $id(selector) {
@@ -137,14 +137,76 @@ export let htm = {
 };
 
 export function resizeCanvas(canvasElem, width, height) {
+    let ctx = canvasElem.getContext('2d');
+
+    // ctx.save();
+    // ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    let font                      = ctx.font;
+    let strokeStyle               = ctx.strokeStyle;
+    let fillStyle                 = ctx.fillStyle;
     let imgData = canvasElem.toDataURL();
+    // 
     canvasElem.width = width;
     canvasElem.height = height;
-    let ctx = canvasElem.getContext('2d');
+    ctx.font = font;
+    ctx.strokeStyle = strokeStyle;
+    ctx.fillStyle = fillStyle;
+
     let img = new Image();
-    ctx.font = `normal normal normal ${shared.TextGridLineHeight}px/normal Times New Roman`;
     img.onload = function(){
         ctx.drawImage(img,0,0);
     };
     img.src = imgData;
 }
+
+// export function resizeCanvas(canvasElem, width, height) {
+//     let w = canvasElem.width;
+//     let h = canvasElem.height;
+//     console.log('checking canvasElem', canvasElem);
+//     if (width==w && height==h) {
+//         return Promise.resolve();
+//     } else {
+//         return new Promise((resolve) => {
+//             let ctx = canvasElem.getContext('2d');
+//             ctx.save();
+//             let font                      = ctx.font;
+//             let strokeStyle               = ctx.strokeStyle;
+//             let fillStyle                 = ctx.fillStyle;
+//             let imgData = canvasElem.toDataURL();
+//             canvasElem.width = width;
+//             canvasElem.height = height;
+//             let img = new Image();
+//             img.onload = function(){
+//                 ctx.restore();
+//                 ctx.setTransform(1, 0, 0, 1, 0, 0);
+//                 ctx.drawImage(img,0,0);
+
+//                 ctx.font = font;
+//                 ctx.strokeStyle = strokeStyle;
+//                 ctx.fillStyle = fillStyle;
+//                 resolve();
+//             };
+//             img.src = imgData;
+//         }).then(() => {
+//             return resizeCanvas(canvasElem, width, height);
+//         });
+//     }
+// }
+
+
+// let globalAlpha               = ctx.globalAlpha;
+// let lineWidth                 = ctx.lineWidth;
+// let lineCap                   = ctx.lineCap;
+// let lineJoin                  = ctx.lineJoin;
+// let miterLimit                = ctx.miterLimit;
+// let lineDashOffset            = ctx.lineDashOffset;
+// let shadowOffsetX             = ctx.shadowOffsetX;
+// let shadowOffsetY             = ctx.shadowOffsetY;
+// let shadowBlur                = ctx.shadowBlur;
+// let shadowColor               = ctx.shadowColor;
+// let globalCompositeOperation  = ctx.globalCompositeOperation;
+// let textAlign                 = ctx.textAlign;
+// let textBaseline              = ctx.textBaseline;
+// let direction                 = ctx.direction;
+// let imageSmoothingEnabled     = ctx.imageSmoothingEnabled;
