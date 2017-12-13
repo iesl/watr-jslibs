@@ -3,18 +3,17 @@
  *
  **/
 
-/* global require _ $ d3 */
+/* global require _ d3 */
 
 import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
-import * as viewtext from './view-pdf-text.js';
 import { t } from './jstags.js';
 import { $id, resizeCanvas } from './jstags.js';
 import { shared } from './shared-state';
 import * as rtrees from  './rtrees.js';
+import * as lbl from './labeling';
 
 let rtree = require('rbush');
-let knn = require('rbush-knn');
 
 import '../style/view-pdf-text.less';
 
@@ -30,16 +29,18 @@ function getTextgridClippedToCurrentSelection() {
         });
         let byRows = _.groupBy(tuples, t => t[0]);
 
-        let clippedGrid = _.map(_.toPairs(byRows), ([rowNum, rowTuples]) => {
-            let cols = _.map(rowTuples, t => t[1]);
-            let minCol = _.min(cols);
-            let maxCol = _.max(cols);
-            let gridRow = rowTuples[0][2];
-            let text = gridRow.text.slice(minCol, maxCol+1);
-            let loci = gridRow.loci.slice(minCol, maxCol+1);
+        let clippedGrid =
+            _.map(_.toPairs(byRows), ([rowNum, rowTuples]) => {
+                let cols    = _.map(rowTuples, t => t[1]),
+                    minCol  = _.min(cols),
+                    maxCol  = _.max(cols),
+                    gridRow = rowTuples[0][2],
+                    text    = gridRow.text.slice(minCol, maxCol+1),
+                    loci    = gridRow.loci.slice(minCol, maxCol+1)
+                ;
 
-            return [rowNum, text, loci];
-        });
+                return [rowNum, text, loci];
+            });
 
         let sortedRows = _.sortBy(clippedGrid, g => g[0]);
 
@@ -65,6 +66,7 @@ export function setupReflowControl() {
     let pageNum = shared.pageImageRTrees.length + 1;
 
     let reflowWidget = new TextReflowWidget('reflow-controls', gridData, pageNum);
+
     reflowWidget.init().then(result => {
         return result;
     }) ;
@@ -80,6 +82,11 @@ class TextReflowWidget {
         this.frameId  = `textgrid-frame-${gridNum}`;
         this.canvasId = `textgrid-canvas-${gridNum}`;
         this.svgId    = `textgrid-svg-${gridNum}`;
+        this.mouseHoverPts = [];
+    }
+
+    gridHeight()  {
+        return (this.gridData.rows.length * shared.TextGridLineHeight) + shared.TextGridOriginPt.y + 10;
     }
 
     init () {
@@ -87,11 +94,7 @@ class TextReflowWidget {
         return new Promise((resolve) => {
             let initWidth = 500;
 
-            let computeGridHeight = (grid) => {
-                return (grid.rows.length * shared.TextGridLineHeight) + shared.TextGridOriginPt.y + 10;
-            };
-
-            let gridHeight = computeGridHeight(this.gridData);
+            let gridHeight = this.gridHeight();
 
             let gridNodes =
                 t.div(`.textgrid #${this.frameId}`, {style: `width: ${initWidth}; height: ${gridHeight}`}, [
@@ -142,7 +145,6 @@ class TextReflowWidget {
         this.d3$textgridSvg
             .on("mouseover", function() {})
             .on("mouseout", function() {})
-            .on("mouseup", function() {})
         ;
 
         this.d3$textgridSvg.on("mousedown",  function() {
@@ -150,18 +152,27 @@ class TextReflowWidget {
 
             // let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
 
-            if (widget.focalPoint) {
+            if (widget.mouseHoverPts.length > 0) {
+                let focalPoint = widget.mouseHoverPts[0];
+
                 if (mouseEvent.shiftKey) {
-                    console.log('shift click on ', widget.focalPoint);
-
+                    // Join lines
+                    // console.log('split data', widget.gridData);
                 } else if (mouseEvent.ctrlKey) {
-                    console.log('ctrl click on ', widget.focalPoint);
-                    // Split the textgrid
-                    let splitData = widget.splitGridData(widget.focalPoint[0]);
+                    let splitData = widget.splitGridData(focalPoint);
                     widget.gridData = splitData;
-
-                    console.log('split data', widget.gridData);
+                    // console.log('split data', widget.gridData);
                     widget.redrawText();
+                } else {
+                    lbl.createLabelChoiceWidget(['Author', 'First', 'Middle', 'Last'])
+                        .then(choice => {
+                            let labelChoice = choice.selectedLabel;
+                            widget.labelGridData(focalPoint, labelChoice);
+                            console.log('labeled data', widget.gridData);
+                            widget.redrawText();
+                        })
+                    ;
+
                 }
             }})
             .on("mousemove", function() {
@@ -176,9 +187,11 @@ class TextReflowWidget {
 
                 neighborHits = _.sortBy(hits, hit => [hit.bottom, hit.left]);
 
-                widget.focalPoint = neighborHits.slice(0, 1);
+                widget.mouseHoverPts = neighborHits.slice(0, 1);
 
                 widget.showHoverFocus();
+            })
+            .on("mouseup", function() {
             })
         ;
 
@@ -187,7 +200,7 @@ class TextReflowWidget {
     showHoverFocus() {
         let d3$hitReticles = this.d3$textgridSvg
             .selectAll('.hit-reticle')
-            .data(this.focalPoint, (d) => d.id)
+            .data(this.mouseHoverPts, (d) => d.id)
         ;
 
         d3$hitReticles
@@ -229,6 +242,33 @@ class TextReflowWidget {
         return {
             rows: splitRows
         };
+    }
+
+    labelRow(rowLoci, labelChoice) {
+        if (rowLoci.length == 1) {
+            _.merge(rowLoci[0], {bio: [`U::${labelChoice}`]});
+        } else if (rowLoci.length > 1) {
+            _.each(rowLoci, (cell, col) => {
+                let label = `B::${labelChoice}`;
+                if (col==rowLoci.length-1) {
+                    label = `L::${labelChoice}`;
+                } else if (col > 0){
+                    label = `I::${labelChoice}`;
+                }
+                _.merge(cell, {bio: [label]});
+            });
+        }
+    }
+
+    labelGridData(focalPt, labelChoice) {
+        let focusRow = focalPt.row;
+        _.each(this.gridData.rows, (gridRow, rowNum) => {
+            if (focusRow == rowNum) {
+                // let locFmtA = {g: [['d', 1, [1, 2, 10, 20]]]};
+                // let locFmtB = {i: ['d', 1, [1, 2, 10, 20]]};
+                this.labelRow(gridRow.loci, labelChoice);
+            }
+        });
     }
 
 
@@ -285,7 +325,7 @@ class TextReflowWidget {
                 return gridDataPt;
             });
 
-            if (this.gridCanvas.width < currLeft+10 || this.gridCanvas.height <= y) {
+            if (this.gridCanvas.width < currLeft+10 || this.gridCanvas.height < y) {
                 resizeCanvas(this.gridCanvas, currLeft+10, y + (shared.TextGridLineHeight*3));
             }
 

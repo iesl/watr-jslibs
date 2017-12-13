@@ -157,6 +157,44 @@ let labelButton = (label) => {
 };
 
 
+export function createTextReflowLabeler() {
+    let labelNames = [
+        'Title',
+        'Authors',
+        'Abstract',
+        'Affiliations',
+        'References'
+    ];
+
+    createLabelChoiceWidget(labelNames)
+        .then(choice => {
+
+            let labelChoice = choice.selectedLabel;
+
+            let labelData = {
+                labelChoice: labelChoice,
+                gridJson: {
+                    stableId: shared.currentDocument,
+                    rows:[
+                        // {loci: gridDataPts}
+                    ]
+                }
+            };
+            console.log('labeling', labelData);
+
+            // server.postNewSpanLabel(labelData)
+            //     .then(() => {
+            //         d3.selectAll('.label-selection-rect').remove();
+            //         updateAnnotationShapes();
+            //     });
+
+        })
+        .catch(() => {
+            return d3.selectAll('.label-selection-rect').remove();
+        })
+    ;
+}
+
 
 export function createTextGridLabeler(gridDataPts) {
     let labelNames = [
@@ -195,7 +233,7 @@ export function createTextGridLabeler(gridDataPts) {
     ;
 }
 
-function createLabelChoiceWidget(labelNames) {
+export function createLabelChoiceWidget(labelNames) {
 
     let buttons = _.map(labelNames, labelButton);
 
