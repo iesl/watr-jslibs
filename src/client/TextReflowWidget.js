@@ -1,6 +1,5 @@
 /**
  *
- *
  **/
 
 /* global require _ d3 */
@@ -12,58 +11,17 @@ import { $id, resizeCanvas } from './jstags.js';
 import { shared } from './shared-state';
 import * as rtrees from  './rtrees.js';
 import * as lbl from './labeling';
+import * as colors from './colors';
+import * as textgrid from './textgrid';
 
 let rtree = require('rbush');
 
 import '../style/view-pdf-text.less';
 
-function getTextgridClippedToCurrentSelection() {
-    let selections = shared.currentSelections;
-
-    let rowData = _.flatMap(selections, sel => {
-        let hits = rtrees.searchPage(sel.pageNum, sel);
-
-        let tuples = _.map(hits, hit => {
-            let g = hit.gridDataPt;
-            return [g.row, g.col, g.gridRow];
-        });
-        let byRows = _.groupBy(tuples, t => t[0]);
-
-        let clippedGrid =
-            _.map(_.toPairs(byRows), ([rowNum, rowTuples]) => {
-                let cols    = _.map(rowTuples, t => t[1]),
-                    minCol  = _.min(cols),
-                    maxCol  = _.max(cols),
-                    gridRow = rowTuples[0][2],
-                    text    = gridRow.text.slice(minCol, maxCol+1),
-                    loci    = gridRow.loci.slice(minCol, maxCol+1)
-                ;
-
-                return [rowNum, text, loci];
-            });
-
-        let sortedRows = _.sortBy(clippedGrid, g => g[0]);
-
-        let rowData = _.map(sortedRows, g => {
-            return {
-                text: g[1],
-                loci: g[2]
-            };
-        });
-
-        return rowData;
-    });
-
-    return {
-        rows: rowData
-    };
-}
-
-
 export function setupReflowControl() {
-    let gridData = getTextgridClippedToCurrentSelection();
+    let textGrid  = textgrid.createFromCurrentSelection();
 
-    let reflowWidget = new TextReflowWidget('reflow-controls', gridData);
+    let reflowWidget = new TextReflowWidget('reflow-controls', textGrid);
 
     reflowWidget.textHeight = 20;
 
@@ -74,55 +32,74 @@ export function setupReflowControl() {
 
 class TextReflowWidget {
 
-    constructor (containerId, gridData) {
+    constructor (containerId, textGrid, borders) {
         let gridNum = 1000;
         this.containerId = containerId;
-        this.gridData = gridData;
+        // this.gridData = gridData;
         this.gridNum = gridNum;
+        this._textGrid = textGrid;
+        // console.log('textgridPane', textGrid)
 
         this.frameId  = `textgrid-frame-${gridNum}`;
         this.canvasId = `textgrid-canvas-${gridNum}`;
         this.svgId    = `textgrid-svg-${gridNum}`;
         this.mouseHoverPts = [];
 
-        this._fringes = {
+        this.borders = borders || {
             left: 20,
-            top: 0,
-            right: 20,
+            top: 10,
+            right: 90,
             bottom: 10
         };
     }
 
+    get textGrid () { return this._textGrid; }
+
+    set borders ({left: left, top: top, right: right, bottom: bottom}) {
+        this._borders = {left, top, right, bottom};
+    }
+
+    get borders () { return this._borders; }
 
     set textHeight (h) {
         this._textHeight = h;
-        //       style  variant    wght size/line-height   family
-        // font="italic small-caps bold 12px               arial";
-        // this._textFont = 'normal normal normal '+h+'px/normal Times New Roman';
         this._textFont = 'normal normal normal '+h+'px/normal Calibri';
-        // this._textFont = `normal normal normal ${shared.TextGridLineHeight}px/normal Times New Roman`;
-        // this._textFont = 'normal normal normal 20px/normal Times New Roman';
-        // this._textFont = '20px Calibri';
     }
 
-    get fringes() { return this._fringes; }
-    get gridOrigin   () { return coords.mkPoint.fromXy(this.fringes.left, this.fringes.top); }
-    get fringeHeight   () { return this.fringes.top + this.fringes.bottom; }
-    get fringeWidth   () { return this.fringes.left + this.fringes.right; }
-
-    get textFont   () { return this._textFont; }
-    get textHeight () { return this._textHeight; }
-
-
-    gridHeight()  {
-        return this.gridData.rows.length * this.textHeight + this.fringeHeight;
+    get gridBounds   () {
+        let height = this.textGrid.gridRows.length * this.textHeight;
+        return coords.mk.fromLtwh(this.borders.left, this.borders.top, this.gridWidth, height);
     }
+
+    get gridOrigin   () { return this.gridBounds.topLeft; }
+
+
+    get gridWidth   () { return this._gridWidth; }
+    set gridWidth   (w) { this._gridWidth = w; }
+
+    get widgetBounds   () {
+        return coords.mk.fromLtwh(0, 0, this.gridCanvas.width, this.gridCanvas.height);
+    }
+
+    get fringes  () {
+        let grid = this.gridBounds;
+        let b = this.borders;
+        let fr = {
+            right: coords.mk.fromLtwh(grid.right, grid.top, b.right, grid.height),
+            left: coords.mk.fromLtwh(0, grid.width, b.left, grid.height)
+        };
+        return fr;
+    }
+
+    get textFont     () { return this._textFont; }
+    get textHeight   () { return this._textHeight; }
+
 
     init () {
 
         return new Promise((resolve) => {
             let initWidth = 100;
-            let gridHeight = this.gridHeight();
+            let gridHeight = this.gridBounds.bottom;
 
             let gridNodes =
                 t.div(`.textgrid #${this.frameId}`, {style: `width: ${initWidth}; height: ${gridHeight}`}, [
@@ -133,7 +110,7 @@ class TextReflowWidget {
 
             this.d3$textgridSvg = d3.select('#'+this.frameId)
                 .append('svg').classed('textgrid', true)
-                .datum(this.gridData)
+                .datum(this.textGrid.gridData)
                 .attr('id', `${this.svgId}`)
                 .attr('page', this.gridNum)
                 .attr('width', initWidth)
@@ -151,9 +128,17 @@ class TextReflowWidget {
     }
 
     redrawText() {
+        this.labelColors = {};
+        let labelSet = this.textGrid.computeLabelSet();
+        _.each(labelSet, (l, i) => {
+            this.labelColors[l] = colors.labelColors[i];
+        });
 
 
         let data = this.fillGridCanvas();
+
+        this.drawLabelKey();
+
         $id(this.frameId).css({width: this.gridCanvas.width, height: this.gridCanvas.height});
 
         d3.select(`#${this.svgId}`)
@@ -165,6 +150,29 @@ class TextReflowWidget {
         this.initMouseHandlers();
         return data;
 
+    }
+
+    drawLabelKey() {
+        let labelData = _.toPairs(this.labelColors);
+        console.log('labelColors', labelData);
+
+        // let {left: l, top: t, width: w, height: h} = this.fringes.right;
+        let fringe = this.fringes.right;
+
+        d3.select('#'+this.svgId)
+            .selectAll('.label-key')
+            .data(labelData)
+            .enter()
+            .append('text')
+            .classed('label-key', true)
+            .attr('stroke', d => d[1])
+            .attr('fill', d => d[1])
+            .call(util.initRect, () => fringe)
+            .attr('y', (d, i) => (i+1)*this.textHeight)
+            .text(d => d[0])
+            .exit()
+            .remove()
+        ;
     }
 
     initMouseHandlers() {
@@ -189,16 +197,16 @@ class TextReflowWidget {
                     // Join lines
                     // console.log('split data', widget.gridData);
                 } else if (mouseEvent.ctrlKey) {
-                    let splitData = widget.splitGridData(focalPoint);
-                    widget.gridData = splitData;
-                    // console.log('split data', widget.gridData);
+                    widget.textGrid.splitGridData(focalPoint);
+                    // widget.textGrid.gridData = splitData;
+                    // console.log('split data', widget.textGrid.gridData);
                     widget.redrawText();
                 } else {
                     lbl.createLabelChoiceWidget(['Author', 'First', 'Middle', 'Last'])
                         .then(choice => {
                             let labelChoice = choice.selectedLabel;
-                            widget.labelGridData(focalPoint, labelChoice);
-                            console.log('labeled data', widget.gridData);
+                            widget.textGrid.labelGridData(focalPoint, labelChoice);
+                            console.log('labeled data', widget.textGrid.gridData);
                             widget.redrawText();
                         })
                     ;
@@ -248,89 +256,32 @@ class TextReflowWidget {
             .remove() ;
     }
 
-    splitGridData(splitFocusPt) {
-        let focusRow = splitFocusPt.row;
-        let focusCol = splitFocusPt.col;
-        let splitRows = _.flatMap(this.gridData.rows, (gridRow, rowNum) => {
-            if (focusRow == rowNum) {
-                let text0 = gridRow.text.slice(0, focusCol);
-                let loci0 = gridRow.loci.slice(0, focusCol);
-                let text1 = gridRow.text.slice(focusCol, gridRow.text.length);
-                let loci1 = gridRow.loci.slice(focusCol, gridRow.loci.length);
-                return [
-                    {text: text0, loci: loci0},
-                    {text: text1, loci: loci1}
-                ];
-            } else {
-                return [gridRow];
-            }
-
-        });
-
-        return {
-            rows: splitRows
-        };
-    }
-
-    labelRow(rowLoci, labelChoice) {
-        if (rowLoci.length == 1) {
-            _.merge(rowLoci[0], {bio: [`U::${labelChoice}`]});
-        } else if (rowLoci.length > 1) {
-            _.each(rowLoci, (cell, col) => {
-                let label = `B::${labelChoice}`;
-                if (col==rowLoci.length-1) {
-                    label = `L::${labelChoice}`;
-                } else if (col > 0){
-                    label = `I::${labelChoice}`;
-                }
-                _.merge(cell, {bio: [label]});
-            });
-        }
-    }
-
-    labelGridData(focalPt, labelChoice) {
-        let focusRow = focalPt.row;
-        _.each(this.gridData.rows, (gridRow, rowNum) => {
-            if (focusRow == rowNum) {
-                // let locFmtA = {g: [['d', 1, [1, 2, 10, 20]]]};
-                // let locFmtB = {i: ['d', 1, [1, 2, 10, 20]]};
-                this.labelRow(gridRow.loci, labelChoice);
-            }
-        });
-    }
-
-
 
     fillGridCanvas() {
         let idGen = util.IdGenerator();
         let context = this.context;
-        context.font = this.textFont;
-
 
         context.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
 
-        let maxLineLen = _.max(_.map(this.gridData.rows, row => row.text.length));
+        let maxLineLen = _.max(_.map(this.textGrid.gridData.rows, row => row.text.length));
 
-        let initMaxWidth = maxLineLen * this.textHeight  + this.fringeWidth;
-        // let initHeight   = rowCount * this.textHeight + this.fringeHeight;
-        resizeCanvas(this.gridCanvas, initMaxWidth, this.gridHeight());
+        let initWidth = maxLineLen * this.textHeight;
 
-        // context.font = this.textFont;
+        let initHeight = this.gridBounds.bottom;
+        resizeCanvas(this.gridCanvas, initWidth, initHeight);
 
         let maxWidth = 0;
 
-        let gridData = _.flatMap(this.gridData.rows, (gridRow, rowNum) => {
+        let gridData = _.flatMap(this.textGrid.gridData.rows, (gridRow, rowNum) => {
 
-            // let y = shared.TextGridOriginPt.y + (rowNum * shared.TextGridLineHeight);
             let y = this.gridOrigin.y + ((rowNum+1) * this.textHeight);
             let x = this.gridOrigin.x;
             let text = gridRow.text;
             let currLeft = x;
-            let gridDataPts = _.map(text.split(''), (ch, chi) => {
+            let gridDataPts = _.map(text.split(''), (ch, col) => {
                 let chWidth = context.measureText(ch).width;
 
-
-                let charDef = gridRow.loci[chi];
+                let charDef = gridRow.loci[col];
                 let charPage = charDef.g ? charDef.g[0][1] : charDef.i[1];
 
                 let gridDataPt = coords.mk.fromLtwh(
@@ -340,10 +291,12 @@ class TextReflowWidget {
                 gridDataPt.id = idGen();
                 gridDataPt.gridRow = gridRow;
                 gridDataPt.row = rowNum;
-                gridDataPt.col = chi;
+                gridDataPt.col = col;
                 gridDataPt.char = ch;
                 gridDataPt.page = charPage;
                 gridDataPt.locus = charDef;
+                gridDataPt.pins = charDef.bio? charDef.bio : [];
+                gridDataPt.labels = _.map(gridDataPt.pins, p => p.split('::')[1]);
 
                 let isGlyphData = charDef.g != undefined;
                 if (isGlyphData) {
@@ -363,14 +316,25 @@ class TextReflowWidget {
 
             maxWidth = Math.max(maxWidth, currLeft);
 
-            // context.font = this.textFont;
-            context.fillStyle = 'blue';
+            let l = _.map(gridDataPts, p => p.labels);
+            let la;
+            if (l.length > 0) {
+                la = this.labelColors[l[0]];
+            } else {
+                la = 'black';
+            }
+            context.fillStyle = la;
             context.fillText(text, x, y);
             return gridDataPts;
         });
 
-        let finalWidth = maxWidth + this.fringeWidth;
-        resizeCanvas(this.gridCanvas, finalWidth, this.gridHeight());
+        this.gridWidth = maxWidth;
+
+        let gridBounds = this.gridBounds;
+        let finalWidth = gridBounds.right + this.borders.right;
+        let finalHeight = gridBounds.bottom + this.borders.bottom;
+
+        resizeCanvas(this.gridCanvas, finalWidth, finalHeight);
 
         let glyphDataPts = _.filter(
             _.map(gridData, p => p.glyphDataPt),
@@ -379,8 +343,7 @@ class TextReflowWidget {
 
         let result = {
             gridDataPts: gridData,
-            glyphDataPts: glyphDataPts,
-            maxWidth: maxWidth
+            glyphDataPts: glyphDataPts
         };
 
         return result;

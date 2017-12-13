@@ -1,6 +1,7 @@
 /* global require location _ d3 */
 
 import * as util from './commons.js';
+import * as colors from './colors';
 
 export let d3select = {
     pageImages: () => {
@@ -25,25 +26,6 @@ export function selectShapes(dataBlock) {
         .data(dataBlock.shapes, util.getId) ;
 }
 
-let colorMap = {
-    "Caption"                : "blue",
-    "Image"                  : "brown",
-    "CharRun"                : "chocolate",
-    "CharRunBegin"           : "purple",
-    "CharRunBaseline"        : "purple",
-    "FontBaseline"           : "blue",
-    "LeftAlignedCharCol"     : "crimson",
-    "RightAlignedCharCol"    : "darkorchid",
-    "LeftAlignedColEnd"      : "darkred",
-    "HPageDivider"           : "darksalmon",
-    "ColLeftEvidence"        : "darkturquoise",
-    "ColRightEvidence"       : "firebrick",
-    "PageLines"              : "green",
-    "HLinePath"              : "indianred",
-    "VLinePath"              : "khaki",
-    "LinePath"               : "lavender",
-    "OutlineBox"             : "magenta"
-} ;
 
 
 export function getSelectionText() {
@@ -64,7 +46,7 @@ function dataToColor(d) {
     } else if (d.class === undefined) {
         return "black";
     } else {
-        return colorMap[d.class];
+        return colors.colorMap[d.class];
     }
 }
 

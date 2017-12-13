@@ -10,7 +10,7 @@ import * as coords from './coord-sys.js';
 import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
-import * as reflow from  './textreflow.js';
+import * as reflowWidget from  './TextReflowWidget.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
 import {$id, t, icon} from './jstags.js';
@@ -285,7 +285,7 @@ function setupStatusBar(statusBarId) {
 
             let gridShaperBtn = t.button([icon.fa('indent')]);
             gridShaperBtn.on('click', function(event) {
-                reflow.setupReflowControl();
+                reflowWidget.setupReflowControl();
 
             });
 
