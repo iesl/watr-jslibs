@@ -6,9 +6,20 @@
 
 import {shared} from './shared-state';
 
-export function getAnnotations() {
+export function apiUri(path) {
+    return `/api/v1/${path}`;
+}
+
+export let api = {
+    root: p => apiUri(p),
+    labeling: p => apiUri(p)
+};
+
+
+
+export function getDocumentZones () {
     return new Promise((resolve, reject) => {
-        let url = `/api/v1/labeling/labels/${shared.currentDocument}`;
+        let url = `/api/v1/labeling/zones/${shared.currentDocument}`;
         $.getJSON(
             url, (response) => resolve(response)
         ).fail((xhr, status, err) => reject("Server Error:" + status + err.message));
@@ -28,55 +39,11 @@ export function getCorpusArtifactTextgrid(entryName) {
     return apiGet(`/api/v1/corpus/artifacts/vtrace/json/${entryName}/${show}`);
 }
 
-export function getLabelingPanelWidget() {
-
-    let labelNames = [
-        'Title',
-        'Authors',
-        'Abstract',
-        'Affiliations',
-        'References'
-    ];
-
-    let reqData = {
-        labels: labelNames,
-        description: "Some Desc"
-    };
-
-    return new Promise((resolve, reject) => {
-        $.post({
-            url: "/api/v1/labeling/ui/labeler",
-            data: JSON.stringify(reqData),
-            contentType: 'application/json',
-            method: "POST"
-        }, function success (labelerHtml) {
-            resolve(labelerHtml);
-
-        }).fail(function() {
-            reject("Server Error");
-        });
-    });
-}
-
-
-export function postNewSpanLabel(labelData) {
-    return new Promise((resolve, reject) => {
-        $.post({
-            url: "/api/v1/labeling/label/span",
-            data: JSON.stringify(labelData),
-            datatype: 'json',
-            contentType: 'application/json',
-            method: "POST"
-        }, function(res) {
-            resolve(res);
-        }).fail((xhr, status, err) => reject("Server Error:" + status + err.message));
-    });
-}
 export function deleteLabels(labelData) {
     return new Promise((resolve, reject) => {
         console.log('labelData', labelData);
         $.ajax({
-            url: "/api/v1/labeling/label",
+            url: "/api/v1/labeling/zone",
             data: JSON.stringify(labelData),
             datatype: 'json',
             contentType: 'application/json',
@@ -115,10 +82,7 @@ export function apiPost(url, data) {
     });
 }
 
-export function apiUri(path) {
-    return `/api/v1/${path}`;
-}
 
 export function postNewRegionLabel(labelData) {
-    return apiPost(apiUri("labeling/label/region"), labelData);
+    return apiPost(apiUri("labeling/zones"), labelData);
 }

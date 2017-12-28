@@ -109,6 +109,8 @@ export function initPageAndGridRTrees(textgrids) {
                 gridDataPt.char = ch;
                 gridDataPt.page = gridNum;
                 gridDataPt.locus = charDef;
+                charDef.gridDataPt = gridDataPt;
+
 
                 // let isGlyphData = typeof charDef[0] == typeof [];
                 let isGlyphData = charDef.g != undefined;

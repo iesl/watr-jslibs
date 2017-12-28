@@ -10,6 +10,20 @@ import {shared} from './shared-state';
 
 
 function dispatch() {
+    // let TB = watr.TextBoxing;
+
+    // console.log('TextBoxing', TB);
+    // console.log('TextBoxing', TB.tbox('sdf'));
+    // let a = TB.tbox('this is some text').atop(
+    //     TB.tbox('some other text').atop(
+    //         TB.tbox('--------------------')
+    //     )
+    // );
+
+    // let b = a.beside(a);
+    // console.log(a);
+    // console.log(a.toString());
+    // console.log(b.toString());
 
     let path = window.location.pathname;
     let root = path.split("/")[1];

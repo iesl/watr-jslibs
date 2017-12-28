@@ -12,7 +12,7 @@ import '../style/browse.less';
 let pageLen = 20;
 
 function createEntryItem(entry) {
-    let interestingLabels = _.filter(entry.labels[0], l => l !== 'DocumentPages');
+    let interestingLabels = _.filter(entry.labels[0], l => l !== 'FullPdf');
     let labelList = _.map(interestingLabels, l => t.li(` ${l}`));
 
     let entryPanel =

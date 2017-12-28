@@ -20,9 +20,8 @@ export function mkAnnotation(props) {
 }
 
 export function updateAnnotationShapes() {
-    server.getAnnotations().then(annotations =>{
-        refreshZoneHightlights(annotations.zones);
-    });
+    return server.getDocumentZones()
+        .then(zoneRecs => refreshZoneHightlights(zoneRecs.zones));
 }
 
 function mapGlyphLociToGridDataPts(glyphsLoci) {
@@ -182,12 +181,6 @@ export function createTextReflowLabeler() {
             };
             console.log('labeling', labelData);
 
-            // server.postNewSpanLabel(labelData)
-            //     .then(() => {
-            //         d3.selectAll('.label-selection-rect').remove();
-            //         updateAnnotationShapes();
-            //     });
-
         })
         .catch(() => {
             return d3.selectAll('.label-selection-rect').remove();
@@ -196,42 +189,42 @@ export function createTextReflowLabeler() {
 }
 
 
-export function createTextGridLabeler(gridDataPts) {
-    let labelNames = [
-        'Title',
-        'Authors',
-        'Abstract',
-        'Affiliations',
-        'References'
-    ];
+// export function createTextGridLabeler(gridDataPts) {
+//     let labelNames = [
+//         'Title',
+//         'Authors',
+//         'Abstract',
+//         'Affiliations',
+//         'References'
+//     ];
 
-    createLabelChoiceWidget(labelNames)
-        .then(choice => {
+//     createLabelChoiceWidget(labelNames)
+//         .then(choice => {
 
-            let labelChoice = choice.selectedLabel;
+//             let labelChoice = choice.selectedLabel;
 
-            let labelData = {
-                labelChoice: labelChoice,
-                gridJson: {
-                    stableId: shared.currentDocument,
-                    rows:[
-                        {loci: gridDataPts}
-                    ]
-                }
-            };
+//             let labelData = {
+//                 labelChoice: labelChoice,
+//                 gridJson: {
+//                     stableId: shared.currentDocument,
+//                     rows:[
+//                         {loci: gridDataPts}
+//                     ]
+//                 }
+//             };
 
-            server.postNewSpanLabel(labelData)
-                .then(() => {
-                    d3.selectAll('.label-selection-rect').remove();
-                    updateAnnotationShapes();
-                });
+//             server.postNewSpanLabel(labelData)
+//                 .then(() => {
+//                     d3.selectAll('.label-selection-rect').remove();
+//                     updateAnnotationShapes();
+//                 });
 
-        })
-        .catch(() => {
-            d3.selectAll('.label-selection-rect').remove();
-        })
-    ;
-}
+//         })
+//         .catch(() => {
+//             d3.selectAll('.label-selection-rect').remove();
+//         })
+//     ;
+// }
 
 export function createLabelChoiceWidget(labelNames) {
 

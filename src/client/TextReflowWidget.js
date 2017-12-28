@@ -2,14 +2,12 @@
  *
  **/
 
-/* global require _ d3 */
+/* global require _ d3 watr */
 
 import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
 import { t } from './jstags.js';
 import { $id, resizeCanvas } from './jstags.js';
-import { shared } from './shared-state';
-import * as rtrees from  './rtrees.js';
 import * as lbl from './labeling';
 import * as colors from './colors';
 import * as textgrid from './textgrid';
@@ -35,10 +33,8 @@ class TextReflowWidget {
     constructor (containerId, textGrid, borders) {
         let gridNum = 1000;
         this.containerId = containerId;
-        // this.gridData = gridData;
         this.gridNum = gridNum;
         this._textGrid = textGrid;
-        // console.log('textgridPane', textGrid)
 
         this.frameId  = `textgrid-frame-${gridNum}`;
         this.canvasId = `textgrid-canvas-${gridNum}`;
@@ -63,11 +59,13 @@ class TextReflowWidget {
 
     set textHeight (h) {
         this._textHeight = h;
-        this._textFont = 'normal normal normal '+h+'px/normal Calibri';
+        this._textFont = '20px mono';
     }
 
     get gridBounds   () {
-        let height = this.textGrid.gridRows.length * this.textHeight;
+        let height = 400; // this.textGrid.rows.length * this.textHeight;
+        // console.log('gridBounds(1)', this.textHeight);
+        // console.log('gridBounds(2)', this.textGrid.rows.length);
         return coords.mk.fromLtwh(this.borders.left, this.borders.top, this.gridWidth, height);
     }
 
@@ -98,7 +96,7 @@ class TextReflowWidget {
     init () {
 
         return new Promise((resolve) => {
-            let initWidth = 100;
+            let initWidth = 400;
             let gridHeight = this.gridBounds.bottom;
 
             let gridNodes =
@@ -122,58 +120,118 @@ class TextReflowWidget {
             this.gridCanvas = document.getElementById(this.canvasId);
             this.context = this.gridCanvas.getContext('2d');
             this.context.font = this.textFont;
-            return this.redrawText();
+            return this.redrawAll();
         });
 
     }
 
-    redrawText() {
-        this.labelColors = {};
-        let labelSet = this.textGrid.computeLabelSet();
-        _.each(labelSet, (l, i) => {
-            this.labelColors[l] = colors.labelColors[i];
-        });
+    redrawAll() {
+
+        let TGW = watr.textgrid.TextGridLabelWidget;
+        let Schemas = watr.textgrid.LabelSchemasCompanion;
+        let textGrid = this.textGrid;
+
+        console.log('grid', textGrid.toText());
+        let labelTree = TGW.textGridToLabelTree(textGrid);
+
+        let gridRegions = TGW.labelTreeToGridRegions(labelTree, Schemas.testLabelSchema, 5, 20);
+
+        console.log('gridRegions', gridRegions);
+        // Fill Canvas with text, including grid cells, headers
+        // Fill SVG with rectangular overlays for label-cover indicators
+        // Fill RTree with data regions for: grid-cells, label-covers, label-keys
 
 
-        let data = this.fillGridCanvas();
+        let data = this.fillGridCanvas(gridRegions);
+        // $id(this.frameId).css({width: this.gridCanvas.width, height: this.gridCanvas.height});
 
-        this.drawLabelKey();
+        // d3.select(`#${this.svgId}`)
+        //     .attr('width', this.gridCanvas.width)
+        //     .attr('height', this.gridCanvas.height);
 
-        $id(this.frameId).css({width: this.gridCanvas.width, height: this.gridCanvas.height});
-
-        d3.select(`#${this.svgId}`)
-            .attr('width', this.gridCanvas.width)
-            .attr('height', this.gridCanvas.height);
-
-        this.reflowRTree = rtree();
-        this.reflowRTree.load(data.gridDataPts);
-        this.initMouseHandlers();
-        return data;
+        // this.reflowRTree = rtree();
+        // this.reflowRTree.load(data.gridDataPts);
+        // this.initMouseHandlers();
+        // return data;
 
     }
 
-    drawLabelKey() {
-        let labelData = _.toPairs(this.labelColors);
-        console.log('labelColors', labelData);
+    fillGridCanvas(gridRegions) {
+        let idGen = util.IdGenerator();
+        let context = this.context;
 
-        // let {left: l, top: t, width: w, height: h} = this.fringes.right;
-        let fringe = this.fringes.right;
+        // context.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
 
-        d3.select('#'+this.svgId)
-            .selectAll('.label-key')
-            .data(labelData)
-            .enter()
-            .append('text')
-            .classed('label-key', true)
-            .attr('stroke', d => d[1])
-            .attr('fill', d => d[1])
-            .call(util.initRect, () => fringe)
-            .attr('y', (d, i) => (i+1)*this.textHeight)
-            .text(d => d[0])
-            .exit()
-            .remove()
-        ;
+        let maxLineLen = 100; // _.max(_.map(this.textGrid.gridData.rows, row => row.text.length));
+
+        let initWidth = maxLineLen * this.textHeight;
+
+        let initHeight = 100; // this.gridBounds.bottom;
+        // resizeCanvas(this.gridCanvas, initWidth, initHeight);
+
+        let maxWidth = 0;
+
+
+        let GridRegion = watr.textgrid.GridRegion;
+        console.log('GridRegion', GridRegion.fold);
+
+        // let f1 = cell => {
+        //     console.log('isCell', cell);
+        //     // cell.id = idGen();
+        //     // let text = cell.cell.char.toString();
+        //     // context.fillStyle = 'black';
+        //     // console.log('text', text);
+        //     // context.fillText(text, cell.x(), cell.y());
+
+        // };
+        function f1(a) {
+            console.log('isHead', a);
+            return 0;
+        }
+
+        function f2(a) {
+            console.log('isHead', a);
+            return 0;
+        }
+        function f3(a) {
+            console.log('isHead', a);
+            return 0;
+        }
+
+        function f4(a) {
+            console.log('isHead', a);
+            return 0;
+        }
+
+        GridRegion.fold(
+            gridRegions, f1, f2, f3, f4
+        );
+
+        console.log('done');
+
+        // this.gridWidth = maxWidth;
+
+        // let gridBounds = this.gridBounds;
+        // let finalWidth = gridBounds.right + this.borders.right;
+        // let finalHeight = gridBounds.bottom + this.borders.bottom;
+
+        // resizeCanvas(this.gridCanvas, finalWidth, finalHeight);
+
+        // let glyphDataPts = _.filter(
+        //     _.map(gridData, p => p.glyphDataPt),
+        //     p =>  p !== undefined
+        // );
+
+        // let result = {
+        //     gridDataPts: gridData,
+        //     glyphDataPts: glyphDataPts
+        // };
+
+        // return result;
     }
+
+
+
 
     initMouseHandlers() {
         let widget = this;
@@ -194,20 +252,18 @@ class TextReflowWidget {
                 let focalPoint = widget.mouseHoverPts[0];
 
                 if (mouseEvent.shiftKey) {
-                    // Join lines
-                    // console.log('split data', widget.gridData);
+                    widget.textGrid.joinRows(focalPoint.row);
+                    widget.redrawAll();
                 } else if (mouseEvent.ctrlKey) {
-                    widget.textGrid.splitGridData(focalPoint);
-                    // widget.textGrid.gridData = splitData;
-                    // console.log('split data', widget.textGrid.gridData);
-                    widget.redrawText();
+                    widget.textGrid.splitRow(focalPoint.row, focalPoint.col);
+                    widget.redrawAll();
                 } else {
                     lbl.createLabelChoiceWidget(['Author', 'First', 'Middle', 'Last'])
                         .then(choice => {
                             let labelChoice = choice.selectedLabel;
                             widget.textGrid.labelGridData(focalPoint, labelChoice);
                             console.log('labeled data', widget.textGrid.gridData);
-                            widget.redrawText();
+                            widget.redrawAll();
                         })
                     ;
 
@@ -257,7 +313,7 @@ class TextReflowWidget {
     }
 
 
-    fillGridCanvas() {
+    fillGridCanvasXX() {
         let idGen = util.IdGenerator();
         let context = this.context;
 
@@ -284,6 +340,9 @@ class TextReflowWidget {
                 let charDef = gridRow.loci[col];
                 let charPage = charDef.g ? charDef.g[0][1] : charDef.i[1];
 
+                if (charDef.bio == undefined) {
+                    charDef.bio = [];
+                }
                 let gridDataPt = coords.mk.fromLtwh(
                     currLeft, y-this.textHeight, chWidth, this.textHeight
                 );
@@ -348,5 +407,7 @@ class TextReflowWidget {
 
         return result;
     }
+
+
 
 }
