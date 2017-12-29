@@ -17,15 +17,27 @@ export class DrawingApi {
     get textHeight   () { return this._textHeight; }
 
     drawChar(cell, char) {
-        console.log('cell', cell, char);
         this.context.fillStyle = 'black';
-        this.context.fillText(char, cell.x, cell.y);
+        this.context.fillText(char, cell.x*10, cell.y*10);
 
     }
 
     drawBox(box, border) {
+        console.log('drawBox');
         this.context.rect(box.x, box.y, 20, 20);
         this.context.stroke();
+    }
+
+    applyBgColor(x, y, color) {
+        console.log('applyBgColor');
+    }
+
+    applyColor(x, y, color) {
+        console.log('applyColor');
+
+    }
+    gradientHorizontal(box) {
+        console.log('gradientHorizontal');
     }
 }
 // trait DrawingApi extends js.Object {

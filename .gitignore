@@ -36,3 +36,6 @@ log-data.d
 *log.json
 
 /dist
+
+# Firefox bug artifact:
+*debuglog.txt
