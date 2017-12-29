@@ -4,3 +4,5 @@ coverage
 flow-typed
 node_modules
 example/public/
+*.config.js
+*.conf.js

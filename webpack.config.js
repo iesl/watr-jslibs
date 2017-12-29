@@ -2,14 +2,6 @@ const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-// const jQueryProvider = new webpack.ProvidePlugin({
-//     $: 'jquery',
-//     jQuery: 'jquery',
-//     'window.jQuery': 'jquery',
-//     'window.$': 'jquery'
-// });
-
-// const commonsPlugin = new webpack.optimize.CommonsChunkPlugin({});
 
 const config = {
     entry: {
