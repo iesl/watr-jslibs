@@ -3,7 +3,6 @@
  **/
 
 /* global $ _ Image */
-import { shared } from './shared-state';
 
 export function $id(selector) {
     return $('#' + selector);

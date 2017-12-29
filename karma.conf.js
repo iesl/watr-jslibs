@@ -3,7 +3,9 @@
 
 /* global module */
 
-let watrmarksLib = '../watr-marks/js/target/scala-2.12/watrmarks-fastopt.js';
+let watrmarksJsPath = '../watr-marks/js/target/scala-2.12/';
+let watrmarksLib = watrmarksJsPath + 'watrmarks-fastopt.js';
+let watrmarksSrcMap = watrmarksJsPath + 'watrmarks-fastopt.js.map';
 
 module.exports = function(config) {
     config.set({
@@ -19,10 +21,17 @@ module.exports = function(config) {
             //    included: should the files be included in the browser using <script> tag?
             //    nocache: should the files be served from disk on each request by Karma's webserver?
 
-            {pattern: 'src/client/*.js', watched:true, served:false, included:false, nocache:false},
-            {pattern: 'test/*.js',       watched:true, served:true,  included:true},
-            {pattern: 'test/*.html',     watched:true, served:true,  included:true},
-            {pattern: watrmarksLib,      watched:true, served:true,  included:true}
+            {pattern: 'node_modules/jquery/dist/jquery.min.js', watched:false, served:true, included:true, nocache:false},
+            {pattern: 'node_modules/lodash/lodash.min.js', watched:false, served:true, included:true, nocache:false},
+            {pattern: 'node_modules/d3/build/d3.min.js', watched:false, served:true, included:true, nocache:false},
+            {pattern: 'dist/app.css', watched:false, served:true, included:false, nocache:true},
+
+            {pattern: 'src/client/*.js', watched:true,   served:false, included:false, nocache:false},
+            {pattern: 'test/*.js',       watched:true,   served:true,  included:true},
+            {pattern: 'test/*.html',     watched:true,   served:true,  included:true},
+            {pattern: watrmarksLib,      watched:true,   served:true,  included:true},
+            {pattern: watrmarksSrcMap,   watched:true,   served:true,  included:false}
+
             // assets
             //    {pattern: '*.html', watched:true, served:true, included:false}
             //    {pattern: 'images/*', watched:false, served:true, included:false}
@@ -96,7 +105,7 @@ module.exports = function(config) {
 
         webpackMiddleware: {
             //turn off webpack bash output when run the tests
-            noInfo: true,
+            noInfo: false,
             stats: 'errors-only'
         },
 

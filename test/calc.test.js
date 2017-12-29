@@ -1,3 +1,6 @@
+/**
+ * This is just a hello-world module to get the test harness working properly.
+ */
 
 /* global require beforeEach afterEach fixture expect describe it */
 
@@ -12,7 +15,7 @@ describe('Calculator', function() {
         fixture.base = 'test';
         fixture.cleanup();
         let fixtures = fixture.load('calc.test.html');
-        let htmlSnippet = fixtures[0];
+        // let htmlSnippet = fixtures[0];
         // console.log('html', htmlSnippet);
     });
 

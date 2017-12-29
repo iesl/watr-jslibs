@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "css-loader": "^0.28.7",
+    "d3": "^4.12.2",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^1.1.5",
     "form-serializer": "^2.5.0",

@@ -1,9 +1,8 @@
+/* global require beforeEach  fixture describe it watr */
 
-/* global require beforeEach afterEach fixture expect describe it watr */
+let ReflowWidget = require('./../src/client/ReflowWidget.js');
 
-let gp = require('./../src/client/graphpaper.js');
-
-describe('GraphPaper', function() {
+describe('ReflowWidget', function() {
 
 
     beforeEach(function() {
@@ -14,26 +13,28 @@ describe('GraphPaper', function() {
         // console.log('html', htmlSnippet);
     });
 
-    it('hello world', function() {
-        let textGridConstruction = new watr.textgrid.TextGridConstruction();
-        let TGLW = watr.textgrid.TextGridLabelWidget;
-        let GraphPaper = watr.utils.GraphPaper;
-        let ProxyGraphPaper = watr.utils.ProxyGraphPaper;
+    it('should render', function() {
+        let textGridConstruction = new watr.textgrid.TextGridConstructor();
         let textGrid = textGridConstruction.getTestTextGrid();
         let labelSchema = textGridConstruction.getTestLabelSchema();
+        let reflowWidget = new ReflowWidget.ReflowWidget('page-textgrids', textGrid, labelSchema);
 
-        let drawingApi = new gp.DrawingApi('gp-canvas');
-        drawingApi.drawChar({x: 10, y: 10}, 'z');
-        drawingApi.drawBox({x: 20, y: 20}, 'z');
+        reflowWidget.init();
 
-        let graphPaper = new ProxyGraphPaper(100, 100, drawingApi);
-        console.log('graphPaper', graphPaper);
-        textGridConstruction.drawTextGridToGraphPaper(textGrid, labelSchema, graphPaper);
-
-        // let labelTree = TGLW.textGridToLabelTree(textGrid);
-        // let gridRegions = TGLW.labelTreeToGridRegions(labelTree, labelSchema, 2, 3);
-
-
+        // let rtreeApi = new rtreeapi.RTreeApi();
+        // let TGLW = watr.textgrid.TextGridLabelWidget;
+        // let GraphPaper = watr.utils.GraphPaper;
+        // let ProxyGraphPaper = watr.utils.ProxyGraphPaper;
+        // let drawingApi = new gp.DrawingApi('gp-canvas', 20);
+        // let graphPaper = new ProxyGraphPaper(500, 500, drawingApi);
+        // // textGridConstruction.drawTextGridToGraphPaper(textGrid, labelSchema, graphPaper);
+        // textGridConstruction.writeTextGrid(textGrid, labelSchema, graphPaper, rtreeApi);
+        // let rtree = rtreeApi.rtree;
+        // rtree.all().forEach(d => {
+        //     console.log('d', d.region, d.region.isHeading());
+        // });
+        // let queryBox = coords.mk.fromLtwh(clickPt.x, clickPt.y, 1, 1);
+        // rtree.search()
 
     });
 });

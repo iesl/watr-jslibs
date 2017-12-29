@@ -4,27 +4,51 @@
 
 /* global require */
 
+import * as coords from './coord-sys.js';
+
 export class DrawingApi {
-    constructor (canvasId) {
+    constructor (canvasId, fontSize) {
         this.canvasId = canvasId;
         this.gridCanvas = document.getElementById(this.canvasId);
         this.context = this.gridCanvas.getContext('2d');
+        this._textFont = `${fontSize}px mono`;
         this.context.font = this.textFont;
-        this._textFont = '20px mono';
+        this.cellWidth = this.context.measureText('A').width;
+        this.cellHeight = fontSize+4;
+        this.context.textBaseline="bottom";
+
     }
 
     get textFont     () { return this._textFont; }
     get textHeight   () { return this._textHeight; }
 
+    cellToBounds(cell) {
+        let x = cell.x   * this.cellWidth;
+        let y = cell.y * this.cellHeight;
+        let w = this.cellWidth;
+        let h = this.cellHeight;
+        return coords.mk.fromLtwh(x, y, w, h);
+    }
+
+    boxToBounds(box) {
+        let bb = box.toLTBounds();
+        let x = bb.getLeft()*this.cellWidth;
+        let y = bb.getTop()* this.cellHeight;
+        let w = bb.getWidth() * this.cellWidth;
+        let h = bb.getHeight()* this.cellHeight;
+        return coords.mk.fromLtwh(x, y, w, h);
+    }
+
     drawChar(cell, char) {
+        let {left, top, width, height} = this.cellToBounds(cell);
         this.context.fillStyle = 'black';
-        this.context.fillText(char, cell.x*10, cell.y*10);
+        this.context.fillText(char, left, top+height);
 
     }
 
     drawBox(box, border) {
-        console.log('drawBox');
-        this.context.rect(box.x, box.y, 20, 20);
+        let {left, top, width, height} = this.boxToBounds(box);
+        this.context.rect(left, top, width, height);
         this.context.stroke();
     }
 
@@ -40,10 +64,3 @@ export class DrawingApi {
         console.log('gradientHorizontal');
     }
 }
-// trait DrawingApi extends js.Object {
-//     def drawChar(cell: GridCell, char: Char): Unit
-//     def drawBox(box: Box, borderChars: BorderChars = BorderLineStyle.SingleWidth): Unit
-//     def applyBgColor(x: Int, y: Int, color: Color): Unit
-//     def applyColor(x: Int, y: Int, color: Color): Unit
-//     def gradientHorizontal(box: Box): Unit
-// }

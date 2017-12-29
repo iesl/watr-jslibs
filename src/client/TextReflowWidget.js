@@ -8,37 +8,50 @@ import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
 import { t } from './jstags.js';
 import { $id, resizeCanvas } from './jstags.js';
-import * as lbl from './labeling';
-import * as colors from './colors';
-import * as textgrid from './textgrid';
+// import * as lbl from './labeling';
+// import * as colors from './colors';
+// import * as textgrid from './textgrid';
+import * as gp from './graphpaper';
+
+
 
 let rtree = require('rbush');
 
 import '../style/view-pdf-text.less';
 
-export function setupReflowControl() {
-    let textGrid  = textgrid.createFromCurrentSelection();
+// export function setupReflowControl() {
+//     let textGrid = textgrid.createFromCurrentSelection();
 
-    let reflowWidget = new TextReflowWidget('reflow-controls', textGrid);
+//     let reflowWidget = new TextReflowWidget('reflow-controls', textGrid);
 
-    reflowWidget.textHeight = 20;
+//     reflowWidget.init().then(result => {
+//         return result;
+//     }) ;
+// }
 
-    reflowWidget.init().then(result => {
-        return result;
-    }) ;
-}
-
-class TextReflowWidget {
+export class TextReflowWidget {
 
     constructor (containerId, textGrid, borders) {
+
         let gridNum = 1000;
         this.containerId = containerId;
         this.gridNum = gridNum;
         this._textGrid = textGrid;
+        this.textHeight = 20;
 
         this.frameId  = `textgrid-frame-${gridNum}`;
         this.canvasId = `textgrid-canvas-${gridNum}`;
         this.svgId    = `textgrid-svg-${gridNum}`;
+
+
+        let ProxyGraphPaper = watr.utils.ProxyGraphPaper;
+        let textGridConstruction = new watr.textgrid.TextGridConstructor();
+        // TODO get this from workflow definition
+        let labelSchema = textGridConstruction.getTestLabelSchema();
+        let drawingApi = new gp.DrawingApi(this.canvasId, this.textHeight);
+        // TODO should set the canvas dimensions automatically
+        let graphPaper = new ProxyGraphPaper(500, 500, drawingApi);
+
         this.mouseHoverPts = [];
 
         this.borders = borders || {
@@ -57,10 +70,10 @@ class TextReflowWidget {
 
     get borders () { return this._borders; }
 
-    set textHeight (h) {
-        this._textHeight = h;
-        this._textFont = '20px mono';
-    }
+    // set textHeight (h) {
+    //     this._textHeight = h;
+    //     this._textFont = '20px mono';
+    // }
 
     get gridBounds   () {
         let height = 400; // this.textGrid.rows.length * this.textHeight;
@@ -155,82 +168,6 @@ class TextReflowWidget {
         // return data;
 
     }
-
-    fillGridCanvas(gridRegions) {
-        let idGen = util.IdGenerator();
-        let context = this.context;
-
-        // context.clearRect(0, 0, this.gridCanvas.width, this.gridCanvas.height);
-
-        let maxLineLen = 100; // _.max(_.map(this.textGrid.gridData.rows, row => row.text.length));
-
-        let initWidth = maxLineLen * this.textHeight;
-
-        let initHeight = 100; // this.gridBounds.bottom;
-        // resizeCanvas(this.gridCanvas, initWidth, initHeight);
-
-        let maxWidth = 0;
-
-
-        let GridRegion = watr.textgrid.GridRegion;
-        console.log('GridRegion', GridRegion.fold);
-
-        // let f1 = cell => {
-        //     console.log('isCell', cell);
-        //     // cell.id = idGen();
-        //     // let text = cell.cell.char.toString();
-        //     // context.fillStyle = 'black';
-        //     // console.log('text', text);
-        //     // context.fillText(text, cell.x(), cell.y());
-
-        // };
-        function f1(a) {
-            console.log('isHead', a);
-            return 0;
-        }
-
-        function f2(a) {
-            console.log('isHead', a);
-            return 0;
-        }
-        function f3(a) {
-            console.log('isHead', a);
-            return 0;
-        }
-
-        function f4(a) {
-            console.log('isHead', a);
-            return 0;
-        }
-
-        GridRegion.fold(
-            gridRegions, f1, f2, f3, f4
-        );
-
-        console.log('done');
-
-        // this.gridWidth = maxWidth;
-
-        // let gridBounds = this.gridBounds;
-        // let finalWidth = gridBounds.right + this.borders.right;
-        // let finalHeight = gridBounds.bottom + this.borders.bottom;
-
-        // resizeCanvas(this.gridCanvas, finalWidth, finalHeight);
-
-        // let glyphDataPts = _.filter(
-        //     _.map(gridData, p => p.glyphDataPt),
-        //     p =>  p !== undefined
-        // );
-
-        // let result = {
-        //     gridDataPts: gridData,
-        //     glyphDataPts: glyphDataPts
-        // };
-
-        // return result;
-    }
-
-
 
 
     initMouseHandlers() {
