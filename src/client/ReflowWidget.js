@@ -29,8 +29,6 @@ export class ReflowWidget {
         this.frameId  = `textgrid-frame-${gridNum}`;
         this.canvasId = `textgrid-canvas-${gridNum}`;
         this.svgId    = `textgrid-svg-${gridNum}`;
-
-        this.mouseHoverPts = [];
     }
 
 
@@ -39,7 +37,7 @@ export class ReflowWidget {
 
         return new Promise((resolve) => {
             let initWidth = 800;
-            let gridHeight = 500; // this.gridBounds.bottom;
+            let gridHeight = 1000; // this.gridBounds.bottom;
 
             let gridNodes =
                 t.div(`.textgrid #${this.frameId}`, {style: `width: ${initWidth}px; height: ${gridHeight}px;`}, [
@@ -59,34 +57,98 @@ export class ReflowWidget {
             ;
 
         }).then(() => {
-            let ProxyGraphPaper = watr.utils.ProxyGraphPaper;
-            let drawingApi = new gp.DrawingApi(this.canvasId, this.textHeight);
-            // TODO should set the canvas dimensions automatically
-            this.canvasGraphPaper = new ProxyGraphPaper(500, 500, drawingApi);
             return this.redrawAll();
         });
 
     }
 
+    updateDimensions() {
+        return new Promise((resolve) => {
+            let height = (this.rowCount+2) * this.cellHeight;
+            let width = (this.colCount+2) * this.cellWidth;
+            let frameStyle = {
+                style: `width: ${width}px; height: ${height}px;`
+            };
+            $id(this.frameId).css(frameStyle);
+            $id(this.canvasId)
+                .attr('width', width)
+                .attr('height', height);
+            this.d3$textgridSvg
+                .attr('width', width)
+                .attr('height', height)
+                .call(() => resolve())
+            ;
+        });
+    }
 
     redrawAll() {
+        // compute widget display grid height/width/cell dimensions
+        // TGC.writeTextGrid(this.textGrid, this.labelSchema, this.canvasGraphPaper, rtreeApi);
+
+        // TODO should set the canvas dimensions automatically
         let rtreeApi = new rtreeapi.RTreeApi();
         let TGC = new watr.textgrid.TextGridConstructor();
-        TGC.writeTextGrid(this.textGrid, this.labelSchema, this.canvasGraphPaper, rtreeApi);
-        // this.initMouseHandlers();
+        let gridProps = TGC.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
+        let rowCount = gridProps.getGridRowCount();
+        let colCount = gridProps.getGridColCount();
+
+        this.rowCount = rowCount;
+        this.colCount = colCount;
+        const ProxyGraphPaper = watr.utils.ProxyGraphPaper;
+        let drawingApi = new gp.DrawingApi(this.canvasId, this.textHeight);
+        this.canvasGraphPaper = new ProxyGraphPaper(colCount, rowCount, drawingApi);
+        let cellDimensions = this.canvasGraphPaper.cellDimensions();
+        console.log('cellDimensions', cellDimensions, rowCount, colCount);
+        this.cellWidth = cellDimensions.width;
+        this.cellHeight = cellDimensions.height;
+
+        this.updateDimensions().then(() => {
+            TGC.writeTextGrid(gridProps, this.canvasGraphPaper, rtreeApi);
+            this.reflowRTree = rtreeApi.rtree;
+            this.initMouseHandlers();
+
+        });
+
         // return data;
     }
 
 
     initMouseHandlers() {
-        // let widget = this;
-        // let reflowRTree = widget.reflowRTree;
+        let widget = this;
+        let reflowRTree = widget.reflowRTree;
         // let neighborHits = [];
+        widget.mouseHoverPts = [];
 
         // this.d3$textgridSvg
         //     .on("mouseover", function() {})
         //     .on("mouseout", function() {})
         // ;
+
+        this.d3$textgridSvg.on("mousemove", function() {
+            let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
+
+            // Construct a query box that aligns with grid
+            let cellCol = Math.floor(userPt.x / widget.cellWidth);
+            let cellLeft = cellCol * widget.cellWidth;
+            let cellRow = Math.floor(userPt.y / widget.cellHeight);
+            let cellTop = cellRow * widget.cellHeight;
+            let cellBox = coords.mk.fromLtwh(cellLeft, cellTop, widget.cellWidth, widget.cellHeight);
+            // RTree cells are 4x4 for indexing purposes, this query is centered within the cell (not touching the edges)
+            let rtreeQuery = coords.mk.fromLtwh(cellCol*4+1, cellRow*4+1, 1, 1);
+
+            let cellNum = cellRow * widget.rowCount + cellCol;
+            cellBox.id = cellNum;
+
+            let cellContent = reflowRTree.search(rtreeQuery);
+
+            widget.mouseHoverPts = [cellBox];
+            if (cellContent.length > 0) {
+                let c = cellContent[0];
+                console.log('mousemove', c.region.classes);
+            }
+
+            widget.showHoverFocus();
+        });
 
         // this.d3$textgridSvg.on("mousedown",  function() {
         //     let mouseEvent = d3.event;

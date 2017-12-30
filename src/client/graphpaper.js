@@ -10,20 +10,31 @@ export class DrawingApi {
     constructor (canvasId, fontSize) {
         this.canvasId = canvasId;
         this.gridCanvas = document.getElementById(this.canvasId);
-        this.context = this.gridCanvas.getContext('2d');
-        this._textFont = `${fontSize}px mono`;
-        this.context.font = this.textFont;
-        this.cellWidth = this.context.measureText('A').width;
-        this.cellHeight = fontSize+4;
-        this.context.textBaseline="bottom";
+        this.fontSize = fontSize;
+        this.initContext();
+    }
 
+    initContext() {
+        let context = this.gridCanvas.getContext('2d');
+        let font = `${this.fontSize}px mono`;
+        context.font = font;
+        context.textBaseline="bottom";
+        this._cellWidth = context.measureText('A').width;
+        this._cellHeight = this.fontSize+4;
+        return context;
     }
 
     get textFont     () { return this._textFont; }
     get textHeight   () { return this._textHeight; }
+    get cellWidth    () { return this._cellWidth; }
+    get cellHeight   () { return this._cellHeight; }
+
+    get context2d    () {
+        return this.initContext();
+    }
 
     cellToBounds(cell) {
-        let x = cell.x   * this.cellWidth;
+        let x = cell.x * this.cellWidth;
         let y = cell.y * this.cellHeight;
         let w = this.cellWidth;
         let h = this.cellHeight;
@@ -41,15 +52,15 @@ export class DrawingApi {
 
     drawChar(cell, char) {
         let {left, top, width, height} = this.cellToBounds(cell);
-        this.context.fillStyle = 'black';
-        this.context.fillText(char, left, top+height);
+        this.context2d.fillStyle = 'black';
+        this.context2d.fillText(char, left, top+height);
 
     }
 
     drawBox(box, border) {
         let {left, top, width, height} = this.boxToBounds(box);
-        this.context.rect(left, top, width, height);
-        this.context.stroke();
+        this.context2d.rect(left, top, width, height);
+        this.context2d.stroke();
     }
 
     applyBgColor(x, y, color) {
