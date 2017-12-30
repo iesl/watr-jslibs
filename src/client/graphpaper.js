@@ -43,10 +43,10 @@ export class DrawingApi {
 
     boxToBounds(box) {
         let bb = box.toLTBounds();
-        let x = bb.getLeft()*this.cellWidth;
-        let y = bb.getTop()* this.cellHeight;
-        let w = bb.getWidth() * this.cellWidth;
-        let h = bb.getHeight()* this.cellHeight;
+        let x = bb.left*this.cellWidth;
+        let y = bb.top* this.cellHeight;
+        let w = bb.width * this.cellWidth;
+        let h = bb.height* this.cellHeight;
         return coords.mk.fromLtwh(x, y, w, h);
     }
 
