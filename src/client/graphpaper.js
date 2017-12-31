@@ -46,7 +46,7 @@ export class DrawingApi {
         let x = bb.left*this.cellWidth;
         let y = bb.top* this.cellHeight;
         let w = bb.width * this.cellWidth;
-        let h = bb.height* this.cellHeight;
+        let h = bb.height * this.cellHeight;
         return coords.mk.fromLtwh(x, y, w, h);
     }
 

@@ -155,78 +155,7 @@ let labelButton = (label) => {
         ]) ;
 };
 
-
-export function createTextReflowLabeler() {
-    let labelNames = [
-        'Title',
-        'Authors',
-        'Abstract',
-        'Affiliations',
-        'References'
-    ];
-
-    createLabelChoiceWidget(labelNames)
-        .then(choice => {
-
-            let labelChoice = choice.selectedLabel;
-
-            let labelData = {
-                labelChoice: labelChoice,
-                gridJson: {
-                    stableId: shared.currentDocument,
-                    rows:[
-                        // {loci: gridDataPts}
-                    ]
-                }
-            };
-            console.log('labeling', labelData);
-
-        })
-        .catch(() => {
-            return d3.selectAll('.label-selection-rect').remove();
-        })
-    ;
-}
-
-
-// export function createTextGridLabeler(gridDataPts) {
-//     let labelNames = [
-//         'Title',
-//         'Authors',
-//         'Abstract',
-//         'Affiliations',
-//         'References'
-//     ];
-
-//     createLabelChoiceWidget(labelNames)
-//         .then(choice => {
-
-//             let labelChoice = choice.selectedLabel;
-
-//             let labelData = {
-//                 labelChoice: labelChoice,
-//                 gridJson: {
-//                     stableId: shared.currentDocument,
-//                     rows:[
-//                         {loci: gridDataPts}
-//                     ]
-//                 }
-//             };
-
-//             server.postNewSpanLabel(labelData)
-//                 .then(() => {
-//                     d3.selectAll('.label-selection-rect').remove();
-//                     updateAnnotationShapes();
-//                 });
-
-//         })
-//         .catch(() => {
-//             d3.selectAll('.label-selection-rect').remove();
-//         })
-//     ;
-// }
-
-export function createLabelChoiceWidget(labelNames) {
+export function createLabelChoiceWidget(labelNames, containerId) {
 
     let buttons = _.map(labelNames, labelButton);
 
@@ -236,7 +165,8 @@ export function createLabelChoiceWidget(labelNames) {
             t.div(".form-group", buttons)
         ]);
 
-    let context = '#splitpane_root__bottom';
+    // let context = '#splitpane_root__bottom';
+    let context =  '#'+containerId;
     let innerPromise = modals.makeFormPromise(form);
 
     form.find('button.labelChoice').click(function() {
@@ -251,9 +181,42 @@ export function createLabelChoiceWidget(labelNames) {
         "Choose Label"
     );
 
+    console.log('curr pt', shared.currMouseClientPt);
     $('.b-modal-content').css({
         'left': shared.currMouseClientPt.x,
         'top': shared.currMouseClientPt.y
     });
     return labelPromise;
 }
+
+// export function createLabelChoiceWidget(labelNames) {
+
+//     let buttons = _.map(labelNames, labelButton);
+
+//     let form =
+//         t.form([
+//             t.input(':hidden', '@selectedLabel', '#selectedLabel'),
+//             t.div(".form-group", buttons)
+//         ]);
+
+//     let context = '#splitpane_root__bottom';
+//     let innerPromise = modals.makeFormPromise(form);
+
+//     form.find('button.labelChoice').click(function() {
+//         let $button = $(this);
+//         form.find('#selectedLabel')
+//             .attr('value', $button.attr('value'));
+//     });
+
+//     let labelPromise = modals.makeModalPromise(
+//         context, innerPromise,
+//         form,
+//         "Choose Label"
+//     );
+
+//     $('.b-modal-content').css({
+//         'left': shared.currMouseClientPt.x,
+//         'top': shared.currMouseClientPt.y
+//     });
+//     return labelPromise;
+// }

@@ -8,7 +8,7 @@ import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
 import { t } from './jstags.js';
 import { $id, resizeCanvas } from './jstags.js';
-// import * as lbl from './labeling';
+import * as lbl from './labeling';
 
 // import * as textgrid from './textgrid';
 import * as gp from './graphpaper';
@@ -23,7 +23,7 @@ export class ReflowWidget {
         let gridNum = 1000;
         this.containerId = containerId;
         this.gridNum = gridNum;
-        this.textGrid = textGrid;
+        this.textGrid = textGrid; // .trimRights().padRights();
         this.textHeight = 20;
         this.labelSchema = labelSchema;
 
@@ -88,7 +88,6 @@ export class ReflowWidget {
         let canvas = document.getElementById(this.canvasId);
         let ctx = canvas.getContext('2d');
 
-
         let rowWidth = this.cellWidth * (this.colCount+8);
         _.each(_.range(this.rowCount+10), row =>{
             let rtop = row * this.cellHeight;
@@ -96,17 +95,14 @@ export class ReflowWidget {
 
             let grd=ctx.createLinearGradient(0,rtop,0,rtop+h);
             grd.addColorStop(0, colors.Color.GhostWhite);
-            grd.addColorStop(0.8, colors.Color.Linen);
+            grd.addColorStop(0.9, colors.Color.Linen);
             grd.addColorStop(1, colors.Color.Cornsilk);
 
             ctx.fillStyle=grd;
-
             ctx.fillRect(0, rtop, rowWidth, this.cellHeight);
-
         });
-
-
     }
+
     redrawAll() {
 
         let rtreeApi = new rtreeapi.RTreeApi();
@@ -130,7 +126,7 @@ export class ReflowWidget {
             this.reflowRTree = rtreeApi.rtree;
 
             let allClasses = this.labelSchema.allLabels;
-            let colorMap = _.zipObject(allClasses, colors.labelColors);
+            let colorMap = _.zipObject(allClasses, colors.HighContrast);
 
             console.log('allClasses', allClasses);
             this.d3$textgridSvg
@@ -161,7 +157,7 @@ export class ReflowWidget {
                         .classed(`${regionType}`, true)
                         .classed(`${cls}`, true)
                         .call(util.initRect, () => scaled)
-                        .call(util.initFill, colorMap[cls], 0.2)
+                        .call(util.initFill, colorMap[cls], 0.4)
                     ;
                 }
             });
@@ -232,6 +228,7 @@ export class ReflowWidget {
                     widget.hoverCell.length=0;
                     widget.hoverCell.push(cellBox);
                     widget.updateCellHoverHighlight();
+
                 }
             } else {
                 widget.hoverCell.push(cellBox);
@@ -240,6 +237,10 @@ export class ReflowWidget {
 
             if (cellContent.length > 0) {
                 let c = cellContent[0];
+                if (c.region.isCell()) {
+                    let pins = c.region['cell$1'];
+                    console.log(pins.showPinsVert().toString());
+                }
                 widget.showLabelHighlights(c);
             } else {
                 widget.clearLabelHighlights();
@@ -253,10 +254,9 @@ export class ReflowWidget {
 
             // Construct a query box that aligns with grid
             let cellCoords = widget.getCellCoordsFromUserPt(userPt);
-            let cellBox =  widget.getCellBoundsFromCellCoords(cellCoords);
+            // let cellBox =  widget.getCellBoundsFromCellCoords(cellCoords);
             let cellContent = widget.getCellContent(cellCoords);
 
-            // let clientPt = coords.mkPoint.fromXy(mouseEvent.clientX, mouseEvent.clientY);
 
             if (cellContent.length > 0 && cellContent[0].region.isCell()) {
                 let focalPoint = cellContent[0];
@@ -265,26 +265,31 @@ export class ReflowWidget {
                 let Options = watr.utils.Options;
 
                 if (mouseEvent.shiftKey) {
+                    console.log('focalPt: slurp', row, col);
                     let maybeGrid = widget.textGrid.slurp(row);
                     let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
                     widget.textGrid = newGrid;
+
                     widget.redrawAll();
                 } else if (mouseEvent.ctrlKey) {
-                    console.log('focalPt', focalPoint.region.row, focalPoint.region.col);
+                    console.log('focalPt: split', row, col);
                     let maybeGrid = widget.textGrid.split(row, col) ;//.orUndefined;
                     let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
                     widget.textGrid = newGrid;
 
                     widget.redrawAll();
                 } else {
-                    // lbl.createLabelChoiceWidget(['Author', 'First', 'Middle', 'Last'])
-                    //     .then(choice => {
-                    //         let labelChoice = choice.selectedLabel;
-                    //         widget.textGrid.labelGridData(focalPoint, labelChoice);
-                    //         console.log('labeled data', widget.textGrid.gridData);
-                    //         widget.redrawAll();
-                    //     })
-                    // ;
+                    let focalClasses = focalPoint.region.getClasses;
+                    let focalLabel = _.last(focalClasses);
+                    let childLabels = widget.labelSchema.childLabelsFor(focalLabel);
+                    lbl.createLabelChoiceWidget(childLabels, widget.containerId)
+                        .then(choice => {
+                            let labelChoice = choice.selectedLabel;
+                            widget.textGrid.labelGridData(focalPoint, labelChoice);
+                            console.log('labeled data', widget.textGrid.gridData);
+                            widget.redrawAll();
+                        })
+                    ;
 
                 }
             }})
@@ -317,7 +322,7 @@ export class ReflowWidget {
         _.each(['LabelCover', 'Heading', 'Cell', 'LabelKey'], cls => {
             this.d3$textgridSvg
                 .selectAll(`rect.${cls}`)
-                .attr('fill-opacity', 0.1)
+                .attr('fill-opacity', 0.4)
             ;
         });
     }

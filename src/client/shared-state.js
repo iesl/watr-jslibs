@@ -6,7 +6,7 @@
  *       https://stackoverflow.com/questions/6073505/what-is-the-difference-between-screenx-y-clientx-y-and-pagex-y
  **/
 
-/* global Rx */
+/* global Rx $ */
 
 import * as coords from './coord-sys.js';
 
@@ -45,6 +45,12 @@ export function setSelections(sels) {
 
 
 export function initGlobalMouseTracking() {
+    $(document).on('mousemove', function(event) {
+        let clientPt = coords.mkPoint.fromXy(event.clientX, event.clientY);
+        shared.currMouseClientPt = clientPt;
+    });
+    // For some reason this doesn't work in the testing environment, so I use the regular
+    //   handler above as well.
     shared.rx.clientPt = Rx.Observable
         .fromEvent(document, 'mousemove')
         .map(event => {

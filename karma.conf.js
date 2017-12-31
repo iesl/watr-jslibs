@@ -24,6 +24,9 @@ module.exports = function(config) {
             {pattern: 'node_modules/jquery/dist/jquery.min.js', watched:false, served:true, included:true, nocache:false},
             {pattern: 'node_modules/lodash/lodash.min.js', watched:false, served:true, included:true, nocache:false},
             {pattern: 'node_modules/d3/build/d3.min.js', watched:false, served:true, included:true, nocache:false},
+            {pattern: 'node_modules/rxjs/bundles/Rx.min.js', watched:false, served:true, included:true, nocache:false},
+            {pattern: 'node_modules/form-serializer/dist/jquery.serialize-object.min.js', watched:false, served:true, included:true, nocache:false},
+
             {pattern: 'dist/app.css', watched:false, served:true, included:false, nocache:true},
 
             {pattern: 'src/client/*.js', watched:true,   served:false, included:false, nocache:false},
