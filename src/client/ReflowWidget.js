@@ -15,6 +15,15 @@ import * as gp from './graphpaper';
 import * as rtreeapi from './rtree-api';
 import * as colors from './colors';
 
+const GraphPaper = watr.utils.GraphPaper;
+const ProxyGraphPaper = watr.utils.ProxyGraphPaper;
+const Options = watr.utils.Options;
+const Labels = watr.watrmarks.Labels;
+const LTBounds = watr.geometry.LTBounds_Companion;
+const TGC = new watr.textgrid.TextGridConstructor();
+const JsArray = watr.utils.JsArray;
+const TGI = watr.textgrid.TextGridInterop;
+
 
 export class ReflowWidget {
 
@@ -63,7 +72,7 @@ export class ReflowWidget {
 
     }
 
-    updateDimensions() {
+    updateDomNodeDimensions() {
         return new Promise((resolve) => {
             let height = (this.rowCount+2) * this.cellHeight;
             let width = (this.colCount+2) * this.cellWidth;
@@ -106,26 +115,24 @@ export class ReflowWidget {
     redrawAll() {
 
         let rtreeApi = new rtreeapi.RTreeApi();
-        let TGC = new watr.textgrid.TextGridConstructor();
         let gridProps = TGC.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
         let rowCount = gridProps.getGridRowCount();
         let colCount = gridProps.getGridColCount();
 
         this.rowCount = rowCount;
         this.colCount = colCount;
-        const ProxyGraphPaper = watr.utils.ProxyGraphPaper;
         let drawingApi = new gp.DrawingApi(this.canvasId, this.textHeight);
         this.canvasGraphPaper = new ProxyGraphPaper(colCount, rowCount, drawingApi);
         let cellDimensions = this.canvasGraphPaper.cellDimensions();
         this.cellWidth = cellDimensions.width;
         this.cellHeight = cellDimensions.height;
 
-        this.updateDimensions().then(() => {
+        this.updateDomNodeDimensions().then(() => {
             this.applyCanvasStripes();
             TGC.writeTextGrid(gridProps, this.canvasGraphPaper, rtreeApi);
             this.reflowRTree = rtreeApi.rtree;
 
-            let allClasses = this.labelSchema.allLabels;
+            let allClasses = TGI.labelSchemas.allLabels(this.labelSchema);
             let colorMap = _.zipObject(allClasses, colors.HighContrast);
 
             console.log('allClasses', allClasses);
@@ -137,7 +144,7 @@ export class ReflowWidget {
                 let region = data.region;
                 let bounds = region.bounds;
                 let scaled = this.scaleLTBounds(bounds);
-                let classes = region.getClasses;
+                let classes = TGI.gridRegions.labels(region);
 
                 let regionType;
                 if (region.isLabelKey()) {
@@ -168,6 +175,69 @@ export class ReflowWidget {
 
     }
 
+
+    // graphCellToIndexBounds(graphCell) {
+    //     return coords.mk.fromLtwh(
+    //         graphCell.left*4, graphCell.top*4,
+    //         ((graphCell.spanRight-1)*4),
+    //         ((graphCell.spanDown-1)*4)
+    //     );
+    // }
+
+    // graph4x4BoundsToGraphBox(graph4x4Bounds) {
+    //     console.log(graph4x4Bounds, 'graph4x4Bounds');
+    //     let l = graph4x4Bounds.left / 4;
+    //     let t = graph4x4Bounds.top / 4;
+    //     let w = graph4x4Bounds.width / 4;
+    //     let h = graph4x4Bounds.height / 4;
+    //     let bounds = LTBounds.FromInts(l, t, w, h);
+    //     return GraphPaper.boundsToBox(bounds);
+    // }
+
+    // indexBoundsToGraphBox(indexBounds) {
+    //     let originX = Math.floor(indexBounds.x / this.cellWidth);
+    //     let originY = Math.floor(indexBounds.y / this.cellHeight);
+    //     return coords.mk.fromLtwh(
+    //         graphCell.left*4, graphCell.top*4,
+    //         ((graphCell.spanRight-1)*4),
+    //         ((graphCell.spanDown-1)*4)
+    //     );
+    // }
+
+    // indexBoundsToQueryBounds(indexBounds) {
+    //     return coords.mk.fromLtwh(
+    //         indexBounds.left+1, indexBounds.top+1,
+    //         indexBounds.spanRight-1,
+    //         indexBounds.spanDown-1
+    //     );
+    // }
+
+    graphCellToClientBounds(graphCell) {
+        // Construct a query box that aligns with grid
+        let cellLeft = graphCell.x * this.cellWidth;
+        let cellTop = graphCell.y * this.cellHeight;
+        return coords.mk.fromLtwh(cellLeft, cellTop, this.cellWidth, this.cellHeight);
+    }
+
+    // getGraphBoundsFromBox(cellBox) {
+    //     // Construct a query box that aligns with grid
+    //     let cellLeft = cellCoords.x * this.cellWidth;
+    //     let cellTop = cellCoords.y * this.cellHeight;
+    //     let bounds = coords.mk.fromLtwh(
+    //         cellBox.left*4+1, cellBox.top*4+1,
+    //         ((cellBox.spanRight-1)*4)-1,
+    //         ((cellBox.spanDown-1)*4)-1
+    //     );
+    //     return coords.mk.fromLtwh(cellLeft, cellTop, this.cellWidth, this.cellHeight);
+    // }
+
+
+    clientPointToGraphCell(clientPt) {
+        let cellCol = Math.floor(clientPt.x / this.cellWidth);
+        let cellRow = Math.floor(clientPt.y / this.cellHeight);
+        return coords.mkPoint.fromXy(cellCol, cellRow);
+    }
+
     scaleLTBounds(bb) {
         let x = bb.left*this.cellWidth;
         let y = bb.top* this.cellHeight;
@@ -176,72 +246,62 @@ export class ReflowWidget {
         return coords.mk.fromLtwh(x, y, w, h);
     }
 
-    getCellContent(cellCoords) {
+    getCellContent(graphCell) {
         let reflowRTree = this.reflowRTree;
         // RTree cells are 4x4 for indexing purposes, this query is centered within the cell (not touching the edges)
-        let rtreeQuery = coords.mk.fromLtwh(cellCoords.x*4+1, cellCoords.y*4+1, 1, 1);
+        let rtreeQuery = coords.mk.fromLtwh(graphCell.x*4+1, graphCell.y*4+1, 1, 1);
         let cellContent = reflowRTree.search(rtreeQuery);
-        return cellContent;
+        if (cellContent.length > 1) {
+            console.error("more than one thing found at grid cell ", graphCell);
+        }
+        return cellContent[0];
     }
 
-    getCellCoordsFromUserPt(userPt) {
-        let cellCol = Math.floor(userPt.x / this.cellWidth);
-        let cellRow = Math.floor(userPt.y / this.cellHeight);
-        return coords.mkPoint.fromXy(cellCol, cellRow);
+    getBoxContent(cellBox) {
+        return this.reflowRTree.search(
+            coords.mk.fromLtwh(
+                cellBox.left*4+1, cellBox.top*4+1,
+                ((cellBox.spanRight+1)*4)-2,
+                ((cellBox.spanDown+1)*4)-2
+            )
+        );
     }
 
-    getCellBoundsFromCellCoords(cellCoords) {
-        // Construct a query box that aligns with grid
-        let cellLeft = cellCoords.x * this.cellWidth;
-        let cellTop = cellCoords.y * this.cellHeight;
-        return coords.mk.fromLtwh(cellLeft, cellTop, this.cellWidth, this.cellHeight);
+
+    getCellNum(graphCell) {
+        return graphCell.y * this.rowCount + graphCell.x;
     }
 
-    getCellNum(cellCoords) {
-        return cellCoords.y * this.rowCount + cellCoords.x;
-    }
+
 
     initMouseHandlers() {
         let widget = this;
-        let reflowRTree = widget.reflowRTree;
-        // let neighborHits = [];
-        // widget.mouseHoverPts = [];
-        widget.hoverCell = [];
-
-        // this.d3$textgridSvg
-        //     .on("mouseover", function() {})
-        //     .on("mouseout", function() {})
-        // ;
+        widget.hoverCell = null;
 
         this.d3$textgridSvg.on("mousemove", function() {
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
-            // Construct a query box that aligns with grid
-            let cellCoords = widget.getCellCoordsFromUserPt(userPt);
-            let cellBox =  widget.getCellBoundsFromCellCoords(cellCoords);
-            let cellContent = widget.getCellContent(cellCoords);
+            let graphCell = widget.clientPointToGraphCell(userPt);
+            let cellContent = widget.getCellContent(graphCell);
 
-            cellBox.id = widget.getCellNum(cellCoords);
+            graphCell.id = widget.getCellNum(graphCell);
 
-            if (widget.hoverCell.length > 0) {
-                if (cellBox.id != widget.hoverCell[0].id) {
-                    widget.hoverCell.length=0;
-                    widget.hoverCell.push(cellBox);
-                    widget.updateCellHoverHighlight();
-
+            if (widget.hoverCell != null) {
+                if (graphCell.id != widget.hoverCell.id) {
+                    widget.hoverCell = graphCell;
+                    widget.updateCellHoverHighlight(graphCell);
                 }
             } else {
-                widget.hoverCell.push(cellBox);
-                widget.updateCellHoverHighlight();
+                widget.hoverCell = graphCell;
+                widget.updateCellHoverHighlight(graphCell);
             }
 
-            if (cellContent.length > 0) {
-                let c = cellContent[0];
-                if (c.region.isCell()) {
-                    let pins = c.region['cell$1'];
-                    console.log(pins.showPinsVert().toString());
+            if (cellContent) {
+                if (cellContent.region.isCell()) {
+                    // let pins = c.region['cell$1'];
+                    // console.log(pins.showPinsVert().toString());
                 }
-                widget.showLabelHighlights(c);
+                widget.showLabelHighlights(cellContent);
             } else {
                 widget.clearLabelHighlights();
             }
@@ -252,44 +312,67 @@ export class ReflowWidget {
             let mouseEvent = d3.event;
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
-            // Construct a query box that aligns with grid
-            let cellCoords = widget.getCellCoordsFromUserPt(userPt);
-            // let cellBox =  widget.getCellBoundsFromCellCoords(cellCoords);
-            let cellContent = widget.getCellContent(cellCoords);
+            let graphCell = widget.clientPointToGraphCell(userPt);
+            console.log('mousedown:graphCell', graphCell);
+            let cellContent = widget.getCellContent(graphCell);
 
+            if (cellContent && cellContent.region.isLabelCover()) {
 
-            if (cellContent.length > 0 && cellContent[0].region.isCell()) {
-                let focalPoint = cellContent[0];
-                let row = focalPoint.region.row;
-                let col = focalPoint.region.col;
-                let Options = watr.utils.Options;
+                let classes = TGI.gridRegions.labels(cellContent.region);
+                console.log('cellContent', classes);
+                // let focalBox = GraphPaper.boundsToBox(cellContent.region.bounds);
+                // let focalBox = widget.graph4x4BoundsToGraphBox(cellContent.region.bounds);
+                let focalBox = GraphPaper.boundsToBox(LTBounds.FromInts(
+                    cellContent.region.bounds.left,
+                    cellContent.region.bounds.top,
+                    cellContent.region.bounds.width,
+                    cellContent.region.bounds.height
+                ));
+                let boxRight = focalBox.shiftOrigin(1, 0);
+                let contentRight = widget.getBoxContent(boxRight);
+                let contentFocus = widget.getBoxContent(focalBox);
+
+                // let regionsRight = _.map(contentRight, c => c.region.classes.join(',')).join(' && ');
+                // let regionsFocus = _.map(contentFocus, c => c.region.classes.join(',')).join(' && ');
+                let queryRight = boxRight.modifySpan(widget.colCount, 0);
+                let rightContents = widget.getBoxContent(queryRight);
+                let rightCells0 = _.filter(rightContents, c => c.region.isCell());
+
+                let rightCells = _.map(rightCells0, r => r.region);
+                console.log('rightCells', rightCells);
+
+            }
+
+            if (cellContent && cellContent.region.isCell()) {
+                let row = cellContent.region.row;
+                let col = cellContent.region.col;
 
                 if (mouseEvent.shiftKey) {
-                    console.log('focalPt: slurp', row, col);
                     let maybeGrid = widget.textGrid.slurp(row);
                     let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
                     widget.textGrid = newGrid;
 
                     widget.redrawAll();
                 } else if (mouseEvent.ctrlKey) {
-                    console.log('focalPt: split', row, col);
-                    let maybeGrid = widget.textGrid.split(row, col) ;//.orUndefined;
+                    let maybeGrid = widget.textGrid.split(row, col);
                     let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
                     widget.textGrid = newGrid;
 
                     widget.redrawAll();
                 } else {
-                    let focalClasses = focalPoint.region.getClasses;
+
+                    let focalClasses = TGI.gridRegions.labels(cellContent.region);
                     let focalLabel = _.last(focalClasses);
                     let childLabels = widget.labelSchema.childLabelsFor(focalLabel);
                     lbl.createLabelChoiceWidget(childLabels, widget.containerId)
                         .then(choice => {
                             let labelChoice = choice.selectedLabel;
-                            widget.textGrid.labelGridData(focalPoint, labelChoice);
-                            console.log('labeled data', widget.textGrid.gridData);
+                            widget.textGrid.labelRow(row, Labels.forString(labelChoice));
                             widget.redrawAll();
                         })
-                    ;
+                        .catch(err => {
+                            console.log('err', err);
+                        }) ;
 
                 }
             }})
@@ -297,25 +380,18 @@ export class ReflowWidget {
 
     }
 
-    updateCellHoverHighlight() {
-        let d3$hitReticles = this.d3$textgridSvg
+    updateCellHoverHighlight(hoverGraphCell) {
+        this.d3$textgridSvg
             .selectAll('.cell-focus')
-            .data(this.hoverCell, (d) => d.id)
-        ;
+            .remove() ;
 
-        d3$hitReticles
-            .enter()
+        this.d3$textgridSvg
             .append('rect')
             .classed('cell-focus', true)
-            .attr('id', d => d.id)
-            .call(util.initRect, d => d)
+            .call(util.initRect, () => this.graphCellToClientBounds(hoverGraphCell))
             .call(util.initStroke, 'blue', 1, 0.4)
             .call(util.initFill, 'yellow', 0.4)
         ;
-
-        d3$hitReticles
-            .exit()
-            .remove() ;
     }
 
     clearLabelHighlights() {
@@ -326,8 +402,9 @@ export class ReflowWidget {
             ;
         });
     }
+
     showLabelHighlights(cell) {
-        let classes = cell.region.getClasses;
+        let classes = TGI.gridRegions.labels(cell.region);
         let cls = classes[classes.length-1];
         // console.log('hovering', classes);
 

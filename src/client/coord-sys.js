@@ -17,6 +17,7 @@ export let coordSys = {
     unknown: Symbol('unknown'),
     screen: Symbol('screen'),
     div: Symbol('div'),
+    graphUnits: Symbol('graphUnits'),
     pdfMedia: Symbol('pdf-media')
 };
 
@@ -78,6 +79,10 @@ class BBox {
             Math.trunc(this.width * 100.0),
             Math.trunc(this.height * 100.0)
         ];
+    }
+
+    toString() {
+        return `BBox(${this.left}, ${this.top}, ${this.width}, ${this.height})`;
     }
 }
 

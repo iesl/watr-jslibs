@@ -1,7 +1,5 @@
 /* global require beforeEach  fixture describe it watr */
 
-let ReflowWidget = require('./../src/client/ReflowWidget.js');
-let Shared = require('./../src/client/shared-state.js');
 
 describe('ReflowWidget', function() {
 
@@ -15,6 +13,9 @@ describe('ReflowWidget', function() {
     });
 
     it('should render', function() {
+        let ReflowWidget = require('./../src/client/ReflowWidget.js');
+        let Shared = require('./../src/client/shared-state.js');
+
         Shared.initGlobalMouseTracking();
         let textGridConstruction = new watr.textgrid.TextGridConstructor();
         let textGrid = textGridConstruction.getTestTextGrid();

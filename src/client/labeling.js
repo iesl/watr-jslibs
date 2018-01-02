@@ -181,7 +181,6 @@ export function createLabelChoiceWidget(labelNames, containerId) {
         "Choose Label"
     );
 
-    console.log('curr pt', shared.currMouseClientPt);
     $('.b-modal-content').css({
         'left': shared.currMouseClientPt.x,
         'top': shared.currMouseClientPt.y
@@ -189,34 +188,3 @@ export function createLabelChoiceWidget(labelNames, containerId) {
     return labelPromise;
 }
 
-// export function createLabelChoiceWidget(labelNames) {
-
-//     let buttons = _.map(labelNames, labelButton);
-
-//     let form =
-//         t.form([
-//             t.input(':hidden', '@selectedLabel', '#selectedLabel'),
-//             t.div(".form-group", buttons)
-//         ]);
-
-//     let context = '#splitpane_root__bottom';
-//     let innerPromise = modals.makeFormPromise(form);
-
-//     form.find('button.labelChoice').click(function() {
-//         let $button = $(this);
-//         form.find('#selectedLabel')
-//             .attr('value', $button.attr('value'));
-//     });
-
-//     let labelPromise = modals.makeModalPromise(
-//         context, innerPromise,
-//         form,
-//         "Choose Label"
-//     );
-
-//     $('.b-modal-content').css({
-//         'left': shared.currMouseClientPt.x,
-//         'top': shared.currMouseClientPt.y
-//     });
-//     return labelPromise;
-// }
