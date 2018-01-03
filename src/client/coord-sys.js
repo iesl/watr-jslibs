@@ -42,7 +42,7 @@ export let mkPoint = {
    General purpose bounding box data that meets the interface requirements
    for the various libraries in use
    */
-class BBox {
+export class BBox {
     constructor (l, t, w, h, sys) {
         this.left = l;
         this.top = t;

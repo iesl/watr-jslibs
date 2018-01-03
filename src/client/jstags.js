@@ -138,14 +138,11 @@ export let htm = {
 export function resizeCanvas(canvasElem, width, height) {
     let ctx = canvasElem.getContext('2d');
 
-    // ctx.save();
-    // ctx.setTransform(1, 0, 0, 1, 0, 0);
-
     let font                      = ctx.font;
     let strokeStyle               = ctx.strokeStyle;
     let fillStyle                 = ctx.fillStyle;
     let imgData = canvasElem.toDataURL();
-    // 
+
     canvasElem.width = width;
     canvasElem.height = height;
     ctx.font = font;

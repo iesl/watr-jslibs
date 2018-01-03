@@ -9,6 +9,7 @@ import * as coords from './coord-sys.js';
 import { t } from './jstags.js';
 import { $id, resizeCanvas } from './jstags.js';
 import * as lbl from './labeling';
+let rtree = require('rbush');
 
 // import * as textgrid from './textgrid';
 import * as gp from './graphpaper';
@@ -16,12 +17,12 @@ import * as rtreeapi from './rtree-api';
 import * as colors from './colors';
 
 const GraphPaper = watr.utils.GraphPaper;
-const ProxyGraphPaper = watr.utils.ProxyGraphPaper;
+// const ProxyGraphPaper = watr.utils.ProxyGraphPaper;
 const Options = watr.utils.Options;
 const Labels = watr.watrmarks.Labels;
 const LTBounds = watr.geometry.LTBounds_Companion;
 const TGC = new watr.textgrid.TextGridConstructor();
-const JsArray = watr.utils.JsArray;
+// const JsArray = watr.utils.JsArray;
 const TGI = watr.textgrid.TextGridInterop;
 
 
@@ -112,9 +113,16 @@ export class ReflowWidget {
         });
     }
 
+    makeRTreeBox(region) {
+        let {left, top, width, height} = region.bounds;
+        let box = new coords.BBox(
+            left*4, top*4, width*4,height*4
+        );
+        box.region = region;
+        return box;
+    }
     redrawAll() {
-
-        let rtreeApi = new rtreeapi.RTreeApi();
+        // let rtreeApi = new rtreeapi.RTreeApi();
         let gridProps = TGC.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
         let rowCount = gridProps.getGridRowCount();
         let colCount = gridProps.getGridColCount();
@@ -122,20 +130,94 @@ export class ReflowWidget {
         this.rowCount = rowCount;
         this.colCount = colCount;
         let drawingApi = new gp.DrawingApi(this.canvasId, this.textHeight);
-        this.canvasGraphPaper = new ProxyGraphPaper(colCount, rowCount, drawingApi);
-        let cellDimensions = this.canvasGraphPaper.cellDimensions();
-        this.cellWidth = cellDimensions.width;
-        this.cellHeight = cellDimensions.height;
+
+        this.cellWidth = drawingApi.cellWidth;
+        this.cellHeight = drawingApi.cellHeight;
+        this.drawingApi = drawingApi;
 
         this.updateDomNodeDimensions().then(() => {
+            this.drawingApi.initContext();
             this.applyCanvasStripes();
-            TGC.writeTextGrid(gridProps, this.canvasGraphPaper, rtreeApi);
-            this.reflowRTree = rtreeApi.rtree;
+            // TGC.writeTextGrid(gridProps, this.canvasGraphPaper, rtreeApi);
 
+            let gridRegions = TGI.widgetDisplayGridProps.gridRegions(gridProps);
             let allClasses = TGI.labelSchemas.allLabels(this.labelSchema);
             let colorMap = _.zipObject(allClasses, colors.HighContrast);
 
-            console.log('allClasses', allClasses);
+            let rtreeBoxes = _.map(gridRegions, region => {
+                let classes = TGI.gridRegions.labels(region);
+                let cls = classes[classes.length-1];
+                if (region.isLabelKey()) {
+                    let box = region.gridBox;
+                    let label = region.labelIdent;
+                    this.drawingApi.fontWeight = 'bold';
+                    this.drawingApi.fontStyle = 'normal';
+                    this.drawingApi.alpha = 1.0;
+                    this.drawingApi.contextProp = {fillStyle: colorMap[cls]};
+                    this.drawingApi.drawString(box, label);
+                } else if (region.isCell()) {
+                    this.drawingApi.fontWeight = 'bold';
+                    this.drawingApi.fontStyle = 'normal';
+                    this.drawingApi.alpha = 1.0;
+                    this.drawingApi.contextProp = {fillStyle: 'black'};
+                    let ch = region.cell.char.toString();
+                    if (region.cell.char == ' ') {
+                        ch = '░';
+                        this.drawingApi.alpha = 0.4;
+                    }
+
+                    drawingApi.drawChar(
+                        region.gridBox.origin,
+                        ch.toString()
+                    );
+                } else if (region.isLabelCover()) {
+                    this.drawingApi.alpha = 1;
+                    this.drawingApi.contextProp = {fillStyle: 'black'};
+                    this.drawingApi.contextProp = {strokeStyle: 'black'};
+                    let box = region.gridBox;
+                    let bounds = region.bounds;
+                    this.drawingApi.drawString(box, 'aa');
+
+                    this.drawingApi.contextProp = {fillStyle: colorMap[cls]};
+                    this.drawingApi.contextProp = {strokeStyle: colorMap[cls]};
+                    this.drawingApi.alpha = 0.8;
+                    let {left, top, right, bottom} = this.scaleLTBounds(bounds);
+                    // let {left, top, right, bottom} = bounds;
+                    let ctxMod = (ctx) => {
+                        console.log('ctxmod', bounds);
+                        let grd=ctx.createLinearGradient(
+                            left,
+                            top,
+                            right,
+                            bottom
+                        );
+                        grd.addColorStop(0, colors.Color.White);
+                        grd.addColorStop(0.3, colors.Color.Linen);
+
+                        // grd.addColorStop(0.5, colors.Color.Red);
+                        grd.addColorStop(1, colorMap[cls]);
+                        console.log('ltwh', left, top, right, bottom);
+                        ctx.fillStyle=grd;
+                    };
+                    this.drawingApi.fillBox(box, ctxMod);
+
+
+                } else if (region.isHeading()) {
+                    let box = region.gridBox;
+                    this.drawingApi.fontStyle = 'italic';
+                    this.drawingApi.alpha = 0.3;
+                    this.drawingApi.fontWeight = 'bolder';
+                    // .call(util.initFill, colorMap[cls], 0.4)
+                    this.drawingApi.contextProp = {fillStyle: colorMap[cls]};
+                    this.drawingApi.drawString(box, region.heading);
+                }
+                return this.makeRTreeBox(region);
+            });
+
+            this.reflowRTree = rtree();
+
+            this.reflowRTree.load(rtreeBoxes);
+
             this.d3$textgridSvg
                 .selectAll(`rect`)
                 .remove();
@@ -164,7 +246,7 @@ export class ReflowWidget {
                         .classed(`${regionType}`, true)
                         .classed(`${cls}`, true)
                         .call(util.initRect, () => scaled)
-                        .call(util.initFill, colorMap[cls], 0.4)
+                        .call(util.initFill, 'black', 0.0)
                     ;
                 }
             });
@@ -398,7 +480,7 @@ export class ReflowWidget {
         _.each(['LabelCover', 'Heading', 'Cell', 'LabelKey'], cls => {
             this.d3$textgridSvg
                 .selectAll(`rect.${cls}`)
-                .attr('fill-opacity', 0.4)
+                .attr('fill-opacity', 0)
             ;
         });
     }
@@ -412,14 +494,14 @@ export class ReflowWidget {
             this.clearLabelHighlights();
             this.d3$textgridSvg
                 .selectAll(`rect.${cls}`)
-                .attr('fill-opacity', 0.6)
+                .attr('fill-opacity', 0.2)
             ;
         }
         else if (cell.region.isLabelKey()) {
             this.clearLabelHighlights();
             this.d3$textgridSvg
                 .selectAll(`rect.${cls}`)
-                .attr('fill-opacity', 0.6)
+                .attr('fill-opacity', 0.2)
             ;
         }
 
