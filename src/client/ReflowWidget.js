@@ -7,13 +7,12 @@
 import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
 import { t } from './jstags.js';
-import { $id, resizeCanvas } from './jstags.js';
+import { $id } from './jstags.js';
 import * as lbl from './labeling';
 let rtree = require('rbush');
 
 // import * as textgrid from './textgrid';
 import * as gp from './graphpaper';
-import * as rtreeapi from './rtree-api';
 import * as colors from './colors';
 
 const GraphPaper = watr.utils.GraphPaper;
@@ -176,30 +175,34 @@ export class ReflowWidget {
                     this.drawingApi.contextProp = {strokeStyle: 'black'};
                     let box = region.gridBox;
                     let bounds = region.bounds;
-                    this.drawingApi.drawString(box, 'aa');
+
+                    let abbrev = TGI.labelSchemas.abbrevFor(this.labelSchema, cls);
+                    this.drawingApi.drawString(box, abbrev);
 
                     this.drawingApi.contextProp = {fillStyle: colorMap[cls]};
                     this.drawingApi.contextProp = {strokeStyle: colorMap[cls]};
                     this.drawingApi.alpha = 0.8;
                     let {left, top, right, bottom} = this.scaleLTBounds(bounds);
                     // let {left, top, right, bottom} = bounds;
-                    let ctxMod = (ctx) => {
-                        console.log('ctxmod', bounds);
-                        let grd=ctx.createLinearGradient(
-                            left,
-                            top,
-                            right,
-                            bottom
-                        );
-                        grd.addColorStop(0, colors.Color.White);
-                        grd.addColorStop(0.3, colors.Color.Linen);
 
-                        // grd.addColorStop(0.5, colors.Color.Red);
+                    this.drawingApi.fillBox(box, (ctx) => {
+                        let grd=ctx.createLinearGradient(
+                            left, top, right, bottom
+                        );
+                        grd.addColorStop(0, 'rgb(255, 255, 255, 0.0)');
                         grd.addColorStop(1, colorMap[cls]);
-                        console.log('ltwh', left, top, right, bottom);
                         ctx.fillStyle=grd;
-                    };
-                    this.drawingApi.fillBox(box, ctxMod);
+                    });
+
+                    this.drawingApi.fillBox(box, (ctx) => {
+                        let grd=ctx.createLinearGradient(
+                            left, top, left+3, bottom
+                        );
+                        grd.addColorStop(0, colorMap[cls]);
+                        grd.addColorStop(0.1, 'rgb(255, 255, 255, 0.0)');
+
+                        ctx.fillStyle=grd;
+                    });
 
 
                 } else if (region.isHeading()) {
@@ -246,7 +249,7 @@ export class ReflowWidget {
                         .classed(`${regionType}`, true)
                         .classed(`${cls}`, true)
                         .call(util.initRect, () => scaled)
-                        .call(util.initFill, 'black', 0.0)
+                        .call(util.initFill, 'yellow', 0.0)
                     ;
                 }
             });
@@ -395,13 +398,11 @@ export class ReflowWidget {
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
             let graphCell = widget.clientPointToGraphCell(userPt);
-            console.log('mousedown:graphCell', graphCell);
             let cellContent = widget.getCellContent(graphCell);
 
             if (cellContent && cellContent.region.isLabelCover()) {
 
                 let classes = TGI.gridRegions.labels(cellContent.region);
-                console.log('cellContent', classes);
                 // let focalBox = GraphPaper.boundsToBox(cellContent.region.bounds);
                 // let focalBox = widget.graph4x4BoundsToGraphBox(cellContent.region.bounds);
                 let focalBox = GraphPaper.boundsToBox(LTBounds.FromInts(
@@ -410,18 +411,22 @@ export class ReflowWidget {
                     cellContent.region.bounds.width,
                     cellContent.region.bounds.height
                 ));
-                let boxRight = focalBox.shiftOrigin(1, 0);
+                let boxRight = focalBox.shiftOrigin(2, 0);
                 let contentRight = widget.getBoxContent(boxRight);
-                let contentFocus = widget.getBoxContent(focalBox);
+                let rightLabelCovers = _.filter(contentRight, c => c.region.isLabelCover());
+                // console.log('contentRight', contentRight);
+                if (rightLabelCovers.length == 0) {
 
-                // let regionsRight = _.map(contentRight, c => c.region.classes.join(',')).join(' && ');
-                // let regionsFocus = _.map(contentFocus, c => c.region.classes.join(',')).join(' && ');
-                let queryRight = boxRight.modifySpan(widget.colCount, 0);
-                let rightContents = widget.getBoxContent(queryRight);
-                let rightCells0 = _.filter(rightContents, c => c.region.isCell());
+                    let queryRight = boxRight.modifySpan(widget.colCount, 0);
+                    let rightContents = widget.getBoxContent(queryRight);
+                    let rightCells0 = _.filter(rightContents, c => c.region.isCell());
 
-                let rightCells = _.map(rightCells0, r => r.region);
-                console.log('rightCells', rightCells);
+                    let rightCells = _.map(rightCells0, r => r.region);
+                    let region0 = _.head(rightCells);
+                    widget.textGrid.unlabelNear(region0.row, region0.col, Labels.forString(classes[0]));
+                    widget.redrawAll();
+
+                }
 
             }
 
@@ -444,8 +449,8 @@ export class ReflowWidget {
                 } else {
 
                     let focalClasses = TGI.gridRegions.labels(cellContent.region);
-                    let focalLabel = _.last(focalClasses);
-                    let childLabels = widget.labelSchema.childLabelsFor(focalLabel);
+                    let focalLabel = _.last(focalClasses) || '';
+                    let childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
                     lbl.createLabelChoiceWidget(childLabels, widget.containerId)
                         .then(choice => {
                             let labelChoice = choice.selectedLabel;
@@ -494,14 +499,14 @@ export class ReflowWidget {
             this.clearLabelHighlights();
             this.d3$textgridSvg
                 .selectAll(`rect.${cls}`)
-                .attr('fill-opacity', 0.2)
+                .attr('fill-opacity', 0.5)
             ;
         }
         else if (cell.region.isLabelKey()) {
             this.clearLabelHighlights();
             this.d3$textgridSvg
                 .selectAll(`rect.${cls}`)
-                .attr('fill-opacity', 0.2)
+                .attr('fill-opacity', 0.5)
             ;
         }
 

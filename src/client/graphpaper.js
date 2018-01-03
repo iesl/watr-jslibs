@@ -129,12 +129,10 @@ export class DrawingApi {
     fillBox(box, modCtx) {
         let currProps = this.contextProps;
         let ctx = this.context2d;
-        // console.log('fillBox', ctx);
         if (modCtx !== undefined) {
             modCtx(this.context2d);
         }
         let {left, top, width, height} = this.boxToBounds(box);
-        // console.log('fillBox(2)', ctx);
         ctx.fillRect(left, top, width, height);
         this.contextProps = currProps;
     }
