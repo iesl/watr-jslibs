@@ -10,10 +10,12 @@ import { t } from './jstags.js';
 import { $id } from './jstags.js';
 import * as lbl from './labeling';
 let rtree = require('rbush');
+import {shared} from './shared-state';
 
 // import * as textgrid from './textgrid';
 import * as gp from './graphpaper';
 import * as colors from './colors';
+import * as rtrees from  './rtrees.js';
 
 const GraphPaper = watr.utils.GraphPaper;
 // const ProxyGraphPaper = watr.utils.ProxyGraphPaper;
@@ -24,6 +26,87 @@ const TGC = new watr.textgrid.TextGridConstructor();
 // const JsArray = watr.utils.JsArray;
 const TGI = watr.textgrid.TextGridInterop;
 
+export function setupReflowControl() {
+    let textGrid = createFromCurrentSelection();
+
+    let labelSchema = TGC.getTestLabelSchema();
+    let reflowWidget = new ReflowWidget('reflow-controls', textGrid, labelSchema);
+
+    reflowWidget.init().then(result => {
+        return result;
+    }) ;
+}
+
+
+/**
+ *
+ *
+ * GridData   :: { rows: [Row] }
+ * Row        :: [Cell]
+ * Cell       :: {bio: [], g: G, gridDataPt: GridDataPt}
+ *             | {bio: [], i: I, gridDataPt}
+ * G          :: [charloc,..... ]
+ * I          :: charloc
+ * Charloc    :: ['c', 0, bbox]
+ * Bbox       ::[l, t, w, h]
+ * GridDataPt ::
+ *
+ */
+
+export function createFromCurrentSelection() {
+    let selections = shared.currentSelections;
+    let rowData = _.flatMap(selections, sel => {
+        let hits = rtrees.searchPage(sel.pageNum, sel);
+
+        let tuples = _.map(hits, hit => {
+            let g = hit.gridDataPt;
+            return [g.row, g.col, g.gridRow];
+        });
+        let byRows = _.groupBy(tuples, t => t[0]);
+
+        let clippedGrid =
+            _.map(_.toPairs(byRows), ([rowNum, rowTuples]) => {
+                let cols    = _.map(rowTuples, t => t[1]),
+                    minCol  = _.min(cols),
+                    maxCol  = _.max(cols),
+                    gridRow = rowTuples[0][2],
+                    text    = gridRow.text.slice(minCol, maxCol+1),
+                    loci    = gridRow.loci.slice(minCol, maxCol+1)
+                ;
+
+                return [rowNum, text, loci];
+            });
+
+        let sortedRows = _.sortBy(clippedGrid, g => g[0]);
+
+        let rowData = _.map(sortedRows, g => {
+            let gfiltered = _.map(g[2], go => {
+                return _.pick(go, ['g', 'i']);
+            });
+
+            return {
+                text: g[1],
+                loci: gfiltered
+            };
+        });
+
+        return rowData;
+    });
+
+    let data = {
+        stableId: shared.currentDocument,
+        rows: rowData
+    };
+
+    let TextGridCompanion = watr.textgrid.TextGrid.Companion;
+    console.log('griddata', data);
+    let textGrid = TextGridCompanion.fromJsonStr(
+        JSON.stringify(data)
+    );
+
+    console.log('textGrid', textGrid);
+    return textGrid;
+}
 
 export class ReflowWidget {
 
@@ -40,7 +123,6 @@ export class ReflowWidget {
         this.canvasId = `textgrid-canvas-${gridNum}`;
         this.svgId    = `textgrid-svg-${gridNum}`;
     }
-
 
 
     init () {
@@ -95,7 +177,7 @@ export class ReflowWidget {
 
     saveTextGrid() {
         let gridJson = this.textGrid.toJson().toString();
-        console.log('gridJson', gridJson.length);
+        console.log(gridJson.length);
 
     }
 
