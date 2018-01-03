@@ -93,6 +93,12 @@ export class ReflowWidget {
         });
     }
 
+    saveTextGrid() {
+        let gridJson = this.textGrid.toJson().toString();
+        console.log('gridJson', gridJson.length);
+
+    }
+
     applyCanvasStripes() {
         let canvas = document.getElementById(this.canvasId);
         let ctx = canvas.getContext('2d');
@@ -123,8 +129,9 @@ export class ReflowWidget {
     redrawAll() {
         // let rtreeApi = new rtreeapi.RTreeApi();
         let gridProps = TGC.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
-        let rowCount = gridProps.getGridRowCount();
-        let colCount = gridProps.getGridColCount();
+        let rowCount = Math.max(gridProps.getGridRowCount(), 40);
+        let colCount = Math.max(gridProps.getGridColCount(), 100);
+
 
         this.rowCount = rowCount;
         this.colCount = colCount;
@@ -243,15 +250,13 @@ export class ReflowWidget {
                 }
                 let cls = classes[classes.length-1];
 
-                if (! region.isCell()) {
-                    this.d3$textgridSvg
-                        .append('rect')
-                        .classed(`${regionType}`, true)
-                        .classed(`${cls}`, true)
-                        .call(util.initRect, () => scaled)
-                        .call(util.initFill, 'yellow', 0.0)
-                    ;
-                }
+                this.d3$textgridSvg
+                    .append('rect')
+                    .classed(`${regionType}`, true)
+                    .classed(`${cls}`, true)
+                    .call(util.initRect, () => scaled)
+                    .call(util.initFill, 'yellow', 0.0)
+                ;
             });
 
             this.initMouseHandlers();
@@ -259,43 +264,6 @@ export class ReflowWidget {
         });
 
     }
-
-
-    // graphCellToIndexBounds(graphCell) {
-    //     return coords.mk.fromLtwh(
-    //         graphCell.left*4, graphCell.top*4,
-    //         ((graphCell.spanRight-1)*4),
-    //         ((graphCell.spanDown-1)*4)
-    //     );
-    // }
-
-    // graph4x4BoundsToGraphBox(graph4x4Bounds) {
-    //     console.log(graph4x4Bounds, 'graph4x4Bounds');
-    //     let l = graph4x4Bounds.left / 4;
-    //     let t = graph4x4Bounds.top / 4;
-    //     let w = graph4x4Bounds.width / 4;
-    //     let h = graph4x4Bounds.height / 4;
-    //     let bounds = LTBounds.FromInts(l, t, w, h);
-    //     return GraphPaper.boundsToBox(bounds);
-    // }
-
-    // indexBoundsToGraphBox(indexBounds) {
-    //     let originX = Math.floor(indexBounds.x / this.cellWidth);
-    //     let originY = Math.floor(indexBounds.y / this.cellHeight);
-    //     return coords.mk.fromLtwh(
-    //         graphCell.left*4, graphCell.top*4,
-    //         ((graphCell.spanRight-1)*4),
-    //         ((graphCell.spanDown-1)*4)
-    //     );
-    // }
-
-    // indexBoundsToQueryBounds(indexBounds) {
-    //     return coords.mk.fromLtwh(
-    //         indexBounds.left+1, indexBounds.top+1,
-    //         indexBounds.spanRight-1,
-    //         indexBounds.spanDown-1
-    //     );
-    // }
 
     graphCellToClientBounds(graphCell) {
         // Construct a query box that aligns with grid
@@ -424,6 +392,7 @@ export class ReflowWidget {
                     let rightCells = _.map(rightCells0, r => r.region);
                     let region0 = _.head(rightCells);
                     widget.textGrid.unlabelNear(region0.row, region0.col, Labels.forString(classes[0]));
+                    widget.saveTextGrid();
                     widget.redrawAll();
 
                 }
