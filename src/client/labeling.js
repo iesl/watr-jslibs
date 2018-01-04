@@ -15,10 +15,6 @@ import {t} from './jstags.js';
 
 import * as coords from './coord-sys.js';
 
-export function mkAnnotation(props) {
-    return props; // Object.assign({id: nextAnnotId()}, props);
-}
-
 export function updateAnnotationShapes() {
     return server.getDocumentZones()
         .then(zoneRecs => refreshZoneHightlights(zoneRecs.zones));
@@ -43,6 +39,9 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
 
 export function refreshZoneHightlights(zonesJs) {
     let zones = _.map(zonesJs, (z) => dt.zoneFromJson(z));
+    console.log("zones", zones);
+    shared.zones = zones;
+
     rtrees.initPageLabelRTrees(zones);
 
     d3 .selectAll('.annotation-rect')
@@ -96,7 +95,7 @@ export function refreshZoneHightlights(zonesJs) {
 
 
 
-export function createHeaderLabelUI(annotation) {
+export function createHeaderLabelUI(mbrSelection, page) {
     let labelNames = [
         'Title',
         'Authors',
@@ -105,31 +104,24 @@ export function createHeaderLabelUI(annotation) {
         'References'
     ];
 
-    createLabelChoiceWidget(labelNames)
+    let containerId = 'splitpane_root__bottom';
+    createLabelChoiceWidget(labelNames, containerId)
         .then(choice => {
             console.log('choice', choice);
 
-            let ser = _.map(annotation.targets, t => {
-                return {
-                    page: t[0],
-                    bbox: t[1].intRep
-                };
-            });
-
             let labelChoice = choice.selectedLabel;
 
-            let labelData = {
+            let zoneData = {
                 stableId: shared.currentDocument,
                 labelChoice: labelChoice,
-                selection: {
-                    annotType: annotation.type,
-                    page: annotation.page,
-                    targets: ser
+                target: {
+                    page: page,
+                    bbox: mbrSelection
                 }
             };
 
-            console.log('labelData', labelData);
-            server.postNewRegionLabel(labelData)
+            console.log('labelData', zoneData);
+            server.createNewZone(zoneData)
                 .then(res => {
                     d3.selectAll('.label-selection-rect').remove();
                     updateAnnotationShapes();
@@ -187,4 +179,3 @@ export function createLabelChoiceWidget(labelNames, containerId) {
     });
     return labelPromise;
 }
-

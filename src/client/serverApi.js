@@ -39,17 +39,15 @@ export function getCorpusArtifactTextgrid(entryName) {
     return apiGet(`/api/v1/corpus/artifacts/vtrace/json/${entryName}/${show}`);
 }
 
-export function deleteLabels(labelData) {
+export function deleteZone(zoneId) {
     return new Promise((resolve, reject) => {
-        console.log('labelData', labelData);
         $.ajax({
-            url: "/api/v1/labeling/zone",
-            data: JSON.stringify(labelData),
+            url: `/api/v1/labeling/zones/${zoneId}`,
             datatype: 'json',
             contentType: 'application/json',
             method: "DELETE",
             success: function(res) {
-                console.log('deleteLabels: succ', res);
+                console.log('deleteZone: succ', res);
                 resolve(res);
             },
             error: function(xhr, status, err) {
@@ -83,6 +81,6 @@ export function apiPost(url, data) {
 }
 
 
-export function postNewRegionLabel(labelData) {
+export function createNewZone(labelData) {
     return apiPost(apiUri("labeling/zones"), labelData);
 }

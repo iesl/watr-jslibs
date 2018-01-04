@@ -18,9 +18,11 @@ describe('ReflowWidget', function() {
 
         Shared.initGlobalMouseTracking();
         let textGridConstruction = new watr.textgrid.TextGridConstructor();
+        // let textGrid = textGridConstruction.getTestTextGridLarge();
         let textGrid = textGridConstruction.getTestTextGrid();
         let labelSchema = textGridConstruction.getTestLabelSchema();
         let reflowWidget = new ReflowWidget.ReflowWidget('page-textgrids', textGrid, labelSchema);
+
 
         reflowWidget.init();
     });

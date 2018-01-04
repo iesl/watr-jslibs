@@ -1,29 +1,116 @@
-
 @import "inc/_list";
 @import "inc/_modals";
 @import "inc/_buttons";
 @import "inc/_solarized";
 
-// div.textgrid-control-panes {
-//     display: grid;
+div.gridwidget {
+    display: inline-grid;
 
-//     grid-template-areas:
-//         "up"
-//         "dn"
-//     ;
+    // lgt/rgt = left/right-gutter
+    // tsb/bsb = top/bottom status bar
+    // inf     = infobar
+    // frm     = frame div
+    grid-template-areas:
+    /**/"tsb tsb tsb"
+        "lgt inf rgt"
+        "lgt frm rgt"
+        "bsb bsb bsb"
+    ;
 
-//     grid-template-rows    : 50px 1fr;
+    grid-template-columns: 6px auto 6px;
+    grid-template-rows: 40px 60px auto 4px;
 
-//     width: 100%;
-//     height: 100%;
+    min-height: 0;  /* NEW */
+    min-width: 0;   /* NEW; needed for Firefox */
 
 
-//     div#page-textgrids {
-//         grid-area: up;
-//     }
+    div.status-top {
+        grid-area: tsb;
 
-//     div#reflow-controls {
-//         grid-area: dn;
-//     }
+        background: @base01;
+    }
 
-// }
+    div.status-bottom {
+        grid-area: bsb;
+
+        background: @base1;
+    }
+
+    div.infobar {
+        grid-area: inf;
+        background: @base3;
+
+        display: grid;
+
+        grid-column-gap  : 8px;
+        grid-row-gap     : 2px;
+
+        grid-template-columns : repeat(auto-fill, 380px);
+        grid-template-rows    : repeat(auto-fill, 30px);
+        grid-auto-flow: row;
+
+        div.infoslot {
+            // display: grid;
+
+            background: @base2;
+	          border: 1px solid gray;
+            width: 100%;
+            font-size: 120%;
+            font-weight: bold;
+
+            span.infoslot-label {
+                display: inline-block;
+                background: @base3;
+                width: 40%;
+                height: 100%;
+                text-align: center;
+	              // border: 1px solid blue;
+            }
+
+            span.infoslot-value {
+                display: inline-block;
+                text-align: right;
+            }
+        }
+
+    }
+
+    div.left-gutter{
+        grid-area: lgt;
+
+        background: @base0;
+    }
+
+    div.right-gutter{
+        grid-area: rgt;
+
+        background: @base0;
+    }
+
+    div.gridcontent {
+        grid-area: frm;
+
+        div.textgrid {
+            position: relative;
+
+            // canvas.textgrid and svg.textgrid are superimposed
+            canvas.textgrid {
+                position: absolute;
+
+                top: 0;
+                left: 0;
+
+                z-index: -10;
+            }
+
+            svg.textgrid {
+                position: absolute;
+
+                top: 0;
+                left: 0;
+
+                z-index: 1000;
+            }
+        }
+    }
+}

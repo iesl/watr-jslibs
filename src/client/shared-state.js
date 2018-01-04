@@ -21,9 +21,10 @@ export let shared = {
 
     dataPts: [],
 
-    documentAnnotations: {},
+    zones: [],
 
-    annotationLabels: {},
+    // documentAnnotations: {},
+    // annotationLabels: {},
 
     currentSelections: [],
 

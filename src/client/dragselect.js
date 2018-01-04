@@ -7,8 +7,6 @@
 import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
 
-
-
 export default function awaitUserSelection(d3$svg, initSvgPt) {
 
     return new Promise((resolve, reject) => {

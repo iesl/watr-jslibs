@@ -66,6 +66,7 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
             awaitUserSelection(d3$svg, svgUserPt)
                 .then(pointOrRect => {
                     defaultModeMouseHandlers(d3$svg, pageNum);
+                    console.log('awaitUserSelection: ', pointOrRect);
                     if (pointOrRect.point) {
                         let clickPt = pointOrRect.point;
                         let queryBox = coords.mk.fromLtwh(clickPt.x, clickPt.y, 1, 1);
@@ -90,13 +91,9 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
 
                         let minBoundSelection = rtrees.queryHitsMBR(hits);
 
-                        let annotation = lbl.mkAnnotation({
-                            type: 'bounding-boxes',
-                            page: pageNum,
-                            targets: [[pageNum, minBoundSelection]] 
-                        });
+                        // console.log('minBoundSelection: ', minBoundSelection);
 
-                        createImageLabelingPanel(pdfImageRect, annotation);
+                        createImageLabelingPanel(pdfImageRect, minBoundSelection, pageNum);
                     }
 
                 });
@@ -228,27 +225,28 @@ export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
 
 
 
-function createImageLabelingPanel(initSelection, annotation) {
+function createImageLabelingPanel(userSelection, mbrSelection, page) {
 
-    let target = annotation.targets[0];
+    // let target = annotation.targets[0];
 
-    let [page, mbr] = target;
+    // let [page, mbr] = target;
 
     let svgPageSelector = `svg#page-image-${page}`;
 
     d3.select(svgPageSelector)
         .append('rect')
-        .call(util.initRect, () => initSelection)
+        .call(util.initRect, () => userSelection)
         .classed('label-selection-rect', true)
         .call(util.initStroke, 'blue', 1, 1.0)
         .call(util.initFill, 'yellow', 0.7)
         .transition().duration(200)
-        .call(util.initRect, () => mbr)
+        .call(util.initRect, () => mbrSelection)
         .call(util.initFill, 'yellow', 0.3)
     ;
 
+    console.log('createImageLabelingPanel: ', mbrSelection, page);
 
-    lbl.createHeaderLabelUI(annotation);
+    lbl.createHeaderLabelUI(mbrSelection, page);
 
 }
 
@@ -263,37 +261,49 @@ function setupStatusBar(statusBarId) {
     let $selectStatus = t.div('.statusitem', "Selections");
 
     shared.rx.selections.subscribe(currSelects=> {
-        if (currSelects.length > 0) {
+        $selectStatus.empty();
+        $selectStatus.append(t.span(`Selected:${currSelects.length} del: `));
+
+        if (currSelects.length == 1) {
+            let selection = currSelects[0];
+            let gridForSelection = reflowWidget.textGridForSelection(selection);
             let deleteBtn = t.button([icon.trash]);
             var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
             clicks.subscribe(() => {
-                let zoneIds = _.map(currSelects, (sel) => sel.zoneId);
-                let delReq = {
-                    stableId: shared.currentDocument,
-                    zoneIds: zoneIds
-                };
-                server.deleteLabels(delReq).then(resp => {
+                let zoneId = selection.zoneId;
+                server.deleteZone(zoneId).then(resp => {
                     global.setSelections([]);
-
-                    lbl.refreshZoneHightlights(resp.zones);
+                    shared.activeReflowWidget = undefined;
+                    lbl.updateAnnotationShapes();
                 }).catch(() => {
+                    shared.activeReflowWidget = undefined;
+                    lbl.updateAnnotationShapes();
                     global.setSelections([]);
-
-                })
-                ;
+                }) ;
             });
 
-            let gridShaperBtn = t.button([icon.fa('indent')]);
-
-            gridShaperBtn.on('click', function() {
-                reflowWidget.setupReflowControl();
-            });
-
-            $selectStatus.empty();
-            $selectStatus.append(t.span(`Selected:${currSelects.length} del: `));
             $selectStatus.append(deleteBtn);
-            $selectStatus.append(gridShaperBtn);
+
+            if (gridForSelection !== undefined) {
+                reflowWidget.showGrid(gridForSelection);
+            } else {
+                let gridShaperBtn = t.button([icon.fa('indent')]);
+
+                gridShaperBtn.on('click', function() {
+                    let textGrid = reflowWidget.createFromSelection(selection);
+                    reflowWidget.showGrid(textGrid);
+                });
+                $selectStatus.append(gridShaperBtn);
+
+            }
+        }
+        else if (currSelects.length > 1) {
+            reflowWidget.unshowGrid();
+
+
+
         } else {
+            reflowWidget.unshowGrid();
             $selectStatus.text(``);
         }
     });

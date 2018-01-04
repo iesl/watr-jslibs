@@ -2,7 +2,7 @@
  *
  **/
 
-/* global require _ d3 watr */
+/* global require _ d3 watr fabric $ */
 
 import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
@@ -12,105 +12,127 @@ import * as lbl from './labeling';
 let rtree = require('rbush');
 import {shared} from './shared-state';
 
-// import * as textgrid from './textgrid';
-import * as gp from './graphpaper';
+import * as gp from './graphpaper-variants';
 import * as colors from './colors';
 import * as rtrees from  './rtrees.js';
+import * as server from './serverApi.js';
 
 const GraphPaper = watr.utils.GraphPaper;
-// const ProxyGraphPaper = watr.utils.ProxyGraphPaper;
 const Options = watr.utils.Options;
 const Labels = watr.watrmarks.Labels;
+const JsArray = watr.utils.JsArray;
 const LTBounds = watr.geometry.LTBounds_Companion;
-const TGC = new watr.textgrid.TextGridConstructor();
-// const JsArray = watr.utils.JsArray;
+const TGCC = watr.textgrid.TextGridConstructor_Companion;
+const TGC = TGCC.create();
+let TextGridCompanion = watr.textgrid.TextGrid.Companion;
 const TGI = watr.textgrid.TextGridInterop;
 
-export function setupReflowControl() {
-    let textGrid = createFromCurrentSelection();
+function printToInfobar(slot, label, value) {
+    $(`#slot-label-${slot}`).text(label);
+    $(`#slot-value-${slot}`).text(value);
+}
 
+export function unshowGrid() {
+    if (shared.activeReflowWidget != undefined) {
+        let widget = shared.activeReflowWidget;
+        $id(widget.containerId).empty();
+        shared.activeReflowWidget = undefined;
+    }
+}
+
+export function showGrid(textGridDef) {
+    let {textGrid, zoneId, zoneLabel} = textGridDef;
     let labelSchema = TGC.getTestLabelSchema();
-    let reflowWidget = new ReflowWidget('reflow-controls', textGrid, labelSchema);
+    let reflowWidget = new ReflowWidget('reflow-controls', textGrid, labelSchema, zoneId, zoneLabel);
+    shared.activeReflowWidget = reflowWidget;
 
-    reflowWidget.init().then(result => {
-        return result;
-    }) ;
+    return reflowWidget.init();
+}
+
+export function textGridForSelection(selection) {
+    let zoneId = selection.zoneId ;
+    let zoneLabel = selection.label;
+    let maybeExistingGrid = _.find(shared.zones, z => z.zoneId == zoneId);
+
+    if (maybeExistingGrid !== undefined && maybeExistingGrid.glyphDefs !== null) {
+        let textGrid = TextGridCompanion.fromJsonStr(
+            JSON.stringify(maybeExistingGrid.glyphDefs)
+        );
+
+        let res = {
+            textGrid: textGrid,
+            zoneId: zoneId,
+            zoneLabel: zoneLabel
+        };
+
+        return res;
+    }
+    return undefined;
 }
 
 
-/**
- *
- *
- * GridData   :: { rows: [Row] }
- * Row        :: [Cell]
- * Cell       :: {bio: [], g: G, gridDataPt: GridDataPt}
- *             | {bio: [], i: I, gridDataPt}
- * G          :: [charloc,..... ]
- * I          :: charloc
- * Charloc    :: ['c', 0, bbox]
- * Bbox       ::[l, t, w, h]
- * GridDataPt ::
- *
- */
+export function createFromSelection(selection) {
 
-export function createFromCurrentSelection() {
-    let selections = shared.currentSelections;
-    let rowData = _.flatMap(selections, sel => {
-        let hits = rtrees.searchPage(sel.pageNum, sel);
+    let zoneId = selection.zoneId ;
+    let zoneLabel = selection.label;
+    let hits = rtrees.searchPage(selection.pageNum, selection);
 
-        let tuples = _.map(hits, hit => {
-            let g = hit.gridDataPt;
-            return [g.row, g.col, g.gridRow];
-        });
-        let byRows = _.groupBy(tuples, t => t[0]);
-
-        let clippedGrid =
-            _.map(_.toPairs(byRows), ([rowNum, rowTuples]) => {
-                let cols    = _.map(rowTuples, t => t[1]),
-                    minCol  = _.min(cols),
-                    maxCol  = _.max(cols),
-                    gridRow = rowTuples[0][2],
-                    text    = gridRow.text.slice(minCol, maxCol+1),
-                    loci    = gridRow.loci.slice(minCol, maxCol+1)
-                ;
-
-                return [rowNum, text, loci];
-            });
-
-        let sortedRows = _.sortBy(clippedGrid, g => g[0]);
-
-        let rowData = _.map(sortedRows, g => {
-            let gfiltered = _.map(g[2], go => {
-                return _.pick(go, ['g', 'i']);
-            });
-
-            return {
-                text: g[1],
-                loci: gfiltered
-            };
-        });
-
-        return rowData;
+    let tuples = _.map(hits, hit => {
+        let g = hit.gridDataPt;
+        return [g.row, g.col, g.gridRow];
     });
+    let byRows = _.groupBy(tuples, t => t[0]);
+
+    let clippedGrid =
+        _.map(_.toPairs(byRows), ([rowNum, rowTuples]) => {
+            let cols    = _.map(rowTuples, t => t[1]),
+                minCol  = _.min(cols),
+                maxCol  = _.max(cols),
+                gridRow = rowTuples[0][2],
+                text    = gridRow.text.slice(minCol, maxCol+1),
+                loci    = gridRow.loci.slice(minCol, maxCol+1)
+            ;
+
+            return [rowNum, text, loci];
+        });
+
+    let sortedRows = _.sortBy(clippedGrid, g => g[0]);
+
+    let rowData = _.map(sortedRows, g => {
+        let gfiltered = _.map(g[2], go => {
+            return _.pick(go, ['g', 'i']);
+        });
+
+        return {
+            text: g[1],
+            loci: gfiltered
+        };
+    });
+
 
     let data = {
         stableId: shared.currentDocument,
         rows: rowData
     };
 
-    let TextGridCompanion = watr.textgrid.TextGrid.Companion;
-    console.log('griddata', data);
     let textGrid = TextGridCompanion.fromJsonStr(
         JSON.stringify(data)
     );
 
-    console.log('textGrid', textGrid);
-    return textGrid;
+    let res = {
+        textGrid: textGrid,
+        zoneId: zoneId,
+        zoneLabel: zoneLabel
+    };
+
+    return res;
+
+
 }
 
 export class ReflowWidget {
 
-    constructor (containerId, textGrid, labelSchema) {
+    constructor (containerId, textGrid, labelSchema, zoneId, zoneLabel) {
 
         let gridNum = 1000;
         this.containerId = containerId;
@@ -122,21 +144,53 @@ export class ReflowWidget {
         this.frameId  = `textgrid-frame-${gridNum}`;
         this.canvasId = `textgrid-canvas-${gridNum}`;
         this.svgId    = `textgrid-svg-${gridNum}`;
+        this.zoneId = zoneId;
+        this.zoneLabel = zoneLabel;
     }
 
 
     init () {
 
         return new Promise((resolve) => {
-            let initWidth = 800;
-            let gridHeight = 1000; // this.gridBounds.bottom;
+            let initWidth = 400;
+            let gridHeight = 300; // this.gridBounds.bottom;
+
+            /**
+             * Structure:
+             *    div.gridwidget
+             *        div.status-top
+             *        div.infobar
+             *        div.frame
+             *            canvas.textgrid
+             *            svg.textgrid
+             *        div.status-bottom
+             */
 
             let gridNodes =
                 t.div(`.textgrid #${this.frameId}`, {style: `width: ${initWidth}px; height: ${gridHeight}px;`}, [
                     t.canvas(`.textgrid #${this.canvasId}`, {page: this.gridNum, width: initWidth, height: gridHeight})
                 ]) ;
 
-            $id(this.containerId).append(gridNodes);
+            let infobarSlots = _.map(_.range(0, 6), i => {
+                return t.div(`.infoslot #slot-${i}`, [
+                    t.span(`.infoslot-label #slot-label-${i}`, ''),
+                    t.span(`.infoslot-value #slot-value-${i}`, '')
+                ]);
+            });
+
+            let widgetNode =
+                t.div(`.gridwidget`, [
+                    t.div(`.status-top`),
+                    t.div(`.left-gutter`),
+                    t.div(`.infobar`, infobarSlots),
+                    t.div(`.gridcontent`, [
+                        gridNodes
+                    ]),
+                    t.div(`.right-gutter`),
+                    t.div(`.status-bottom`)
+                ]);
+
+            $id(this.containerId).append(widgetNode);
 
             this.d3$textgridSvg = d3.select('#'+this.frameId)
                 .append('svg').classed('textgrid', true)
@@ -156,16 +210,12 @@ export class ReflowWidget {
 
     updateDomNodeDimensions() {
         return new Promise((resolve) => {
-            let height = (this.rowCount+2) * this.cellHeight;
-            let width = (this.colCount+2) * this.cellWidth;
-            let frameStyle = {
-                style: `width: ${width}px; height: ${height}px;`
-            };
-            $id(this.frameId).css(frameStyle);
+            let height = this.rowCount * this.cellHeight;
+            let width = this.colCount * this.cellWidth;
 
-            $id(this.canvasId)
-                .attr('width', width)
-                .attr('height', height);
+            $id(this.frameId).width(width).height(height);
+
+            this.drawingApi.setDimensions(width, height, this.colCount, this.rowCount);
 
             this.d3$textgridSvg
                 .attr('width', width)
@@ -176,28 +226,15 @@ export class ReflowWidget {
     }
 
     saveTextGrid() {
-        let gridJson = this.textGrid.toJson().toString();
-        console.log(gridJson.length);
+        shared.activeReflowWidget = this;
+        let gridAsJson = JSON.parse(this.textGrid.toJson().toString());
+        let postData = {
+            SetText: {
+                gridJson: gridAsJson
+            }
+        };
 
-    }
-
-    applyCanvasStripes() {
-        let canvas = document.getElementById(this.canvasId);
-        let ctx = canvas.getContext('2d');
-
-        let rowWidth = this.cellWidth * (this.colCount+8);
-        _.each(_.range(this.rowCount+10), row =>{
-            let rtop = row * this.cellHeight;
-            let h = this.cellHeight;
-
-            let grd=ctx.createLinearGradient(0,rtop,0,rtop+h);
-            grd.addColorStop(0, colors.Color.GhostWhite);
-            grd.addColorStop(0.9, colors.Color.Linen);
-            grd.addColorStop(1, colors.Color.Cornsilk);
-
-            ctx.fillStyle=grd;
-            ctx.fillRect(0, rtop, rowWidth, this.cellHeight);
-        });
+        // return server.apiPost(server.apiUri(`labeling/zones/${this.zoneId}`), postData);
     }
 
     makeRTreeBox(region) {
@@ -208,142 +245,177 @@ export class ReflowWidget {
         box.region = region;
         return box;
     }
+
+
+    drawGridShapes() {
+        let gridProps = this.gridProps;
+
+        this.drawingApi.applyCanvasStripes();
+
+
+        let gridRegions = TGI.widgetDisplayGridProps.gridRegions(gridProps);
+        let allClasses = TGI.labelSchemas.allLabels(this.labelSchema);
+        let colorMap = _.zipObject(allClasses, colors.HighContrast);
+
+        let rtreeBoxes = _.map(gridRegions, region => {
+            let classes = TGI.gridRegions.labels(region);
+            let cls = classes[classes.length-1];
+            let box = region.gridBox;
+            let bounds = region.bounds;
+            let {left, top, width, height} = this.scaleLTBounds(bounds);
+            if (region.isLabelKey()) {
+                let label = region.labelIdent;
+                let text = new fabric.Text(label, {
+                    objectCaching: false,
+                    left: left, top: top,
+                    fontSize: 20,
+                    fontStyle: 'normal',
+                    fontFamily: 'Courier New',
+                    fontWeight: 'bold',
+                    textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.5).toRgba()
+                });
+                this.drawingApi.fabricCanvas.add(text);
+
+
+            } else if (region.isCells()) {
+                let cells = JsArray.fromScala(region.cells);
+                let cellStr = _.map(cells, c => {
+                    let ch = c.char.toString();
+                    if (ch == ' ') {ch = '░';}
+                    return ch;
+                }).join('');
+
+
+                let text = new fabric.Text(cellStr, {
+                    objectCaching: false,
+                    left: left, top: top,
+                    fontSize: 20,
+                    fontStyle: 'normal',
+                    fontFamily: 'Courier New'
+                    // fontWeight: 'bold',
+                    // textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.5).toRgba()
+                });
+                this.drawingApi.fabricCanvas.add(text);
+
+            } else if (region.isLabelCover()) {
+
+                this.drawingApi.fillBox(box, (rect) => {
+                    rect.setGradient('fill', {
+                        x1: 0, y1: 0,
+                        x2: 0, y2: height,
+                        colorStops: {
+                            0:  new fabric.Color('rgb(255, 255, 255').setAlpha(0).toRgba(),
+                            0.6:  new fabric.Color('rgb(255, 255, 255').setAlpha(0.1).toRgba(),
+                            1:  new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba()
+                        }
+                    });
+                });
+
+                this.drawingApi.fillBox(box, (rect) => {
+                    rect.setGradient('fill', {
+                        x1: 0, y1: 0,
+                        x2: 0, y2: height,
+                        colorStops: {
+                            0:  new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba(),
+                            0.2: new fabric.Color('rgb(255, 255, 255').setAlpha(0).toRgba()
+                        }
+                    });
+                });
+
+                let abbrev = TGI.labelSchemas.abbrevFor(this.labelSchema, cls);
+                let text = new fabric.Text(abbrev, {
+                    objectCaching: false,
+                    left: left, top: top,
+                    fontSize: 20,
+                    fontStyle: 'normal',
+                    fontFamily: 'Courier New',
+                    fontWeight: 'bolder',
+                    fill: 'black',
+                    // textBackgroundColor: new fabric.Color(colorMap[cls]).toRgb(),
+                    underline: true
+                    // linethrough: '',
+                    // overline: ''
+                });
+
+                this.drawingApi.fabricCanvas.add(text);
+
+            } else if (region.isHeading()) {
+                let text = new fabric.Text(region.heading, {
+                    objectCaching: false,
+                    left: left, top: top,
+                    fontSize: 20,
+                    fontStyle: 'italic',
+                    fontFamily: 'Courier New',
+                    fontWeight: 'bolder',
+                    textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.2).toRgba()
+                    // underline: '',
+                    // linethrough: '',
+                    // overline: ''
+                });
+                this.drawingApi.fabricCanvas.add(text);
+            }
+            return this.makeRTreeBox(region);
+        });
+
+        this.drawingApi.fabricCanvas.renderAll();
+
+        this.reflowRTree = rtree();
+
+        this.reflowRTree.load(rtreeBoxes);
+
+        this.d3$textgridSvg
+            .selectAll(`rect`)
+            .remove();
+
+        _.each(this.reflowRTree.all(), data => {
+            let region = data.region;
+            let bounds = region.bounds;
+            let scaled = this.scaleLTBounds(bounds);
+            let classes = TGI.gridRegions.labels(region);
+
+            let regionType;
+            if (region.isLabelKey()) {
+                regionType = 'LabelKey';
+            } else if (region.isCells()) {
+                regionType = 'Cell';
+            } else if (region.isLabelCover()) {
+                regionType = 'LabelCover';
+            } else if (region.isHeading()) {
+                regionType = 'Heading';
+            }
+            let cls = classes[classes.length-1];
+
+            this.d3$textgridSvg
+                .append('rect')
+                .classed(`${regionType}`, true)
+                .classed(`${cls}`, true)
+                .call(util.initRect, () => scaled)
+                .call(util.initFill, 'yellow', 0.0)
+            ;
+        });
+
+        this.initMouseHandlers();
+
+    }
+
     redrawAll() {
-        // let rtreeApi = new rtreeapi.RTreeApi();
-        let gridProps = TGC.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
-        let rowCount = Math.max(gridProps.getGridRowCount(), 40);
-        let colCount = Math.max(gridProps.getGridColCount(), 100);
+        this.gridProps = TGC.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
+        let rowCount = Math.max(this.gridProps.getGridRowCount(), 40);
+        let colCount = Math.max(this.gridProps.getGridColCount(), 100);
 
 
         this.rowCount = rowCount;
         this.colCount = colCount;
-        let drawingApi = new gp.DrawingApi(this.canvasId, this.textHeight);
+        let drawingApi = new gp.FabricJsGraphPaper(this.canvasId, this.textHeight);
 
         this.cellWidth = drawingApi.cellWidth;
         this.cellHeight = drawingApi.cellHeight;
         this.drawingApi = drawingApi;
 
-        this.updateDomNodeDimensions().then(() => {
-            this.drawingApi.initContext();
-            this.applyCanvasStripes();
-            // TGC.writeTextGrid(gridProps, this.canvasGraphPaper, rtreeApi);
 
-            let gridRegions = TGI.widgetDisplayGridProps.gridRegions(gridProps);
-            let allClasses = TGI.labelSchemas.allLabels(this.labelSchema);
-            let colorMap = _.zipObject(allClasses, colors.HighContrast);
-
-            let rtreeBoxes = _.map(gridRegions, region => {
-                let classes = TGI.gridRegions.labels(region);
-                let cls = classes[classes.length-1];
-                if (region.isLabelKey()) {
-                    let box = region.gridBox;
-                    let label = region.labelIdent;
-                    this.drawingApi.fontWeight = 'bold';
-                    this.drawingApi.fontStyle = 'normal';
-                    this.drawingApi.alpha = 1.0;
-                    this.drawingApi.contextProp = {fillStyle: colorMap[cls]};
-                    this.drawingApi.drawString(box, label);
-                } else if (region.isCell()) {
-                    this.drawingApi.fontWeight = 'bold';
-                    this.drawingApi.fontStyle = 'normal';
-                    this.drawingApi.alpha = 1.0;
-                    this.drawingApi.contextProp = {fillStyle: 'black'};
-                    let ch = region.cell.char.toString();
-                    if (region.cell.char == ' ') {
-                        ch = '░';
-                        this.drawingApi.alpha = 0.4;
-                    }
-
-                    drawingApi.drawChar(
-                        region.gridBox.origin,
-                        ch.toString()
-                    );
-                } else if (region.isLabelCover()) {
-                    this.drawingApi.alpha = 1;
-                    this.drawingApi.contextProp = {fillStyle: 'black'};
-                    this.drawingApi.contextProp = {strokeStyle: 'black'};
-                    let box = region.gridBox;
-                    let bounds = region.bounds;
-
-                    let abbrev = TGI.labelSchemas.abbrevFor(this.labelSchema, cls);
-                    this.drawingApi.drawString(box, abbrev);
-
-                    this.drawingApi.contextProp = {fillStyle: colorMap[cls]};
-                    this.drawingApi.contextProp = {strokeStyle: colorMap[cls]};
-                    this.drawingApi.alpha = 0.8;
-                    let {left, top, right, bottom} = this.scaleLTBounds(bounds);
-                    // let {left, top, right, bottom} = bounds;
-
-                    this.drawingApi.fillBox(box, (ctx) => {
-                        let grd=ctx.createLinearGradient(
-                            left, top, right, bottom
-                        );
-                        grd.addColorStop(0, 'rgb(255, 255, 255, 0.0)');
-                        grd.addColorStop(1, colorMap[cls]);
-                        ctx.fillStyle=grd;
-                    });
-
-                    this.drawingApi.fillBox(box, (ctx) => {
-                        let grd=ctx.createLinearGradient(
-                            left, top, left+3, bottom
-                        );
-                        grd.addColorStop(0, colorMap[cls]);
-                        grd.addColorStop(0.1, 'rgb(255, 255, 255, 0.0)');
-
-                        ctx.fillStyle=grd;
-                    });
-
-
-                } else if (region.isHeading()) {
-                    let box = region.gridBox;
-                    this.drawingApi.fontStyle = 'italic';
-                    this.drawingApi.alpha = 0.3;
-                    this.drawingApi.fontWeight = 'bolder';
-                    // .call(util.initFill, colorMap[cls], 0.4)
-                    this.drawingApi.contextProp = {fillStyle: colorMap[cls]};
-                    this.drawingApi.drawString(box, region.heading);
-                }
-                return this.makeRTreeBox(region);
-            });
-
-            this.reflowRTree = rtree();
-
-            this.reflowRTree.load(rtreeBoxes);
-
-            this.d3$textgridSvg
-                .selectAll(`rect`)
-                .remove();
-
-            _.each(this.reflowRTree.all(), data => {
-                let region = data.region;
-                let bounds = region.bounds;
-                let scaled = this.scaleLTBounds(bounds);
-                let classes = TGI.gridRegions.labels(region);
-
-                let regionType;
-                if (region.isLabelKey()) {
-                    regionType = 'LabelKey';
-                } else if (region.isCell()) {
-                    regionType = 'Cell';
-                } else if (region.isLabelCover()) {
-                    regionType = 'LabelCover';
-                } else if (region.isHeading()) {
-                    regionType = 'Heading';
-                }
-                let cls = classes[classes.length-1];
-
-                this.d3$textgridSvg
-                    .append('rect')
-                    .classed(`${regionType}`, true)
-                    .classed(`${cls}`, true)
-                    .call(util.initRect, () => scaled)
-                    .call(util.initFill, 'yellow', 0.0)
-                ;
-            });
-
-            this.initMouseHandlers();
-
-        });
+        return this.updateDomNodeDimensions()
+            .then(() => this.drawGridShapes())
+            .then(() => this.saveTextGrid());
 
     }
 
@@ -353,18 +425,6 @@ export class ReflowWidget {
         let cellTop = graphCell.y * this.cellHeight;
         return coords.mk.fromLtwh(cellLeft, cellTop, this.cellWidth, this.cellHeight);
     }
-
-    // getGraphBoundsFromBox(cellBox) {
-    //     // Construct a query box that aligns with grid
-    //     let cellLeft = cellCoords.x * this.cellWidth;
-    //     let cellTop = cellCoords.y * this.cellHeight;
-    //     let bounds = coords.mk.fromLtwh(
-    //         cellBox.left*4+1, cellBox.top*4+1,
-    //         ((cellBox.spanRight-1)*4)-1,
-    //         ((cellBox.spanDown-1)*4)-1
-    //     );
-    //     return coords.mk.fromLtwh(cellLeft, cellTop, this.cellWidth, this.cellHeight);
-    // }
 
 
     clientPointToGraphCell(clientPt) {
@@ -404,7 +464,7 @@ export class ReflowWidget {
 
 
     getCellNum(graphCell) {
-        return graphCell.y * this.rowCount + graphCell.x;
+        return graphCell.y * this.colCount + graphCell.x;
     }
 
 
@@ -412,33 +472,50 @@ export class ReflowWidget {
     initMouseHandlers() {
         let widget = this;
         widget.hoverCell = null;
+        printToInfobar(2, `dim`, `${this.colCount}x${this.rowCount}`);
 
         this.d3$textgridSvg.on("mousemove", function() {
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
-            let graphCell = widget.clientPointToGraphCell(userPt);
-            let cellContent = widget.getCellContent(graphCell);
+            let focalGraphCell = widget.clientPointToGraphCell(userPt);
+            let cellContent = widget.getCellContent(focalGraphCell);
 
-            graphCell.id = widget.getCellNum(graphCell);
+            printToInfobar(0, `@client`, ` (${userPt.x}, ${userPt.y})`);
+
+            focalGraphCell.id = widget.getCellNum(focalGraphCell);
+            printToInfobar(1, '@dispcell', ` (${focalGraphCell.x}, ${focalGraphCell.y}) #${focalGraphCell.id}`);
 
             if (widget.hoverCell != null) {
-                if (graphCell.id != widget.hoverCell.id) {
-                    widget.hoverCell = graphCell;
-                    widget.updateCellHoverHighlight(graphCell);
+                if (focalGraphCell.id != widget.hoverCell.id) {
+                    widget.hoverCell = focalGraphCell;
+                    widget.updateCellHoverHighlight(focalGraphCell);
                 }
             } else {
-                widget.hoverCell = graphCell;
-                widget.updateCellHoverHighlight(graphCell);
+                widget.hoverCell = focalGraphCell;
+                widget.updateCellHoverHighlight(focalGraphCell);
             }
 
             if (cellContent) {
-                if (cellContent.region.isCell()) {
+                let focalBox = GraphPaper.boundsToBox(LTBounds.FromInts(
+                    cellContent.region.bounds.left,
+                    cellContent.region.bounds.top,
+                    cellContent.region.bounds.width,
+                    cellContent.region.bounds.height
+                ));
+                if (cellContent.region.isCells()) {
+                    let row = cellContent.region.row;
+                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                    let col = focalCellIndex;
+                    printToInfobar(3, '@gridcell', ` (${row}, ${col})`);
                     // let pins = c.region['cell$1'];
                     // console.log(pins.showPinsVert().toString());
+                } else {
+                    printToInfobar(3, '@gridcell', ` --`);
                 }
                 widget.showLabelHighlights(cellContent);
             } else {
                 widget.clearLabelHighlights();
+                printToInfobar(3, '@gridcell', ` --`);
             }
 
         });
@@ -447,75 +524,77 @@ export class ReflowWidget {
             let mouseEvent = d3.event;
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
-            let graphCell = widget.clientPointToGraphCell(userPt);
-            let cellContent = widget.getCellContent(graphCell);
+            let focalGraphCell = widget.clientPointToGraphCell(userPt);
+            let cellContent = widget.getCellContent(focalGraphCell);
 
-            if (cellContent && cellContent.region.isLabelCover()) {
 
-                let classes = TGI.gridRegions.labels(cellContent.region);
-                // let focalBox = GraphPaper.boundsToBox(cellContent.region.bounds);
-                // let focalBox = widget.graph4x4BoundsToGraphBox(cellContent.region.bounds);
+            if (cellContent) {
+
+                let focalLabels = TGI.gridRegions.labels(cellContent.region);
                 let focalBox = GraphPaper.boundsToBox(LTBounds.FromInts(
                     cellContent.region.bounds.left,
                     cellContent.region.bounds.top,
                     cellContent.region.bounds.width,
                     cellContent.region.bounds.height
                 ));
-                let boxRight = focalBox.shiftOrigin(2, 0);
-                let contentRight = widget.getBoxContent(boxRight);
-                let rightLabelCovers = _.filter(contentRight, c => c.region.isLabelCover());
-                // console.log('contentRight', contentRight);
-                if (rightLabelCovers.length == 0) {
 
-                    let queryRight = boxRight.modifySpan(widget.colCount, 0);
-                    let rightContents = widget.getBoxContent(queryRight);
-                    let rightCells0 = _.filter(rightContents, c => c.region.isCell());
+                if (cellContent.region.isLabelCover()) {
 
-                    let rightCells = _.map(rightCells0, r => r.region);
-                    let region0 = _.head(rightCells);
-                    widget.textGrid.unlabelNear(region0.row, region0.col, Labels.forString(classes[0]));
-                    widget.saveTextGrid();
-                    widget.redrawAll();
+                    let boxRight = focalBox.shiftOrigin(2, 0);
+                    let contentRight = widget.getBoxContent(boxRight);
+                    let rightLabelCovers = _.filter(contentRight, c => c.region.isLabelCover());
+                    // console.log('contentRight', contentRight);
+                    if (rightLabelCovers.length == 0) {
 
+                        let queryRight = boxRight.modifySpan(widget.colCount, 0);
+                        let rightContents = widget.getBoxContent(queryRight);
+                        let rightCells0 = _.filter(rightContents, c => c.region.isCells());
+
+                        let rightCells = _.map(rightCells0, r => r.region);
+                        let region0 = _.head(rightCells);
+                        widget.textGrid.unlabelNear(region0.row, 0, Labels.forString(focalLabels[0]));
+                        widget.redrawAll();
+
+                    }
+
+                } else if (cellContent.region.isCells()) {
+                    let row = cellContent.region.row;
+                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                    let col = focalCellIndex;
+
+                    printToInfobar(3, 'grid cell', `(${row}, ${col})`);
+
+                    if (mouseEvent.shiftKey) {
+                        let maybeGrid = widget.textGrid.slurp(row);
+                        let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
+                        widget.textGrid = newGrid;
+
+                        widget.redrawAll();
+                    } else if (mouseEvent.ctrlKey) {
+                        let maybeGrid = widget.textGrid.split(row, col);
+                        let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
+                        widget.textGrid = newGrid;
+
+                        widget.redrawAll();
+                    } else {
+
+                        let focalClasses = TGI.gridRegions.labels(cellContent.region);
+                        let focalLabel = _.last(focalClasses) || '';
+                        let childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
+                        lbl.createLabelChoiceWidget(childLabels, widget.containerId)
+                            .then(choice => {
+                                let labelChoice = choice.selectedLabel;
+                                widget.textGrid.labelRow(row, Labels.forString(labelChoice));
+                                widget.redrawAll();
+                            })
+                            .catch(err => {
+                                console.log('err', err);
+                            }) ;
+
+                    }
                 }
-
             }
-
-            if (cellContent && cellContent.region.isCell()) {
-                let row = cellContent.region.row;
-                let col = cellContent.region.col;
-
-                if (mouseEvent.shiftKey) {
-                    let maybeGrid = widget.textGrid.slurp(row);
-                    let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
-                    widget.textGrid = newGrid;
-
-                    widget.redrawAll();
-                } else if (mouseEvent.ctrlKey) {
-                    let maybeGrid = widget.textGrid.split(row, col);
-                    let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
-                    widget.textGrid = newGrid;
-
-                    widget.redrawAll();
-                } else {
-
-                    let focalClasses = TGI.gridRegions.labels(cellContent.region);
-                    let focalLabel = _.last(focalClasses) || '';
-                    let childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
-                    lbl.createLabelChoiceWidget(childLabels, widget.containerId)
-                        .then(choice => {
-                            let labelChoice = choice.selectedLabel;
-                            widget.textGrid.labelRow(row, Labels.forString(labelChoice));
-                            widget.redrawAll();
-                        })
-                        .catch(err => {
-                            console.log('err', err);
-                        }) ;
-
-                }
-            }})
-        ;
-
+        }) ;
     }
 
     updateCellHoverHighlight(hoverGraphCell) {
@@ -563,3 +642,158 @@ export class ReflowWidget {
 
     }
 }
+
+
+
+
+
+
+    // drawGridShapesVer2() {
+    //     let gridProps = this.gridProps;
+
+    //     this.drawingApi.applyCanvasStripes();
+
+    //     let gridRegions = TGI.widgetDisplayGridProps.gridRegions(gridProps);
+    //     let allClasses = TGI.labelSchemas.allLabels(this.labelSchema);
+    //     let colorMap = _.zipObject(allClasses, colors.HighContrast);
+
+    //     let rtreeBoxes = _.map(gridRegions, region => {
+    //         let classes = TGI.gridRegions.labels(region);
+    //         let cls = classes[classes.length-1];
+    //         let box = region.gridBox;
+    //         let bounds = region.bounds;
+    //         let {left, top, width, height} = this.scaleLTBounds(bounds);
+    //         if (region.isLabelKey()) {
+    //             let label = region.labelIdent;
+    //             let text = new fabric.Text(label, {
+    //                 objectCaching: false,
+    //                 left: left, top: top,
+    //                 fontSize: 20,
+    //                 fontStyle: 'normal',
+    //                 fontFamily: 'Courier New',
+    //                 fontWeight: 'bold',
+    //                 textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.5).toRgba()
+    //             });
+    //             this.drawingApi.fabricCanvas.add(text);
+
+
+    //         } else if (region.isCells()) {
+    //             let cells = JsArray.fromScala(region.cells);
+    //             let cellStr = _.map(cells, c => {
+    //                 let ch = c.char.toString();
+    //                 if (ch == ' ') {ch = '░';}
+    //                 return ch;
+    //             }).join('');
+
+
+    //             let text = new fabric.Text(cellStr, {
+    //                 objectCaching: false,
+    //                 left: left, top: top,
+    //                 fontSize: 20,
+    //                 fontStyle: 'normal',
+    //                 fontFamily: 'Courier New'
+    //                 // fontWeight: 'bold',
+    //                 // textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.5).toRgba()
+    //             });
+    //             this.drawingApi.fabricCanvas.add(text);
+
+    //         } else if (region.isLabelCover()) {
+
+    //             this.drawingApi.fillBox(box, (rect) => {
+    //                 rect.setGradient('fill', {
+    //                     x1: 0, y1: 0,
+    //                     x2: 0, y2: height,
+    //                     colorStops: {
+    //                         0:  new fabric.Color('rgb(255, 255, 255').setAlpha(0).toRgba(),
+    //                         0.6:  new fabric.Color('rgb(255, 255, 255').setAlpha(0.1).toRgba(),
+    //                         1:  new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba()
+    //                     }
+    //                 });
+    //             });
+
+    //             this.drawingApi.fillBox(box, (rect) => {
+    //                 rect.setGradient('fill', {
+    //                     x1: 0, y1: 0,
+    //                     x2: 0, y2: height,
+    //                     colorStops: {
+    //                         0:  new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba(),
+    //                         0.2: new fabric.Color('rgb(255, 255, 255').setAlpha(0).toRgba()
+    //                     }
+    //                 });
+    //             });
+
+    //             let abbrev = TGI.labelSchemas.abbrevFor(this.labelSchema, cls);
+    //             let text = new fabric.Text(abbrev, {
+    //                 objectCaching: false,
+    //                 left: left, top: top,
+    //                 fontSize: 20,
+    //                 fontStyle: 'normal',
+    //                 fontFamily: 'Courier New',
+    //                 fontWeight: 'bolder',
+    //                 fill: 'black',
+    //                 // textBackgroundColor: new fabric.Color(colorMap[cls]).toRgb(),
+    //                 underline: true
+    //                 // linethrough: '',
+    //                 // overline: ''
+    //             });
+
+    //             this.drawingApi.fabricCanvas.add(text);
+
+    //         } else if (region.isHeading()) {
+    //             let text = new fabric.Text(region.heading, {
+    //                 objectCaching: false,
+    //                 left: left, top: top,
+    //                 fontSize: 20,
+    //                 fontStyle: 'italic',
+    //                 fontFamily: 'Courier New',
+    //                 fontWeight: 'bolder',
+    //                 textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.2).toRgba()
+    //                 // underline: '',
+    //                 // linethrough: '',
+    //                 // overline: ''
+    //             });
+    //             this.drawingApi.fabricCanvas.add(text);
+    //         }
+    //         return this.makeRTreeBox(region);
+    //     });
+
+    //     this.drawingApi.fabricCanvas.renderAll();
+
+    //     this.reflowRTree = rtree();
+
+    //     this.reflowRTree.load(rtreeBoxes);
+
+    //     this.d3$textgridSvg
+    //         .selectAll(`rect`)
+    //         .remove();
+
+    //     _.each(this.reflowRTree.all(), data => {
+    //         let region = data.region;
+    //         let bounds = region.bounds;
+    //         let scaled = this.scaleLTBounds(bounds);
+    //         let classes = TGI.gridRegions.labels(region);
+
+    //         let regionType;
+    //         if (region.isLabelKey()) {
+    //             regionType = 'LabelKey';
+    //         } else if (region.isCells()) {
+    //             regionType = 'Cell';
+    //         } else if (region.isLabelCover()) {
+    //             regionType = 'LabelCover';
+    //         } else if (region.isHeading()) {
+    //             regionType = 'Heading';
+    //         }
+    //         let cls = classes[classes.length-1];
+
+    //         this.d3$textgridSvg
+    //             .append('rect')
+    //             .classed(`${regionType}`, true)
+    //             .classed(`${cls}`, true)
+    //             .call(util.initRect, () => scaled)
+    //             .call(util.initFill, 'yellow', 0.0)
+    //         ;
+    //     });
+
+    //     this.initMouseHandlers();
+
+    // }

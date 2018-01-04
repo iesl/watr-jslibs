@@ -1,6 +1,5 @@
 /* global require location _ d3 */
 
-import * as util from './commons.js';
 import * as colors from './colors';
 
 export let d3select = {
@@ -23,7 +22,7 @@ export let d3select = {
 
 export function selectShapes(dataBlock) {
     return d3select.allSvgs().selectAll(".shape")
-        .data(dataBlock.shapes, util.getId) ;
+        .data(dataBlock.shapes, getId) ;
 }
 
 

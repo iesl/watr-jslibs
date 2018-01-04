@@ -2,51 +2,44 @@
  *
  **/
 
-/* global require _ */
+/* global require _ fabric */
 
 import * as coords from './coord-sys.js';
+import * as colors from './colors';
 
 export class DrawingApi {
     constructor (canvasId, fontSize) {
         this.canvasId = canvasId;
         this.gridCanvas = document.getElementById(this.canvasId);
         this.fontSize = fontSize;
+        this.fabricCanvas = new fabric.StaticCanvas(canvasId, {
+            renderOnAddRemove: false
+        });
         this.fontProps = {
             style: 'normal',
             weight: 'normal',
             size: '20'
         };
-        this.contextProps = {
-            globalAlpha            : 1.0,
-            strokeStyle            : 'blue',
-            fillStyle              : 'blue',
-            // lineWidth                :  ctx.lineWidth;
-            // lineCap                  :  ctx.lineCap;
-            // lineJoin                 :  ctx.lineJoin;
-            // miterLimit               :  ctx.miterLimit;
-            // lineDashOffset           :  ctx.lineDashOffset;
-            // shadowOffsetX            :  ctx.shadowOffsetX;
-            // shadowOffsetY            :  ctx.shadowOffsetY;
-            // shadowBlur               :  ctx.shadowBlur;
-            // shadowColor              :  ctx.shadowColor;
-            // globalCompositeOperation :  ctx.globalCompositeOperation;
-            textAlign                : 'bottom'
-            // textBaseline             :  ctx.textBaseline;
-            // direction                :  ctx.direction;
-            // imageSmoothingEnabled    :  ctx.imageSmoothingEnabled;
-
-        };
-        this.makeFontFace({size: fontSize});
-        let context = this.initContext();
+        let fontFace = this.makeFontFace({size: fontSize});
+        let context = this.fabricCanvas.getContext();
+        context.font = fontFace;
         this._cellWidth = context.measureText('A').width;
         this._cellHeight = this.fontSize+4;
+        // console.log('cellWidth', this.cellWidth);
+        // console.log('cellHeight', this.cellHeight);
+    }
+    setDimensions(w, h, cols, rows) {
+        this.rowCount = rows;
+        this.colCount = cols;
+        this.fabricCanvas.setDimensions(w, h);
     }
 
     initContext() {
-        let context = this.gridCanvas.getContext('2d');
-        context.font = this.fontFace;
-        Object.assign(context, this.contextProps);
-        return context;
+        // let context = this.gridCanvas.getContext('2d');
+        // context.font = this.fontFace;
+        // Object.assign(context, this.contextProps);
+        // return context;
+        return this.fabricCanvas.getContext();
     }
 
     //  |------------+--------------+-------------+-----------+-------------+-------------|
@@ -60,15 +53,15 @@ export class DrawingApi {
     //  |------------+--------------+-------------+-----------+-------------+-------------|
     makeFontFace() {
         let p = this.fontProps;
-        this.fontFace = `${p.style} normal ${p.weight} ${p.size}px Courier New`;
+        return `${p.style} normal ${p.weight} ${p.size}px Courier New`;
     }
 
     set contextProp(p) {
-        Object.assign(this.contextProps, p);
+        // Object.assign(this.contextProps, p);
     }
 
     set alpha(w) {
-        this.contextProps.globalAlpha = w;
+        // this.contextProps.globalAlpha = w;
     }
 
     set fontWeight(w) {
@@ -86,7 +79,9 @@ export class DrawingApi {
     get cellHeight   () { return this._cellHeight; }
 
     get context2d    () {
-        return this.initContext();
+        return this.fabricCanvas.getContext();
+        // return this.context;
+        // return this.initContext();
     }
 
     cellToBounds(cell) {
@@ -106,35 +101,50 @@ export class DrawingApi {
         return coords.mk.fromLtwh(x, y, w, h);
     }
 
-    drawString(cell, str) {
-        _.each(_.range(0, str.length), i => {
-            let shifted = cell.shiftOrigin(i, 0);
-            this.drawChar(shifted.origin, str.charAt(i));
+    drawString(box, str) {
+        let {left, top, width, height} = this.cellToBounds(box.origin);
+        let text = new fabric.Text(str, {
+            objectCaching: false,
+            left: left, top: top,
+            fontSize: 20,
+            fontStyle: 'normal',
+            fontFamily: 'Courier New'
         });
+        this.fabricCanvas.add(text);
     }
 
     drawChar(cell, char) {
         let {left, top, width, height} = this.cellToBounds(cell);
-        this.context2d.fillStyle = 'black';
-        this.context2d.fillText(char, left, top+height);
-
+        // this.context2d.fillStyle = 'black';
+        // this.context2d.fillText(char, left, top+height);
+        let text = new fabric.Text(char, {
+            objectCaching: false,
+            left: left, top: top,
+            fontSize: 20,
+            fontStyle: 'normal',
+            fontFamily: 'Courier New'
+        });
+        this.fabricCanvas.add(text);
     }
 
     drawBox(box, border) {
-        let {left, top, width, height} = this.boxToBounds(box);
-        this.context2d.rect(left, top, width, height);
-        this.context2d.stroke();
+        // let {left, top, width, height} = this.boxToBounds(box);
+        let bounds = this.boxToBounds(box);
+
+        var rect = new fabric.Rect(bounds);
+        this.fabricCanvas.add(rect);
+        // this.context2d.rect(left, top, width, height);
+        // this.context2d.stroke();
     }
 
     fillBox(box, modCtx) {
-        let currProps = this.contextProps;
-        let ctx = this.context2d;
-        if (modCtx !== undefined) {
-            modCtx(this.context2d);
-        }
-        let {left, top, width, height} = this.boxToBounds(box);
-        ctx.fillRect(left, top, width, height);
-        this.contextProps = currProps;
+        let bounds = this.boxToBounds(box);
+        var rect = new fabric.Rect(bounds, {
+            objectCaching: false
+        });
+        modCtx(rect);
+
+        this.fabricCanvas.add(rect);
     }
 
     applyBgColor(x, y, color) {
@@ -147,5 +157,31 @@ export class DrawingApi {
     }
     gradientHorizontal(box) {
         console.log('gradientHorizontal');
+    }
+
+    applyCanvasStripes() {
+        let rowWidth = this.cellWidth * (this.colCount+8);
+        _.each(_.range(this.rowCount+10), row => {
+            let rtop = row * this.cellHeight;
+            let h = this.cellHeight;
+            var rect = new fabric.Rect({
+                left: 0,
+                top: rtop,
+                width: rowWidth,
+                height: h
+            });
+            rect.setGradient('fill', {
+                x1: 0,
+                y1: 0,
+                x2: 0, y2: h,
+                colorStops: {
+                    0 : colors.Color.GhostWhite,
+                    0.9: colors.Color.Linen,
+                    1: colors.Color.Cornsilk
+                }
+            });
+
+            this.fabricCanvas.add(rect);
+        });
     }
 }

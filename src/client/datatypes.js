@@ -6,6 +6,21 @@
 
 import * as coords from './coord-sys.js';
 
+/**
+ *
+ *
+ * GridData   :: { rows: [Row] }
+ * Row        :: [Cell]
+ * Cell       :: {bio: [], g: G, gridDataPt: GridDataPt}
+ *             | {bio: [], i: I, gridDataPt}
+ * G          :: [charloc,..... ]
+ * I          :: charloc
+ * Charloc    :: ['c', 0, bbox]
+ * Bbox       ::[l, t, w, h]
+ * GridDataPt ::
+ *
+ */
+
 class Assignment {
     constructor (workflow, zonelock, zone) {
         this.workflow = workflow;
@@ -111,3 +126,4 @@ export function pageRegionFromJson(jsonRep, zoneId) {
     );
 
 }
+
