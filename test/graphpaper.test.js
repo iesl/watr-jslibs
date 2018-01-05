@@ -13,8 +13,9 @@ describe('ReflowWidget', function() {
     });
 
     it('should render', function() {
-        let ReflowWidget = require('./../src/client/ReflowWidget.js');
-        let Shared = require('./../src/client/shared-state.js');
+        let ReflowWidget = require('./../src/client/lib/ReflowWidget.js');
+        ReflowWidget.DEV_MODE = true;
+        let Shared = require('./../src/client/lib/shared-state.js');
 
         Shared.initGlobalMouseTracking();
         let textGridConstruction = new watr.textgrid.TextGridConstructor();

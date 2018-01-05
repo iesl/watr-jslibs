@@ -1,9 +1,9 @@
 
 /* global $ */
 
-import * as frame from './frame.js';
+import * as frame from '../lib/frame.js';
 
-import '../style/browse.less';
+import '../../style/browse.less';
 
 export function runMain() {
     let loginDiv = $('#login-forms').detach();

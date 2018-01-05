@@ -11,8 +11,10 @@ const extractLess = new ExtractTextPlugin({
 });
 
 const config = {
+    // context: path.resolve(__dirname, "app"),
+
     entry: {
-        app: './src/client/app-main.js'
+        app: './src/client/page/app-main.js'
     },
 
     devtool: 'inline-source-map',
@@ -46,7 +48,13 @@ const config = {
     plugins: [
         extractLess
         // jQueryProvider
-    ]
+    ],
+
+    devServer: {
+        contentBase: path.join(__dirname, "dist"),
+        compress: true,
+        port: 9000
+}
 };
 
 module.exports = config;

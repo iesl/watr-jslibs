@@ -4,9 +4,10 @@
 
 /* global $ _ */
 
-import * as frame from './frame.js';
-import {t, htm} from './jstags.js';
-import * as server from './serverApi.js';
+import * as frame from '../lib/frame.js';
+import {t, htm} from '../lib/jstags.js';
+import * as server from '../lib/serverApi.js';
+
 
 function curationUri(path) {
     return server.apiUri(`workflow/${path}`);

@@ -3,28 +3,28 @@
  **/
 /* global $ _ d3 */
 
-import * as util from  './commons.js';
-import * as frame from './frame.js';
-import {shared} from './shared-state';
-import * as global from './shared-state';
-import * as server from './serverApi.js';
-import * as panes from  './splitpane-utils.js';
-import * as rtrees from  './rtrees.js';
-import {$id} from './jstags.js';
+import * as util from  '../lib/commons.js';
+import * as frame from '../lib/frame.js';
+import {shared} from '../lib/shared-state';
+import * as global from '../lib/shared-state';
+import * as server from '../lib/serverApi.js';
+import * as panes from  '../lib/splitpane-utils.js';
+import * as rtrees from  '../lib/rtrees.js';
+import {$id} from '../lib/jstags.js';
 
 import * as curate from './curate-main.js';
-import * as dt from './datatypes';
+import * as dt from '../lib/datatypes';
 
-import '../style/split-pane.css';
-import '../style/pretty-split-pane.css';
-import '../style/selection.css';
+import '../../style/split-pane.css';
+import '../../style/pretty-split-pane.css';
+import '../../style/selection.css';
 
-import '../style/annot.less';
+import '../../style/annot.less';
 
-import {t, htm} from './jstags.js';
+import {t, htm} from '../lib/jstags.js';
 
-import * as pageview from  './view-pdf-pages.js';
-import * as textview from  './view-pdf-text.js';
+import * as pageview from '../lib/view-pdf-pages.js';
+import * as textview from '../lib/view-pdf-text.js';
 
 function setupFrameLayout() {
 

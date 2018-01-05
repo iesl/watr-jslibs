@@ -1,5 +1,5 @@
 {
-  "name": "segvis",
+  "name": "WatrColorClient",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
@@ -15,6 +15,7 @@
   "devDependencies": {
     "css-loader": "^0.28.7",
     "d3": "^4.12.2",
+    "express": "^4.16.2",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^1.1.5",
     "form-serializer": "^2.5.0",
@@ -29,17 +30,28 @@
     "karma-json-fixtures-preprocessor": "0.0.6",
     "karma-mocha-reporter": "^2.2.5",
     "karma-webpack": "^2.0.9",
+    "koa": "^2.4.1",
+    "koa-body": "^2.5.0",
+    "koa-bodyparser": "^4.2.0",
+    "koa-ejs": "^4.1.0",
+    "koa-json": "^2.0.2",
+    "koa-router": "^7.3.0",
+    "koa-send": "^4.1.2",
     "less-loader": "^4.0.5",
     "requirejs": "^2.3.5",
     "rxjs": "^5.5.6",
     "style-loader": "^0.19.0",
     "url-loader": "^0.6.2",
-    "webpack": "^3.8.1"
+    "webpack": "^3.8.1",
+    "webpack-dev-middleware": "^2.0.3",
+    "webpack-dev-server": "^2.9.7"
   },
   "scripts": {
     "build": "webpack",
     "build-v": "webpack --display-modules",
     "watch": "webpack --watch",
-    "karma": "karma start karma.conf.js"
+    "karma": "karma start karma.conf.js",
+    "start": "webpack-dev-server --open",
+    "serve": "node src/server/main.js --corpus /dev/null"
   }
 }

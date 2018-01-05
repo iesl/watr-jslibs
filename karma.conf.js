@@ -28,13 +28,13 @@ module.exports = function(config) {
             {pattern: 'node_modules/fabric/dist/fabric.js', watched:false, served:true, included:true, nocache:false},
             {pattern: 'node_modules/form-serializer/dist/jquery.serialize-object.min.js', watched:false, served:true, included:true, nocache:false},
 
-            {pattern: 'dist/app.css', watched:true, served:true, included:false, nocache:true},
-            {pattern: 'dist/app.bundle.js', watched:true, served:false, included:false, nocache:true},
-            {pattern: 'src/client/*.js', watched:false,   served:false, included:false, nocache:false},
-            {pattern: 'test/*.js',       watched:true,   served:true,  included:true},
-            {pattern: 'test/*.html',     watched:true,   served:true,  included:true},
-            {pattern: watrmarksLib,      watched:true,   served:true,  included:true},
-            {pattern: watrmarksSrcMap,   watched:false,   served:true,  included:false}
+            {pattern: 'dist/app.css',         watched:true,  served:true,  included:false, nocache:true},
+            {pattern: 'dist/app.bundle.js',   watched:true,  served:false, included:false, nocache:true},
+            {pattern: 'src/client/**/*.js',   watched:false, served:false, included:false, nocache:false},
+            {pattern: 'test/*.js',            watched:true,  served:true,  included:true},
+            {pattern: 'test/*.html',          watched:true,  served:true,  included:true},
+            {pattern: watrmarksLib,           watched:true,  served:true,  included:true},
+            {pattern: watrmarksSrcMap,        watched:false, served:true,  included:false}
 
             // assets
             //    {pattern: '*.html', watched:true, served:true, included:false}

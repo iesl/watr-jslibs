@@ -23,7 +23,8 @@ import * as textview from  './view-pdf-text.js';
 import { shared } from './shared-state';
 import * as global from './shared-state';
 
-import '../style/view-pdf-text.less';
+import '../../style/view-pdf-text.less';
+
 
 function defaultModeMouseHandlers(d3$svg, pageNum) {
     d3$svg.on("mousedown", function() {

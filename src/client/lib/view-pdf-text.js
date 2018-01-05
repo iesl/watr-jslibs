@@ -13,7 +13,7 @@ import * as util from  './commons.js';
 import * as pageview from  './view-pdf-pages.js';
 import {t} from './jstags.js';
 
-import '../style/view-pdf-text.less';
+import '../../style/view-pdf-text.less';
 
 import { shared } from './shared-state';
 

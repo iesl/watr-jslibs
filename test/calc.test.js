@@ -4,7 +4,7 @@
 
 /* global require beforeEach afterEach fixture expect describe it */
 
-let calc = require('./../src/client/calc.js');
+let calc = require('./../src/client/attic/calc.js');
 
 
 describe('Calculator', function() {

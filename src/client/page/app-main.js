@@ -3,27 +3,12 @@
  **/
 
 import * as annot from  './annot-main.js';
-import * as browse from  './browse-main.js';
+import * as browse from './browse-main.js';
 import * as login from  './login-main.js';
-import * as curate from  './curate-main.js';
-import {shared} from './shared-state';
-
+import * as curate from './curate-main.js';
+import {shared} from '../lib/shared-state';
 
 function dispatch() {
-    // let TB = watr.TextBoxing;
-
-    // console.log('TextBoxing', TB);
-    // console.log('TextBoxing', TB.tbox('sdf'));
-    // let a = TB.tbox('this is some text').atop(
-    //     TB.tbox('some other text').atop(
-    //         TB.tbox('--------------------')
-    //     )
-    // );
-
-    // let b = a.beside(a);
-    // console.log(a);
-    // console.log(a.toString());
-    // console.log(b.toString());
 
     let path = window.location.pathname;
     let root = path.split("/")[1];

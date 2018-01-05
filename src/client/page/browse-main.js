@@ -1,14 +1,14 @@
 
 /* global _ $ Rx */
 // import  * as _ from  'lodash';
-import * as frame from './frame.js';
-import {t, icon} from './jstags.js';
+import * as frame from '../lib/frame.js';
+import {t, icon} from '../lib/jstags.js';
 // import  * as $ from 'jquery';
 
 // import  * as Rx from 'rxjs/Rx';
-import * as server from './serverApi.js';
+import * as server from '../lib/serverApi.js';
 
-import '../style/browse.less';
+import '../../style/browse.less';
 let pageLen = 20;
 
 function createEntryItem(entry) {
