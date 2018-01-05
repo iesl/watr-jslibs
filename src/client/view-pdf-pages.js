@@ -149,8 +149,6 @@ function toggleLabelSelection(pageNum, clickedItems) {
     global.setSelections(nonintersectingItems);
 }
 
-
-
 function displayLabelHovers(pageNum, hoverPt) {
     let queryBox = coords.mk.fromLtwh(hoverPt.x, hoverPt.y, 1, 1);
 
@@ -249,9 +247,6 @@ function createImageLabelingPanel(userSelection, mbrSelection, page) {
     lbl.createHeaderLabelUI(mbrSelection, page);
 
 }
-
-
-
 
 function setupStatusBar(statusBarId) {
 

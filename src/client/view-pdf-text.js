@@ -163,53 +163,20 @@ function showSelectionHighlight(d3$textgridSvg, selections) {
 }
 
 
-// Setup keyboard watcher
-// function initKeyboardHandlers() {
-//     function rebind(domNode) {
-//         keyboardJS.reset();
-//         keyboardJS.watch(domNode);
-//         keyboardJS.bind('a', function(kdownEvent) {
-//             console.log('kdown', kdownEvent);
-//             kdownEvent.preventRepeat();
-//         }, function(kupEvent) {
-//         });
-
-//     }
-
-//     $('svg.textgrid').each(function() {
-//         console.log('watch', this);
-//         $(this)
-//             .on("mouseover", () => rebind(this))
-//             .on("mouseout", () => keyboardJS.watch())
-//         ;
-//     });
-
-// }
-
-
 export function textgridSvgHandlers(d3$textgridSvg) {
     let pageNum = parseInt(d3$textgridSvg.attr('page'));
     let reticleGroup = initHoverReticles(d3$textgridSvg);
 
     let neighborHits = [];
-    let gridSelection = [];
-    let selectionStartId = undefined;
-    let selectionEndId = undefined;
 
     d3$textgridSvg
         .on("mouseover", function() {
             reticleGroup.attr("opacity", 0.4);
 
-            // Set statusbar page num
         })
         .on("mouseout", function() {
-            // remove key handlers
-            // clear statusbar
-
             reticleGroup.attr("opacity", 0);
-
             d3.selectAll('.textloc').remove();
-
         });
 
     d3$textgridSvg.on("mousedown",  function() {
@@ -221,31 +188,8 @@ export function textgridSvgHandlers(d3$textgridSvg) {
             let firstHit = neighborHits[neighborHits.length-1];
 
             syncScrollPageImageToTextClick(clientPt, firstHit);
-
-            // if (mouseEvent.shiftKey) {
-            //     // Start text selection
-            //     selectionEndId = selectionStartId = parseInt(firstHit.id);
-            // }
         }})
-        .on("mouseup", function() {
-            // if (selectionStartId !== undefined) {
-            //     console.log('gridSelection', gridSelection);
-
-            //     let gridDataPts = _.map(gridSelection, pt => pt.locus);
-
-            //     gridSelection = [];
-            //     selectionStartId = undefined;
-            //     selectionEndId = undefined;
-            //     d3$textgridSvg
-            //         .selectAll("rect.glyph-selection")
-            //         .remove() ;
-
-
-            //     lbl.createTextGridLabeler(gridDataPts);
-
-            // }
-
-        })
+        .on("mouseup", function() {})
         .on("mousemove", function() {
             let textgridRTree = shared.textgridRTrees[pageNum] ;
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
@@ -261,27 +205,6 @@ export function textgridSvgHandlers(d3$textgridSvg) {
                 _.filter(hits, hit => hit.glyphDataPt != undefined),
                 hit => [hit.bottom, hit.left]
             );
-
-            // console.log('neighborHits', neighborHits);
-
-            // if (selectionStartId) {
-            //     let selectQuery = coords.mk.fromLtwh(userPt.x, userPt.y, 1, 1);
-            //     let selectHits = textgridRTree.search(selectQuery);
-
-            //     let hitId = selectHits[0] ? parseInt(selectHits[0].id) : undefined;
-            //     if (selectHits.length>0 && selectionEndId != hitId) {
-            //         selectionEndId = hitId;
-            //         if (selectionStartId <= selectionEndId) {
-            //             gridSelection = shared.dataPts[pageNum].slice(selectionStartId, selectionEndId+1);
-            //         } else {
-            //             gridSelection = shared.dataPts[pageNum].slice(selectionEndId, selectionStartId);
-            //         }
-
-            //         showSelectionHighlight(d3$textgridSvg, gridSelection);
-            //     }
-            // } else if (neighborHits.length > 0) {
-            //     showGlyphHoverReticles(d3$textgridSvg, queryBox, neighborHits);
-            // }
 
             showGlyphHoverReticles(d3$textgridSvg, queryBox, neighborHits);
         })
@@ -322,5 +245,4 @@ export function setupPageTextGrids(contentId, textgrids) {
 
     });
 
-    // initKeyboardHandlers();
 }

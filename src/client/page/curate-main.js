@@ -63,7 +63,7 @@ export function assignmentButton(workflowSlug) {
     return $button;
 }
 
-function newWorkflowForm() {
+function newCurationWorkflowDef() {
     let $form = t.div([
         t.form([
             t.div([
@@ -104,7 +104,7 @@ function newWorkflowForm() {
 
 function updateWorkflowList() {
     $('#new-workflow-form').empty();
-    $('#new-workflow-form').append(newWorkflowForm());
+    $('#new-workflow-form').append(newCurationWorkflowDef());
 
     $('#workflows').empty();
 

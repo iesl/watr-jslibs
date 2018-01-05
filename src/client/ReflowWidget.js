@@ -27,6 +27,8 @@ const TGC = TGCC.create();
 let TextGridCompanion = watr.textgrid.TextGrid.Companion;
 const TGI = watr.textgrid.TextGridInterop;
 
+let DEV_MODE = false;
+
 function printToInfobar(slot, label, value) {
     $(`#slot-label-${slot}`).text(label);
     $(`#slot-value-${slot}`).text(value);
@@ -41,6 +43,8 @@ export function unshowGrid() {
 }
 
 export function showGrid(textGridDef) {
+    unshowGrid();
+
     let {textGrid, zoneId, zoneLabel} = textGridDef;
     let labelSchema = TGC.getTestLabelSchema();
     let reflowWidget = new ReflowWidget('reflow-controls', textGrid, labelSchema, zoneId, zoneLabel);
@@ -234,7 +238,13 @@ export class ReflowWidget {
             }
         };
 
-        // return server.apiPost(server.apiUri(`labeling/zones/${this.zoneId}`), postData);
+        if (DEV_MODE) {
+            return {};
+        } else {
+            return server.apiPost(server.apiUri(`labeling/zones/${this.zoneId}`), postData)
+                .then(() => lbl.updateAnnotationShapes()) ;
+
+        }
     }
 
     makeRTreeBox(region) {
@@ -279,12 +289,14 @@ export class ReflowWidget {
 
             } else if (region.isCells()) {
                 let cells = JsArray.fromScala(region.cells);
-                let cellStr = _.map(cells, c => {
-                    let ch = c.char.toString();
-                    if (ch == ' ') {ch = '░';}
-                    return ch;
-                }).join('');
-
+                let cellChrs = _.map(cells, c => c.char.toString());
+                if (cellChrs[0] == ' ') {
+                    cellChrs[0] = '░';
+                }
+                if (cellChrs[cellChrs.length-1] == ' ') {
+                    cellChrs[cellChrs.length-1] = '░';
+                }
+                let cellStr = cellChrs.join('');
 
                 let text = new fabric.Text(cellStr, {
                     objectCaching: false,
@@ -476,11 +488,13 @@ export class ReflowWidget {
 
         this.d3$textgridSvg.on("mousemove", function() {
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
+            let clientX = Math.floor(userPt.x);
+            let clientY = Math.floor(userPt.y);
 
             let focalGraphCell = widget.clientPointToGraphCell(userPt);
             let cellContent = widget.getCellContent(focalGraphCell);
 
-            printToInfobar(0, `@client`, ` (${userPt.x}, ${userPt.y})`);
+            printToInfobar(0, `@client`, ` (${clientX}, ${clientY})`);
 
             focalGraphCell.id = widget.getCellNum(focalGraphCell);
             printToInfobar(1, '@dispcell', ` (${focalGraphCell.x}, ${focalGraphCell.y}) #${focalGraphCell.id}`);

@@ -37,15 +37,18 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
     return dataPts;
 }
 
-export function refreshZoneHightlights(zonesJs) {
+ function refreshZoneHightlights(zonesJs) {
     let zones = _.map(zonesJs, (z) => dt.zoneFromJson(z));
     console.log("zones", zones);
     shared.zones = zones;
 
     rtrees.initPageLabelRTrees(zones);
 
-    d3 .selectAll('.annotation-rect')
+     d3.selectAll('.annotation-rect')
        .remove();
+
+     d3.selectAll('.glyph-zone-highlight')
+         .remove();
 
     _.each(zones, zone => {
         if (zone.glyphDefs != null) {
@@ -58,15 +61,14 @@ export function refreshZoneHightlights(zonesJs) {
                 let textgridSvg = util.d3select.pageTextgridSvg(pageNum);
 
                 textgridSvg
-                        .selectAll(`.span${zone.zoneId}`)
-                        .data(pageGridData)
-                        .enter()
-                        .append('rect')
-                        .call(util.initRect, d => d)
-                        .call(util.initStroke, 'cyan', 1, 0.1)
-                        .call(util.initFill, 'green', 0.2)
-                        .classed(`span${zone.zoneId}`, true)
-                    ;
+                    .selectAll(`.span${zone.zoneId}`)
+                    .data(pageGridData)
+                    .enter()
+                    .append('rect')
+                    .call(util.initRect, d => d)
+                    .call(util.initFill, 'cyan', 0.2)
+                    .classed(`span${zone.zoneId}`, true)
+                    .classed('glyph-zone-highlight', true) ;
 
             });
         }
@@ -91,7 +93,7 @@ export function refreshZoneHightlights(zonesJs) {
 
 
     });
-}
+ }
 
 
 
