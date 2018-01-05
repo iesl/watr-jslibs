@@ -226,10 +226,6 @@ export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
 
 function createImageLabelingPanel(userSelection, mbrSelection, page) {
 
-    // let target = annotation.targets[0];
-
-    // let [page, mbr] = target;
-
     let svgPageSelector = `svg#page-image-${page}`;
 
     d3.select(svgPageSelector)

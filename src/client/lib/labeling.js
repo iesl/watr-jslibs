@@ -39,7 +39,6 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
 
  function refreshZoneHightlights(zonesJs) {
     let zones = _.map(zonesJs, (z) => dt.zoneFromJson(z));
-    console.log("zones", zones);
     shared.zones = zones;
 
     rtrees.initPageLabelRTrees(zones);
@@ -95,21 +94,17 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
     });
  }
 
-
-
 export function createHeaderLabelUI(mbrSelection, page) {
-    let labelNames = [
-        'Title',
-        'Authors',
-        'Abstract',
-        'Affiliations',
-        'References'
-    ];
+    let labelNames = _.flatMap(shared.curations, c => {
+        let topLabelNames = _.map(c.labelSchemas.schemas, ls => ls.label);
+        topLabelNames.unshift('#'+c.workflow);
+        return topLabelNames;
+    });
+
 
     let containerId = 'splitpane_root__bottom';
     createLabelChoiceWidget(labelNames, containerId)
         .then(choice => {
-            console.log('choice', choice);
 
             let labelChoice = choice.selectedLabel;
 
@@ -122,7 +117,6 @@ export function createHeaderLabelUI(mbrSelection, page) {
                 }
             };
 
-            console.log('labelData', zoneData);
             server.createNewZone(zoneData)
                 .then(res => {
                     d3.selectAll('.label-selection-rect').remove();
@@ -151,7 +145,13 @@ let labelButton = (label) => {
 
 export function createLabelChoiceWidget(labelNames, containerId) {
 
-    let buttons = _.map(labelNames, labelButton);
+    let buttons = _.map(labelNames, n => {
+        if (n[0] == '#') {
+            return t.span(n.slice(1));
+        } else {
+            return labelButton(n);
+        }
+    });
 
     let form =
         t.form([

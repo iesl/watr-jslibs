@@ -3,7 +3,7 @@
 
 import * as frame from '../lib/frame.js';
 
-import '../../style/browse.less';
+import '../../style/browse-main.less';
 
 export function runMain() {
     let loginDiv = $('#login-forms').detach();

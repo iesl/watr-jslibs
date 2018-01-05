@@ -46,7 +46,21 @@ export function showGrid(textGridDef) {
     unshowGrid();
 
     let {textGrid, zoneId, zoneLabel} = textGridDef;
-    let labelSchema = TGC.getTestLabelSchema();
+
+    let allSchemas = _.map(shared.curations, c => c.labelSchemas);
+
+    let matchingSchemas = _.filter(allSchemas, s => {
+        return _.some(s.schemas, c => c.label === zoneLabel);
+    });
+
+    let schema = matchingSchemas[0];
+    let localSchema = Object.assign({}, schema);
+    localSchema.schemas = _.filter(schema.schemas, s => s.label === zoneLabel);
+
+    localSchema.schemas = localSchema.schemas[0].children;
+
+    let labelSchema = TGI.labelSchemas.schemasFromJson(JSON.stringify(localSchema));
+
     let reflowWidget = new ReflowWidget('reflow-controls', textGrid, labelSchema, zoneId, zoneLabel);
     shared.activeReflowWidget = reflowWidget;
 

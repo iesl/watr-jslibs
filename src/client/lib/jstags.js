@@ -127,8 +127,22 @@ export function makeModal(form) {
 
 export let htm = {
     labeledTextInput: (label, key) => {
-        return t.div([
+        return t.span([
             t.input(':text', `@${key}`, `#${key}`),
+            t.label({for: `$key`}, label)
+        ]);
+    },
+
+    labeledTextboxInput: (label, key) => {
+        return t.span([
+            t.textarea(':textarea', `@${key}`, `#${key}`),
+            t.label({for: `$key`}, label)
+        ]);
+    },
+
+    labeledFileInput: (label, key) => {
+        return t.div([
+            t.input(':file', `@${key}`, `#${key}`),
             t.label({for: `$key`}, label)
         ]);
     }

@@ -47,7 +47,6 @@ export function deleteZone(zoneId) {
             contentType: 'application/json',
             method: "DELETE",
             success: function(res) {
-                console.log('deleteZone: succ', res);
                 resolve(res);
             },
             error: function(xhr, status, err) {

@@ -23,6 +23,8 @@ export let shared = {
 
     zones: [],
 
+    curations: [],
+
     // documentAnnotations: {},
     // annotationLabels: {},
 

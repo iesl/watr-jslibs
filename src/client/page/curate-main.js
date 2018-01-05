@@ -7,6 +7,9 @@
 import * as frame from '../lib/frame.js';
 import {t, htm} from '../lib/jstags.js';
 import * as server from '../lib/serverApi.js';
+import {shared} from '../lib/shared-state';
+
+import '../../style/curate-main.less';
 
 
 function curationUri(path) {
@@ -15,11 +18,11 @@ function curationUri(path) {
 
 export let rest = {
     create: {
-        workflows: (slug, desc, label) => {
+        workflow: (slug, desc, label) => {
             let data = {
                 workflow: slug,
                 description: desc,
-                targetLabel: label
+                labelSchemas: label
             };
             return server.apiPost(curationUri('workflows'), data);
         },
@@ -64,15 +67,17 @@ export function assignmentButton(workflowSlug) {
     return $button;
 }
 
-function newCurationWorkflowDef() {
+
+function submitNewCuration() {
     let $form = t.div([
         t.form([
             t.div([
-                htm.labeledTextInput('Workflow', 'workflow'),
-                htm.labeledTextInput('Description', 'description'),
-                htm.labeledTextInput('Target Label', 'targetLabel'),
-                htm.labeledTextInput('Curated Labels', 'curatedLabels'),
                 t.div([
+                    htm.labeledTextInput('Workflow', 'workflow'),
+                    htm.labeledTextInput('Description', 'description'),
+                    htm.labeledTextboxInput('Label Schema (Json)', 'labelSchema')
+                ]),
+                t.span([
                     t.button(':submit', '=Submit', "Submit")
                 ])
             ])
@@ -85,18 +90,7 @@ function newCurationWorkflowDef() {
 
         let $thisForm = $(this);
         let payload = $thisForm.serializeObject();
-
-        let labels = payload.curatedLabels
-            .split(/( *, *)/).filter(x => x.match(/,/)==null)
-        ;
-
-        payload.curatedLabels = labels;
-
-        server.apiPost('/api/v1/workflow/workflows', payload)
-            .then(() => {
-                updateWorkflowList();
-            })
-        ;
+        rest.create.workflow(payload.workflow, payload.description, payload.labelSchema);
 
     });
 
@@ -104,56 +98,64 @@ function newCurationWorkflowDef() {
 }
 
 function updateWorkflowList() {
-    $('#new-workflow-form').empty();
-    $('#new-workflow-form').append(newCurationWorkflowDef());
 
     $('#workflows').empty();
 
-    rest.read.workflows()
-        .then(workflows => {
-            console.log('workflows', workflows);
+    rest.read.workflows() .then(workflows => {
+        console.log('workflows', workflows);
 
-            _.each(workflows, workflowDef => {
-                rest.read.report(workflowDef.workflow)
-                    .then(workflow => {
-                        console.log('workflow', workflow);
-                        let c = workflow.statusCounts;
-                        let lbls = _.join(
-                            _.map(workflowDef.curatedLabels, l => l.key),
-                            ", "
-                        );
-                        let rec = t.li([
-                            t.div([
-                                t.h4(`Workflow: ${workflowDef.workflow}`, [
-                                    assignmentButton(workflowDef.workflow)
-                                ]),
-                                `Description: ${workflowDef.description}`,
-                                t.br(), `Target label    : ${workflowDef.targetLabel.key}`,
-                                t.br(), `Curated labels  : ${lbls}`,
-                                t.br(), `Remaining       : ${workflow.unassignedCount}`,
-                                t.br(), `Assigned        : ${c.Assigned}; Completed: ${c.Completed};  Skipped: ${c.Skipped}`,
-                                t.br(), `User Assignments: ${workflow.userAssignmentCounts}`
-                            ])
+        shared.curations = workflows;
+        _.each(workflows, workflowDef => {
+            rest.read.report(workflowDef.workflow)
+                .then(workflow => {
+                    console.log('workflow', workflow);
+                    let c = workflow.statusCounts;
+                    let lbls = _.join(
+                        _.map(workflowDef.curatedLabels, l => l.key),
+                        ", "
+                    );
+                    let rec = t.li([
+                        t.div([
+                            t.h4(`Workflow: ${workflowDef.workflow}`, [
+                                assignmentButton(workflowDef.workflow)
+                            ]),
+                            `Description: ${workflowDef.description}`,
+                            t.br(), `Target label    : ${workflowDef.targetLabel.key}`,
+                            t.br(), `Curated labels  : ${lbls}`,
+                            t.br(), `Remaining       : ${workflow.unassignedCount}`,
+                            t.br(), `Assigned        : ${c.Assigned}; Completed: ${c.Completed};  Skipped: ${c.Skipped}`,
+                            t.br(), `User Assignments: ${workflow.userAssignmentCounts}`
                         ])
-                        ;
+                    ])
+                    ;
 
-                        $('#workflows').append(rec);
-                    }) ;
-            });
-
-        }) ;
-
+                    $('#workflows').append(rec);
+                }) ;
+        });
+    }) ;
 }
 
+function setupPage() {
+    let page = t.div('.page-frame', [
+        t.div('.left-sidebar'),
+        t.div('#curation-submit .curation-submit', [
+            submitNewCuration()
+        ]),
+        t.div('.curation-list', [
+            t.ul("#workflows")
+        ])
+    ]);
+    return page;
+}
 export function runMain() {
     frame.setupFrameLayout();
+//     xhrFields: {
+//         withCredentials: true
+// }
 
     let $contentPane = $('#splitpane_root__bottom');
-    // let $topbarPane = $('#splitpane_root__top');
 
-    $contentPane.append(t.div("#new-workflow-form"));
-    $contentPane.append(t.ul("#workflows"));
-
+    $contentPane.append(setupPage());
 
     updateWorkflowList();
 

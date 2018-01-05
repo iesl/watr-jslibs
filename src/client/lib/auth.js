@@ -104,8 +104,6 @@ export function doLogout() {
 
 function attemptLogin(loginData) {
     return new Promise((resolve, reject) => {
-        console.log('logindata', loginData);
-        console.log('asJson', loginData.asJson);
         $.post({
             url: loginData.action,
             data: loginData.asJson,
@@ -125,7 +123,6 @@ export function getAuthedJson(url) {
             url: url,
             method: "GET",
             dataFilter: function(data) {
-                console.log('dataFilter', data);
                 return data;
             }
             // success: (res, status, xhr) => {

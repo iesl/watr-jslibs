@@ -72,8 +72,6 @@ export function initPageLabelRTrees(zones) {
 
 export function initPageAndGridRTrees(textgrids) {
     // Assumes that the divs+canvas+svgs are all in place in the DOM
-    // initPageImageGlyphRTrees(textgrids);
-    // console.log('textgrids', textgrids);
     _.each(textgrids, (textgrid, gridNum) => {
         let idGen = util.IdGenerator();
         let pageImageRTree = rtree();
@@ -81,9 +79,6 @@ export function initPageAndGridRTrees(textgrids) {
         shared.pageImageRTrees[gridNum] = pageImageRTree;
         shared.textgridRTrees[gridNum] = textGridRTree;
         let textgridCanvas = $(`#textgrid-canvas-${gridNum}`)[0];
-        // console.log('initing', gridNum, textgrid);
-        // console.log('curr pageImageRTrees', shared.pageImageRTrees);
-        // console.log('curr textGridRTrees', shared.textgridRTrees);
         let context = textgridCanvas.getContext('2d');
 
         context.font = `normal normal normal ${shared.TextGridLineHeight}px/normal Times New Roman`;

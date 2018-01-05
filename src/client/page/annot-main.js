@@ -85,9 +85,7 @@ function curationStatusChange(event, ui) {
     let newStatus = ui.item.value;
 
     curate.rest.update.status(assignment.workflow.slug, assignment.zonelock.id, newStatus)
-        .then(response => {
-            console.log("status update", response);
-        });
+        .then(() => {return {};});
 }
 
 export function runMain() {
@@ -120,9 +118,11 @@ export function runMain() {
                     textview.textgridSvgHandlers(d3$svg);
                 });
 
-            // Figure out if this doc is assigned to the current user
-            server.apiGet('/api/v1/workflow/workflows/assignments')
+            curate.rest.read.workflows()
+                .then(workflows => { return shared.curations = workflows;})
+                .then(() => { return server.apiGet('/api/v1/workflow/workflows/assignments'); })
                 .then(response => {
+                    // Figure out if this doc is assigned to the current user
 
                     let assignments = dt.assignmentsFromJson(response);
                     let filtered = _.filter(assignments, a => {
