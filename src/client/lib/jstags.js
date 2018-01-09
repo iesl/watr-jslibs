@@ -52,7 +52,7 @@ _.each(allSvgTags, tag => {
 
 let i           = (...args) => elem('i', ...args);
 
-let fa = (icon) => i('.fa', `.fa-${icon}`, {'aria-hidden': true});
+let fa = (icon) => () => i('.fa', `.fa-${icon}`, {'aria-hidden': true});
 
 export let icon = {
     fa           : fa,
@@ -125,6 +125,12 @@ export function makeModal(form) {
     return modal;
 }
 
+export function mkIconButton(iconName, tooltip) {
+    let btn = t.button({title: tooltip}, [icon.fa(iconName)]);
+    // btn.onclick = 
+
+    return btn;
+}
 export let htm = {
     labeledTextInput: (label, key) => {
         return t.span([

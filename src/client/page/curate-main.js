@@ -149,9 +149,6 @@ function setupPage() {
 }
 export function runMain() {
     frame.setupFrameLayout();
-//     xhrFields: {
-//         withCredentials: true
-// }
 
     let $contentPane = $('#splitpane_root__bottom');
 

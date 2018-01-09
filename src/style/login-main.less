@@ -1,0 +1,29 @@
+
+@import "inc/_list";
+@import "inc/_modals";
+@import "inc/_buttons";
+@import "inc/_solarized";
+
+div.page-frame {
+    display: grid;
+
+    grid-template-areas:
+    "sd hd"
+        "sd xx"
+    ;
+
+    grid-template-rows    : 100px 1fr;
+    grid-template-columns : 50px 1fr;
+    grid-column-gap       : 10px;
+    grid-row-gap          : 12px;
+
+    width: 100%;
+    height: 100%;
+
+    .left-sidebar {
+        grid-area: sd;
+        background: @base01;
+    }
+
+
+}

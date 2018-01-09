@@ -38,7 +38,9 @@ export let shared = {
     pageImageLabelRTrees: [],
     textgridRTrees: [],
 
-    pageCount: () => this.pageImageRTrees.length
+    pageCount: () => this.pageImageRTrees.length,
+
+    DEV_MODE: false
 };
 
 export function setSelections(sels) {

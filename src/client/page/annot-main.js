@@ -19,7 +19,7 @@ import '../../style/split-pane.css';
 import '../../style/pretty-split-pane.css';
 import '../../style/selection.css';
 
-import '../../style/annot.less';
+import '../../style/annot-main.less';
 
 import {t, htm} from '../lib/jstags.js';
 

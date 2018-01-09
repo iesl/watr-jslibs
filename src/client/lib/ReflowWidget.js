@@ -6,11 +6,13 @@
 
 import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
-import { t } from './jstags.js';
+import { t, icon } from './jstags.js';
 import { $id } from './jstags.js';
+import { mkIconButton } from './jstags.js';
 import * as lbl from './labeling';
 let rtree = require('rbush');
 import {shared} from './shared-state';
+import {zipWithIndex} from './lodash-plus';
 
 import * as gp from './graphpaper-variants';
 import * as colors from './colors';
@@ -27,7 +29,6 @@ const TGC = TGCC.create();
 let TextGridCompanion = watr.textgrid.TextGrid.Companion;
 const TGI = watr.textgrid.TextGridInterop;
 
-let DEV_MODE = false;
 
 function printToInfobar(slot, label, value) {
     $(`#slot-label-${slot}`).text(label);
@@ -166,6 +167,79 @@ export class ReflowWidget {
         this.zoneLabel = zoneLabel;
     }
 
+    nudgeLineDownToggleButton() {
+        let tooltip = '';
+        let iconName = 'angle-down';
+        let btn = t.input(
+            '#tgl1 .tgl .tgl-light', {
+                type: 'radio',
+                checked: false
+            },
+        );
+        let label = t.label('.tgl-btn', {
+            for: 'tgl1'
+        }, [
+            icon.fa(iconName)
+        ]);
+        let both = t.span(
+            label, btn
+        );
+        return both;
+    }
+
+    makeRadios(name, values) {
+        let radios = _.flatMap(zipWithIndex(values), ([[val, vicon], vi]) => {
+            let id = `radio-btn-${name}-${vi}`;
+            let btn = t.input({
+                type: 'radio',
+                name: name,
+                value: val,
+                id: id,
+                checked: false
+            });
+
+            // let label = t.label('', {for: id}, [icon.fa('trash')]);
+            let label = t.label('.tgl-btn', {for: 'tgl1'}, [icon.fa(vicon)]);
+            return [btn, label];
+        });
+        return radios;
+    }
+
+    setupTopStatusBar() {
+        let controls = [
+          [ 'slicer'          , 'scissors'           ],
+          [ 'move-to-top'     , 'angle-double-up'    ],
+          [ 'move-to-bottom'  , 'angle-double-down'  ],
+          [ 'move-up-1'       , 'angle-up'           ],
+          [ 'move-down-1'     , 'angle-down'         ],
+          [ 'toggle-infopane' , 'toggle-off'         ],
+          [ 'close'           , 'close'              ]
+        ];
+        let buttonsLeft0 = this.makeRadios('shapers', controls);
+        // let buttonsLeft1 = this.makeRadios('movers');
+        // let buttonsLeft0 = t.span(
+        //     '.spacedout',
+        //     scissors,
+        // );
+        // let buttonsLeft1 = t.form(
+        //     '.spacedout .inline', {
+        //         action: "#"
+        //     },
+        //     dblDown, dblUp,
+        //     down, up
+        // );
+        // let buttonsRight = t.span(
+        //     '.pull-right .spacedout',
+        //     toggleInfoSlots,
+        //     unshowWidget
+        // );
+        $(`#${this.containerId} .status-top`)
+            .append(buttonsLeft0)
+            // .append(buttonsLeft1)
+            // .append(buttonsRight)
+        ;
+
+    }
 
     init () {
 
@@ -210,6 +284,9 @@ export class ReflowWidget {
 
             $id(this.containerId).append(widgetNode);
 
+            // Setup status bar
+            this.setupTopStatusBar();
+
             this.d3$textgridSvg = d3.select('#'+this.frameId)
                 .append('svg').classed('textgrid', true)
                 .datum(this.textGrid.gridData)
@@ -251,6 +328,8 @@ export class ReflowWidget {
                 gridJson: gridAsJson
             }
         };
+
+        let DEV_MODE = shared.DEV_MODE;
 
         if (DEV_MODE) {
             return {};
@@ -672,156 +751,56 @@ export class ReflowWidget {
 }
 
 
+    // setupTopStatusBar2() {
+    //     // let toggleInfoSlots = t.button([icon.fa('toggle-off')]);
+    //     let toggleInfoSlots = mkIconButton('toggle-off', 'toggle infopane');
+    //     let dblDown = t.button([icon.fa('angle-double-down')]);
+    //     let dblUp = t.button([icon.fa('angle-double-up')]);
+    //     // let down = t.button([icon.fa('angle-down')]);
+    //     let down = this.nudgeLineDownToggleButton();
+    //     let up = t.button([icon.fa('angle-up')]);
+    //     let unshowWidget = t.button([icon.fa('close')]);
+    //     let scissors = t.button([icon.fa('scissors')]);
+    //     let buttonsLeft0 = t.span(
+    //         '.spacedout',
+    //         scissors,
+    //     );
+    //     let buttonsLeft1 = t.form(
+    //         '.spacedout .inline', {
+    //             action: "#"
+    //         },
+    //         dblDown, dblUp,
+    //         down, up
+    //     );
+    //     let buttonsRight = t.span(
+    //         '.pull-right .spacedout',
+    //         toggleInfoSlots,
+    //         unshowWidget
+    //     );
+    //     $(`#${this.containerId} .status-top`)
+    //         .append(buttonsLeft0)
+    //         .append(buttonsLeft1)
+    //         .append(buttonsRight)
+    //     ;
 
 
+    //     document.getElementById('tgl1').onchange = function(e) {
+    //         e.preventDefault();
+    //         e.stopPropagation();
 
+    //         return false;
+    //     };
+    //     document.getElementById('tgl1').onclick = function(e) {
+    //         e.preventDefault();
+    //         e.stopPropagation();
 
-    // drawGridShapesVer2() {
-    //     let gridProps = this.gridProps;
+    //         return false;
+    //     };
 
-    //     this.drawingApi.applyCanvasStripes();
+    //     // $("#tg1").on('click', function(e) {
+    //     //     e.preventDefault();
+    //     //     e.stopPropagation();
 
-    //     let gridRegions = TGI.widgetDisplayGridProps.gridRegions(gridProps);
-    //     let allClasses = TGI.labelSchemas.allLabels(this.labelSchema);
-    //     let colorMap = _.zipObject(allClasses, colors.HighContrast);
-
-    //     let rtreeBoxes = _.map(gridRegions, region => {
-    //         let classes = TGI.gridRegions.labels(region);
-    //         let cls = classes[classes.length-1];
-    //         let box = region.gridBox;
-    //         let bounds = region.bounds;
-    //         let {left, top, width, height} = this.scaleLTBounds(bounds);
-    //         if (region.isLabelKey()) {
-    //             let label = region.labelIdent;
-    //             let text = new fabric.Text(label, {
-    //                 objectCaching: false,
-    //                 left: left, top: top,
-    //                 fontSize: 20,
-    //                 fontStyle: 'normal',
-    //                 fontFamily: 'Courier New',
-    //                 fontWeight: 'bold',
-    //                 textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.5).toRgba()
-    //             });
-    //             this.drawingApi.fabricCanvas.add(text);
-
-
-    //         } else if (region.isCells()) {
-    //             let cells = JsArray.fromScala(region.cells);
-    //             let cellStr = _.map(cells, c => {
-    //                 let ch = c.char.toString();
-    //                 if (ch == ' ') {ch = '░';}
-    //                 return ch;
-    //             }).join('');
-
-
-    //             let text = new fabric.Text(cellStr, {
-    //                 objectCaching: false,
-    //                 left: left, top: top,
-    //                 fontSize: 20,
-    //                 fontStyle: 'normal',
-    //                 fontFamily: 'Courier New'
-    //                 // fontWeight: 'bold',
-    //                 // textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.5).toRgba()
-    //             });
-    //             this.drawingApi.fabricCanvas.add(text);
-
-    //         } else if (region.isLabelCover()) {
-
-    //             this.drawingApi.fillBox(box, (rect) => {
-    //                 rect.setGradient('fill', {
-    //                     x1: 0, y1: 0,
-    //                     x2: 0, y2: height,
-    //                     colorStops: {
-    //                         0:  new fabric.Color('rgb(255, 255, 255').setAlpha(0).toRgba(),
-    //                         0.6:  new fabric.Color('rgb(255, 255, 255').setAlpha(0.1).toRgba(),
-    //                         1:  new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba()
-    //                     }
-    //                 });
-    //             });
-
-    //             this.drawingApi.fillBox(box, (rect) => {
-    //                 rect.setGradient('fill', {
-    //                     x1: 0, y1: 0,
-    //                     x2: 0, y2: height,
-    //                     colorStops: {
-    //                         0:  new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba(),
-    //                         0.2: new fabric.Color('rgb(255, 255, 255').setAlpha(0).toRgba()
-    //                     }
-    //                 });
-    //             });
-
-    //             let abbrev = TGI.labelSchemas.abbrevFor(this.labelSchema, cls);
-    //             let text = new fabric.Text(abbrev, {
-    //                 objectCaching: false,
-    //                 left: left, top: top,
-    //                 fontSize: 20,
-    //                 fontStyle: 'normal',
-    //                 fontFamily: 'Courier New',
-    //                 fontWeight: 'bolder',
-    //                 fill: 'black',
-    //                 // textBackgroundColor: new fabric.Color(colorMap[cls]).toRgb(),
-    //                 underline: true
-    //                 // linethrough: '',
-    //                 // overline: ''
-    //             });
-
-    //             this.drawingApi.fabricCanvas.add(text);
-
-    //         } else if (region.isHeading()) {
-    //             let text = new fabric.Text(region.heading, {
-    //                 objectCaching: false,
-    //                 left: left, top: top,
-    //                 fontSize: 20,
-    //                 fontStyle: 'italic',
-    //                 fontFamily: 'Courier New',
-    //                 fontWeight: 'bolder',
-    //                 textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.2).toRgba()
-    //                 // underline: '',
-    //                 // linethrough: '',
-    //                 // overline: ''
-    //             });
-    //             this.drawingApi.fabricCanvas.add(text);
-    //         }
-    //         return this.makeRTreeBox(region);
-    //     });
-
-    //     this.drawingApi.fabricCanvas.renderAll();
-
-    //     this.reflowRTree = rtree();
-
-    //     this.reflowRTree.load(rtreeBoxes);
-
-    //     this.d3$textgridSvg
-    //         .selectAll(`rect`)
-    //         .remove();
-
-    //     _.each(this.reflowRTree.all(), data => {
-    //         let region = data.region;
-    //         let bounds = region.bounds;
-    //         let scaled = this.scaleLTBounds(bounds);
-    //         let classes = TGI.gridRegions.labels(region);
-
-    //         let regionType;
-    //         if (region.isLabelKey()) {
-    //             regionType = 'LabelKey';
-    //         } else if (region.isCells()) {
-    //             regionType = 'Cell';
-    //         } else if (region.isLabelCover()) {
-    //             regionType = 'LabelCover';
-    //         } else if (region.isHeading()) {
-    //             regionType = 'Heading';
-    //         }
-    //         let cls = classes[classes.length-1];
-
-    //         this.d3$textgridSvg
-    //             .append('rect')
-    //             .classed(`${regionType}`, true)
-    //             .classed(`${cls}`, true)
-    //             .call(util.initRect, () => scaled)
-    //             .call(util.initFill, 'yellow', 0.0)
-    //         ;
-    //     });
-
-    //     this.initMouseHandlers();
-
+    //     //     return true;
+    //     // });
     // }
