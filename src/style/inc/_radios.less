@@ -1,11 +1,11 @@
-
-.toggle-switch {
+.radio-switch {
   padding: 4px;
 	overflow: hidden;
 }
 
-.toggle-switch input {
+.radio-switch input {
     position: absolute !important;
+    // clip: rect(0, 0, 0, 0);
     display: none;
     height: 1px;
     width: 1px;
@@ -13,8 +13,13 @@
     overflow: hidden;
 }
 
-.toggle-switch label {
+.radio-switch label {
+  // float: left;
+}
+
+.radio-switch label {
   display: inline-block;
+  // width: 60px;
   background-color: @base3;
   color: rgba(0, 0, 0, 1);
   font-size: 1em;
@@ -30,23 +35,24 @@
   -ms-transition:     all 0.1s ease-in-out;
   -o-transition:      all 0.1s ease-in-out;
   transition:         all 0.1s ease-in-out;
-  border-radius: 4px 4px 4px 4px;
 }
 
-.toggle-switch label:hover {
+.radio-switch label:hover {
 	cursor: pointer;
 }
 
-.toggle-switch input:not(:checked) ~ label.checked {
-    display: none;
+.radio-switch input:checked + label {
+  background-color: #A5DC86;
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
-.toggle-switch input:not(:checked) ~ label.unchecked {
-    display: inline-block;
+
+.radio-switch label:first-of-type {
+  border-radius: 4px 0 0 4px;
 }
-.toggle-switch input:checked ~ label.unchecked {
-    display: none;
+
+.radio-switch label:last-of-type {
+  border-radius: 0 4px 4px 0;
 }
-.toggle-switch input:checked ~ label.checked {
-    display: inline-block;
-}
+
 

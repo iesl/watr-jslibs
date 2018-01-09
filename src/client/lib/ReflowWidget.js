@@ -167,76 +167,93 @@ export class ReflowWidget {
         this.zoneLabel = zoneLabel;
     }
 
-    nudgeLineDownToggleButton() {
-        let tooltip = '';
-        let iconName = 'angle-down';
-        let btn = t.input(
-            '#tgl1 .tgl .tgl-light', {
-                type: 'radio',
-                checked: false
-            },
-        );
-        let label = t.label('.tgl-btn', {
-            for: 'tgl1'
-        }, [
-            icon.fa(iconName)
-        ]);
-        let both = t.span(
-            label, btn
-        );
-        return both;
-    }
 
     makeRadios(name, values) {
-        let radios = _.flatMap(zipWithIndex(values), ([[val, vicon], vi]) => {
-            let id = `radio-btn-${name}-${vi}`;
+        let radios = _.flatMap(zipWithIndex(values), ([[val, vicon, initCheck, tooltip], vi]) => {
+            let id = `${name}-choice-${vi}`;
             let btn = t.input({
                 type: 'radio',
                 name: name,
                 value: val,
-                id: id,
-                checked: false
+                id: id
             });
 
-            // let label = t.label('', {for: id}, [icon.fa('trash')]);
-            let label = t.label('.tgl-btn', {for: 'tgl1'}, [icon.fa(vicon)]);
+            if (initCheck) {
+                $(btn).attr('checked', initCheck);
+                $(btn).prop('checked', initCheck);
+            }
+
+            let label = t.label({
+                for: id,
+                title: tooltip
+            }, [icon.fa(vicon)]);
             return [btn, label];
         });
-        return radios;
+        let form = t.form('.inline', [
+            t.span('.radio-switch', [
+                radios
+            ])
+        ]);
+        return form;
+    }
+
+    makeToggle(name, checkedIcon, uncheckedIcon, initCheck, tooltip) {
+        let id = 'my-toggle';
+        let input = t.input({
+            type: 'checkbox',
+            name: name,
+            id: id
+        });
+
+        if (initCheck) {
+            $(input).attr('checked', initCheck);
+            $(input).prop('checked', initCheck);
+        }
+
+        let labelOn = t.label('.checked', {
+            for: id,
+            title: tooltip
+        }, [icon.fa(checkedIcon)]);
+
+        let labelOff = t.label('.unchecked', {
+            for: id,
+            title: tooltip
+        }, [icon.fa(uncheckedIcon)]);
+
+        let form = t.form('.inline', [
+            t.span('.toggle-switch', [
+                input, labelOn, labelOff
+            ])
+        ]);
+        return form;
     }
 
     setupTopStatusBar() {
         let controls = [
-          [ 'slicer'          , 'scissors'           ],
-          [ 'move-to-top'     , 'angle-double-up'    ],
-          [ 'move-to-bottom'  , 'angle-double-down'  ],
-          [ 'move-up-1'       , 'angle-up'           ],
-          [ 'move-down-1'     , 'angle-down'         ],
-          [ 'toggle-infopane' , 'toggle-off'         ],
-          [ 'close'           , 'close'              ]
+            [ 'labeler'         , 'pencil'             , true,  'Labeling tool'],
+            [ 'slicer'          , 'scissors'           , false, 'Text slicing'],
+            [ 'move-to-top'     , 'angle-double-up'    , false, 'Move text to top'],
+            [ 'move-to-bottom'  , 'angle-double-down'  , false, 'Move text to bottom'],
+            [ 'move-up-1'       , 'angle-up'           , false, 'Move text up one line'],
+            [ 'move-down-1'     , 'angle-down'         , false, 'Move text down one line'],
         ];
-        let buttonsLeft0 = this.makeRadios('shapers', controls);
-        // let buttonsLeft1 = this.makeRadios('movers');
-        // let buttonsLeft0 = t.span(
-        //     '.spacedout',
-        //     scissors,
-        // );
-        // let buttonsLeft1 = t.form(
-        //     '.spacedout .inline', {
-        //         action: "#"
-        //     },
-        //     dblDown, dblUp,
-        //     down, up
-        // );
-        // let buttonsRight = t.span(
-        //     '.pull-right .spacedout',
-        //     toggleInfoSlots,
-        //     unshowWidget
-        // );
+
+        let leftControls = this.makeRadios('shapers', controls);
+
+        let infoToggle = this.makeToggle('info-toggle', 'toggle-on', 'toggle-off', false, 'Toggle Infopane');
+        let closeButton = t.span(
+            '.spacedout',
+            t.button()
+        );
+
+        let rightControls = t.span(
+            '.pull-right .spacedout',
+            infoToggle, closeButton
+        );
+        // unshowWidget
         $(`#${this.containerId} .status-top`)
-            .append(buttonsLeft0)
-            // .append(buttonsLeft1)
-            // .append(buttonsRight)
+            .append(leftControls)
+            .append(rightControls)
         ;
 
     }
@@ -751,38 +768,6 @@ export class ReflowWidget {
 }
 
 
-    // setupTopStatusBar2() {
-    //     // let toggleInfoSlots = t.button([icon.fa('toggle-off')]);
-    //     let toggleInfoSlots = mkIconButton('toggle-off', 'toggle infopane');
-    //     let dblDown = t.button([icon.fa('angle-double-down')]);
-    //     let dblUp = t.button([icon.fa('angle-double-up')]);
-    //     // let down = t.button([icon.fa('angle-down')]);
-    //     let down = this.nudgeLineDownToggleButton();
-    //     let up = t.button([icon.fa('angle-up')]);
-    //     let unshowWidget = t.button([icon.fa('close')]);
-    //     let scissors = t.button([icon.fa('scissors')]);
-    //     let buttonsLeft0 = t.span(
-    //         '.spacedout',
-    //         scissors,
-    //     );
-    //     let buttonsLeft1 = t.form(
-    //         '.spacedout .inline', {
-    //             action: "#"
-    //         },
-    //         dblDown, dblUp,
-    //         down, up
-    //     );
-    //     let buttonsRight = t.span(
-    //         '.pull-right .spacedout',
-    //         toggleInfoSlots,
-    //         unshowWidget
-    //     );
-    //     $(`#${this.containerId} .status-top`)
-    //         .append(buttonsLeft0)
-    //         .append(buttonsLeft1)
-    //         .append(buttonsRight)
-    //     ;
-
 
     //     document.getElementById('tgl1').onchange = function(e) {
     //         e.preventDefault();
@@ -803,4 +788,3 @@ export class ReflowWidget {
 
     //     //     return true;
     //     // });
-    // }
