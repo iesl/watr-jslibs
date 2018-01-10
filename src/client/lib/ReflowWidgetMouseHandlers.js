@@ -79,90 +79,123 @@ export function updateUserPosition(widget) {
     return handlers;
 }
 
-export function labelingToolHandlers(widget) {
-    let handlers = {
+export function labelingTool(widget) {
+    return {
         mousedown: function(mouseEvent) {
 
-            let { focalGraphCell,
-                  focalBox,
-                  cellContent
-                } = widget.userGridLocation;
+            whenFocusedOnCells(widget.userGridLocation.cellContent, () => {
+                let { focalGraphCell,
+                      focalBox,
+                      cellContent  } = widget.userGridLocation;
 
-            if (cellContent) {
+                let cellRow = cellContent.region.row;
+                let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                let cellCol = focalCellIndex;
 
+                if (mouseEvent.shiftKey) {
+                    maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
+                } else if (mouseEvent.ctrlKey) {
+                    maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));
+                } else {
+                    // Add a label to the clicked row of text
+                    let focalClasses = TGI.gridRegions.labels(cellContent.region);
+                    let focalLabel = _.last(focalClasses) || '';
+                    let childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
+                    lbl.createLabelChoiceWidget(childLabels, widget.containerId)
+                        .then(choice => {
+                            let labelChoice = choice.selectedLabel;
+                            widget.textGrid.labelRow(cellRow, Labels.forString(labelChoice));
+                            widget.redrawAll();
+                        }, () => { /* Ok, user cancelled label selection */ });
+                }
+            });
+
+            whenFocusedOnLabelCover(widget.userGridLocation.cellContent, () => {
+                // If user clicks on a leaf (right-most) label cover indicator, delete that label
+                let { focalBox,
+                      cellContent
+                    } = widget.userGridLocation;
                 let focalLabels = TGI.gridRegions.labels(cellContent.region);
 
-                if (cellContent.region.isLabelCover()) {
-                    // If user clicks on a leaf (right-most) label cover indicator, delete that label
+                let boxRight = focalBox.shiftOrigin(2, 0);
+                let contentRight = widget.getBoxContent(boxRight);
+                let rightLabelCovers = _.filter(contentRight, c => c.region.isLabelCover());
+                let isLeafLabelCover = rightLabelCovers.length == 0;
 
-                    let boxRight = focalBox.shiftOrigin(2, 0);
-                    let contentRight = widget.getBoxContent(boxRight);
-                    let rightLabelCovers = _.filter(contentRight, c => c.region.isLabelCover());
-                    let isLeafLabelCover = rightLabelCovers.length == 0;
+                if (isLeafLabelCover) {
+                    let queryRight = boxRight.modifySpan(widget.colCount, 0);
+                    let rightContents = widget.getBoxContent(queryRight);
+                    let rightCells0 = _.filter(rightContents, c => c.region.isCells());
 
-                    if (isLeafLabelCover) {
-                        let queryRight = boxRight.modifySpan(widget.colCount, 0);
-                        let rightContents = widget.getBoxContent(queryRight);
-                        let rightCells0 = _.filter(rightContents, c => c.region.isCells());
-
-                        let rightCells = _.map(rightCells0, r => r.region);
-                        let region0 = _.head(rightCells);
-                        widget.textGrid.unlabelNear(region0.row, 0, Labels.forString(focalLabels[0]));
-                        widget.redrawAll();
-                    }
-
-                } else if (cellContent.region.isCells()) {
-                    let cellRow = cellContent.region.row;
-                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                    let cellCol = focalCellIndex;
-
-                    if (mouseEvent.shiftKey) {
-                        let maybeGrid = widget.textGrid.slurp(cellRow);
-
-                        Options.fold(
-                            maybeGrid, () => {},
-                            newGrid => {
-                                widget.textGrid = newGrid;
-                                widget.redrawAll();
-                            });
-
-                    } else if (mouseEvent.ctrlKey) {
-                        let maybeGrid = widget.textGrid.split(cellRow, cellCol);
-
-                        Options.fold(
-                            maybeGrid, () => {},
-                            newGrid => {
-                                widget.textGrid = newGrid;
-                                widget.redrawAll();
-                            });
-
-                    } else {
-
-                        // Add a label to the clicked row of text
-                        let focalClasses = TGI.gridRegions.labels(cellContent.region);
-                        let focalLabel = _.last(focalClasses) || '';
-                        let childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
-                        lbl.createLabelChoiceWidget(childLabels, widget.containerId)
-                            .then(choice => {
-                                let labelChoice = choice.selectedLabel;
-                                widget.textGrid.labelRow(cellRow, Labels.forString(labelChoice));
-                                widget.redrawAll();
-                            }, () => {
-                                // Ok, user cancelled label selection
-                            });
-                    }
+                    let rightCells = _.map(rightCells0, r => r.region);
+                    let region0 = _.head(rightCells);
+                    widget.textGrid.unlabelNear(region0.row, 0, Labels.forString(focalLabels[0]));
+                    widget.redrawAll();
                 }
-            }
+            });
         }
     };
-
-    return handlers;
 }
 
-function slicerToolHandlers() {
+
+export function slicerTool(widget) {
+    return {
+        mousedown: function(mouseEvent) {
+
+            whenFocusedOnCells(widget.userGridLocation.cellContent, () => {
+                let { focalGraphCell,
+                      focalBox,
+                      cellContent  } = widget.userGridLocation;
+
+                let cellRow = cellContent.region.row;
+                let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                let cellCol = focalCellIndex;
+
+                if (mouseEvent.shiftKey) {
+                    maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
+                } else {
+                    maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));
+                }
+            });
+        }
+    };
+}
+
+
+export function lineToTop() {
 
 }
 
-function reorderTextHandlers() {
-
+export function lineToBottom() {
 }
+
+export function lineUp1() {
+}
+
+export function lineDown1() {
+}
+
+
+
+
+function whenFocusedOnLabelCover(cellContent, func) {
+    if (cellContent !== undefined && cellContent.region.isLabelCover()) {
+        func(cellContent);
+    }
+}
+
+function whenFocusedOnCells(cellContent, func) {
+    if (cellContent !== undefined && cellContent.region.isCells()) {
+        func(cellContent);
+    }
+}
+
+function maybeUpdateGrid(widget, maybeGrid) {
+    Options.fold(
+        maybeGrid, () => {},
+        newGrid => {
+            widget.textGrid = newGrid;
+            widget.redrawAll();
+        });
+}
+

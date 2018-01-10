@@ -15,17 +15,12 @@ import * as gp from './graphpaper-variants';
 import * as colors from './colors';
 import * as server from './serverApi.js';
 
-const GraphPaper = watr.utils.GraphPaper;
-const Options = watr.utils.Options;
-const Labels = watr.watrmarks.Labels;
 const JsArray = watr.utils.JsArray;
-const LTBounds = watr.geometry.LTBounds_Companion;
 const TGCC = watr.textgrid.TextGridConstructor_Companion;
 const TGC = TGCC.create();
 const TGI = watr.textgrid.TextGridInterop;
 
-
-import * as mouseHandlers from './ReflowWidgetMouseHandlers.js';
+import * as reflowTools from './ReflowWidgetMouseHandlers.js';
 
 export function unshowGrid() {
     if (shared.activeReflowWidget != undefined) {
@@ -57,13 +52,18 @@ export class ReflowWidget {
 
 
     setupTopStatusBar() {
+        let widget = this;
+        let setTool = h => {
+            return function (){ widget.setMouseHandlers([reflowTools.updateUserPosition, h]); }
+        };
+
         let controls = [
-            [ 'labeler'         , 'pencil'             , true,  'Labeling tool'           ],
-            [ 'slicer'          , 'scissors'           , false, 'Text slicing'            ],
-            [ 'move-to-top'     , 'angle-double-up'    , false, 'Move text to top'        ],
-            [ 'move-to-bottom'  , 'angle-double-down'  , false, 'Move text to bottom'     ],
-            [ 'move-up-1'       , 'angle-up'           , false, 'Move text up one line'   ],
-            [ 'move-down-1'     , 'angle-down'         , false, 'Move text down one line' ],
+            [ 'labeler'    , 'pencil'             , true,  'Labeling tool'        , setTool( reflowTools.labelingTool )  ],
+            [ 'slicer'     , 'scissors'           , false, 'Text slicing'         , setTool( reflowTools.slicerTool   )  ],
+            [ 'to-top'     , 'angle-double-up'    , false, 'Move line to top'     , setTool( reflowTools.lineToTop    )  ],
+            [ 'to-bottom'  , 'angle-double-down'  , false, 'Move line to bottom'  , setTool( reflowTools.lineToBottom )  ],
+            [ 'up-1'       , 'angle-up'           , false, 'Move line up'         , setTool( reflowTools.lineUp1      )  ],
+            [ 'down-1'     , 'angle-down'         , false, 'Move line down'       , setTool( reflowTools.lineDown1    )  ],
         ];
 
         let leftControls = htm.makeRadios('shapers', controls);
@@ -144,6 +144,11 @@ export class ReflowWidget {
             ;
 
         }).then(() => {
+            this.setMouseHandlers([
+                reflowTools.updateUserPosition,
+                reflowTools.labelingTool
+            ]);
+
             return this.redrawAll();
         });
 
@@ -350,11 +355,6 @@ export class ReflowWidget {
             ;
         });
 
-        this.setMouseHandlers([
-            mouseHandlers.updateUserPosition,
-            mouseHandlers.labelingToolHandlers
-        ]);
-
     }
 
     redrawAll() {
@@ -427,158 +427,27 @@ export class ReflowWidget {
 
     setMouseHandlers(handlers) {
         let widget = this;
-        widget.mouseHandlers = _.map(handlers, h => {
+        widget.mouseHandlers = _.map(handlers, handler => {
             let init = {
                 mousemove: function() {},
                 mouseup: function() {},
                 mousedown: function() {}
             };
-            Object.assign(init, h(widget));
+            Object.assign(init, handler(widget));
             return init;
         });
 
-        this.d3$textgridSvg.on("mousemove", function() {
-            let mouseEvent = d3.event;
+        widget.d3$textgridSvg.on("mousemove", function() {
             _.each(widget.mouseHandlers, h => {
-                h.mousemove(mouseEvent);
+                h.mousemove(d3.event);
             });
         });
-        this.d3$textgridSvg.on("mousedown", function() {
-            let mouseEvent = d3.event;
+        widget.d3$textgridSvg.on("mousedown", function() {
             _.each(widget.mouseHandlers, h => {
-                h.mousedown(mouseEvent)
+                h.mousedown(d3.event)
             });
         });
 
-    }
-    initMouseHandlers2() {
-        let widget = this;
-        widget.hoverCell = null;
-        widget.printToInfobar(2, `dim`, `${this.colCount}x${this.rowCount}`);
-
-        this.d3$textgridSvg.on("mousemove", function() {
-            let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
-            let clientX = Math.floor(userPt.x);
-            let clientY = Math.floor(userPt.y);
-
-            let focalGraphCell = widget.clientPointToGraphCell(userPt);
-            let cellContent = widget.getCellContent(focalGraphCell);
-
-            widget.printToInfobar(0, `@client`, ` (${clientX}, ${clientY})`);
-
-            focalGraphCell.id = widget.getCellNum(focalGraphCell);
-            widget.printToInfobar(1, '@dispcell', ` (${focalGraphCell.x}, ${focalGraphCell.y}) #${focalGraphCell.id}`);
-
-            if (widget.hoverCell != null) {
-                if (focalGraphCell.id != widget.hoverCell.id) {
-                    widget.hoverCell = focalGraphCell;
-                    widget.updateCellHoverHighlight(focalGraphCell);
-                }
-            } else {
-                widget.hoverCell = focalGraphCell;
-                widget.updateCellHoverHighlight(focalGraphCell);
-            }
-
-            if (cellContent) {
-                let focalBox = GraphPaper.boundsToBox(LTBounds.FromInts(
-                    cellContent.region.bounds.left,
-                    cellContent.region.bounds.top,
-                    cellContent.region.bounds.width,
-                    cellContent.region.bounds.height
-                ));
-                if (cellContent.region.isCells()) {
-                    let row = cellContent.region.row;
-                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                    let col = focalCellIndex;
-                    widget.printToInfobar(3, '@gridcell', ` (${row}, ${col})`);
-                    // let pins = c.region['cell$1'];
-                    // console.log(pins.showPinsVert().toString());
-                } else {
-                    widget.printToInfobar(3, '@gridcell', ` --`);
-                }
-                widget.showLabelHighlights(cellContent);
-            } else {
-                widget.clearLabelHighlights();
-                widget.printToInfobar(3, '@gridcell', ` --`);
-            }
-
-        });
-
-        this.d3$textgridSvg.on("mousedown",  function() {
-            let mouseEvent = d3.event;
-            let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
-
-            let focalGraphCell = widget.clientPointToGraphCell(userPt);
-            let cellContent = widget.getCellContent(focalGraphCell);
-
-
-            if (cellContent) {
-
-                let focalLabels = TGI.gridRegions.labels(cellContent.region);
-                let focalBox = GraphPaper.boundsToBox(LTBounds.FromInts(
-                    cellContent.region.bounds.left,
-                    cellContent.region.bounds.top,
-                    cellContent.region.bounds.width,
-                    cellContent.region.bounds.height
-                ));
-
-                if (cellContent.region.isLabelCover()) {
-
-                    let boxRight = focalBox.shiftOrigin(2, 0);
-                    let contentRight = widget.getBoxContent(boxRight);
-                    let rightLabelCovers = _.filter(contentRight, c => c.region.isLabelCover());
-                    // console.log('contentRight', contentRight);
-                    if (rightLabelCovers.length == 0) {
-
-                        let queryRight = boxRight.modifySpan(widget.colCount, 0);
-                        let rightContents = widget.getBoxContent(queryRight);
-                        let rightCells0 = _.filter(rightContents, c => c.region.isCells());
-
-                        let rightCells = _.map(rightCells0, r => r.region);
-                        let region0 = _.head(rightCells);
-                        widget.textGrid.unlabelNear(region0.row, 0, Labels.forString(focalLabels[0]));
-                        widget.redrawAll();
-
-                    }
-
-                } else if (cellContent.region.isCells()) {
-                    let row = cellContent.region.row;
-                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                    let col = focalCellIndex;
-
-                    widget.printToInfobar(3, 'grid cell', `(${row}, ${col})`);
-
-                    if (mouseEvent.shiftKey) {
-                        let maybeGrid = widget.textGrid.slurp(row);
-                        let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
-                        widget.textGrid = newGrid;
-
-                        widget.redrawAll();
-                    } else if (mouseEvent.ctrlKey) {
-                        let maybeGrid = widget.textGrid.split(row, col);
-                        let newGrid = Options.getOrElse(maybeGrid, widget.textGrid);
-                        widget.textGrid = newGrid;
-
-                        widget.redrawAll();
-                    } else {
-
-                        let focalClasses = TGI.gridRegions.labels(cellContent.region);
-                        let focalLabel = _.last(focalClasses) || '';
-                        let childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
-                        lbl.createLabelChoiceWidget(childLabels, widget.containerId)
-                            .then(choice => {
-                                let labelChoice = choice.selectedLabel;
-                                widget.textGrid.labelRow(row, Labels.forString(labelChoice));
-                                widget.redrawAll();
-                            })
-                            .catch(err => {
-                                console.log('err', err);
-                            }) ;
-
-                    }
-                }
-            }
-        }) ;
     }
 
     updateCellHoverHighlight(hoverGraphCell) {

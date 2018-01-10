@@ -155,7 +155,7 @@ export let htm = {
     },
 
     makeRadios(name, values) {
-        let radios = _.flatMap(zipWithIndex(values), ([[val, vicon, initCheck, tooltip], vi]) => {
+        let radios = _.flatMap(zipWithIndex(values), ([[val, vicon, initCheck, tooltip, callback], vi]) => {
             let id = `${name}-choice-${vi}`;
             let btn = t.input({
                 type: 'radio',
@@ -169,10 +169,18 @@ export let htm = {
                 $(btn).prop('checked', initCheck);
             }
 
+            $(btn).on('change', function() {
+                console.log('changing toolset', callback);
+                if ( $(this).is(':checked') ) {
+                    callback();
+                }
+            });
+
             let label = t.label({
                 for: id,
                 title: tooltip
             }, [icon.fa(vicon)]);
+
             return [btn, label];
         });
         let form = t.form('.inline', [
