@@ -11,6 +11,7 @@ import * as panes from  './splitpane-utils.js';
 import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
 import * as reflowWidget from  './ReflowWidget.js';
+import * as reflowWidgetInit from  './ReflowWidgetInit.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
 import {$id, t, icon} from './jstags.js';
@@ -258,7 +259,7 @@ function setupStatusBar(statusBarId) {
 
         if (currSelects.length == 1) {
             let selection = currSelects[0];
-            let gridForSelection = reflowWidget.textGridForSelection(selection);
+            let gridForSelection = reflowWidgetInit.textGridForSelection(selection);
             let deleteBtn = t.button([icon.trash]);
             var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
             clicks.subscribe(() => {
@@ -277,13 +278,13 @@ function setupStatusBar(statusBarId) {
             $selectStatus.append(deleteBtn);
 
             if (gridForSelection !== undefined) {
-                reflowWidget.showGrid(gridForSelection);
+                reflowWidgetInit.showGrid(gridForSelection);
             } else {
                 let gridShaperBtn = t.button([icon.fa('indent')]);
 
                 gridShaperBtn.on('click', function() {
-                    let textGrid = reflowWidget.createFromSelection(selection);
-                    reflowWidget.showGrid(textGrid);
+                    let textGrid = reflowWidgetInit.createFromSelection(selection);
+                    reflowWidgetInit.showGrid(textGrid);
                 });
                 $selectStatus.append(gridShaperBtn);
 

@@ -60,10 +60,11 @@ export class ReflowWidget {
         let controls = [
             [ 'labeler'    , 'pencil'             , true,  'Labeling tool'        , setTool( reflowTools.labelingTool )  ],
             [ 'slicer'     , 'scissors'           , false, 'Text slicing'         , setTool( reflowTools.slicerTool   )  ],
-            [ 'to-top'     , 'angle-double-up'    , false, 'Move line to top'     , setTool( reflowTools.lineToTop    )  ],
-            [ 'to-bottom'  , 'angle-double-down'  , false, 'Move line to bottom'  , setTool( reflowTools.lineToBottom )  ],
-            [ 'up-1'       , 'angle-up'           , false, 'Move line up'         , setTool( reflowTools.lineUp1      )  ],
-            [ 'down-1'     , 'angle-down'         , false, 'Move line down'       , setTool( reflowTools.lineDown1    )  ],
+            [ 'move'       , 'arrows-v'           , false, 'Move line up or down' , setTool( reflowTools.moveLine    )   ]
+            // [ 'to-top'     , 'angle-double-up'    , false, 'Move line to top'     , setTool( reflowTools.moveLine    )   ]
+            // [ 'to-bottom'  , 'angle-double-down'  , false, 'Move line to bottom'  , setTool( reflowTools.lineToBottom )  ],
+            // [ 'up-1'       , 'angle-up'           , false, 'Move line up'         , setTool( reflowTools.lineUp1      )  ],
+            // [ 'down-1'     , 'angle-down'         , false, 'Move line down'       , setTool( reflowTools.lineDown1    )  ],
         ];
 
         let leftControls = htm.makeRadios('shapers', controls);
@@ -209,8 +210,10 @@ export class ReflowWidget {
     drawGridShapes() {
         let gridProps = this.gridProps;
 
-        this.drawingApi.applyCanvasStripes();
+        // this.cellRowToDisplayRow = {};
+        this.cellRowToDisplayRegion = {};
 
+        this.drawingApi.applyCanvasStripes();
 
         let gridRegions = TGI.widgetDisplayGridProps.gridRegions(gridProps);
         let allClasses = TGI.labelSchemas.allLabels(this.labelSchema);
@@ -238,6 +241,17 @@ export class ReflowWidget {
 
             } else if (region.isCells()) {
                 let cells = JsArray.fromScala(region.cells);
+                // Create a mapping between textgrid rows and displaygrid rows
+                // let headCell = cells[0];
+                // console.log('head cell', headCell.pageRegion);
+                let cellRow = region.row;
+                let displayGraphRow = box.origin.y;
+                // this.cellRowToDisplayRow[cellRow] = displayGraphRow;
+                // this.cellRowToDisplayBox[cellRow] = box;
+                this.cellRowToDisplayRegion[cellRow] = this.scaleLTBounds(bounds);
+
+                console.log('cell row , box', cellRow, box.origin);
+
                 let cellChrs = _.map(cells, c => c.char.toString());
                 if (cellChrs[0] == ' ') {
                     cellChrs[0] = '░';
@@ -358,7 +372,7 @@ export class ReflowWidget {
     }
 
     redrawAll() {
-        this.gridProps = TGC.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
+        this.gridProps = TGI.textGrids.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
         let rowCount = Math.max(this.gridProps.getGridRowCount(), 40);
         let colCount = Math.max(this.gridProps.getGridColCount(), 100);
 

@@ -4,6 +4,7 @@
 
 /* global require _ d3 watr */
 
+import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
 const GraphPaper = watr.utils.GraphPaper;
 const Options = watr.utils.Options;
@@ -162,7 +163,57 @@ export function slicerTool(widget) {
 }
 
 
-export function lineToTop() {
+export function moveLine(widget) {
+    return {
+        mousedown: function(mouseEvent) {
+            whenFocusedOnCells(widget.userGridLocation.cellContent, () => {
+                let { focalGraphCell,
+                      focalBox,
+                      cellContent  } = widget.userGridLocation;
+                let cellRow = cellContent.region.row;
+                let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                let cellCol = focalCellIndex;
+                // Determine legal drop points for this line
+                let possibleRows = TGI.textGrids.findLegalReorderingRows(widget.textGrid, cellRow, cellCol);
+                console.log('possibleRows', possibleRows);
+
+                if (possibleRows.length > 1) {
+                    let possibleDropRegions = _.map(possibleRows, cellRow => {
+                        return widget.cellRowToDisplayRegion[cellRow]
+                    })
+
+                    console.log('possibleDropRegions', possibleDropRegions);
+                    _.each(possibleDropRegions, dropRegion => {
+                        widget.d3$textgridSvg
+                            .append('rect')
+                            .classed(`${'asdf'}`, true)
+                            .call(util.initRect, () => dropRegion)
+                            .call(util.initFill, 'blue', 0.3)
+                        ;
+                    });
+
+                    // Construct the 'grabbed' region
+                    widget.d3$textgridSvg
+                        .append('rect')
+                        .classed(`${'asdf'}`, true)
+                        .call(util.initRect, () => widget.scaleLTBounds(cellContent.region.bounds))
+                        .call(util.initFill, 'green', 0.9)
+                    ;
+                }
+
+                // If there are legal drop points, Construct an svg overlay
+                //   representing the drag/drop operation
+            });
+        },
+
+        mousemove: function(mouseEvent) {
+            // Update drag object and drop point indicator
+        },
+
+        mouseup: function(mouseEvent) {
+            // Either drop on legal point or cancel
+        }
+    };
 
 }
 
@@ -198,4 +249,3 @@ function maybeUpdateGrid(widget, maybeGrid) {
             widget.redrawAll();
         });
 }
-
