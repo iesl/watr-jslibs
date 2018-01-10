@@ -3,6 +3,7 @@
  **/
 
 /* global $ _ Image */
+import {zipWithIndex} from './lodash-plus';
 
 export function $id(selector) {
     return $('#' + selector);
@@ -52,7 +53,7 @@ _.each(allSvgTags, tag => {
 
 let i           = (...args) => elem('i', ...args);
 
-let fa = (icon) => () => i('.fa', `.fa-${icon}`, {'aria-hidden': true});
+let fa = (icon) => i('.fa', `.fa-${icon}`, {'aria-hidden': true});
 
 export let icon = {
     fa           : fa,
@@ -125,12 +126,6 @@ export function makeModal(form) {
     return modal;
 }
 
-export function mkIconButton(iconName, tooltip) {
-    let btn = t.button({title: tooltip}, [icon.fa(iconName)]);
-    // btn.onclick = 
-
-    return btn;
-}
 export let htm = {
     labeledTextInput: (label, key) => {
         return t.span([
@@ -151,6 +146,72 @@ export let htm = {
             t.input(':file', `@${key}`, `#${key}`),
             t.label({for: `$key`}, label)
         ]);
+    },
+
+    iconButton: (iconName) => {
+        return t.button('.btn-icon', [
+            icon.fa(iconName)
+        ]);
+    },
+
+    makeRadios(name, values) {
+        let radios = _.flatMap(zipWithIndex(values), ([[val, vicon, initCheck, tooltip], vi]) => {
+            let id = `${name}-choice-${vi}`;
+            let btn = t.input({
+                type: 'radio',
+                name: name,
+                value: val,
+                id: id
+            });
+
+            if (initCheck) {
+                $(btn).attr('checked', initCheck);
+                $(btn).prop('checked', initCheck);
+            }
+
+            let label = t.label({
+                for: id,
+                title: tooltip
+            }, [icon.fa(vicon)]);
+            return [btn, label];
+        });
+        let form = t.form('.inline', [
+            t.span('.radio-switch', [
+                radios
+            ])
+        ]);
+        return form;
+    },
+
+    makeToggle(name, checkedIcon, uncheckedIcon, initCheck, tooltip) {
+        let id = 'my-toggle';
+        let input = t.input({
+            type: 'checkbox',
+            name: name,
+            id: id
+        });
+
+        if (initCheck) {
+            $(input).attr('checked', initCheck);
+            $(input).prop('checked', initCheck);
+        }
+
+        let labelOn = t.label('.checked', {
+            for: id,
+            title: tooltip
+        }, [icon.fa(checkedIcon)]);
+
+        let labelOff = t.label('.unchecked', {
+            for: id,
+            title: tooltip
+        }, [icon.fa(uncheckedIcon)]);
+
+        let form = t.form('.inline', [
+            t.span('.toggle-switch', [
+                input, labelOn, labelOff
+            ])
+        ]);
+        return form;
     }
 
 };

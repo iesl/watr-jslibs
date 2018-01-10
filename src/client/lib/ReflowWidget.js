@@ -6,17 +6,13 @@
 
 import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
-import { t, icon } from './jstags.js';
-import { $id } from './jstags.js';
-import { mkIconButton } from './jstags.js';
+import { $id, t, icon, htm } from './jstags.js';
 import * as lbl from './labeling';
 let rtree = require('rbush');
 import {shared} from './shared-state';
-import {zipWithIndex} from './lodash-plus';
 
 import * as gp from './graphpaper-variants';
 import * as colors from './colors';
-import * as rtrees from  './rtrees.js';
 import * as server from './serverApi.js';
 
 const GraphPaper = watr.utils.GraphPaper;
@@ -26,14 +22,10 @@ const JsArray = watr.utils.JsArray;
 const LTBounds = watr.geometry.LTBounds_Companion;
 const TGCC = watr.textgrid.TextGridConstructor_Companion;
 const TGC = TGCC.create();
-let TextGridCompanion = watr.textgrid.TextGrid.Companion;
 const TGI = watr.textgrid.TextGridInterop;
 
 
-function printToInfobar(slot, label, value) {
-    $(`#slot-label-${slot}`).text(label);
-    $(`#slot-value-${slot}`).text(value);
-}
+import * as mouseHandlers from './ReflowWidgetMouseHandlers.js';
 
 export function unshowGrid() {
     if (shared.activeReflowWidget != undefined) {
@@ -41,112 +33,6 @@ export function unshowGrid() {
         $id(widget.containerId).empty();
         shared.activeReflowWidget = undefined;
     }
-}
-
-export function showGrid(textGridDef) {
-    unshowGrid();
-
-    let {textGrid, zoneId, zoneLabel} = textGridDef;
-
-    let allSchemas = _.map(shared.curations, c => c.labelSchemas);
-
-    let matchingSchemas = _.filter(allSchemas, s => {
-        return _.some(s.schemas, c => c.label === zoneLabel);
-    });
-
-    let schema = matchingSchemas[0];
-    let localSchema = Object.assign({}, schema);
-    localSchema.schemas = _.filter(schema.schemas, s => s.label === zoneLabel);
-
-    localSchema.schemas = localSchema.schemas[0].children;
-
-    let labelSchema = TGI.labelSchemas.schemasFromJson(JSON.stringify(localSchema));
-
-    let reflowWidget = new ReflowWidget('reflow-controls', textGrid, labelSchema, zoneId, zoneLabel);
-    shared.activeReflowWidget = reflowWidget;
-
-    return reflowWidget.init();
-}
-
-export function textGridForSelection(selection) {
-    let zoneId = selection.zoneId ;
-    let zoneLabel = selection.label;
-    let maybeExistingGrid = _.find(shared.zones, z => z.zoneId == zoneId);
-
-    if (maybeExistingGrid !== undefined && maybeExistingGrid.glyphDefs !== null) {
-        let textGrid = TextGridCompanion.fromJsonStr(
-            JSON.stringify(maybeExistingGrid.glyphDefs)
-        );
-
-        let res = {
-            textGrid: textGrid,
-            zoneId: zoneId,
-            zoneLabel: zoneLabel
-        };
-
-        return res;
-    }
-    return undefined;
-}
-
-
-export function createFromSelection(selection) {
-
-    let zoneId = selection.zoneId ;
-    let zoneLabel = selection.label;
-    let hits = rtrees.searchPage(selection.pageNum, selection);
-
-    let tuples = _.map(hits, hit => {
-        let g = hit.gridDataPt;
-        return [g.row, g.col, g.gridRow];
-    });
-    let byRows = _.groupBy(tuples, t => t[0]);
-
-    let clippedGrid =
-        _.map(_.toPairs(byRows), ([rowNum, rowTuples]) => {
-            let cols    = _.map(rowTuples, t => t[1]),
-                minCol  = _.min(cols),
-                maxCol  = _.max(cols),
-                gridRow = rowTuples[0][2],
-                text    = gridRow.text.slice(minCol, maxCol+1),
-                loci    = gridRow.loci.slice(minCol, maxCol+1)
-            ;
-
-            return [rowNum, text, loci];
-        });
-
-    let sortedRows = _.sortBy(clippedGrid, g => g[0]);
-
-    let rowData = _.map(sortedRows, g => {
-        let gfiltered = _.map(g[2], go => {
-            return _.pick(go, ['g', 'i']);
-        });
-
-        return {
-            text: g[1],
-            loci: gfiltered
-        };
-    });
-
-
-    let data = {
-        stableId: shared.currentDocument,
-        rows: rowData
-    };
-
-    let textGrid = TextGridCompanion.fromJsonStr(
-        JSON.stringify(data)
-    );
-
-    let res = {
-        textGrid: textGrid,
-        zoneId: zoneId,
-        zoneLabel: zoneLabel
-    };
-
-    return res;
-
-
 }
 
 export class ReflowWidget {
@@ -165,85 +51,28 @@ export class ReflowWidget {
         this.svgId    = `textgrid-svg-${gridNum}`;
         this.zoneId = zoneId;
         this.zoneLabel = zoneLabel;
+
     }
 
 
-    makeRadios(name, values) {
-        let radios = _.flatMap(zipWithIndex(values), ([[val, vicon, initCheck, tooltip], vi]) => {
-            let id = `${name}-choice-${vi}`;
-            let btn = t.input({
-                type: 'radio',
-                name: name,
-                value: val,
-                id: id
-            });
-
-            if (initCheck) {
-                $(btn).attr('checked', initCheck);
-                $(btn).prop('checked', initCheck);
-            }
-
-            let label = t.label({
-                for: id,
-                title: tooltip
-            }, [icon.fa(vicon)]);
-            return [btn, label];
-        });
-        let form = t.form('.inline', [
-            t.span('.radio-switch', [
-                radios
-            ])
-        ]);
-        return form;
-    }
-
-    makeToggle(name, checkedIcon, uncheckedIcon, initCheck, tooltip) {
-        let id = 'my-toggle';
-        let input = t.input({
-            type: 'checkbox',
-            name: name,
-            id: id
-        });
-
-        if (initCheck) {
-            $(input).attr('checked', initCheck);
-            $(input).prop('checked', initCheck);
-        }
-
-        let labelOn = t.label('.checked', {
-            for: id,
-            title: tooltip
-        }, [icon.fa(checkedIcon)]);
-
-        let labelOff = t.label('.unchecked', {
-            for: id,
-            title: tooltip
-        }, [icon.fa(uncheckedIcon)]);
-
-        let form = t.form('.inline', [
-            t.span('.toggle-switch', [
-                input, labelOn, labelOff
-            ])
-        ]);
-        return form;
-    }
 
     setupTopStatusBar() {
         let controls = [
-            [ 'labeler'         , 'pencil'             , true,  'Labeling tool'],
-            [ 'slicer'          , 'scissors'           , false, 'Text slicing'],
-            [ 'move-to-top'     , 'angle-double-up'    , false, 'Move text to top'],
-            [ 'move-to-bottom'  , 'angle-double-down'  , false, 'Move text to bottom'],
-            [ 'move-up-1'       , 'angle-up'           , false, 'Move text up one line'],
-            [ 'move-down-1'     , 'angle-down'         , false, 'Move text down one line'],
+            [ 'labeler'         , 'pencil'             , true,  'Labeling tool'           ],
+            [ 'slicer'          , 'scissors'           , false, 'Text slicing'            ],
+            [ 'move-to-top'     , 'angle-double-up'    , false, 'Move text to top'        ],
+            [ 'move-to-bottom'  , 'angle-double-down'  , false, 'Move text to bottom'     ],
+            [ 'move-up-1'       , 'angle-up'           , false, 'Move text up one line'   ],
+            [ 'move-down-1'     , 'angle-down'         , false, 'Move text down one line' ],
         ];
 
-        let leftControls = this.makeRadios('shapers', controls);
+        let leftControls = htm.makeRadios('shapers', controls);
 
-        let infoToggle = this.makeToggle('info-toggle', 'toggle-on', 'toggle-off', false, 'Toggle Infopane');
+        let infoToggle = htm.makeToggle('info-toggle', 'toggle-on', 'toggle-off', false, 'Toggle debug info pane');
+
         let closeButton = t.span(
             '.spacedout',
-            t.button()
+            htm.iconButton('close')
         );
 
         let rightControls = t.span(
@@ -318,6 +147,11 @@ export class ReflowWidget {
             return this.redrawAll();
         });
 
+    }
+
+    printToInfobar(slot, label, value) {
+        $(`#slot-label-${slot}`).text(label);
+        $(`#slot-value-${slot}`).text(value);
     }
 
     updateDomNodeDimensions() {
@@ -516,7 +350,10 @@ export class ReflowWidget {
             ;
         });
 
-        this.initMouseHandlers();
+        this.setMouseHandlers([
+            mouseHandlers.updateUserPosition,
+            mouseHandlers.labelingToolHandlers
+        ]);
 
     }
 
@@ -584,17 +421,40 @@ export class ReflowWidget {
         );
     }
 
-
     getCellNum(graphCell) {
         return graphCell.y * this.colCount + graphCell.x;
     }
 
+    setMouseHandlers(handlers) {
+        let widget = this;
+        widget.mouseHandlers = _.map(handlers, h => {
+            let init = {
+                mousemove: function() {},
+                mouseup: function() {},
+                mousedown: function() {}
+            };
+            Object.assign(init, h(widget));
+            return init;
+        });
 
+        this.d3$textgridSvg.on("mousemove", function() {
+            let mouseEvent = d3.event;
+            _.each(widget.mouseHandlers, h => {
+                h.mousemove(mouseEvent);
+            });
+        });
+        this.d3$textgridSvg.on("mousedown", function() {
+            let mouseEvent = d3.event;
+            _.each(widget.mouseHandlers, h => {
+                h.mousedown(mouseEvent)
+            });
+        });
 
-    initMouseHandlers() {
+    }
+    initMouseHandlers2() {
         let widget = this;
         widget.hoverCell = null;
-        printToInfobar(2, `dim`, `${this.colCount}x${this.rowCount}`);
+        widget.printToInfobar(2, `dim`, `${this.colCount}x${this.rowCount}`);
 
         this.d3$textgridSvg.on("mousemove", function() {
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
@@ -604,10 +464,10 @@ export class ReflowWidget {
             let focalGraphCell = widget.clientPointToGraphCell(userPt);
             let cellContent = widget.getCellContent(focalGraphCell);
 
-            printToInfobar(0, `@client`, ` (${clientX}, ${clientY})`);
+            widget.printToInfobar(0, `@client`, ` (${clientX}, ${clientY})`);
 
             focalGraphCell.id = widget.getCellNum(focalGraphCell);
-            printToInfobar(1, '@dispcell', ` (${focalGraphCell.x}, ${focalGraphCell.y}) #${focalGraphCell.id}`);
+            widget.printToInfobar(1, '@dispcell', ` (${focalGraphCell.x}, ${focalGraphCell.y}) #${focalGraphCell.id}`);
 
             if (widget.hoverCell != null) {
                 if (focalGraphCell.id != widget.hoverCell.id) {
@@ -630,16 +490,16 @@ export class ReflowWidget {
                     let row = cellContent.region.row;
                     let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
                     let col = focalCellIndex;
-                    printToInfobar(3, '@gridcell', ` (${row}, ${col})`);
+                    widget.printToInfobar(3, '@gridcell', ` (${row}, ${col})`);
                     // let pins = c.region['cell$1'];
                     // console.log(pins.showPinsVert().toString());
                 } else {
-                    printToInfobar(3, '@gridcell', ` --`);
+                    widget.printToInfobar(3, '@gridcell', ` --`);
                 }
                 widget.showLabelHighlights(cellContent);
             } else {
                 widget.clearLabelHighlights();
-                printToInfobar(3, '@gridcell', ` --`);
+                widget.printToInfobar(3, '@gridcell', ` --`);
             }
 
         });
@@ -686,7 +546,7 @@ export class ReflowWidget {
                     let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
                     let col = focalCellIndex;
 
-                    printToInfobar(3, 'grid cell', `(${row}, ${col})`);
+                    widget.printToInfobar(3, 'grid cell', `(${row}, ${col})`);
 
                     if (mouseEvent.shiftKey) {
                         let maybeGrid = widget.textGrid.slurp(row);
@@ -766,25 +626,3 @@ export class ReflowWidget {
 
     }
 }
-
-
-
-    //     document.getElementById('tgl1').onchange = function(e) {
-    //         e.preventDefault();
-    //         e.stopPropagation();
-
-    //         return false;
-    //     };
-    //     document.getElementById('tgl1').onclick = function(e) {
-    //         e.preventDefault();
-    //         e.stopPropagation();
-
-    //         return false;
-    //     };
-
-    //     // $("#tg1").on('click', function(e) {
-    //     //     e.preventDefault();
-    //     //     e.stopPropagation();
-
-    //     //     return true;
-    //     // });
