@@ -1,7 +1,7 @@
 /* global require beforeEach  fixture describe it watr */
 
 
-describe('ReflowWidget', function() {
+xdescribe('ReflowWidget', function() {
 
 
     beforeEach(function() {

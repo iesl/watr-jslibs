@@ -24,6 +24,7 @@ module.exports = function(config) {
             {pattern: 'node_modules/jquery/dist/jquery.min.js', watched:false, served:true, included:true, nocache:false},
             {pattern: 'node_modules/lodash/lodash.min.js', watched:false, served:true, included:true, nocache:false},
             {pattern: 'node_modules/d3/build/d3.min.js', watched:false, served:true, included:true, nocache:false},
+            {pattern: 'node_modules/d3-scale/build/d3-scale.js', watched:false, served:true, included:, nocache:false},
             {pattern: 'node_modules/rxjs/bundles/Rx.min.js', watched:false, served:true, included:true, nocache:false},
             {pattern: 'node_modules/fabric/dist/fabric.js', watched:false, served:true, included:true, nocache:false},
             {pattern: 'node_modules/form-serializer/dist/jquery.serialize-object.min.js', watched:false, served:true, included:true, nocache:false},
