@@ -56,8 +56,8 @@ export class BBox {
     get maxX() { return this.left + this.width; }
     get maxY() { return this.top + this.height; }
 
-    // get x() { return this.left; }
-    // get y() { return this.top; }
+    get x() { return this.left; }
+    get y() { return this.top; }
 
     get x1() { return this.left; }
     get x2() { return this.left + this.width; }

@@ -22,5 +22,6 @@ export function runMain() {
     let loginDiv = $('#login-forms').detach();
     $('#login-panel').append(loginDiv);
     $('#login-forms').attr('hidden', false);
-
 }
+
+

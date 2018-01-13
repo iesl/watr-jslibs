@@ -28,6 +28,61 @@ import * as coords from './coord-sys.js';
 import * as colors from './colors';
 
 
+/**
+ * Set of functions to  convert between cell-based and cartesian geometries
+ */
+export class GraphPaper  {
+    constructor (rowCount, colCount, cellWidth, cellHeight) {
+        this.rowCount = rowCount;
+        this.colCount= colCount;
+        this.cellWidth = cellWidth;
+        this.cellHeight = cellHeight;
+    }
+
+
+    cellAt(x, y) {
+        return new GraphCell(x, y, this);
+    }
+
+    boxAt(x, y, spanRight, spanDown) {
+        return new GraphBox(this.cellAt(x, y), spanRight, spanDown, this);
+    }
+}
+
+class GraphCell  {
+    constructor (x, y, graphPaper) {
+        this.x = x;
+        this.y = y;
+        this.graphPaper = graphPaper;
+    }
+
+    getBounds() {
+        let gp = this.graphPaper;
+        return new coords.BBox(
+            this.x*gp.cellWidth,
+            this.y*gp.cellHeight,
+            gp.cellWidth,
+            gp.cellHeight
+        );
+    }
+}
+
+class GraphBox  {
+    constructor (originCell, spanRight, spanDown, graphPaper) {
+        this.originCell = originCell;
+        this.spanRight = spanRight;
+        this.spanDown = spanDown;
+        this.graphPaper = graphPaper;
+
+        this.bounds = new coords.BBox(
+            this.originCell.x*graphPaper.cellWidth,
+            this.originCell.y*graphPaper.cellHeight,
+            (this.spanRight-1)*graphPaper.cellWidth,
+            (this.spanDown-1)*graphPaper.cellHeight
+        );
+    }
+
+}
 
 export class FabricJsGraphPaper  {
     constructor (canvasId, fontSize) {
