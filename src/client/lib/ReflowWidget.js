@@ -20,7 +20,7 @@ const TGCC = watr.textgrid.TextGridConstructor_Companion;
 const TGC = TGCC.create();
 const TGI = watr.textgrid.TextGridInterop;
 
-import * as reflowTools from './ReflowWidgetMouseHandlers.js';
+import * as reflowTools from './ReflowTools.js';
 
 export function unshowGrid() {
     if (shared.activeReflowWidget != undefined) {
@@ -54,22 +54,29 @@ export class ReflowWidget {
     setupTopStatusBar() {
         let widget = this;
         let setTool = h => {
-            return function (){ widget.setMouseHandlers([reflowTools.updateUserPosition, h]); }
+            return function (){
+                return widget.setMouseHandlers([reflowTools.updateUserPosition, h]);
+            };
         };
 
         let controls = [
             [ 'labeler'    , 'pencil'             , true,  'Labeling tool'        , setTool( reflowTools.labelingTool )  ],
             [ 'slicer'     , 'scissors'           , false, 'Text slicing'         , setTool( reflowTools.slicerTool   )  ],
-            [ 'move'       , 'arrows-v'           , false, 'Move line up or down' , setTool( reflowTools.moveLine    )   ]
-            // [ 'to-top'     , 'angle-double-up'    , false, 'Move line to top'     , setTool( reflowTools.moveLine    )   ]
-            // [ 'to-bottom'  , 'angle-double-down'  , false, 'Move line to bottom'  , setTool( reflowTools.lineToBottom )  ],
-            // [ 'up-1'       , 'angle-up'           , false, 'Move line up'         , setTool( reflowTools.lineUp1      )  ],
-            // [ 'down-1'     , 'angle-down'         , false, 'Move line down'       , setTool( reflowTools.lineDown1    )  ],
-        ];
+            [ 'move'       , 'arrows-v'           , false, 'Move line up or down' , setTool( reflowTools.moveLine     )  ]
+       ];
 
         let leftControls = htm.makeRadios('shapers', controls);
 
         let infoToggle = htm.makeToggle('info-toggle', 'toggle-on', 'toggle-off', false, 'Toggle debug info pane');
+
+        infoToggle.on('change', function(event) {
+            let isChecked = $(event.target).prop('checked');
+            if (isChecked) {
+                $('div.gridwidget').addClass('hideinfobar');
+            } else {
+                $('div.gridwidget').removeClass('hideinfobar');
+            }
+        });
 
         let closeButton = t.span(
             '.spacedout',
@@ -230,7 +237,7 @@ export class ReflowWidget {
                 let text = new fabric.Text(label, {
                     objectCaching: false,
                     left: left, top: top,
-                    fontSize: 20,
+                    fontSize: this.textHeight,
                     fontStyle: 'normal',
                     fontFamily: 'Courier New',
                     fontWeight: 'bold',
@@ -264,7 +271,7 @@ export class ReflowWidget {
                 let text = new fabric.Text(cellStr, {
                     objectCaching: false,
                     left: left, top: top,
-                    fontSize: 20,
+                    fontSize: this.textHeight,
                     fontStyle: 'normal',
                     fontFamily: 'Courier New'
                     // fontWeight: 'bold',
@@ -301,7 +308,7 @@ export class ReflowWidget {
                 let text = new fabric.Text(abbrev, {
                     objectCaching: false,
                     left: left, top: top,
-                    fontSize: 20,
+                    fontSize: this.textHeight,
                     fontStyle: 'normal',
                     fontFamily: 'Courier New',
                     fontWeight: 'bolder',
@@ -318,7 +325,7 @@ export class ReflowWidget {
                 let text = new fabric.Text(region.heading, {
                     objectCaching: false,
                     left: left, top: top,
-                    fontSize: 20,
+                    fontSize: this.textHeight,
                     fontStyle: 'italic',
                     fontFamily: 'Courier New',
                     fontWeight: 'bolder',
@@ -372,7 +379,10 @@ export class ReflowWidget {
     }
 
     redrawAll() {
+        console.log("redrawAll, 0", this.textGrid, this.labelSchema);
+
         this.gridProps = TGI.textGrids.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
+        console.log("redrawAll, 1");
         let rowCount = Math.max(this.gridProps.getGridRowCount(), 40);
         let colCount = Math.max(this.gridProps.getGridColCount(), 100);
 
@@ -458,7 +468,12 @@ export class ReflowWidget {
         });
         widget.d3$textgridSvg.on("mousedown", function() {
             _.each(widget.mouseHandlers, h => {
-                h.mousedown(d3.event)
+                h.mousedown(d3.event);
+            });
+        });
+        widget.d3$textgridSvg.on("mouseup", function() {
+            _.each(widget.mouseHandlers, h => {
+                h.mouseup(d3.event);
             });
         });
 

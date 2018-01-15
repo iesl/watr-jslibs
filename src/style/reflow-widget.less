@@ -5,7 +5,6 @@
 @import "inc/_buttons";
 @import "inc/_solarized";
 
-
 div.gridwidget {
     display: inline-grid;
 
@@ -116,4 +115,20 @@ div.gridwidget {
             }
         }
     }
+}
+
+div.gridwidget.hideinfobar {
+    display: inline-grid;
+
+    // lgt/rgt = left/right-gutter
+    // tsb/bsb = top/bottom status bar
+    // inf     = infobar
+    // frm     = frame div
+    grid-template-areas:
+    /**/"tsb tsb tsb"
+        "lgt frm rgt"
+        "lgt frm rgt"
+        "bsb bsb bsb"
+    ;
+
 }

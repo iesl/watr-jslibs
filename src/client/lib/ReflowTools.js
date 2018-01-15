@@ -163,9 +163,100 @@ export function slicerTool(widget) {
 }
 
 
+function doReorderDragDrop(widget) {
+    let dragTextRow = widget.textReorderingState.dragSubjectTextRow;
+    let dropTextRows = widget.textReorderingState.dropTargetsTextRows;
+    let dragRegion = widget.cellRowToDisplayRegion[dragTextRow];
+    widget.textReorderingState.dragRegion = dragRegion;
+
+    // mouse cursor := closed hand
+
+    return {
+        mousedown: function(mouseEvent) {},
+
+        mousemove: function() {
+            let { clientX, clientY } = widget.userGridLocation;
+            widget.d3$textgridSvg
+                .select('.reorder-subject')
+                .attr('x', clientX)
+                .attr('y', clientY)
+            ;
+            //
+            whenFocusedOnCells(widget.userGridLocation.cellContent, () => {
+                let { focalGraphCell,
+                      focalBox,
+                      cellContent  } = widget.userGridLocation;
+                let focalTextRow = cellContent.region.row;
+                let hoveringDropTarget = _.some(dropTextRows, r => r == focalTextRow);
+
+                if (hoveringDropTarget) {
+                    widget.textReorderingState.currentDropRow = focalTextRow;
+                    widget.d3$textgridSvg
+                        .select('.reorder-subject')
+                        .attr('opacity', 0.1) ;
+                } else {
+                    widget.textReorderingState.currentDropRow = undefined;
+                    widget.d3$textgridSvg
+                        .select('.reorder-subject')
+                        .attr('opacity', 0.4) ;
+                }
+
+            }, () => {
+                widget.textReorderingState.currentDropRow = undefined;
+                widget.d3$textgridSvg
+                    .select('.reorder-subject')
+                    .attr('opacity', 0.4) ;
+            });
+        },
+        mouseup: function() {
+            // Either drop on legal point or cancel
+            let dropRow = widget.textReorderingState.currentDropRow;
+            if (dropRow !== undefined) {
+                let newOrdering = _.flatMap(dropTextRows, r => {
+                    if (r == dropRow) {
+                        if (dragTextRow < dropRow) {
+                            return [dropRow, dragTextRow];
+                        } else {
+                            return [dragTextRow, dropRow];
+                        }
+                    } else {
+                        return [r];
+                    }
+                });
+                //
+                console.log('new order is', newOrdering);
+                let minRow = _.min(newOrdering);
+                let maybeNewTextGrid = TGI.textGrids.reorderRows(widget.textGrid, minRow, newOrdering);
+                console.log('maybeNewTextGrid', maybeNewTextGrid);
+
+                maybeUpdateGrid(widget, maybeNewTextGrid);
+            } 
+            widget.d3$textgridSvg
+                .selectAll('.reorder-region')
+                .remove();
+
+            widget.setMouseHandlers([
+                updateUserPosition,
+                moveLine
+            ]);
+        }
+    };
+
+}
 export function moveLine(widget) {
     return {
         mousedown: function(mouseEvent) {
+            if (widget.textReorderingState !== undefined) {
+
+                widget.setMouseHandlers([
+                    updateUserPosition,
+                    doReorderDragDrop
+                ]);
+            }
+        },
+
+        mousemove: function(mouseEvent) {
+            // Update drag object and drop point indicator
             whenFocusedOnCells(widget.userGridLocation.cellContent, () => {
                 let { focalGraphCell,
                       focalBox,
@@ -174,59 +265,70 @@ export function moveLine(widget) {
                 let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
                 let cellCol = focalCellIndex;
                 // Determine legal drop points for this line
-                let possibleRows = TGI.textGrids.findLegalReorderingRows(widget.textGrid, cellRow, cellCol);
-                console.log('possibleRows', possibleRows);
+                let possibleTextRows = TGI.textGrids.findLegalReorderingRows(widget.textGrid, cellRow, cellCol);
+                console.log('possibleTextRows', possibleTextRows);
 
-                if (possibleRows.length > 1) {
-                    let possibleDropRegions = _.map(possibleRows, cellRow => {
-                        return widget.cellRowToDisplayRegion[cellRow]
-                    })
+                if (possibleTextRows.length > 1) {
+                    // Legal reorderable textGrid rows
+                    let dropTargetTextRows = _.filter(possibleTextRows, r => r != cellRow);
 
-                    console.log('possibleDropRegions', possibleDropRegions);
-                    _.each(possibleDropRegions, dropRegion => {
-                        widget.d3$textgridSvg
-                            .append('rect')
-                            .classed(`${'asdf'}`, true)
-                            .call(util.initRect, () => dropRegion)
-                            .call(util.initFill, 'blue', 0.3)
-                        ;
-                    });
+                    widget.textReorderingState = {
+                        dragSubjectTextRow: cellRow,
+                        dropTargetsTextRows: dropTargetTextRows
+                    };
 
-                    // Construct the 'grabbed' region
-                    widget.d3$textgridSvg
-                        .append('rect')
-                        .classed(`${'asdf'}`, true)
-                        .call(util.initRect, () => widget.scaleLTBounds(cellContent.region.bounds))
-                        .call(util.initFill, 'green', 0.9)
-                    ;
+                } else {
+                    widget.textReorderingState = undefined;
                 }
-
-                // If there are legal drop points, Construct an svg overlay
-                //   representing the drag/drop operation
+                updateDropRegionIndicators(widget);
+            }, () => {
+                widget.textReorderingState = undefined;
+                updateDropRegionIndicators(widget);
             });
-        },
-
-        mousemove: function(mouseEvent) {
-            // Update drag object and drop point indicator
         },
 
         mouseup: function(mouseEvent) {
             // Either drop on legal point or cancel
         }
     };
-
 }
 
-export function lineToBottom() {
+function updateDropRegionIndicators(widget) {
+    widget.d3$textgridSvg
+        .selectAll('.reorder-region')
+        .remove();
+    if (widget.textReorderingState !== undefined) {
+
+        let dragTextRow = widget.textReorderingState.dragSubjectTextRow;
+        let dropTextRows = widget.textReorderingState.dropTargetsTextRows;
+
+        let dragRegion = widget.cellRowToDisplayRegion[dragTextRow];
+        let dropRegions = _.map(dropTextRows, textRow => {
+            return widget.cellRowToDisplayRegion[textRow];
+        });
+
+
+        _.each(dropRegions, dropRegion => {
+            widget.d3$textgridSvg
+                .append('rect')
+                .classed('reorder-region', true)
+                .classed('reorder-drop', true)
+                .call(util.initRect, () => dropRegion)
+                .call(util.initFill, 'blue', 0.3)
+            ;
+        });
+
+        // Construct the 'grabbed' region
+        widget.d3$textgridSvg
+            .append('rect')
+            .classed('reorder-region', true)
+            .classed('reorder-subject', true)
+            .call(util.initRect, () => dragRegion)
+            .call(util.initFill, 'green', 0.4)
+        ;
+
+    }
 }
-
-export function lineUp1() {
-}
-
-export function lineDown1() {
-}
-
-
 
 
 function whenFocusedOnLabelCover(cellContent, func) {
@@ -235,9 +337,13 @@ function whenFocusedOnLabelCover(cellContent, func) {
     }
 }
 
-function whenFocusedOnCells(cellContent, func) {
+function whenFocusedOnCells(cellContent, func, elseFunc) {
     if (cellContent !== undefined && cellContent.region.isCells()) {
         func(cellContent);
+    } else {
+        if (elseFunc != undefined) {
+            elseFunc();
+        }
     }
 }
 
