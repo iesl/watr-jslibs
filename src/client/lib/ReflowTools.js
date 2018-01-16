@@ -223,14 +223,16 @@ function doReorderDragDrop(widget) {
                         return [r];
                     }
                 });
-                //
-                console.log('new order is', newOrdering);
+
                 let minRow = _.min(newOrdering);
+
+                console.log('new order is', newOrdering, ' starting from ', minRow);
+
                 let maybeNewTextGrid = TGI.textGrids.reorderRows(widget.textGrid, minRow, newOrdering);
-                console.log('maybeNewTextGrid', maybeNewTextGrid);
+                // console.log('maybeNewTextGrid', maybeNewTextGrid);
 
                 maybeUpdateGrid(widget, maybeNewTextGrid);
-            } 
+            }
             widget.d3$textgridSvg
                 .selectAll('.reorder-region')
                 .remove();
@@ -266,7 +268,7 @@ export function moveLine(widget) {
                 let cellCol = focalCellIndex;
                 // Determine legal drop points for this line
                 let possibleTextRows = TGI.textGrids.findLegalReorderingRows(widget.textGrid, cellRow, cellCol);
-                console.log('possibleTextRows', possibleTextRows);
+                // console.log('possibleTextRows', possibleTextRows);
 
                 if (possibleTextRows.length > 1) {
                     // Legal reorderable textGrid rows

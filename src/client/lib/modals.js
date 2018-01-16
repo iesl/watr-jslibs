@@ -28,7 +28,7 @@ export function makeModalPromise(context, innerPromise, body, header, footer) {
     return new Promise((resolve, reject) => {
         let $modal =
             t.div('#the-modal', '.b-modal-backdrop', [
-                t.div('.b-modal-content', [
+                t.div('.b-modal-content #modal-content', [
                     t.div('.b-modal-header', [
                         t.span("#the-modal-close", ".b-modal-close", icon.fa('close') ),
                         header

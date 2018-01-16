@@ -257,8 +257,6 @@ export class ReflowWidget {
                 // this.cellRowToDisplayBox[cellRow] = box;
                 this.cellRowToDisplayRegion[cellRow] = this.scaleLTBounds(bounds);
 
-                console.log('cell row , box', cellRow, box.origin);
-
                 let cellChrs = _.map(cells, c => c.char.toString());
                 if (cellChrs[0] == ' ') {
                     cellChrs[0] = '░';
@@ -379,10 +377,7 @@ export class ReflowWidget {
     }
 
     redrawAll() {
-        console.log("redrawAll, 0", this.textGrid, this.labelSchema);
-
         this.gridProps = TGI.textGrids.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
-        console.log("redrawAll, 1");
         let rowCount = Math.max(this.gridProps.getGridRowCount(), 40);
         let colCount = Math.max(this.gridProps.getGridColCount(), 100);
 

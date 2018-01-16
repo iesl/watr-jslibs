@@ -22,6 +22,7 @@ export default function awaitUserSelection(d3$svg, initSvgPt) {
             .attr("rx", 4)
             .attr("ry", 4)
         ;
+        let userWithinPageBounds = true;
 
         update(initSvgPt);
 
@@ -79,7 +80,7 @@ export default function awaitUserSelection(d3$svg, initSvgPt) {
             }
         });
         d3$svg.on("mousemove", function() {
-            if (selectionRect != null) {
+            if (selectionRect != null && userWithinPageBounds) {
                 let p = d3.mouse(this);
                 let clickPt = coords.mkPoint.fromD3Mouse(p);
                 update(clickPt);
@@ -87,7 +88,18 @@ export default function awaitUserSelection(d3$svg, initSvgPt) {
         });
 
         d3$svg.on("mousedown", function() {});
-        d3$svg.on("mouseover", function() {});
-        d3$svg.on("mouseout", function() {});
+        d3$svg.on("mouseover", function() {
+            // User moved back inside  page frame, resume updates
+            userWithinPageBounds = true;
+            console.log('user in bounds');
+
+        });
+        d3$svg.on("mouseout", function() {
+            // User moved outside of page frame, suspend updates
+            userWithinPageBounds = false;
+            console.log('user out of bounds');
+
+
+        });
     });
 }
