@@ -22,20 +22,25 @@ import * as coords from './coord-sys.js';
  */
 
 class Assignment {
-    constructor (workflow, zonelock, zone) {
-        this.workflow = workflow;
+    constructor (zonelock) {
+        // this.workflow = workflow;
         this.zonelock = zonelock;
-        this.zone = zone;
+        // this.zone = zone;
     }
+    // constructor (workflow, zonelock, zone) {
+    //     this.workflow = workflow;
+    //     this.zonelock = zonelock;
+    //     this.zone = zone;
+    // }
 }
 
 export function assignmentsFromJson(jsonRep) {
     return _.map(jsonRep, assignmentJson => {
-        let x = workflowFromJson(assignmentJson.workflow);
+        // let x = workflowFromJson(assignmentJson.workflow);
         let y = zonelockFromJson(assignmentJson.zonelock);
-        let z = zoneFromJson(assignmentJson.zone);
-        y.assignee = assignmentJson.assignee;
-        return new Assignment(x, y, z);
+        // let z = zoneFromJson(assignmentJson.zone);
+        // y.assignee = assignmentJson.assignee;
+        return new Assignment( y );
     });
 }
 

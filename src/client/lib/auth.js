@@ -161,7 +161,6 @@ export function getLoginStatus() {
         }).done(function(res) {
             result.info = res;
             result.login = true;
-            // resolve(result);
         }).fail(function(res) {
             result = { status: res.statusText } ;
         }).always(() => {

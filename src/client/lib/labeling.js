@@ -17,7 +17,9 @@ import * as coords from './coord-sys.js';
 
 export function updateAnnotationShapes() {
     return server.getDocumentZones()
-        .then(zoneRecs => refreshZoneHightlights(zoneRecs.zones));
+        .then(zoneRecs => {
+            return refreshZoneHightlights(zoneRecs.zones);
+        });
 }
 
 function mapGlyphLociToGridDataPts(glyphsLoci) {

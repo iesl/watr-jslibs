@@ -48,8 +48,7 @@ function curationStatusMenu(status) {
     let codes = [
         'Completed',
         'Assigned',
-        'Skipped',
-        'NeedsReview'
+        'Skipped'
     ];
     let choices = _.map(codes, code => {
         return t.option({selected: status == code, code: code}, code);
@@ -60,18 +59,31 @@ function curationStatusMenu(status) {
     return $menu;
 }
 
-function workflowControlPanel(assignment) {
-    let btn = curate.assignmentButton(assignment.workflow.slug);
-
-    // let labels = _.map(assignment.workflow.curatedLabels, l => l.key);
-    // let labelString = _.join(', ', labels);
+function assignedCurationControlPanel(assignment) {
+    let workflowSlug = assignment.zonelock.workflow;
+    let btn = curate.assignmentButton(workflowSlug);
 
     let panel = t.span([
-        t.strong(`Curating: `), assignment.workflow.slug,
+        t.strong(`Curating: `), workflowSlug,
         t.nbsp(5),
         t.strong(`Status: `), curationStatusMenu(assignment.zonelock.status),
         t.nbsp(5),
-        t.strong(`Assigned To: `), assignment.zonelock.assignee.email || '<unassigned>',
+        t.strong(`Assigned To You`),
+        t.nbsp(4),
+        btn
+    ]);
+
+    return panel;
+}
+
+function unassignedCurationControlPanel(assignment) {
+    let workflowSlug = assignment.zonelock.workflow;
+    let btn = curate.assignmentButton(workflowSlug);
+
+    let panel = t.span([
+        t.strong(`Curating: `), workflowSlug,
+        t.nbsp(5),
+        t.strong(`Status: `), assignment.zonelock.status,
         t.nbsp(4),
         btn
     ]);
@@ -97,7 +109,7 @@ export function runMain() {
     shared.currentDocument = entry;
 
     server.getCorpusArtifactTextgrid(entry)
-        .then(jsdata => {
+        .then((jsdata => {
             let dataBlock = jsdata[0];
             let pages = dataBlock.pages;
             let textgrids = _.map(pages, p => p.textgrid);
@@ -120,29 +132,45 @@ export function runMain() {
 
             curate.rest.read.workflows()
                 .then(workflows => { return shared.curations = workflows;})
-                .then(() => { return server.apiGet('/api/v1/workflow/workflows/assignments'); })
+                .then(() => { return server.apiGet(`/api/v1/workflow/documents/${entry}`); })
                 .then(response => {
-                    // Figure out if this doc is assigned to the current user
-
                     let assignments = dt.assignmentsFromJson(response);
-                    let filtered = _.filter(assignments, a => {
-                        return _.some(a.zone.regions, r => {
-                            return r.stableId === entry;
-                        });
-                    });
+                    // console.log('workflow for doc', response);
+                    console.log('current user', shared.loginInfo);
+                    // Figure out if this doc is assigned to the current user
+                    console.log('workflow for doc', assignments);
+                    let assignmentsForCurrentUser  = _.filter(assignments, a => a.zonelock.assignee == shared.loginInfo.id);
+                    let documentHasCurationStatus = assignments.length > 0;
+                    let completedAssignments  = _.filter(assignments, a => a.zonelock.status == 'Completed');
+                    let isComplete = completedAssignments.length > 0;
+                    let isAssignedToCurrentUser = assignmentsForCurrentUser.length > 0;
 
-                    if (filtered.length > 0) {
-                        shared.activeAssignment = filtered[0];
-                        let panel = workflowControlPanel(filtered[0]);
-                        $('.topbar-item-middle').append(panel);
-                        $('#curation-status').selectmenu( {
-                            change: curationStatusChange
-                        });
+                    if (documentHasCurationStatus) {
+                        let assignment = assignments[0];
+                        if (isAssignedToCurrentUser) {
+                            let userAssignment = assignmentsForCurrentUser[0];
+                            shared.activeAssignment = userAssignment;
+                            let panel = assignedCurationControlPanel(userAssignment);
+                            $('.topbar-item-middle').append(panel);
+                            $('#curation-status').selectmenu( {
+                                change: curationStatusChange
+                            });
+
+                        } else {
+                            let panel = unassignedCurationControlPanel(assignment);
+                            $('.topbar-item-middle').append(panel);
+                        }
+                    } else {
+                        // "Uncurated"  + button='label this paper'
+                        let panel = t.span([
+                            t.strong(`Curation Status: Not yet assigned.`),
+                        ]);
+                        $('.topbar-item-middle').append((panel));
                     }
-                })
-            ;
 
-        })
+                }) ;
+
+        }))
         .catch(error => {
             $('.content-pane').append(`<div><p>ERROR: ${error}: ${error}</p></div>`);
         }) ;

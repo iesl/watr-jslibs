@@ -2,7 +2,7 @@
  * Mouse handlers for ReflowWidget
  **/
 
-/* global require _ d3 watr */
+/* global require _ watr */
 
 import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
@@ -17,9 +17,9 @@ import * as lbl from './labeling';
 export function updateUserPosition(widget) {
     let handlers = {
 
-        init: () => {
+        mouseover: function() {
             widget.hoverCell = null;
-            widget.printToInfobar(2, `dim`, `${this.colCount}x${this.rowCount}`);
+            widget.printToInfobar(2, `dim`, `${widget.colCount}x${widget.rowCount}`);
         },
 
 
@@ -84,56 +84,60 @@ export function labelingTool(widget) {
     return {
         mousedown: function(mouseEvent) {
 
-            whenFocusedOnCells(widget.userGridLocation.cellContent, () => {
-                let { focalGraphCell,
-                      focalBox,
-                      cellContent  } = widget.userGridLocation;
+            foldCellContent(widget.userGridLocation.cellContent, {
+                onCells: () => {
+                    let { focalGraphCell,
+                          focalBox,
+                          cellContent  } = widget.userGridLocation;
 
-                let cellRow = cellContent.region.row;
-                let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                let cellCol = focalCellIndex;
+                    let cellRow = cellContent.region.row;
+                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                    let cellCol = focalCellIndex;
 
-                if (mouseEvent.shiftKey) {
-                    maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
-                } else if (mouseEvent.ctrlKey) {
-                    maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));
-                } else {
-                    // Add a label to the clicked row of text
-                    let focalClasses = TGI.gridRegions.labels(cellContent.region);
-                    let focalLabel = _.last(focalClasses) || '';
-                    let childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
-                    lbl.createLabelChoiceWidget(childLabels, widget.containerId)
-                        .then(choice => {
-                            let labelChoice = choice.selectedLabel;
-                            widget.textGrid.labelRow(cellRow, Labels.forString(labelChoice));
-                            widget.redrawAll();
-                        }, () => { /* Ok, user cancelled label selection */ });
+                    if (mouseEvent.shiftKey) {
+                        maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
+                    } else if (mouseEvent.ctrlKey) {
+                        maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));
+                    } else {
+                        // Add a label to the clicked row of text
+                        let focalClasses = TGI.gridRegions.labels(cellContent.region);
+                        let focalLabel = _.last(focalClasses) || '';
+                        let childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
+                        lbl.createLabelChoiceWidget(childLabels, widget.containerId)
+                            .then(choice => {
+                                let labelChoice = choice.selectedLabel;
+                                widget.textGrid.labelRow(cellRow, Labels.forString(labelChoice));
+                                widget.redrawAll();
+                            }, () => { /* Ok, user cancelled label selection */ });
+                    }
+                },
+
+                onLabelCover: () => {
+                    // If user clicks on a leaf (right-most) label cover indicator, delete that label
+                    let { focalBox,
+                          cellContent
+                        } = widget.userGridLocation;
+                    let focalLabels = TGI.gridRegions.labels(cellContent.region);
+
+                    let boxRight = focalBox.shiftOrigin(2, 0);
+                    let contentRight = widget.getBoxContent(boxRight);
+                    let rightLabelCovers = _.filter(contentRight, c => c.region.isLabelCover());
+                    let isLeafLabelCover = rightLabelCovers.length == 0;
+
+                    if (isLeafLabelCover) {
+                        let queryRight = boxRight.modifySpan(widget.colCount, 0);
+                        let rightContents = widget.getBoxContent(queryRight);
+                        let rightCells0 = _.filter(rightContents, c => c.region.isCells());
+
+                        let rightCells = _.map(rightCells0, r => r.region);
+                        let region0 = _.head(rightCells);
+                        widget.textGrid.unlabelNear(region0.row, 0, Labels.forString(focalLabels[0]));
+                        widget.redrawAll();
+                    }
+
                 }
             });
 
-            whenFocusedOnLabelCover(widget.userGridLocation.cellContent, () => {
-                // If user clicks on a leaf (right-most) label cover indicator, delete that label
-                let { focalBox,
-                      cellContent
-                    } = widget.userGridLocation;
-                let focalLabels = TGI.gridRegions.labels(cellContent.region);
-
-                let boxRight = focalBox.shiftOrigin(2, 0);
-                let contentRight = widget.getBoxContent(boxRight);
-                let rightLabelCovers = _.filter(contentRight, c => c.region.isLabelCover());
-                let isLeafLabelCover = rightLabelCovers.length == 0;
-
-                if (isLeafLabelCover) {
-                    let queryRight = boxRight.modifySpan(widget.colCount, 0);
-                    let rightContents = widget.getBoxContent(queryRight);
-                    let rightCells0 = _.filter(rightContents, c => c.region.isCells());
-
-                    let rightCells = _.map(rightCells0, r => r.region);
-                    let region0 = _.head(rightCells);
-                    widget.textGrid.unlabelNear(region0.row, 0, Labels.forString(focalLabels[0]));
-                    widget.redrawAll();
-                }
-            });
         }
     };
 }
@@ -143,21 +147,24 @@ export function slicerTool(widget) {
     return {
         mousedown: function(mouseEvent) {
 
-            whenFocusedOnCells(widget.userGridLocation.cellContent, () => {
-                let { focalGraphCell,
-                      focalBox,
-                      cellContent  } = widget.userGridLocation;
+            foldCellContent(widget.userGridLocation.cellContent, {
+                onCells: () => {
+                    let { focalGraphCell,
+                          focalBox,
+                          cellContent  } = widget.userGridLocation;
 
-                let cellRow = cellContent.region.row;
-                let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                let cellCol = focalCellIndex;
+                    let cellRow = cellContent.region.row;
+                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                    let cellCol = focalCellIndex;
 
-                if (mouseEvent.shiftKey) {
-                    maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
-                } else {
-                    maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));
+                    if (mouseEvent.shiftKey) {
+                        maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
+                    } else {
+                        maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));
+                    }
                 }
             });
+
         }
     };
 }
@@ -172,7 +179,7 @@ function doReorderDragDrop(widget) {
     // mouse cursor := closed hand
 
     return {
-        mousedown: function(mouseEvent) {},
+        mousedown: function() {},
 
         mousemove: function() {
             let { clientX, clientY } = widget.userGridLocation;
@@ -181,32 +188,35 @@ function doReorderDragDrop(widget) {
                 .attr('x', clientX)
                 .attr('y', clientY)
             ;
-            //
-            whenFocusedOnCells(widget.userGridLocation.cellContent, () => {
-                let { focalGraphCell,
-                      focalBox,
-                      cellContent  } = widget.userGridLocation;
-                let focalTextRow = cellContent.region.row;
-                let hoveringDropTarget = _.some(dropTextRows, r => r == focalTextRow);
+            foldCellContent(widget.userGridLocation.cellContent, {
+                onCells: () => {
 
-                if (hoveringDropTarget) {
-                    widget.textReorderingState.currentDropRow = focalTextRow;
-                    widget.d3$textgridSvg
-                        .select('.reorder-subject')
-                        .attr('opacity', 0.1) ;
-                } else {
+                    let { cellContent  } = widget.userGridLocation;
+                    let focalTextRow = cellContent.region.row;
+                    let hoveringDropTarget = _.some(dropTextRows, r => r == focalTextRow);
+
+                    if (hoveringDropTarget) {
+                        widget.textReorderingState.currentDropRow = focalTextRow;
+                        widget.d3$textgridSvg
+                            .select('.reorder-subject')
+                            .attr('opacity', 0.1) ;
+                    } else {
+                        widget.textReorderingState.currentDropRow = undefined;
+                        widget.d3$textgridSvg
+                            .select('.reorder-subject')
+                            .attr('opacity', 0.4) ;
+                    }
+
+                },
+                elseRun: () => {
                     widget.textReorderingState.currentDropRow = undefined;
                     widget.d3$textgridSvg
                         .select('.reorder-subject')
                         .attr('opacity', 0.4) ;
-                }
 
-            }, () => {
-                widget.textReorderingState.currentDropRow = undefined;
-                widget.d3$textgridSvg
-                    .select('.reorder-subject')
-                    .attr('opacity', 0.4) ;
+                }
             });
+
         },
         mouseup: function() {
             // Either drop on legal point or cancel
@@ -226,10 +236,8 @@ function doReorderDragDrop(widget) {
 
                 let minRow = _.min(newOrdering);
 
-                console.log('new order is', newOrdering, ' starting from ', minRow);
 
                 let maybeNewTextGrid = TGI.textGrids.reorderRows(widget.textGrid, minRow, newOrdering);
-                // console.log('maybeNewTextGrid', maybeNewTextGrid);
 
                 maybeUpdateGrid(widget, maybeNewTextGrid);
             }
@@ -247,7 +255,7 @@ function doReorderDragDrop(widget) {
 }
 export function moveLine(widget) {
     return {
-        mousedown: function(mouseEvent) {
+        mousedown: function() {
             if (widget.textReorderingState !== undefined) {
 
                 widget.setMouseHandlers([
@@ -257,39 +265,42 @@ export function moveLine(widget) {
             }
         },
 
-        mousemove: function(mouseEvent) {
+        mousemove: function() {
             // Update drag object and drop point indicator
-            whenFocusedOnCells(widget.userGridLocation.cellContent, () => {
-                let { focalGraphCell,
-                      focalBox,
-                      cellContent  } = widget.userGridLocation;
-                let cellRow = cellContent.region.row;
-                let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                let cellCol = focalCellIndex;
-                // Determine legal drop points for this line
-                let possibleTextRows = TGI.textGrids.findLegalReorderingRows(widget.textGrid, cellRow, cellCol);
-                // console.log('possibleTextRows', possibleTextRows);
+            foldCellContent(widget.userGridLocation.cellContent, {
+                onCells: () => {
+                    let { focalGraphCell,
+                          focalBox,
+                          cellContent  } = widget.userGridLocation;
+                    let cellRow = cellContent.region.row;
+                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                    let cellCol = focalCellIndex;
+                    // Determine legal drop points for this line
+                    let possibleTextRows = TGI.textGrids.findLegalReorderingRows(widget.textGrid, cellRow, cellCol);
+                    // console.log('possibleTextRows', possibleTextRows);
 
-                if (possibleTextRows.length > 1) {
-                    // Legal reorderable textGrid rows
-                    let dropTargetTextRows = _.filter(possibleTextRows, r => r != cellRow);
+                    if (possibleTextRows.length > 1) {
+                        // Legal reorderable textGrid rows
+                        let dropTargetTextRows = _.filter(possibleTextRows, r => r != cellRow);
 
-                    widget.textReorderingState = {
-                        dragSubjectTextRow: cellRow,
-                        dropTargetsTextRows: dropTargetTextRows
-                    };
+                        widget.textReorderingState = {
+                            dragSubjectTextRow: cellRow,
+                            dropTargetsTextRows: dropTargetTextRows
+                        };
 
-                } else {
+                    } else {
+                        widget.textReorderingState = undefined;
+                    }
+                    updateDropRegionIndicators(widget);
+                },
+                elseRun: () => {
                     widget.textReorderingState = undefined;
+                    updateDropRegionIndicators(widget);
                 }
-                updateDropRegionIndicators(widget);
-            }, () => {
-                widget.textReorderingState = undefined;
-                updateDropRegionIndicators(widget);
             });
         },
 
-        mouseup: function(mouseEvent) {
+        mouseup: function() {
             // Either drop on legal point or cancel
         }
     };
@@ -332,20 +343,26 @@ function updateDropRegionIndicators(widget) {
     }
 }
 
+function foldCellContent(cellContent, { onLabelCover, onCells, onLabelKey, onHeading, elseRun }) {
+    let handlerRan = false;
 
-function whenFocusedOnLabelCover(cellContent, func) {
-    if (cellContent !== undefined && cellContent.region.isLabelCover()) {
-        func(cellContent);
-    }
-}
-
-function whenFocusedOnCells(cellContent, func, elseFunc) {
-    if (cellContent !== undefined && cellContent.region.isCells()) {
-        func(cellContent);
-    } else {
-        if (elseFunc != undefined) {
-            elseFunc();
+    if (cellContent !== undefined) {
+        if (cellContent.region.isLabelCover() && onLabelCover !== undefined) {
+            handlerRan = true;
+            onLabelCover();
+        } else if (cellContent.region.isCells() && onCells !== undefined) {
+            handlerRan = true;
+            onCells();
+        } else if (cellContent.region.isHeading() && onHeading !== undefined) {
+            handlerRan = true;
+            onHeading();
+        } else if (cellContent.region.isLabelKey() && onLabelKey !== undefined) {
+            handlerRan = true;
+            onLabelKey();
         }
+    }
+    if (!handlerRan) {
+        elseRun();
     }
 }
 

@@ -448,6 +448,8 @@ export class ReflowWidget {
         let widget = this;
         widget.mouseHandlers = _.map(handlers, handler => {
             let init = {
+                mouseover: function() {},
+                mouseout: function() {},
                 mousemove: function() {},
                 mouseup: function() {},
                 mousedown: function() {}
@@ -455,23 +457,20 @@ export class ReflowWidget {
             Object.assign(init, handler(widget));
             return init;
         });
-
-        widget.d3$textgridSvg.on("mousemove", function() {
-            _.each(widget.mouseHandlers, h => {
-                h.mousemove(d3.event);
+        let events = [
+            'mouseover',
+            'mouseout',
+            'mousemove',
+            'mouseup',
+            'mousedown'
+        ];
+        _.each(events, event => {
+            widget.d3$textgridSvg.on(event, function() {
+                _.each(widget.mouseHandlers, h => {
+                    h[event](d3.event);
+                });
             });
         });
-        widget.d3$textgridSvg.on("mousedown", function() {
-            _.each(widget.mouseHandlers, h => {
-                h.mousedown(d3.event);
-            });
-        });
-        widget.d3$textgridSvg.on("mouseup", function() {
-            _.each(widget.mouseHandlers, h => {
-                h.mouseup(d3.event);
-            });
-        });
-
     }
 
     updateCellHoverHighlight(hoverGraphCell) {

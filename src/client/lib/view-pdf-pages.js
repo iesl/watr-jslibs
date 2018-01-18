@@ -152,34 +152,32 @@ function toggleLabelSelection(pageNum, clickedItems) {
 }
 
 function displayLabelHovers(pageNum, hoverPt) {
+    let pageImageFrameId = `div#page-image-frame-${pageNum}`;
     let queryBox = coords.mk.fromLtwh(hoverPt.x, hoverPt.y, 1, 1);
 
     let hoveredLabels = rtrees.searchPageLabels(pageNum, queryBox);
-    if (hoveredLabels.length > 0) {
-        _.each(hoveredLabels, hoverHit => {
-            let $hit = $(hoverHit.selector);
-            if (! $hit.hasClass('tooltipped')) {
-                let pageImageFrameId = `div#page-image-frame-${pageNum}`;
 
-                $hit.attr('title', hoverHit.label);
+    let hoveredTooltips = _.map(hoveredLabels, hit => {
+        let $hit = $(hit.selector);
+        let tooltip = _.remove(shared.tooltips, tt => tt.id == hit.id)[0];
+        if (tooltip === undefined) {
+            tooltip = new Tooltip($hit, {
+                title: hit.label,
+                trigger: 'manual',
+                container: pageImageFrameId
+            });
+            tooltip.id = hit.id;
+            tooltip.show();
+        }
+        return tooltip;
+    });
 
-                const tt = new Tooltip($hit, {
-                    title: hoverHit.label,
-                    trigger: 'manual',
-                    container: pageImageFrameId
-                });
-                tt.show();
-                $hit.addClass('tooltipped');
-                $hit.prop('tooltip', tt);
-            }
-        });
-    } else {
-        $('.tooltipped').each(function() {
-            let tt = $(this).prop('tooltip');
-            tt.dispose();
-            $(this).removeClass('tooltipped');
-        });
-    }
+    _.each(shared.tooltips, tooltip => {
+        tooltip.hide();
+        tooltip.dispose();
+    });
+
+    shared.tooltips = hoveredTooltips;
 }
 
 function displayCharHoverReticles(d3$svg, pageNum, userPt) {

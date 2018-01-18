@@ -38,12 +38,10 @@ function siteNavMenu() {
 
 function setupMenubar($menubar) {
 
-    let page = shared.page;
     let $page = t.span('.topbar-item-head', shared.page);
     $menubar.append($page);
     let $nav = siteNavMenu() ;
     $menubar.append($nav);
-    // $('#nav-menu').menu();
 
     $menubar.append(t.span('.topbar-item-middle'));
     $menubar.append(t.span('.user-info .topbar-item-last'));
@@ -52,6 +50,7 @@ function setupMenubar($menubar) {
 }
 
 function setUserInfo(loginInfo) {
+    shared.loginInfo = loginInfo.info;
     $('.user-info').empty();
     $('.user-info').append(
         `Logged in as `,

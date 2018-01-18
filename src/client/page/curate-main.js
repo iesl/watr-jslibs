@@ -11,7 +11,6 @@ import {shared} from '../lib/shared-state';
 
 import '../../style/curate-main.less';
 
-
 function curationUri(path) {
     return server.apiUri(`workflow/${path}`);
 }
@@ -32,7 +31,8 @@ export let rest = {
     },
     read: {
         workflows: () => server.apiGet(curationUri('workflows')),
-        report: (workflowId) => server.apiGet(curationUri(`workflows/${workflowId}/report`))
+        report: (workflowId) => server.apiGet(curationUri(`workflows/${workflowId}/report`)),
+        zone: (zoneId) => server.apiGet(curationUri(`zones/${zoneId}`))
     },
     update: {
         status: (slug, assignId, statusCode) => {
@@ -54,11 +54,11 @@ export function assignmentButton(workflowSlug) {
 
     $button.on('click', function() {
         rest.create.assignment(workflowSlug)
+            .then(response => rest.read.zone(response[0].zonelock.zone))
             .then(response => {
-                if (response.length > 0) {
-                    let stableId = response[0].zone.regions[0].page.stableId;
-                    navigateTo('/document/'+stableId);
-                }
+                console.log('create assignment', response);
+                let stableId = response.zone.regions[0].page.stableId;
+                navigateTo('/document/'+stableId);
             })
         ;
 
@@ -66,7 +66,6 @@ export function assignmentButton(workflowSlug) {
 
     return $button;
 }
-
 
 function submitNewCuration() {
     let $form = t.div([

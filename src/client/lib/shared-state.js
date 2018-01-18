@@ -19,14 +19,13 @@ export let shared = {
 
     currMouseClientPt: {x: -1, y: -1},
 
+    tooltips: [],
+
     dataPts: [],
 
     zones: [],
 
     curations: [],
-
-    // documentAnnotations: {},
-    // annotationLabels: {},
 
     currentSelections: [],
 
