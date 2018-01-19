@@ -6,7 +6,8 @@ import {t, icon} from '../lib/jstags.js';
 
 import * as server from '../lib/serverApi.js';
 
-import '../../style/browse-main.less';
+// import '../../style/browse-main.less';
+
 let pageLen = 20;
 
 function createEntryItem(entry) {

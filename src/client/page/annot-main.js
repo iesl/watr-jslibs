@@ -15,11 +15,10 @@ import {$id} from '../lib/jstags.js';
 import * as curate from './curate-main.js';
 import * as dt from '../lib/datatypes';
 
-import '../../style/split-pane.css';
-import '../../style/pretty-split-pane.css';
-import '../../style/selection.css';
-
-import '../../style/annot-main.less';
+// import '../../style/split-pane.css';
+// import '../../style/pretty-split-pane.css';
+// import '../../style/selection.css';
+// import '../../style/annot-main.less';
 
 import {t, htm} from '../lib/jstags.js';
 
@@ -96,10 +95,54 @@ function curationStatusChange(event, ui) {
 
     let newStatus = ui.item.value;
 
-    curate.rest.update.status(assignment.workflow.slug, assignment.zonelock.id, newStatus)
+    console.log('curationStatusChange', assignment);
+    curate.rest.update.status(assignment.zonelock.id, newStatus)
         .then(() => {return {};});
 }
 
+function showCurationStatus() {
+    let entry = shared.currentDocument;
+
+    curate.rest.read.workflows()
+        .then(workflows => { return shared.curations = workflows;})
+        .then(() => { return server.apiGet(`/api/v1/workflow/documents/${entry}`); })
+        .then(response => {
+            let assignments = dt.assignmentsFromJson(response);
+            // console.log('workflow for doc', response);
+            console.log('current user', shared.loginInfo);
+            // Figure out if this doc is assigned to the current user
+            console.log('workflow for doc', assignments);
+            let assignmentsForCurrentUser  = _.filter(assignments, a => a.zonelock.assignee == shared.loginInfo.id);
+            let documentHasCurationStatus = assignments.length > 0;
+            let completedAssignments  = _.filter(assignments, a => a.zonelock.status == 'Completed');
+            // let isComplete = completedAssignments.length > 0;
+            let isAssignedToCurrentUser = assignmentsForCurrentUser.length > 0;
+
+            if (documentHasCurationStatus) {
+                let assignment = assignments[0];
+                if (isAssignedToCurrentUser) {
+                    let userAssignment = assignmentsForCurrentUser[0];
+                    shared.activeAssignment = userAssignment;
+                    let panel = assignedCurationControlPanel(userAssignment);
+                    $('.topbar-item-middle').append(panel);
+                    $('#curation-status').selectmenu( {
+                        change: curationStatusChange
+                    });
+
+                } else {
+                    let panel = unassignedCurationControlPanel(assignment);
+                    $('.topbar-item-middle').append(panel);
+                }
+            } else {
+                // "Uncurated"  + button='label this paper'
+                let panel = t.span([
+                    t.strong(`Curation Status: Not yet assigned.`),
+                ]);
+                $('.topbar-item-middle').append((panel));
+            }
+
+        }) ;
+}
 export function runMain() {
 
     frame.setupFrameLayout();
@@ -130,45 +173,7 @@ export function runMain() {
                     textview.textgridSvgHandlers(d3$svg);
                 });
 
-            curate.rest.read.workflows()
-                .then(workflows => { return shared.curations = workflows;})
-                .then(() => { return server.apiGet(`/api/v1/workflow/documents/${entry}`); })
-                .then(response => {
-                    let assignments = dt.assignmentsFromJson(response);
-                    // console.log('workflow for doc', response);
-                    console.log('current user', shared.loginInfo);
-                    // Figure out if this doc is assigned to the current user
-                    console.log('workflow for doc', assignments);
-                    let assignmentsForCurrentUser  = _.filter(assignments, a => a.zonelock.assignee == shared.loginInfo.id);
-                    let documentHasCurationStatus = assignments.length > 0;
-                    let completedAssignments  = _.filter(assignments, a => a.zonelock.status == 'Completed');
-                    let isComplete = completedAssignments.length > 0;
-                    let isAssignedToCurrentUser = assignmentsForCurrentUser.length > 0;
-
-                    if (documentHasCurationStatus) {
-                        let assignment = assignments[0];
-                        if (isAssignedToCurrentUser) {
-                            let userAssignment = assignmentsForCurrentUser[0];
-                            shared.activeAssignment = userAssignment;
-                            let panel = assignedCurationControlPanel(userAssignment);
-                            $('.topbar-item-middle').append(panel);
-                            $('#curation-status').selectmenu( {
-                                change: curationStatusChange
-                            });
-
-                        } else {
-                            let panel = unassignedCurationControlPanel(assignment);
-                            $('.topbar-item-middle').append(panel);
-                        }
-                    } else {
-                        // "Uncurated"  + button='label this paper'
-                        let panel = t.span([
-                            t.strong(`Curation Status: Not yet assigned.`),
-                        ]);
-                        $('.topbar-item-middle').append((panel));
-                    }
-
-                }) ;
+            showCurationStatus();
 
         }))
         .catch(error => {

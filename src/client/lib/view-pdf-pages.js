@@ -24,7 +24,7 @@ import * as textview from  './view-pdf-text.js';
 import { shared } from './shared-state';
 import * as global from './shared-state';
 
-import '../../style/view-pdf-text.less';
+// import '../../style/view-pdf-text.less';
 
 
 function defaultModeMouseHandlers(d3$svg, pageNum) {
@@ -117,31 +117,51 @@ function initPageImageMouseHandlers(d3$svg, pageNum) {
 function setupSelectionHighlighting() {
 
     shared.rx.selections.subscribe(currSelects => {
-
-        d3.selectAll('.select-highlight')
-            .remove();
+        d3.selectAll('.annotation-rect')
+            .classed('annotation-selected', false);
 
         let groups = _.groupBy(currSelects, p => p.pageNum);
 
         _.each(groups, pageGroup => {
             let pageNum = pageGroup[0].pageNum;
             let svgPageSelector = `svg#page-image-${pageNum}`;
-            d3.select(svgPageSelector)
-                .selectAll('.select-highlight')
-                .data(pageGroup)
-                .enter()
-                .append('rect')
-                .classed('select-highlight', true)
-                .call(util.initRect, d => d)
-                .call(util.initStroke, 'black', 1, 0.9)
-                .call(util.initFill, 'red', 0.3)
-            ;
-
+            console.log('pageGroup', pageGroup);
+            _.each(pageGroup, r => {
+                d3.select(svgPageSelector)
+                    .select(r.selector)
+                    .classed('annotation-selected', true);
+            });
         });
 
 
+        // d3.selectAll('.select-highlight')
+        //     .remove();
 
+        // let groups = _.groupBy(currSelects, p => p.pageNum);
 
+        // _.each(groups, pageGroup => {
+        //     let pageNum = pageGroup[0].pageNum;
+        //     let svgPageSelector = `svg#page-image-${pageNum}`;
+        //     console.log('pageGroup', pageGroup);
+
+        //     _.each(pageGroup, r => {
+        //         d3.select(svgPageSelector)
+        //             .select(r.selector)
+        //             .attr('opacity', 0)
+        //         ;
+        //     });
+        //     d3.select(svgPageSelector)
+        //         .selectAll('.select-highlight')
+        //         .data(pageGroup)
+        //         .enter()
+        //         .append('rect')
+        //         .classed('select-highlight', true)
+        //         .call(util.initRect, d => d)
+        //         .call(util.initStroke, 'black', 1, 0.7)
+        //         .call(util.initFill, 'none', 0)
+        //     ;
+
+        // });
     });
 
 }
@@ -350,8 +370,6 @@ export function setupPageImages(contentSelector, pageImageShapes) {
             initPageImageMouseHandlers(d3$svg, pageNum);
         }) ;
 
-    setupSelectionHighlighting();
-
     imageSvgs.selectAll(".shape")
         .data(d => d)
         .enter()
@@ -364,4 +382,6 @@ export function setupPageImages(contentSelector, pageImageShapes) {
     ;
 
     lbl.updateAnnotationShapes();
+
+    setupSelectionHighlighting();
 }

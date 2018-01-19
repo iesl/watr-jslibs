@@ -84,7 +84,7 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
                 .append('rect')
                 .call(util.initRect, r => r.bbox)
                 .call(util.initStroke, 'blue', 1, 0.8)
-                .call(util.initFill, 'purple', 0.3)
+                .call(util.initFill, 'purple', 0.2)
                 .attr('id', `ann${zone.zoneId}_${region.regionId}`)
                 .classed('annotation-rect', true)
                 .classed(`ann${zone.zoneId}`, true)

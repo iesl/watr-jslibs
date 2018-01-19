@@ -8,6 +8,8 @@ import * as login from  './login-main.js';
 import * as curate from './curate-main.js';
 import {shared} from '../lib/shared-state';
 
+import '../../style/app-main.less';
+
 function dispatch() {
 
     let path = window.location.pathname;

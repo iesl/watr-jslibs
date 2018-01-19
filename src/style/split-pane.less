@@ -1,5 +1,4 @@
-/*!
-
+/**
 Split Pane v0.9.4
 
 Copyright (c) 2014 - 2016 Simon Hagström
@@ -118,4 +117,36 @@ https://raw.github.com/shagstrom/split-pane/master/LICENSE
 .split-pane.fixed-bottom > .split-pane-resize-shim,
 .split-pane.horizontal-percent > .split-pane-resize-shim {
 	cursor: row-resize;
+}
+
+
+.split-pane-divider {
+    background: #aaa;
+    pointer-events: none;
+}
+
+.split-pane-divider.dragged.touch {
+	  background: blue;
+	  opacity: 0.25;
+}
+
+
+.split-pane-component-inner {
+	  box-sizing: border-box;
+	  border: 1px solid gray;
+	  background: white;
+	  width: 100%;
+	  height: 100%;
+	  /* padding: 0 1em; */
+	  padding: 0;
+	  overflow: auto;
+}
+
+.split-pane-frame {
+    box-sizing: border-box;
+	  width: 100%;
+	  height: 100%;
+	  border: 1px;
+    border-style: solid;
+    border-color: #aaa;
 }

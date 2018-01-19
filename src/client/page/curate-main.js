@@ -2,14 +2,15 @@
  * Curation workflow overview
  **/
 
-/* global $ _ */
+/* global $ _ watr */
 
 import * as frame from '../lib/frame.js';
 import {t, htm} from '../lib/jstags.js';
 import * as server from '../lib/serverApi.js';
 import {shared} from '../lib/shared-state';
+// const JsArray = watr.utils.JsArray;
 
-import '../../style/curate-main.less';
+// import '../../style/curate-main.less';
 
 function curationUri(path) {
     return server.apiUri(`workflow/${path}`);
@@ -35,12 +36,12 @@ export let rest = {
         zone: (zoneId) => server.apiGet(curationUri(`zones/${zoneId}`))
     },
     update: {
-        status: (slug, assignId, statusCode) => {
+        status: (assignId, statusCode) => {
             let data = {
                 update: { StatusUpdate: {status: statusCode} }
             };
 
-            return server.apiPost(curationUri(`workflows/${slug}/assignments/${assignId}`), data);
+            return server.apiPost(curationUri(`assignments/${assignId}`), data);
         }
     }
 };
@@ -107,10 +108,16 @@ function updateWorkflowList() {
         _.each(workflows, workflowDef => {
             rest.read.report(workflowDef.workflow)
                 .then(workflow => {
-                    console.log('workflow', workflow);
+                    let assigned = workflow.userAssignmentCounts;
+                    let names = workflow.usernames;
+
+                    let assignedList = _.map(_.toPairs(assigned), ([uid, num]) => {
+                        return t.li(`${names[parseInt(uid)]}: ${num}`);
+                    });
+
                     let c = workflow.statusCounts;
                     let lbls = _.join(
-                        _.map(workflowDef.curatedLabels, l => l.key),
+                        _.map(workflowDef.labelSchemas.schemas, l => l.label),
                         ", "
                     );
                     let rec = t.li([
@@ -123,7 +130,7 @@ function updateWorkflowList() {
                             t.br(), `Curated labels  : ${lbls}`,
                             t.br(), `Remaining       : ${workflow.unassignedCount}`,
                             t.br(), `Assigned        : ${c.Assigned}; Completed: ${c.Completed};  Skipped: ${c.Skipped}`,
-                            t.br(), `User Assignments: ${workflow.userAssignmentCounts}`
+                            t.br(), `User Assignments:`, t.ul(assignedList)
                         ])
                     ])
                     ;
