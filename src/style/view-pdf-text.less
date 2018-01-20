@@ -1,35 +1,36 @@
 
-@import "inc/_list";
-@import "inc/_buttons";
-@import "inc/_solarized";
-@import "inc/_svg";
-
-
 div.page-textgrids {
-    margin: 0 auto;
+    margin: 0;
     padding: 10px;
-}
 
-div.textgrid {
-    position: relative;
+    border: 0;
+    background: @base2;
 
-    // canvas.textgrid and svg.textgrid are superimposed
-    canvas.textgrid {
-        position: absolute;
+    div.textgrid {
+        margin: 10px auto;
+        // padding: 10px;
+        position: relative;
+        background: white;
 
-        top: 0;
-        left: 0;
+        // canvas.textgrid and svg.textgrid are superimposed
+        canvas.textgrid {
+            position: absolute;
 
-        z-index: -10;
+            top: 0;
+            left: 0;
+
+            // z-index: -10;
+        }
+
+        svg.textgrid {
+            position: absolute;
+
+            top: 0;
+            left: 0;
+
+            z-index: 1000;
+        }
     }
 
-    svg.textgrid {
-        position: absolute;
-
-        top: 0;
-        left: 0;
-
-        z-index: 1000;
-    }
 }
 

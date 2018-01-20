@@ -90,9 +90,7 @@ export class ReflowWidget {
         // unshowWidget
         $(`#${this.containerId} .status-top`)
             .append(leftControls)
-            .append(rightControls)
-        ;
-
+            .append(rightControls);
     }
 
     init () {
@@ -217,7 +215,6 @@ export class ReflowWidget {
     drawGridShapes() {
         let gridProps = this.gridProps;
 
-        // this.cellRowToDisplayRow = {};
         this.cellRowToDisplayRegion = {};
 
         this.drawingApi.applyCanvasStripes();
@@ -249,12 +246,7 @@ export class ReflowWidget {
             } else if (region.isCells()) {
                 let cells = JsArray.fromScala(region.cells);
                 // Create a mapping between textgrid rows and displaygrid rows
-                // let headCell = cells[0];
-                // console.log('head cell', headCell.pageRegion);
                 let cellRow = region.row;
-                let displayGraphRow = box.origin.y;
-                // this.cellRowToDisplayRow[cellRow] = displayGraphRow;
-                // this.cellRowToDisplayBox[cellRow] = box;
                 this.cellRowToDisplayRegion[cellRow] = this.scaleLTBounds(bounds);
 
                 let cellChrs = _.map(cells, c => c.char.toString());

@@ -16,16 +16,10 @@ import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
 import {$id, t, icon} from './jstags.js';
 
-
 import * as server from './serverApi.js';
-
 import * as textview from  './view-pdf-text.js';
-
 import { shared } from './shared-state';
 import * as global from './shared-state';
-
-// import '../../style/view-pdf-text.less';
-
 
 function defaultModeMouseHandlers(d3$svg, pageNum) {
     d3$svg.on("mousedown", function() {
@@ -132,38 +126,7 @@ function setupSelectionHighlighting() {
                     .classed('annotation-selected', true);
             });
         });
-
-
-        // d3.selectAll('.select-highlight')
-        //     .remove();
-
-        // let groups = _.groupBy(currSelects, p => p.pageNum);
-
-        // _.each(groups, pageGroup => {
-        //     let pageNum = pageGroup[0].pageNum;
-        //     let svgPageSelector = `svg#page-image-${pageNum}`;
-        //     console.log('pageGroup', pageGroup);
-
-        //     _.each(pageGroup, r => {
-        //         d3.select(svgPageSelector)
-        //             .select(r.selector)
-        //             .attr('opacity', 0)
-        //         ;
-        //     });
-        //     d3.select(svgPageSelector)
-        //         .selectAll('.select-highlight')
-        //         .data(pageGroup)
-        //         .enter()
-        //         .append('rect')
-        //         .classed('select-highlight', true)
-        //         .call(util.initRect, d => d)
-        //         .call(util.initStroke, 'black', 1, 0.7)
-        //         .call(util.initFill, 'none', 0)
-        //     ;
-
-        // });
     });
-
 }
 
 function toggleLabelSelection(pageNum, clickedItems) {
@@ -219,6 +182,10 @@ function displayCharHoverReticles(d3$svg, pageNum, userPt) {
 
     showPageImageGlyphHoverReticles(d3$svg, hits, queryBox);
     let textgridSvg = util.d3select.pageTextgridSvg(pageNum);
+    let gridData = _.map(hits, h => h.gridDataPt);
+    // if (gridData.length > 0) {
+    //     console.log('gridData', gridData);
+    // }
     textview.showTexgridHoverReticles(textgridSvg, _.map(hits, h => h.gridDataPt));
 }
 
@@ -334,7 +301,9 @@ export function setupPageImages(contentSelector, pageImageShapes) {
 
     let ctx = {maxh: 0, maxw: 0};
 
-    _.map(pageImageShapes, (sh) =>{
+    console.log('pageImageShapes', pageImageShapes);
+
+    _.each(pageImageShapes, (sh) =>{
         ctx.maxh = Math.max(ctx.maxh, sh[0].y + sh[0].height);
         ctx.maxw = Math.max(ctx.maxw, sh[0].x + sh[0].width);
     });
@@ -361,8 +330,25 @@ export function setupPageImages(contentSelector, pageImageShapes) {
         .attr('id', (d, i) => `page-image-${i}`)
         .attr('width', d => d[0].x + d[0].width)
         .attr('height', (d) => d[0].y + d[0].height )
+        // .attr('transform', 'scale(0.9)')
     ;
 
+    d3.selectAll("svg.page-image")
+        .each(function (d, i){
+            console.log('d', d, i);
+            let self = d3.select(this);
+            // let shape = d.type;
+            // return self.append(shape)
+            //     .call(util.initShapeDimensions);
+            return self .append('image')
+                .attr("x"      , d =>  d[0].x )
+                .attr("y"      , d =>  d[0].y )
+                .attr("width"  , d =>  d[0].width )
+                .attr("height" , d =>  d[0].height )
+                .attr("href"   , d =>  '/api/v1/corpus/artifacts/entry/'+util.corpusEntry()+'/image/page/'+d[0].page )
+            ;
+        })
+    ;
 
     d3.selectAll('svg.page-image')
         .each(function (pageData, pageNum){
@@ -370,16 +356,16 @@ export function setupPageImages(contentSelector, pageImageShapes) {
             initPageImageMouseHandlers(d3$svg, pageNum);
         }) ;
 
-    imageSvgs.selectAll(".shape")
-        .data(d => d)
-        .enter()
-        .each(function (d){
-            let self = d3.select(this);
-            let shape = d.type;
-            return self.append(shape)
-                .call(util.initShapeDimensions);
-        })
-    ;
+    // imageSvgs.selectAll(".shape")
+    //     .data(d => d)
+    //     .enter()
+    //     .each(function (d){
+    //         let self = d3.select(this);
+    //         let shape = d.type;
+    //         return self.append(shape)
+    //             .call(util.initShapeDimensions);
+    //     })
+    // ;
 
     lbl.updateAnnotationShapes();
 

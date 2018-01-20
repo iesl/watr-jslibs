@@ -1,31 +1,28 @@
-@import "_svg";
 
 div.page-images {
-    width: 100%; /*can be in percentage also.*/
-    text-align: center;
-    padding: 0;
-    border: 0;
-    background: #dee0ad;
-}
+    margin: 0;
+    padding: 10px;
 
-div.page-image {
-    /* padding-bottom: 5px; */
-    /* margin-left: auto; */
-    /* margin-right: auto; */
-    /* width: 50px; */
-    padding: 0;
-    margin: 0;
     border: 0;
-    display: inline-block;
-}
-svg.page-image {
-    /* padding-bottom: 5px; */
-    /* margin-left: auto; */
-    /* margin-right: auto; */
-    /* width: 50px; */
-    padding: 0;
-    margin: 0;
-    border: 0;
-    display: block;
+    background: @base2;
+
+    div.page-image {
+        margin: 10px auto;
+        padding: 0;
+        // border: 0;
+        display: inline-block;
+
+        svg.page-image {
+            /* padding-bottom: 5px; */
+            /* margin-left: auto; */
+            /* margin-right: auto; */
+            /* width: 50px; */
+            padding: 0;
+            margin: 0;
+            border: 0;
+            display: block;
+        }
+    }
+
 }
 
