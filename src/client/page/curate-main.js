@@ -55,7 +55,10 @@ export function assignmentButton(workflowSlug) {
 
     $button.on('click', function() {
         rest.create.assignment(workflowSlug)
-            .then(response => rest.read.zone(response[0].zonelock.zone))
+            .then(response => {
+                console.log('assignment', response);
+                return rest.read.zone(response.zonelock.zone);
+            })
             .then(response => {
                 console.log('create assignment', response);
                 let stableId = response.zone.regions[0].page.stableId;

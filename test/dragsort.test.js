@@ -81,14 +81,14 @@
 //                 let b = d.bounds;
 //                 return `M ${b.x} ${b.y} L ${b.x2} ${b.y} L ${b.x2} ${b.y2} L ${b.x} ${b.y2} z`;
 //             })
-//             .call(util.initFill, () => 'blue', 0.4)
+//             .call(d3x.initFill, () => 'blue', 0.4)
 //             .attr('id', d => d.id)
 //             .attr('stroke', 1)
 //         ;
 //         // let rectSel = sortNode
 //         //     .append('rect')
-//         //     .call(util.initRect, d => d.bounds)
-//         //     .call(util.initFill, () => 'blue', 0.7)
+//         //     .call(d3x.initRect, d => d.bounds)
+//         //     .call(d3x.initFill, () => 'blue', 0.7)
 //         //     .attr('id', d => d.id)
 //         //     .attr('stroke', 1)
 //         // ;

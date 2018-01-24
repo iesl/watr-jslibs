@@ -8,6 +8,7 @@ import * as Cookies from  'js-cookie';
 
 import {makeModal} from './jstags.js';
 import {t, htm} from './jstags.js';
+import * as server from './serverApi.js';
 
 function labeledPasswordInput(label, key) {
     return t.div([
@@ -26,7 +27,7 @@ function loginForm() {
                     htm.labeledTextInput('Email', 'email'),
                     labeledPasswordInput('Password', 'password'),
                     t.div([
-                        t.button(':submit', '=Login', "Login")
+                        t.button(':submit =Login', "Login")
                     ])
                 ]),
             ]),
@@ -37,7 +38,7 @@ function loginForm() {
                     htm.labeledTextInput('Username', 'username'),
                     labeledPasswordInput('Password', 'password'),
                     t.div([
-                        t.button(':submit', '=Signup', "Signup")
+                        t.button(':submit =Signup', "Signup")
                     ])
                 ])
             ])
@@ -89,84 +90,25 @@ export function doLogin() {
         ;
     });
 }
+
 export function doLogout() {
-    return getAuthedJson('/api/v1/auth/logout')
+    return server.apiGet(server.apiUri('auth/logout'))
         .then(() => {
             Cookies.remove("tsec-auth", {path: '/'});
-            let data = {
+            return {
                 login: false
             };
-            return Promise.resolve(data);
-        })
-    ;
+        });
 }
 
 
 function attemptLogin(loginData) {
-    return new Promise((resolve, reject) => {
-        $.post({
-            url: loginData.action,
-            data: loginData.asJson,
-            datatype: 'json',
-            contentType: 'application/json',
-            method: "POST"
-        }, function(res, status, xhr) {
-            resolve(res);
-        }).fail((xhr, status, err) => reject("Server Error: status=" + status + "; msg=" + err.message));
-    });
-}
-
-
-export function getAuthedJson(url) {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-            url: url,
-            method: "GET",
-            dataFilter: function(data) {
-                return data;
-            }
-            // success: (res, status, xhr) => {
-            //     // console.log('success', res, status, xhr);
-            //     // resolve(res);
-            // },
-            // error: function(xhr, status, err) {
-            //     resolve( { status: 'Unauthorized' } );
-            //     // reject("Server Error:" + status + err.message);
-            // }
-        }).done(function(res, status) {
-            console.log('success', res, status);
-            resolve(res);
-
-            return '<i />';
-        }).fail(function(res) {
-            if (res.status == 401) {
-               reject ( { status: 'Unauthorized' } );
-            } {
-                reject ( { status: res.statusText } );
-            }
-            console.log('fail', res);
-            return '<i />';
-        }) ;
-    });
+    return server.apiPost(loginData.action, loginData.asJson);
 }
 
 
 export function getLoginStatus() {
-    let authStatus = new Promise((resolve, reject) => {
-        let result = { login: false };
-
-        $.ajax({
-            url: '/api/v1/auth/status',
-            method: "POST"
-        }).done(function(res) {
-            result.info = res;
-            result.login = true;
-        }).fail(function(res) {
-            result = { status: res.statusText } ;
-        }).always(() => {
-            resolve(result);
-        }) ;
-    });
-
-    return authStatus ;
+    return server.apiGet(server.apiUri('auth/status'))
+        .then(response => ({ login: true, info: response }))
+        .catch(err => ({ login: false, status: err.statusText }));
 }

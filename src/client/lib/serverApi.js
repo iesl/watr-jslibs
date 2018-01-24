@@ -73,8 +73,8 @@ export function apiPost(url, data) {
             method: "POST"
         }, function success (response) {
             resolve(response);
-        }).fail(function() {
-            reject("Server Error");
+        }).fail((xhr, status, err) => {
+            reject("Server Error: status=" + status + "; msg=" + err.message);
         });
     });
 }

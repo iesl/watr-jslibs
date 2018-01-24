@@ -5,10 +5,6 @@ import {$id, t} from './jstags.js';
 import * as auth from './auth.js';
 import {shared} from './shared-state';
 
-// import '../../style/frame.less';
-// import '../../style/split-pane.css';
-// import '../../style/pretty-split-pane.css';
-// import '../../style/selection.css';
 
 function siteNavMenu() {
     let pages = [
@@ -101,7 +97,7 @@ function setUserLoginInfo(loginInfo) {
     }
 }
 
-export function setupSplitFrame() {
+function setupSplitFrame() {
     $('body').append(t.div('#content')) ;
 
     let splitPaneRootId = panes.createSplitPaneRoot("#content");

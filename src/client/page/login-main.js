@@ -4,7 +4,6 @@
 import * as frame from '../lib/frame.js';
 import {t, htm} from '../lib/jstags.js';
 
-// import '../../style/login-main.less';
 
 function setupPage() {
     let page = t.div('.page-frame', [

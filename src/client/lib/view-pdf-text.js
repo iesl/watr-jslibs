@@ -13,7 +13,7 @@ import * as util from  './commons.js';
 import * as pageview from  './view-pdf-pages.js';
 import {t} from './jstags.js';
 
-// import '../../style/view-pdf-text.less';
+import * as d3x from './d3-extras';
 
 import { shared } from './shared-state';
 
@@ -24,8 +24,8 @@ function scrollSyncIndicator(parentSelection, indicatorPoint) {
         .attr("cx", indicatorPoint.x)
         .attr("cy", indicatorPoint.y)
         .attr("r", 20)
-        .call(util.initStroke, 'black', 1, 0)
-        .call(util.initFill, 'red', 1)
+        .call(d3x.initStroke, 'black', 1, 0)
+        .call(d3x.initFill, 'red', 1)
         .transition()
         .duration(300)
         .attr("r", 2)
@@ -46,8 +46,8 @@ export function initHoverReticles(d3$textgridSvg) {
     reticleGroup
         .append('rect')
         .classed('query-reticle', true)
-        .call(util.initStroke, 'blue', 1, 0.6)
-        .call(util.initFill, 'blue', 0.2)
+        .call(d3x.initStroke, 'blue', 1, 0.6)
+        .call(d3x.initFill, 'blue', 0.2)
     ;
     return reticleGroup;
 }
@@ -57,7 +57,7 @@ export function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
 
     d3$textgridSvg.select('g.reticles')
         .select('rect.query-reticle')
-        .call(util.initRect, () => queryBox)
+        .call(d3x.initRect, () => queryBox)
     ;
 
     showTexgridHoverReticles(d3$textgridSvg, queryHits);
@@ -67,7 +67,7 @@ export function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
     });
 
     pageview.showPageImageGlyphHoverReticles(
-        util.d3select.pageImage(pageNum),
+        d3x.d3select.pageImage(pageNum),
         ns
     );
 }
@@ -84,9 +84,9 @@ export function showTexgridHoverReticles(d3$textgridSvg, gridDataPts) {
         .append('rect')
         .classed('hit-reticle', true)
         .attr('id', d => d.id)
-        .call(util.initRect, d => d)
-        .call(util.initStroke, 'green', 1, 0.2)
-        .call(util.initFill, 'yellow', 0.7)
+        .call(d3x.initRect, d => d)
+        .call(d3x.initStroke, 'green', 1, 0.2)
+        .call(d3x.initFill, 'yellow', 0.7)
     ;
 
     d3$hitReticles
@@ -154,9 +154,9 @@ function showSelectionHighlight(d3$textgridSvg, selections) {
         .append('rect')
         .classed("glyph-selection", true)
         .attr('id', d => d.id)
-        .call(util.initRect, d => d)
-        .call(util.initStroke, 'black', 1, 0.1)
-        .call(util.initFill, 'blue', 0.1)
+        .call(d3x.initRect, d => d)
+        .call(d3x.initStroke, 'black', 1, 0.1)
+        .call(d3x.initFill, 'blue', 0.1)
     ;
 
     sel.exit().remove() ;

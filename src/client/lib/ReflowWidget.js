@@ -11,6 +11,8 @@ import * as lbl from './labeling';
 let rtree = require('rbush');
 import {shared} from './shared-state';
 
+import * as d3x from './d3-extras';
+
 import * as gp from './graphpaper-variants';
 import * as colors from './colors';
 import * as server from './serverApi.js';
@@ -361,8 +363,8 @@ export class ReflowWidget {
                 .append('rect')
                 .classed(`${regionType}`, true)
                 .classed(`${cls}`, true)
-                .call(util.initRect, () => scaled)
-                .call(util.initFill, 'yellow', 0.0)
+                .call(d3x.initRect, () => scaled)
+                .call(d3x.initFill, 'yellow', 0.0)
             ;
         });
 
@@ -473,9 +475,9 @@ export class ReflowWidget {
         this.d3$textgridSvg
             .append('rect')
             .classed('cell-focus', true)
-            .call(util.initRect, () => this.graphCellToClientBounds(hoverGraphCell))
-            .call(util.initStroke, 'blue', 1, 0.4)
-            .call(util.initFill, 'yellow', 0.4)
+            .call(d3x.initRect, () => this.graphCellToClientBounds(hoverGraphCell))
+            .call(d3x.initStroke, 'blue', 1, 0.4)
+            .call(d3x.initFill, 'yellow', 0.4)
         ;
     }
 

@@ -1,7 +1,3 @@
-// @import "inc/_list";
-// @import "inc/_modals";
-// @import "inc/_buttons";
-// @import "inc/_solarized";
 
 div.entry-listing-frame {
     display: grid;
@@ -41,7 +37,7 @@ div.entry-listing-frame {
             }
 
             input {
-                width: 3em;
+                width: 8em;
                 height: 30px;
             }
 
@@ -82,12 +78,14 @@ div.entry-listing-frame {
 
                 .listing-title {
                     grid-area: ttl;
-                    overflow: hidden;
                     color: black;
                     background-color: @base1;
                     font-size: 1em;
                     font-weight: bold;
                     text-align: center;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                 }
 
                 .listing-image {

@@ -1,32 +1,67 @@
+/**
+ *
+ *
+ *    div#splitpane_root.split-pane-component
+ *        div.split-pane.fixed-top
+ *            div.split-pane-frame
+ *                div#root__top.split-pane-component
+ *                div#root__divider.split-pane-divider
+ *                    div.split-pane-divider-inner
+ *                div#root__bottom.split-pane-component
+ *
+ *    #splitpane_root
+ *        .split-pane.fixed-top
+ *            .split-pane-frame
+ *                #root__top
+ *                #root__divider
+ *                    .split-pane-divider-inner
+ *                #root__bottom
+ *
+ *
+ *
+ *
+ *    #sp_root.user-content
+ *        .pane-layout
+ *            .pane-list
+ *                .pane#root__0
+ *                    .user-content#0
+ *                #root__01sep
+ *                    .split-pane-divider-inner
+ *                .pane#root__1
+ *                    .user-content#1
+ *
+ *
+ *
+ */
 
-// import  * as $ from 'jquery';
-/* global $ */
+/* global $ watr */
+const TB = watr.TextBoxing;
+
+import * as jstags from './jstags.js';
 import './split-pane.js';
 
-export let idSelector = s => `#${s}`;
+const t = jstags.t;
 
-let splitPaneRootId = 'splitpane_root';
-let defaultDividerWidth = 1;
+const splitPaneRootId = 'splitpane_root';
+
+const defaultDividerWidth = 1;
 
 function mkComponent() {
-    return $("<div class='split-pane-component'></div>");
+    return t.div('.split-pane-component');
 }
+
 function mkDivider() {
-    return $("<div class='split-pane-divider'></div>");
+    return t.div('.split-pane-divider');
 }
 
-function mkSplitPlane() {
-    return $("<div class='split-pane'></div>");
+function mkSplitPane() {
+    return t.div('.split-pane');
 }
-
 
 function composePanes(split, lpane, divider, rpane) {
-    let frame = $("<div class='split-pane-frame'></div>");
-    // let l = lpane.append($("<div class='pretty-split-pane-component-inner'></div>"));
-    // let r = rpane.append($("<div class='pretty-split-pane-component-inner'></div>"));
-    return frame.append(
+    return t.div('.split-pane-frame', [
         split.append(lpane, divider, rpane)
-    );
+    ]);
 }
 
 function makeChildIds(parentId){
@@ -40,8 +75,6 @@ function makeChildIds(parentId){
 export function setParentPaneWidth (elem, width)  {
     let pane = $(elem).closest('.split-pane-component');
     let id = $(pane).attr('id');
-    // console.log('elem', elem);
-    // console.log('pane', pane);
     let idParts = id.split('__');
     idParts.pop();
     let parentId = idParts.join('__');
@@ -56,7 +89,7 @@ export function setParentPaneWidth (elem, width)  {
 
 export function createSplitPaneRoot (containerId)  {
     $(containerId).append(
-        $(`<div id="${splitPaneRootId}" class="split-pane-component"> </div>`)
+        t.div(`#${splitPaneRootId} .split-pane-component`)
     );
     return splitPaneRootId;
 }
@@ -77,23 +110,26 @@ export function splitVertical(containerSelector, splitProps) {
     let rightId = `${parentId}__right` ;
     let dividerId = `${parentId}__divider` ;
 
-    let {splitClass: splitClass, splitAt: splitAt} = getSplitProps(splitProps);
+    let {splitClass, splitAt} = getSplitProps(splitProps);
 
     let lpane = mkComponent()
         .attr('id', leftId)
-        .css({width: splitAt})
+        .css({'min-width': `${splitAt}px`})
     ;
     let divider = mkDivider()
         .attr('id', dividerId)
         .addClass('v-divider')
-        .css({left: splitAt, width: defaultDividerWidth})
+        .css({left: splitAt, width: defaultDividerWidth, 'min-width': defaultDividerWidth})
     ;
     let rpane = mkComponent()
         .attr('id', rightId)
         .css({left: splitAt+defaultDividerWidth})
     ;
 
-    let split = mkSplitPlane().addClass(splitClass);
+    let split = mkSplitPane()
+        .addClass(splitClass)
+        .addClass('row')
+    ;
 
     $(containerSelector).append(
         composePanes(split, lpane, divider, rpane)
@@ -116,17 +152,17 @@ export function splitHorizontal(containerSelector, splitProps) {
     let bottomId = `${parentId}__bottom` ;
     let dividerId = `${parentId}__divider` ;
 
-    let {splitClass: splitClass, splitAt: splitAt} = getSplitProps(splitProps);
+    let {splitClass, splitAt} = getSplitProps(splitProps);
 
     let topPane = mkComponent()
         .attr('id', topId)
-        .css({height: splitAt})
+        .css({'min-height': `${splitAt}px`})
     ;
 
     let divider = mkDivider()
         .attr('id', dividerId)
         .addClass('h-divider')
-        .css({top: splitAt, height: defaultDividerWidth})
+        .css({top: splitAt, 'min-height': defaultDividerWidth})
     ;
     let bottomPane = mkComponent()
         .attr('id', bottomId)
@@ -134,7 +170,10 @@ export function splitHorizontal(containerSelector, splitProps) {
     ;
 
 
-    let split = mkSplitPlane().addClass(splitClass);
+    let split = mkSplitPane()
+        .addClass(splitClass)
+        .addClass('column')
+    ;
 
     $(containerSelector).append(
         composePanes(split, topPane, divider, bottomPane)

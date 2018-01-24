@@ -1,36 +1,56 @@
 
-div.page-textgrids {
-    margin: 0;
-    padding: 10px;
+div.page-text-viewer {
 
-    border: 0;
-    background: @base2;
+    width: 0 auto;
 
-    div.textgrid {
-        margin: 10px auto;
+    div.page-textgrids {
+
+        display: flex;
+        flex-direction: column;
+        flex-wrap: no-wrap;
+
+        // justify-content: left;
+        align-items: left;
+
+        margin: 0;
+        padding: 8px;
+        border: 0;
+        background: @base2;
+
+
+        // margin: 0;
         // padding: 10px;
-        position: relative;
-        background: white;
 
-        // canvas.textgrid and svg.textgrid are superimposed
-        canvas.textgrid {
-            position: absolute;
+        // border: 0;
+        // background: @base2;
 
-            top: 0;
-            left: 0;
+        div.textgrid {
+            margin: 10px auto;
+            // padding: 10px;
+            position: relative;
+            background: white;
 
-            // z-index: -10;
+            // canvas.textgrid and svg.textgrid are superimposed
+            canvas.textgrid {
+                position: absolute;
+
+                top: 0;
+                left: 0;
+
+                // z-index: -10;
+            }
+
+            svg.textgrid {
+                position: absolute;
+
+                top: 0;
+                left: 0;
+
+                z-index: 1000;
+            }
         }
 
-        svg.textgrid {
-            position: absolute;
-
-            top: 0;
-            left: 0;
-
-            z-index: 1000;
-        }
     }
 
-}
 
+}

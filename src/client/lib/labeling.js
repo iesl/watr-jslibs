@@ -10,6 +10,7 @@ import * as rtrees from './rtrees';
 import * as util from './commons.js';
 import * as server from './serverApi.js';
 import * as modals from './modals.js';
+import * as d3x from './d3-extras';
 
 import {t} from './jstags.js';
 
@@ -59,15 +60,15 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
             let gridDataByPage = _.groupBy(gridDataPts, p => p.page);
             _.each(gridDataByPage, pageGridData => {
                 let pageNum = pageGridData[0].page;
-                let textgridSvg = util.d3select.pageTextgridSvg(pageNum);
+                let textgridSvg = d3x.d3select.pageTextgridSvg(pageNum);
 
                 textgridSvg
                     .selectAll(`.span${zone.zoneId}`)
                     .data(pageGridData)
                     .enter()
                     .append('rect')
-                    .call(util.initRect, d => d)
-                    .call(util.initFill, 'cyan', 0.2)
+                    .call(d3x.initRect, d => d)
+                    .call(d3x.initFill, 'cyan', 0.2)
                     .classed(`span${zone.zoneId}`, true)
                     .classed('glyph-zone-highlight', true) ;
 
@@ -82,9 +83,9 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
                 .data([region])
                 .enter()
                 .append('rect')
-                .call(util.initRect, r => r.bbox)
-                .call(util.initStroke, 'blue', 1, 0.8)
-                .call(util.initFill, 'purple', 0.2)
+                .call(d3x.initRect, r => r.bbox)
+                .call(d3x.initStroke, 'blue', 1, 0.8)
+                .call(d3x.initFill, 'purple', 0.2)
                 .attr('id', `ann${zone.zoneId}_${region.regionId}`)
                 .classed('annotation-rect', true)
                 .classed(`ann${zone.zoneId}`, true)

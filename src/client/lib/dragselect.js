@@ -17,7 +17,7 @@ export default function awaitUserSelection(d3$svg, initSvgPt) {
 
         let emptyRect  = { left: originPt.x, top: originPt.y, width: 0, height: 0 };
         let selectionRect = d3$svg.append("rect")
-            .call(util.initRect, () => emptyRect)
+            .call(d3x.initRect, () => emptyRect)
             .classed("selection", true)
             .attr("rx", 4)
             .attr("ry", 4)
@@ -46,7 +46,7 @@ export default function awaitUserSelection(d3$svg, initSvgPt) {
 
             let adjusted = getSelectionMinBoundingRect();
             selectionRect
-                .call(util.initRect, () => adjusted);
+                .call(d3x.initRect, () => adjusted);
         }
 
 

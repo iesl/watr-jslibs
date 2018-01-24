@@ -8,17 +8,20 @@ import * as server from '../lib/serverApi.js';
 
 // import '../../style/browse-main.less';
 
-let pageLen = 20;
+let pageLen = 50;
 
 function createEntryItem(entry) {
     let interestingLabels = _.filter(entry.labels[0], l => l.slice(0, 3) !== 'seg');
     let labelList = _.map(interestingLabels, l => t.li(` ${l}`));
+    let entryName = entry.stableId.replace(/\.pdf\.d/, '');
 
     let entryPanel =
         t.div('.listing-entry', [
             t.div('.listing-entry-grid', [
                 t.div('.listing-title', [
-                    t.span(` #${entry.num} : ${entry.stableId}`)
+                    t.span(` #${entry.num}: ${entryName}`, {
+                        title: entryName
+                    })
                 ]),
                 t.div('.listing-image', [
                     t.a({href: `/document/${entry.stableId}?show=textgrid.json`},[
@@ -135,4 +138,3 @@ export function runMain() {
     server.getCorpusListing(0, pageLen)
         .then(resp => updatePage(resp));
 }
-

@@ -15,6 +15,7 @@ import * as reflowWidgetInit from  './ReflowWidgetInit.js';
 import awaitUserSelection from './dragselect.js';
 import Tooltip from 'tooltip.js';
 import {$id, t, icon} from './jstags.js';
+import * as d3x from './d3-extras';
 
 import * as server from './serverApi.js';
 import * as textview from  './view-pdf-text.js';
@@ -181,7 +182,7 @@ function displayCharHoverReticles(d3$svg, pageNum, userPt) {
     );
 
     showPageImageGlyphHoverReticles(d3$svg, hits, queryBox);
-    let textgridSvg = util.d3select.pageTextgridSvg(pageNum);
+    let textgridSvg = d3x.d3select.pageTextgridSvg(pageNum);
     let gridData = _.map(hits, h => h.gridDataPt);
     // if (gridData.length > 0) {
     //     console.log('gridData', gridData);
@@ -200,9 +201,9 @@ export function showPageImageGlyphHoverReticles(d3$pageImageSvg, queryHits) {
         .append('rect')
         .datum(d => d.glyphDataPt? d.glyphDataPt : d)
         .classed('textloc', true)
-        .call(util.initRect, d => d)
-        .call(util.initStroke, 'blue', 1, 0.2)
-        .call(util.initFill, 'blue', 0.5)
+        .call(d3x.initRect, d => d)
+        .call(d3x.initStroke, 'blue', 1, 0.2)
+        .call(d3x.initFill, 'blue', 0.5)
     ;
 
     d3$imageHitReticles .exit() .remove() ;
@@ -216,13 +217,13 @@ function createImageLabelingPanel(userSelection, mbrSelection, page) {
 
     d3.select(svgPageSelector)
         .append('rect')
-        .call(util.initRect, () => userSelection)
+        .call(d3x.initRect, () => userSelection)
         .classed('label-selection-rect', true)
-        .call(util.initStroke, 'blue', 1, 1.0)
-        .call(util.initFill, 'yellow', 0.7)
+        .call(d3x.initStroke, 'blue', 1, 1.0)
+        .call(d3x.initFill, 'yellow', 0.7)
         .transition().duration(200)
-        .call(util.initRect, () => mbrSelection)
-        .call(util.initFill, 'yellow', 0.3)
+        .call(d3x.initRect, () => mbrSelection)
+        .call(d3x.initFill, 'yellow', 0.3)
     ;
 
     console.log('createImageLabelingPanel: ', mbrSelection, page);
@@ -309,18 +310,22 @@ export function setupPageImages(contentSelector, pageImageShapes) {
     });
 
     panes.setParentPaneWidth(contentSelector, ctx.maxw + 80);
+    console.log('setupPageImages, parent page width', ctx.maxw+80);
 
     let {topPaneId: statusBar, bottomPaneId: pageImageDivId} =
         panes.splitHorizontal(contentSelector, {fixedTop: 30});
 
     setupStatusBar(statusBar);
 
-    $id(pageImageDivId)
-        .addClass('page-images');
+    $id(pageImageDivId).append(
+        t.div('.split-pane-component-inner', [
+            t.div('#page-images .page-images')
+        ])
+    );
 
-    let imageSvgs = d3.select("#"+pageImageDivId)
+    let imageSvgs = d3.select("#page-images")
         .selectAll(".page-image")
-        .data(pageImageShapes, util.getId)
+        .data(pageImageShapes, d3x.getId)
         .enter()
         .append('div').classed('page-image', true)
         .attr('id', (d, i) => `page-image-frame-${i}`)
@@ -335,11 +340,7 @@ export function setupPageImages(contentSelector, pageImageShapes) {
 
     d3.selectAll("svg.page-image")
         .each(function (d, i){
-            console.log('d', d, i);
             let self = d3.select(this);
-            // let shape = d.type;
-            // return self.append(shape)
-            //     .call(util.initShapeDimensions);
             return self .append('image')
                 .attr("x"      , d =>  d[0].x )
                 .attr("y"      , d =>  d[0].y )
@@ -355,17 +356,6 @@ export function setupPageImages(contentSelector, pageImageShapes) {
             let d3$svg = d3.select(this);
             initPageImageMouseHandlers(d3$svg, pageNum);
         }) ;
-
-    // imageSvgs.selectAll(".shape")
-    //     .data(d => d)
-    //     .enter()
-    //     .each(function (d){
-    //         let self = d3.select(this);
-    //         let shape = d.type;
-    //         return self.append(shape)
-    //             .call(util.initShapeDimensions);
-    //     })
-    // ;
 
     lbl.updateAnnotationShapes();
 

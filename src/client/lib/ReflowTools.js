@@ -326,8 +326,8 @@ function updateDropRegionIndicators(widget) {
                 .append('rect')
                 .classed('reorder-region', true)
                 .classed('reorder-drop', true)
-                .call(util.initRect, () => dropRegion)
-                .call(util.initFill, 'blue', 0.3)
+                .call(d3x.initRect, () => dropRegion)
+                .call(d3x.initFill, 'blue', 0.3)
             ;
         });
 
@@ -336,8 +336,8 @@ function updateDropRegionIndicators(widget) {
             .append('rect')
             .classed('reorder-region', true)
             .classed('reorder-subject', true)
-            .call(util.initRect, () => dragRegion)
-            .call(util.initFill, 'green', 0.4)
+            .call(d3x.initRect, () => dragRegion)
+            .call(d3x.initFill, 'green', 0.4)
         ;
 
     }

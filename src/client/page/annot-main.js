@@ -1,7 +1,7 @@
 /**
  *
  **/
-/* global $ _ d3 */
+/* global $ _ d3 watr */
 
 import * as util from  '../lib/commons.js';
 import * as frame from '../lib/frame.js';
@@ -15,32 +15,65 @@ import {$id} from '../lib/jstags.js';
 import * as curate from './curate-main.js';
 import * as dt from '../lib/datatypes';
 
-// import '../../style/split-pane.css';
-// import '../../style/pretty-split-pane.css';
-// import '../../style/selection.css';
-// import '../../style/annot-main.less';
-
 import {t, htm} from '../lib/jstags.js';
 
 import * as pageview from '../lib/view-pdf-pages.js';
 import * as textview from '../lib/view-pdf-text.js';
+const TB = watr.TextBoxing;
+const Tree = watr.scalazed.Tree;
+
+function getDescendantTree(rootSelector) {
+
+    function loop($elem) {
+
+        let maybeId = $elem.attr('id');
+        let cls = $elem.attr('class');
+        let id = maybeId === undefined ? '' : `#${maybeId}`;
+
+        let childs = _.map($elem.children(), function(elemChild) {
+            return loop($(elemChild));
+        });
+        if (childs.length > 0) {
+            return Tree.Node(`${id}.${cls}`, childs);
+        } else {
+            return Tree.Leaf(`${id}.${cls}`);
+        }
+    }
+
+    return loop($(rootSelector));
+}
 
 function setupFrameLayout() {
+    let $contentPane = $('.content-pane');
+    $contentPane.append(t.div('#annot-panes'));
 
-    let {leftPaneId: leftPaneId, rightPaneId: rightPaneId} =
-        panes.splitVertical('.content-pane', {fixedLeft: 200});
 
-    // let {topPaneId: reflowPane, bottomPaneId: textgridPane} =
-    //     panes.splitHorizontal($id(rightPaneId), {fixedTop: 100});
+    let { leftPaneId, rightPaneId } =
+        panes.splitVertical('#annot-panes', {fixedLeft: 200});
 
-    $id(leftPaneId).addClass('view-pdf-pages');
-    $id(rightPaneId).addClass('textgrid-control-panes');
 
-    $id(rightPaneId).append(t.div('.reflow-controls #reflow-controls'));
-    $id(rightPaneId).append(t.div('.page-textgrids #page-textgrids'));
-    // $id(reflowPane).addClass('reflow-control');
-    // $id(textgridPane).addClass('page-textgrids');
+    // $id(leftPaneId).addClass('page-image-viewer');
+    // $id(rightPaneId).addClass('page-text-viewer');
+    // $id(rightPaneId).append(t.div('.reflow-controls #reflow-controls'));
 
+    $id(leftPaneId).append(
+        t.div('.split-pane-component-inner', [
+            t.div('.page-image-viewer')
+        ])
+    );
+    $id(rightPaneId).append(
+        t.div('.split-pane-component-inner', [
+            t.div('.page-text-viewer', [
+                t.div('.reflow-controls #reflow-controls'),
+                t.div('.page-textgrids #page-textgrids')
+            ])
+        ])
+    );
+
+    let desc = getDescendantTree('.content-pane');
+    let treeStr = Tree.drawTree(desc);
+    console.log('setupFrameLayout');
+    console.log(treeStr.toString());
 }
 
 function curationStatusMenu(status) {
@@ -108,14 +141,8 @@ function showCurationStatus() {
         .then(() => { return server.apiGet(`/api/v1/workflow/documents/${entry}`); })
         .then(response => {
             let assignments = dt.assignmentsFromJson(response);
-            // console.log('workflow for doc', response);
-            console.log('current user', shared.loginInfo);
-            // Figure out if this doc is assigned to the current user
-            console.log('workflow for doc', assignments);
             let assignmentsForCurrentUser  = _.filter(assignments, a => a.zonelock.assignee == shared.loginInfo.id);
             let documentHasCurationStatus = assignments.length > 0;
-            let completedAssignments  = _.filter(assignments, a => a.zonelock.status == 'Completed');
-            // let isComplete = completedAssignments.length > 0;
             let isAssignedToCurrentUser = assignmentsForCurrentUser.length > 0;
 
             if (documentHasCurationStatus) {
@@ -143,6 +170,31 @@ function showCurationStatus() {
 
         }) ;
 }
+
+function setupGrid() {
+    t.div('.fixed-top', [
+        t.div('.topbar', [
+
+        ]),
+        t.div('.divider'),
+        t.div('.content-pane', [
+            t.div('.frame', [
+                t.div('.fixed-left', [
+                    t.div('.bottom-left', [
+
+                    ]),
+                    t.div('.divider'),
+                    t.div('.bottom-right', [
+                        t.div('.reflow-controls'),
+                        t.div('.page-textgrids'),
+
+                    ])
+                ])
+            ])
+        ])
+    ]);
+}
+
 export function runMain() {
 
     frame.setupFrameLayout();
@@ -162,7 +214,7 @@ export function runMain() {
 
             setupFrameLayout();
 
-            pageview.setupPageImages('div.view-pdf-pages', pageShapes);
+            pageview.setupPageImages('div.page-image-viewer', pageShapes);
             textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
             rtrees.initPageAndGridRTrees(textgrids);
