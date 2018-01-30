@@ -13,7 +13,7 @@ import * as rtrees from  './rtrees.js';
 import * as reflowWidget from  './ReflowWidget.js';
 import * as reflowWidgetInit from  './ReflowWidgetInit.js';
 import awaitUserSelection from './dragselect.js';
-import Tooltip from 'tooltip.js';
+import Tippy from 'tippy.js';
 import {$id, t, icon} from './jstags.js';
 import * as d3x from './d3-extras';
 
@@ -21,6 +21,7 @@ import * as server from './serverApi.js';
 import * as textview from  './view-pdf-text.js';
 import { shared } from './shared-state';
 import * as global from './shared-state';
+import {zipWithIndex} from './lodash-plus';
 
 function defaultModeMouseHandlers(d3$svg, pageNum) {
     d3$svg.on("mousedown", function() {
@@ -120,7 +121,7 @@ function setupSelectionHighlighting() {
         _.each(groups, pageGroup => {
             let pageNum = pageGroup[0].pageNum;
             let svgPageSelector = `svg#page-image-${pageNum}`;
-            console.log('pageGroup', pageGroup);
+
             _.each(pageGroup, r => {
                 d3.select(svgPageSelector)
                     .select(r.selector)
@@ -138,27 +139,42 @@ function toggleLabelSelection(pageNum, clickedItems) {
 function displayLabelHovers(pageNum, hoverPt) {
     let pageImageFrameId = `div#page-image-frame-${pageNum}`;
     let queryBox = coords.mk.fromLtwh(hoverPt.x, hoverPt.y, 1, 1);
+    // console.log('displayLabelHovers, page:', pageNum);
 
     let hoveredLabels = rtrees.searchPageLabels(pageNum, queryBox);
 
     let hoveredTooltips = _.map(hoveredLabels, hit => {
         let $hit = $(hit.selector);
+        $hit.attr('title', hit.label);
+
+
         let tooltip = _.remove(shared.tooltips, tt => tt.id == hit.id)[0];
         if (tooltip === undefined) {
-            tooltip = new Tooltip($hit, {
-                title: hit.label,
-                trigger: 'manual',
-                container: pageImageFrameId
-            });
-            tooltip.id = hit.id;
-            tooltip.show();
+            tooltip = $hit.prop('_tippy');
+            if (tooltip === undefined) {
+                Tippy(hit.selector, {
+                    updateDuration: 0,
+                    popperOptions: {
+                        modifiers: {
+                            // preventOverflow: {
+                            //     enabled: false
+                            // },
+                            computeStyle: {
+                                gpuAcceleration: false
+                            }
+                        }
+                    }
+                });
+                tooltip = $hit.prop('_tippy');
+                tooltip.id = hit.id;
+            }
         }
+        tooltip.show();
         return tooltip;
     });
 
     _.each(shared.tooltips, tooltip => {
         tooltip.hide();
-        tooltip.dispose();
     });
 
     shared.tooltips = hoveredTooltips;
@@ -225,8 +241,6 @@ function createImageLabelingPanel(userSelection, mbrSelection, page) {
         .call(d3x.initRect, () => mbrSelection)
         .call(d3x.initFill, 'yellow', 0.3)
     ;
-
-    console.log('createImageLabelingPanel: ', mbrSelection, page);
 
     lbl.createHeaderLabelUI(mbrSelection, page);
 
@@ -298,19 +312,23 @@ function setupStatusBar(statusBarId) {
 
 }
 
-export function setupPageImages(contentSelector, pageImageShapes) {
+export function setupPageImages(contentSelector, pageGeometries) {
 
     let ctx = {maxh: 0, maxw: 0};
 
-    console.log('pageImageShapes', pageImageShapes);
+    pageGeometries = _.map(zipWithIndex(pageGeometries), ([g, i]) => {
+        let pageBounds = coords.mk.fromArray(g);
+        pageBounds.page = i+1;
+        return pageBounds;
+    });
 
-    _.each(pageImageShapes, (sh) =>{
-        ctx.maxh = Math.max(ctx.maxh, sh[0].y + sh[0].height);
-        ctx.maxw = Math.max(ctx.maxw, sh[0].x + sh[0].width);
+
+    _.each(pageGeometries, sh  => {
+        ctx.maxh = Math.max(ctx.maxh, sh.y + sh.height);
+        ctx.maxw = Math.max(ctx.maxw, sh.x + sh.width);
     });
 
     panes.setParentPaneWidth(contentSelector, ctx.maxw + 80);
-    console.log('setupPageImages, parent page width', ctx.maxw+80);
 
     let {topPaneId: statusBar, bottomPaneId: pageImageDivId} =
         panes.splitHorizontal(contentSelector, {fixedTop: 30});
@@ -325,16 +343,16 @@ export function setupPageImages(contentSelector, pageImageShapes) {
 
     let imageSvgs = d3.select("#page-images")
         .selectAll(".page-image")
-        .data(pageImageShapes, d3x.getId)
+        .data(pageGeometries, d3x.getId)
         .enter()
         .append('div').classed('page-image', true)
         .attr('id', (d, i) => `page-image-frame-${i}`)
-        .attr('width', d => d[0].x + d[0].width)
-        .attr('height', (d) => d[0].y + d[0].height )
+        .attr('width', d => d.x + d.width)
+        .attr('height', (d) => d.y + d.height )
         .append('svg').classed('page-image', true)
         .attr('id', (d, i) => `page-image-${i}`)
-        .attr('width', d => d[0].x + d[0].width)
-        .attr('height', (d) => d[0].y + d[0].height )
+        .attr('width', d => d.x + d.width)
+        .attr('height', (d) => d.y + d.height )
         // .attr('transform', 'scale(0.9)')
     ;
 
@@ -342,11 +360,11 @@ export function setupPageImages(contentSelector, pageImageShapes) {
         .each(function (d, i){
             let self = d3.select(this);
             return self .append('image')
-                .attr("x"      , d =>  d[0].x )
-                .attr("y"      , d =>  d[0].y )
-                .attr("width"  , d =>  d[0].width )
-                .attr("height" , d =>  d[0].height )
-                .attr("href"   , d =>  '/api/v1/corpus/artifacts/entry/'+util.corpusEntry()+'/image/page/'+d[0].page )
+                .attr("x"      , d =>  d.x )
+                .attr("y"      , d =>  d.y )
+                .attr("width"  , d =>  d.width )
+                .attr("height" , d =>  d.height )
+                .attr("href"   , d =>  '/api/v1/corpus/artifacts/entry/'+util.corpusEntry()+'/image/page/'+d.page )
             ;
         })
     ;

@@ -35,8 +35,9 @@ export function getCorpusListing(start, len) {
 }
 
 export function getCorpusArtifactTextgrid(entryName) {
-    let show = "textgrid.json";
-    return apiGet(`/api/v1/corpus/artifacts/vtrace/json/${entryName}/${show}`);
+    // let show = "textgrid.json";
+    // return apiGet(`/api/v1/corpus/artifacts/vtrace/json/${entryName}/${show}`);
+    return apiGet(`/api/v1/corpus/artifacts/entry/${entryName}/text`);
 }
 
 export function deleteZone(zoneId) {

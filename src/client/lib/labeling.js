@@ -180,14 +180,14 @@ export function createLabelChoiceWidget(labelNames, containerId) {
     let containerHeight = $(window).height();
     let dialogHeight = $('#modal-content').height(); // ('clientHeight');
     let dialog = $('#modal-content');
-    console.log('dialog', dialog);
+    // console.log('dialog', dialog);
     let maxY = containerHeight - dialogHeight;
     let yPos = Math.min(maxY, shared.currMouseClientPt.y);
-    console.log('containerHeight', containerHeight);
-    console.log('dialogHeight', dialogHeight);
-    console.log('clientY', shared.currMouseClientPt.y);
-    console.log('maxY', maxY);
-    console.log('yPos', yPos);
+    // console.log('containerHeight', containerHeight);
+    // console.log('dialogHeight', dialogHeight);
+    // console.log('clientY', shared.currMouseClientPt.y);
+    // console.log('maxY', maxY);
+    // console.log('yPos', yPos);
 
     $('.b-modal-content').css({
         'left': shared.currMouseClientPt.x,

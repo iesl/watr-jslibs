@@ -56,11 +56,11 @@ export function assignmentButton(workflowSlug) {
     $button.on('click', function() {
         rest.create.assignment(workflowSlug)
             .then(response => {
-                console.log('assignment', response);
+                // console.log('assignment', response);
                 return rest.read.zone(response.zonelock.zone);
             })
             .then(response => {
-                console.log('create assignment', response);
+                // console.log('create assignment', response);
                 let stableId = response.zone.regions[0].page.stableId;
                 navigateTo('/document/'+stableId);
             })
@@ -105,7 +105,7 @@ function updateWorkflowList() {
     $('#workflows').empty();
 
     rest.read.workflows() .then(workflows => {
-        console.log('workflows', workflows);
+        // console.log('workflows', workflows);
 
         shared.curations = workflows;
         _.each(workflows, workflowDef => {

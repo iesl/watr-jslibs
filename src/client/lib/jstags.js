@@ -170,7 +170,7 @@ export let htm = {
             }
 
             $(btn).on('change', function() {
-                console.log('changing toolset', callback);
+                // console.log('changing toolset', callback);
                 if ( $(this).is(':checked') ) {
                     callback();
                 }

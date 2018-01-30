@@ -14,7 +14,7 @@ function allowDrop(ev) {
 }
 
 function drag(ev) {
-    console.log('drag', ev);
+    // console.log('drag', ev);
     ev.originalEvent.dataTransfer.setData("text", ev.target.id);
 }
 
@@ -22,7 +22,7 @@ function drop(ev) {
     ev.preventDefault();
     ev.originalEvent.preventDefault();
     var data = ev.originalEvent.dataTransfer.getData("text");
-    console.log('dropped', data);
+    // console.log('dropped', data);
     // ev.target.appendChild(document.getElementById(data));
 }
 
@@ -44,7 +44,7 @@ export function reorder(sortablesSelector) {
         let drag = d3.drag()
             .on('start', function(gridBox) {
                 dragTarget = d3.select(d3.event.sourceEvent.target);
-                console.log('drag:start', dragTarget);
+                // console.log('drag:start', dragTarget);
 
                 let others = d3.selectAll(sortablesSelector)
                     .filter(d => d.id != gridBox.id);
@@ -54,7 +54,7 @@ export function reorder(sortablesSelector) {
 
 
                 others.on('mouseover', function() {
-                    console.log('mouseover', d3.event);
+                    // console.log('mouseover', d3.event);
                     let hovered = d3.select(d3.event.target);
                     // let hovered = d3.select(this);
                     hovered.attr('fill-opacity', 0.1);
@@ -82,7 +82,7 @@ export function reorder(sortablesSelector) {
                 ;
             })
             .on('end', function(d) {
-                console.log('drag:end');
+                // console.log('drag:end');
                 // d3.selectAll(sortablesSelector).on(".drag", null);
                 resolve();
             });

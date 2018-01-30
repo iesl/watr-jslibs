@@ -11,7 +11,7 @@
     "rbush": "^2.0.1",
     "rbush-knn": "^2.0.0",
     "simple-ajax-uploader": "^2.5.5",
-    "tooltip.js": "^1.1.6"
+    "tippy.js": "^2.1.0"
   },
   "devDependencies": {
     "css-loader": "^0.28.7",

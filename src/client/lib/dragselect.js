@@ -6,6 +6,7 @@
 
 import * as coords from './coord-sys.js';
 import * as util from  './commons.js';
+import * as d3x from './d3-extras';
 
 export default function awaitUserSelection(d3$svg, initSvgPt) {
 
@@ -91,13 +92,13 @@ export default function awaitUserSelection(d3$svg, initSvgPt) {
         d3$svg.on("mouseover", function() {
             // User moved back inside  page frame, resume updates
             userWithinPageBounds = true;
-            console.log('user in bounds');
+            // console.log('user in bounds');
 
         });
         d3$svg.on("mouseout", function() {
             // User moved outside of page frame, suspend updates
             userWithinPageBounds = false;
-            console.log('user out of bounds');
+            // console.log('user out of bounds');
 
 
         });

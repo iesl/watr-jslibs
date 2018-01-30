@@ -128,7 +128,7 @@ function curationStatusChange(event, ui) {
 
     let newStatus = ui.item.value;
 
-    console.log('curationStatusChange', assignment);
+    // console.log('curationStatusChange', assignment);
     curate.rest.update.status(assignment.zonelock.id, newStatus)
         .then(() => {return {};});
 }
@@ -204,11 +204,10 @@ export function runMain() {
     shared.currentDocument = entry;
 
     server.getCorpusArtifactTextgrid(entry)
-        .then((jsdata => {
-            let dataBlock = jsdata[0];
-            let pages = dataBlock.pages;
+        .then((textGridJson => {
+            let pages = textGridJson.pages;
             let textgrids = _.map(pages, p => p.textgrid);
-            let pageShapes = _.map(pages, p => p.shapes);
+            let pageShapes = _.map(pages, p => p.pageGeometry);
 
             global.initGlobalMouseTracking();
 
