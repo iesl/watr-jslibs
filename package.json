@@ -56,6 +56,6 @@
     "watch": "webpack --watch",
     "karma": "karma start karma.conf.js",
     "start": "webpack-dev-server --open",
-    "serve": "node src/server/main.js --corpus /dev/null"
+    "server": "node dev-server.js"
   }
 }

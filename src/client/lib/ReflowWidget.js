@@ -32,6 +32,7 @@ export function unshowGrid() {
     }
 }
 
+
 export class ReflowWidget {
 
     constructor (containerId, textGrid, labelSchema, zoneId, zoneLabel) {

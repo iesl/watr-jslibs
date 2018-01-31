@@ -14,7 +14,8 @@ const config = {
     // context: path.resolve(__dirname, "app"),
 
     entry: {
-        app: './src/client/page/app-main.js'
+        app: './src/client/page/app-main.js',
+        devapp: './src/client/page/dev-main.js'
     },
 
     devtool: 'inline-source-map',
@@ -53,8 +54,9 @@ const config = {
     devServer: {
         contentBase: path.join(__dirname, "dist"),
         compress: true,
-        port: 9000
-}
+        port: 9000,
+        publicPath: '/'
+    }
 };
 
 module.exports = config;
