@@ -24,10 +24,11 @@ export function updateUserPosition(widget) {
 
 
         mousemove: function (d3Event){
-            let userPt = coords.mkPoint.fromXy(d3Event.layerX, d3Event.layerY);
+            let userPt = coords.mkPoint.fromXy(d3Event.offsetX, d3Event.offsetY);
             let clientX = Math.floor(userPt.x);
             let clientY = Math.floor(userPt.y);
 
+            // console.log('d3Event', d3Event);
             let focalGraphCell = widget.clientPointToGraphCell(userPt);
             let cellContent = widget.getCellContent(focalGraphCell);
 
@@ -361,7 +362,7 @@ function foldCellContent(cellContent, { onLabelCover, onCells, onLabelKey, onHea
             onLabelKey();
         }
     }
-    if (!handlerRan) {
+    if (!handlerRan && elseRun !== undefined) {
         elseRun();
     }
 }

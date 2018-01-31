@@ -459,13 +459,20 @@ export class ReflowWidget {
             'mouseup',
             'mousedown'
         ];
-        _.each(events, event => {
-            widget.d3$textgridSvg.on(event, function() {
+        _.each(events, eventType => {
+            $id(widget.frameId).on(eventType, function(event) {
                 _.each(widget.mouseHandlers, h => {
-                    h[event](d3.event);
+                    h[eventType](event);
                 });
             });
         });
+        // _.each(events, event => {
+        //     widget.d3$textgridSvg.on(event, function() {
+        //         _.each(widget.mouseHandlers, h => {
+        //             h[event](d3.event);
+        //         });
+        //     });
+        // });
     }
 
     updateCellHoverHighlight(hoverGraphCell) {
