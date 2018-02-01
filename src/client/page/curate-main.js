@@ -2,7 +2,7 @@
  * Curation workflow overview
  **/
 
-/* global $ _ watr */
+/* global $ _  */
 
 import * as frame from '../lib/frame.js';
 import {t, htm} from '../lib/jstags.js';
@@ -10,7 +10,6 @@ import * as server from '../lib/serverApi.js';
 import {shared} from '../lib/shared-state';
 // const JsArray = watr.utils.JsArray;
 
-// import '../../style/curate-main.less';
 
 function curationUri(path) {
     return server.apiUri(`workflow/${path}`);

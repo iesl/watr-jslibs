@@ -253,16 +253,15 @@ function setupStatusBar(statusBarId) {
 
     let $selectStatus = t.div('.statusitem', "Selections");
 
-    shared.rx.selections.subscribe(currSelects=> {
+    shared.rx.selections.subscribe( selectedZones => {
         $selectStatus.empty();
-        $selectStatus.append(t.span(`Selected:${currSelects.length} del: `));
+        $selectStatus.append(t.span(`Selected:${selectedZones.length} del: `));
 
-        if (currSelects.length == 1) {
-            let selection = currSelects[0];
-            let gridForSelection = reflowWidgetInit.textGridForSelection(selection);
+        if (selectedZones.length == 1) {
+            let selection = selectedZones[0];
+            let gridForSelection = reflowWidgetInit.getTextGridForSelectedZone(selection);
             let deleteBtn = t.button([icon.trash]);
-            var clicks = Rx.Observable.fromEvent(deleteBtn, 'click');
-            clicks.subscribe(() => {
+            deleteBtn.on('click', function() {
                 let zoneId = selection.zoneId;
                 server.deleteZone(zoneId).then(resp => {
                     global.setSelections([]);
@@ -283,14 +282,14 @@ function setupStatusBar(statusBarId) {
                 let gridShaperBtn = t.button([icon.fa('indent')]);
 
                 gridShaperBtn.on('click', function() {
-                    let textGrid = reflowWidgetInit.createFromSelection(selection);
+                    let textGrid = reflowWidgetInit.createTextGridFromSelectedZone(selection);
                     reflowWidgetInit.showGrid(textGrid);
                 });
                 $selectStatus.append(gridShaperBtn);
 
             }
         }
-        else if (currSelects.length > 1) {
+        else if (selectedZones.length > 1) {
             reflowWidget.unshowGrid();
 
 

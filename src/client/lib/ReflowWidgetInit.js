@@ -12,9 +12,10 @@ let TextGridCompanion = watr.textgrid.TextGrid.Companion;
 const TGI = watr.textgrid.TextGridInterop;
 
 
-export function textGridForSelection(selection) {
-    let zoneId = selection.zoneId ;
-    let zoneLabel = selection.label;
+/* Return existing text grid (or undefined) for selectedZone */
+export function getTextGridForSelectedZone(selectedZone) {
+    let zoneId = selectedZone.zoneId ;
+    let zoneLabel = selectedZone.label;
     let maybeExistingGrid = _.find(shared.zones, z => z.zoneId == zoneId);
 
     if (maybeExistingGrid !== undefined && maybeExistingGrid.glyphDefs !== null) {
@@ -34,16 +35,19 @@ export function textGridForSelection(selection) {
 }
 
 
-export function createFromSelection(selection) {
+/* Create new text grid for selected zone */
+export function createTextGridFromSelectedZone(selectedZone) {
 
-    let zoneId = selection.zoneId ;
-    let zoneLabel = selection.label;
-    let hits = rtrees.searchPage(selection.pageNum, selection);
+    let zoneId = selectedZone.zoneId ;
+    let zoneLabel = selectedZone.label;
+    let hits = rtrees.searchPage(selectedZone.pageNum, selectedZone);
 
     let tuples = _.map(hits, hit => {
+        console.log('hit', hit);
         let g = hit.gridDataPt;
         return [g.row, g.col, g.gridRow];
     });
+
     let byRows = _.groupBy(tuples, t => t[0]);
 
     let clippedGrid =
@@ -56,10 +60,11 @@ export function createFromSelection(selection) {
                 loci    = gridRow.loci.slice(minCol, maxCol+1)
             ;
 
-            return [rowNum, text, loci];
+            return [parseInt(rowNum), text, loci];
         });
 
     let sortedRows = _.sortBy(clippedGrid, g => g[0]);
+    console.log('sortedRows', sortedRows);
 
     let rowData = _.map(sortedRows, g => {
         let gfiltered = _.map(g[2], go => {
