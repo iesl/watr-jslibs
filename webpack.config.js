@@ -15,7 +15,7 @@ const config = {
 
     entry: {
         app: './src/client/page/app-main.js',
-        devapp: './src/client/page/dev-main.js'
+        devapp: './src/dev/page/dev-main.js'
     },
 
     devtool: 'inline-source-map',

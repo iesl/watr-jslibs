@@ -466,13 +466,6 @@ export class ReflowWidget {
                 });
             });
         });
-        // _.each(events, event => {
-        //     widget.d3$textgridSvg.on(event, function() {
-        //         _.each(widget.mouseHandlers, h => {
-        //             h[event](d3.event);
-        //         });
-        //     });
-        // });
     }
 
     updateCellHoverHighlight(hoverGraphCell) {

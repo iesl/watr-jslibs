@@ -34,8 +34,8 @@ module.exports = function(config) {
             {pattern: 'dist/app.css',         watched:true,  served:true,  included:false, nocache:true},
             {pattern: 'dist/app.bundle.js',   watched:true,  served:false, included:false, nocache:true},
             {pattern: 'src/client/**/*.js',   watched:false, served:false, included:false, nocache:false},
-            {pattern: 'test/*.js',            watched:true,  served:true,  included:true},
-            {pattern: 'test/*.html',          watched:true,  served:true,  included:true},
+            {pattern: 'src/test/*.js',        watched:true,  served:true,  included:true},
+            {pattern: 'src/test/*.html',      watched:true,  served:true,  included:true},
             {pattern: watrmarksLib,           watched:true,  served:true,  included:true},
             {pattern: watrmarksSrcMap,        watched:false, served:true,  included:false}
 

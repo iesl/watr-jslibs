@@ -1,41 +1,11 @@
 /**
- *
- *
- *    div#splitpane_root.split-pane-component
- *        div.split-pane.fixed-top
- *            div.split-pane-frame
- *                div#root__top.split-pane-component
- *                div#root__divider.split-pane-divider
- *                    div.split-pane-divider-inner
- *                div#root__bottom.split-pane-component
- *
- *    #splitpane_root
- *        .split-pane.fixed-top
- *            .split-pane-frame
- *                #root__top
- *                #root__divider
- *                    .split-pane-divider-inner
- *                #root__bottom
- *
- *
- *
- *
- *    #sp_root.user-content
- *        .pane-layout
- *            .pane-list
- *                .pane#root__0
- *                    .user-content#0
- *                #root__01sep
- *                    .split-pane-divider-inner
- *                .pane#root__1
- *                    .user-content#1
- *
- *
+ * Helper utilities for split-pane
  *
  */
 
 /* global $ watr */
-const TB = watr.TextBoxing;
+// const TB = watr.TextBoxing;
+const Tree = watr.scalazed.Tree;
 
 import * as jstags from './jstags.js';
 import './split-pane.js';
@@ -186,4 +156,30 @@ export function splitHorizontal(containerSelector, splitProps) {
         bottomPaneId: bottomId
     };
 
+}
+
+export function getDescendantTree(rootSelector) {
+
+    function loop($elem) {
+
+        let maybeId = $elem.attr('id');
+        let cls = $elem.attr('class');
+        let id = maybeId === undefined ? '' : `#${maybeId}`;
+
+        let childs = _.map($elem.children(), function(elemChild) {
+            return loop($(elemChild));
+        });
+        if (childs.length > 0) {
+            return Tree.Node(`${id}.${cls}`, childs);
+        } else {
+            return Tree.Leaf(`${id}.${cls}`);
+        }
+    }
+
+    return loop($(rootSelector));
+}
+
+export function getDescendantTreeString(rootSelector) {
+    let desc = getDescendantTree(rootSelector);
+    return Tree.drawTree(desc);
 }

@@ -68,10 +68,14 @@ function runSplitPane() {
     jst.$id(leftPaneId).append(
         t.div('Some Text')
     );
-    jst.$id(rightPaneId).append(
-        t.div('Right panel text')
-    );
+
     $('div.split-pane').splitPane();
+
+    let treeStr = spu.getDescendantTreeString("#"+splitPaneRootId);
+
+    jst.$id(rightPaneId).append(
+        t.div(t.pre().text(treeStr))
+    );
 
 }
 

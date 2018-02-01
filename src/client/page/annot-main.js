@@ -1,7 +1,7 @@
 /**
  *
  **/
-/* global $ _ d3 watr */
+/* global $ _ d3 */
 
 import * as util from  '../lib/commons.js';
 import * as frame from '../lib/frame.js';
@@ -15,33 +15,11 @@ import {$id} from '../lib/jstags.js';
 import * as curate from './curate-main.js';
 import * as dt from '../lib/datatypes';
 
-import {t, htm} from '../lib/jstags.js';
+import {t} from '../lib/jstags.js';
 
 import * as pageview from '../lib/view-pdf-pages.js';
 import * as textview from '../lib/view-pdf-text.js';
-const TB = watr.TextBoxing;
-const Tree = watr.scalazed.Tree;
 
-function getDescendantTree(rootSelector) {
-
-    function loop($elem) {
-
-        let maybeId = $elem.attr('id');
-        let cls = $elem.attr('class');
-        let id = maybeId === undefined ? '' : `#${maybeId}`;
-
-        let childs = _.map($elem.children(), function(elemChild) {
-            return loop($(elemChild));
-        });
-        if (childs.length > 0) {
-            return Tree.Node(`${id}.${cls}`, childs);
-        } else {
-            return Tree.Leaf(`${id}.${cls}`);
-        }
-    }
-
-    return loop($(rootSelector));
-}
 
 function setupFrameLayout() {
     let $contentPane = $('.content-pane');
@@ -70,10 +48,6 @@ function setupFrameLayout() {
         ])
     );
 
-    let desc = getDescendantTree('.content-pane');
-    let treeStr = Tree.drawTree(desc);
-    console.log('setupFrameLayout');
-    console.log(treeStr.toString());
 }
 
 function curationStatusMenu(status) {
@@ -171,29 +145,26 @@ function showCurationStatus() {
         }) ;
 }
 
-function setupGrid() {
-    t.div('.fixed-top', [
-        t.div('.topbar', [
-
-        ]),
-        t.div('.divider'),
-        t.div('.content-pane', [
-            t.div('.frame', [
-                t.div('.fixed-left', [
-                    t.div('.bottom-left', [
-
-                    ]),
-                    t.div('.divider'),
-                    t.div('.bottom-right', [
-                        t.div('.reflow-controls'),
-                        t.div('.page-textgrids'),
-
-                    ])
-                ])
-            ])
-        ])
-    ]);
-}
+// function setupGrid() {
+//     t.div('.fixed-top', [
+//         t.div('.topbar', [
+//         ]),
+//         t.div('.divider'),
+//         t.div('.content-pane', [
+//             t.div('.frame', [
+//                 t.div('.fixed-left', [
+//                     t.div('.bottom-left', [
+//                     ]),
+//                     t.div('.divider'),
+//                     t.div('.bottom-right', [
+//                         t.div('.reflow-controls'),
+//                         t.div('.page-textgrids'),
+//                     ])
+//                 ])
+//             ])
+//         ])
+//     ]);
+// }
 
 export function runMain() {
 
