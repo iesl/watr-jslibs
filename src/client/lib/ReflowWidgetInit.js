@@ -43,7 +43,6 @@ export function createTextGridFromSelectedZone(selectedZone) {
     let hits = rtrees.searchPage(selectedZone.pageNum, selectedZone);
 
     let tuples = _.map(hits, hit => {
-        console.log('hit', hit);
         let g = hit.gridDataPt;
         return [g.row, g.col, g.gridRow];
     });
@@ -64,7 +63,6 @@ export function createTextGridFromSelectedZone(selectedZone) {
         });
 
     let sortedRows = _.sortBy(clippedGrid, g => g[0]);
-    console.log('sortedRows', sortedRows);
 
     let rowData = _.map(sortedRows, g => {
         let gfiltered = _.map(g[2], go => {
