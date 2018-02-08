@@ -114,7 +114,7 @@ function updateWorkflowList() {
                     let names = workflow.usernames;
 
                     let assignedList = _.map(_.toPairs(assigned), ([uid, num]) => {
-                        return t.li(`${names[parseInt(uid)]}: ${num}`);
+                        return t.li(` ${names[parseInt(uid)]}: ${num}`);
                     });
 
                     let c = workflow.statusCounts;
