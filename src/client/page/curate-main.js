@@ -70,34 +70,6 @@ export function assignmentButton(workflowSlug) {
     return $button;
 }
 
-function submitNewCuration() {
-    let $form = t.div([
-        t.form([
-            t.div([
-                t.div([
-                    htm.labeledTextInput('Workflow', 'workflow'),
-                    htm.labeledTextInput('Description', 'description'),
-                    htm.labeledTextboxInput('Label Schema (Json)', 'labelSchema')
-                ]),
-                t.span([
-                    t.button(':submit', '=Submit', "Submit")
-                ])
-            ])
-        ])
-    ]);
-
-
-    $form.find('form').submit(function (event) {
-        event.preventDefault();
-
-        let $thisForm = $(this);
-        let payload = $thisForm.serializeObject();
-        rest.create.workflow(payload.workflow, payload.description, payload.labelSchema);
-
-    });
-
-    return $form;
-}
 
 function updateWorkflowList() {
 
@@ -146,9 +118,6 @@ function updateWorkflowList() {
 function setupPage() {
     let page = t.div('.page-frame', [
         t.div('.left-sidebar'),
-        t.div('#curation-submit .curation-submit', [
-            submitNewCuration()
-        ]),
         t.div('.curation-list', [
             t.ul("#workflows")
         ])

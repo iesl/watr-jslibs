@@ -1,14 +1,9 @@
 
-// @import "inc/_list";
-// @import "inc/_modals";
-// @import "inc/_buttons";
-// @import "inc/_solarized";
-
 div.page-frame {
     display: grid;
 
     grid-template-areas:
-        "sd hd"
+        "sd xx"
         "sd xx"
     ;
 
@@ -23,11 +18,6 @@ div.page-frame {
     .left-sidebar {
         grid-area: sd;
         background: @base01;
-    }
-
-    .curation-submit{
-        grid-area: hd;
-        background: @base2;
     }
 
     .curation-list{
