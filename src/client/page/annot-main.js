@@ -14,6 +14,7 @@ import {$id} from '../lib/jstags.js';
 
 import * as curate from './curate-main.js';
 import * as dt from '../lib/datatypes';
+import * as schemas from '../lib/schemas';
 
 import {t} from '../lib/jstags.js';
 
@@ -109,9 +110,10 @@ function showCurationStatus() {
     curate.rest.read.workflows()
         .then(workflows => { return shared.curations = workflows;})
         .then(() => { return server.apiGet(`/api/v1/workflow/documents/${entry}`); })
-        .then(response => {
-            console.log(response);
-            let assignments = dt.assignmentsFromJson(response);
+        .then(assignments => {
+            _.each(assignments, r => schemas.validateLockedWorkflow(r));
+            console.log('assignments', assignments);
+            // let assignments = dt.assignmentsFromJson(response);
             let assignmentsForCurrentUser  = _.filter(assignments, a => a.holder == shared.loginInfo.id);
             let documentHasCurationStatus = assignments.length > 0;
             let isAssignedToCurrentUser = assignmentsForCurrentUser.length > 0;

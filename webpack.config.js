@@ -28,6 +28,7 @@ const config = {
     // { test: /\.less$/,                         use: ["style-loader", "css-loader", "less-loader"]},
     module: {
         rules: [
+            { test: /\.ts$/,                         use: ['ts-loader'], exclude: /node_modules/ },
             { test: /\.(css|scss)$/,                   use: ['style-loader', 'css-loader']},
             { test: /\.less$/,
               use: extractLess.extract({
@@ -44,6 +45,10 @@ const config = {
             { test: /test\.js$/,                       use: ['mocha-loader'], exclude: /node_modules/},
             { test: /\.(jpe?g|png|gif|svg)$/i,         use: ['url-loader?limit=10000', 'img-loader']}
         ]
+    },
+
+    resolve: {
+        extensions: [ '.tsx', '.ts', '.js' ]
     },
 
     plugins: [

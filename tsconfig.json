@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "es6",
+        "outDir": "./dist/",
+        "allowSyntheticDefaultImports": true,
+        "noEmit": false,
+        "checkJs": true,
+        "allowJs": true,
+        "jsx": "react",
+        "sourceMap": true,
+        "strict": true,
+
+        "lib": [ "dom", "es6" ]
+    },
+    "include": [
+        "./src/**/*.ts"
+    ],
+    "exclude": [
+        "./node_modules/",
+        "./dist/"
+    ]
+}

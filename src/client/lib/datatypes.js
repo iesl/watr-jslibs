@@ -2,7 +2,7 @@
  * Server interop datatypes
  **/
 
-/* global _ */
+/* global _ require */
 
 import * as coords from './coord-sys.js';
 
@@ -20,6 +20,7 @@ import * as coords from './coord-sys.js';
  * GridDataPt ::
  *
  */
+
 
 // class Assignment {
 //     constructor (zonelock) {
@@ -131,4 +132,3 @@ export function pageRegionFromJson(jsonRep, zoneId) {
     );
 
 }
-
