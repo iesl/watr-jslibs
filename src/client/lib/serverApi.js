@@ -76,9 +76,11 @@ export function apiPost(url, data) {
 
 
 export function createNewZone(labelData) {
-    return apiPost(apiUri("labeling/zones"), labelData);
+    return apiPost(apiUri("labeling/zones"), labelData)
+        .then(schema.isValid('Annotation'));
 }
 
 export function getDocumentZones () {
-    return apiGet(apiUri(`labeling/zones/${shared.currentDocument}`));
+    return apiGet(apiUri(`labeling/zones/${shared.currentDocument}`))
+        .then(schema.allValid('Annotation'));
 }

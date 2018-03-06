@@ -5,7 +5,7 @@
 /* global $ _ d3 */
 
 import {shared} from './shared-state';
-import * as dt from './datatypes';
+// import * as dt from './datatypes';
 import * as rtrees from './rtrees';
 import * as util from './commons.js';
 import * as server from './serverApi.js';

@@ -5,9 +5,12 @@
 
 /* global _ require */
 
+let Ajv = require('ajv');
+
 function schemaName(n) {
     return `http://watrworks.net/schemas/${n}Schema.json`;
 }
+
 function shortSchemaName(url) {
     let prefix = `http://watrworks.net/schemas/`;
     let postfix = `Schema.json`;
@@ -20,93 +23,110 @@ function defaultObj(n) {
     let o = {
         '$id': schemaName(n),
         'type': 'object',
-        'additionalProperties': false,
-        'properties': {
-        }
+        additionalProperties: false,
+        properties: {
+        },
+        required: []
     };
     return o;
 }
 
+function rec(n, props) {
+    // let {req, opt} = props;
+    let reqs = {
+        properties: props,
+        required: _.keys(props)
+    };
+    return Object.assign(defaultObj(n), reqs);
+}
 
-let IntT = { "type": "integer" };
-let IntOrNullT = { "type": ["integer", 'null'] };
 
-let StrT = { "type": "string" };
-let StrOrNullT = { "type": ["string", 'null'] };
+let Int = { "type": "integer" };
+let IntOrNull = { "type": ["integer", 'null'] };
+
+let Str = { "type": "string" };
+let StrOrNull = { "type": ["string", 'null'] };
 
 let Ref = (n) => { return { "$ref": `${n}Schema.json` }; };
+let ArrayOf = (t) => { return { "items": t }; };
 
 
-let CorpusLockSchema = Object.assign(defaultObj('CorpusLock'), {
-    properties: {
-        document : IntT,
-        holder   : IntOrNullT,
-        id       : IntT,
-        lockPath : StrT,
-        status   : StrT
-    }
-});
+function createSchemas(schemaArray) {
+    return new Ajv({
+        schemas: schemaArray,
+        allErrors: true
+    });
+}
 
+let ajv = createSchemas([
 
-let WorkflowRecordSchema = Object.assign(defaultObj('WorkflowRecord'), {
-    properties: {
+    rec('CorpusLock', {
+        document : Int,
+        holder   : IntOrNull,
+        id       : Int,
+        lockPath : Str,
+        status   : Str
+    }),
+
+    rec('WorkflowRecord', {
         labelSchemas : Ref('LabelSchemas'),
-        targetPath   : StrT,
-        workflow     : StrT
-    }
-});
+        targetPath   : Str,
+        workflow     : Str
+    }),
 
-let LockedWorkflowSchema = Object.assign(defaultObj('LockedWorkflow'), {
-    properties: {
+    rec('LockedWorkflow', {
         lockRecord     : Ref("CorpusLock"),
         workflowRecord : Ref("WorkflowRecord")
-    }
-});
+    }),
 
-let LabelSchemaSchema = Object.assign(defaultObj('LabelSchema'), {
-    properties: {
-        label       : StrT,
-        description : StrOrNullT,
-        children    : { items: Ref("LabelSchema") },
-        abbrev      : { items: StrOrNullT }
-    }
-});
+    rec('LabelSchema', {
+        label       : Str,
+        description : StrOrNull,
+        children    : ArrayOf(Ref("LabelSchema")),
+        abbrev      : ArrayOf(StrOrNull)
+    }),
 
-let LabelSchemasSchema = Object.assign(defaultObj('LabelSchemas'), {
-    properties: {
-        name: StrT,
-        schemas: { items: Ref('LabelSchema') }
-    }
-});
+    rec('LabelSchemas', {
+        name: Str,
+        schemas: ArrayOf( Ref('LabelSchema') )
+    }),
 
-let Ajv = require('ajv');
+    rec('Annotation', {
+        id        : Int,
+        document  : Int,
+        owner     : IntOrNull,
+        annotPath : StrOrNull,
+        created   : Int,
+        body      : StrOrNull
+    })
 
-let ajv = new Ajv({
-    schemas: [
-        CorpusLockSchema,
-        WorkflowRecordSchema,
-        LockedWorkflowSchema,
-        LabelSchemaSchema,
-        LabelSchemasSchema
-    ],
-    allErrors: true
-});
+]);
 
 
-export function isValid(sname, data) {
+
+export function allValid(sname) {
+    return function(data) {
+        _.each(data, isValid(sname));
+        return data;
+    };
+}
+
+export function isValid(sname) {
     let validator = ajv.getSchema(schemaName(sname));
     if (validator == undefined) {
         let schemas = _.map(
             _.filter(_.keys(ajv._schemas), k => /watrworks.net/.test(k)),
             shortSchemaName
         );
-        console.log('Schema name', sname, 'not found', 'available', schemas);
+        console.log('Schema name', sname, 'not found.');
+        console.log('Available schemas: ', schemas);
     }
-    return validateData(validator, data);
+    return function(data) {
+        return validateData(validator, data);
+    };
 }
 
 function validateData(validator, data) {
-
     let valid = validator(data);
 
     if (!valid) {

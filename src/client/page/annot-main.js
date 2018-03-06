@@ -1,6 +1,7 @@
 /**
  *
  **/
+
 /* global $ _ d3 */
 
 import * as util from  '../lib/commons.js';
@@ -13,8 +14,7 @@ import * as rtrees from  '../lib/rtrees.js';
 import {$id} from '../lib/jstags.js';
 
 import * as curate from './curate-main.js';
-import * as dt from '../lib/datatypes';
-import * as schemas from '../lib/schemas';
+import * as schema from '../lib/schemas';
 
 import {t} from '../lib/jstags.js';
 
@@ -112,9 +112,9 @@ function showCurationStatus() {
         .then(workflows => { return shared.curations = workflows;})
         .then(() => { return server.apiGet(`/api/v1/workflow/documents/${entry}`); })
         .then(assignments => {
-            _.each(assignments, r => schemas.isValid('LockedWorkflow', r));
+            // _.each(assignments, r => schema.isValid('LockedWorkflow', r));
+            schema.allValid('LockedWorkflow')(assignments);
             console.log('assignments', assignments);
-            // let assignments = dt.assignmentsFromJson(response);
             let assignmentsForCurrentUser  = _.filter(assignments, a => a.holder == shared.loginInfo.id);
             let documentHasCurationStatus = assignments.length > 0;
             let isAssignedToCurrentUser = assignmentsForCurrentUser.length > 0;
