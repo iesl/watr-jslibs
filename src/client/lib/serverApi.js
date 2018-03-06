@@ -17,14 +17,6 @@ export let api = {
 
 
 
-export function getDocumentZones () {
-    return new Promise((resolve, reject) => {
-        let url = `/api/v1/labeling/zones/${shared.currentDocument}`;
-        $.getJSON(
-            url, (response) => resolve(response)
-        ).fail((xhr, status, err) => reject("Server Error:" + status + err.message));
-    });
-}
 
 export function getCorpusListing(start, len) {
     return new Promise((resolve, reject) => {
@@ -82,5 +74,10 @@ export function apiPost(url, data) {
 
 
 export function createNewZone(labelData) {
+    // TODO: Append to Annotation table rather than zone table
     return apiPost(apiUri("labeling/zones"), labelData);
+}
+
+export function getDocumentZones () {
+    return apiGet(apiUri(`labeling/zones/${shared.currentDocument}`));
 }

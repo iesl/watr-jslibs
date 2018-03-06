@@ -30,10 +30,6 @@ function setupFrameLayout() {
         panes.splitVertical('#annot-panes', {fixedLeft: 200});
 
 
-    // $id(leftPaneId).addClass('page-image-viewer');
-    // $id(rightPaneId).addClass('page-text-viewer');
-    // $id(rightPaneId).append(t.div('.reflow-controls #reflow-controls'));
-
     $id(leftPaneId).append(
         t.div('.split-pane-component-inner', [
             t.div('.page-image-viewer')
@@ -83,13 +79,13 @@ function assignedCurationControlPanel(assignment) {
 }
 
 function unassignedCurationControlPanel(assignment) {
-    let workflowSlug = assignment.zonelock.workflow;
+    let workflowSlug = assignment.workflowRecord.workflow;
     let btn = curate.assignmentButton(workflowSlug);
 
     let panel = t.span([
         t.strong(`Curating: `), workflowSlug,
         t.nbsp(5),
-        t.strong(`Status: `), assignment.zonelock.status,
+        t.strong(`Status: `), assignment.lockRecord.status,
         t.nbsp(4),
         btn
     ]);
@@ -114,8 +110,9 @@ function showCurationStatus() {
         .then(workflows => { return shared.curations = workflows;})
         .then(() => { return server.apiGet(`/api/v1/workflow/documents/${entry}`); })
         .then(response => {
+            console.log(response);
             let assignments = dt.assignmentsFromJson(response);
-            let assignmentsForCurrentUser  = _.filter(assignments, a => a.zonelock.assignee == shared.loginInfo.id);
+            let assignmentsForCurrentUser  = _.filter(assignments, a => a.holder == shared.loginInfo.id);
             let documentHasCurationStatus = assignments.length > 0;
             let isAssignedToCurrentUser = assignmentsForCurrentUser.length > 0;
 

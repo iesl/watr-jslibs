@@ -41,7 +41,7 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
 }
 
  function refreshZoneHightlights(zonesJs) {
-    let zones = _.map(zonesJs, (z) => dt.zoneFromJson(z));
+    let zones = _.map(zonesJs, z => dt.zoneFromJson(z));
     shared.zones = zones;
 
     rtrees.initPageLabelRTrees(zones);

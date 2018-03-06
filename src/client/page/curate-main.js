@@ -76,35 +76,51 @@ function updateWorkflowList() {
     $('#workflows').empty();
 
     rest.read.workflows() .then(workflows => {
-        // console.log('workflows', workflows);
+        console.log('workflows', workflows);
 
         shared.curations = workflows;
         _.each(workflows, workflowDef => {
             rest.read.report(workflowDef.workflow)
-                .then(workflow => {
-                    let assigned = workflow.userAssignmentCounts;
-                    let names = workflow.usernames;
+                .then(workflowReport => {
+                    console.log('workflow report', workflowReport);
+                    let assigned = workflowReport.userAssignmentCounts;
+                    // let names = workflowReport.usernames;
 
-                    let assignedList = _.map(_.toPairs(assigned), ([uid, num]) => {
-                        return t.li(` ${names[parseInt(uid)]}: ${num}`);
+                    let assignedList = _.map(_.toPairs(assigned), ([uid, email, status, num]) => {
+                        return t.li(` ${email}: ${status} = ${num}`);
                     });
 
-                    let c = workflow.statusCounts;
+                    let c = workflowReport.statusCounts;
                     let lbls = _.join(
                         _.map(workflowDef.labelSchemas.schemas, l => l.label),
                         ", "
                     );
                     let rec = t.li([
-                        t.div([
-                            t.h4(`Workflow: ${workflowDef.workflow}`, [
-                                assignmentButton(workflowDef.workflow)
+                        t.table([
+                            t.th([
+                                t.td([t.h2([`Workflow: ${workflowDef.workflow}`])])
                             ]),
-                            `Description: ${workflowDef.description}`,
-                            t.br(), `Target label    : ${workflowDef.targetLabel.key}`,
-                            t.br(), `Curated labels  : ${lbls}`,
-                            t.br(), `Remaining       : ${workflow.unassignedCount}`,
-                            t.br(), `Assigned        : ${c.Assigned}; Completed: ${c.Completed};  Skipped: ${c.Skipped}`,
-                            t.br(), `User Assignments:`, t.ul(assignedList)
+                            t.tr([
+                                t.td([t.h3([`${workflowDef.workflow}`])]),
+                                t.td([assignmentButton(workflowDef.workflow)])
+                            ]),
+                            t.tr([
+                                t.td([`Target Path`]), t.td([workflowDef.targetPath])
+                            ]),
+                            t.tr([
+                                t.td([`Curated Labels`]), t.td([lbls])
+                            ]),
+                            t.tr([
+                                t.td([`Assignment Overview`]), t.td([
+                                    `Available: ${c.Available}; Completed: ${c.Completed};  Skipped: ${c.Locked}`
+                                ])
+                            ]),
+                            t.tr([
+                                t.td([`User Assignments`]), t.td([
+                                    t.ul(assignedList)
+                                ])
+                            ]),
+
                         ])
                     ])
                     ;

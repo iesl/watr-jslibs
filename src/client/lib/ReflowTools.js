@@ -13,6 +13,7 @@ const LTBounds = watr.geometry.LTBounds_Companion;
 const Labels = watr.watrmarks.Labels;
 
 import * as lbl from './labeling';
+import * as d3x from './d3-extras';
 
 export function updateUserPosition(widget) {
     let handlers = {

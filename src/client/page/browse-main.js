@@ -11,8 +11,9 @@ import * as server from '../lib/serverApi.js';
 let pageLen = 50;
 
 function createEntryItem(entry) {
-    let interestingLabels = _.filter(entry.labels[0], l => l.slice(0, 3) !== 'seg');
-    let labelList = _.map(interestingLabels, l => t.li(` ${l}`));
+    // let interestingLabels = _.filter(entry.labels[0], l => l.slice(0, 3) !== 'seg');
+    // let labelList = _.map(interestingLabels, l => t.li(` ${l}`));
+    console.log(entry);
     let entryName = entry.stableId.replace(/\.pdf\.d/, '');
 
     let entryPanel =
@@ -29,7 +30,7 @@ function createEntryItem(entry) {
                     ])
                 ]),
                 t.div('.listing-info', [
-                    t.ul('.h-indent-ul', [t.li("Labels")], labelList)
+                    // t.ul('.h-indent-ul', [t.li("Labels")], labelList)
                 ])
             ])
         ])

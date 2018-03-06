@@ -33,19 +33,14 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
         let queryBox = coords.mk.fromLtwh(clickPt.x, clickPt.y, 1, 1);
         let hoveredLabels = rtrees.searchPageLabels(pageNum, queryBox);
         if (hoveredLabels.length > 0) {
-
             toggleLabelSelection(pageNum, hoveredLabels);
-
         } else {
-
             let neighbors = rtrees.knnQueryPage(pageNum, clickPt, 4);
             if (neighbors.length > 0) {
                 let nearestNeighbor = neighbors[0];
                 // let ns = _.map(neighbors, (n) => n.char).join('');
                 textview.syncScrollTextGridToImageClick(clickPt, nearestNeighbor.gridDataPt);
-
             }
-
         }
     });
 

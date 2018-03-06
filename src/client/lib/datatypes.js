@@ -21,26 +21,26 @@ import * as coords from './coord-sys.js';
  *
  */
 
-class Assignment {
-    constructor (zonelock) {
-        // this.workflow = workflow;
-        this.zonelock = zonelock;
-        // this.zone = zone;
-    }
-    // constructor (workflow, zonelock, zone) {
-    //     this.workflow = workflow;
-    //     this.zonelock = zonelock;
-    //     this.zone = zone;
-    // }
-}
+// class Assignment {
+//     constructor (zonelock) {
+//         // this.workflow = workflow;
+//         this.zonelock = zonelock;
+//         // this.zone = zone;
+//     }
+//     // constructor (workflow, zonelock, zone) {
+//     //     this.workflow = workflow;
+//     //     this.zonelock = zonelock;
+//     //     this.zone = zone;
+//     // }
+// }
 
-export function assignmentsFromJson(jsonRep) {
-    return _.map(jsonRep, assignmentJson => {
-        // let x = workflowFromJson(assignmentJson.workflow);
-        let y = zonelockFromJson(assignmentJson.zonelock);
+export function assignmentsFromJson(jsonReps) {
+    return _.map(jsonReps, js=> {
+        let {document, holder, id, lockPath, status} = js;
+        // let y = zonelockFromJson(assignmentJson.zonelock);
         // let z = zoneFromJson(assignmentJson.zone);
         // y.assignee = assignmentJson.assignee;
-        return new Assignment( y );
+        return js;
     });
 }
 
@@ -63,24 +63,24 @@ export function workflowFromJson(jsonRep) {
     );
 }
 
-class ZoneLock {
-    constructor (id, assignee, status, workflow, zone) {
-        this.id = id;
-        this.assignee = assignee;
-        this.status = status;
-        this.workflow = workflow;
-        this.zone = zone;
-    }
-}
-export function zonelockFromJson(jsonRep) {
-    return new ZoneLock(
-        jsonRep.id,
-        jsonRep.assignee,
-        jsonRep.status,
-        jsonRep.workflow,
-        jsonRep.zone
-    );
-}
+// class ZoneLock {
+//     constructor (id, assignee, status, workflow, zone) {
+//         this.id = id;
+//         this.assignee = assignee;
+//         this.status = status;
+//         this.workflow = workflow;
+//         this.zone = zone;
+//     }
+// }
+// export function zonelockFromJson(jsonRep) {
+//     return new ZoneLock(
+//         jsonRep.id,
+//         jsonRep.assignee,
+//         jsonRep.status,
+//         jsonRep.workflow,
+//         jsonRep.zone
+//     );
+// }
 
 class Zone {
     constructor (zoneId, label, order, regions, glyphDefs) {
