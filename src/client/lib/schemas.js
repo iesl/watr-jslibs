@@ -4,76 +4,85 @@
  **/
 
 /* global _ require */
-var defsSchema = {
-    "$id": "http://example.com/schemas/defs.json",
-    "t": {
-        "int": { "type": "integer" },
-        "str": { "type": "string" },
-        "str?": { "type": [null, "string"] },
-        "int?": { "type": [null, "integer"] }
-    }
-};
 
-let CorpusLockSchema = {
-    "$id": "http://example.com/schemas/CorpusLockSchema.json",
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-        "document": { "$ref": "defs.json#/t/int" },
-        "holder": { "$ref": "defs.json#/t/int?" },
-        "id": { "$ref": "defs.json#/t/int" },
-        "lockPath": { "$ref": "defs.json#/t/str" },
-        "status": { "$ref": "defs.json#/t/str" }
-    }
-};
+function schemaName(n) {
+    return `http://watrworks.net/schemas/${n}Schema.json`;
+}
+function shortSchemaName(url) {
+    let prefix = `http://watrworks.net/schemas/`;
+    let postfix = `Schema.json`;
+    let n1 = url.slice(prefix.length);
+    let n2 = n1.slice(0, n1.length-postfix.length);
+    return n2;
+}
 
-let WorkflowRecordSchema = {
-    "$id": "http://example.com/schemas/WorkflowRecordSchema.json",
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-        "labelSchemas": { "$ref": "LabelSchemasSchema.json" },
-        "targetPath": { "$ref": "defs.json#/t/str" },
-        "workflow": { "$ref": "defs.json#/t/str" }
-    }
-};
-
-let LockedWorkflowSchema = {
-    "$id": "http://example.com/schemas/LockedWorkflowSchema.json",
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-        "lockRecord": { "$ref": "CorpusLockSchema.json" },
-        "workflowRecord": { "$ref": "WorkflowRecordSchema.json" }
-    }
-};
+function defaultObj(n) {
+    let o = {
+        '$id': schemaName(n),
+        'type': 'object',
+        'additionalProperties': false,
+        'properties': {
+        }
+    };
+    return o;
+}
 
 
-let LabelSchemaSchema = {
-    "$id": "http://example.com/schemas/LabelSchemaSchema.json",
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-        "label": { "$ref": "defs.json#/t/str" },
-        "description": { "$ref": "defs.json#/t/str?" },
-        "children": { "items":  { "$ref": "LabelSchemaSchema.json" } },
-        "abbrev": { "items": { "$ref": "defs.json#/t/str?" } }
+let IntT = { "type": "integer" };
+let IntOrNullT = { "type": ["integer", 'null'] };
+
+let StrT = { "type": "string" };
+let StrOrNullT = { "type": ["string", 'null'] };
+
+let Ref = (n) => { return { "$ref": `${n}Schema.json` }; };
+
+
+let CorpusLockSchema = Object.assign(defaultObj('CorpusLock'), {
+    properties: {
+        document : IntT,
+        holder   : IntOrNullT,
+        id       : IntT,
+        lockPath : StrT,
+        status   : StrT
     }
-};
-let LabelSchemasSchema = {
-    "$id": "http://example.com/schemas/LabelSchemasSchema.json",
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-        "name": { "$ref": "defs.json#/t/str" },
-        "schemas": { "items": { "$ref": "LabelSchemaSchema.json" } }
+});
+
+
+let WorkflowRecordSchema = Object.assign(defaultObj('WorkflowRecord'), {
+    properties: {
+        labelSchemas : Ref('LabelSchemas'),
+        targetPath   : StrT,
+        workflow     : StrT
     }
-};
+});
+
+let LockedWorkflowSchema = Object.assign(defaultObj('LockedWorkflow'), {
+    properties: {
+        lockRecord     : Ref("CorpusLock"),
+        workflowRecord : Ref("WorkflowRecord")
+    }
+});
+
+let LabelSchemaSchema = Object.assign(defaultObj('LabelSchema'), {
+    properties: {
+        label       : StrT,
+        description : StrOrNullT,
+        children    : { items: Ref("LabelSchema") },
+        abbrev      : { items: StrOrNullT }
+    }
+});
+
+let LabelSchemasSchema = Object.assign(defaultObj('LabelSchemas'), {
+    properties: {
+        name: StrT,
+        schemas: { items: Ref('LabelSchema') }
+    }
+});
+
 let Ajv = require('ajv');
 
 let ajv = new Ajv({
     schemas: [
-        defsSchema,
         CorpusLockSchema,
         WorkflowRecordSchema,
         LockedWorkflowSchema,
@@ -84,18 +93,19 @@ let ajv = new Ajv({
 });
 
 
-export function validateCorpusLock(data) {
-    let validator = ajv.getSchema('http://example.com/schemas/CorpusLockSchema.json');
+export function isValid(sname, data) {
+    let validator = ajv.getSchema(schemaName(sname));
+    if (validator == undefined) {
+        let schemas = _.map(
+            _.filter(_.keys(ajv._schemas), k => /watrworks.net/.test(k)),
+            shortSchemaName
+        );
+        console.log('Schema name', sname, 'not found', 'available', schemas);
+    }
     return validateData(validator, data);
 }
 
-
-export function validateLockedWorkflow(data) {
-    let validator = ajv.getSchema('http://example.com/schemas/LockedWorkflowSchema.json');
-    return validateData(validator, data);
-}
-
-export function validateData(validator, data) {
+function validateData(validator, data) {
 
     let valid = validator(data);
 

@@ -6,6 +6,8 @@
 
 import {shared} from './shared-state';
 
+import * as schema from './schemas';
+
 export function apiUri(path) {
     return `/api/v1/${path}`;
 }
@@ -74,7 +76,6 @@ export function apiPost(url, data) {
 
 
 export function createNewZone(labelData) {
-    // TODO: Append to Annotation table rather than zone table
     return apiPost(apiUri("labeling/zones"), labelData);
 }
 

@@ -79,6 +79,7 @@ function assignedCurationControlPanel(assignment) {
     return panel;
 }
 
+
 function unassignedCurationControlPanel(assignment) {
     let workflowSlug = assignment.workflowRecord.workflow;
     let btn = curate.assignmentButton(workflowSlug);
@@ -111,7 +112,7 @@ function showCurationStatus() {
         .then(workflows => { return shared.curations = workflows;})
         .then(() => { return server.apiGet(`/api/v1/workflow/documents/${entry}`); })
         .then(assignments => {
-            _.each(assignments, r => schemas.validateLockedWorkflow(r));
+            _.each(assignments, r => schemas.isValid('LockedWorkflow', r));
             console.log('assignments', assignments);
             // let assignments = dt.assignmentsFromJson(response);
             let assignmentsForCurrentUser  = _.filter(assignments, a => a.holder == shared.loginInfo.id);
