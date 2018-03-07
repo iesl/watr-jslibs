@@ -6,6 +6,7 @@ export function corpusEntry() {
     return entry;
 }
 
+
 export function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[[]]/g, "\\$&");

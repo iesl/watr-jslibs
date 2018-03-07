@@ -90,6 +90,7 @@ export class ReflowWidget {
             '.pull-right .spacedout',
             infoToggle, closeButton
         );
+
         // unshowWidget
         $(`#${this.containerId} .status-top`)
             .append(leftControls)
@@ -459,6 +460,10 @@ export class ReflowWidget {
             'mouseup',
             'mousedown'
         ];
+
+        // Clear all previous handlers
+        $id(widget.frameId).off();
+
         _.each(events, eventType => {
             $id(widget.frameId).on(eventType, function(event) {
                 _.each(widget.mouseHandlers, h => {
@@ -466,6 +471,7 @@ export class ReflowWidget {
                 });
             });
         });
+
     }
 
     updateCellHoverHighlight(hoverGraphCell) {
