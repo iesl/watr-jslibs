@@ -459,6 +459,9 @@ export class ReflowWidget {
             'mouseup',
             'mousedown'
         ];
+
+        $id(widget.frameId).off();
+
         _.each(events, eventType => {
             $id(widget.frameId).on(eventType, function(event) {
                 _.each(widget.mouseHandlers, h => {

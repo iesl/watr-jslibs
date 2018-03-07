@@ -1,5 +1,8 @@
-/* global _ $ Rx */
+/* global  */
 
+import * as _ from 'lodash';
+import * as $ from 'jquery';
+import * as Rx from 'rxjs';
 
 import * as frame from '../lib/frame.js';
 import {t, icon} from '../lib/jstags.js';
@@ -38,6 +41,7 @@ function createEntryItem(entry) {
 
     return entryPanel;
 }
+
 
 
 function createEntryItems(corpusEntries) {

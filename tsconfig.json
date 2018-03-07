@@ -1,10 +1,11 @@
 {
     "compilerOptions": {
-        "target": "es5",
-        "module": "es6",
+        "target": "es2016",
+        "module": "commonjs",
+        "moduleResolution": "node",
         "outDir": "./dist/",
         "allowSyntheticDefaultImports": true,
-        "noEmit": false,
+        "noEmit": true,
         "checkJs": true,
         "allowJs": true,
         "jsx": "react",
@@ -14,7 +15,7 @@
         "lib": [ "dom", "es6" ]
     },
     "include": [
-        "./src/**/*.ts"
+        "./src/**/*"
     ],
     "exclude": [
         "./node_modules/",

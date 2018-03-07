@@ -3,8 +3,9 @@
  * Server interop datatypes
  **/
 
-/* global _ require */
+/* global require */
 
+import * as _ from 'lodash';
 let Ajv = require('ajv');
 
 function schemaName(n) {
@@ -30,6 +31,7 @@ function defaultObj(n) {
     };
     return o;
 }
+
 
 function rec(n, props) {
     // let {req, opt} = props;

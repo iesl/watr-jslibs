@@ -2,7 +2,9 @@
  * Some helper functions for working with client-side html
  **/
 
-/* global $ _ Image */
+import * as _ from 'lodash';
+import * as $ from 'jquery';
+
 import {zipWithIndex} from './lodash-plus';
 
 export function $id(selector) {

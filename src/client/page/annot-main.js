@@ -2,7 +2,11 @@
  *
  **/
 
-/* global $ _ d3 */
+/* global */
+
+import * as _ from 'lodash';
+import * as $ from 'jquery';
+import * as d3 from 'd3';
 
 import * as util from  '../lib/commons.js';
 import * as frame from '../lib/frame.js';
@@ -20,6 +24,7 @@ import {t} from '../lib/jstags.js';
 
 import * as pageview from '../lib/view-pdf-pages.js';
 import * as textview from '../lib/view-pdf-text.js';
+
 
 
 function setupFrameLayout() {
@@ -114,7 +119,7 @@ function showCurationStatus() {
         .then(assignments => {
             // _.each(assignments, r => schema.isValid('LockedWorkflow', r));
             schema.allValid('LockedWorkflow')(assignments);
-            console.log('assignments', assignments);
+            // console.log('assignments', assignments);
             let assignmentsForCurrentUser  = _.filter(assignments, a => a.holder == shared.loginInfo.id);
             let documentHasCurationStatus = assignments.length > 0;
             let isAssignedToCurrentUser = assignmentsForCurrentUser.length > 0;
@@ -171,6 +176,8 @@ export function runMain() {
     frame.setupFrameLayout();
 
     let entry = util.corpusEntry();
+
+    let bar = entry.foo;
 
     shared.currentDocument = entry;
 

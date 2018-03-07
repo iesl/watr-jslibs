@@ -2,19 +2,18 @@
  *
  **/
 
-/* global $ _ d3 */
+
+import * as _ from 'lodash';
+import * as $ from 'jquery';
+import * as d3 from 'd3';
 
 import {shared} from './shared-state';
-// import * as dt from './datatypes';
 import * as rtrees from './rtrees';
-import * as util from './commons.js';
 import * as server from './serverApi.js';
 import * as modals from './modals.js';
 import * as d3x from './d3-extras';
 
 import {t} from './jstags.js';
-
-
 import * as coords from './coord-sys.js';
 
 export function updateAnnotationShapes() {
@@ -41,8 +40,8 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
     return dataPts;
 }
 
- function refreshZoneHightlights(zonesJs) {
-    let zones = _.map(zonesJs, z => dt.zoneFromJson(z));
+
+function refreshZoneHightlights(zones) {
     shared.zones = zones;
 
     rtrees.initPageLabelRTrees(zones);
@@ -122,7 +121,7 @@ export function createHeaderLabelUI(mbrSelection, page) {
             };
 
             server.createNewZone(zoneData)
-                .then(res => {
+                .then(annot => {
                     d3.selectAll('.label-selection-rect').remove();
                     updateAnnotationShapes();
                 })
@@ -180,7 +179,7 @@ export function createLabelChoiceWidget(labelNames, containerId) {
 
     let containerHeight = $(window).height();
     let dialogHeight = $('#modal-content').height(); // ('clientHeight');
-    let dialog = $('#modal-content');
+    // let dialog = $('#modal-content');
     // console.log('dialog', dialog);
     let maxY = containerHeight - dialogHeight;
     let yPos = Math.min(maxY, shared.currMouseClientPt.y);

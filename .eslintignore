@@ -1,4 +1,3 @@
-lib
 *.svg.react.js
 coverage
 flow-typed

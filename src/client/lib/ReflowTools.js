@@ -2,9 +2,9 @@
  * Mouse handlers for ReflowWidget
  **/
 
-/* global require _ watr */
+/* global require watr */
+import * as _ from 'lodash';
 
-import * as util from  './commons.js';
 import * as coords from './coord-sys.js';
 const GraphPaper = watr.utils.GraphPaper;
 const Options = watr.utils.Options;

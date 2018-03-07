@@ -1,6 +1,8 @@
 /* global require location */
 
-
+/**
+ * @returns {string}
+ */
 export function corpusEntry() {
     let entry = location.href.split('/').reverse()[0].split('?')[0];
     return entry;

@@ -1,5 +1,8 @@
-/* global require _ $  */
+/* global require */
 
+
+import * as _ from 'lodash';
+import * as $ from 'jquery';
 import { shared } from './shared-state';
 import * as coords from './coord-sys.js';
 let rtree = require('rbush');
