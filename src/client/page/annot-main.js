@@ -177,8 +177,6 @@ export function runMain() {
 
     let entry = util.corpusEntry();
 
-    let bar = entry.foo;
-
     shared.currentDocument = entry;
 
     server.getCorpusArtifactTextgrid(entry)

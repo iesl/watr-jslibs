@@ -1,5 +1,8 @@
+/**
+ *
+ */
 
-/* global d3 */
+import * as d3 from 'd3';
 
 export function initRect(sel, fbbox) {
     sel .attr("x"      , d => fbbox(d).left)

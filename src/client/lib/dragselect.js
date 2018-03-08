@@ -2,10 +2,8 @@
  *
  **/
 
-/* global d3 */
-
+import * as d3 from 'd3';
 import * as coords from './coord-sys.js';
-import * as util from  './commons.js';
 import * as d3x from './d3-extras';
 
 export default function awaitUserSelection(d3$svg, initSvgPt) {

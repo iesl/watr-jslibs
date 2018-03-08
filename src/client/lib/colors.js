@@ -2,8 +2,6 @@
  * A few color related utilities
  **/
 
-/* global require _ d3 */
-
 export let labelColors =  [
     'black',
     'blue',

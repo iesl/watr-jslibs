@@ -5,15 +5,14 @@
  *
  */
 
-/* global d3 _ $ */
+/* global  _ $ */
 
-import * as lbl from './labeling';
 import * as coords from './coord-sys.js';
-import * as util from  './commons.js';
 import * as pageview from  './view-pdf-pages.js';
 import {t} from './jstags.js';
 
 import * as d3x from './d3-extras';
+import * as d3 from 'd3';
 
 import { shared } from './shared-state';
 
@@ -144,23 +143,23 @@ export function syncScrollTextGridToImageClick(clientPt, txtDataPt) {
 
 }
 
-function showSelectionHighlight(d3$textgridSvg, selections) {
+// function showSelectionHighlight(d3$textgridSvg, selections) {
 
-    let sel = d3$textgridSvg
-        .selectAll("rect.glyph-selection")
-        .data(selections, d=> d.id)
-    ;
-    sel.enter()
-        .append('rect')
-        .classed("glyph-selection", true)
-        .attr('id', d => d.id)
-        .call(d3x.initRect, d => d)
-        .call(d3x.initStroke, 'black', 1, 0.1)
-        .call(d3x.initFill, 'blue', 0.1)
-    ;
+//     let sel = d3$textgridSvg
+//         .selectAll("rect.glyph-selection")
+//         .data(selections, d=> d.id)
+//     ;
+//     sel.enter()
+//         .append('rect')
+//         .classed("glyph-selection", true)
+//         .attr('id', d => d.id)
+//         .call(d3x.initRect, d => d)
+//         .call(d3x.initStroke, 'black', 1, 0.1)
+//         .call(d3x.initFill, 'blue', 0.1)
+//     ;
 
-    sel.exit().remove() ;
-}
+//     sel.exit().remove() ;
+// }
 
 
 export function textgridSvgHandlers(d3$textgridSvg) {
@@ -190,8 +189,9 @@ export function textgridSvgHandlers(d3$textgridSvg) {
             syncScrollPageImageToTextClick(clientPt, firstHit);
         }})
         .on("mouseup", function() {})
-        .on("mousemove", function() {
+        .on("mousemove", function(e, i) {
             let textgridRTree = shared.textgridRTrees[pageNum] ;
+
             let userPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
             let queryWidth = 20;
             let queryBoxHeight = shared.TextGridLineHeight * 2;
