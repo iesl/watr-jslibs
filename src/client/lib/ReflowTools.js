@@ -24,12 +24,12 @@ export function updateUserPosition(widget) {
         },
 
 
-        mousemove: function (d3Event){
-            let userPt = coords.mkPoint.fromXy(d3Event.offsetX, d3Event.offsetY);
+        mousemove: function (event){
+            let userPt = coords.mkPoint.fromXy(event.offsetX, event.offsetY);
             let clientX = Math.floor(userPt.x);
             let clientY = Math.floor(userPt.y);
 
-            // console.log('d3Event', d3Event);
+            // console.log('event', event);
             let focalGraphCell = widget.clientPointToGraphCell(userPt);
             let cellContent = widget.getCellContent(focalGraphCell);
 
@@ -84,7 +84,7 @@ export function updateUserPosition(widget) {
 
 export function labelingTool(widget) {
     return {
-        mousedown: function(mouseEvent) {
+        mousedown: function($event) {
 
             foldCellContent(widget.userGridLocation.cellContent, {
                 onCells: () => {
@@ -96,9 +96,9 @@ export function labelingTool(widget) {
                     let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
                     let cellCol = focalCellIndex;
 
-                    if (mouseEvent.shiftKey) {
+                    if ($event.shiftKey) {
                         maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
-                    } else if (mouseEvent.ctrlKey) {
+                    } else if ($event.ctrlKey) {
                         maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));
                     } else {
                         // Add a label to the clicked row of text
@@ -147,7 +147,7 @@ export function labelingTool(widget) {
 
 export function slicerTool(widget) {
     return {
-        mousedown: function(mouseEvent) {
+        mousedown: function($event) {
 
             foldCellContent(widget.userGridLocation.cellContent, {
                 onCells: () => {
@@ -159,7 +159,7 @@ export function slicerTool(widget) {
                     let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
                     let cellCol = focalCellIndex;
 
-                    if (mouseEvent.shiftKey) {
+                    if ($event.shiftKey) {
                         maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
                     } else {
                         maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));

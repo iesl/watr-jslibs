@@ -18,6 +18,7 @@ export function runSplitPane() {
 
     });
 
+
     let buttons = {
         hsplit: htm.iconButton('minus-square-o'),
         vsplit: htm.iconButton('columns')
@@ -51,3 +52,5 @@ export function runSplitPane() {
         ])
     );
 }
+
+

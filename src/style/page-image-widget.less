@@ -1,16 +1,9 @@
-@import "inc/_list";
-@import "inc/_radios";
-@import "inc/_toggles";
-@import "inc/_modals";
-@import "inc/_buttons";
-@import "inc/_solarized";
 
-div.gridwidget {
+div.page-image-widget {
     display: inline-grid;
 
     // lgt/rgt = left/right-gutter
     // tsb/bsb = top/bottom status bar
-    // inf     = infobar
     // frm     = frame div
     grid-template-areas:
     /**/"tsb tsb tsb"
@@ -20,11 +13,14 @@ div.gridwidget {
     ;
 
     grid-template-columns: 6px auto 6px;
-    grid-template-rows: 40px 60px auto 4px;
+    grid-template-rows: 20px 60px auto 4px;
 
     min-height: 0;  /* NEW */
     min-width: 0;   /* NEW; needed for Firefox */
 
+    div.infobar {
+        grid-area: inf;
+    }
 
     div.status-top {
         grid-area: tsb;
@@ -36,10 +32,6 @@ div.gridwidget {
         grid-area: bsb;
 
         background: @base1;
-    }
-
-    div.infobar {
-        grid-area: inf;
     }
 
     div.left-gutter{
@@ -54,29 +46,19 @@ div.gridwidget {
         background: @base0;
     }
 
-    div.gridcontent {
+    div.widgetcontent {
         grid-area: frm;
 
-        div.textgrid {
-            position: relative;
+        div.page-image{
+            margin: 5px auto;
+            border: 0;
+            z-index: 10;
 
-            // canvas.textgrid and svg.textgrid are superimposed
-            canvas.textgrid {
-                position: absolute;
-
-                top: 0;
-                left: 0;
-
-                z-index: 1;
-            }
-
-            svg.textgrid {
-                position: absolute;
-
-                top: 0;
-                left: 0;
-
-                z-index: 10 ;
+            svg.page-image {
+                padding: 0;
+                margin: 0;
+                border: 0;
+                z-index: -1;
             }
         }
     }

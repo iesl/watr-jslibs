@@ -28,3 +28,8 @@ export function IdGenerator() {
     return nextId;
 }
 
+
+export function eventHasLeftClick(event) {
+    // buttons: 0=none, 1=left, 3=middle, 2=right
+    let b = event.buttons; return b == 1;
+}

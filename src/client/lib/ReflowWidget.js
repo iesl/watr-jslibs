@@ -2,11 +2,16 @@
  *
  **/
 
-/* global require _ d3 watr fabric $ */
+/* global require watr fabric */
 
-import * as util from  './commons.js';
+import * as $ from 'jquery';
+import * as _ from 'lodash';
+import * as d3 from 'd3';
+
+import * as mhs from './MouseHandlerSets';
+
 import * as coords from './coord-sys.js';
-import { $id, t, icon, htm } from './jstags.js';
+import { $id, t, htm } from './jstags.js';
 import * as lbl from './labeling';
 let rtree = require('rbush');
 import {shared} from './shared-state';
@@ -441,34 +446,7 @@ export class ReflowWidget {
 
     setMouseHandlers(handlers) {
         let widget = this;
-        widget.mouseHandlers = _.map(handlers, handler => {
-            let init = {
-                mouseover: function() {},
-                mouseout: function() {},
-                mousemove: function() {},
-                mouseup: function() {},
-                mousedown: function() {}
-            };
-            Object.assign(init, handler(widget));
-            return init;
-        });
-        let events = [
-            'mouseover',
-            'mouseout',
-            'mousemove',
-            'mouseup',
-            'mousedown'
-        ];
-
-        $id(widget.frameId).off();
-
-        _.each(events, eventType => {
-            $id(widget.frameId).on(eventType, function(event) {
-                _.each(widget.mouseHandlers, h => {
-                    h[eventType](event);
-                });
-            });
-        });
+        mhs.setMouseHandlers(widget, widget.frameId, handlers);
     }
 
     updateCellHoverHighlight(hoverGraphCell) {

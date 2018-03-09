@@ -1,9 +1,12 @@
 /**
  *
- *
  **/
 
-/* global Rx d3 _ $ */
+/* global */
+
+import * as _ from 'lodash';
+import * as $ from 'jquery';
+import * as d3 from 'd3';
 
 import * as lbl from './labeling';
 import * as coords from './coord-sys.js';
@@ -12,10 +15,12 @@ import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
 import * as reflowWidget from  './ReflowWidget.js';
 import * as reflowWidgetInit from  './ReflowWidgetInit.js';
-import awaitUserSelection from './dragselect.js';
+
+import {awaitUserSelection} from './dragselect';
 import Tippy from 'tippy.js';
 import {$id, t, icon} from './jstags.js';
 import * as d3x from './d3-extras';
+import * as mhs from './MouseHandlerSets';
 
 import * as server from './serverApi.js';
 import * as textview from  './view-pdf-text.js';
@@ -23,8 +28,11 @@ import { shared } from './shared-state';
 import * as global from './shared-state';
 import {zipWithIndex} from './lodash-plus';
 
-function defaultModeMouseHandlers(d3$svg, pageNum) {
-    d3$svg.on("mousedown", function() {
+
+
+function defaultModeMouseHandlers($pageImageDiv, pageNum) {
+
+    $pageImageDiv.on("mousedown", function() {
         // one of:
         //  - toggle labeled region selection
         //  - sync textgrid to clicked pt
@@ -45,7 +53,7 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
     });
 
 
-    d3$svg.on("mousemove", function() {
+    $pageImageDiv.on("mousemove", function() {
         let mouseEvent = d3.event;
         let svgUserPt = coords.mkPoint.fromD3Mouse(d3.mouse(this));
 
@@ -56,9 +64,9 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
 
             mouseEvent.stopPropagation(); // silence other listeners
 
-            awaitUserSelection(d3$svg, svgUserPt)
+            awaitUserSelection($pageImageDiv, svgUserPt)
                 .then(pointOrRect => {
-                    defaultModeMouseHandlers(d3$svg, pageNum);
+                    defaultModeMouseHandlers($pageImageDiv, pageNum);
                     console.log('awaitUserSelection: ', pointOrRect);
                     if (pointOrRect.point) {
                         let clickPt = pointOrRect.point;
@@ -91,19 +99,16 @@ function defaultModeMouseHandlers(d3$svg, pageNum) {
 
                 });
         } else {
-            displayLabelHovers(pageNum, svgUserPt); // OrElse:
-            displayCharHoverReticles(d3$svg, pageNum, svgUserPt);
+            displayLabelHovers(pageNum, svgUserPt);
+            displayCharHoverReticles($pageImageDiv, pageNum, svgUserPt);
         }
     });
 
-    d3$svg.on("mouseup", function() {});
-    d3$svg.on("mouseover", function() {});
-    d3$svg.on("mouseout", function() {});
+    $pageImageDiv.on("mouseup", function() {});
+    $pageImageDiv.on("mouseover", function() {});
+    $pageImageDiv.on("mouseout", function() {});
 }
 
-function initPageImageMouseHandlers(d3$svg, pageNum) {
-    defaultModeMouseHandlers(d3$svg, pageNum);
-}
 
 function setupSelectionHighlighting() {
 
@@ -132,7 +137,7 @@ function toggleLabelSelection(pageNum, clickedItems) {
 }
 
 function displayLabelHovers(pageNum, hoverPt) {
-    let pageImageFrameId = `div#page-image-frame-${pageNum}`;
+    // let pageImageFrameId = `div#page-image-frame-${pageNum}`;
     let queryBox = coords.mk.fromLtwh(hoverPt.x, hoverPt.y, 1, 1);
     // console.log('displayLabelHovers, page:', pageNum);
 
@@ -194,7 +199,7 @@ function displayCharHoverReticles(d3$svg, pageNum, userPt) {
 
     showPageImageGlyphHoverReticles(d3$svg, hits, queryBox);
     let textgridSvg = d3x.d3select.pageTextgridSvg(pageNum);
-    let gridData = _.map(hits, h => h.gridDataPt);
+    // let gridData = _.map(hits, h => h.gridDataPt);
     // if (gridData.length > 0) {
     //     console.log('gridData', gridData);
     // }
@@ -363,10 +368,18 @@ export function setupPageImages(contentSelector, pageGeometries) {
         })
     ;
 
-    d3.selectAll('svg.page-image')
+    // d3.selectAll('svg.page-image')
+    //     .each(function (pageData, pageNum){
+    //         let d3$svg = d3.select(this);
+    //         console.log('d3.this', this);
+    //         initPageImageMouseHandlers(d3$svg, pageNum);
+    //     }) ;
+
+    d3.selectAll('div.page-image')
         .each(function (pageData, pageNum){
-            let d3$svg = d3.select(this);
-            initPageImageMouseHandlers(d3$svg, pageNum);
+            // let d3$svg = d3.select(this);
+            // console.log('d3.this', this);
+            defaultModeMouseHandlers($(this), pageNum);
         }) ;
 
     lbl.updateAnnotationShapes();

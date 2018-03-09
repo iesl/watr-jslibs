@@ -97,7 +97,7 @@ function refreshZoneHightlights(zones) {
     });
  }
 
-export function createHeaderLabelUI(mbrSelection, page) {
+export function createHeaderLabelUI(mbrSelection, page, containerId) {
     let labelNames = _.flatMap(shared.curations, c => {
         let topLabelNames = _.map(c.labelSchemas.schemas, ls => ls.label);
         topLabelNames.unshift('#'+c.workflow);
@@ -105,7 +105,7 @@ export function createHeaderLabelUI(mbrSelection, page) {
     });
 
 
-    let containerId = 'splitpane_root__bottom';
+    // let containerId = 'splitpane_root__bottom';
     createLabelChoiceWidget(labelNames, containerId)
         .then(choice => {
 

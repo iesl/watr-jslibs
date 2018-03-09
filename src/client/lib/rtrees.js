@@ -145,3 +145,79 @@ export function initPageAndGridRTrees(textgrids) {
 
 }
 
+
+export function gridDataToGlyphData(gridDataPts) {
+    return _.filter(
+        _.map(gridDataPts, p => p.glyphDataPt),
+        p =>  p !== undefined
+    );
+}
+
+export function initGridData(textgrids, canvasContexts, gridTextOrigin, gridTextHeight) {
+
+    return _.map(textgrids, (textgrid, gridNum) => {
+        let idGen = util.IdGenerator();
+
+        let context;
+        if (canvasContexts != undefined) {
+            context = canvasContexts[gridNum];
+        } else {
+            context = {
+                measureText: () => 10,
+                fillText: () => {}
+            };
+        }
+
+        if (gridTextHeight == undefined) {
+            gridTextHeight = 20;
+        }
+        if (gridTextOrigin == undefined) {
+            gridTextOrigin = coords.mkPoint.fromXy(0, 0);
+        }
+
+        let gridRowsDataPts = _.map(textgrid.rows, (gridRow, rowNum) => {
+
+            let y = gridTextOrigin.y + (rowNum * gridTextHeight);
+            let x = gridTextOrigin.x;
+            let text = gridRow.text;
+            let currLeft = x;
+            let gridDataPts = _.map(text.split(''), (ch, chi) => {
+                let chWidth = context.measureText(ch).width;
+                let charDef = gridRow.loci[chi];
+
+                let gridDataPt = coords.mk.fromLtwh(
+                    currLeft, y-gridTextHeight, chWidth, gridTextHeight
+                );
+
+                gridDataPt.id = idGen();
+                gridDataPt.gridRow = gridRow;
+                gridDataPt.row = rowNum;
+                gridDataPt.col = chi;
+                gridDataPt.char = ch;
+                gridDataPt.page = gridNum;
+                gridDataPt.locus = charDef;
+                charDef.gridDataPt = gridDataPt;
+
+                let isGlyphData = charDef.g != undefined;
+                if (isGlyphData) {
+                    let charBBox = charDef.g[0][2];
+                    let glyphDataPt = coords.mk.fromArray(charBBox);
+                    glyphDataPt.id = gridDataPt.id;
+                    glyphDataPt.gridDataPt = gridDataPt;
+                    glyphDataPt.page = gridNum;
+                    glyphDataPt.locus = charDef;
+                    gridDataPt.glyphDataPt = glyphDataPt;
+                }
+
+                currLeft += chWidth;
+
+                return gridDataPt;
+            });
+            return gridDataPts;
+        });
+
+        return _.flatten(gridRowsDataPts);
+    });
+
+}
+

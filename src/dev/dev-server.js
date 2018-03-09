@@ -19,6 +19,7 @@ const app = new Koa();
 let projectRoot = path.resolve(__dirname, '../..' );
 let srcRoot = path.resolve(projectRoot, 'src');
 let devRoot = path.resolve(srcRoot, 'dev');
+let devDataRoot = path.resolve(devRoot, 'data');
 let srcClientRoot = path.resolve(srcRoot, 'client');
 let distRoot = path.resolve(projectRoot, 'dist');
 let projectParent = path.resolve(projectRoot, '..');
@@ -27,6 +28,7 @@ let watrmarksLib = path.resolve(projectParent, './watr-marks/js/target/scala-2.1
 console.log('srcRoot', srcRoot);
 console.log('srcClientRoot', srcClientRoot);
 console.log('projectRoot', projectRoot);
+console.log('devData', devDataRoot);
 
 render(app, {
     root: path.join(devRoot, 'view'),
@@ -37,6 +39,7 @@ render(app, {
 });
 
 // Serve public assets
+
 
 router
     .get('/dist/:file', async function(ctx, next) {
@@ -53,6 +56,17 @@ router
     })
     .get('/style/:file', async function(ctx, next) {
         await send(ctx, ctx.params.file, { root: srcRoot + '/style' });
+    })
+    .get('/image/page/:pagenum', async function(ctx, next) {
+        let pagenum = ctx.params.pagenum;
+        let p = path.resolve(devDataRoot, `corpus-entry-0/page-images`);
+        let file = `page-${pagenum}.opt.png`;
+        await send(ctx, file, { root: p } );
+    })
+    .get('/data/textgrid', async function(ctx, next) {
+        let p = path.resolve(devDataRoot, `corpus-entry-0`);
+        let file = 'textgrid.json';
+        await send(ctx, file, { root: p  });
     })
 ;
 

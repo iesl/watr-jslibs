@@ -33,10 +33,21 @@ export let mkPoint = {
     fromXy: (x, y, sys) => {
         return new Point(x, y, sys);
     },
+
     fromD3Mouse: (d3Mouse) => {
         return new Point(d3Mouse[0], d3Mouse[1]);
+    },
+
+    offsetFromJqEvent: (event) => {
+        return mkPoint.fromXy(event.offsetX, event.offsetY);
     }
 };
+
+export function pointFloor(p) {
+    return mkPoint.fromXy(
+        Math.floor(p.x), Math.floor(p.y)
+    );
+}
 
 /**
    General purpose bounding box data that meets the interface requirements
@@ -126,3 +137,9 @@ export let mk = {
         );
     }
 };
+
+export function boxCenteredAt(p, width, height) {
+    let left = p.x - (width/2);
+    let top = p.y - (height/2);
+    return mk.fromLtwh(left, top, width, height);
+}

@@ -8,6 +8,7 @@ import '../style/app-main.less';
 
 import {shared} from '../client/lib/shared-state';
 import * as ReflowWidgetDev from  './reflow-widget.dev.js';
+import * as PageImageWidgetDev from  './PageImageWidgetDev.js';
 import * as SplitPaneDev from  './split-pane.dev.js';
 import * as spu  from '../client/lib/splitpane-utils.js';
 import * as jst  from '../client/lib/jstags.js';
@@ -18,8 +19,10 @@ shared.DEV_MODE = true;
 function runHome() {
     let pages = t.ul([
         t.li([ t.a('Reflow', {href: '/reflow'}) ]),
-        t.li([ t.a('Split Pane', {href: '/splitpane'}) ])
+        t.li([ t.a('Split Pane', {href: '/splitpane'}) ]),
+        t.li([ t.a('Page Image Widget', {href: '/pageimage'}) ])
     ]);
+
     $('#dev-pages').append(
         pages
     );
@@ -44,6 +47,10 @@ function dispatch() {
 
     case "splitpane":
         SplitPaneDev.runSplitPane();
+        break;
+
+    case "pageimage":
+        PageImageWidgetDev.run();
         break;
 
     }
