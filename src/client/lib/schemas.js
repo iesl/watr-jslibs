@@ -93,12 +93,38 @@ let ajv = createSchemas([
         schemas: ArrayOf( Ref('LabelSchema') )
     }),
 
+    rec('PageRegion', {
+        page: {
+            stableId: Str,
+            pageNum : Int
+        },
+        bbox: {
+            left   : Int,
+            top    : Int,
+            width  : Int,
+            height : Int
+        }
+    }),
+
+    rec('Location', {
+        Zone: {
+            regions: ArrayOf( Ref('PageRegion') )
+        }
+    }),
+
+    rec('Zone', {
+        name: Str,
+        schemas: ArrayOf( Ref('LabelSchema') )
+    }),
+
     rec('Annotation', {
         id        : Int,
         document  : Int,
         owner     : IntOrNull,
         annotPath : StrOrNull,
         created   : Int,
+        label     : Str,
+        location  : Ref('Location'),
         body      : StrOrNull
     })
 

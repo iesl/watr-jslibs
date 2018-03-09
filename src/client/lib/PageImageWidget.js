@@ -16,6 +16,9 @@ import {eventHasLeftClick} from './commons.js';
 import * as mhs from './MouseHandlerSets';
 import {awaitUserSelection} from './dragselect';
 import * as lbl from './labeling';
+import * as schema from './schemas';
+import Tippy from 'tippy.js';
+import { concat } from 'rxjs/operators';
 
 export class PageImageWidget {
 
@@ -31,7 +34,6 @@ export class PageImageWidget {
         this.frameId = `div#page-image-${pageNum}`;
         this.containerId = containerId;
         this.glyphRtree = rtree();
-        this.labelRtree = rtree();
     }
 
     init() {
@@ -83,6 +85,8 @@ export class PageImageWidget {
         ;
 
         widget.setMouseHandlers([pageImageHandlers]);
+
+        widget.tooltips = [];
     }
 
     printToInfobar(slot, label, value) {
@@ -98,6 +102,33 @@ export class PageImageWidget {
     setGlyphData(glyphData) {
         this.glyphData = glyphData;
         this.glyphRtree.load(glyphData);
+    }
+
+    setAnnotations(annotationRecs) {
+        schema.allValid('Annotation')(annotationRecs);
+
+        let dataPts = _.flatMap(annotationRecs, rec => {
+            let label = rec.label;
+            let regions = rec.location.Zone.regions;
+            return _.map(regions, (region, i) => {
+                let data = coords.mk.fromLtwhFloatReps(region.bbox);
+                data.id = `ann${rec.id}_${i}`;
+                // data.id = region.regionId;
+                data.selector = '#' + data.id;
+                data.pageNum = region.page.pageNum;
+                data.label = label;
+                data.title = label;
+                data.annotId = rec.id;
+                return data;
+            });
+        });
+
+        this.annotationRecs = annotationRecs;
+        this.annotationRegions = dataPts;
+        this.labelRtree = rtree();
+        this.labelRtree.load(dataPts);
+
+        this.showAnnotations();
     }
 
     displayCharHoverReticles(userPt) {
@@ -123,6 +154,77 @@ export class PageImageWidget {
 
         // let textgridSvg = d3x.d3select.pageTextgridSvg(pageNum);
         // textview.showTexgridHoverReticles(textgridSvg, _.map(hits, h => h.gridDataPt));
+    }
+
+    displayLabelHovers(hoverPt) {
+        let widget = this;
+        let queryBox = coords.mk.fromLtwh(hoverPt.x, hoverPt.y, 1, 1);
+
+        let hoveredLabels = widget.labelRtree.search(queryBox);
+
+        let hoveredTooltips = _.map(hoveredLabels, hit => {
+
+            let $hit = $(hit.selector);
+            $hit.attr('title', hit.label);
+
+            let tooltip = _.remove(widget.tooltips, tt => tt.id == hit.id)[0];
+
+            if (tooltip === undefined) {
+                tooltip = $hit.prop('_tippy');
+                if (tooltip === undefined) {
+                    Tippy(hit.selector, {
+                        updateDuration: 0,
+                        popperOptions: {
+                            modifiers: {
+                                // preventOverflow: {
+                                //     enabled: false
+                                // },
+                                computeStyle: {
+                                    gpuAcceleration: false
+                                }
+                            }
+                        }
+                    });
+                    tooltip = $hit.prop('_tippy');
+                    tooltip.id = hit.id;
+                }
+            }
+            tooltip.show();
+            return tooltip;
+        });
+
+        _.each(widget.tooltips, tooltip => {
+            tooltip.hide();
+        });
+
+        widget.tooltips = hoveredTooltips;
+    }
+
+    d3select() {
+        return d3.select(this.svgId);
+    }
+
+    showAnnotations() {
+        let widget = this;
+
+        widget.d3select()
+            .selectAll('.annotation-rect')
+            .remove();
+
+        _.each(widget.annotationRegions, (region, i) => {
+            let label = region.label;
+
+            widget.d3select()
+                .append('rect')
+                .datum(region)
+                .call(d3x.initRect, r => r)
+                .call(d3x.initStroke, 'blue', 1, 0.8)
+                .call(d3x.initFill, 'purple', 0.2)
+                .attr('id', region.id)
+                .classed('annotation-rect', true)
+            ;
+
+        });
     }
 
     createImageLabelingPanel(userSelection, mbrSelection) {
@@ -201,6 +303,7 @@ function pageImageHandlers(widget) {
                     });
             } else {
                 widget.displayCharHoverReticles(userPt);
+                widget.displayLabelHovers(userPt);
             }
         }
     };
