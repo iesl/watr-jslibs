@@ -2,55 +2,46 @@
 div.infobar {
     background: @base3;
 
-    display: grid;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: no-wrap;
 
-    grid-column-gap  : 8px;
-    grid-row-gap     : 2px;
+    width: 100%;
+    height: 100%;
 
-    grid-template-columns : repeat(auto-fill, 190px);
-    grid-template-rows    : repeat(auto-fill, 28px);
-    grid-auto-flow: row;
+    div.infobar-row {
+        display: inline-flex;
+        // flex-direction: column;
+        flex-wrap: no-wrap;
 
-    div.infoslot {
-        // display: grid;
+        div.infoslot {
 
-        background: @base2;
-	      border: 1px solid black;
-        padding: 1px;
-        width: 100%;
-        font-size: 120%;
-        font-weight: bold;
+            background: @base2;
+            border: 1px solid black;
+            padding: 1px;
+            width: 100%;
+            font-size: 120%;
+            font-weight: bold;
 
-        span.infoslot-label {
-            display: inline-block;
-            background: @base3;
-            width: 40%;
-            // height: 100%;
-            text-align: center;
-	          // border: 1px solid blue;
-        }
+            span.infoslot-label {
+                display: inline-block;
+                background: @base3;
+                width: 40%;
+                // height: 100%;
+                text-align: center;
+                // border: 1px solid blue;
+            }
 
-        span.infoslot-value {
-            display: inline-block;
-            text-align: right;
+            span.infoslot-value {
+                display: inline-block;
+                text-align: right;
+            }
         }
     }
 
 }
 
 .hideinfobar {
-    display: inline-grid;
-
-    // lgt/rgt = left/right-gutter
-    // tsb/bsb = top/bottom status bar
-    // inf     = infobar
-    // frm     = frame div
-    grid-template-areas:
-    /**/"tsb tsb tsb"
-        "lgt frm rgt"
-        "lgt frm rgt"
-        "bsb bsb bsb"
-    ;
 
     div.infobar {
         display: none;

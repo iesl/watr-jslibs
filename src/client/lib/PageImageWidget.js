@@ -2,7 +2,6 @@
  *
  **/
 
-import * as $ from 'jquery';
 import * as _ from 'lodash';
 import * as d3 from 'd3';
 import * as d3x from './d3-extras';
@@ -19,6 +18,7 @@ import * as schema from './schemas';
 import * as Rx from 'rxjs';
 import * as knn from 'rbush-knn';
 import ToolTips from './Tooltips';
+import Infobar from './Infobar';
 
 export class PageImageWidget {
 
@@ -30,16 +30,18 @@ export class PageImageWidget {
     constructor (pageNum, pageGeometry, containerId) {
         this.pageNum = pageNum;
         this.pageBounds = coords.mk.fromArray(pageGeometry);
-        this.svgId = `svg#page-image-${pageNum}`;
-        this.frameId = `div#page-image-${pageNum}`;
+        this.svgId = `page-image-svg-${pageNum}`;
+        this.svgSelector = `#${this.svgId}`;
+        this.frameId = `page-image-div-${pageNum}`;
+        this.frameSelector = `#${this.frameId}`;
         this.containerId = containerId;
         this.glyphRtree = rtree();
 
         this._tooltipHoversRx = new Rx.Subject();
-        this._tooltips = new ToolTips(this.frameId, this._tooltipHoversRx);
+        this._tooltips = new ToolTips(this.frameSelector, this._tooltipHoversRx);
+        this.infoBar = new Infobar(this.containerId, 2, 3);
     }
 
-    get tooltips() { return this._tooltips; }
 
     updateTooltipHovers(hits) {
         this._tooltipHoversRx.next(hits);
@@ -48,17 +50,12 @@ export class PageImageWidget {
     init() {
         let widget = this;
 
-        let infobarSlots = _.map(_.range(0, 6), i => {
-            return t.div(`.infoslot #slot-${i}`, [
-                t.span(`.infoslot-label #slot-label-${i}`, ''),
-                t.span(`.infoslot-value #slot-value-${i}`, '')
-            ]);
-        });
+        let infobarElem = this.infoBar.getElem();
 
         let widgetNode =
             t.div(`.page-image-widget #page-image-widget-${widget.pageNum}`, [
                 t.div(`.status-top`),
-                t.div(`.infobar`, infobarSlots),
+                infobarElem,
                 t.div(`.left-gutter`),
                 t.div(`.widgetcontent #page-image-content-${widget.pageNum}`),
                 t.div(`.right-gutter`),
@@ -70,16 +67,16 @@ export class PageImageWidget {
         d3.select(`#page-image-content-${widget.pageNum}`)
             .append('div').classed('page-image', true)
             .datum(widget.pageBounds)
-            .attr('id', (d, i) => `page-image-${i}`)
+            .attr('id', (d, i) => `page-image-div-${i}`)
             .attr('width', d => d.x + d.width)
             .attr('height', d => d.y + d.height )
             .append('svg').classed('page-image', true)
             .datum(widget.pageBounds)
-            .attr('id', (d, i) => `page-image-${i}`)
+            .attr('id', (d, i) => `page-image-svg-${i}`)
             .attr('width', d => d.x + d.width)
             .attr('height', d => d.y + d.height )
         ;
-        d3.selectAll(widget.svgId)
+        d3.selectAll(widget.svgSelector)
             .each(function (){
                 let self = d3.select(this);
                 return self .append('image')
@@ -106,7 +103,7 @@ export class PageImageWidget {
     get selectionsRx() { return this._selectionsRx; }
 
     d3select() {
-        return d3.select(this.svgId);
+        return d3.select(this.svgSelector);
     }
 
     setSelections(sels) {
@@ -133,9 +130,9 @@ export class PageImageWidget {
     }
 
     printToInfobar(slot, label, value) {
-        $(`#slot-label-${slot}`).text(label);
-        $(`#slot-value-${slot}`).text(value.toString());
+        this.infoBar.printToInfobar(slot, label, value);
     }
+
 
     setMouseHandlers(handlers) {
         let widget = this;
@@ -189,9 +186,9 @@ export class PageImageWidget {
 
         let hits = widget.glyphRtree.search(queryBox);
 
-        // widget.printToInfobar(4, `glyphs`, `${hits.length}`);
+        widget.printToInfobar(4, `glyphs`, `${hits.length}`);
 
-        let reticles = d3.selectAll(widget.svgId)
+        let reticles = d3.selectAll(widget.svgSelector)
             .selectAll('.textloc')
             .data(hits, d => d.id);
 
@@ -243,7 +240,7 @@ export class PageImageWidget {
 
     createImageLabelingPanel(userSelection, mbrSelection) {
 
-        d3.select(this.svgId).append('rect')
+        d3.select(this.svgSelector).append('rect')
             .call(d3x.initRect, () => userSelection)
             .classed('label-selection-rect', true)
             .call(d3x.initStroke, 'blue', 1, 1.0)
@@ -307,7 +304,7 @@ function pageImageHandlers(widget) {
 
             if (eventHasLeftClick(event)) {
                 widget.setMouseHandlers([]);
-                awaitUserSelection(d3.select(widget.svgId), userPt)
+                awaitUserSelection(d3.select(widget.svgSelector), userPt)
                     .then(pointOrRect => {
                         widget.setMouseHandlers([pageImageHandlers]);
 

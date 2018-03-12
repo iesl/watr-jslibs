@@ -1,6 +1,6 @@
 /**
  * An Rx driven tooltip widget, for those cases when a straight-up DOM based
- * tooltip engine won't suffice. 
+ * tooltip engine won't suffice.
  */
 
 import * as $ from 'jquery';

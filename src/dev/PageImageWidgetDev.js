@@ -55,11 +55,11 @@ export function run()  {
         let pages = textgrid.pages;
         let textgrids = _.map(pages, p => p.textgrid);
 
-        console.log('textgrids', textgrids);
+        // console.log('textgrids', textgrids);
         let gridData = rtrees.initGridData(textgrids);
-        console.log('gridData', gridData);
+        // console.log('gridData', gridData);
         let glyphData = rtrees.gridDataToGlyphData(gridData[0]);
-        console.log('glyphData', glyphData);
+        // console.log('glyphData', glyphData);
 
         let widget = new PageImageWidget.PageImageWidget(0, g, 'page-images');
 

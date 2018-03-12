@@ -24,10 +24,12 @@ import * as server from './serverApi.js';
 
 const JsArray = watr.utils.JsArray;
 const TGCC = watr.textgrid.TextGridConstructor_Companion;
-const TGC = TGCC.create();
+// const TGC = TGCC.create();
 const TGI = watr.textgrid.TextGridInterop;
 
 import * as reflowTools from './ReflowTools.js';
+
+import Infobar from './Infobar';
 
 export function unshowGrid() {
     if (shared.activeReflowWidget != undefined) {
@@ -54,6 +56,7 @@ export class ReflowWidget {
         this.svgId    = `textgrid-svg-${gridNum}`;
         this.zoneId = zoneId;
         this.zoneLabel = zoneLabel;
+        this.infoBar = new Infobar(this.containerId, 2, 3);
 
     }
 
@@ -75,16 +78,7 @@ export class ReflowWidget {
 
         let leftControls = htm.makeRadios('shapers', controls);
 
-        let infoToggle = htm.makeToggle('info-toggle', 'toggle-on', 'toggle-off', false, 'Toggle debug info pane');
-
-        infoToggle.on('change', function(event) {
-            let isChecked = $(event.target).prop('checked');
-            if (isChecked) {
-                $('div.gridwidget').addClass('hideinfobar');
-            } else {
-                $('div.gridwidget').removeClass('hideinfobar');
-            }
-        });
+        let infoToggle = this.infoBar.getToggle();
 
         let closeButton = t.span(
             '.spacedout',
@@ -123,18 +117,13 @@ export class ReflowWidget {
                     t.canvas(`.textgrid #${this.canvasId}`, {page: this.gridNum, width: initWidth, height: gridHeight})
                 ]) ;
 
-            let infobarSlots = _.map(_.range(0, 6), i => {
-                return t.div(`.infoslot #slot-${i}`, [
-                    t.span(`.infoslot-label #slot-label-${i}`, ''),
-                    t.span(`.infoslot-value #slot-value-${i}`, '')
-                ]);
-            });
+            let infobarElem = this.infoBar.getElem();
 
             let widgetNode =
                 t.div(`.gridwidget`, [
                     t.div(`.status-top`),
                     t.div(`.left-gutter`),
-                    t.div(`.infobar`, infobarSlots),
+                    infobarElem,
                     t.div(`.gridcontent`, [
                         gridNodes
                     ]),
@@ -169,8 +158,7 @@ export class ReflowWidget {
     }
 
     printToInfobar(slot, label, value) {
-        $(`#slot-label-${slot}`).text(label);
-        $(`#slot-value-${slot}`).text(value);
+        this.infoBar.printToInfobar(slot, label, value);
     }
 
     updateDomNodeDimensions() {
@@ -445,8 +433,7 @@ export class ReflowWidget {
     }
 
     setMouseHandlers(handlers) {
-        let widget = this;
-        mhs.setMouseHandlers(widget, widget.frameId, handlers);
+        mhs.setMouseHandlers(this, this.frameId, handlers);
     }
 
     updateCellHoverHighlight(hoverGraphCell) {

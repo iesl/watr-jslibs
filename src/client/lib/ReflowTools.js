@@ -25,6 +25,7 @@ export function updateUserPosition(widget) {
 
 
         mousemove: function (event){
+
             let userPt = coords.mkPoint.fromXy(event.offsetX, event.offsetY);
             let clientX = Math.floor(userPt.x);
             let clientY = Math.floor(userPt.y);

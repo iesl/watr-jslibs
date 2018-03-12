@@ -4,11 +4,10 @@
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
+import { $id } from './jstags.js';
 
 export function setMouseHandlers(hArg, targetDivId, handlers) {
     $(targetDivId).off();
-
-    // console.log('setMouseHandlers', hArg, targetDivId, handlers);
 
     let mouseHandlers = _.map(handlers, handler => {
         let init = {
@@ -33,7 +32,7 @@ export function setMouseHandlers(hArg, targetDivId, handlers) {
 
 
     _.each(events, eventType => {
-        $(targetDivId).on(eventType, function(event) {
+        $id(targetDivId).on(eventType, function(event) {
             _.each(mouseHandlers, h => {
                 h[eventType](event);
             });
