@@ -8,33 +8,41 @@ export function run()  {
 
     Shared.initGlobalMouseTracking();
 
-    let annot0 = {
-        "id" : 2,
-        "document" : 1,
-        "owner" : null,
-        "annotPath" : null,
-        "created" : 1520626895815,
-        "label" : "Math",
-        "location" : {
-            "Zone" : {
-                "regions" : [
-                    {
-                        "page" : {
-                            "stableId" : "doc#0",
-                            "pageNum" : 0
-                        },
-                        "bbox" : {
-                            "left" : 10000,
-                            "top" : 10000,
-                            "width" : 8000,
-                            "height" : 4000
-                        }
-                    }
-                ]
-            }
+    let annots = [
+
+        {"id" : 2,
+         "document" : 1,
+         "owner" : null,
+         "annotPath" : null,
+         "created" : 1520626895815,
+         "label" : "Math",
+         "location" : {
+             "Zone" : {
+                 "regions" : [
+                     {"page" : {"stableId" : "doc#0", "pageNum" : 0},
+                      "bbox" : {"left" : 10000, "top" : 10000, "width" : 8000, "height" : 4000}}
+                 ]
+             }
+         },
+         "body" : null
         },
-        "body" : null
-    };
+        {"id" : 3,
+         "document" : 1,
+         "owner" : null,
+         "annotPath" : null,
+         "created" : 1520626895815,
+         "label" : "Title",
+         "location" : {
+             "Zone" : {
+                 "regions" : [
+                     {"page" : {"stableId" : "doc#0", "pageNum" : 0},
+                      "bbox" : {"left" : 13000, "top" : 20000, "width" : 24000, "height" : 8000}}
+                 ]
+             }
+         },
+         "body" : null
+        }
+    ];
 
 
 
@@ -57,7 +65,7 @@ export function run()  {
 
         widget.init();
         widget.setGlyphData(glyphData);
-        widget.setAnnotations([annot0]);
+        widget.setAnnotations(annots);
 
     });
 

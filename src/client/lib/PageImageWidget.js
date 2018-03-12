@@ -2,7 +2,6 @@
  *
  **/
 
-
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 import * as d3 from 'd3';
@@ -17,8 +16,9 @@ import * as mhs from './MouseHandlerSets';
 import {awaitUserSelection} from './dragselect';
 import * as lbl from './labeling';
 import * as schema from './schemas';
-import Tippy from 'tippy.js';
-import { concat } from 'rxjs/operators';
+import * as Rx from 'rxjs';
+import * as knn from 'rbush-knn';
+import ToolTips from './Tooltips';
 
 export class PageImageWidget {
 
@@ -34,6 +34,15 @@ export class PageImageWidget {
         this.frameId = `div#page-image-${pageNum}`;
         this.containerId = containerId;
         this.glyphRtree = rtree();
+
+        this._tooltipHoversRx = new Rx.Subject();
+        this._tooltips = new ToolTips(this.frameId, this._tooltipHoversRx);
+    }
+
+    get tooltips() { return this._tooltips; }
+
+    updateTooltipHovers(hits) {
+        this._tooltipHoversRx.next(hits);
     }
 
     init() {
@@ -86,7 +95,41 @@ export class PageImageWidget {
 
         widget.setMouseHandlers([pageImageHandlers]);
 
-        widget.tooltips = [];
+        widget._tooltips = [];
+        widget.currentSelections = [];
+        widget._selectionsRx = new Rx.Subject();
+        widget.setupSelectionHighlighting();
+    }
+
+    get tooltips() { return this._tooltips; }
+    set tooltips(t) { this._tooltips = t; }
+    get selectionsRx() { return this._selectionsRx; }
+
+    d3select() {
+        return d3.select(this.svgId);
+    }
+
+    setSelections(sels) {
+
+        this.currentSelections = sels;
+        this.selectionsRx.next(sels);
+    }
+
+    setupSelectionHighlighting() {
+        let widget = this;
+        this.selectionsRx.subscribe(currSelects => {
+
+
+            widget.d3select().selectAll('.annotation-rect')
+                .classed('annotation-selected', false);
+
+            _.each(currSelects , sel => {
+                widget.d3select()
+                    .select(sel.selector)
+                    .classed('annotation-selected', true);
+            });
+
+        });
     }
 
     printToInfobar(slot, label, value) {
@@ -131,13 +174,22 @@ export class PageImageWidget {
         this.showAnnotations();
     }
 
+    queryForGlyphs(queryBox) {
+        return this.glyphRtree.search(queryBox);
+    }
+
+    queryForNearestGlyph(queryPt) {
+        let hits = knn(this.glyphRtree, queryPt.x, queryPt.y, 1);
+        return hits[0];
+    }
+
     displayCharHoverReticles(userPt) {
         let widget = this;
         let queryBox = coords.boxCenteredAt(userPt, 10, 10);
 
         let hits = widget.glyphRtree.search(queryBox);
 
-        widget.printToInfobar(4, `glyphs`, `${hits.length}`);
+        // widget.printToInfobar(4, `glyphs`, `${hits.length}`);
 
         let reticles = d3.selectAll(widget.svgId)
             .selectAll('.textloc')
@@ -152,6 +204,7 @@ export class PageImageWidget {
         reticles.exit().remove();
 
 
+        widget.emitGlyphHoverPts(hits);
         // let textgridSvg = d3x.d3select.pageTextgridSvg(pageNum);
         // textview.showTexgridHoverReticles(textgridSvg, _.map(hits, h => h.gridDataPt));
     }
@@ -159,50 +212,11 @@ export class PageImageWidget {
     displayLabelHovers(hoverPt) {
         let widget = this;
         let queryBox = coords.mk.fromLtwh(hoverPt.x, hoverPt.y, 1, 1);
-
         let hoveredLabels = widget.labelRtree.search(queryBox);
+        widget.updateTooltipHovers(hoveredLabels);
 
-        let hoveredTooltips = _.map(hoveredLabels, hit => {
-
-            let $hit = $(hit.selector);
-            $hit.attr('title', hit.label);
-
-            let tooltip = _.remove(widget.tooltips, tt => tt.id == hit.id)[0];
-
-            if (tooltip === undefined) {
-                tooltip = $hit.prop('_tippy');
-                if (tooltip === undefined) {
-                    Tippy(hit.selector, {
-                        updateDuration: 0,
-                        popperOptions: {
-                            modifiers: {
-                                // preventOverflow: {
-                                //     enabled: false
-                                // },
-                                computeStyle: {
-                                    gpuAcceleration: false
-                                }
-                            }
-                        }
-                    });
-                    tooltip = $hit.prop('_tippy');
-                    tooltip.id = hit.id;
-                }
-            }
-            tooltip.show();
-            return tooltip;
-        });
-
-        _.each(widget.tooltips, tooltip => {
-            tooltip.hide();
-        });
-
-        widget.tooltips = hoveredTooltips;
     }
 
-    d3select() {
-        return d3.select(this.svgId);
-    }
 
     showAnnotations() {
         let widget = this;
@@ -211,7 +225,7 @@ export class PageImageWidget {
             .selectAll('.annotation-rect')
             .remove();
 
-        _.each(widget.annotationRegions, (region, i) => {
+        _.each(widget.annotationRegions, region => {
             let label = region.label;
 
             widget.d3select()
@@ -241,6 +255,20 @@ export class PageImageWidget {
 
         lbl.createHeaderLabelUI(mbrSelection, this.pageNum, this.containerId);
     }
+
+    toggleLabelSelection(clickedItems) {
+        let nonintersectingItems = _.differenceBy(clickedItems,  this.currentSelections, s => s.id);
+        this.setSelections(nonintersectingItems);
+    }
+
+    emitGlyphPt(glyphPt) {
+        // TODO make this subscribable so that text grid can sync on click
+
+    }
+    emitGlyphHoverPts(glyphPts) {
+        // TODO make this subscribable so that text grid can sync on hover
+
+    }
 }
 
 
@@ -248,34 +276,29 @@ function pageImageHandlers(widget) {
     let handlers = {
 
         click: function(event) {
-            widget.printToInfobar(5, `action`, `click`);
-            // one of:
-            //  - toggle labeled region selection
-            //  - sync textgrid to clicked pt
-            //  - begin selection handling
+
             let clickPt = coords.mkPoint.offsetFromJqEvent(event);
             let queryBox = coords.boxCenteredAt(clickPt, 2, 2);
 
-            // let hoveredLabels = rtrees.searchPageLabels(pageNum, queryBox);
-            // if (hoveredLabels.length > 0) {
-            //     toggleLabelSelection(pageNum, hoveredLabels);
-            // } else {
-            //     let neighbors = rtrees.knnQueryPage(pageNum, clickPt, 4);
-            //     if (neighbors.length > 0) {
-            //         let nearestNeighbor = neighbors[0];
-            //         textview.syncScrollTextGridToImageClick(clickPt, nearestNeighbor.gridDataPt);
-            //     }
-            // }
+            let hoveredLabels = widget.labelRtree.search(queryBox);
+            if (hoveredLabels.length > 0) {
+                widget.toggleLabelSelection(hoveredLabels);
+            } else {
+                let nearestGlyph = widget.queryForNearestGlyph(clickPt);
+                if (nearestGlyph !== undefined) {
+                    // textview.syncScrollTextGridToImageClick(clickPt, nearestNeighbor.gridDataPt);
+                    widget.emitGlyphPt(nearestGlyph);
+                }
+            }
         },
 
 
         mousedown: function() {
-            widget.printToInfobar(5, `action`, `down`);
+            //  - maybe begin selection handling
         },
 
 
         mousemove: function(event) {
-            widget.printToInfobar(5, `action`, `move`);
             let userPt = coords.mkPoint.offsetFromJqEvent(event);
             let clientPt = coords.pointFloor(userPt);
 

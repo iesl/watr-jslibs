@@ -6,7 +6,7 @@
         "underscore"
     ],
     "loadEagerly": [
-        "src/client/lib/*.js"
+        "src/client/lib/*.js",
         "src/client/page/*.js"
     ],
     "dontLoad": [
