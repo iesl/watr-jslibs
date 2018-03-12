@@ -16,12 +16,12 @@ import * as d3x from './d3-extras';
 import {t} from './jstags.js';
 import * as coords from './coord-sys.js';
 
-export function updateAnnotationShapes() {
-    return server.getDocumentZones()
-        .then(zoneRecs => {
-            return refreshZoneHightlights(zoneRecs.zones);
-        });
-}
+// export function updateAnnotationShapes() {
+//     return server.getDocumentAnnotations()
+//         .then(zoneRecs => {
+//             return refreshZoneHightlights(zoneRecs.zones);
+//         });
+// }
 
 function mapGlyphLociToGridDataPts(glyphsLoci) {
 
@@ -97,13 +97,17 @@ function refreshZoneHightlights(zones) {
     });
  }
 
-export function createHeaderLabelUI(mbrSelection, page, containerId) {
+export function getSharedCurationLabels() {
     let labelNames = _.flatMap(shared.curations, c => {
         let topLabelNames = _.map(c.labelSchemas.schemas, ls => ls.label);
         topLabelNames.unshift('#'+c.workflow);
         return topLabelNames;
     });
+    return labelNames;
+}
 
+export function createHeaderLabelUI(mbrSelection, page, containerId) {
+    let labelNames = getSharedCurationLabels();
 
     // let containerId = 'splitpane_root__bottom';
     createLabelChoiceWidget(labelNames, containerId)
@@ -179,15 +183,8 @@ export function createLabelChoiceWidget(labelNames, containerId) {
 
     let containerHeight = $(window).height();
     let dialogHeight = $('#modal-content').height(); // ('clientHeight');
-    // let dialog = $('#modal-content');
-    // console.log('dialog', dialog);
     let maxY = containerHeight - dialogHeight;
     let yPos = Math.min(maxY, shared.currMouseClientPt.y);
-    // console.log('containerHeight', containerHeight);
-    // console.log('dialogHeight', dialogHeight);
-    // console.log('clientY', shared.currMouseClientPt.y);
-    // console.log('maxY', maxY);
-    // console.log('yPos', yPos);
 
     $('.b-modal-content').css({
         'left': shared.currMouseClientPt.x,

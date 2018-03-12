@@ -42,7 +42,10 @@ export function unshowGrid() {
 
 export class ReflowWidget {
 
-    constructor (containerId, textGrid, labelSchema, zoneId, zoneLabel) {
+    /**
+     * @param {ServerDataExchange}  serverDataExchange
+     */
+    constructor (containerId, textGrid, labelSchema, zoneId, zoneLabel, serverDataExchange) {
 
         let gridNum = 1000;
         this.containerId = containerId;
@@ -57,6 +60,7 @@ export class ReflowWidget {
         this.zoneId = zoneId;
         this.zoneLabel = zoneLabel;
         this.infoBar = new Infobar(this.containerId, 2, 3);
+        this.serverDataExchange = serverDataExchange;
 
     }
 
@@ -181,20 +185,10 @@ export class ReflowWidget {
     saveTextGrid() {
         shared.activeReflowWidget = this;
         let gridAsJson = JSON.parse(this.textGrid.toJson().toString());
-        let postData = {
-            SetText: {
-                gridJson: gridAsJson
-            }
-        };
 
-        let DEV_MODE = shared.DEV_MODE;
-
-        if (DEV_MODE) {
-            return {};
-        } else {
-            return server.apiPost(server.apiUri(`labeling/zones/${this.zoneId}`), postData)
-                .then(() => lbl.updateAnnotationShapes()) ;
-
+        if (! shared.DEV_MODE) {
+            let sdx = this.serverDataExchange;
+            sdx.setAnnotationText(this.zoneId, gridAsJson);
         }
     }
 

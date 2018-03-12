@@ -12,14 +12,24 @@ div.page-image-widget {
         "bsb bsb bsb"
     ;
 
-    grid-template-columns: 6px auto 6px;
-    grid-template-rows: 20px 60px auto 4px;
+    grid-template-columns: 2px auto 2px;
+    grid-template-rows: 20px 60px auto 3px;
 
     min-height: 0;  /* NEW */
     min-width: 0;   /* NEW; needed for Firefox */
 
     div.infobar {
         grid-area: inf;
+    }
+
+    &.hideinfobar {
+
+        grid-template-areas:
+        /**/"tsb tsb tsb"
+            "lgt frm rgt"
+            "lgt frm rgt"
+            "bsb bsb bsb"
+        ;
     }
 
     div.status-top {
@@ -50,7 +60,7 @@ div.page-image-widget {
         grid-area: frm;
 
         div.page-image{
-            margin: 5px auto;
+            // margin: 5px auto;
             border: 0;
             z-index: 10;
 

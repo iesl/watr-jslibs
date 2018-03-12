@@ -7,7 +7,6 @@ import * as coords from './coord-sys.js';
 import * as d3x from './d3-extras';
 
 export function awaitUserSelection(d3$svg, initSvgPt) {
-    console.log('awaitUserSelection');
 
     return new Promise((resolve, reject) => {
 

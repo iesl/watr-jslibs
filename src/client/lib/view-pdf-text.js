@@ -65,10 +65,10 @@ export function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
         return hit.glyphDataPt !== undefined;
     });
 
-    pageview.showPageImageGlyphHoverReticles(
-        d3x.d3select.pageImage(pageNum),
-        ns
-    );
+    // pageview.showPageImageGlyphHoverReticles(
+    //     d3x.d3select.pageImage(pageNum),
+    //     ns
+    // );
 }
 
 export function showTexgridHoverReticles(d3$textgridSvg, gridDataPts) {

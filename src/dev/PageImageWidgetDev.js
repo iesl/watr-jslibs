@@ -3,6 +3,7 @@
 import * as Shared from '../client/lib/shared-state';
 import * as PageImageWidget from  '../client/lib/PageImageWidget.js';
 import * as rtrees from  '../client/lib/rtrees.js';
+import * as coords from '../client/lib/coord-sys.js';
 
 export function run()  {
 
@@ -60,8 +61,9 @@ export function run()  {
         // console.log('gridData', gridData);
         let glyphData = rtrees.gridDataToGlyphData(gridData[0]);
         // console.log('glyphData', glyphData);
+        let pageGeometry = coords.mk.fromArray(page0.pageGeometry);
 
-        let widget = new PageImageWidget.PageImageWidget(0, g, 'page-images');
+        let widget = new PageImageWidget.PageImageWidget(0, pageGeometry, 'page-images');
 
         widget.init();
         widget.setGlyphData(glyphData);

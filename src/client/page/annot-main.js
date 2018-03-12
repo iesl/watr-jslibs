@@ -183,13 +183,15 @@ export function runMain() {
         .then((textGridJson => {
             let pages = textGridJson.pages;
             let textgrids = _.map(pages, p => p.textgrid);
-            let pageShapes = _.map(pages, p => p.pageGeometry);
+
+            let gridData = rtrees.initGridData(textgrids);
 
             global.initGlobalMouseTracking();
 
             setupFrameLayout();
 
-            pageview.setupPageImages('div.page-image-viewer', pageShapes);
+            pageview.setupPageImages('div.page-image-viewer', textGridJson, gridData);
+
             textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
             rtrees.initPageAndGridRTrees(textgrids);

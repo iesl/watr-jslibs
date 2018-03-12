@@ -6,8 +6,9 @@
  *       https://stackoverflow.com/questions/6073505/what-is-the-difference-between-screenx-y-clientx-y-and-pagex-y
  **/
 
-/* global Rx $ */
+/* global $ */
 
+import * as Rx from 'rxjs';
 import * as coords from './coord-sys.js';
 
 

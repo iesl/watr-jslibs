@@ -2,6 +2,7 @@
  *
  **/
 
+import * as $ from 'jquery';
 import * as _ from 'lodash';
 import * as d3 from 'd3';
 import * as d3x from './d3-extras';
@@ -9,7 +10,7 @@ import * as d3x from './d3-extras';
 import * as coords from './coord-sys.js';
 import * as rtrees from  './rtrees.js';
 import * as rtree from 'rbush';
-import {t, $id} from './jstags.js';
+import {t, $id, icon} from './jstags.js';
 import {eventHasLeftClick} from './commons.js';
 import * as mhs from './MouseHandlerSets';
 import {awaitUserSelection} from './dragselect';
@@ -17,8 +18,110 @@ import * as lbl from './labeling';
 import * as schema from './schemas';
 import * as Rx from 'rxjs';
 import * as knn from 'rbush-knn';
+import * as util from  './commons.js';
 import ToolTips from './Tooltips';
 import Infobar from './Infobar';
+import * as reflowWidgetInit from  './ReflowWidgetInit.js';
+import {shared} from './shared-state';
+
+export class PageImageListWidget {
+
+    /**
+     * @param {ServerDataExchange}  serverDataExchange
+     */
+    constructor (pageImageWidgets, statusBarId, serverDataExchange) {
+        this.pageImageWidgets = pageImageWidgets;
+        this.statusBarId = statusBarId;
+        this.serverDataExchange = serverDataExchange;
+
+        this.init();
+    }
+
+    init() {
+
+        this.setupStatusBar(this.statusBarId);
+
+        let sdx = this.serverDataExchange;
+
+        _.each(this.pageImageWidgets, pageImageWidget => {
+            sdx.subscribeToAllAnnotations(annots => {
+                pageImageWidget.setAnnotations(annots);
+            });
+        });
+
+        // _.each(this.pageImageWidgets, (pageImageWidget, pageNum) => {
+        //     sdx.subscribeToPageUpdates(pageNum, (update) => {
+        //         pageImageWidget.updateAnnotationRegions(update);
+        //     });
+        // });
+
+    }
+
+
+    subscribeToAnnotationUpdates() {
+        let widget = this;
+        let sdx = this.serverDataExchange;
+
+        sdx.getSelectedAnnotationsRx().subscribe( selectedAnnots => {
+            $(widget.selectionStatusId).empty();
+            $(widget.selectionStatusId)
+                .append(t.span(`Selected:${selectedAnnots.length} del: `));
+
+            if (selectedAnnots.length == 1) {
+                let selection = selectedAnnots[0];
+                let gridForSelection = reflowWidgetInit.getTextGridForSelectedZone(selection);
+                let deleteBtn = t.button([icon.trash]);
+                deleteBtn.on('click', function() {
+                    let zoneId = selection.zoneId;
+                    sdx.deleteAnnotation(zoneId);
+                });
+
+                $id(widget.statusBarId).append(deleteBtn);
+
+                if (gridForSelection !== undefined) {
+                    reflowWidgetInit.showGrid(gridForSelection);
+                } else {
+                    let gridShaperBtn = t.button([icon.fa('indent')]);
+
+                    gridShaperBtn.on('click', function() {
+                        let textGrid = reflowWidgetInit.createTextGridFromSelectedZone(selection);
+                        reflowWidgetInit.showGrid(textGrid);
+                    });
+                    $id(widget.statusBarId).append(gridShaperBtn);
+
+                }
+            }
+            else if (selectedAnnots.length > 1) {
+                // reflowWidget.unshowGrid();
+            } else {
+                // reflowWidget.unshowGrid();
+                // $selectStatus.text(``);
+            }
+        });
+    }
+
+    setupStatusBar(statusBarId) {
+
+        $id(statusBarId)
+            .addClass('statusbar');
+
+        let statusItems =
+            t.div('.statusitems', [
+                t.div('.statusitem #selections', "Selections"),
+                t.div('.statusitem #mouse', 'Mouse')
+            ]);
+
+        $id(this.statusBarId).append(statusItems);
+
+        this.selectionStatusId = 'selections';
+        this.mouseStatusId = 'mouse';
+
+        shared.rx.clientPt.subscribe(clientPt => {
+            $('#mouse').text(`x:${clientPt.x} y:${clientPt.y}`);
+        });
+
+    }
+}
 
 export class PageImageWidget {
 
@@ -29,7 +132,7 @@ export class PageImageWidget {
      */
     constructor (pageNum, pageGeometry, containerId) {
         this.pageNum = pageNum;
-        this.pageBounds = coords.mk.fromArray(pageGeometry);
+        this.pageBounds = pageGeometry;
         this.svgId = `page-image-svg-${pageNum}`;
         this.svgSelector = `#${this.svgId}`;
         this.frameId = `page-image-div-${pageNum}`;
@@ -39,7 +142,10 @@ export class PageImageWidget {
 
         this._tooltipHoversRx = new Rx.Subject();
         this._tooltips = new ToolTips(this.frameSelector, this._tooltipHoversRx);
-        this.infoBar = new Infobar(this.containerId, 2, 3);
+        this.DEV_MODE = false;
+        if (this.DEV_MODE) {
+            this.infoBar = new Infobar(this.frameId, 2, 3);
+        }
     }
 
 
@@ -50,10 +156,15 @@ export class PageImageWidget {
     init() {
         let widget = this;
 
-        let infobarElem = this.infoBar.getElem();
+        let infobarElem = '';
+        let infobarContainerClass = '.hideinfobar';
+        if (this.DEV_MODE) {
+            infobarElem = this.infoBar.getElem();
+            infobarContainerClass = '';
+        }
 
         let widgetNode =
-            t.div(`.page-image-widget #page-image-widget-${widget.pageNum}`, [
+            t.div(`.page-image-widget #page-image-widget-${widget.pageNum} ${infobarContainerClass}`, [
                 t.div(`.status-top`),
                 infobarElem,
                 t.div(`.left-gutter`),
@@ -67,15 +178,16 @@ export class PageImageWidget {
         d3.select(`#page-image-content-${widget.pageNum}`)
             .append('div').classed('page-image', true)
             .datum(widget.pageBounds)
-            .attr('id', (d, i) => `page-image-div-${i}`)
+            .attr('id', () => `page-image-div-${widget.pageNum}`)
             .attr('width', d => d.x + d.width)
             .attr('height', d => d.y + d.height )
             .append('svg').classed('page-image', true)
             .datum(widget.pageBounds)
-            .attr('id', (d, i) => `page-image-svg-${i}`)
+            .attr('id', () => `page-image-svg-${widget.pageNum}`)
             .attr('width', d => d.x + d.width)
             .attr('height', d => d.y + d.height )
         ;
+
         d3.selectAll(widget.svgSelector)
             .each(function (){
                 let self = d3.select(this);
@@ -84,9 +196,9 @@ export class PageImageWidget {
                     .attr("y"      , d =>  d.y )
                     .attr("width"  , d =>  d.width )
                     .attr("height" , d =>  d.height )
-                    .attr("href"   , () =>  `/image/page/${widget.pageNum + 1}` )
+                    // .attr("href"   , () =>  `/image/page/${widget.pageNum + 1}` )
+                    .attr("href"   , d =>  '/api/v1/corpus/artifacts/entry/'+util.corpusEntry()+'/image/page/'+d.page )
                 ;
-                // .attr("href"   , d =>  '/api/v1/corpus/artifacts/entry/'+util.corpusEntry()+'/image/page/'+d.page )
             })
         ;
 
@@ -130,7 +242,9 @@ export class PageImageWidget {
     }
 
     printToInfobar(slot, label, value) {
-        this.infoBar.printToInfobar(slot, label, value);
+        if (this.DEV_MODE) {
+            this.infoBar.printToInfobar(slot, label, value);
+        }
     }
 
 
@@ -144,12 +258,21 @@ export class PageImageWidget {
         this.glyphRtree.load(glyphData);
     }
 
+    updateAnnotationRegions(regionDataPts) {
+        this.annotationRegions = regionDataPts;
+        this.labelRtree = rtree();
+        this.labelRtree.load(regionDataPts);
+
+        this.showAnnotations();
+    }
+
     setAnnotations(annotationRecs) {
         schema.allValid('Annotation')(annotationRecs);
 
         let dataPts = _.flatMap(annotationRecs, rec => {
             let label = rec.label;
             let regions = rec.location.Zone.regions;
+
             return _.map(regions, (region, i) => {
                 let data = coords.mk.fromLtwhFloatReps(region.bbox);
                 data.id = `ann${rec.id}_${i}`;
@@ -222,20 +345,65 @@ export class PageImageWidget {
             .selectAll('.annotation-rect')
             .remove();
 
-        _.each(widget.annotationRegions, region => {
-            let label = region.label;
+        // _.each(widget.annotationRegions, region => {
+        //     widget.d3select()
+        //         .append('rect')
+        //         .datum(region)
+        //         .call(d3x.initRect, r => r)
+        //         .call(d3x.initStroke, 'blue', 1, 0.8)
+        //         .call(d3x.initFill, 'purple', 0.2)
+        //         .attr('id', region.id)
+        //         .classed('annotation-rect', true)
+        //     ;
 
-            widget.d3select()
-                .append('rect')
-                .datum(region)
-                .call(d3x.initRect, r => r)
-                .call(d3x.initStroke, 'blue', 1, 0.8)
-                .call(d3x.initFill, 'purple', 0.2)
-                .attr('id', region.id)
-                .classed('annotation-rect', true)
-            ;
+        // });
+
+
+        let annots = widget.annotationRecs;
+        console.log('annots', annots);
+
+        _.each(annots, annot => {
+            // if (annot.glyphDefs != null) {
+            //     let glyphsLoci = _.flatMap(annot.glyphDefs.rows, r => r.loci);
+
+            //     let gridDataPts = self.mapGlyphLociToGridDataPts(glyphsLoci);
+            //     let gridDataByPage = _.groupBy(gridDataPts, p => p.page);
+            //     _.each(gridDataByPage, pageGridData => {
+
+            //         widget.d3select()
+            //             .selectAll(`.span${annot.annotId}`)
+            //             .data(pageGridData)
+            //             .enter()
+            //             .append('rect')
+            //             .call(d3x.initRect, d => d)
+            //             .call(d3x.initFill, 'cyan', 0.2)
+            //             .classed(`span${annot.annotId}`, true)
+            //             .classed('glyph-annot-highlight', true) ;
+
+            //     });
+            // }
+
+            _.each(annot.regions, region => {
+                console.log('region', region);
+
+                widget.d3select()
+                    .selectAll(`#ann${annot.annotId}_${region.regionId}`)
+                    .data([region])
+                    .enter()
+                    .append('rect')
+                    .call(d3x.initRect, r => r.bbox)
+                    .call(d3x.initStroke, 'blue', 1, 0.8)
+                    .call(d3x.initFill, 'purple', 0.2)
+                    .attr('id', `ann${annot.annotId}_${region.regionId}`)
+                    .classed('annotation-rect', true)
+                    .classed(`ann${annot.annotId}`, true)
+                ;
+
+            });
+
 
         });
+
     }
 
     createImageLabelingPanel(userSelection, mbrSelection) {
@@ -250,6 +418,7 @@ export class PageImageWidget {
             .call(d3x.initFill, 'yellow', 0.3)
         ;
 
+        // widget.setAnnotations(annots);
         lbl.createHeaderLabelUI(mbrSelection, this.pageNum, this.containerId);
     }
 

@@ -80,7 +80,7 @@ export function createNewZone(labelData) {
         .then(schema.isValid('Annotation'));
 }
 
-export function getDocumentZones () {
+export function getDocumentAnnotations () {
     return apiGet(apiUri(`labeling/zones/${shared.currentDocument}`))
         .then(schema.allValid('Annotation'));
 }
