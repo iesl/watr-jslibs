@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import { $id } from './jstags.js';
 
 export function setMouseHandlers(hArg, targetDivId, handlers) {
-    $(targetDivId).off();
+    $id(targetDivId).off();
 
     let mouseHandlers = _.map(handlers, handler => {
         let init = {
