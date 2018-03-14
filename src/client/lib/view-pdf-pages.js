@@ -308,7 +308,7 @@ function setupStatusBar(statusBarId) {
 
 }
 
-export function setupPageImages(contentSelector, pageGeometries) {
+export function setupPageImages(pageImageSelector, pageGeometries) {
 
     let ctx = {maxh: 0, maxw: 0};
 
@@ -326,9 +326,10 @@ export function setupPageImages(contentSelector, pageGeometries) {
 
     // panes.setParentPaneWidth(contentSelector, ctx.maxw + 80);
 
-    $(contentSelector).append(
-        t.div([
-            t.div('#statusbar .statusbar'),
+    // $(contentSelector).append(t.div('#statusbar .statusbar'));
+    console.log('pageImageSelector', pageImageSelector);
+    $(pageImageSelector).append(
+        t.div('.page-images-outer', [
             t.div('#page-images .page-images')
         ])
     );

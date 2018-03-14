@@ -26,7 +26,7 @@ import * as $ from 'jquery';
 import { $id, t } from './jstags.js';
 
 
-const splitPaneRootId = 'splitpane_root';
+export const splitPaneRootId = 'splitpane_root';
 
 function mkComponent(id) {
     return t.div('.split-pane-component')
@@ -41,7 +41,7 @@ function composePanes(paneComponents) {
 
 export function createSplitPaneRoot (containerId)  {
     $(containerId).append(
-        t.div(`#${splitPaneRootId} .split-pane-component`)
+        t.div(`#${splitPaneRootId} .split-pane-component .split-pane-frame`)
     );
     return splitPaneRootId;
 }
@@ -63,7 +63,7 @@ function generatePaneIds(parentId, n) {
 }
 
 function getNearestPaneAncestor (elem)  {
-    let pane = $(elem).parent().closest('.split-pane-component');
+    let pane = $(elem).closest('.split-pane-component');
     let id;
     if (pane.length > 0) {
         id = $(pane).attr('id');
@@ -73,7 +73,7 @@ function getNearestPaneAncestor (elem)  {
     return id;
 }
 
-export function splitVertical(containerId, numPanes) {
+export function splitVertical(containerId, numPanes, addProps) {
     let parentId = getNearestPaneAncestor('#'+containerId);
     let paneIds = generatePaneIds(parentId, numPanes);
     let panes = _.map(paneIds, id =>  mkComponent(id));
@@ -86,6 +86,7 @@ export function splitVertical(containerId, numPanes) {
     return Split(paneSelectors, {
         sizes: [50, 50],
         direction: 'horizontal',
+        gutterSize: 14,
         minSize: 100
     });
 }
@@ -94,21 +95,21 @@ export function splitVertical(containerId, numPanes) {
 export function fixedTopProps(topHeight) {
     return {
         gutterSize: 0,
-        sizes: [`${topHeight}px`, '']
+        sizes: [`${topHeight}px`, 100]
     };
 }
-export function splitHorizontal(containerSelector, numPanes, addProps) {
-    let parentId = getNearestPaneAncestor(containerSelector);
+export function splitHorizontal(containerId, numPanes, addProps) {
+    let parentId = getNearestPaneAncestor('#'+containerId);
     let props = addProps || {};
     let paneIds = generatePaneIds(parentId, numPanes);
     let panes = _.map(paneIds, id =>  mkComponent(id));
 
     let paneSelectors = _.map(paneIds, id =>  `#${id}`);
-    console.log('splitHorizontal',containerSelector, parentId, paneIds);
+    console.log('splitHorizontal', containerId, parentId, paneIds);
 
     let frame = composePanes(panes).addClass('split-pane-frame-column');
 
-    $id(containerSelector).append(frame);
+    $id(containerId).append(frame);
     let defaultProps = {
         sizes: [50, 50],
         direction: 'vertical',

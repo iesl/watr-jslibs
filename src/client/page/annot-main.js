@@ -26,21 +26,36 @@ function setupFrameLayout() {
     let $contentPane = $('.content-pane');
     $contentPane.append(t.div('#annot-panes'));
 
+    SplitWin.createSplitPaneRoot("#annot-panes");
 
-    SplitWin.splitVertical('annot-panes', 2);
-    let leftPaneId = SplitWin.makePaneId(0);
-    let rightPaneId = SplitWin.makePaneId(1);
+    SplitWin.splitVertical(SplitWin.splitPaneRootId, 2);
+    let pageImagePaneId = SplitWin.makePaneId(0);
+    let pageTextPaneId = SplitWin.makePaneId(1);
 
-    $id(leftPaneId).append(
+    console.log('pageTextPaneId', pageTextPaneId);
+    console.log('pageImagePaneId', pageImagePaneId);
+
+    let tprops = SplitWin.fixedTopProps(30);
+    SplitWin.splitHorizontal(pageImagePaneId, 2, tprops);
+
+    let pageImageStatusPaneId = SplitWin.makePaneId(0, 0);
+    let pageImageViewerPaneId = SplitWin.makePaneId(0, 1);
+
+    $id(pageImageStatusPaneId).append(
+        t.div(`#statusbar .statusbar`)
+    );
+
+
+    $id(pageImageViewerPaneId).append(
         t.div('.page-image-viewer')
     );
 
-    $id(rightPaneId).append(
-        t.div('', [
-            t.div('.page-text-viewer', [
-                t.div('.reflow-controls #reflow-controls'),
-                t.div('.page-textgrids #page-textgrids')
-            ])
+
+
+    $id(pageTextPaneId).append(
+        t.div('.page-text-viewer', [
+            t.div('.reflow-controls #reflow-controls'),
+            t.div('.page-textgrids #page-textgrids')
         ])
     );
 

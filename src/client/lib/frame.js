@@ -105,6 +105,7 @@ function setupSplitFrame() {
     ])) ;
 
 
+
     let $menubar = $id('topbar')
         .css({overflow: 'hidden'});
 

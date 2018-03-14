@@ -1,11 +1,4 @@
 /**
-Split Pane v0.9.4
-
-Copyright (c) 2014 - 2016 Simon Hagström
-
-Released under the MIT license
-https://raw.github.com/shagstrom/split-pane/master/LICENSE
-
 */
 
 .split-pane-frame {
@@ -13,8 +6,12 @@ https://raw.github.com/shagstrom/split-pane/master/LICENSE
     flex-wrap: no-wrap;
     height: 100%;
     width: 100%;
-    overflow: hidden;
+    // overflow: auto;
     z-index: 0;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .split-pane-frame-column {
@@ -26,24 +23,32 @@ https://raw.github.com/shagstrom/split-pane/master/LICENSE
 
 
 .gutter {
-    background-color: #eee;
+    background-color: #333;
 
     background-repeat: no-repeat;
     background-position: 50%;
+    z-index: 100;
 }
 
 
 .gutter.gutter-vertical {
+    cursor: ns-resize;
     background-image:  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=')
 }
 
 .gutter.gutter-horizontal {
+    cursor: ew-resize;
     background-image:  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==')
 }
-.split {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+
+.split-pane-component {
+    // position: relative;
+    // left: 0;
+    width: 100%;
+    overflow: auto;
+    // top: auto;
+    // bottom: 0;
+    // z-index: 1;
 }
 
 
