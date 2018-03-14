@@ -153,6 +153,15 @@ export class PageImageWidget {
         this._tooltipHoversRx.next(hits);
     }
 
+    widgetId() {
+        return `page-image-widget-${this.pageNum}`;
+    }
+
+    selectWidgetElem(elemSelector) {
+        console.log('elemSelector',  `#${this.widgetId()} ${elemSelector}`  ) ;
+        return $(`#${this.widgetId()} ${elemSelector}`);
+    }
+
     init() {
         let widget = this;
 
@@ -174,6 +183,13 @@ export class PageImageWidget {
             ]);
 
         $id(widget.containerId).append(widgetNode);
+
+        let $statusTop = widget.selectWidgetElem('.status-top');
+
+        $statusTop.append(
+            t.span(`Page: ${widget.pageNum}`)
+        );
+
 
         d3.select(`#page-image-content-${widget.pageNum}`)
             .append('div').classed('page-image', true)
@@ -345,18 +361,18 @@ export class PageImageWidget {
             .selectAll('.annotation-rect')
             .remove();
 
-        // _.each(widget.annotationRegions, region => {
-        //     widget.d3select()
-        //         .append('rect')
-        //         .datum(region)
-        //         .call(d3x.initRect, r => r)
-        //         .call(d3x.initStroke, 'blue', 1, 0.8)
-        //         .call(d3x.initFill, 'purple', 0.2)
-        //         .attr('id', region.id)
-        //         .classed('annotation-rect', true)
-        //     ;
+        _.each(widget.annotationRegions, region => {
+            widget.d3select()
+                .append('rect')
+                .datum(region)
+                .call(d3x.initRect, r => r)
+                .call(d3x.initStroke, 'blue', 1, 0.8)
+                .call(d3x.initFill, 'purple', 0.2)
+                .attr('id', region.id)
+                .classed('annotation-rect', true)
+            ;
 
-        // });
+        });
 
 
         let annots = widget.annotationRecs;
@@ -384,7 +400,6 @@ export class PageImageWidget {
             // }
 
             _.each(annot.regions, region => {
-                console.log('region', region);
 
                 widget.d3select()
                     .selectAll(`#ann${annot.annotId}_${region.regionId}`)

@@ -47,6 +47,7 @@ export default class ToolTips {
                         }
                     });
                     tooltip = $elem.prop('_tippy');
+                    console.log('hoverHit', hoverHit, $elem);
                     tooltip.id = hoverHit.id;
                 }
             }
