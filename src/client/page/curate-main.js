@@ -158,7 +158,7 @@ function setupPage() {
 export function runMain() {
     frame.setupFrameLayout();
 
-    let $contentPane = $('#splitpane_root__bottom');
+    let $contentPane = $('.content-pane');
 
     $contentPane.append(setupPage());
 

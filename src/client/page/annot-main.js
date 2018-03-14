@@ -8,7 +8,8 @@ import * as frame from '../lib/frame.js';
 import {shared} from '../lib/shared-state';
 import * as global from '../lib/shared-state';
 import * as server from '../lib/serverApi.js';
-import * as panes from  '../lib/splitpane-utils.js';
+// import * as panes from  '../lib/splitpane-utils.js';
+import * as SplitWin from  '../lib/SplitWin.js';
 import * as rtrees from  '../lib/rtrees.js';
 import {$id} from '../lib/jstags.js';
 
@@ -26,21 +27,16 @@ function setupFrameLayout() {
     $contentPane.append(t.div('#annot-panes'));
 
 
-    let { leftPaneId, rightPaneId } =
-        panes.splitVertical('#annot-panes', {fixedLeft: 200});
-
-
-    // $id(leftPaneId).addClass('page-image-viewer');
-    // $id(rightPaneId).addClass('page-text-viewer');
-    // $id(rightPaneId).append(t.div('.reflow-controls #reflow-controls'));
+    SplitWin.splitVertical('annot-panes', 2);
+    let leftPaneId = SplitWin.makePaneId(0);
+    let rightPaneId = SplitWin.makePaneId(1);
 
     $id(leftPaneId).append(
-        t.div('.split-pane-component-inner', [
-            t.div('.page-image-viewer')
-        ])
+        t.div('.page-image-viewer')
     );
+
     $id(rightPaneId).append(
-        t.div('.split-pane-component-inner', [
+        t.div('', [
             t.div('.page-text-viewer', [
                 t.div('.reflow-controls #reflow-controls'),
                 t.div('.page-textgrids #page-textgrids')
@@ -189,6 +185,7 @@ export function runMain() {
 
             rtrees.initPageAndGridRTrees(textgrids);
 
+
             d3.selectAll('svg.textgrid')
                 .each(function (){
                     let d3$svg = d3.select(this);
@@ -196,7 +193,6 @@ export function runMain() {
                 });
 
             showCurationStatus();
-
         }))
         .catch(error => {
             $('.content-pane').append(`<div><p>ERROR: ${error}: ${error}</p></div>`);

@@ -7,7 +7,7 @@
 
 import * as lbl from './labeling';
 import * as coords from './coord-sys.js';
-import * as panes from  './splitpane-utils.js';
+import * as SplitWin from  '../lib/SplitWin.js';
 import * as util from  './commons.js';
 import * as rtrees from  './rtrees.js';
 import * as reflowWidget from  './ReflowWidget.js';
@@ -248,9 +248,6 @@ function createImageLabelingPanel(userSelection, mbrSelection, page) {
 
 function setupStatusBar(statusBarId) {
 
-    $id(statusBarId)
-        .addClass('statusbar');
-
     let $selectStatus = t.div('.statusitem', "Selections");
 
     shared.rx.selections.subscribe( selectedZones => {
@@ -327,18 +324,27 @@ export function setupPageImages(contentSelector, pageGeometries) {
         ctx.maxw = Math.max(ctx.maxw, sh.x + sh.width);
     });
 
-    panes.setParentPaneWidth(contentSelector, ctx.maxw + 80);
+    // panes.setParentPaneWidth(contentSelector, ctx.maxw + 80);
 
-    let {topPaneId: statusBar, bottomPaneId: pageImageDivId} =
-        panes.splitHorizontal(contentSelector, {fixedTop: 30});
-
-    setupStatusBar(statusBar);
-
-    $id(pageImageDivId).append(
-        t.div('.split-pane-component-inner', [
+    $(contentSelector).append(
+        t.div([
+            t.div('#statusbar .statusbar'),
             t.div('#page-images .page-images')
         ])
     );
+
+    // SplitWin.splitHorizontal('annot-panes', 2);
+    // let {topPaneId: statusBar, bottomPaneId: pageImageDivId} =
+    //     panes.splitHorizontal(contentSelector, {fixedTop: 30});
+    // let statusBarId = SplitWin.makePaneId(1, 0);
+
+    setupStatusBar('statusbar');
+
+    // $('#page-images').append(
+    //     t.div('.split-pane-component-inner', [
+    //         t.div('#page-images .page-images')
+    //     ])
+    // );
 
     let imageSvgs = d3.select("#page-images")
         .selectAll(".page-image")

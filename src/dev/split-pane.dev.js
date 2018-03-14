@@ -30,7 +30,7 @@ export function runSplitPane() {
 
 
     let {leftPaneId, rightPaneId} =
-        spu.splitVertical(jst.$id(bottomPaneId), {fixedLeft: 200});
+        spu.splitVertical(jst.$id(bottomPaneId), {fixedLeft: 40});
 
     jst.$id(leftPaneId).append(
         t.div('Some Text')

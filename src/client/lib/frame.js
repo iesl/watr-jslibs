@@ -1,9 +1,10 @@
 /* global require $ _ */
 
-import * as panes from  './splitpane-utils.js';
+// import * as panes from  './splitpane-utils.js';
 import {$id, t} from './jstags.js';
 import * as auth from './auth.js';
 import {shared} from './shared-state';
+import * as SplitWin from  '../lib/SplitWin.js';
 
 
 function siteNavMenu() {
@@ -98,21 +99,16 @@ function setUserLoginInfo(loginInfo) {
 }
 
 function setupSplitFrame() {
-    $('body').append(t.div('#content')) ;
+    $('body').append(t.div('#content', [
+        t.div('#topbar .topbar'),
+        t.div('#content-pane .content-pane'),
+    ])) ;
 
-    let splitPaneRootId = panes.createSplitPaneRoot("#content");
 
-    let {topPaneId: topPaneId, bottomPaneId: bottomPaneId} =
-        panes.splitHorizontal($id(splitPaneRootId), {fixedTop: 40});
-
-    let $menubar = $id(topPaneId)
-        .addClass('topbar')
+    let $menubar = $id('topbar')
         .css({overflow: 'hidden'});
 
-
-    $id(bottomPaneId).addClass('content-pane');
-
-    setupMenubar($menubar);
+    setupMenubar($('#topbar'));
 
 }
 

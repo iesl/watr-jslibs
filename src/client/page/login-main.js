@@ -15,7 +15,8 @@ function setupPage() {
 
 export function runMain() {
     frame.setupFrameLayout();
-    let $contentPane = $('#splitpane_root__bottom');
+    let containerId = '#content-pane';
+    let $contentPane = $(containerId);
     $contentPane.append(setupPage());
 
     let loginDiv = $('#login-forms').detach();

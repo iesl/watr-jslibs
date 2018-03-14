@@ -105,7 +105,7 @@ export function createHeaderLabelUI(mbrSelection, page) {
     });
 
 
-    let containerId = 'splitpane_root__bottom';
+    let containerId = 'splitpane_root__pane-0';
     createLabelChoiceWidget(labelNames, containerId)
         .then(choice => {
 

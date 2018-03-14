@@ -64,12 +64,14 @@ export function createSplitPaneRoot (containerId)  {
     return splitPaneRootId;
 }
 
+
 function getSplitProps(splitProps) {
-    return splitProps.fixedLeft ? {splitClass: 'fixed-left', splitAt: splitProps.fixedLeft} :
+    return splitProps.fixedLeft ? {splitClass: 'horizontal-percent', splitAt: splitProps.fixedLeft} :
     splitProps.fixedTop ? {splitClass: 'fixed-top', splitAt: splitProps.fixedTop} :
     {splitClass: 'fixed-top', splitAt: splitProps.fixedTop}
     ;
 }
+
 
 export function splitVertical(containerSelector, splitProps) {
     let parentSelection  = $(containerSelector).closest('.split-pane-component');
@@ -80,25 +82,27 @@ export function splitVertical(containerSelector, splitProps) {
     let rightId = `${parentId}__right` ;
     let dividerId = `${parentId}__divider` ;
 
-    let {splitClass, splitAt} = getSplitProps(splitProps);
+    // let {splitClass, splitAt} = getSplitProps(splitProps);
 
     let lpane = mkComponent()
         .attr('id', leftId)
-        .css({'min-width': `${splitAt}px`})
+        .css({'min-width': `100px`})
+        // .css({'min-width': `${splitAt}px`})
     ;
     let divider = mkDivider()
         .attr('id', dividerId)
         .addClass('v-divider')
-        .css({left: splitAt, width: defaultDividerWidth, 'min-width': defaultDividerWidth})
+        // .css({left: splitAt, width: defaultDividerWidth, 'min-width': defaultDividerWidth})
+        .css({width: defaultDividerWidth, 'min-width': defaultDividerWidth})
     ;
     let rpane = mkComponent()
         .attr('id', rightId)
-        .css({left: splitAt+defaultDividerWidth})
+        // .css({left: splitAt+defaultDividerWidth})
     ;
 
     let split = mkSplitPane()
-        .addClass(splitClass)
-        .addClass('row')
+        .addClass('horizontal-percent')
+        // .addClass('row')
     ;
 
     $(containerSelector).append(
@@ -141,7 +145,8 @@ export function splitHorizontal(containerSelector, splitProps) {
 
 
     let split = mkSplitPane()
-        .addClass(splitClass)
+        .addClass('horizontal-percent')
+        // .addClass(splitClass)
         .addClass('column')
     ;
 
