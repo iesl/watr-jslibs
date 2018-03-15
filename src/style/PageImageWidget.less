@@ -12,8 +12,9 @@ div.page-image-widget {
         "bsb bsb bsb"
     ;
 
+
     grid-template-columns: 2px auto 2px;
-    grid-template-rows: 20px 60px auto 3px;
+    grid-template-rows: 1.3em 60px auto 3px;
 
     min-height: 0;  /* NEW */
     min-width: 0;   /* NEW; needed for Firefox */
@@ -36,10 +37,13 @@ div.page-image-widget {
         grid-area: tsb;
 
         background: @base01;
+        padding-left: 10px;
 
-        font-size: 80%;
+        font-size: 1.1em;
+        font-weight: bold;
         color: white;
 
+        .noselect();
     }
 
     div.status-bottom {
@@ -65,7 +69,8 @@ div.page-image-widget {
         grid-area: frm;
 
         div.page-image{
-            // margin: 5px auto;
+            padding: 0;
+            margin: 0;
             border: 0;
             z-index: 10;
 
@@ -78,4 +83,3 @@ div.page-image-widget {
         }
     }
 }
-

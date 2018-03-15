@@ -29,6 +29,7 @@ console.log('srcRoot', srcRoot);
 console.log('srcClientRoot', srcClientRoot);
 console.log('projectRoot', projectRoot);
 console.log('devData', devDataRoot);
+console.log('config publicPath', config.output.path);
 
 render(app, {
     root: path.join(devRoot, 'view'),
@@ -39,7 +40,6 @@ render(app, {
 });
 
 // Serve public assets
-
 
 router
     .get('/dist/:file', async function(ctx, next) {
@@ -68,6 +68,12 @@ router
         let file = 'textgrid.json';
         await send(ctx, file, { root: p  });
     })
+    .get('/api/v1/corpus/artifacts/entry/:stableId/image/page/:pagenum' , async function(ctx, next) {
+        let pagenum = ctx.params.pagenum;
+        let p = path.resolve(devDataRoot, `corpus-entry-0/page-images`);
+        let file = `page-${pagenum}.opt.png`;
+        await send(ctx, file, { root: p } );
+    })
 ;
 
 
@@ -81,24 +87,16 @@ function run (options) {
             let { page: page } = ctx.params;
             await ctx.render(page, {});
         })
-        // .get('/entry/:entry/image/page/:page', async function(ctx, next) {
-        //     let { entry: entry, page: page } = ctx.params;
-        //     let file = `page-${page}.opt.png`;
-        //     let basepath = `${entryRoot(entry)}/page-images/`;
-        //     await send(ctx, file, { root: basepath });
-        // })
-        // .get('/menu', async function(ctx, next) {
-        //     ctx.body = await JSON.stringify(menu);
-        // })
     ;
 
     app
         .use(router.routes())
         .use(router.allowedMethods())
         .use(json())
-        .use(webpackDevMiddleware(compiler, {
-            publicPath: config.output.publicPath
-        }));
+    ;
+        // .use(webpackDevMiddleware(compiler, {
+        //     publicPath: config.output.path
+        // }))
 
     const server = app.listen(9000, function() {
         console.log('Koa is listening to http://localhost:9000');
@@ -106,5 +104,3 @@ function run (options) {
 }
 
 run();
-
-

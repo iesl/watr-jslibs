@@ -11,7 +11,6 @@ const extractLess = new ExtractTextPlugin({
 });
 
 const config = {
-    // context: path.resolve(__dirname, "app"),
 
     entry: {
         app: './src/client/page/app-main.js',
@@ -22,7 +21,7 @@ const config = {
 
     output: {
         filename: '[name].bundle.js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, 'dist'),
     },
 
     // { test: /\.less$/,                         use: ["style-loader", "css-loader", "less-loader"]},
