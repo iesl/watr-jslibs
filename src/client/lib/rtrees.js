@@ -123,8 +123,12 @@ export function initPageAndGridRTrees(textgrids) {
 
                 return gridDataPt;
             });
-            // context.strokeText(text, x, y);
-            context.fillText(text, x, y);
+            try {
+
+                context.fillText(text, x, y);
+            } catch(error) {
+                console.log('error @', text, x, y);
+            }
             return gridDataPts;
         });
 
@@ -141,4 +145,3 @@ export function initPageAndGridRTrees(textgrids) {
     });
 
 }
-

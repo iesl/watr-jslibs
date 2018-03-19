@@ -224,6 +224,7 @@ export function setupPageTextGrids(contentId, textgrids) {
 
     _.each(textgrids, (textgrid, gridNum) => {
         let gridHeight = computeGridHeight(textgrid);
+        gridHeight = Math.min(gridHeight, 2500);
         let frameIdSelector = `#textgrid-frame-${gridNum}`;
         let gridNodes =
             t.div('.textgrid', frameIdSelector, {
