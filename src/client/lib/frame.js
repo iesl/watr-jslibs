@@ -1,5 +1,7 @@
-/* global require $ _ */
+/* global require  */
 
+import * as $ from 'jquery';
+import * as _ from 'lodash';
 import * as panes from  './splitpane-utils.js';
 import {$id, t} from './jstags.js';
 import * as auth from './auth.js';

@@ -109,10 +109,12 @@ export class ReflowWidget {
              * Structure:
              *    div.gridwidget
              *        div.status-top
+             *        div.left-gutter
              *        div.infobar
              *        div.frame
              *            canvas.textgrid
              *            svg.textgrid
+             *        div.right-gutter
              *        div.status-bottom
              */
 

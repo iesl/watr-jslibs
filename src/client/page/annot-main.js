@@ -22,8 +22,8 @@ import * as schema from '../lib/schemas';
 
 import {t} from '../lib/jstags.js';
 
-import * as pageview from '../lib/view-pdf-pages.js';
 import * as textview from '../lib/view-pdf-text.js';
+import { PageImageListWidget } from '../lib/PageImageListWidget.js';
 
 
 
@@ -190,7 +190,7 @@ export function runMain() {
 
             setupFrameLayout();
 
-            pageview.setupPageImages('div.page-image-viewer', textGridJson, gridData);
+            PageImageListWidget.setupPageImages('div.page-image-viewer', textGridJson, gridData);
 
             textview.setupPageTextGrids('div.page-textgrids', textgrids);
 

@@ -10,7 +10,13 @@ import * as reflowWidgetInit from  './ReflowWidgetInit.js';
 import {shared} from './shared-state';
 import * as schema from './schemas';
 import * as coords from './coord-sys.js';
-import * as Rx from 'rxjs';
+
+import * as panes from  './splitpane-utils.js';
+import { PageImageWidget } from './PageImageWidget.js';
+import * as rtrees from './rtrees.js';
+import {zipWithIndex} from './lodash-plus';
+import {ServerDataExchange} from  './ServerDataExchange.js';
+
 
 export class PageImageListWidget {
 
@@ -21,18 +27,25 @@ export class PageImageListWidget {
         this.containerId = containerId;
         this.serverDataExchange = serverDataExchange;
 
+        this.pageImageWidgetContainerId = 'page-image-widget-list';
         this.init();
     }
 
-    init() {
-        // Outer Div
 
-        // containerId.append(
+    init() {
+        /**
+         * Structure:
+         */
+
+        let listId = this.pageImageWidgetContainerId;
+
         let node =
-            t.div([
-                t.div('.page-image-viewer', [
-                    t.div(`#page-images-status .status-top`),
-                    t.div('#page-images .page-images')
+            t.div(`.page-image-list-widget`, [
+                t.div(`#page-images-status .statusbar`),
+                t.div('#page-images .page-images', [
+                    t.div(`.page-image-widgets`, [
+                        t.div(`#${listId} .list`),
+                    ])
                 ])
             ]);
 
@@ -177,3 +190,116 @@ export class PageImageListWidget {
         });
     }
 }
+
+export function setupPageImages(contentSelector, textGridJson, gridData) {
+    let pages = textGridJson.pages;
+    let pageGeometries = _.map(pages, p => p.pageGeometry);
+
+    let ctx = {maxh: 0, maxw: 0};
+
+    pageGeometries = _.map(zipWithIndex(pageGeometries), ([g, i]) => {
+        let pageBounds = coords.mk.fromArray(g);
+        pageBounds.page = i+1;
+        return pageBounds;
+    });
+
+
+    _.each(pageGeometries, sh  => {
+        ctx.maxh = Math.max(ctx.maxh, sh.y + sh.height);
+        ctx.maxw = Math.max(ctx.maxw, sh.x + sh.width);
+    });
+
+    let {topPaneId: statusBarId, bottomPaneId: pageImageDivId} =
+        panes.splitHorizontal(contentSelector, {fixedTop: 30});
+
+    // setupStatusBar(statusBar);
+
+    $id(pageImageDivId).append(
+        t.div('.split-pane-component-inner', [
+            t.div('#page-images .page-images')
+        ])
+    );
+
+    let widgets = _.map(pageGeometries, (pageGeometry, pageNum) => {
+        let widget = new PageImageWidget(pageNum, pageGeometry, 'page-images');
+        let glyphData = rtrees.gridDataToGlyphData(gridData[pageNum]);
+        widget.init();
+        widget.setGlyphData(glyphData);
+        // let annots = [];
+        // widget.setAnnotations(annots);
+        return widget;
+    });
+
+    let sdx = new ServerDataExchange();
+
+    let pageImages = new PageImageListWidget(widgets, statusBarId, sdx);
+
+    sdx.init();
+
+
+}
+
+// function setupStatusBar(statusBarId) {
+
+//     $id(statusBarId)
+//         .addClass('statusbar');
+
+//     let $selectStatus = t.div('.statusitem', "Selections");
+
+//     shared.rx.selections.subscribe( selectedZones => {
+//         $selectStatus.empty();
+//         $selectStatus.append(t.span(`Selected:${selectedZones.length} del: `));
+
+//         if (selectedZones.length == 1) {
+//             let selection = selectedZones[0];
+//             let gridForSelection = reflowWidgetInit.getTextGridForSelectedZone(selection);
+//             let deleteBtn = t.button([icon.trash]);
+//             deleteBtn.on('click', function() {
+//                 let zoneId = selection.zoneId;
+//                 server.deleteZone(zoneId).then(resp => {
+//                     global.setSelections([]);
+//                     shared.activeReflowWidget = undefined;
+//                     lbl.updateAnnotationShapes();
+//                 }).catch(() => {
+//                     shared.activeReflowWidget = undefined;
+//                     lbl.updateAnnotationShapes();
+//                     global.setSelections([]);
+//                 }) ;
+//             });
+
+//             $selectStatus.append(deleteBtn);
+
+//             if (gridForSelection !== undefined) {
+//                 reflowWidgetInit.showGrid(gridForSelection);
+//             } else {
+//                 let gridShaperBtn = t.button([icon.fa('indent')]);
+
+//                 gridShaperBtn.on('click', function() {
+//                     let textGrid = reflowWidgetInit.createTextGridFromSelectedZone(selection);
+//                     reflowWidgetInit.showGrid(textGrid);
+//                 });
+//                 $selectStatus.append(gridShaperBtn);
+
+//             }
+//         }
+//         else if (selectedZones.length > 1) {
+//             reflowWidget.unshowGrid();
+
+
+
+//         } else {
+//             reflowWidget.unshowGrid();
+//             $selectStatus.text(``);
+//         }
+//     });
+
+//     let $mouseCoords = t.div('.statusitem', 'Mouse');
+//     shared.rx.clientPt.subscribe(clientPt => {
+//         $mouseCoords.text(`x:${clientPt.x} y:${clientPt.y}`);
+//     });
+
+//     $id(statusBarId)
+//         .append($selectStatus)
+//         .append($mouseCoords);
+
+// }

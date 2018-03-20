@@ -2,10 +2,12 @@
  * Curation workflow overview
  **/
 
-/* global $ _  */
+/* global */
+import * as $ from 'jquery';
+import * as _ from 'lodash';
 
 import * as frame from '../lib/frame.js';
-import {t, htm} from '../lib/jstags.js';
+import {t} from '../lib/jstags.js';
 import * as server from '../lib/serverApi.js';
 import {shared} from '../lib/shared-state';
 // const JsArray = watr.utils.JsArray;
@@ -150,3 +152,6 @@ export function runMain() {
     updateWorkflowList();
 
 }
+
+// Error in affiliation segmentation (all authors considered 1 affil.)
+// https://bioarxiv.watrworks.net/document/10.1101-028399.d?show=textgrid.json

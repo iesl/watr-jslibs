@@ -8,7 +8,6 @@
 /* global  _ $ */
 
 import * as coords from './coord-sys.js';
-import * as pageview from  './view-pdf-pages.js';
 import {t} from './jstags.js';
 
 import * as d3x from './d3-extras';
