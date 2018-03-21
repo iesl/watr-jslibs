@@ -13,7 +13,8 @@ import * as frame from '../lib/frame.js';
 import {shared} from '../lib/shared-state';
 import * as global from '../lib/shared-state';
 import * as server from '../lib/serverApi.js';
-import * as panes from  '../lib/splitpane-utils.js';
+// import * as panes from  '../lib/splitpane-utils.js';
+import * as spu  from '../lib/SplitWin.js';
 import * as rtrees from  '../lib/rtrees.js';
 import {$id} from '../lib/jstags.js';
 
@@ -33,7 +34,7 @@ function setupFrameLayout() {
 
 
     let { leftPaneId, rightPaneId } =
-        panes.splitVertical('#annot-panes', {fixedLeft: 200});
+        spu.splitVertical('#annot-panes', {fixedLeft: 200});
 
 
     $id(leftPaneId).append(

@@ -2,7 +2,8 @@
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
-import * as panes from  './splitpane-utils.js';
+// import * as panes from  './splitpane-utils.js';
+import * as spu  from './SplitWin.js';
 import {$id, t} from './jstags.js';
 import * as auth from './auth.js';
 import {shared} from './shared-state';
@@ -102,10 +103,10 @@ function setUserLoginInfo(loginInfo) {
 function setupSplitFrame() {
     $('body').append(t.div('#content')) ;
 
-    let splitPaneRootId = panes.createSplitPaneRoot("#content");
+    let splitPaneRootId = spu.createSplitPaneRoot("#content");
 
     let {topPaneId: topPaneId, bottomPaneId: bottomPaneId} =
-        panes.splitHorizontal($id(splitPaneRootId), {fixedTop: 40});
+        spu.splitHorizontal($id(splitPaneRootId), {fixedTop: 40});
 
     let $menubar = $id(topPaneId)
         .addClass('topbar')

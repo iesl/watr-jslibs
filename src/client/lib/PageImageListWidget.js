@@ -11,7 +11,7 @@ import {shared} from './shared-state';
 import * as schema from './schemas';
 import * as coords from './coord-sys.js';
 
-import * as panes from  './splitpane-utils.js';
+import * as spu  from './SplitWin.js';
 import { PageImageWidget } from './PageImageWidget.js';
 import * as rtrees from './rtrees.js';
 import {zipWithIndex} from './lodash-plus';
@@ -210,7 +210,7 @@ export function setupPageImages(contentSelector, textGridJson, gridData) {
     });
 
     let {topPaneId: statusBarId, bottomPaneId: pageImageDivId} =
-        panes.splitHorizontal(contentSelector, {fixedTop: 30});
+        spu.splitHorizontal(contentSelector, {fixedTop: 30});
 
     // setupStatusBar(statusBar);
 

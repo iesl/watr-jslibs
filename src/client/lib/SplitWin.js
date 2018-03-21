@@ -1,48 +1,216 @@
 /**
- *   .split-pane-frame   : immediate parent for split-pane-component
- *   .split-pane-component : child panes, immediately nested within a div.split-pane-frame
  *
- * Split options:
- *     sizes        	Array 		                      Initial sizes of each element in percents or CSS values.
- *     minSize      	Number or Array 	100 	        Minimum size of each element.
- *     gutterSize   	Number 	          10 	          Gutter size in pixels.
- *     snapOffset   	Number 	          30  	        Snap to minimum size offset in pixels.
- *     direction    	String 	         'horizontal' 	Direction to split: horizontal or vertical.
- *     cursor       	String 	         'col-resize' 	Cursor to display while dragging.
- *     gutter       	Function 		                    Called to create each gutter element
- *     elementStyle 	Function 		                    Called to set the style of each element.
- *     gutterStyle  	Function 		                    Called to set the style of the gutter.
- *     onDrag       	Function 		                    Callback on drag.
- *     onDragStart  	Function 		                    Callback on drag start.
- *     onDragEnd    	Function 		                    Callback on drag end.
+ * Construct a tree of nested windowed panes, where each intermediate node holds a list of child panes,
+ *  and the leaves are user content.
+ *
+ *
+ *
+ *   .splitwin-root      : root element in hierarchy
+ *   .splitwin-pane      : child panes, immediately nested within a div.split-pane-frame
+ *
  *
  */
 
-/* global */
-
-import Split from 'split.js';
 import * as _ from 'lodash';
 import * as $ from 'jquery';
-import { $id, t } from './jstags.js';
+
+import Split from 'split.js';
+import { $id, t, htm } from './jstags.js';
+
+const noop = function() { return; };
+
+const SplitOptions = {
+    sizes        : [],           //	Array 		                      Initial sizes of each element in percents or CSS values.
+    minSize      : [],           //	Number or Array 	100 	        Minimum size of each element.
+    gutterSize   : 0,            //	Number 	          10 	          Gutter size in pixels.
+    snapOffset   : 0,            //	Number 	          30  	        Snap to minimum size offset in pixels.
+    direction    : 'vertical',   //	String 	         'horizontal' 	Direction to split: horizontal or vertical.
+    cursor       : 'col-resize', //	String 	         'col-resize' 	Cursor to display while dragging.
+    gutter       : noop,         //	Function 		                    Called to create each gutter element
+    elementStyle : noop,         //	Function 		                    Called to set the style of each element.
+    gutterStyle  : noop,         //	Function 		                    Called to set the style of the gutter.
+    onDrag       : noop,         //	Function 		                    Callback on drag.
+    onDragStart  : noop,         //	Function 		                    Callback on drag start.
+    onDragEnd    : noop          //	Function 		                    Callback on drag end.
+};
+const splitPaneRootId = 'splitwin_root';
+
+export const row = 'row';
+export const col = 'column';
+
+class Frame {
+    constructor($elem) {
+        this.elem = $elem;
+        this.frameId = $elem.attr('id');
+        this.direction = col;
+    }
+
+    setDirection(dir) {
+        let cdiv = this.childrenDiv();
+        this.direction = dir;
+        if (dir == row) {
+            cdiv.addClass('splitwin-row');
+            cdiv.removeClass('splitwin-column');
+        } else if (dir == col) {
+            cdiv.addClass('splitwin-column');
+            cdiv.removeClass('splitwin-row');
+        } else {
+            throw Error('unknown direction', dir);
+        }
+    }
+
+    childrenDiv() {
+        return $id(this.frameId).children('.children');
+    }
+    getChildren() {
+        return this.panes;
+    }
+
+    getSplitDir() {
+        return this.direction == 'column' ? 'vertical' : 'horizontal';
+    }
+
+    getParentPane() {
+        // console.log('getParentPane', this.frameId);
+        let idParts = this.frameId.split(/__/);
+        // console.log('idParts', idParts);
+        let parentId = idParts.slice(0, idParts.length-1).join('__');
+        // console.log('parentId', parentId);
+        return parentId;
+    }
+
+    addPanes(n) {
+        let $e = this.elem;
+        let paneIds = generatePaneIds(this.frameId, n);
+        let panes = _.map(paneIds, id =>  mkPane(id));
+        let paneElems = _.map(panes, p => p.elem);
+
+        $e.children('.children').append(paneElems);
+
+        this.rebuild();
+        return panes;
+    }
+
+    rebuild() {
+        let $e = this.elem;
+        let ch = $e.children('.children').children();
+        console.log('rebuild: ch', ch);
 
 
-const splitPaneRootId = 'splitpane_root';
+        let childPanes = ch.filter(function () {
+            return $(this).is('.splitwin-pane');
+        });
 
-function mkComponent(id) {
-    return t.div('.split-pane-component')
-        .attr('id', id) ;
+        console.log('rebuild: childPanes len=', childPanes.length);
+
+        let paneIds = _.map(childPanes.toArray(), p => {
+            return $(p).attr('id');
+        });
+
+        let panes = _.map(childPanes.toArray(), p => {
+            return $(p).prop('SplitWin');
+        });
+        console.log('rebuild: panes', panes);
+
+        let paneSelectors = _.map(paneIds, id => `#${id}`);
+
+        let paneElems = _.map(panes, p => p.elem);
+
+
+        console.log('rebuild: paneSelectors = ', paneSelectors.join(', '));
+
+        let size = Math.floor(100 / paneIds.length);
+
+        let sizes = _.map(_.range(0, paneIds.length), () => size);
+
+        console.log('rebuild: sizes = ', sizes.join(', '));
+
+        if (this.split != undefined) {
+            this.split.destroy();
+        }
+
+        // $e.children('.children').empty();
+        // $e.children('.children').append(paneElems);
+
+        this.split = Split(paneSelectors, {
+            sizes: sizes,
+            direction: this.getSplitDir(),
+            gutterSize: 6,
+            minSize: 10
+        });
+
+
+        this.paneIds = paneIds;
+        this.panes = panes;
+        // this.updateSplit(split);
+    }
+
+    updateSplit(split) {
+        if (this.split != undefined) {
+            this.split.destroy();
+        }
+        this.split = split;
+    }
+
+
+    addPaneControls() {
+        let self = this;
+        let exp = htm.iconButton('expand');
+        let comp = htm.iconButton('compress');
+        let del = htm.iconButton('times');
+        let controls = t.div('.splitwin-controls', [
+            exp, comp, del
+        ]);
+
+
+        del.on('click', function() {
+            self.delete();
+        });
+
+        $id(this.frameId).addClass('controls');
+
+        $id(this.frameId).children('.status-top').append(controls);
+    }
+
+    delete() {
+        this.updateSplit(undefined);
+        $id(this.frameId).remove();
+        let parentPaneId = this.getParentPane();
+        let parentSplitWin = $id(parentPaneId).prop('SplitWin');
+        parentSplitWin.rebuild();
+    }
+
+    maximize() {
+
+    }
+
+    restoreSize() {
+
+    }
+
+
 }
 
-function composePanes(paneComponents) {
-    return t.div('.split-pane-frame', paneComponents);
+export function createRootFrame(containerId)  {
+    let root = mkPane(splitPaneRootId);
+    root.elem.addClass('splitwin-root');
+    $(containerId).append(root.elem);
+    return root;
 }
 
+function mkPane(id) {
+    let elem =
+        t.div(`#${id} .splitwin-pane`, [
+            t.div(`.status-top`),
+            t.div(`.left-gutter`),
+            t.div(`.children`),
+            t.div(`.right-gutter`),
+            t.div(`.status-bottom`)
+        ]);
 
-export function createSplitPaneRoot (containerId)  {
-    $(containerId).append(
-        t.div(`#${splitPaneRootId} .split-pane-frame`)
-    );
-    return splitPaneRootId;
+    let frame = new Frame(elem);
+    elem.prop('SplitWin', frame);
+    return frame;
 }
 
 export function makePaneId(...indexes) {
@@ -59,47 +227,4 @@ function generatePaneIds(parentId, n) {
     return _.map(_.range(0, n), id => {
         return `${parentId}__pane-${id}`;
     });
-}
-
-export function splitVertical(containerSelector, numPanes) {
-    let paneIds = generatePaneIds(containerSelector, numPanes);
-    let panes = _.map(paneIds, id =>  mkComponent(id));
-    let paneSelectors = _.map(paneIds, id =>  `#${id}`);
-
-    let frame = composePanes(panes).addClass('split-pane-frame-row');
-    $id(containerSelector).append(frame);
-
-    return Split(paneSelectors, {
-        sizes: [50, 50],
-        direction: 'horizontal',
-        minSize: 100
-    });
-}
-
-
-export function fixedTopProps(topHeight) {
-    return {
-        gutterSize: 0,
-        sizes: [`${topHeight}px`, '']
-    };
-}
-export function splitHorizontal(containerSelector, numPanes, addProps) {
-    let props = addProps || {};
-    let paneIds = generatePaneIds(containerSelector, numPanes);
-    let panes = _.map(paneIds, id =>  mkComponent(id));
-
-    let paneSelectors = _.map(paneIds, id =>  `#${id}`);
-
-    let frame = composePanes(panes).addClass('split-pane-frame-column');
-
-    $id(containerSelector).append(frame);
-    let defaultProps = {
-        sizes: [50, 50],
-        direction: 'vertical',
-        minSize: 1
-    };
-
-    let init = Object.assign({}, defaultProps, props);
-
-    return Split(paneSelectors, init);
 }
