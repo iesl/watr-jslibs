@@ -60,7 +60,7 @@ class Frame {
     }
 
     childrenDiv() {
-        return $id(this.frameId).children('.children');
+        return $id(this.frameId).children('.frame-content');
     }
     getChildren() {
         return this.panes;
@@ -85,15 +85,14 @@ class Frame {
         let panes = _.map(paneIds, id =>  mkPane(id));
         let paneElems = _.map(panes, p => p.elem);
 
-        $e.children('.children').append(paneElems);
+        this.childrenDiv().append(paneElems);
 
         this.rebuild();
         return panes;
     }
 
     rebuild() {
-        let $e = this.elem;
-        let ch = $e.children('.children').children();
+        let ch = this.childrenDiv().children();
         console.log('rebuild: ch', ch);
 
 
@@ -203,7 +202,7 @@ function mkPane(id) {
         t.div(`#${id} .splitwin-pane`, [
             t.div(`.status-top`),
             t.div(`.left-gutter`),
-            t.div(`.children`),
+            t.div(`.frame-content`),
             t.div(`.right-gutter`),
             t.div(`.status-bottom`)
         ]);

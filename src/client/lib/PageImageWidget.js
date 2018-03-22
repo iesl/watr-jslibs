@@ -64,7 +64,7 @@ export class PageImageWidget {
                 t.div(`.status-top`),
                 infobarElem,
                 t.div(`.left-gutter`),
-                t.div(`.widgetcontent #page-image-content-${widget.pageNum}`),
+                t.div(`.frame-content #page-image-content-${widget.pageNum}`),
                 t.div(`.right-gutter`),
                 t.div(`.status-bottom`)
             ]);

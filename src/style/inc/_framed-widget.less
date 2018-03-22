@@ -1,0 +1,76 @@
+
+.framed-guttered-area() {
+    display: grid;
+
+    // lgt/rgt = left/right-gutter
+    // tsb/bsb = top/bottom status bar
+    // frm     = frame div
+    grid-template-areas:
+    /**/"tsb tsb tsb"
+        "lgt frm rgt"
+        "lgt frm rgt"
+        "bsb bsb bsb"
+    ;
+
+
+    grid-template-columns: 4px auto 18px;
+    grid-template-rows: 1.3em 60px auto 3px;
+
+    min-height: 0;
+    min-width: 0;
+
+    height: 100%;
+    width: 100%;
+
+    div.infobar {
+        grid-area: inf;
+    }
+
+    &.hideinfobar {
+
+        grid-template-areas:
+        /**/"tsb tsb tsb"
+            "lgt frm rgt"
+            "lgt frm rgt"
+            "bsb bsb bsb"
+        ;
+        grid-template-rows: 1.3em auto 3px;
+    }
+
+    div.status-top {
+        grid-area: tsb;
+        background: @base01;
+
+        font-size: 1.1em;
+        font-weight: bold;
+        color: white;
+
+        .noselect();
+    }
+
+    div.status-bottom {
+        grid-area: bsb;
+
+        background: @base1;
+        text-align: bottom;
+    }
+
+    div.left-gutter{
+        grid-area: lgt;
+
+        border: 0;
+        background: @base0;
+    }
+
+    div.right-gutter{
+        grid-area: rgt;
+
+        border: 0;
+        background: @base0;
+    }
+
+    .frame-content {
+        grid-area: frm;
+        display: block;
+    }
+}
