@@ -9,7 +9,6 @@ import {t, icon} from '../lib/jstags.js';
 
 import * as server from '../lib/serverApi.js';
 
-// import '../../style/browse-main.less';
 
 let pageLen = 50;
 
@@ -131,7 +130,9 @@ function createEntryListingFrame() {
             t.div('.listing-main')
         ]) ;
 
-    $('.content-pane')
+    let $contentPane = $('.main > .content');
+
+    $contentPane
         .append(listingFrame) ;
 
 }

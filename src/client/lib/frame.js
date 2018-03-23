@@ -2,9 +2,7 @@
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
-// import * as panes from  './splitpane-utils.js';
-import * as spu  from './SplitWin.js';
-import {$id, t} from './jstags.js';
+import {t} from './jstags.js';
 import * as auth from './auth.js';
 import {shared} from './shared-state';
 
@@ -101,22 +99,15 @@ function setUserLoginInfo(loginInfo) {
 }
 
 function setupSplitFrame() {
-    $('body').append(t.div('#content')) ;
+    let layout =
+        t.div(`.main`, [
+            t.div(`.topbar`),
+            t.div(`.content`)
+        ]);
 
-    let splitPaneRootId = spu.createSplitPaneRoot("#content");
+    $('body').append(layout) ;
 
-    let {topPaneId: topPaneId, bottomPaneId: bottomPaneId} =
-        spu.splitHorizontal($id(splitPaneRootId), {fixedTop: 40});
-
-    let $menubar = $id(topPaneId)
-        .addClass('topbar')
-        .css({overflow: 'hidden'});
-
-
-    $id(bottomPaneId).addClass('content-pane');
-
-    setupMenubar($menubar);
-
+    setupMenubar($('.topbar'));
 }
 
 export function setupFrameLayout() {

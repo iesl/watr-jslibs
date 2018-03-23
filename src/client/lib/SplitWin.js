@@ -59,6 +59,14 @@ class Frame {
         }
     }
 
+    clientAreaSelector() {
+        return `#${this.frameId} > .frame-content`;
+    }
+
+    clientArea() {
+        return $(this.clientAreaSelector());
+    }
+
     childrenDiv() {
         return $id(this.frameId).children('.frame-content');
     }
@@ -80,7 +88,6 @@ class Frame {
     }
 
     addPanes(n) {
-        let $e = this.elem;
         let paneIds = generatePaneIds(this.frameId, n);
         let panes = _.map(paneIds, id =>  mkPane(id));
         let paneElems = _.map(panes, p => p.elem);
@@ -194,6 +201,10 @@ export function createRootFrame(containerId)  {
     let root = mkPane(splitPaneRootId);
     root.elem.addClass('splitwin-root');
     $(containerId).append(root.elem);
+    $(containerId).css({
+        overflow: 'hidden'
+    });
+
     return root;
 }
 

@@ -192,10 +192,13 @@ export class PageImageListWidget {
 }
 
 export function setupPageImages(contentSelector, textGridJson, gridData) {
+
+    console.log('setupPageImages', contentSelector, textGridJson, gridData);
     let pages = textGridJson.pages;
     let pageGeometries = _.map(pages, p => p.pageGeometry);
 
     let ctx = {maxh: 0, maxw: 0};
+    console.log('ctx', ctx);
 
     pageGeometries = _.map(zipWithIndex(pageGeometries), ([g, i]) => {
         let pageBounds = coords.mk.fromArray(g);
@@ -209,19 +212,25 @@ export function setupPageImages(contentSelector, textGridJson, gridData) {
         ctx.maxw = Math.max(ctx.maxw, sh.x + sh.width);
     });
 
-    let {topPaneId: statusBarId, bottomPaneId: pageImageDivId} =
-        spu.splitHorizontal(contentSelector, {fixedTop: 30});
+    // let {topPaneId: statusBarId, bottomPaneId: pageImageDivId} =
+    //     spu.splitHorizontal(contentSelector, {fixedTop: 30});
 
     // setupStatusBar(statusBar);
 
-    $id(pageImageDivId).append(
-        t.div('.split-pane-component-inner', [
-            t.div('#page-images .page-images')
-        ])
-    );
+    // let layout =
+    //     t.div([
+    //         t.div(`#page-image-list-status`),
+    //         t.div('#page-images .page-images')
+    //     ]);
 
+    // $id(contentSelector).append(layout);
+    let sdx = new ServerDataExchange();
+
+    let imageList = new PageImageListWidget('page-image-list', sdx);
+
+    let pcid = imageList.pageImageWidgetContainerId;
     let widgets = _.map(pageGeometries, (pageGeometry, pageNum) => {
-        let widget = new PageImageWidget(pageNum, pageGeometry, 'page-images');
+        let widget = new PageImageWidget(pageNum, pageGeometry, pcid);
         let glyphData = rtrees.gridDataToGlyphData(gridData[pageNum]);
         widget.init();
         widget.setGlyphData(glyphData);
@@ -230,11 +239,10 @@ export function setupPageImages(contentSelector, textGridJson, gridData) {
         return widget;
     });
 
-    let sdx = new ServerDataExchange();
 
-    let pageImages = new PageImageListWidget(widgets, statusBarId, sdx);
+    imageList.setPageImageWidgets(widgets);
 
-    sdx.init();
+    // sdx.init();
 
 
 }

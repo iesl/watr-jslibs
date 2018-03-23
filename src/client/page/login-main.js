@@ -1,9 +1,10 @@
+/**
+ *
+ **/
 
-/* global $ */
-
+import * as $ from 'jquery';
 import * as frame from '../lib/frame.js';
-import {t, htm} from '../lib/jstags.js';
-
+import {t} from '../lib/jstags.js';
 
 function setupPage() {
     let page = t.div('.page-frame', [
@@ -15,7 +16,7 @@ function setupPage() {
 
 export function runMain() {
     frame.setupFrameLayout();
-    let $contentPane = $('#splitpane_root__bottom');
+    let $contentPane = $('.main > .content');
     $contentPane.append(setupPage());
 
     let loginDiv = $('#login-forms').detach();

@@ -8,8 +8,6 @@
 }
 
 
-
-
 div.splitwin-pane {
 
     display: inline-grid;
@@ -65,8 +63,10 @@ div.splitwin-pane {
 
         display: flex;
         flex-wrap: no-wrap;
-        height: 100%;
         width: 100%;
+        height: auto;
+
+        overflow: hidden;
 
         &.splitwin-column {
             flex-direction: column;

@@ -24,30 +24,33 @@ import * as schema from '../lib/schemas';
 import {t} from '../lib/jstags.js';
 
 import * as textview from '../lib/view-pdf-text.js';
-import { PageImageListWidget } from '../lib/PageImageListWidget.js';
+import { PageImageListWidget, setupPageImages } from '../lib/PageImageListWidget.js';
 
 
 
 function setupFrameLayout() {
-    let $contentPane = $('.content-pane');
-    $contentPane.append(t.div('#annot-panes'));
+    let $contentPane = $('.main > .content');
+
+    $contentPane.append(t.div('#main'));
 
 
-    let { leftPaneId, rightPaneId } =
-        spu.splitVertical('#annot-panes', {fixedLeft: 200});
+    let rootFrame = spu.createRootFrame("#main");
+    rootFrame.setDirection(spu.row);
 
+    let [paneLeft, pane2] = rootFrame.addPanes(2);
 
-    $id(leftPaneId).append(
-        t.div('.split-pane-component-inner', [
-            t.div('.page-image-viewer')
-        ])
-    );
-    $id(rightPaneId).append(
-        t.div('.split-pane-component-inner', [
-            t.div('.page-text-viewer', [
-                t.div('.reflow-controls #reflow-controls'),
-                t.div('.page-textgrids #page-textgrids')
-            ])
+    $(paneLeft.clientAreaSelector()).attr('id', 'page-image-list');
+    $(paneLeft.clientAreaSelector()).addClass('client-content');
+
+    // // $id(leftPaneId)
+    // paneLeft.clientArea().append(
+    //     t.div('.page-image-viewer')
+    // );
+
+    pane2.clientArea().append(
+        t.div('.page-text-viewer', [
+            t.div('.reflow-controls #reflow-controls'),
+            t.div('.page-textgrids #page-textgrids')
         ])
     );
 
@@ -191,19 +194,20 @@ export function runMain() {
 
             setupFrameLayout();
 
-            PageImageListWidget.setupPageImages('div.page-image-viewer', textGridJson, gridData);
+            // console.log('(pre) setupPageImages', textGridJson, gridData);
+            setupPageImages('page-image-list', textGridJson, gridData);
 
-            textview.setupPageTextGrids('div.page-textgrids', textgrids);
+            // textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
-            rtrees.initPageAndGridRTrees(textgrids);
+            // rtrees.initPageAndGridRTrees(textgrids);
 
-            d3.selectAll('svg.textgrid')
-                .each(function (){
-                    let d3$svg = d3.select(this);
-                    textview.textgridSvgHandlers(d3$svg);
-                });
+            // d3.selectAll('svg.textgrid')
+            //     .each(function (){
+            //         let d3$svg = d3.select(this);
+            //         textview.textgridSvgHandlers(d3$svg);
+            //     });
 
-            showCurationStatus();
+            // showCurationStatus();
 
         }))
         .catch(error => {

@@ -1,6 +1,8 @@
 
 .page-image-list-widget {
-    height: 100%;
+    // height: 100%;
+    display: inline-block;
+    margin-left: calc(10%);
 
     & > .statusbar {
         background: @base1;
@@ -21,31 +23,27 @@
         }
     }
 
-    & > .page-images {
 
-        // height: calc(100% - 40px);
-        // height: 100% - 40px);
+    .page-images {
+        display: inline-block;
+        overflow: auto;
+        overflow-y: scroll;
+        height: 100%;
 
-
-        & > .page-image-widgets {
+        .page-image-widgets {
 
             margin: 0;
             padding: 0;
             border: 0;
 
-            width: 100%;
-            height: 100%;
-
-            overflow-y: auto;
-
 
             & > .list {
 
-                display: inline-flex;
+                display: flex;
 
                 flex-direction: column;
                 // flex-wrap: no-wrap;
-                justify-content: space-between; /* flex-start | flex-end | center | space-between | space-around | space-evenly; */
+                // justify-content: space-between; /* flex-start | flex-end | center | space-between | space-around | space-evenly; */
                 // justify-content: center;
 
                 margin: 0;

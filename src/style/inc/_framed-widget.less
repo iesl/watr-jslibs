@@ -8,13 +8,12 @@
     grid-template-areas:
     /**/"tsb tsb tsb"
         "lgt frm rgt"
-        "lgt frm rgt"
         "bsb bsb bsb"
     ;
 
 
     grid-template-columns: 4px auto 18px;
-    grid-template-rows: 1.3em 60px auto 3px;
+    grid-template-rows: 1.3em auto 3px;
 
     min-height: 0;
     min-width: 0;
@@ -24,17 +23,6 @@
 
     div.infobar {
         grid-area: inf;
-    }
-
-    &.hideinfobar {
-
-        grid-template-areas:
-        /**/"tsb tsb tsb"
-            "lgt frm rgt"
-            "lgt frm rgt"
-            "bsb bsb bsb"
-        ;
-        grid-template-rows: 1.3em auto 3px;
     }
 
     div.status-top {
@@ -51,7 +39,8 @@
     div.status-bottom {
         grid-area: bsb;
 
-        background: @base1;
+        background: black;
+        color: black;
         text-align: bottom;
     }
 

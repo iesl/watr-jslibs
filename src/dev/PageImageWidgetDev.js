@@ -6,8 +6,17 @@ import * as PageImageListWidget from  '../client/lib/PageImageListWidget.js';
 import * as rtrees from  '../client/lib/rtrees.js';
 import * as coords from '../client/lib/coord-sys.js';
 import * as testdata from './annot-testdata.js';
+import * as spu  from '../client/lib/SplitWin.js';
 
 export function run()  {
+
+    let rootFrame = spu.createRootFrame("#main");
+    rootFrame.setDirection(spu.row);
+
+    let [paneLeft, paneRight] = rootFrame.addPanes(2);
+
+    $(paneLeft.clientAreaSelector()).attr('id', 'page-image-list');
+    $(paneLeft.clientAreaSelector()).addClass('client-content');
 
     Shared.initGlobalMouseTracking();
 
@@ -31,8 +40,9 @@ export function run()  {
         // console.log('textgrids', textgrids);
         let gridData = rtrees.initGridData(textgrids);
 
-        let imageList = new PageImageListWidget.PageImageListWidget('container');
+        let imageList = new PageImageListWidget.PageImageListWidget('page-image-list');
 
+        $('div.page-image-list-widget').addClass('vcentered');
         let pageImageContainer = imageList.pageImageWidgetContainerId;
 
         let pageImageWidgets = _.map(gridData, (pageGridData, pageNum) => {

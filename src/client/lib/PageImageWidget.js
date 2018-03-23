@@ -77,6 +77,10 @@ export class PageImageWidget {
             t.span(`Page: ${widget.pageNum}`)
         );
 
+        let width = ''+widget.pageBounds.width+'px';
+        let height = ''+widget.pageBounds.height+'px';
+        console.log('pageBounds', widget.pageBounds);
+
 
         d3.select(`#page-image-content-${widget.pageNum}`)
             .append('div').classed('page-image', true)
