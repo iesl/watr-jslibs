@@ -17,6 +17,28 @@ export function annotData() {
                 ]
             }
         },
+        "body" : {
+            "TextGrid" : {
+                textGridDef : ""
+            }
+
+        }
+    };
+    let annotTemplate2 = {
+        "id" : 2,
+        "document" : 1,
+        "owner" : 98,
+        "annotPath" : 'A.B.C',
+        "created" : 1520626895815,
+        "label" : "Math",
+        "location" : {
+            "Zone" : {
+                "regions" : [
+                    {"page" : {"stableId" : "doc#0", "pageNum" : 0},
+                     "bbox" : {"left" : 10000, "top" : 10000, "width" : 8000, "height" : 4000}}
+                ]
+            }
+        },
         "body" : null
     };
 
@@ -25,8 +47,12 @@ export function annotData() {
     let annots = _.flatMap(_.range(0, numPages), pageNum => {
         return _.map(_.range(0, annotsPerPage), annotNum => {
             let id = (pageNum * annotsPerPage) + annotNum;
+            let template = annotTemplate;
+            if (annotNum % 2 == 0) {
+                template = annotTemplate2;
+            }
 
-            let annot = Object.assign({}, annotTemplate, {
+            let annot = Object.assign({}, template, {
                 id: id,
                 location : {
                     Zone : {

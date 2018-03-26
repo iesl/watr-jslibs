@@ -42,15 +42,24 @@ function rec(n, props) {
     return Object.assign(defaultObj(n), reqs);
 }
 
+let Ref = (n) => { return { "$ref": `${n}Schema.json` }; };
+let ArrayOf = (t) => { return { "items": t }; };
+
 
 let Int = { "type": "integer" };
 let IntOrNull = { "type": ["integer", 'null'] };
 
 let Str = { "type": "string" };
-let StrOrNull = { "type": ["string", 'null'] };
 
-let Ref = (n) => { return { "$ref": `${n}Schema.json` }; };
-let ArrayOf = (t) => { return { "items": t }; };
+let StrOrNull =  { "type": ["string", 'null'] };
+
+let TextGridOrNull = {
+    'type':['object', 'null'],
+    'oneOf':[
+        Ref("Body"),
+        {'type':'null'}
+    ]
+};
 
 
 function createSchemas(schemaArray) {
@@ -61,6 +70,14 @@ function createSchemas(schemaArray) {
 }
 
 let ajv = createSchemas([
+
+    rec('Body', {
+        'TextGrid' : Ref('TextGrid')
+    }),
+
+    rec('TextGrid', {
+        textGridDef: StrOrNull
+    }),
 
     rec('CorpusLock', {
         document : Int,
@@ -125,7 +142,7 @@ let ajv = createSchemas([
         created   : Int,
         label     : Str,
         location  : Ref('Location'),
-        body      : StrOrNull
+        body      : TextGridOrNull
     })
 
 ]);
@@ -166,4 +183,3 @@ function validateData(validator, data) {
     }
     return data;
 }
-

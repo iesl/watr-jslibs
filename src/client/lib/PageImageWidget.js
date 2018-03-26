@@ -47,6 +47,9 @@ export class PageImageWidget {
         }
     }
 
+    setServerExchange(serverExchange) {
+        this.serverExchange = serverExchange;
+    }
 
 
     init() {
@@ -63,10 +66,10 @@ export class PageImageWidget {
             t.div(`.page-image-widget #page-image-widget-${widget.pageNum} ${infobarContainerClass}`, [
                 t.div(`.status-top`),
                 infobarElem,
-                t.div(`.left-gutter`),
+                // t.div(`.left-gutter`),
                 t.div(`.frame-content #page-image-content-${widget.pageNum}`),
-                t.div(`.right-gutter`),
-                t.div(`.status-bottom`)
+                // t.div(`.right-gutter`),
+                // t.div(`.status-bottom`)
             ]);
 
         $id(widget.containerId).append(widgetNode);
@@ -77,10 +80,9 @@ export class PageImageWidget {
             t.span(`Page: ${widget.pageNum}`)
         );
 
-        let width = ''+widget.pageBounds.width+'px';
-        let height = ''+widget.pageBounds.height+'px';
-        console.log('pageBounds', widget.pageBounds);
-
+        // let width = ''+widget.pageBounds.width+'px';
+        // let height = ''+widget.pageBounds.height+'px';
+        // console.log('pageBounds', widget.pageBounds);
 
         d3.select(`#page-image-content-${widget.pageNum}`)
             .append('div').classed('page-image', true)
@@ -111,7 +113,6 @@ export class PageImageWidget {
         widget.setMouseHandlers([pageImageHandlers]);
 
         widget._tooltips = [];
-        widget.clickedRegionRx = new Rx.Subject();
 
         widget.labelRtree = rtree();
     }
@@ -255,8 +256,16 @@ export class PageImageWidget {
             .call(d3x.initFill, 'yellow', 0.3)
         ;
 
-        // widget.setAnnotations(annots);
-        lbl.createHeaderLabelUI(mbrSelection, this.pageNum, this.containerId);
+        let widget = this;
+        return lbl.createHeaderLabelUI(mbrSelection, this.pageNum, this.containerId)
+            .then(annotData => {
+                d3.selectAll('.label-selection-rect').remove();
+                return widget.serverExchange.createAnnotation(annotData);
+            })
+            .catch(() => {
+                d3.selectAll('.label-selection-rect').remove();
+            }) ;
+
     }
 
 
@@ -281,7 +290,7 @@ function pageImageHandlers(widget) {
 
             let hoveredLabels = widget.labelRtree.search(queryBox);
             if (hoveredLabels.length > 0) {
-                widget.clickedRegionRx.next(hoveredLabels);
+                widget.serverExchange.labelsClicked(hoveredLabels);
             } else {
                 let nearestGlyph = widget.queryForNearestGlyph(clickPt);
                 if (nearestGlyph !== undefined) {

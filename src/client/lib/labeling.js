@@ -109,8 +109,7 @@ export function getSharedCurationLabels() {
 export function createHeaderLabelUI(mbrSelection, page, containerId) {
     let labelNames = getSharedCurationLabels();
 
-    // let containerId = 'splitpane_root__bottom';
-    createLabelChoiceWidget(labelNames, containerId)
+    return createLabelChoiceWidget(labelNames, containerId)
         .then(choice => {
 
             let labelChoice = choice.selectedLabel;
@@ -124,21 +123,8 @@ export function createHeaderLabelUI(mbrSelection, page, containerId) {
                 }
             };
 
-            server.createNewZone(zoneData)
-                .then(annot => {
-                    d3.selectAll('.label-selection-rect').remove();
-                    updateAnnotationShapes();
-                })
-                .catch(res => {
-                    d3.selectAll('.label-selection-rect').remove();
-                })
-            ;
-
-        })
-        .catch(() => {
-            d3.selectAll('.label-selection-rect').remove();
-        })
-    ;
+            return zoneData;
+        }) ;
 
 }
 

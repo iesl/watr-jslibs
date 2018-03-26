@@ -4,18 +4,15 @@
 
 
 import * as _ from 'lodash';
-// import * as $ from 'jquery';
-import * as d3 from 'd3';
+
 import * as Rx from 'rxjs';
 import * as server from './serverApi.js';
-
-import * as coords from './coord-sys.js';
-import * as d3x from './d3-extras';
 
 export class ServerDataExchange {
 
     constructor () {
         this.selectionsRx = new Rx.Subject();
+        this.currentSelections = [];
         this.allAnnotationsRx = new Rx.Subject();
 
     }
@@ -25,6 +22,13 @@ export class ServerDataExchange {
     }
 
 
+    createAnnotation(annotData) {
+        let self = this;
+        server.createNewZone(annotData)
+            .then(() => self.refetchAnnotations())
+            .catch(() => {}) ;
+    }
+
     deleteAnnotation(annotId) {
         let self = this;
         server
@@ -32,10 +36,10 @@ export class ServerDataExchange {
             .then(() => self.setSelections([]))
             .then(() => self.refetchAnnotations())
         ;
-            // .catch(() => {}) ;
     }
 
     setAnnotationText(annotId, gridTextJson) {
+        let self = this;
         let postData = {
             SetText: {
                 gridJson: gridTextJson
@@ -58,9 +62,6 @@ export class ServerDataExchange {
         return this.selectionsRx;
     }
 
-    // getAllAnnotationsRx() {
-    //     return this.allAnnotationsRx;
-    // }
 
     subscribeToPageUpdates(pageNum, cb) {
         return this.pageRegionRx.subscribe(cb);
@@ -71,14 +72,16 @@ export class ServerDataExchange {
     }
 
     setSelections(sels) {
+        this.currentSelections = sels;
         this.selectionsRx.next(sels);
     }
 
-    triggerPagewiseAnnotationRegions(annots) {
+    labelsClicked(clickedItems) {
+        let nonintersectingItems = _.differenceBy(clickedItems,  this.currentSelections, s => s.id);
+        this.setSelections(nonintersectingItems);
     }
 
     triggerAnnotationRx(annots) {
-        console.log('triggerAnnotationRx', annots);
         this.allAnnotationsRx.next(annots);
 
         // rtrees.initPageLabelRTrees(annots);

@@ -43,9 +43,9 @@ export function unshowGrid() {
 export class ReflowWidget {
 
     /**
-     * @param {ServerDataExchange}  serverDataExchange
+     * @param {ServerDataExchange}  serverExchange
      */
-    constructor (containerId, textGrid, labelSchema, zoneId, zoneLabel, serverDataExchange) {
+    constructor (containerId, textGrid, labelSchema, zoneId, zoneLabel, serverExchange) {
 
         let gridNum = 1000;
         this.containerId = containerId;
@@ -60,7 +60,7 @@ export class ReflowWidget {
         this.zoneId = zoneId;
         this.zoneLabel = zoneLabel;
         this.infoBar = new Infobar(this.containerId, 2, 3);
-        this.serverDataExchange = serverDataExchange;
+        this.serverExchange = serverExchange;
 
     }
 
@@ -189,8 +189,7 @@ export class ReflowWidget {
         let gridAsJson = JSON.parse(this.textGrid.toJson().toString());
 
         if (! shared.DEV_MODE) {
-            let sdx = this.serverDataExchange;
-            sdx.setAnnotationText(this.zoneId, gridAsJson);
+            this.serverExchange.setAnnotationText(this.zoneId, gridAsJson);
         }
     }
 

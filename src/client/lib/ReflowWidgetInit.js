@@ -14,9 +14,9 @@ const TGI = watr.textgrid.TextGridInterop;
 
 /* Return existing text grid (or undefined) for selectedZone */
 export function getTextGridForSelectedZone(selectedZone) {
-    let zoneId = selectedZone.zoneId ;
+    let annotId = selectedZone.annotId ;
     let zoneLabel = selectedZone.label;
-    let maybeExistingGrid = _.find(shared.zones, z => z.zoneId == zoneId);
+    let maybeExistingGrid = _.find(shared.zones, z => z.annotId == annotId);
 
     if (maybeExistingGrid !== undefined && maybeExistingGrid.glyphDefs !== null) {
         let textGrid = TextGridCompanion.fromJsonStr(
@@ -25,7 +25,7 @@ export function getTextGridForSelectedZone(selectedZone) {
 
         let res = {
             textGrid: textGrid,
-            zoneId: zoneId,
+            annotId: annotId,
             zoneLabel: zoneLabel
         };
 
@@ -36,13 +36,15 @@ export function getTextGridForSelectedZone(selectedZone) {
 
 
 /* Create new text grid for selected zone */
-export function createTextGridFromSelectedZone(selectedZone) {
+export function createTextGridFromSelectedZone(selectedAnnot, glyphs) {
 
-    let zoneId = selectedZone.zoneId ;
-    let zoneLabel = selectedZone.label;
-    let hits = rtrees.searchPage(selectedZone.pageNum, selectedZone);
+    console.log('createTextGridFromSelectedZone', selectedAnnot, glyphs);
 
-    let tuples = _.map(hits, hit => {
+    let annotId = selectedAnnot.annotId ;
+    let zoneLabel = selectedAnnot.label;
+    // let hits = rtrees.searchPage(selectedAnnot.pageNum, selectedAnnot);
+
+    let tuples = _.map(glyphs, hit => {
         let g = hit.gridDataPt;
         return [g.row, g.col, g.gridRow];
     });
@@ -87,7 +89,7 @@ export function createTextGridFromSelectedZone(selectedZone) {
 
     let res = {
         textGrid: textGrid,
-        zoneId: zoneId,
+        annotId: annotId,
         zoneLabel: zoneLabel
     };
 
@@ -96,11 +98,11 @@ export function createTextGridFromSelectedZone(selectedZone) {
 
 }
 
-export function showGrid(textGridDef) {
+export function showGrid(textGridDef, serverExchange) {
     // Get rid of any currently displayed grid
     ReflowWidget.unshowGrid();
 
-    let {textGrid, zoneId, zoneLabel} = textGridDef;
+    let {textGrid, annotId, zoneLabel} = textGridDef;
 
     let allSchemas = _.map(shared.curations, c => c.labelSchemas);
 
@@ -116,7 +118,7 @@ export function showGrid(textGridDef) {
 
     let labelSchema = TGI.labelSchemas.schemasFromJson(JSON.stringify(localSchema));
 
-    let reflowWidget = new ReflowWidget.ReflowWidget('reflow-controls', textGrid, labelSchema, zoneId, zoneLabel);
+    let reflowWidget = new ReflowWidget.ReflowWidget('reflow-controls', textGrid, labelSchema, annotId, zoneLabel, serverExchange);
     shared.activeReflowWidget = reflowWidget;
 
     return reflowWidget.init();

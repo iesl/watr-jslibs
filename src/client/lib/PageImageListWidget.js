@@ -1,6 +1,7 @@
 /**
-
-*/
+ *
+ *
+ */
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
@@ -21,11 +22,11 @@ import {ServerDataExchange} from  './ServerDataExchange.js';
 export class PageImageListWidget {
 
     /**
-     * @param {ServerDataExchange}  serverDataExchange
+     * @param {ServerDataExchange}  serverExchange
      */
-    constructor (containerId, serverDataExchange) {
+    constructor (containerId, serverExchange) {
         this.containerId = containerId;
-        this.serverDataExchange = serverDataExchange;
+        this.serverExchange = serverExchange;
 
         this.pageImageWidgetContainerId = 'page-image-widget-list';
         this.init();
@@ -33,9 +34,6 @@ export class PageImageListWidget {
 
 
     init() {
-        /**
-         * Structure:
-         */
 
         let listId = this.pageImageWidgetContainerId;
 
@@ -53,74 +51,67 @@ export class PageImageListWidget {
 
 
         this.setupStatusBar('page-images-status');
-
-        // let sdx = this.serverDataExchange;
-
-        // _.each(this.pageImageWidgets, pageImageWidget => {
-        //     sdx.subscribeToAllAnnotations(annots => {
-        //         pageImageWidget.setAnnotations(annots);
-        //     });
-        // });
-
-        // _.each(this.pageImageWidgets, (pageImageWidget, pageNum) => {
-        //     sdx.subscribeToPageUpdates(pageNum, (update) => {
-        //         pageImageWidget.updateAnnotationRegions(update);
-        //     });
-        // });
-
-    }
-
-    updateLabelSelections() {
         let widget = this;
-        _.each(widget.pageImageWidgets, pageImageWidget => {
-            pageImageWidget.highlightSelections(widget.currentSelections);
+
+        let serverExchange = this.serverExchange;
+
+        serverExchange.subscribeToAllAnnotations(annots => {
+            widget.setAnnotations(annots);
         });
+
+        this.subscribeToAnnotationSelection();
+
     }
+
 
     setPageImageWidgets(pageImageWidgets) {
         let widget = this;
-        this.pageImageWidgets = pageImageWidgets;
 
-        _.each(pageImageWidgets, pageImageWidget => {
-            pageImageWidget.clickedRegionRx.subscribe(clickedItems => {
-                let nonintersectingItems = _.differenceBy(clickedItems,  widget.currentSelections, s => s.id);
-                widget.currentSelections = nonintersectingItems;
-                widget.updateLabelSelections();
+        widget.pageImageWidgets = pageImageWidgets;
+
+        widget.serverExchange.selectionsRx.subscribe(selectedItems => {
+            _.each(pageImageWidgets, pageImageWidget => {
+                pageImageWidget.highlightSelections(selectedItems);
             });
         });
     }
 
 
-    subscribeToAnnotationUpdates() {
+    subscribeToAnnotationSelection() {
         let widget = this;
-        let sdx = this.serverDataExchange;
+        let serverExchange = this.serverExchange;
 
-        sdx.getSelectedAnnotationsRx().subscribe( selectedAnnots => {
-            $(widget.selectionStatusId).empty();
-            $(widget.selectionStatusId)
-                .append(t.span(`Selected:${selectedAnnots.length} del: `));
+        serverExchange.getSelectedAnnotationsRx().subscribe( selectedAnnots => {
+
+            $id(widget.selectionStatusId).empty();
+            $id('selection-controls').empty();
+
+            $id(widget.selectionStatusId)
+                .append(t.span(`Selected: ${selectedAnnots.length} del: `));
 
             if (selectedAnnots.length == 1) {
                 let selection = selectedAnnots[0];
                 let gridForSelection = reflowWidgetInit.getTextGridForSelectedZone(selection);
                 let deleteBtn = t.button([icon.trash]);
+
                 deleteBtn.on('click', function() {
-                    let zoneId = selection.zoneId;
-                    sdx.deleteAnnotation(zoneId);
+                    serverExchange.deleteAnnotation(selection.annotId);
                 });
 
-                $id(widget.statusBarId).append(deleteBtn);
+                $id('selection-controls').append(deleteBtn);
 
                 if (gridForSelection !== undefined) {
-                    reflowWidgetInit.showGrid(gridForSelection);
+                    reflowWidgetInit.showGrid(gridForSelection, serverExchange);
                 } else {
                     let gridShaperBtn = t.button([icon.fa('indent')]);
+                    let pageWidget = widget.pageImageWidgets[selection.pageNum];
+                    let glyphs = pageWidget.queryForGlyphs(selection);
 
                     gridShaperBtn.on('click', function() {
-                        let textGrid = reflowWidgetInit.createTextGridFromSelectedZone(selection);
-                        reflowWidgetInit.showGrid(textGrid);
+                        let textGrid = reflowWidgetInit.createTextGridFromSelectedZone(selection, glyphs);
+                        reflowWidgetInit.showGrid(textGrid, serverExchange);
                     });
-                    $id(widget.statusBarId).append(gridShaperBtn);
+                    $id('selection-controls').append(gridShaperBtn);
 
                 }
             }
@@ -135,12 +126,10 @@ export class PageImageListWidget {
 
     setupStatusBar(statusBarId) {
 
-        $id(statusBarId)
-            .addClass('statusbar');
-
         let statusItems =
             t.div('.statusitems', [
                 t.div('.statusitem #selections', "Selections"),
+                t.div('.statusitem #selection-controls'),
                 t.div('.statusitem #mouse', 'Mouse')
             ]);
 
@@ -173,13 +162,11 @@ export class PageImageListWidget {
                 return data;
             });
         });
-        let regionsByPage = _.groupBy(dataPts, p => p.pageNum);
-        _.each(regionsByPage, pageRegions => {
-            // console.log('pageRegions', pageRegions);
-            let pageNum = pageRegions[0].pageNum;
 
-            // console.log('pageRegions.pageNum', pageNum);
-            // console.log('pageImageWidgets', this.pageImageWidgets);
+        let regionsByPage = _.groupBy(dataPts, p => p.pageNum);
+
+        _.each(regionsByPage, pageRegions => {
+            let pageNum = pageRegions[0].pageNum;
 
             this.pageImageWidgets[pageNum]
                 .setAnnotationRegionData(pageRegions);
@@ -193,12 +180,10 @@ export class PageImageListWidget {
 
 export function setupPageImages(contentSelector, textGridJson, gridData) {
 
-    console.log('setupPageImages', contentSelector, textGridJson, gridData);
     let pages = textGridJson.pages;
     let pageGeometries = _.map(pages, p => p.pageGeometry);
 
     let ctx = {maxh: 0, maxw: 0};
-    console.log('ctx', ctx);
 
     pageGeometries = _.map(zipWithIndex(pageGeometries), ([g, i]) => {
         let pageBounds = coords.mk.fromArray(g);
@@ -212,21 +197,9 @@ export function setupPageImages(contentSelector, textGridJson, gridData) {
         ctx.maxw = Math.max(ctx.maxw, sh.x + sh.width);
     });
 
-    // let {topPaneId: statusBarId, bottomPaneId: pageImageDivId} =
-    //     spu.splitHorizontal(contentSelector, {fixedTop: 30});
+    let serverExchange = new ServerDataExchange();
 
-    // setupStatusBar(statusBar);
-
-    // let layout =
-    //     t.div([
-    //         t.div(`#page-image-list-status`),
-    //         t.div('#page-images .page-images')
-    //     ]);
-
-    // $id(contentSelector).append(layout);
-    let sdx = new ServerDataExchange();
-
-    let imageList = new PageImageListWidget('page-image-list', sdx);
+    let imageList = new PageImageListWidget('page-image-list', serverExchange);
 
     let pcid = imageList.pageImageWidgetContainerId;
     let widgets = _.map(pageGeometries, (pageGeometry, pageNum) => {
@@ -234,80 +207,14 @@ export function setupPageImages(contentSelector, textGridJson, gridData) {
         let glyphData = rtrees.gridDataToGlyphData(gridData[pageNum]);
         widget.init();
         widget.setGlyphData(glyphData);
-        // let annots = [];
-        // widget.setAnnotations(annots);
+        widget.setServerExchange(serverExchange);
         return widget;
     });
 
 
     imageList.setPageImageWidgets(widgets);
 
-    // sdx.init();
-
+    serverExchange.init();
+    return imageList;
 
 }
-
-// function setupStatusBar(statusBarId) {
-
-//     $id(statusBarId)
-//         .addClass('statusbar');
-
-//     let $selectStatus = t.div('.statusitem', "Selections");
-
-//     shared.rx.selections.subscribe( selectedZones => {
-//         $selectStatus.empty();
-//         $selectStatus.append(t.span(`Selected:${selectedZones.length} del: `));
-
-//         if (selectedZones.length == 1) {
-//             let selection = selectedZones[0];
-//             let gridForSelection = reflowWidgetInit.getTextGridForSelectedZone(selection);
-//             let deleteBtn = t.button([icon.trash]);
-//             deleteBtn.on('click', function() {
-//                 let zoneId = selection.zoneId;
-//                 server.deleteZone(zoneId).then(resp => {
-//                     global.setSelections([]);
-//                     shared.activeReflowWidget = undefined;
-//                     lbl.updateAnnotationShapes();
-//                 }).catch(() => {
-//                     shared.activeReflowWidget = undefined;
-//                     lbl.updateAnnotationShapes();
-//                     global.setSelections([]);
-//                 }) ;
-//             });
-
-//             $selectStatus.append(deleteBtn);
-
-//             if (gridForSelection !== undefined) {
-//                 reflowWidgetInit.showGrid(gridForSelection);
-//             } else {
-//                 let gridShaperBtn = t.button([icon.fa('indent')]);
-
-//                 gridShaperBtn.on('click', function() {
-//                     let textGrid = reflowWidgetInit.createTextGridFromSelectedZone(selection);
-//                     reflowWidgetInit.showGrid(textGrid);
-//                 });
-//                 $selectStatus.append(gridShaperBtn);
-
-//             }
-//         }
-//         else if (selectedZones.length > 1) {
-//             reflowWidget.unshowGrid();
-
-
-
-//         } else {
-//             reflowWidget.unshowGrid();
-//             $selectStatus.text(``);
-//         }
-//     });
-
-//     let $mouseCoords = t.div('.statusitem', 'Mouse');
-//     shared.rx.clientPt.subscribe(clientPt => {
-//         $mouseCoords.text(`x:${clientPt.x} y:${clientPt.y}`);
-//     });
-
-//     $id(statusBarId)
-//         .append($selectStatus)
-//         .append($mouseCoords);
-
-// }

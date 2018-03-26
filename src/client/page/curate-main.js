@@ -8,44 +8,12 @@ import * as _ from 'lodash';
 
 import * as frame from '../lib/frame.js';
 import {t} from '../lib/jstags.js';
-import * as server from '../lib/serverApi.js';
 import {shared} from '../lib/shared-state';
-// const JsArray = watr.utils.JsArray;
+import * as server from '../lib/serverApi.js';
+const rest = server.rest;
 
 
-function curationUri(path) {
-    return server.apiUri(`workflow/${path}`);
-}
 
-export let rest = {
-    create: {
-        workflow: (slug, desc, label) => {
-            let data = {
-                workflow: slug,
-                description: desc,
-                labelSchemas: label
-            };
-            return server.apiPost(curationUri('workflows'), data);
-        },
-        assignment: (slug) => {
-            return server.apiPost(curationUri(`workflows/${slug}/assignments`));
-        }
-    },
-    read: {
-        workflows: () => server.apiGet(curationUri('workflows')),
-        report: (workflowId) => server.apiGet(curationUri(`workflows/${workflowId}/report`)),
-        zone: (zoneId) => server.apiGet(curationUri(`zones/${zoneId}`))
-    },
-    update: {
-        status: (assignId, statusCode) => {
-            let data = {
-                update: { StatusUpdate: {status: statusCode} }
-            };
-
-            return server.apiPost(curationUri(`assignments/${assignId}`), data);
-        }
-    }
-};
 
 function navigateTo(url) {
     window.location.pathname = url;
@@ -142,10 +110,11 @@ function setupPage() {
     ]);
     return page;
 }
+
 export function runMain() {
     frame.setupFrameLayout();
 
-    let $contentPane = $('#splitpane_root__bottom');
+    let $contentPane = $('#main-content');
 
     $contentPane.append(setupPage());
 
@@ -153,5 +122,3 @@ export function runMain() {
 
 }
 
-// Error in affiliation segmentation (all authors considered 1 affil.)
-// https://bioarxiv.watrworks.net/document/10.1101-028399.d?show=textgrid.json

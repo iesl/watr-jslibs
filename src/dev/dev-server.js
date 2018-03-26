@@ -74,6 +74,9 @@ router
         let file = `page-${pagenum}.opt.png`;
         await send(ctx, file, { root: p } );
     })
+    .get('/api/v1/labeling/zones/undefined' , async function(ctx, next) {
+        ctx.body = {};
+    })
 ;
 
 

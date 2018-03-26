@@ -80,6 +80,7 @@ class Frame {
 
     getParentPane() {
         // console.log('getParentPane', this.frameId);
+
         let idParts = this.frameId.split(/__/);
         // console.log('idParts', idParts);
         let parentId = idParts.slice(0, idParts.length-1).join('__');
@@ -100,14 +101,14 @@ class Frame {
 
     rebuild() {
         let ch = this.childrenDiv().children();
-        console.log('rebuild: ch', ch);
+        // console.log('rebuild: ch', ch);
 
 
         let childPanes = ch.filter(function () {
             return $(this).is('.splitwin-pane');
         });
 
-        console.log('rebuild: childPanes len=', childPanes.length);
+        // console.log('rebuild: childPanes len=', childPanes.length);
 
         let paneIds = _.map(childPanes.toArray(), p => {
             return $(p).attr('id');
@@ -116,20 +117,20 @@ class Frame {
         let panes = _.map(childPanes.toArray(), p => {
             return $(p).prop('SplitWin');
         });
-        console.log('rebuild: panes', panes);
+        // console.log('rebuild: panes', panes);
 
         let paneSelectors = _.map(paneIds, id => `#${id}`);
 
-        let paneElems = _.map(panes, p => p.elem);
+        // let paneElems = _.map(panes, p => p.elem);
 
 
-        console.log('rebuild: paneSelectors = ', paneSelectors.join(', '));
+        // console.log('rebuild: paneSelectors = ', paneSelectors.join(', '));
 
         let size = Math.floor(100 / paneIds.length);
 
         let sizes = _.map(_.range(0, paneIds.length), () => size);
 
-        console.log('rebuild: sizes = ', sizes.join(', '));
+        // console.log('rebuild: sizes = ', sizes.join(', '));
 
         if (this.split != undefined) {
             this.split.destroy();

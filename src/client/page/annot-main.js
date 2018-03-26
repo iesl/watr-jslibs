@@ -6,7 +6,6 @@
 
 import * as _ from 'lodash';
 import * as $ from 'jquery';
-import * as d3 from 'd3';
 
 import * as util from  '../lib/commons.js';
 import * as frame from '../lib/frame.js';
@@ -16,10 +15,10 @@ import * as server from '../lib/serverApi.js';
 // import * as panes from  '../lib/splitpane-utils.js';
 import * as spu  from '../lib/SplitWin.js';
 import * as rtrees from  '../lib/rtrees.js';
-import {$id} from '../lib/jstags.js';
 
 import * as curate from './curate-main.js';
 import * as schema from '../lib/schemas';
+const rest = server.rest;
 
 import {t} from '../lib/jstags.js';
 
@@ -29,23 +28,14 @@ import { PageImageListWidget, setupPageImages } from '../lib/PageImageListWidget
 
 
 function setupFrameLayout() {
-    let $contentPane = $('.main > .content');
 
-    $contentPane.append(t.div('#main'));
-
-
-    let rootFrame = spu.createRootFrame("#main");
+    let rootFrame = spu.createRootFrame("#main-content");
     rootFrame.setDirection(spu.row);
 
     let [paneLeft, pane2] = rootFrame.addPanes(2);
 
     $(paneLeft.clientAreaSelector()).attr('id', 'page-image-list');
     $(paneLeft.clientAreaSelector()).addClass('client-content');
-
-    // // $id(leftPaneId)
-    // paneLeft.clientArea().append(
-    //     t.div('.page-image-viewer')
-    // );
 
     pane2.clientArea().append(
         t.div('.page-text-viewer', [
@@ -110,14 +100,14 @@ function curationStatusChange(event, ui) {
     let newStatus = ui.item.value;
 
     // console.log('curationStatusChange', assignment);
-    curate.rest.update.status(assignment.zonelock.id, newStatus)
+    rest.update.status(assignment.zonelock.id, newStatus)
         .then(() => {return {};});
 }
 
 function showCurationStatus() {
     let entry = shared.currentDocument;
 
-    curate.rest.read.workflows()
+    rest.read.workflows()
         .then(workflows => { return shared.curations = workflows;})
         .then(() => { return server.apiGet(`/api/v1/workflow/documents/${entry}`); })
         .then(assignments => {

@@ -5,6 +5,8 @@ import * as _ from 'lodash';
 import {t} from './jstags.js';
 import * as auth from './auth.js';
 import {shared} from './shared-state';
+import * as server from './serverApi.js';
+const rest = server.rest;
 
 
 function siteNavMenu() {
@@ -76,6 +78,7 @@ function loginButton() {
 
     return link;
 }
+
 function logoutButton() {
     let link = t.a('.topbar-item-last', {href: '/logout'}, "Logout");
     link.on('click', function(e){
@@ -87,6 +90,7 @@ function logoutButton() {
     });
     return link;
 }
+
 function setUserLoginInfo(loginInfo) {
     if (loginInfo.login) {
         setUserInfo(loginInfo);
@@ -98,22 +102,23 @@ function setUserLoginInfo(loginInfo) {
     }
 }
 
-function setupSplitFrame() {
+
+export function setupFrameLayout() {
     let layout =
         t.div(`.main`, [
             t.div(`.topbar`),
-            t.div(`.content`)
+            t.div(`.content #main-content`)
         ]);
 
     $('body').append(layout) ;
 
     setupMenubar($('.topbar'));
-}
-
-export function setupFrameLayout() {
-    setupSplitFrame();
 
     auth.getLoginStatus()
         .then(setUserLoginInfo) ;
+
+    rest.read.workflows() .then(workflows => {
+        shared.curations = workflows;
+    });
 
 }

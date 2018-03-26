@@ -82,5 +82,42 @@ export function createNewZone(labelData) {
 
 export function getDocumentAnnotations () {
     return apiGet(apiUri(`labeling/zones/${shared.currentDocument}`))
-        .then(schema.allValid('Annotation'));
+        .then(res => {
+            console.log('getDocumentAnnotations', res);
+            return schema.allValid('Annotation')(res);
+        });
 }
+
+function curationUri(path) {
+    return apiUri(`workflow/${path}`);
+}
+
+export let rest = {
+    create: {
+        workflow: (slug, desc, label) => {
+            let data = {
+                workflow: slug,
+                description: desc,
+                labelSchemas: label
+            };
+            return apiPost(curationUri('workflows'), data);
+        },
+        assignment: (slug) => {
+            return apiPost(curationUri(`workflows/${slug}/assignments`));
+        }
+    },
+    read: {
+        workflows: () => apiGet(curationUri('workflows')),
+        report: (workflowId) => apiGet(curationUri(`workflows/${workflowId}/report`)),
+        zone: (zoneId) => apiGet(curationUri(`zones/${zoneId}`))
+    },
+    update: {
+        status: (assignId, statusCode) => {
+            let data = {
+                update: { StatusUpdate: {status: statusCode} }
+            };
+
+            return apiPost(curationUri(`assignments/${assignId}`), data);
+        }
+    }
+};
