@@ -77,7 +77,7 @@ export class PageImageWidget {
         let $statusTop = widget.selectWidgetElem('.status-top');
 
         $statusTop.append(
-            t.span(`Page: ${widget.pageNum}`)
+            t.span(`Page: ${widget.pageNum + 1}`)
         );
 
         // let width = ''+widget.pageBounds.width+'px';
