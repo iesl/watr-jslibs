@@ -34,7 +34,6 @@ function defaultObj(n) {
 
 
 function rec(n, props) {
-    // let {req, opt} = props;
     let reqs = {
         properties: props,
         required: _.keys(props)
@@ -44,6 +43,15 @@ function rec(n, props) {
 
 let Ref = (n) => { return { "$ref": `${n}Schema.json` }; };
 let ArrayOf = (t) => { return { "items": t }; };
+let NullOr = (t) => {
+    return {
+        'type':['object', 'null'],
+        'oneOf':[
+            t,
+            {'type':'null'}
+        ]
+    };
+};
 
 
 let Int = { "type": "integer" };
@@ -53,13 +61,7 @@ let Str = { "type": "string" };
 
 let StrOrNull =  { "type": ["string", 'null'] };
 
-let TextGridOrNull = {
-    'type':['object', 'null'],
-    'oneOf':[
-        Ref("Body"),
-        {'type':'null'}
-    ]
-};
+let TextGridOrNull = NullOr(Ref('Body'));
 
 
 function createSchemas(schemaArray) {
