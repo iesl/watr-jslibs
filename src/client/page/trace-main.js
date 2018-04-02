@@ -22,7 +22,7 @@ import ToolTips from '../lib/Tooltips';
 import * as Rx from 'rxjs';
 import * as coords from '../lib/coord-sys.js';
 
-import {t} from '../lib/jstags.js';
+import {t, htm} from '../lib/jstags.js';
 
 
 let _tooltipHoversRx = new Rx.Subject();
@@ -39,7 +39,9 @@ function setupFrameLayout() {
     $(paneLeft.clientAreaSelector()).addClass('client-content');
 
     paneRight.clientArea().append(
-        t.div('#tracelog-menu')
+        t.div('.scrollable-pane', [
+            t.div('#tracelog-menu')
+        ])
     );
 }
 
@@ -68,11 +70,15 @@ function addTooltip(r) {
     return r.on("mouseover", function(d) {
         r .call(d3x.initStroke, 'yellow', 1, 2.0)
             .transition().duration(200)
-            .call(d3x.initStroke, 'red', 1.0) ;
+            .call(d3x.initStroke, 'red', 1.0)
+            .call(d3x.initFill, 'red', 1.0)
+        ;
 
     }) .on("mouseout", function(d) {
         r .transition().duration(300)
-            .call(d3x.initStroke, 'black', 2) ;
+            .call(d3x.initStroke, 'black', 2)
+            .call(d3x.initFill, 'blue', 0.2)
+        ;
     });
 
 }
@@ -132,7 +138,7 @@ function setDefaultFillColor(d) {
 
 function initShapeAttrs(r) {
     let shape = r.node().nodeName.toLowerCase();
-    console.log('initShapeAttrs', r);
+    // console.log('initShapeAttrs', r);
     // console.log('initShapeAttrs (shape)', shape);
 
     switch (shape) {
@@ -145,7 +151,7 @@ function initShapeAttrs(r) {
             .attr("class", getCls)
             .attr("label", getCls)
             .attr("opacity", 0.1)
-            .attr("fill-opacity", 0.1)
+            .attr("fill-opacity", 0.2)
             .attr("stroke-opacity", 0.9)
             .attr("stroke-width", 2)
             .attr("fill",  setDefaultFillColor)
@@ -192,7 +198,7 @@ function selectShapes(dataBlock) {
     let pageId = pageImageWidget.svgId;
     let d3Page = d3.select(`#${pageId}`);
     d3Page.select('image')
-        .attr('opacity', 0.4)
+        .attr('opacity', 0.7)
     ;
     let shapes = dataBlock;
     // let filteredShapes = _.filter(dataBlock.shapes, s => {
@@ -205,16 +211,28 @@ function selectShapes(dataBlock) {
 }
 
 
+function runAllTraces(tracelogs) {
+    _.each(tracelogs, t => {
+        runTrace(t);
+    });
+}
+
 function runTrace(tracelog) {
-    console.log('runTrace', tracelog);
-    let name  = tracelog.name;
     let pageNum =  tracelog.page;
     pageImageWidget = pageImageListWidget.pageImageWidgets[pageNum];
 
-    let decodedShapes = _.map(tracelog.log.log, s => coords.fromFigure(s).svgShape());
+    // let pageId = pageImageWidget.svgId;
+    // let d3Page = d3.select(`#${pageId}`);
+    // d3Page.selectAll('rect.backdrop').remove();
 
-    console.log('decodedShapes', decodedShapes);
-    console.log('undecodedShapes', tracelog.log.log);
+    // d3Page .append('rect')
+    //     .datum(pageImageWidget.pageBounds)
+    //     .classed('backdrop', true)
+    //     .call(initShapeAttrs)
+    //     .call(d3x.initFill, () => 'white', 0.7)
+    // ;
+
+    let decodedShapes = _.map(tracelog.log.log, s => coords.fromFigure(s).svgShape());
 
     stepper.stepThrough(DrawShapes, [decodedShapes]);
 }
@@ -227,7 +245,6 @@ function DrawShapes(dataBlock) {
         .each(function (shape){
             let self = d3.select(this);
             shape.id = getId(shape);
-            console.log('DrawShapes: shape', shape);
             return self.append(shape.type)
                 .call(initShapeAttrs) ;
         })
@@ -237,22 +254,68 @@ function DrawShapes(dataBlock) {
 
 
 function setupTracelogMenu(tracelogs) {
-    let menuItems = _.map(tracelogs, tracelog => {
-        let {log, page} = tracelog;
-        // let n = tracelog.name;
-        let {callSite} = log;
-        let n = `p${page}: ${log.tags} @ ${callSite}`;
-        let link = t.a(n, {href: '#'});
-        link.on('click', ev => {
-            runTrace(tracelog);
-        });
+    let filterMenu = htm.labeledTextInput('Filter', 'trace-filter');
 
-        return t.li([link]);
+    let taggedTraces = _.map(tracelogs, tracelog => {
+        let {log, page} = tracelog;
+        let tags = `p${page+1}. ${log.tags.toLowerCase()}`;
+        return [tags, tracelog];
     });
 
+    function makeMenuItems(traces) {
+        let lis = _.map(traces, tracelog => {
+            let {log, page} = tracelog[1];
+            // let n = tracelog.name;
+            let {callSite} = log;
+            let n = t.span([t.small(`p${page+1}: ${log.tags} @ ${callSite}`)]);
+            let link = t.a(n, {href: '#'});
+            link.on('click', ev => {
+                runTrace(tracelog);
+            });
 
-    let menu = t.ul(menuItems);
-    $('#tracelog-menu').append(menu);
+            return t.li([link]);
+        });
+
+        return t.ul(lis);
+    }
+
+    let menu = makeMenuItems(taggedTraces);
+
+    let traceControls = t.div([
+        filterMenu,
+        t.div('#trace-menu', [
+            menu
+        ])
+    ]);
+
+    let filteredTraces = taggedTraces;
+
+    $('#tracelog-menu').append(traceControls);
+
+    $('#trace-filter').on('keypress', function(e) {
+        if (e.keyCode == 13) {
+            runAllTraces(_.map(filteredTraces, t => t[1]));
+            return false;
+        }
+    });
+
+    $('#trace-filter').on('input', function(ev) {
+        // let textVal = $('#trace-filter').val();
+        let textVal = $(this).val();
+        $('#trace-menu').empty();
+        if (textVal.length>0) {
+            let filterExprs = textVal.toLowerCase().split(' ');
+            filteredTraces = _.filter(taggedTraces, ([tags, trace]) => {
+                return _.every(filterExprs, expr => {
+                    return tags.includes(expr);
+                });
+            });
+        } else {
+            filteredTraces = taggedTraces;
+        }
+        let ms = makeMenuItems(filteredTraces);
+        $('#trace-menu').append(ms);
+    });
 }
 
 
