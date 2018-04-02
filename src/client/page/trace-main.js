@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import * as d3 from 'd3';
 import * as $ from 'jquery';
 
+import * as d3x from '../lib/d3-extras';
 import * as util from  '../lib/commons.js';
 import * as frame from '../lib/frame.js';
 import {shared} from '../lib/shared-state';
@@ -17,10 +18,15 @@ import * as spu  from '../lib/SplitWin.js';
 import * as rtrees from  '../lib/rtrees.js';
 import { setupPageImages } from '../lib/PageImageListWidget.js';
 import * as stepper from  '../lib/d3-stepper.js';
-// import * as d3x from '../lib/d3-extras';
+import ToolTips from '../lib/Tooltips';
+import * as Rx from 'rxjs';
+import * as coords from '../lib/coord-sys.js';
 
 import {t} from '../lib/jstags.js';
 
+
+let _tooltipHoversRx = new Rx.Subject();
+let tooltips = new ToolTips('body', _tooltipHoversRx);
 
 function setupFrameLayout() {
 
@@ -57,31 +63,17 @@ let colorMap = {
     "OutlineBox"             : "magenta"
 } ;
 
-// Define the div for the tooltip
-let tooltipDiv = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
 
 function addTooltip(r) {
     return r.on("mouseover", function(d) {
-        if (d.class != undefined) {
-            tooltipDiv.transition()
-                .duration(100)
-                .style("opacity", .9);
-            tooltipDiv.html( d.class + "::" + getId(d) )
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
-        }
-    })
-        .on("mouseout", function(d) {
-            if (d.class != undefined) {
-                tooltipDiv.transition()
-                    .transition()
-                    .delay(3000)
-                    .duration(1000)
-                    .style("opacity", 0);
-            }
-        });
+        r .call(d3x.initStroke, 'yellow', 1, 2.0)
+            .transition().duration(200)
+            .call(d3x.initStroke, 'red', 1.0) ;
+
+    }) .on("mouseout", function(d) {
+        r .transition().duration(300)
+            .call(d3x.initStroke, 'black', 2) ;
+    });
 
 }
 
@@ -119,9 +111,29 @@ function getCls(data) {
 
 }
 
+function dataToColor(d) {
+    let color = 'black';
+    // if (d.stroke !== undefined) {
+    //     color = d.stroke;
+    // }
+    // else {
+    //     color = colorMap[d.class];
+    // }
+    return color;
+}
+
+function setDefaultStrokeColor(d) {
+    return dataToColor(d);
+}
+
+function setDefaultFillColor(d) {
+    return dataToColor(d);
+}
 
 function initShapeAttrs(r) {
     let shape = r.node().nodeName.toLowerCase();
+    console.log('initShapeAttrs', r);
+    // console.log('initShapeAttrs (shape)', shape);
 
     switch (shape) {
     case "rect":
@@ -131,12 +143,12 @@ function initShapeAttrs(r) {
             .attr("height", function(d){ return d.height; })
             .attr("id", getId)
             .attr("class", getCls)
+            .attr("label", getCls)
             .attr("opacity", 0.1)
             .attr("fill-opacity", 0.1)
             .attr("stroke-opacity", 0.9)
-            .attr("stroke-width", 1)
-            // .attr("fill",  setDefaultFillColor)
-            .attr("fill",  'blue')
+            .attr("stroke-width", 2)
+            .attr("fill",  setDefaultFillColor)
             .attr("stroke", "green")
             .call(addTooltip)
         ;
@@ -147,12 +159,11 @@ function initShapeAttrs(r) {
             .attr("r", function(d){ return d.r; })
             .attr("id", getId)
             .attr("class", getCls)
+            .attr("label", getCls)
             .attr("fill-opacity", 0.2)
             .attr("stroke-width", 1)
-            .attr("fill",  'blue')
-            .attr("stroke", 'black')
-            // .attr("fill",  setDefaultFillColor)
-            // .attr("stroke", setDefaultStrokeColor)
+            .attr("fill",  setDefaultFillColor)
+            .attr("stroke", setDefaultStrokeColor)
             .call(addTooltip)
         ;
 
@@ -163,12 +174,10 @@ function initShapeAttrs(r) {
             .attr("y2", function(d){ return d.y2; })
             .attr("id", getId)
             .attr("class", getCls)
-            .attr("fill-opacity", 0.2)
-            .attr("stroke-width", 1)
-            .attr("fill",  'blue')
-            .attr("stroke", 'black')
-            // .attr("fill",  setDefaultFillColor)
-            // .attr("stroke", setDefaultStrokeColor)
+            .attr("label", getCls)
+            .attr("stroke-width", 2)
+            .attr("fill",  setDefaultFillColor)
+            .attr("stroke", setDefaultStrokeColor)
             .call(addTooltip)
         ;
     }
@@ -182,38 +191,44 @@ let pageImageWidget;
 function selectShapes(dataBlock) {
     let pageId = pageImageWidget.svgId;
     let d3Page = d3.select(`#${pageId}`);
+    d3Page.select('image')
+        .attr('opacity', 0.4)
+    ;
+    let shapes = dataBlock;
+    // let filteredShapes = _.filter(dataBlock.shapes, s => {
+    //     return s.class !== undefined &&  s.type != 'image';
+    // });
+    // console.log('shapes', dataBlock.shapes);
+
     return d3Page.selectAll(".shape")
-        .data(dataBlock.shapes, getId) ;
+        .data(shapes, getId) ;
 }
 
 
 function runTrace(tracelog) {
+    console.log('runTrace', tracelog);
     let name  = tracelog.name;
-    let pageStr = name.split(':')[0];
-    let pageNumS = pageStr.split(' ')[1];
-    let pageNum = parseInt(pageNumS) - 1;
-    // console.log('tracing page ', pageStr, pageNumS, pageNum);
+    let pageNum =  tracelog.page;
     pageImageWidget = pageImageListWidget.pageImageWidgets[pageNum];
-    stepper.stepThrough(DrawShapes, tracelog.steps);
+
+    let decodedShapes = _.map(tracelog.log.log, s => coords.fromFigure(s).svgShape());
+
+    console.log('decodedShapes', decodedShapes);
+    console.log('undecodedShapes', tracelog.log.log);
+
+    stepper.stepThrough(DrawShapes, [decodedShapes]);
 }
 
 function DrawShapes(dataBlock) {
-    console.log("Running OutlineMethod" );
 
     let shapes = selectShapes(dataBlock);
 
-    // printlog(dataBlock.desc);
-
     return shapes.enter()
-        .each(function (d){
+        .each(function (shape){
             let self = d3.select(this);
-            let shape = "rect";
-            if (d.type != undefined) {
-                shape = d.type;
-            } else {
-                d.type = "rect";
-            }
-            return self.append(shape)
+            shape.id = getId(shape);
+            console.log('DrawShapes: shape', shape);
+            return self.append(shape.type)
                 .call(initShapeAttrs) ;
         })
     ;
@@ -223,11 +238,13 @@ function DrawShapes(dataBlock) {
 
 function setupTracelogMenu(tracelogs) {
     let menuItems = _.map(tracelogs, tracelog => {
-        let n = tracelog.name;
+        let {log, page} = tracelog;
+        // let n = tracelog.name;
+        let {callSite} = log;
+        let n = `p${page}: ${log.tags} @ ${callSite}`;
         let link = t.a(n, {href: '#'});
         link.on('click', ev => {
             runTrace(tracelog);
-
         });
 
         return t.li([link]);
@@ -236,8 +253,6 @@ function setupTracelogMenu(tracelogs) {
 
     let menu = t.ul(menuItems);
     $('#tracelog-menu').append(menu);
-    // _.each(tracelog.steps[0].shapes, shape => {
-    // });
 }
 
 

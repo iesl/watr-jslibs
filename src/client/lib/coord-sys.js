@@ -21,11 +21,40 @@ export let coordSys = {
     pdfMedia: Symbol('pdf-media')
 };
 
+
 class Point {
     constructor (x, y, sys) {
         this.x = x;
         this.y = y;
         this._system = sys? sys : coordSys.unknown;
+        this.type = 'Point';
+    }
+
+    svgShape() {
+        return {
+            type: 'circle',
+            r: 3,
+            cx: this.x,
+            cy: this.y
+        };
+    }
+}
+
+class Line {
+    constructor (p1, p2) {
+        this.p1 = p1;
+        this.p2 = p2;
+        this.type = 'Line';
+    }
+
+    svgShape() {
+        return {
+            type: 'line',
+            x1: this.p1.x,
+            x2: this.p2.x,
+            y1: this.p1.y,
+            y2: this.p2.y
+        };
     }
 }
 
@@ -40,6 +69,10 @@ export let mkPoint = {
 
     offsetFromJqEvent: (event) => {
         return mkPoint.fromXy(event.offsetX, event.offsetY);
+    },
+
+    fromFloatReps: (o) => {
+        return new Point(o.x / 100.0, o.y  / 100.0);
     }
 };
 
@@ -60,6 +93,7 @@ export class BBox {
         this.width = w;
         this.height = h;
         this._system = sys? sys : coordSys.unknown;
+        this.type = 'BBox';
     }
 
     get minX() { return this.left; }
@@ -94,6 +128,16 @@ export class BBox {
 
     toString() {
         return `BBox(${this.left}, ${this.top}, ${this.width}, ${this.height})`;
+    }
+
+    svgShape() {
+        return {
+            type: 'rect',
+            x: this.x,
+            y: this.y,
+            width: this.width,
+            height: this.height
+        };
     }
 }
 
@@ -142,4 +186,22 @@ export function boxCenteredAt(p, width, height) {
     let left = p.x - (width/2);
     let top = p.y - (height/2);
     return mk.fromLtwh(left, top, width, height);
+}
+
+export function fromFigure(fig) {
+    let shape;
+
+    if (fig.LTBounds) {
+        shape = mk.fromLtwhFloatReps(fig.LTBounds);
+    }
+    else if (fig.Line) {
+        let p1 = mkPoint.fromFloatReps(fig.Line.p1);
+        let p2 = mkPoint.fromFloatReps(fig.Line.p2);
+        shape = new Line(p1, p2);
+    }
+    else if (fig.Point) {
+        shape = mkPoint.fromFloatReps(fig.Point);
+    }
+
+    return shape;
 }
