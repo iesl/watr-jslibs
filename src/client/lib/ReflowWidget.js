@@ -12,7 +12,6 @@ import * as mhs from './MouseHandlerSets';
 
 import * as coords from './coord-sys.js';
 import { $id, t, htm } from './jstags.js';
-import * as lbl from './labeling';
 let rtree = require('rbush');
 import {shared} from './shared-state';
 
@@ -20,11 +19,8 @@ import * as d3x from './d3-extras';
 
 import * as gp from './graphpaper-variants';
 import * as colors from './colors';
-import * as server from './serverApi.js';
 
 const JsArray = watr.utils.JsArray;
-const TGCC = watr.textgrid.TextGridConstructor_Companion;
-// const TGC = TGCC.create();
 const TGI = watr.textgrid.TextGridInterop;
 
 import * as reflowTools from './ReflowTools.js';

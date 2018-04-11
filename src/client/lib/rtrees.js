@@ -215,6 +215,14 @@ export function initGridData(textgrids, canvasContexts, gridTextOrigin, gridText
 
                 return gridDataPt;
             });
+
+            try {
+                context.fillText(text, x, y);
+            }
+            catch (error) {
+                console.log('error', error);
+            }
+
             return gridDataPts;
         });
 

@@ -41,6 +41,7 @@ export class PageImageWidget {
 
         this._tooltipHoversRx = new Rx.Subject();
         this._tooltips = new ToolTips(this.frameSelector, this._tooltipHoversRx);
+        this.selectedRegionRx = new Rx.Subject();
         this.DEV_MODE = false;
         if (this.DEV_MODE) {
             this.infoBar = new Infobar(this.frameId, 2, 3);
@@ -328,6 +329,7 @@ function pageImageHandlers(widget) {
 
                         if (pointOrRect.rect) {
                             let r = pointOrRect.rect;
+                            widget.selectedRegionRx.next(r);
 
                             let queryBox = coords.mk.fromLtwhObj(r);
                             let hits = widget.glyphRtree.search(queryBox);

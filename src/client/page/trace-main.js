@@ -150,8 +150,8 @@ function initShapeAttrs(r) {
             .attr("id", getId)
             .attr("class", getCls)
             .attr("label", getCls)
-            .attr("opacity", 0.1)
-            .attr("fill-opacity", 0.2)
+            .attr("opacity", 0.3)
+            .attr("fill-opacity", 0.4)
             .attr("stroke-opacity", 0.9)
             .attr("stroke-width", 2)
             .attr("fill",  setDefaultFillColor)
@@ -219,20 +219,13 @@ function runAllTraces(tracelogs) {
 
 function runTrace(tracelog) {
     let pageNum =  tracelog.page;
+
     pageImageWidget = pageImageListWidget.pageImageWidgets[pageNum];
 
-    // let pageId = pageImageWidget.svgId;
-    // let d3Page = d3.select(`#${pageId}`);
-    // d3Page.selectAll('rect.backdrop').remove();
 
-    // d3Page .append('rect')
-    //     .datum(pageImageWidget.pageBounds)
-    //     .classed('backdrop', true)
-    //     .call(initShapeAttrs)
-    //     .call(d3x.initFill, () => 'white', 0.7)
-    // ;
 
-    let decodedShapes = _.map(tracelog.log.log, s => coords.fromFigure(s).svgShape());
+    let body = tracelog.entry.GeometryTraceLog.body;
+    let decodedShapes = _.map(body, s => coords.fromFigure(s).svgShape());
 
     stepper.stepThrough(DrawShapes, [decodedShapes]);
 }
@@ -256,56 +249,55 @@ function DrawShapes(dataBlock) {
 function setupTracelogMenu(tracelogs) {
     let filterMenu = htm.labeledTextInput('Filter', 'trace-filter');
 
-    let taggedTraces = _.map(tracelogs, tracelog => {
-        let {log, page} = tracelog;
-        let tags = `p${page+1}. ${log.tags.toLowerCase()}`;
-        return [tags, tracelog];
-    });
-
-    function makeMenuItems(traces) {
-        let lis = _.map(traces, tracelog => {
-            let {log, page} = tracelog[1];
-            // let n = tracelog.name;
-            let {callSite} = log;
-            let n = t.span([t.small(`p${page+1}: ${log.tags} @ ${callSite}`)]);
-            let link = t.a(n, {href: '#'});
-            link.on('click', ev => {
-                runTrace(tracelog);
-            });
-
-            return t.li([link]);
+    function makeMenuItem(tracelog) {
+        let {entry, page} = tracelog;
+        entry = entry.GeometryTraceLog;
+        let {callSite} = entry;
+        let n = t.span([t.small(`p${page+1}: ${entry.tags} @ ${callSite}`)]);
+        let link = t.a(n, {href: '#'});
+        link.on('click', ev => {
+            runTrace(tracelog);
         });
 
-        return t.ul(lis);
+        return t.li([link]);
     }
 
-    let menu = makeMenuItems(taggedTraces);
+    function makeMenuItems(taggedTraces) {
+        return t.ul([
+            _.map(taggedTraces, t => t[2])
+        ]);
+    }
+
+    let taggedTraces = _.map(tracelogs, tracelog => {
+        let {entry, page} = tracelog;
+        entry = entry.GeometryTraceLog;
+        let tags = `p${page+1}. ${entry.tags.toLowerCase()} ${entry.callSite.toLowerCase()}`;
+        return [tags, tracelog, makeMenuItem(tracelog)];
+    });
+
+
+
+    let filteredTraces = taggedTraces;
+
 
     let traceControls = t.div([
         filterMenu,
         t.div('#trace-menu', [
-            menu
+            makeMenuItems(taggedTraces)
         ])
     ]);
 
-    let filteredTraces = taggedTraces;
 
+    console.log('appending trace');
     $('#tracelog-menu').append(traceControls);
 
-    $('#trace-filter').on('keypress', function(e) {
-        if (e.keyCode == 13) {
-            runAllTraces(_.map(filteredTraces, t => t[1]));
-            return false;
-        }
-    });
-
-    $('#trace-filter').on('input', function(ev) {
-        // let textVal = $('#trace-filter').val();
+    function filterFunc(ev) {
         let textVal = $(this).val();
         $('#trace-menu').empty();
         if (textVal.length>0) {
             let filterExprs = textVal.toLowerCase().split(' ');
-            filteredTraces = _.filter(taggedTraces, ([tags, trace]) => {
+
+            filteredTraces = _.filter(taggedTraces, ([tags, logs]) => {
                 return _.every(filterExprs, expr => {
                     return tags.includes(expr);
                 });
@@ -315,9 +307,41 @@ function setupTracelogMenu(tracelogs) {
         }
         let ms = makeMenuItems(filteredTraces);
         $('#trace-menu').append(ms);
+    }
+
+    let debouncedFilter = _.debounce(filterFunc, 150);
+
+    $('#trace-filter').on('keypress', function(e) {
+        if (e.keyCode == 13) {
+            debouncedFilter.cancel();
+            runAllTraces(_.map(filteredTraces, t => t[1]));
+            return false;
+        }
+        return true;
     });
+
+    $('#trace-filter').on('input', debouncedFilter);
 }
 
+function selectionHandlers(widget) {
+    let handlers = {
+
+        click: function(event) {
+        },
+
+        mouseup: function() {
+        },
+
+        mousedown: function(event) {
+        },
+
+
+        mousemove: function(event) {
+        }
+    };
+
+    return handlers;
+}
 
 
 export function runMain() {
@@ -344,6 +368,13 @@ export function runMain() {
         setupFrameLayout();
 
         pageImageListWidget = setupPageImages('page-image-list', textGridJson, gridData);
+
+        _.each(pageImageListWidget.pageImageWidgets, widget => {
+            widget.selectedRegionRx.subscribe(rect => {
+                console.log('selected page ', widget.pageNum, 'r=', rect);
+
+            });
+        });
 
         setupTracelogMenu(tracelogJson);
 

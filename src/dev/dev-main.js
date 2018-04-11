@@ -8,11 +8,12 @@ import '../style/app-main.less';
 
 import {shared} from '../client/lib/shared-state';
 import * as ReflowWidgetDev from  './reflow-widget.dev.js';
+import * as TextgridWidgetDev from  './TextgridWidgetDev';
 import * as PageImageWidgetDev from  './PageImageWidgetDev.js';
 import * as SplitPaneDev from  './split-pane.dev.js';
-import * as spu  from '../client/lib/splitpane-utils.js';
 import * as jst  from '../client/lib/jstags.js';
 const t = jst.t;
+
 
 shared.DEV_MODE = true;
 
@@ -20,6 +21,7 @@ function runHome() {
     let pages = t.ul([
         t.li([ t.a('Reflow', {href: '/reflow'}) ]),
         t.li([ t.a('Split Pane', {href: '/splitpane'}) ]),
+        t.li([ t.a('Text Viewer', {href: '/pagetext'}) ]),
         t.li([ t.a('Page Image Widget', {href: '/pageimage'}) ])
     ]);
 
@@ -51,6 +53,10 @@ function dispatch() {
 
     case "pageimage":
         PageImageWidgetDev.run();
+        break;
+
+    case "pagetext":
+        TextgridWidgetDev.run();
         break;
 
     }

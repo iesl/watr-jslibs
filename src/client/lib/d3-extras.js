@@ -22,21 +22,9 @@ export function initFill(sel, fill, fillOpacity) {
 }
 
 export let d3select = {
-    pageImages: () => {
-        return d3.select('div.page-images').selectAll('svg.page-image');
-    },
-    pageTextgrids: () => {
-        return d3.select('div.page-textgrids').selectAll('svg.textgrid');
-    },
     pageTextgridSvg: (n) => {
         return d3.select('div.page-textgrids').select(`svg#textgrid-svg-${n}`);
     },
-    pageImage: (n) => {
-        return d3.select('div.page-images').selectAll(`svg#page-image-${n}`);
-    },
-    allSvgs: () => {
-        return d3.select('svg');
-    }
 };
 
 
@@ -56,4 +44,8 @@ export function getId(data) {
         }
     }
     return "";
+}
+
+export function d3$id(selector) {
+    return d3.select('#'+selector);
 }

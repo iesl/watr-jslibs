@@ -63,6 +63,12 @@ router
         let file = `page-${pagenum}.opt.png`;
         await send(ctx, file, { root: p } );
     })
+    .get('/data/textgrids/:num', async function(ctx, next) {
+        let num = ctx.params.num;
+        let p = path.resolve(devDataRoot, `textgrids`);
+        let file = `textgrid-${num}.json`;
+        await send(ctx, file, { root: p  });
+    })
     .get('/data/textgrid', async function(ctx, next) {
         let p = path.resolve(devDataRoot, `corpus-entry-0`);
         let file = 'textgrid.json';
