@@ -23,22 +23,19 @@ export class TextgridListWidget {
         this.containerId = containerId;
         this.textGrids = textGridDefs;
 
-        this.frameId  = `textgrid-frame-${gridNum}`;
-        this.canvasId = `textgrid-canvas-${gridNum}`;
-        this.svgId    = `textgrid-svg-${gridNum}`;
         this.serverExchange = serverExchange;
 
     }
 
     getRootNode() {
 
-        let listId = this.pageImageWidgetContainerId;
+        let listId = this.pageTextWidgetContainerId;
 
         let node =
-            t.div(`.page-image-list-widget`, [
-                t.div(`#page-images-status .statusbar`),
-                t.div('#page-images .page-images', [
-                    t.div(`.page-image-widgets`, [
+            t.div(`.page-text-list-widget`, [
+                t.div(`#page-texts-status .statusbar`),
+                t.div('#page-texts .page-texts', [
+                    t.div(`.page-text-widgets`, [
                         t.div(`#${listId} .list`),
                     ])
                 ])

@@ -1,18 +1,12 @@
+/* global require $ */
 
-/* global require  $ watr */
 import * as Shared from '../client/lib/shared-state';
-// import * as ReflowWidget from  '../client/lib/ReflowWidget.js';
 import * as TextgridWidget from  '../client/lib/TextgridWidget.js';
 
 
 export function run()  {
-    console.log("running TextgridWidget");
 
     Shared.initGlobalMouseTracking();
-    // let textGridConstruction = new watr.textgrid.TextGridConstructor();
-    // let textGrid = textGridConstruction.getTestTextGridLarge();
-    // let textGrid = textGridConstruction.getTestTextGrid();
-    // let labelSchema = textGridConstruction.getTestLabelSchema();
 
     $.getJSON('/data/textgrids/00', textgrid => {
         let pages = textgrid.pages;
