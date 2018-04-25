@@ -45,26 +45,6 @@ function setupFrameLayout() {
     );
 }
 
-let colorMap = {
-    "Caption"                : "blue",
-    "Image"                  : "brown",
-    "CharRun"                : "chocolate",
-    "CharRunBegin"           : "purple",
-    "CharRunBaseline"        : "purple",
-    "FontBaseline"           : "blue",
-    "LeftAlignedCharCol"     : "crimson",
-    "RightAlignedCharCol"    : "darkorchid",
-    "LeftAlignedColEnd"      : "darkred",
-    "HPageDivider"           : "darksalmon",
-    "ColLeftEvidence"        : "darkturquoise",
-    "ColRightEvidence"       : "firebrick",
-    "PageLines"              : "green",
-    "HLinePath"              : "indianred",
-    "VLinePath"              : "khaki",
-    "LinePath"               : "lavender",
-    "OutlineBox"             : "magenta"
-} ;
-
 
 function addTooltip(r) {
     return r.on("mouseover", function(d) {
