@@ -15,7 +15,6 @@ let pageLen = 50;
 function createEntryItem(entry) {
     // let interestingLabels = _.filter(entry.labels[0], l => l.slice(0, 3) !== 'seg');
     // let labelList = _.map(interestingLabels, l => t.li(` ${l}`));
-    console.log(entry);
     let entryName = entry.stableId.replace(/\.pdf\.d/, '');
 
     let entryPanel =
@@ -32,15 +31,15 @@ function createEntryItem(entry) {
                     ])
                 ]),
                 t.div('.listing-info', [
-                    // t.ul('.h-indent-ul', [t.li("Labels")], labelList)
+                    t.a({href: `/document/${entry.stableId}?show=tracelog`},[
+                        t.span("tracelogs")
+                    ])
                 ])
             ])
-        ])
-    ;
+        ]) ;
 
     return entryPanel;
 }
-
 
 
 function createEntryItems(corpusEntries) {

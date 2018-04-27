@@ -44,8 +44,10 @@ function setupFrameLayout() {
         ])
     );
 }
-
-
+/**
+ *
+ * @param {any} r
+ */
 function addTooltip(r) {
     return r.on("mouseover", function(d) {
         r .call(d3x.initStroke, 'yellow', 1, 2.0)
@@ -65,6 +67,10 @@ function addTooltip(r) {
 
 
 
+/**
+ *
+ * @param {any} data
+ */
 function getId(data) {
     let shape = data.type;
 
@@ -181,10 +187,6 @@ function selectShapes(dataBlock) {
         .attr('opacity', 0.7)
     ;
     let shapes = dataBlock;
-    // let filteredShapes = _.filter(dataBlock.shapes, s => {
-    //     return s.class !== undefined &&  s.type != 'image';
-    // });
-    // console.log('shapes', dataBlock.shapes);
 
     return d3Page.selectAll(".shape")
         .data(shapes, getId) ;
@@ -228,6 +230,16 @@ function DrawShapes(dataBlock) {
 
 function setupTracelogMenu(tracelogs) {
     let filterMenu = htm.labeledTextInput('Filter', 'trace-filter');
+    let clearButton = t.button('.btn-lightlink', "Reset");
+
+    clearButton.on('click', function() {
+        d3.selectAll('image')
+            .attr('opacity', 1.0);
+
+        return d3.selectAll(".shape")
+            .remove();
+
+    });
 
     function makeMenuItem(tracelog) {
         let {entry, page} = tracelog;
@@ -261,7 +273,7 @@ function setupTracelogMenu(tracelogs) {
 
 
     let traceControls = t.div([
-        filterMenu,
+        t.span([filterMenu, clearButton]),
         t.div('#trace-menu', [
             makeMenuItems(taggedTraces)
         ])
