@@ -65,8 +65,6 @@ function addTooltip(r) {
 
 }
 
-
-
 /**
  *
  * @param {any} data

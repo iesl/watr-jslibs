@@ -5,6 +5,7 @@
 /* global */
 
 import * as _ from 'lodash';
+import * as d3 from 'd3';
 import * as $ from 'jquery';
 
 import * as util from  '../lib/commons.js';
@@ -186,15 +187,15 @@ export function runMain() {
             // console.log('(pre) setupPageImages', textGridJson, gridData);
             setupPageImages('page-image-list', textGridJson, gridData);
 
-            // textview.setupPageTextGrids('div.page-textgrids', textgrids);
+            textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
-            // rtrees.initPageAndGridRTrees(textgrids);
+            rtrees.initPageAndGridRTrees(textgrids);
 
-            // d3.selectAll('svg.textgrid')
-            //     .each(function (){
-            //         let d3$svg = d3.select(this);
-            //         textview.textgridSvgHandlers(d3$svg);
-            //     });
+            d3.selectAll('svg.textgrid')
+                .each(function (){
+                    let d3$svg = d3.select(this);
+                    textview.textgridSvgHandlers(d3$svg);
+                });
 
             // showCurationStatus();
 
