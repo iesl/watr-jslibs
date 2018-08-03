@@ -13,7 +13,7 @@ export function annotData() {
             "Zone" : {
                 "regions" : [
                     {"page" : {"stableId" : "doc#0", "pageNum" : 0},
-                     "bbox" : {"left" : 10000, "top" : 10000, "width" : 8000, "height" : 4000}}
+                     "bbox" : [10000, 10000, 8000, 4000]}
                 ]
             }
         },
@@ -35,7 +35,7 @@ export function annotData() {
             "Zone" : {
                 "regions" : [
                     {"page" : {"stableId" : "doc#0", "pageNum" : 0},
-                     "bbox" : {"left" : 10000, "top" : 10000, "width" : 8000, "height" : 4000}}
+                     "bbox" : [10000, 10000, 8000, 4000]}
                 ]
             }
         },
@@ -58,7 +58,7 @@ export function annotData() {
                     Zone : {
                         regions : [
                             {page : {stableId : "doc#0", pageNum : pageNum},
-                             bbox : {left : (3000*(annotNum+2)), top : (6000*(annotNum+3)), width : 10000, height : 3000}}
+                             bbox : [(3000*(annotNum+2)), (6000*(annotNum+3)), 10000, 3000]}
                         ]
                     }
                 }

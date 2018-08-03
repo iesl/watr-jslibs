@@ -192,7 +192,7 @@ export function fromFigure(fig) {
     let shape;
 
     if (fig.LTBounds) {
-        shape = mk.fromLtwhFloatReps(fig.LTBounds);
+        shape = mk.fromArray(fig.LTBounds);
     }
     else if (fig.Line) {
         let p1 = mkPoint.fromFloatReps(fig.Line.p1);

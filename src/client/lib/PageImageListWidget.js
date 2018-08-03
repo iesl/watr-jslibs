@@ -32,6 +32,10 @@ export class PageImageListWidget {
         this.init();
     }
 
+    setDevMode(b) {
+        _.each(this.pageImageWidgets, p => p.setDevMode(b));
+    }
+
 
     init() {
 
@@ -152,7 +156,7 @@ export class PageImageListWidget {
             let regions = rec.location.Zone.regions;
 
             return _.map(regions, (region, i) => {
-                let data = coords.mk.fromLtwhFloatReps(region.bbox);
+                let data = coords.mk.fromArray(region.bbox);
                 data.id = `ann${rec.id}_${i}`;
                 data.selector = '#' + data.id;
                 data.pageNum = region.page.pageNum;

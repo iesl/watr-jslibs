@@ -32,6 +32,13 @@ function defaultObj(n) {
     return o;
 }
 
+function recprops(props) {
+    let reqs = {
+        properties: props,
+        required: _.keys(props)
+    };
+    return Object.assign(defaultObj(''), reqs);
+}
 
 function rec(n, props) {
     let reqs = {
@@ -117,18 +124,13 @@ let ajv = createSchemas([
             stableId: Str,
             pageNum : Int
         },
-        bbox: {
-            left   : Int,
-            top    : Int,
-            width  : Int,
-            height : Int
-        }
+        bbox: ArrayOf( [Int, Int, Int, Int] )
     }),
 
     rec('Location', {
-        Zone: {
+        Zone: recprops({
             regions: ArrayOf( Ref('PageRegion') )
-        }
+        })
     }),
 
     rec('Zone', {
@@ -167,6 +169,7 @@ export function isValid(sname) {
         );
         console.log('Schema name', sname, 'not found.');
         console.log('Available schemas: ', schemas);
+        throw Error("Json Schema Validation Error");
     }
     return function(data) {
         return validateData(validator, data);

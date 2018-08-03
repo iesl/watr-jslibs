@@ -41,6 +41,8 @@ export function run()  {
 
         let imageList = setupPageImages('page-image-list', textgrid, textgrids);
 
+        imageList.setDevMode(true);
+
         console.log(annots);
         imageList.setAnnotations(annots);
 

@@ -74,6 +74,12 @@ router
         let file = 'textgrid.json';
         await send(ctx, file, { root: p  });
     })
+    .get('/data/tracelog/:num', async function(ctx, next) {
+        let num = ctx.params.num;
+        let p = path.resolve(devDataRoot, `tracelogs`);
+        let file = `tracelog-${num}.json`;
+        await send(ctx, file, { root: p  });
+    })
     .get('/api/v1/corpus/artifacts/entry/:stableId/image/page/:pagenum' , async function(ctx, next) {
         let pagenum = ctx.params.pagenum;
         let p = path.resolve(devDataRoot, `corpus-entry-0/page-images`);

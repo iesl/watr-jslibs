@@ -123,7 +123,7 @@ function setDefaultFillColor(d) {
 function initShapeAttrs(r) {
     let shape = r.node().nodeName.toLowerCase();
     // console.log('initShapeAttrs', r);
-    // console.log('initShapeAttrs (shape)', shape);
+    console.log('initShapeAttrs (shape)', shape);
 
     switch (shape) {
     case "rect":
@@ -226,7 +226,7 @@ function DrawShapes(dataBlock) {
 
 
 
-function setupTracelogMenu(tracelogs) {
+export function setupTracelogMenu(tracelogs) {
     let filterMenu = htm.labeledTextInput('Filter', 'trace-filter');
     let clearButton = t.button('.btn-lightlink', "Reset");
 
@@ -243,7 +243,7 @@ function setupTracelogMenu(tracelogs) {
         let {entry, page} = tracelog;
         entry = entry.GeometryTraceLog;
         let {callSite} = entry;
-        let n = t.span([t.small(`p${page+1}: ${entry.tags} @ ${callSite}`)]);
+        let n = t.span([t.small(`p${page+1} ${callSite} ${entry.tags}`)]);
         let link = t.a(n, {href: '#'});
         link.on('click', ev => {
             runTrace(tracelog);
@@ -258,13 +258,29 @@ function setupTracelogMenu(tracelogs) {
         ]);
     }
 
+    // let tracesByPage = _.groupBy(tracelogs, tracelog => tracelog.page+1);
+    // let pageTracePairs = _.toPairsIn(tracesByPage);
+    // let tmp = pageTracePairs[0][1];
+
+    // let taggedTraces = _.map(tmp, tracelog => {
+    //     let {entry, page} = tracelog;
+    //     entry = entry.GeometryTraceLog;
+    //     let tags = `p${page+1}. ${entry.callSite.toLowerCase()} ${entry.tags.toLowerCase()}`;
+    //     return [tags, tracelog, makeMenuItem(tracelog)];
+    // });
+
+
+    // // let uniqueTags = _.uniq(_.map(taggedTraces, t => t[0]));
+    // let tracesByTag = _.groupBy(taggedTraces, t => t[1]);
+
+    // let uniqueTraces = _.uniqu(taggedTraces)
+
     let taggedTraces = _.map(tracelogs, tracelog => {
         let {entry, page} = tracelog;
         entry = entry.GeometryTraceLog;
         let tags = `p${page+1}. ${entry.tags.toLowerCase()} ${entry.callSite.toLowerCase()}`;
         return [tags, tracelog, makeMenuItem(tracelog)];
     });
-
 
 
     let filteredTraces = taggedTraces;
@@ -278,7 +294,6 @@ function setupTracelogMenu(tracelogs) {
     ]);
 
 
-    console.log('appending trace');
     $('#tracelog-menu').append(traceControls);
 
     function filterFunc(ev) {
@@ -299,7 +314,7 @@ function setupTracelogMenu(tracelogs) {
         $('#trace-menu').append(ms);
     }
 
-    let debouncedFilter = _.debounce(filterFunc, 150);
+    let debouncedFilter = _.debounce(filterFunc, 200);
 
     $('#trace-filter').on('keypress', function(e) {
         if (e.keyCode == 13) {

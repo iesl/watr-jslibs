@@ -14,7 +14,7 @@ let pageLen = 50;
 
 function createEntryItem(entry) {
     // let interestingLabels = _.filter(entry.labels[0], l => l.slice(0, 3) !== 'seg');
-    // let labelList = _.map(interestingLabels, l => t.li(` ${l}`));
+    let labelList = _.map(entry.labels, l => t.li(`${l}`));
     let entryName = entry.stableId.replace(/\.pdf\.d/, '');
 
     let entryPanel =
@@ -33,7 +33,8 @@ function createEntryItem(entry) {
                 t.div('.listing-info', [
                     t.a({href: `/document/${entry.stableId}?show=tracelog`},[
                         t.span("tracelogs")
-                    ])
+                    ]),
+                    t.ul('.h-indent-ul', [t.li("Labels")], labelList)
                 ])
             ])
         ]) ;
@@ -63,6 +64,10 @@ function createPaginationDiv(corpusEntries) {
                 icon.fa('chevron-right'),
                 icon.fa('chevron-right')
             ])
+        ]),
+        t.span('.label-filter', [
+            t.input('#label-filter', {value: ''}),
+
         ])
     ]) ;
 
@@ -75,11 +80,12 @@ function setupPaginationRx(corpusEntries) {
     let prevPageRx = Rx.Observable.fromEvent($('.prev-page'), 'click');
     let nextPageRx = Rx.Observable.fromEvent($('.next-page'), 'click');
     let setPageRx = Rx.Observable.fromEvent($('.set-page'), 'change');
+    let filterEntries = Rx.Observable.fromEvent($('#label-filter'), 'change');
+
     prevPageRx.subscribe(() => {
         let newStart = _.clamp(currStart-pageLen, 0, corpusEntries.corpusSize-pageLen);
         server.getCorpusListing(newStart, pageLen)
             .then(resp => {
-                // console.log('prev', resp);
                 updatePage(resp);
             });
     });
@@ -87,7 +93,6 @@ function setupPaginationRx(corpusEntries) {
         let newStart = _.clamp(currStart+pageLen, 0, corpusEntries.corpusSize-pageLen);
         server.getCorpusListing(newStart, pageLen)
             .then(resp => {
-                // console.log('next', resp);
                 updatePage(resp);
             });
     });
@@ -99,6 +104,14 @@ function setupPaginationRx(corpusEntries) {
                 updatePage(resp);
             });
     });
+    // filterEntries.subscribe(() => {
+    //     let value = $('#label-filter').prop('value');
+    //     let newStart = _.clamp(+value, 0, corpusEntries.corpusSize-pageLen);
+    //     server.getCorpusListing(newStart, pageLen)
+    //         .then(resp => {
+    //             updatePage(resp);
+    //         });
+    // });
 }
 
 function updatePage(corpusEntries) {

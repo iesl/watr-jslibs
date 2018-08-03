@@ -1,4 +1,4 @@
-/* global require $ */
+/* global require $ _ */
 
 import * as Shared from '../client/lib/shared-state';
 import * as TextgridWidget from  '../client/lib/TextgridWidget.js';

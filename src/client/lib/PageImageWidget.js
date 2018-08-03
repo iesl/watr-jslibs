@@ -42,9 +42,19 @@ export class PageImageWidget {
         this._tooltipHoversRx = new Rx.Subject();
         this._tooltips = new ToolTips(this.frameSelector, this._tooltipHoversRx);
         this.selectedRegionRx = new Rx.Subject();
-        this.DEV_MODE = false;
-        if (this.DEV_MODE) {
+    }
+
+    setDevMode(b) {
+        let widget = this;
+        this.DEV_MODE = b;
+        if (b) {
+            console.log('setDevMode');
             this.infoBar = new Infobar(this.frameId, 2, 3);
+
+            $(`#page-image-widget-${widget.pageNum} > .infobar-pane `).append(
+                 widget.infoBar.getElem()
+            );
+            $(`#page-image-widget-${widget.pageNum}`).removeClass('hideinfobar');
         }
     }
 
@@ -56,21 +66,11 @@ export class PageImageWidget {
     init() {
         let widget = this;
 
-        let infobarElem = '';
-        let infobarContainerClass = '.hideinfobar';
-        if (this.DEV_MODE) {
-            infobarElem = this.infoBar.getElem();
-            infobarContainerClass = '';
-        }
-
         let widgetNode =
-            t.div(`.page-image-widget #page-image-widget-${widget.pageNum} ${infobarContainerClass}`, [
+            t.div(`.page-image-widget #page-image-widget-${widget.pageNum} .hideinfobar`, [
                 t.div(`.status-top`),
-                infobarElem,
-                // t.div(`.left-gutter`),
+                t.div(`.infobar-pane`),
                 t.div(`.frame-content #page-image-content-${widget.pageNum}`),
-                // t.div(`.right-gutter`),
-                // t.div(`.status-bottom`)
             ]);
 
         $id(widget.containerId).append(widgetNode);
@@ -194,7 +194,7 @@ export class PageImageWidget {
 
         let hits = widget.glyphRtree.search(queryBox);
 
-        widget.printToInfobar(4, `glyphs`, `${hits.length}`);
+        widget.printToInfobar(1, `glyphs`, `${hits.length}`);
 
         let reticles = d3.selectAll(widget.svgSelector)
             .selectAll('.textloc')

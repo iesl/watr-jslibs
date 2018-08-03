@@ -1,8 +1,13 @@
 
+
+
 /* global require beforeEach _ d3 fixture describe */
 
 
-// describe('Grid-based drag/drop reordering', function() {
+describe('Grid-based drag/drop reordering', function() {
+     it('should render', function() {
+     });
+});
 
 
 //     beforeEach(function() {

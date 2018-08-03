@@ -64,6 +64,7 @@ export class TextgridWidget {
         };
     }
 
+
     init() {
         let widget = this;
 
