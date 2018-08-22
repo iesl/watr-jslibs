@@ -3,8 +3,17 @@
 import * as Shared from '../client/lib/shared-state';
 import * as TextgridWidget from  '../client/lib/TextgridWidget.js';
 
+import * as spu  from '../client/lib/SplitWin.js';
 
 export function run()  {
+
+    let rootFrame = spu.createRootFrame("#main");
+    rootFrame.setDirection(spu.row);
+
+    let [paneLeft, paneRight] = rootFrame.addPanes(2);
+
+    $(paneLeft.clientAreaSelector()).attr('id', 'page-textgrids');
+    $(paneLeft.clientAreaSelector()).addClass('client-content');
 
     Shared.initGlobalMouseTracking();
 

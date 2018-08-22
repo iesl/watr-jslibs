@@ -45,9 +45,8 @@ export class TextgridListWidget {
 
 }
 
-
-
 export class TextgridWidget {
+
 
     constructor (containerId, textgrid, gridNum, serverExchange) {
         this.containerId = containerId;

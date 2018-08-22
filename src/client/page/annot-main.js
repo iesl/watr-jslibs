@@ -18,13 +18,14 @@ import * as rtrees from  '../lib/rtrees.js';
 
 import * as curate from './curate-main.js';
 import * as schema from '../lib/schemas';
+
+import {addViewLinkOptions} from './shared-main';
 const rest = server.rest;
 
 import {t} from '../lib/jstags.js';
 
 import * as textview from '../lib/view-pdf-text.js';
 import { PageImageListWidget, setupPageImages } from '../lib/PageImageListWidget.js';
-
 
 
 function setupFrameLayout() {
@@ -43,6 +44,8 @@ function setupFrameLayout() {
             t.div('.page-textgrids #page-textgrids')
         ])
     );
+
+    addViewLinkOptions();
 
 }
 

@@ -56,8 +56,8 @@ export function initGlobalMouseTracking() {
     });
     // For some reason this doesn't work in the testing environment, so I use the regular
     //   handler above as well.
-    shared.rx.clientPt = Rx.Observable
-        .fromEvent(document, 'mousemove')
+    // shared.rx.clientPt = Rx.Observable
+    shared.rx.clientPt = Rx.fromEvent(document, 'mousemove')
         .map(event => {
             let clientPt = coords.mkPoint.fromXy(event.clientX, event.clientY);
             shared.currMouseClientPt = clientPt;

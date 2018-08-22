@@ -214,6 +214,7 @@ export function textgridSvgHandlers(d3$textgridSvg) {
 
 
 
+
 export function setupPageTextGrids(contentId, textgrids) {
     let fixedTextgridWidth = 900;
 

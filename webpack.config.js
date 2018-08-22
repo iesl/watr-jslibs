@@ -4,6 +4,16 @@ const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
+
+// const HtmlWebpackPlugin = require('html-webpack-plugin');
+const WebpackMd5Hash = require('webpack-md5-hash');
+// const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+// const StyleLintPlugin = require('stylelint-webpack-plugin');
+
+
+
+
 const extractLess = new ExtractTextPlugin({
     // filename: "[name].[contenthash].css",
     filename: "[name].css",
@@ -51,7 +61,23 @@ const config = {
     },
 
     plugins: [
-        extractLess
+        extractLess,
+        new CleanWebpackPlugin('dist', {}),
+        // new MiniCssExtractPlugin({
+        //     filename: 'style.[contenthash].css'
+        // }),
+        // new HtmlWebpackPlugin({
+        //     inject: false,
+        //     hash: true,
+        //     template: './src/index.html',
+        //     filename: 'index.html'
+        // }),
+        new WebpackMd5Hash(),
+        // new StyleLintPlugin({
+        //     configFile: './stylelint.config.js',
+        //     files: './src/scss/*.scss',
+        //     syntax: 'scss'
+        // })
         // jQueryProvider
     ],
 

@@ -24,6 +24,7 @@ import * as coords from '../lib/coord-sys.js';
 
 import {t, htm} from '../lib/jstags.js';
 
+import {addViewLinkOptions} from './shared-main';
 
 let _tooltipHoversRx = new Rx.Subject();
 let tooltips = new ToolTips('body', _tooltipHoversRx);
@@ -43,6 +44,8 @@ function setupFrameLayout() {
             t.div('#tracelog-menu')
         ])
     );
+
+    addViewLinkOptions();
 }
 /**
  *
