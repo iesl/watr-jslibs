@@ -11,7 +11,10 @@ const WebpackMd5Hash = require('webpack-md5-hash');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 // const StyleLintPlugin = require('stylelint-webpack-plugin');
 
-
+const TSLintPlugin = require('tslint-webpack-plugin');
+const tslinterPlugin = new TSLintPlugin({
+    files: ['./src/**/*.ts']
+});
 
 
 const extractLess = new ExtractTextPlugin({
@@ -28,16 +31,32 @@ const config = {
     },
 
     devtool: 'inline-source-map',
-
     output: {
         filename: '[name].bundle.js',
         path: path.resolve(__dirname, 'dist'),
+        pathinfo: false
     },
 
-    // { test: /\.less$/,                         use: ["style-loader", "css-loader", "less-loader"]},
+    optimization: {
+        removeAvailableModules: false,
+        removeEmptyChunks: false,
+        splitChunks: false,
+    },
+
     module: {
         rules: [
-            { test: /\.ts$/,                         use: ['ts-loader'], exclude: /node_modules/ },
+            // { test: /\.ts$/, use: ['ts-loader'], exclude: /node_modules/},
+            {test: /\.tsx?$/,
+                use: [
+                    {
+                        loader: 'ts-loader',
+                        options: {
+                            transpileOnly: true,
+                            experimentalWatchApi: true,
+                        },
+                    },
+                ],
+            },
             { test: /\.(css|scss)$/,                   use: ['style-loader', 'css-loader']},
             { test: /\.less$/,
               use: extractLess.extract({
@@ -61,8 +80,10 @@ const config = {
     },
 
     plugins: [
+        // new CleanWebpackPlugin('dist', {}),
         extractLess,
-        new CleanWebpackPlugin('dist', {}),
+        tslinterPlugin
+        // new WebpackMd5Hash(),
         // new MiniCssExtractPlugin({
         //     filename: 'style.[contenthash].css'
         // }),
@@ -72,7 +93,6 @@ const config = {
         //     template: './src/index.html',
         //     filename: 'index.html'
         // }),
-        new WebpackMd5Hash(),
         // new StyleLintPlugin({
         //     configFile: './stylelint.config.js',
         //     files: './src/scss/*.scss',

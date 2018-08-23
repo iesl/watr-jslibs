@@ -9,12 +9,15 @@ import * as d3x from './d3-extras';
 import {t, $id} from './jstags.js';
 import * as coords from './coord-sys';
 import * as mhs from './MouseHandlerSets';
-import * as rtrees from  '../lib/rtrees';
+import * as rtrees from  './rtrees';
+import {getName} from  './index';
 
 import * as rx from 'rxjs';
 import * as rxop from 'rxjs/operators';
 
 let rtree = require('rbush');
+
+console.log(getName('krunal'));
 
 export class TextgridListWidget {
 
