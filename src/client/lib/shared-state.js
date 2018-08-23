@@ -8,9 +8,9 @@
 
 /* global $ */
 
-import * as Rx from 'rxjs';
+import * as rx from 'rxjs';
+import * as rxop from 'rxjs/operators';
 import * as coords from './coord-sys.js';
-
 
 export let shared = {
     TextGridLineHeight:  20,
@@ -31,7 +31,7 @@ export let shared = {
     currentSelections: [],
 
     rx: {
-        selections: new Rx.Subject()
+        selections: new rx.Subject()
     },
 
     pageImageRTrees: [],
@@ -54,14 +54,13 @@ export function initGlobalMouseTracking() {
         let clientPt = coords.mkPoint.fromXy(event.clientX, event.clientY);
         shared.currMouseClientPt = clientPt;
     });
-    // For some reason this doesn't work in the testing environment, so I use the regular
-    //   handler above as well.
-    // shared.rx.clientPt = Rx.Observable
-    shared.rx.clientPt = Rx.fromEvent(document, 'mousemove')
-        .map(event => {
+
+    shared.rx.clientPt = rx.fromEvent(document, 'mousemove').pipe(
+        rxop.map(event => {
             let clientPt = coords.mkPoint.fromXy(event.clientX, event.clientY);
             shared.currMouseClientPt = clientPt;
             return clientPt;
-        }) ;
+        })
+    );
 
 }

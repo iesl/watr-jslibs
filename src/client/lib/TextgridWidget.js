@@ -2,19 +2,19 @@
  *
  **/
 
-/* global require watr fabric */
+/* global require */
 
-import * as $ from 'jquery';
 import * as _ from 'lodash';
-import * as d3 from 'd3';
 import * as d3x from './d3-extras';
-import {t, $id, icon} from './jstags.js';
-import { d3$id } from './d3-extras.js';
-import * as coords from './coord-sys.js';
+import {t, $id} from './jstags.js';
+import * as coords from './coord-sys';
 import * as mhs from './MouseHandlerSets';
-import * as rtrees from  '../lib/rtrees.js';
+import * as rtrees from  '../lib/rtrees';
+
+import * as rx from 'rxjs';
+import * as rxop from 'rxjs/operators';
+
 let rtree = require('rbush');
-let knn = require('rbush-knn');
 
 export class TextgridListWidget {
 
@@ -44,11 +44,11 @@ export class TextgridListWidget {
     }
 
 }
+//
 
 export class TextgridWidget {
 
-
-    constructor (containerId, textgrid, gridNum, serverExchange) {
+    constructor (containerId, textgrid, gridNum) {
         this.containerId = containerId;
         this.gridNum = gridNum;
         this.textgrid = textgrid;
@@ -63,6 +63,7 @@ export class TextgridWidget {
         };
     }
 
+    // create an observable of hovered glyphs
 
     init() {
         let widget = this;
@@ -90,7 +91,7 @@ export class TextgridWidget {
         $id(widget.containerId).append(gridNodes);
 
         // d3.select(frameIdSelector)
-        d3$id(widget.frameId)
+        d3x.d3$id(widget.frameId)
             .append('svg').classed('textgrid', true)
             .attr('id', widget.svgId)
             .attr('page', gridNum)
@@ -116,7 +117,7 @@ export class TextgridWidget {
     }
 
     selectSvg() {
-        return d3$id(this.svgId);
+        return d3x.d3$id(this.svgId);
     }
 
     setMouseHandlers(handlers) {
@@ -128,13 +129,13 @@ export class TextgridWidget {
             .append('g')
             .classed('reticles', true);
 
-
         reticleGroup
-            .append('line')
+            .append('rect')
             .classed('query-reticle', true)
             .call(d3x.initStroke, 'blue', 1, 0.6)
-            .call(d3x.initFill, 'blue', 0.2)
+            .call(d3x.initFill, 'blue', 0.3)
         ;
+
         return reticleGroup;
     }
 
@@ -155,11 +156,11 @@ export class TextgridWidget {
             .classed('hit-reticle', true)
             .attr('id', d => d.id)
             .call(d3x.initRect, d => d)
-            .call(d3x.initStroke, 'green', 2, 0.9)
-            .call(d3x.initFill, 'yellow', 0.8)
+            .call(d3x.initStroke, 'green', 1, 0.5)
+            .call(d3x.initFill, 'yellow', 0.5)
         ;
 
-        d3$hitReticles .exit()
+        d3$hitReticles.exit()
             .remove() ;
     }
 
@@ -173,12 +174,12 @@ function defaultMouseHandlers(widget) {
 
         mousemove: function(event) {
             let userPt = coords.mkPoint.offsetFromJqEvent(event);
-            // let clientPt = coords.pointFloor(userPt);
 
             let textgridRTree = widget.textgridRTree;
 
-            let queryWidth = 20;
-            let queryBoxHeight = widget.options.TextGridLineHeight * 2;
+            let queryWidth = 2;
+            // let queryBoxHeight = widget.options.TextGridLineHeight * 2;
+            let queryBoxHeight = 2;
             let queryLeft = userPt.x-queryWidth;
             let queryTop = userPt.y-queryBoxHeight;
             let queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
@@ -189,7 +190,6 @@ function defaultMouseHandlers(widget) {
                 _.filter(hits, hit => hit.glyphDataPt != undefined),
                 hit => [hit.bottom, hit.left]
             );
-            // console.log('hovering', userPt, neighborHits);
 
             widget.showGlyphHoverReticles(queryBox, neighborHits);
         },
