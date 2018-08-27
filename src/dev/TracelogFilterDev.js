@@ -5,7 +5,7 @@ import * as PageImageWidget from  '../client/lib/PageImageWidget.js';
 import { PageImageListWidget, setupPageImages } from '../client/lib/PageImageListWidget.js';
 import {ServerDataExchange} from  '../client/lib/ServerDataExchange.js';
 import * as rtrees from  '../client/lib/rtrees.js';
-import * as coords from '../client/lib/coord-sys.js';
+import * as coords from '../client/lib/coord-sys';
 import * as testdata from './annot-testdata.js';
 import * as spu  from '../client/lib/SplitWin.js';
 import { t } from '../client/lib/jstags.js';

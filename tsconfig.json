@@ -5,7 +5,6 @@
         "removeComments": true,
         "sourceMap": true,
         "moduleResolution": "node",
-        "outDir": "./jsout/",
 
         "allowSyntheticDefaultImports": true,
         "preserveConstEnums": true,
@@ -13,19 +12,20 @@
         "noEmit": true,
         "checkJs": false,
         "allowJs": true,
+        "strict": true,
+        "target": "es6",
+        "diagnostics": true,
 
-        "module": "commonjs",
+        "module": "commonjs"
 
-        "lib": [
-            "es2016",
-            "dom"
-        ]
     },
     "include": [
-        "./src/client/**/*.ts"
+        "./src/**/*"
     ],
     "exclude": [
-        "./node_modules/",
-        "./dist/"
+        "webpack.config.js",
+        "./node_modules/**/*",
+        "./spec/**/*",
+        "./dist/**/*"
     ]
 }

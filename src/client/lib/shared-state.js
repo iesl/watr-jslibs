@@ -10,7 +10,7 @@
 
 import * as rx from 'rxjs';
 import * as rxop from 'rxjs/operators';
-import * as coords from './coord-sys.js';
+import * as coords from './coord-sys';
 
 export let shared = {
     TextGridLineHeight:  20,

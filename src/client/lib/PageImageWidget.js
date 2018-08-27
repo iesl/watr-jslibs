@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 import * as d3 from 'd3';
 import * as d3x from './d3-extras';
 
-import * as coords from './coord-sys.js';
+import * as coords from './coord-sys';
 import * as rtrees from  './rtrees.js';
 import * as rtree from 'rbush';
 import {t, $id} from './jstags.js';

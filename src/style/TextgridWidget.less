@@ -1,51 +1,32 @@
 
-div#page-textgrids {
+// div#page-textgrids {
 
-    display: flex;
-    flex-direction: column;
-    flex-wrap: no-wrap;
+//     display: flex;
+//     flex-direction: column;
+//     flex-wrap: no-wrap;
 
-    // justify-content: left;
-    align-items: left;
+//     // justify-content: left;
+//     align-items: left;
 
-    margin: 0;
-    padding: 8px;
-    border: 0;
-    background: @base2;
-
-
-
-    div.textgrid {
-        margin: 10px auto;
-        position: relative;
-        background: white;
-
-        // canvas.textgrid and svg.textgrid are superimposed
-        canvas.textgrid {
-            position: absolute;
-
-            top: 0;
-            left: 0;
-
-        }
-
-        svg.textgrid {
-            position: absolute;
-
-            top: 0;
-            left: 0;
-
-        }
-    }
-
-}
+//     margin: 0;
+//     padding: 0;
+//     border: 0;
+//     background: @base2;
 
 
-.page-text-list-widget {
-    display: inline-block;
-    margin-left: calc(10%);
 
-    & > .statusbar {
+
+// }
+
+
+// .page-text-list-widget {
+
+#TextGridWidgets {
+
+    // display: inline-block;
+    // margin-left: calc(10%);
+
+    &Status {
         background: @base1;
         height: 1.3em;
 
@@ -65,38 +46,74 @@ div#page-textgrids {
     }
 
 
-    .page-texts {
-        display: inline-block;
+    &List {
         overflow: auto;
         overflow-y: scroll;
         height: 100%;
 
-        .page-text-widgets {
+        display: inline-block;
+        // display: flex;
+        // flex-direction: column;
 
-            margin: 0;
-            padding: 0;
-            border: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        // flex-wrap: no-wrap;
 
+        // justify-content: left;
+        // align-items: left;
+        background: @base2;
 
-            & > .list {
+        div.textgrid {
+            margin: 10px auto;
+            // margin: auto;
+            position: relative;
+            background: white;
 
-                display: flex;
+            // canvas.textgrid and svg.textgrid are superimposed
+            canvas.textgrid {
+                position: absolute;
 
-                flex-direction: column;
-                // flex-wrap: no-wrap;
-                // justify-content: space-between; /* flex-start | flex-end | center | space-between | space-around | space-evenly; */
-                // justify-content: center;
-
-                margin: 0;
-                padding: 0;
-                border: 0;
-                background: @base2;
-                // height: 100%;
-                // width: 100%;
+                top: 0;
+                left: 0;
 
             }
 
+            svg.textgrid {
+                position: absolute;
+
+                top: 0;
+                left: 0;
+
+            }
         }
+
+        // .page-text-widgets {
+
+        //     margin: 0;
+        //     padding: 0;
+        //     border: 0;
+
+
+        //     & > .list {
+
+        //         display: flex;
+
+        //         flex-direction: column;
+        //         // flex-wrap: no-wrap;
+        //         // justify-content: space-between; /* flex-start | flex-end | center | space-between | space-around | space-evenly; */
+        //         // justify-content: center;
+
+        //         margin: 0;
+        //         padding: 0;
+        //         border: 0;
+        //         background: @base2;
+        //         // height: 100%;
+        //         // width: 100%;
+
+        //     }
+
+        // }
     }
 
 }

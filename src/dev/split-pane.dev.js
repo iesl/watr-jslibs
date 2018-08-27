@@ -1,7 +1,9 @@
 /* global require */
 
-import * as spu  from '../client/lib/SplitWin.js';
+import * as spu  from '../client/lib/SplitWin';
+import * as util  from '../client/lib/commons';
 import * as _ from 'lodash';
+import { $id, t, htm } from '../client/lib//jstags.js';
 
 export function runSplitPane() {
     let rootFrame = spu.createRootFrame("#main");
@@ -17,15 +19,17 @@ export function runSplitPane() {
         p.addPanes(i + 2);
         _.each(p.getChildren(), (p2, i2) => {
             p2.addPaneControls();
-            // p2.setToColumn();
-            // p2.addPanes(i2 + 1);
+            const paneSelector = `#${p2.frameId}`;
+            let treeStr = util.getDescendantTreeString(paneSelector);
+            p2.clientArea().append(
+                t.div([t.pre().text(treeStr)])
+            );
         });
     });
 
 
 
 
-    // let treeStr = util.getDescendantTreeString("#"+splitPaneRootId);
 
     // let rightPaneId = spu.makePaneId(1, 1);
     // jst.$id(rightPaneId).append(

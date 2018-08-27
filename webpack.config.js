@@ -5,16 +5,15 @@ const webpack = require('webpack'); //to access built-in plugins
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 
-// const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WebpackMd5Hash = require('webpack-md5-hash');
-// const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-// const StyleLintPlugin = require('stylelint-webpack-plugin');
 
 const TSLintPlugin = require('tslint-webpack-plugin');
 const tslinterPlugin = new TSLintPlugin({
-    files: ['./src/**/*.ts']
+    files: ['./src/**/*.ts'],
+    config: "./tslint.json"
 });
+
 
 
 const extractLess = new ExtractTextPlugin({
@@ -45,7 +44,6 @@ const config = {
 
     module: {
         rules: [
-            // { test: /\.ts$/, use: ['ts-loader'], exclude: /node_modules/},
             {test: /\.tsx?$/,
                 use: [
                     {
@@ -57,6 +55,7 @@ const config = {
                     },
                 ],
             },
+            // { test: /\.tsx?$/,                         use: ['awesome-typescript-loader']  },
             { test: /\.(css|scss)$/,                   use: ['style-loader', 'css-loader']},
             { test: /\.less$/,
               use: extractLess.extract({
@@ -76,29 +75,12 @@ const config = {
     },
 
     resolve: {
-        extensions: [ '.tsx', '.ts', '.js' ]
+        extensions: ['.ts', '.tsx', '.js', '.jsx']
     },
 
     plugins: [
-        // new CleanWebpackPlugin('dist', {}),
-        extractLess,
-        tslinterPlugin
-        // new WebpackMd5Hash(),
-        // new MiniCssExtractPlugin({
-        //     filename: 'style.[contenthash].css'
-        // }),
-        // new HtmlWebpackPlugin({
-        //     inject: false,
-        //     hash: true,
-        //     template: './src/index.html',
-        //     filename: 'index.html'
-        // }),
-        // new StyleLintPlugin({
-        //     configFile: './stylelint.config.js',
-        //     files: './src/scss/*.scss',
-        //     syntax: 'scss'
-        // })
-        // jQueryProvider
+        tslinterPlugin,
+        extractLess
     ],
 
     devServer: {

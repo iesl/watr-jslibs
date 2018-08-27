@@ -24,7 +24,7 @@
  *  |------------+--------------+-------------+-----------+-------------+-------------|
  *
  **/
-import * as coords from './coord-sys.js';
+import * as coords from './coord-sys';
 import * as colors from './colors';
 
 

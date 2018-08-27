@@ -5,7 +5,7 @@
 /* global require watr */
 import * as _ from 'lodash';
 
-import * as coords from './coord-sys.js';
+import * as coords from './coord-sys';
 const GraphPaper = watr.utils.GraphPaper;
 const Options = watr.utils.Options;
 const TGI = watr.textgrid.TextGridInterop;

@@ -10,7 +10,7 @@ import {t, $id, icon} from './jstags.js';
 import * as reflowWidgetInit from  './ReflowWidgetInit.js';
 import {shared} from './shared-state';
 import * as schema from './schemas';
-import * as coords from './coord-sys.js';
+import * as coords from './coord-sys';
 
 import * as spu  from './SplitWin.js';
 import { PageImageWidget } from './PageImageWidget.js';

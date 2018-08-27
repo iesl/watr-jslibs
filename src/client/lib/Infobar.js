@@ -6,8 +6,8 @@ import * as _ from 'lodash';
 
 import {t, htm, $id} from './jstags.js';
 
-
 export default class Infobar {
+
 
     constructor (containerId, numRows, numCols) {
         this.containerId = containerId;

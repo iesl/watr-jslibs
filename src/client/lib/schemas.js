@@ -40,12 +40,12 @@ function recprops(props) {
     return Object.assign(defaultObj(''), reqs);
 }
 
-function rec(n, props) {
+function rec(name, props) {
     let reqs = {
         properties: props,
         required: _.keys(props)
     };
-    return Object.assign(defaultObj(n), reqs);
+    return Object.assign(defaultObj(name), reqs);
 }
 
 let Ref = (n) => { return { "$ref": `${n}Schema.json` }; };

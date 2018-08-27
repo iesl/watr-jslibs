@@ -10,7 +10,7 @@ import * as d3 from 'd3';
 
 import * as mhs from './MouseHandlerSets';
 
-import * as coords from './coord-sys.js';
+import * as coords from './coord-sys';
 import { $id, t, htm } from './jstags.js';
 let rtree = require('rbush');
 import {shared} from './shared-state';

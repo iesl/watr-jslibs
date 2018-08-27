@@ -14,7 +14,7 @@ import * as modals from './modals.js';
 import * as d3x from './d3-extras';
 
 import {t} from './jstags.js';
-import * as coords from './coord-sys.js';
+import * as coords from './coord-sys';
 
 // export function updateAnnotationShapes() {
 //     return server.getDocumentAnnotations()

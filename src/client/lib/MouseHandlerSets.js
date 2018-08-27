@@ -6,11 +6,11 @@ import * as $ from 'jquery';
 import * as _ from 'lodash';
 import { $id } from './jstags.js';
 
-export function setMouseHandlers(hArg, targetDivId, handlers) {
+export function setMouseHandlers(bindThis, targetDivId, handlers) {
     $id(targetDivId).off();
 
     let mouseHandlers = _.map(handlers, handler => {
-        let init = {
+        const init = {
             mouseover: function() {},
             mouseout: function() {},
             mousemove: function() {},
@@ -18,7 +18,7 @@ export function setMouseHandlers(hArg, targetDivId, handlers) {
             mousedown: function() {},
             click: function() {}
         };
-        Object.assign(init, handler(hArg));
+        Object.assign(init, handler(bindThis));
         return init;
     });
     let events = [

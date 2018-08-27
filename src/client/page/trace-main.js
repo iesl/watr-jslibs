@@ -20,7 +20,7 @@ import { setupPageImages } from '../lib/PageImageListWidget.js';
 import * as stepper from  '../lib/d3-stepper.js';
 import ToolTips from '../lib/Tooltips';
 import * as Rx from 'rxjs';
-import * as coords from '../lib/coord-sys.js';
+import * as coords from '../lib/coord-sys';
 
 import {t, htm} from '../lib/jstags.js';
 

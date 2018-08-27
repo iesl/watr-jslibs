@@ -15,6 +15,7 @@ import * as global from '../lib/shared-state';
 import * as server from '../lib/serverApi.js';
 import * as spu  from '../lib/SplitWin.js';
 import * as rtrees from  '../lib/rtrees.js';
+import * as tgw from  '../lib/TextgridWidget';
 
 import * as curate from './curate-main.js';
 import * as schema from '../lib/schemas';
@@ -24,7 +25,7 @@ const rest = server.rest;
 
 import {t} from '../lib/jstags.js';
 
-import * as textview from '../lib/view-pdf-text.js';
+// import * as textview from '../lib/view-pdf-text.js';
 import { PageImageListWidget, setupPageImages } from '../lib/PageImageListWidget.js';
 
 
@@ -190,15 +191,27 @@ export function runMain() {
             // console.log('(pre) setupPageImages', textGridJson, gridData);
             setupPageImages('page-image-list', textGridJson, gridData);
 
-            textview.setupPageTextGrids('div.page-textgrids', textgrids);
+            let textgridWidgets = new tgw.TextgridWidgets();
+
+            const root = textgridWidgets.getRootNode();
+            $("#page-textgrids").append(root);
+            // $(paneLeft.clientAreaSelector()).append(
+            //     root
+            // );
+
+            _.each(textgrids, (p) => {
+                textgridWidgets.append(p);
+            });
+
+            // textview.setupPageTextGrids('div.page-textgrids', textgrids);
 
             rtrees.initPageAndGridRTrees(textgrids);
 
-            d3.selectAll('svg.textgrid')
-                .each(function (){
-                    let d3$svg = d3.select(this);
-                    textview.textgridSvgHandlers(d3$svg);
-                });
+            // d3.selectAll('svg.textgrid')
+            //     .each(function (){
+            //         let d3$svg = d3.select(this);
+            //         // textview.textgridSvgHandlers(d3$svg);
+            //     });
 
             // showCurationStatus();
 
@@ -208,3 +221,4 @@ export function runMain() {
         }) ;
 
 }
+

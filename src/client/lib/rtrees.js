@@ -4,7 +4,7 @@
 import * as _ from 'lodash';
 import * as $ from 'jquery';
 import { shared } from './shared-state';
-import * as coords from './coord-sys.js';
+import * as coords from './coord-sys';
 let rtree = require('rbush');
 let knn = require('rbush-knn');
 import * as util from  './commons.js';
