@@ -8,11 +8,8 @@ import {t, htm} from "./jstags";
 import * as rx from "rxjs";
 import * as rxop from "rxjs/operators";
 
-export interface ITraceLog {
-
-}
 export class TraceLogs {
-    public selectedTraceLogs = new rx.Subject<ITraceLog[]>();
+    public selectedTraceLogs = new rx.Subject<object[]>();
     public clearLogs = new rx.Subject<number>();
 
     private lunrIndex: lunr.Index;
@@ -25,7 +22,7 @@ export class TraceLogs {
         this.lunrIndex = this.initIndex(tracelogs);
         this.indexTokens = this.lunrIndex.tokenSet.toArray();
 
-        const allLogEntries = _.map(tracelogs, a => this.formatLogEntry(a));
+        const allLogEntries = _.map(tracelogs, a => formatLogEntry(a));
         this.uniqLogTitles = _.uniq(allLogEntries);
     }
 
@@ -35,17 +32,8 @@ export class TraceLogs {
         const filterMenu = htm.labeledTextInput("Filter", "trace-filter");
         const clearButton = t.button(".btn-lightlink", "Reset");
 
-
-        // clearButton.on("click", () => {
-        //     d3.selectAll("image")
-        //         .attr("opacity", 1.0);
-
-        //     return d3.selectAll(".shape")
-        //         .remove();
-        // });
-
         self.clearLogs = rx.fromEvent(clearButton, "click").pipe(
-            rxop.map((e, i) => i)
+            rxop.scan(count => count + 1, 0)
         );
 
         const traceControls = t.div([
@@ -58,9 +46,13 @@ export class TraceLogs {
             ]),
             t.div(".thinborder", [
                 t.div("Trace Logs"),
-                t.div("#trace-menu-hits")
+                t.div("#trace-menu-hits", [
+                    self.makeUL(self.uniqLogTitles)
+                ])
             ])
         ]);
+
+        let hitLogs: object[] = [];
 
         function filterFunc() {
             const textVal = $("#trace-filter").val();
@@ -74,8 +66,8 @@ export class TraceLogs {
 
                 $("#trace-menu-terms").append(hitTermUL);
 
-                const hitLogs = self.getHitTracelogs(hitData);
-                const allLogEntries = _.map(hitLogs, a => self.formatLogEntry(a));
+                hitLogs = self.getHitTracelogs(hitData);
+                const allLogEntries = _.map(hitLogs, a => formatLogEntry(a));
                 const uniqLogEntries = _.uniq(allLogEntries);
                 const hitEntries = self.makeUL(uniqLogEntries);
 
@@ -92,6 +84,7 @@ export class TraceLogs {
 
             } else {
                 const hitTerms = self.makeInlineList(self.indexTokens);
+                hitLogs = [];
 
                 $("#trace-menu-terms").append(hitTerms);
 
@@ -107,11 +100,7 @@ export class TraceLogs {
         $(filterMenu).on("keypress", (e) => {
             if (e.keyCode === 13) {
                 debouncedFilter.cancel();
-                // runAllTraces(_.map(filteredTraces, trace => trace[1]));
-
-                self.selectedTraceLogs.next(
-                );
-
+                self.selectedTraceLogs.next(hitLogs);
                 return false;
             }
             return true;
@@ -140,9 +129,12 @@ export class TraceLogs {
     public getHitTracelogs(hits: lunr.MatchData[]): object[] {
         const self = this;
         const hitIndexes = _.map(hits, h => parseInt(h.ref, 10));
-        return _.map(hitIndexes, i => {
+        const hitLogs = _.map(hitIndexes, i => {
             return self.tracelogs[i];
         });
+
+        const sortedLogs = _.sortBy(hitLogs, log => log.entry.GeometryTraceLog.timestamp)
+        return sortedLogs;
     }
 
     private initIndex(tracelogs: object): lunr.Index {
@@ -186,14 +178,6 @@ export class TraceLogs {
         ]);
     }
 
-    private formatLogEntry(tracelog): string {
-        const { page } = tracelog;
-        const entry = tracelog.entry.GeometryTraceLog;
-        const { callSite } = entry;
-        const n = `p${page+1} ${callSite} ${entry.tags}`;
-        return n;
-    }
-
     private matchDataToIndexTerms(matchData: lunr.MatchData[]): string[] {
         const metadata = _.flatMap(matchData, match => {
             return _.keys(match.matchData.metadata);
@@ -201,24 +185,30 @@ export class TraceLogs {
 
         return _.uniq(metadata);
     }
-    // private matchDataToList(matchData: lunr.MatchData[]): HTMLUListElement {
-    //     return this.makeInlineList(matchDataToIndexTerms(matchData));
-    // }
 
 }
+
+function formatLogEntry(tracelog): string {
+    const { page } = tracelog;
+    const entry = tracelog.entry.GeometryTraceLog;
+    const { callSite } = entry;
+    const n = `p${page+1} ${callSite} ${entry.tags}`;
+    return n;
+}
+
 
 //
 export function displayRx(widget: TraceLogs) {
     const hoverState = t.div("Clear Logs: ", [
         t.span("#ClearLogs").text("??")
     ]);
-    // const hoverGlyphState = t.div("hovering glyphs: ", [
-    //     t.span("#HoverGlyphState").text("??")
-    // ]);
+    const hoverGlyphState = t.div("Select Logs: ", [
+        t.div("#SelectedLogs .scrollable-pane")
+    ]);
     const node =
         t.div([
             hoverState,
-            // hoverGlyphState
+            hoverGlyphState
         ]);
 
     widget.clearLogs.subscribe((i: number) => {
@@ -226,10 +216,14 @@ export function displayRx(widget: TraceLogs) {
 
         $("#ClearLogs").text(txt);
     });
-    // widget.hoveringGlyphs.subscribe((ev: IHoverGlyphEvent) => {
-    //     const s1 = _.join(ev.queryHits, ", ");
-    //     $("#HoverGlyphState").text(s1);
-    // });
+
+    widget.selectedTraceLogs.subscribe((traceLogs) => {
+        const output = _.join(_.map(traceLogs, log => formatLogEntry(log)), "\n");
+        $("#SelectedLogs").empty();
+        $("#SelectedLogs").append(
+            t.pre(output)
+        );
+    });
     return node;
 
 }

@@ -22,6 +22,8 @@ import ToolTips from '../lib/Tooltips';
 import * as Rx from 'rxjs';
 import * as coords from '../lib/coord-sys';
 
+import * as TraceLogs from '../lib/TraceLogs';
+
 import {t, htm} from '../lib/jstags.js';
 
 import {addViewLinkOptions} from './shared-main';
@@ -126,7 +128,7 @@ function setDefaultFillColor(d) {
 function initShapeAttrs(r) {
     let shape = r.node().nodeName.toLowerCase();
     // console.log('initShapeAttrs', r);
-    console.log('initShapeAttrs (shape)', shape);
+    // console.log('initShapeAttrs (shape)', shape);
 
     switch (shape) {
     case "rect":
@@ -227,95 +229,6 @@ function DrawShapes(dataBlock) {
     ;
 }
 
-
-
-
-export function setupTracelogMenu(tracelogs) {
-    let filterMenu = htm.labeledTextInput('Filter', 'trace-filter');
-    let clearButton = t.button('.btn-lightlink', "Reset");
-
-    clearButton.on('click', function() {
-        d3.selectAll('image')
-            .attr('opacity', 1.0);
-
-        return d3.selectAll(".shape")
-            .remove();
-
-    });
-
-    function makeMenuItem(tracelog) {
-        let {entry, page} = tracelog;
-        entry = entry.GeometryTraceLog;
-        let {callSite} = entry;
-        let n = t.span([t.small(`p${page+1} ${callSite} ${entry.tags}`)]);
-        let link = t.a(n, {href: '#'});
-        link.on('click', () => {
-            runTrace(tracelog);
-        });
-
-        return t.li([link]);
-    }
-
-    function makeMenuItems(taggedTraces) {
-        return t.ul([
-            _.map(taggedTraces, t => t[2])
-        ]);
-    }
-
-    let taggedTraces = _.map(tracelogs, tracelog => {
-        let {entry, page} = tracelog;
-        entry = entry.GeometryTraceLog;
-        let tags = `p${page+1}. ${entry.tags.toLowerCase()} ${entry.callSite.toLowerCase()}`;
-        return [tags, tracelog, makeMenuItem(tracelog)];
-    });
-
-
-    let filteredTraces = taggedTraces;
-
-
-    let traceControls = t.div([
-        t.span([filterMenu, clearButton]),
-        t.div('#trace-menu', [
-            makeMenuItems(taggedTraces)
-        ])
-    ]);
-
-
-    $('#tracelog-menu').append(traceControls);
-
-    function filterFunc() {
-        let textVal = $(this).val();
-        $('#trace-menu').empty();
-        if (textVal.length>0) {
-            let filterExprs = textVal.toLowerCase().split(' ');
-
-            filteredTraces = _.filter(taggedTraces, ([tags, logs]) => {
-                return _.every(filterExprs, expr => {
-                    return tags.includes(expr);
-                });
-            });
-        } else {
-            filteredTraces = taggedTraces;
-        }
-        let ms = makeMenuItems(filteredTraces);
-        $('#trace-menu').append(ms);
-    }
-
-    let debouncedFilter = _.debounce(filterFunc, 200);
-
-    $('#trace-filter').on('keypress', function(e) {
-        if (e.keyCode == 13) {
-            debouncedFilter.cancel();
-            runAllTraces(_.map(filteredTraces, t => t[1]));
-            return false;
-        }
-        return true;
-    });
-
-    $('#trace-filter').on('input', debouncedFilter);
-}
-
-
 export function runMain() {
 
     frame.setupFrameLayout();
@@ -341,14 +254,22 @@ export function runMain() {
 
         pageImageListWidget = setupPageImages('page-image-list', textGridJson, gridData);
 
-        _.each(pageImageListWidget.pageImageWidgets, widget => {
-            widget.selectedRegionRx.subscribe(rect => {
-                console.log('selected page ', widget.pageNum, 'r=', rect);
+        const traceLogFilter = new TraceLogs.TraceLogs(tracelogJson);
 
-            });
+        const n = traceLogFilter.getNode();
+        $("#tracelog-menu").append(n);
+
+        traceLogFilter.clearLogs.subscribe((i) => {
+            d3.selectAll('image')
+                .attr('opacity', 1.0);
+
+            d3.selectAll(".shape")
+                .remove();
         });
 
-        setupTracelogMenu(tracelogJson);
+        traceLogFilter.selectedTraceLogs.subscribe((selectedLogs) => {
+            runAllTraces(selectedLogs);
+        });
 
     }) .catch(error => {
         $('.content-pane').append(`<div><p>ERROR: ${error}: ${error}</p></div>`);

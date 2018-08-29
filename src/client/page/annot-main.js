@@ -25,7 +25,6 @@ const rest = server.rest;
 
 import {t} from '../lib/jstags.js';
 
-// import * as textview from '../lib/view-pdf-text.js';
 import { PageImageListWidget, setupPageImages } from '../lib/PageImageListWidget.js';
 
 
