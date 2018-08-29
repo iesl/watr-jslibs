@@ -3,7 +3,17 @@
 const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
+const htmlDev = new HtmlWebpackPlugin({
+    filename: "dev-index.html",
+    chunks: ["devapp"]
+});
+const htmlProd = new HtmlWebpackPlugin({
+    filename: "prod-index.html",
+    chunks: ["app"]
+});
 
 const WebpackMd5Hash = require('webpack-md5-hash');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
@@ -38,8 +48,10 @@ const config = {
 
     optimization: {
         removeAvailableModules: false,
-        removeEmptyChunks: false,
-        splitChunks: false,
+        removeEmptyChunks: true,
+        splitChunks: {
+            // chunks: "all"
+        }
     },
 
     module: {
@@ -80,7 +92,9 @@ const config = {
 
     plugins: [
         tslinterPlugin,
-        extractLess
+        extractLess,
+        htmlDev, htmlProd,
+        new ForkTsCheckerWebpackPlugin()
     ],
 
     devServer: {

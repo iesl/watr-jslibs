@@ -1,15 +1,8 @@
-/* global require $  _ watr */
 
-import * as Shared from '../client/lib/shared-state';
-import * as PageImageWidget from  '../client/lib/PageImageWidget.js';
-import { PageImageListWidget, setupPageImages } from '../client/lib/PageImageListWidget.js';
-import {ServerDataExchange} from  '../client/lib/ServerDataExchange.js';
-import * as rtrees from  '../client/lib/rtrees.js';
-import * as coords from '../client/lib/coord-sys';
-import * as testdata from './annot-testdata.js';
+import * as $ from 'jquery';
 import * as spu  from '../client/lib/SplitWin.js';
 import { t } from '../client/lib/jstags.js';
-import * as traceView  from '../client/page/trace-main.js';
+import * as TraceLogs from '../client/lib/TraceLogs';
 
 export function run()  {
     let rootFrame = spu.createRootFrame("#main");
@@ -17,15 +10,34 @@ export function run()  {
 
     let [paneLeft, paneRight] = rootFrame.addPanes(2);
 
+
     $(paneLeft.clientAreaSelector()).append(
         t.div('.scrollable-pane', [
             t.div('#tracelog-menu')
         ])
     );
 
-    $.getJSON('/data/tracelog/0', tracelog => {
-        traceView.setupTracelogMenu(tracelog);
+    $.getJSON('/data/tracelog/1', tracelogs => {
+        const traceLogs = new TraceLogs.TraceLogs(tracelogs);
+
+        const n = traceLogs.getNode();
+        $("#tracelog-menu").append(n);
+        const rxDisplay = TraceLogs.displayRx(traceLogs);
+        paneRight.clientArea().append(
+            rxDisplay
+        );
     });
-    // traceView.runMain();
 
 }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -6,19 +6,8 @@ import * as $ from 'jquery';
 import { shared } from './shared-state';
 import * as coords from './coord-sys';
 let rtree = require('rbush');
-let knn = require('rbush-knn');
 import * as util from  './commons.js';
 
-// export function searchPage(pageNum, queryBox) {
-//     let pageRTree = shared.pageImageRTrees[pageNum];
-//     return pageRTree.search(queryBox);
-// }
-
-// export function knnQueryPage(pageNum, queryPoint, k) {
-//     let pageRTree = shared.pageImageRTrees[pageNum];
-//     return knn(pageRTree, queryPoint.x, queryPoint.y, k);
-
-// }
 
 /** return min-bounding rect for rtree search hits */
 export function queryHitsMBR(hits) {

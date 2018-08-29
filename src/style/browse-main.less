@@ -50,12 +50,17 @@ div.entry-listing-frame {
 
         display: grid;
 
+
         grid-template-columns : repeat(auto-fill, minmax(250px, 350px));
         grid-template-rows    : repeat(auto-fill, minmax(220px, 240px));
         grid-auto-flow        : row;
         grid-column-gap       : 10px;
         grid-row-gap          : 20px;
 
+        overflow: auto;
+        overflow-y: scroll;
+
+        height: 100%;
 
         .listing-entry {
 

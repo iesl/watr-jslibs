@@ -135,7 +135,17 @@ function updatePage(corpusEntries) {
     setupPaginationRx(corpusEntries);
 }
 
+import * as spu  from '../lib/SplitWin.js';
+
 function createEntryListingFrame() {
+    let rootFrame = spu.createRootFrame("#main-content");
+    rootFrame.setDirection(spu.row);
+
+    let [contentPane] = rootFrame.addPanes(1);
+
+    // $(contentPane.clientAreaSelector()).attr('id', 'page-image-list');
+    $(contentPane.clientAreaSelector()).addClass('client-content');
+
 
     let listingFrame =
         t.div('.entry-listing-frame', [
@@ -144,9 +154,9 @@ function createEntryListingFrame() {
             t.div('.listing-main')
         ]) ;
 
-    let $contentPane = $('.main > .content');
+    // let $contentPane = $('.main > .content');
 
-    $contentPane
+    contentPane.clientArea()
         .append(listingFrame) ;
 
 }

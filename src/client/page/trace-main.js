@@ -229,6 +229,7 @@ function DrawShapes(dataBlock) {
 
 
 
+
 export function setupTracelogMenu(tracelogs) {
     let filterMenu = htm.labeledTextInput('Filter', 'trace-filter');
     let clearButton = t.button('.btn-lightlink', "Reset");
@@ -248,7 +249,7 @@ export function setupTracelogMenu(tracelogs) {
         let {callSite} = entry;
         let n = t.span([t.small(`p${page+1} ${callSite} ${entry.tags}`)]);
         let link = t.a(n, {href: '#'});
-        link.on('click', ev => {
+        link.on('click', () => {
             runTrace(tracelog);
         });
 
@@ -260,23 +261,6 @@ export function setupTracelogMenu(tracelogs) {
             _.map(taggedTraces, t => t[2])
         ]);
     }
-
-    // let tracesByPage = _.groupBy(tracelogs, tracelog => tracelog.page+1);
-    // let pageTracePairs = _.toPairsIn(tracesByPage);
-    // let tmp = pageTracePairs[0][1];
-
-    // let taggedTraces = _.map(tmp, tracelog => {
-    //     let {entry, page} = tracelog;
-    //     entry = entry.GeometryTraceLog;
-    //     let tags = `p${page+1}. ${entry.callSite.toLowerCase()} ${entry.tags.toLowerCase()}`;
-    //     return [tags, tracelog, makeMenuItem(tracelog)];
-    // });
-
-
-    // // let uniqueTags = _.uniq(_.map(taggedTraces, t => t[0]));
-    // let tracesByTag = _.groupBy(taggedTraces, t => t[1]);
-
-    // let uniqueTraces = _.uniqu(taggedTraces)
 
     let taggedTraces = _.map(tracelogs, tracelog => {
         let {entry, page} = tracelog;
@@ -299,7 +283,7 @@ export function setupTracelogMenu(tracelogs) {
 
     $('#tracelog-menu').append(traceControls);
 
-    function filterFunc(ev) {
+    function filterFunc() {
         let textVal = $(this).val();
         $('#trace-menu').empty();
         if (textVal.length>0) {
@@ -329,26 +313,6 @@ export function setupTracelogMenu(tracelogs) {
     });
 
     $('#trace-filter').on('input', debouncedFilter);
-}
-
-function selectionHandlers(widget) {
-    let handlers = {
-
-        click: function(event) {
-        },
-
-        mouseup: function() {
-        },
-
-        mousedown: function(event) {
-        },
-
-
-        mousemove: function(event) {
-        }
-    };
-
-    return handlers;
 }
 
 
