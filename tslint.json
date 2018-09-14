@@ -5,7 +5,8 @@
     ],
     "linterOptions": {
         "exclude": [
-            "node_modules/**/*.ts"
+            "node_modules/**/*.ts",
+            "src/@types/lunr/*.d.ts"
         ]
     },
     "jsRules": {},

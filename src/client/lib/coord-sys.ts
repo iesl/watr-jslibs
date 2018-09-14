@@ -103,6 +103,26 @@ class Line {
         };
     }
 }
+class Trapezoid {
+    public topLine: Line;
+    public bottomLine: Line;
+
+    public constructor(top: Line, bottom: Line) {
+        this.topLine = top;
+        this.bottomLine = bottom;
+    }
+
+    public svgShape() {
+        const p1 = this.topLine.p1;
+        const p2 = this.topLine.p2;
+        const p3 = this.bottomLine.p2;
+        const p4 = this.bottomLine.p1;
+        return {
+            type: "path",
+            d: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} L ${p4.x} ${p4.y} Z`,
+        };
+    }
+}
 
 export let mkPoint = {
     fromXy: (x: number, y: number, sys: CoordSys) => {
@@ -248,6 +268,7 @@ export function boxCenteredAt(p: Point, width: number, height: number) {
 export function fromFigure(fig: any) {
     let shape;
 
+
     if (fig.LTBounds) {
         shape = mk.fromArray(fig.LTBounds);
     } else if (fig.Line) {
@@ -256,6 +277,23 @@ export function fromFigure(fig: any) {
         shape = new Line(p1, p2);
     } else if (fig.Point) {
         shape = mkPoint.fromFloatReps(fig.Point);
+    } else if (fig.Trapezoid) {
+        const topP1 = mkPoint.fromFloatReps(fig.Trapezoid.topLeft);
+        const topP2 = mkPoint.fromFloatReps({
+            x: fig.Trapezoid.topLeft.x + fig.Trapezoid.topWidth,
+            y: fig.Trapezoid.topLeft.y
+        });
+
+        const bottomP1 = mkPoint.fromFloatReps(fig.Trapezoid.bottomLeft);
+        const bottomP2 = mkPoint.fromFloatReps({
+            x: fig.Trapezoid.bottomLeft.x + fig.Trapezoid.bottomWidth,
+            y: fig.Trapezoid.bottomLeft.y
+        });
+
+        const top = new Line(topP1, topP2);
+        const bottom = new Line(bottomP1, bottomP2);
+
+        shape = new Trapezoid(top, bottom);
     }
 
     return shape;

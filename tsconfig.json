@@ -6,7 +6,7 @@
         "sourceMap": true,
         "moduleResolution": "node",
 
-        "allowSyntheticDefaultImports": true,
+        "allowSyntheticDefaultImports": false,
         "preserveConstEnums": true,
 
         "noEmit": true,
@@ -20,7 +20,7 @@
 
     },
     "include": [
-        "./src/**/*"
+        "src/**/*"
     ],
     "exclude": [
         "webpack.config.js",

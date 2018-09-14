@@ -18,7 +18,7 @@ export function run()  {
     );
 
     $.getJSON('/data/tracelog/1', tracelogs => {
-        const traceLogs = new TraceLogs.TraceLogs(tracelogs);
+        const traceLogs = new TraceLogs.TraceLogFilter(tracelogs);
 
         const n = traceLogs.getNode();
         $("#tracelog-menu").append(n);

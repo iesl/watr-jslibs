@@ -18,18 +18,15 @@ import * as spu  from '../lib/SplitWin.js';
 import * as rtrees from  '../lib/rtrees.js';
 import { setupPageImages } from '../lib/PageImageListWidget.js';
 import * as stepper from  '../lib/d3-stepper.js';
-import ToolTips from '../lib/Tooltips';
-import * as Rx from 'rxjs';
 import * as coords from '../lib/coord-sys';
 
 import * as TraceLogs from '../lib/TraceLogs';
 
-import {t, htm} from '../lib/jstags.js';
+import { t } from '../lib/jstags.js';
 
 import {addViewLinkOptions} from './shared-main';
 
-let _tooltipHoversRx = new Rx.Subject();
-let tooltips = new ToolTips('body', _tooltipHoversRx);
+// TODO reinstate tooltips
 
 function setupFrameLayout() {
 
@@ -58,12 +55,12 @@ function addTooltip(r) {
         r .call(d3x.initStroke, 'yellow', 1, 2.0)
             .transition().duration(200)
             .call(d3x.initStroke, 'red', 1.0)
-            .call(d3x.initFill, 'red', 1.0)
+            .call(d3x.initFill, 'red', 0.2)
         ;
 
     }) .on("mouseout", function(d) {
         r .transition().duration(300)
-            .call(d3x.initStroke, 'black', 2)
+            .call(d3x.initStroke, 'black', 1, 0.3)
             .call(d3x.initFill, 'blue', 0.2)
         ;
     });
@@ -87,6 +84,8 @@ function getId(data) {
             return "c_" + data.cx + "_" + data.cy + "_" + data.r ;
         case "line":
             return "l_" + data.x1 + "_" + data.y1 + "_" + data.x2 + "_" + data.y2 ;
+        case "path":
+            return "p_" + data.d;
         }
     }
     return "";
@@ -175,6 +174,17 @@ function initShapeAttrs(r) {
             .attr("stroke", setDefaultStrokeColor)
             .call(addTooltip)
         ;
+    case "path":
+        return r.attr("d", function(d){ return d.d; })
+            .attr("class", getCls)
+            .attr("label", getCls)
+            .attr("stroke-width", 1)
+            .attr("fill",  "blue")
+            .attr("stroke", "black")
+            .attr("fill-opacity", 0.2)
+            .attr("stroke-opacity", 0.3)
+            .call(addTooltip)
+        ;
     }
 
     return r;
@@ -210,6 +220,7 @@ function runTrace(tracelog) {
 
 
     let body = tracelog.entry.GeometryTraceLog.body;
+    console.log("body", body);
     let decodedShapes = _.map(body, s => coords.fromFigure(s).svgShape());
 
     stepper.stepThrough(DrawShapes, [decodedShapes]);
@@ -254,7 +265,7 @@ export function runMain() {
 
         pageImageListWidget = setupPageImages('page-image-list', textGridJson, gridData);
 
-        const traceLogFilter = new TraceLogs.TraceLogs(tracelogJson);
+        const traceLogFilter = new TraceLogs.TraceLogFilter(tracelogJson);
 
         const n = traceLogFilter.getNode();
         $("#tracelog-menu").append(n);
