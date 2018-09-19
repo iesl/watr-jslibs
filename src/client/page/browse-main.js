@@ -2,18 +2,21 @@
 
 import * as _ from 'lodash';
 import * as $ from 'jquery';
-import * as Rx from 'rxjs';
+// import * as Rx from 'rxjs';
+import * as rx from "rxjs";
+import * as rxop from "rxjs/operators";
 
 import * as frame from '../lib/frame.js';
 import {t, icon} from '../lib/jstags.js';
 
 import * as server from '../lib/serverApi.js';
+import * as qs from 'query-string';
+import * as spu  from '../lib/SplitWin.js';
 
 
-let pageLen = 50;
+const DefaultListingLength = 50;
 
 function createEntryItem(entry) {
-    // let interestingLabels = _.filter(entry.labels[0], l => l.slice(0, 3) !== 'seg');
     let labelList = _.map(entry.labels, l => t.li(`${l}`));
     let entryName = entry.stableId.replace(/\.pdf\.d/, '');
 
@@ -64,54 +67,38 @@ function createPaginationDiv(corpusEntries) {
                 icon.fa('chevron-right'),
                 icon.fa('chevron-right')
             ])
-        ]),
-        t.span('.label-filter', [
-            t.input('#label-filter', {value: ''}),
-
         ])
     ]) ;
 
 
     return paginationControls;
 }
+
 function setupPaginationRx(corpusEntries) {
     let currStart = corpusEntries.start;
+    const browseParams = getBrowseParams();
+    const listingLen = browseParams.len;
 
-    let prevPageRx = Rx.Observable.fromEvent($('.prev-page'), 'click');
-    let nextPageRx = Rx.Observable.fromEvent($('.next-page'), 'click');
-    let setPageRx = Rx.Observable.fromEvent($('.set-page'), 'change');
-    let filterEntries = Rx.Observable.fromEvent($('#label-filter'), 'change');
+    let prevPageRx = rx.fromEvent($(".prev-page"), "click");
+    let nextPageRx = rx.fromEvent($(".next-page"), "click");
+    let setPageRx = rx.fromEvent($(".set-page"), "change");
 
     prevPageRx.subscribe(() => {
-        let newStart = _.clamp(currStart-pageLen, 0, corpusEntries.corpusSize-pageLen);
-        server.getCorpusListing(newStart, pageLen)
-            .then(resp => {
-                updatePage(resp);
-            });
+        let newStart = _.clamp(currStart-listingLen, 0, corpusEntries.corpusSize-listingLen);
+        navigateListing(newStart);
     });
+
     nextPageRx.subscribe(() => {
-        let newStart = _.clamp(currStart+pageLen, 0, corpusEntries.corpusSize-pageLen);
-        server.getCorpusListing(newStart, pageLen)
-            .then(resp => {
-                updatePage(resp);
-            });
+        let newStart = _.clamp(currStart+listingLen, 0, corpusEntries.corpusSize-listingLen);
+        navigateListing(newStart);
     });
+
     setPageRx.subscribe(() => {
         let value = $('.set-page').prop('value');
-        let newStart = _.clamp(+value, 0, corpusEntries.corpusSize-pageLen);
-        server.getCorpusListing(newStart, pageLen)
-            .then(resp => {
-                updatePage(resp);
-            });
+        let newStart = _.clamp(+value, 0, corpusEntries.corpusSize-listingLen);
+        navigateListing(newStart);
     });
-    // filterEntries.subscribe(() => {
-    //     let value = $('#label-filter').prop('value');
-    //     let newStart = _.clamp(+value, 0, corpusEntries.corpusSize-pageLen);
-    //     server.getCorpusListing(newStart, pageLen)
-    //         .then(resp => {
-    //             updatePage(resp);
-    //         });
-    // });
+
 }
 
 function updatePage(corpusEntries) {
@@ -135,7 +122,6 @@ function updatePage(corpusEntries) {
     setupPaginationRx(corpusEntries);
 }
 
-import * as spu  from '../lib/SplitWin.js';
 
 function createEntryListingFrame() {
     let rootFrame = spu.createRootFrame("#main-content");
@@ -143,7 +129,6 @@ function createEntryListingFrame() {
 
     let [contentPane] = rootFrame.addPanes(1);
 
-    // $(contentPane.clientAreaSelector()).attr('id', 'page-image-list');
     $(contentPane.clientAreaSelector()).addClass('client-content');
 
 
@@ -154,17 +139,42 @@ function createEntryListingFrame() {
             t.div('.listing-main')
         ]) ;
 
-    // let $contentPane = $('.main > .content');
 
     contentPane.clientArea()
         .append(listingFrame) ;
 
 }
 
+function getBrowseParams() {
+    const params = qs.parse(document.location.search);
+    const from = params.from ? params.from : 0;
+    const len = params.len ? params.len : DefaultListingLength;
+    return { from, len };
+}
+
+function navigateListing(from) {
+
+    const parsed = qs.parse(document.location.search);
+    const listingLen = parsed.len? parsed.len : DefaultListingLength;
+
+    parsed.from = from;
+    parsed.len = listingLen;
+
+    const stringified = qs.stringify(parsed);
+
+    document.location.search = stringified;
+
+}
+
+function populateListing(from, len) {
+    server.getCorpusListing(from, len)
+        .then(updatePage);
+}
+
 export function runMain() {
     frame.setupFrameLayout();
     createEntryListingFrame();
+    const browseParams = getBrowseParams();
 
-    server.getCorpusListing(0, pageLen)
-        .then(resp => updatePage(resp));
+    populateListing(browseParams.from, browseParams.len);
 }
