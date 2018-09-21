@@ -147,7 +147,15 @@ let ajv = createSchemas([
         label     : Str,
         location  : Ref('Location'),
         body      : TextGridOrNull
-    })
+    }),
+
+    // rec('TraceLogBody', {
+    // }),
+    // rec('TraceLogs', {
+    //     page: Str,
+    //     logType: Str,
+    //     body: ArrayOf( )
+    // }),
 
 ]);
 

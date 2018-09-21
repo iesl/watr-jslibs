@@ -23,7 +23,6 @@ export class TraceLogFilter {
     constructor(tracelogs: object) {
         this.tracelogs = tracelogs;
         this.lunrIndex = this.initIndex(tracelogs);
-        // 27: Property 'tokenSet' does not exist on type 'Index'.
         this.indexTokens = this.lunrIndex.tokenSet.toArray();
 
         const allLogEntries = _.map(tracelogs, a => formatLogEntry(a));
@@ -120,7 +119,6 @@ export class TraceLogFilter {
         return traceControls;
     }
 
-    // public searchLogs(queryStr: string): lunr.MatchData[] {
     public searchLogs(queryStr: string): lunr.Index.Result[] {
         const hits = this.lunrIndex.query((query) => {
             const terms = _.filter(_.split(queryStr, / +/), a => a.length > 0);
@@ -143,7 +141,7 @@ export class TraceLogFilter {
             return self.tracelogs[i];
         });
 
-        const sortedLogs = _.sortBy(hitLogs, log => log.entry.GeometryTraceLog.timestamp);
+        const sortedLogs = _.sortBy(hitLogs, log => log.headers.timestamp);
         return sortedLogs;
     }
 
@@ -195,11 +193,19 @@ export class TraceLogFilter {
 }
 
 function formatLogEntry(tracelog): string {
-    const { page } = tracelog;
-    const entry = tracelog.entry.GeometryTraceLog;
-    const { callSite } = entry;
-    const n = `p${page+1}. ${callSite} ${entry.tags}`;
-    return n;
+    let entry = "";
+
+    switch (tracelog.logType) {
+        case "Geometry" :
+            const { page, headers: { timestamp, tags, callSite, name } } = tracelog;
+
+            entry = `p${page+1}. ${callSite} ${tags}`;
+
+            break;
+    }
+
+
+    return entry;
 }
 
 export function displayRx(widget: TraceLogFilter) {

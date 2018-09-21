@@ -2,7 +2,6 @@
  *
  **/
 
-/* global */
 
 import * as _ from 'lodash';
 import * as d3 from 'd3';
@@ -51,14 +50,14 @@ function setupFrameLayout() {
  * @param {any} r
  */
 function addTooltip(r) {
-    return r.on("mouseover", function(d) {
+    return r.on("mouseover", function() {
         r .call(d3x.initStroke, 'yellow', 1, 2.0)
             .transition().duration(200)
             .call(d3x.initStroke, 'red', 1.0)
             .call(d3x.initFill, 'red', 0.2)
         ;
 
-    }) .on("mouseout", function(d) {
+    }) .on("mouseout", function() {
         r .transition().duration(300)
             .call(d3x.initStroke, 'black', 1, 0.3)
             .call(d3x.initFill, 'blue', 0.2)
@@ -126,8 +125,6 @@ function setDefaultFillColor(d) {
 
 function initShapeAttrs(r) {
     let shape = r.node().nodeName.toLowerCase();
-    // console.log('initShapeAttrs', r);
-    // console.log('initShapeAttrs (shape)', shape);
 
     switch (shape) {
     case "rect":
@@ -216,11 +213,7 @@ function runTrace(tracelog) {
     let pageNum =  tracelog.page;
 
     pageImageWidget = pageImageListWidget.pageImageWidgets[pageNum];
-
-
-
-    let body = tracelog.entry.GeometryTraceLog.body;
-    console.log("body", body);
+    let body = tracelog.body;
     let decodedShapes = _.map(body, s => coords.fromFigure(s).svgShape());
 
     stepper.stepThrough(DrawShapes, [decodedShapes]);
@@ -253,7 +246,6 @@ export function runMain() {
         server.getCorpusArtifactTextgrid(entry)
     ]) .then(([tracelogJson, textGridJson]) => {
 
-        // console.log('tracelogJson', tracelogJson);
         let pages = textGridJson.pages;
         let textgrids = _.map(pages, p => p.textgrid);
 
