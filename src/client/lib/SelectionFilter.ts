@@ -10,7 +10,7 @@ import * as rxop from "rxjs/operators";
 
 // TODO update lunr types file to most recent lunr version
 
-export class TraceLogFilter {
+export class SelectionFilter {
 
     public selectedTraceLogs = new rx.Subject<object[]>();
     public clearLogs = new rx.Subject<number>();
@@ -87,6 +87,7 @@ export class TraceLogFilter {
                 const allLogEntries = _.map(hitLogs, a => formatLogEntry(a));
                 const uniqLogEntries = _.uniq(allLogEntries);
                 const hitEntries = self.makeUL(uniqLogEntries);
+                // console.log('hit entry', hitData);
 
                 $("#trace-menu-hits").append(hitEntries);
 
@@ -208,7 +209,7 @@ function formatLogEntry(tracelog): string {
     return entry;
 }
 
-export function displayRx(widget: TraceLogFilter) {
+export function displayRx(widget: SelectionFilter) {
 
     const node =
         t.div([

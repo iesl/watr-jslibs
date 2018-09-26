@@ -2,7 +2,6 @@
  *
  */
 
-
 import * as _ from "lodash";
 import * as coords from "./coord-sys";
 import * as d3x from "./d3-extras";

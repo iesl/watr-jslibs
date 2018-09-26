@@ -257,7 +257,7 @@ export function runMain() {
 
         pageImageListWidget = setupPageImages('page-image-list', textGridJson, gridData);
 
-        const traceLogFilter = new TraceLogs.TraceLogFilter(tracelogJson);
+        const traceLogFilter = new TraceLogs.SelectionFilter(tracelogJson);
 
         const n = traceLogFilter.getNode();
         $("#tracelog-menu").append(n);
