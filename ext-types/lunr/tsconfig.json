@@ -5,15 +5,11 @@
         "noImplicitAny": true,
         "strictNullChecks": false,
         "strictFunctionTypes": true,
-        "baseUrl": "../",
-        "typeRoots": [
-            "../"
-        ],
-        "types": [],
+        "baseUrl": ".",
         "noEmit": true,
         "forceConsistentCasingInFileNames": true
     },
     "files": [
-        "lunr/index.d.ts"
+        "index.d.ts"
     ]
 }

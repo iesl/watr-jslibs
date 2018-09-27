@@ -1,5 +1,5 @@
 
-import * as sf from "../../src/client/lib/SelectionFilter";
+import * as sf from "../../src/client/lib/SelectionFilterEngine";
 // let sf = require("../../src/client/lib/SelectionFilter");
 // let sf = require("../../../src/client/lib/SelectionFilter");
 

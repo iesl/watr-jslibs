@@ -1,508 +1,46 @@
-// Type definitions for lunr.js 0.5.4
+// Type definitions for lunr.js 2.3.3
 // Project: https://github.com/olivernn/lunr.js
-// Definitions by: Sebastian Lenz <https://github.com/sebastian-lenz>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 /**
- * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 0.5.4
+ * lunr - http://lunrjs.com - A bit like Solr, but much smaller and not as bright - 2.3.3
  * Copyright (C) 2014 Oliver Nightingale
  * MIT Licensed
  * @license
  */
+
+export = lunr;
+
 declare namespace lunr {
     let version: string;
 
-
-    /**
-     * A function for splitting a string into tokens ready to be inserted into
-     * the search index. Uses `lunr.tokenizer.seperator` to split strings, change
-     * the value of this property to change how strings are split into tokens.
-     *
-     * @module
-     * @param {String} obj The string to convert into tokens
-     * @see lunr.tokenizer.seperator
-     * @returns {Array}
-     */
-    function tokenizer(obj: any): string[];
-
-    interface TokenizerFunction {
-        // obj is usually a string, but the default lunr tokenizer handles null,
-        // undefined and arrays of objects with a .toString() method.
-        (obj: any): string[];
+    namespace Index {
+        interface Result {
+            ref: string;
+            score: number;
+            matchData: object;
+        }
     }
-
-    module tokenizer {
-        /**
-         * The sperator used to split a string into tokens. Override this property to change the behaviour of
-         * `lunr.tokenizer` behaviour when tokenizing strings. By default this splits on whitespace and hyphens.
-         *
-         * @static
-         * @see lunr.tokenizer
-         *
-         * (Note: this is misspelled in the original API, kept for compatibility sake)
-         */
-        let seperator: RegExp | string;
-
-        let label: string;
-
-        let registeredFunctions: {[label: string]: TokenizerFunction};
-
-        /**
-         * Register a tokenizer function.
-         *
-         * Functions that are used as tokenizers should be registered if they are to be used with a serialised index.
-         *
-         * Registering a function does not add it to an index, functions must still be associated with a specific index for them to be used when indexing and searching documents.
-         *
-         * @param {Function} fn The function to register.
-         * @param {String} label The label to register this function with
-         * @memberOf tokenizer
-         */
-        function registerFunction(fn: TokenizerFunction, label: string): void;
-
-        /**
-         * Loads a previously serialised tokenizer.
-         *
-         * A tokenizer function to be loaded must already be registered with lunr.tokenizer.
-         * If the serialised tokenizer has not been registered then an error will be thrown.
-         *
-         * @param {String} label The label of the serialised tokenizer.
-         * @returns {Function}
-         * @memberOf tokenizer
-         */
-        function load(label: string): TokenizerFunction;
-    }
-
-
-    /**
-     * lunr.stemmer is an english language stemmer, this is a JavaScript implementation of
-     * the PorterStemmer taken from http://tartaurs.org/~martin
-     *
-     * @param token  The string to stem
-     */
-    function stemmer(token: string): string;
-
-
-    /**
-     * lunr.stopWordFilter is an English language stop word list filter, any words contained
-     * in the list will not be passed through the filter.
-     *
-     * This is intended to be used in the Pipeline. If the token does not pass the filter then
-     * undefined will be returned.
-     *
-     * @param token  The token to pass through the filter
-     */
-    function stopWordFilter(token: string): string;
-
-    namespace stopWordFilter {
-        let stopWords: SortedSet<string>;
-    }
-
-
-    /**
-     * lunr.trimmer is a pipeline function for trimming non word characters from the beginning
-     * and end of tokens before they enter the index.
-     *
-     * This implementation may not work correctly for non latin characters and should either
-     * be removed or adapted for use with languages with non-latin characters.
-     * @param token  The token to pass through the filter
-     */
-    function trimmer(token: string): string;
-
-
-    /**
-     * lunr.EventEmitter is an event emitter for lunr. It manages adding and removing event handlers
-     * and triggering events and their handlers.
-     */
-    class EventEmitter
-    {
-        /**
-         * Can bind a single function to many different events in one call.
-         *
-         * @param eventName  The name(s) of events to bind this function to.
-         * @param handler    The function to call when an event is fired. Binds a handler
-         *                   function to a specific event(s).
-         */
-        addListener(eventName: string, handler: Function): void;
-        addListener(eventName: string, eventName2: string, handler: Function): void;
-        addListener(eventName: string, eventName2: string, eventName3: string, handler: Function): void;
-        addListener(eventName: string, eventName2: string, eventName3: string, eventName4: string, handler: Function): void;
-        addListener(eventName: string, eventName2: string, eventName3: string, eventName4: string, eventName5: string, handler: Function): void;
-
-
-        /**
-         * Removes a handler function from a specific event.
-         *
-         * @param eventName  The name of the event to remove this function from.
-         * @param handler    The function to remove from an event.
-         */
-        removeListener(eventName: string, handler: Function): void;
-
-
-        /**
-         * Calls all functions bound to the given event.
-         *
-         * Additional data can be passed to the event handler as arguments to emit after the event name.
-         *
-         * @param eventName The name of the event to emit.
-         * @param args
-         */
-        emit(eventName: string, ...args: any[]): void;
-
-
-        /**
-         * Checks whether a handler has ever been stored against an event.
-         *
-         * @param eventName  The name of the event to check.
-         */
-        hasHandler(eventName: string): boolean;
-    }
-
-
-    interface IPipelineFunction {
-        (token: string): string;
-        (token: string, tokenIndex: number): string;
-        (token: string, tokenIndex: number, tokens: string[]): string;
-    }
-
-
-    /**
-     * lunr.Pipelines maintain an ordered list of functions to be applied to all tokens in documents
-     * entering the search index and queries being ran against the index.
-     *
-     * An instance of lunr.Index created with the lunr shortcut will contain a pipeline with a stop
-     * word filter and an English language stemmer. Extra functions can be added before or after either
-     * of these functions or these default functions can be removed.
-     *
-     * When run the pipeline will call each function in turn, passing a token, the index of that token
-     * in the original list of all tokens and finally a list of all the original tokens.
-     *
-     * The output of functions in the pipeline will be passed to the next function in the pipeline.
-     * To exclude a token from entering the index the function should return undefined, the rest of
-     * the pipeline will not be called with this token.
-     *
-     * For serialisation of pipelines to work, all functions used in an instance of a pipeline should
-     * be registered with lunr.Pipeline. Registered functions can then be loaded. If trying to load a
-     * serialised pipeline that uses functions that are not registered an error will be thrown.
-     *
-     * If not planning on serialising the pipeline then registering pipeline functions is not necessary.
-     */
-    class Pipeline
-    {
-        registeredFunctions: {[label: string]: Function};
-
-
-        /**
-         * Register a function with the pipeline.
-         *
-         * Functions that are used in the pipeline should be registered if the pipeline needs to be
-         * serialised, or a serialised pipeline needs to be loaded.
-         *
-         * Registering a function does not add it to a pipeline, functions must still be added to instances
-         * of the pipeline for them to be used when running a pipeline.
-         *
-         * @param fn     The function to check for.
-         * @param label  The label to register this function with
-         */
-        registerFunction(fn: IPipelineFunction, label: string): void;
-
-
-        /**
-         * Warns if the function is not registered as a Pipeline function.
-         *
-         * @param fn  The function to check for.
-         */
-        warnIfFunctionNotRegistered(fn: IPipelineFunction): void;
-
-
-        /**
-         * Adds new functions to the end of the pipeline.
-         *
-         * Logs a warning if the function has not been registered.
-         *
-         * @param functions  Any number of functions to add to the pipeline.
-         */
-        add(...functions: IPipelineFunction[]): void;
-
-
-        /**
-         * Adds a single function after a function that already exists in the pipeline.
-         *
-         * Logs a warning if the function has not been registered.
-         *
-         * @param existingFn  A function that already exists in the pipeline.
-         * @param newFn       The new function to add to the pipeline.
-         */
-        after(existingFn: IPipelineFunction, newFn: IPipelineFunction): void;
-
-
-        /**
-         * Adds a single function before a function that already exists in the pipeline.
-         *
-         * Logs a warning if the function has not been registered.
-         *
-         * @param existingFn  A function that already exists in the pipeline.
-         * @param newFn       The new function to add to the pipeline.
-         */
-        before(existingFn: IPipelineFunction, newFn: IPipelineFunction): void;
-
-
-        /**
-         * Removes a function from the pipeline.
-         *
-         * @param fn  The function to remove from the pipeline.
-         */
-        remove(fn: IPipelineFunction): void;
-
-
-        /**
-         * Runs the current list of functions that make up the pipeline against
-         * the passed tokens.
-         *
-         * @param tokens  The tokens to run through the pipeline.
-         */
-        run(tokens: string[]): string[];
-
-
-        /**
-         * Resets the pipeline by removing any existing processors.
-         */
-        reset(): void;
-
-
-        /**
-         * Returns a representation of the pipeline ready for serialisation.
-         */
-        toJSON(): any;
-
-
-        /**
-         * Loads a previously serialised pipeline.
-         *
-         * All functions to be loaded must already be registered with lunr.Pipeline. If any function from
-         * the serialised data has not been registered then an error will be thrown.
-         *
-         * @param serialised  The serialised pipeline to load.
-         */
-        static load(serialised: any): Pipeline;
-    }
-
-
-    /**
-     * lunr.Vectors implement vector related operations for a series of elements.
-     */
-    class Vector
-    {
-        list: Node;
-
-
-        /**
-         * Calculates the magnitude of this vector.
-         */
-        magnitude(): number;
-
-
-        /**
-         * Calculates the dot product of this vector and another vector.
-         * @param otherVector  The vector to compute the dot product with.
-         */
-        dot(otherVector: Vector): number;
-
-
-        /**
-         * Calculates the cosine similarity between this vector and another vector.
-         *
-         * @param otherVector  The other vector to calculate the
-         */
-        similarity(otherVector: Vector): number;
-    }
-
-
-    /**
-     * lunr.Vector.Node is a simple struct for each node in a lunr.Vector.
-     */
-    class Node
-    {
-        /**
-         * The index of the node in the vector.
-         */
-        idx: number;
-
-        /**
-         * The data at this node in the vector.
-         */
-        val: number;
-
-        /**
-         * The node directly after this node in the vector.
-         */
-        next: Node;
-
-
-        /**
-         * @param idx   The index of the node in the vector.
-         * @param val   The data at this node in the vector.
-         * @param next  The node directly after this node in the vector.
-         */
-        constructor(idx: number, val: number, next: Node);
-    }
-
-
-    /**
-     * lunr.SortedSets are used to maintain an array of unique values in a sorted order.
-     */
-    class SortedSet<T>
-    {
-        elements: T[];
-
-        length: number;
-
-
-        /**
-         * Inserts new items into the set in the correct position to maintain the order.
-         *
-         * @param values  The objects to add to this set.
-         */
-        add(...values: T[]): void;
-
-
-        /**
-         * Converts this sorted set into an array.
-         */
-        toArray(): T[];
-
-
-        /**
-         * Creates a new array with the results of calling a provided function on
-         * every element in this sorted set.
-         *
-         * Delegates to Array.prototype.map and has the same signature.
-         *
-         * @param fn   The function that is called on each element of the
-         * @param ctx  An optional object that can be used as the context
-         */
-        map(fn: Function, ctx: any): T[];
-
-
-        /**
-         * Executes a provided function once per sorted set element.
-         *
-         * Delegates to Array.prototype.forEach and has the same signature.
-         *
-         * @param fn   The function that is called on each element of the
-         * @param ctx  An optional object that can be used as the context
-         */
-        forEach(fn: Function, ctx: any): any;
-
-
-        /**
-         * Returns the index at which a given element can be found in the sorted
-         * set, or -1 if it is not present.
-         *
-         * @param elem   The object to locate in the sorted set.
-         * @param start  An optional index at which to start searching from
-         * @param end    An optional index at which to stop search from within
-         */
-        indexOf(elem: T, start?: number, end?: number): number;
-
-
-        /**
-         * Returns the position within the sorted set that an element should be
-         * inserted at to maintain the current order of the set.
-         *
-         * This function assumes that the element to search for does not already exist
-         * in the sorted set.
-         *
-         * @param elem - The elem to find the position for in the set
-         * @param start - An optional index at which to start searching from
-         * @param end - An optional index at which to stop search from within
-         */
-        locationFor(elem: T, start?: number, end?: number): number;
-
-
-        /**
-         * Creates a new lunr.SortedSet that contains the elements in the
-         * intersection of this set and the passed set.
-         *
-         * @param otherSet  The set to intersect with this set.
-         */
-        intersect(otherSet: SortedSet<T>): SortedSet<T>;
-
-
-        /**
-         * Creates a new lunr.SortedSet that contains the elements in the union of this
-         * set and the passed set.
-         *
-         * @param otherSet  The set to union with this set.
-         */
-        union(otherSet: SortedSet<T>): SortedSet<T>;
-
-
-        /**
-         * Makes a copy of this set
-         */
-        clone(): SortedSet<T>;
-
-
-        /**
-         * Returns a representation of the sorted set ready for serialisation.
-         */
-        toJSON(): any;
-
-
-        /**
-         * Loads a previously serialised sorted set.
-         *
-         * @param serialisedData  The serialised set to load.
-         */
-        static load<T>(serialisedData: T[]): SortedSet<T>;
-    }
-
-
-    interface IIndexField
-    {
-        /**
-         * The name of the field within the document that
-         */
-        name: string;
-
-        /**
-         * An optional boost that can be applied to terms in this field.
-         */
-        boost: number;
-    }
-
-
-    interface IIndexSearchResult
-    {
-        ref: any;
-
-        score: number;
-    }
-
-
     /**
      * lunr.Index is object that manages a search index. It contains the indexes and stores
      * all the tokens and document lookups. It also provides the main user facing API for
      * the library.
      */
-    class Index
-    {
-        eventEmitter: EventEmitter;
+    export class Index {
+        public invertedIndex: object;
+        public fieldVectors: Object<string, Vector>;
+        public tokenSet: TokenSet;
+        public fields: string[];
+        public pipeline: Pipeline;
 
-        documentStore: Store<string>;
 
-        tokenStore: TokenStore;
-
-        corpusTokens: SortedSet<string>;
-
-        pipeline: Pipeline;
-
-        _fields: IIndexField[];
-
-        _ref: string;
-
-        _idfCache: {[key: string]: string};
+        // eventEmitter: EventEmitter;
+        // documentStore: Store<string>;
+        // tokenStore: TokenSet;
+        // corpusTokens: SortedSet<string>;
+        // pipeline: Pipeline;
+        // _fields: IIndexField[];
+        // _ref: string;
+        // _idfCache: {[key: string]: string};
 
 
         /**
@@ -514,11 +52,11 @@ declare namespace lunr {
          * @param handler    The function to call when an event is fired. Binds a handler
          *                   function to a specific event(s).
          */
-        on(eventName: string, handler: Function): void;
-        on(eventName: string, eventName2: string, handler: Function): void;
-        on(eventName: string, eventName2: string, eventName3: string, handler: Function): void;
-        on(eventName: string, eventName2: string, eventName3: string, eventName4: string, handler: Function): void;
-        on(eventName: string, eventName2: string, eventName3: string, eventName4: string, eventName5: string, handler: Function): void;
+        // on(eventName: string, handler: Function): void;
+        // on(eventName: string, eventName2: string, handler: Function): void;
+        // on(eventName: string, eventName2: string, eventName3: string, handler: Function): void;
+        // on(eventName: string, eventName2: string, eventName3: string, eventName4: string, handler: Function): void;
+        // on(eventName: string, eventName2: string, eventName3: string, eventName4: string, eventName5: string, handler: Function): void;
 
 
         /**
@@ -527,7 +65,7 @@ declare namespace lunr {
          * @param eventName  The name of events to remove the function from.
          * @param handler    The serialised set to load.
          */
-        off(eventName: string, handler: Function): void;
+        // off(eventName: string, handler: Function): void;
 
 
         /**
@@ -703,6 +241,468 @@ declare namespace lunr {
 
 
     /**
+     * A function for splitting a string into tokens ready to be inserted into
+     * the search index. Uses `lunr.tokenizer.seperator` to split strings, change
+     * the value of this property to change how strings are split into tokens.
+     *
+     * @module
+     * @param {String} obj The string to convert into tokens
+     * @see lunr.tokenizer.seperator
+     * @returns {Array}
+     */
+    function tokenizer(obj: any): string[];
+
+    interface TokenizerFunction {
+        // obj is usually a string, but the default lunr tokenizer handles null,
+        // undefined and arrays of objects with a .toString() method.
+        (obj: any): string[];
+    }
+
+    module tokenizer {
+        /**
+         * The sperator used to split a string into tokens. Override this property to change the behaviour of
+         * `lunr.tokenizer` behaviour when tokenizing strings. By default this splits on whitespace and hyphens.
+         *
+         * @static
+         * @see lunr.tokenizer
+         *
+         * (Note: this is misspelled in the original API, kept for compatibility sake)
+         */
+        let seperator: RegExp | string;
+
+        let label: string;
+
+        let registeredFunctions: {[label: string]: TokenizerFunction};
+
+        /**
+         * Register a tokenizer function.
+         *
+         * Functions that are used as tokenizers should be registered if they are to be used with a serialised index.
+         *
+         * Registering a function does not add it to an index, functions must still be associated with a specific index for them to be used when indexing and searching documents.
+         *
+         * @param {Function} fn The function to register.
+         * @param {String} label The label to register this function with
+         * @memberOf tokenizer
+         */
+        function registerFunction(fn: TokenizerFunction, label: string): void;
+
+        /**
+         * Loads a previously serialised tokenizer.
+         *
+         * A tokenizer function to be loaded must already be registered with lunr.tokenizer.
+         * If the serialised tokenizer has not been registered then an error will be thrown.
+         *
+         * @param {String} label The label of the serialised tokenizer.
+         * @returns {Function}
+         * @memberOf tokenizer
+         */
+        function load(label: string): TokenizerFunction;
+    }
+
+
+    /**
+     * lunr.stemmer is an english language stemmer, this is a JavaScript implementation of
+     * the PorterStemmer taken from http://tartaurs.org/~martin
+     *
+     * @param token  The string to stem
+     */
+    function stemmer(token: string): string;
+
+
+    /**
+     * lunr.stopWordFilter is an English language stop word list filter, any words contained
+     * in the list will not be passed through the filter.
+     *
+     * This is intended to be used in the Pipeline. If the token does not pass the filter then
+     * undefined will be returned.
+     *
+     * @param token  The token to pass through the filter
+     */
+    function stopWordFilter(token: string): string;
+
+    namespace stopWordFilter {
+        let stopWords: SortedSet<string>;
+    }
+
+
+    /**
+     * lunr.trimmer is a pipeline function for trimming non word characters from the beginning
+     * and end of tokens before they enter the index.
+     *
+     * This implementation may not work correctly for non latin characters and should either
+     * be removed or adapted for use with languages with non-latin characters.
+     * @param token  The token to pass through the filter
+     */
+    function trimmer(token: string): string;
+
+
+    /**
+     * lunr.EventEmitter is an event emitter for lunr. It manages adding and removing event handlers
+     * and triggering events and their handlers.
+     */
+    class EventEmitter {
+        /**
+         * Can bind a single function to many different events in one call.
+         *
+         * @param eventName  The name(s) of events to bind this function to.
+         * @param handler    The function to call when an event is fired. Binds a handler
+         *                   function to a specific event(s).
+         */
+        addListener(eventName: string, handler: Function): void;
+        addListener(eventName: string, eventName2: string, handler: Function): void;
+        addListener(eventName: string, eventName2: string, eventName3: string, handler: Function): void;
+        addListener(eventName: string, eventName2: string, eventName3: string, eventName4: string, handler: Function): void;
+        addListener(eventName: string, eventName2: string, eventName3: string, eventName4: string, eventName5: string, handler: Function): void;
+
+
+        /**
+         * Removes a handler function from a specific event.
+         *
+         * @param eventName  The name of the event to remove this function from.
+         * @param handler    The function to remove from an event.
+         */
+        removeListener(eventName: string, handler: Function): void;
+
+
+        /**
+         * Calls all functions bound to the given event.
+         *
+         * Additional data can be passed to the event handler as arguments to emit after the event name.
+         *
+         * @param eventName The name of the event to emit.
+         * @param args
+         */
+        emit(eventName: string, ...args: any[]): void;
+
+
+        /**
+         * Checks whether a handler has ever been stored against an event.
+         *
+         * @param eventName  The name of the event to check.
+         */
+        hasHandler(eventName: string): boolean;
+    }
+
+
+    interface IPipelineFunction {
+        (token: string): string;
+        (token: string, tokenIndex: number): string;
+        (token: string, tokenIndex: number, tokens: string[]): string;
+    }
+
+
+    /**
+     * lunr.Pipelines maintain an ordered list of functions to be applied to all tokens in documents
+     * entering the search index and queries being ran against the index.
+     *
+     * An instance of lunr.Index created with the lunr shortcut will contain a pipeline with a stop
+     * word filter and an English language stemmer. Extra functions can be added before or after either
+     * of these functions or these default functions can be removed.
+     *
+     * When run the pipeline will call each function in turn, passing a token, the index of that token
+     * in the original list of all tokens and finally a list of all the original tokens.
+     *
+     * The output of functions in the pipeline will be passed to the next function in the pipeline.
+     * To exclude a token from entering the index the function should return undefined, the rest of
+     * the pipeline will not be called with this token.
+     *
+     * For serialisation of pipelines to work, all functions used in an instance of a pipeline should
+     * be registered with lunr.Pipeline. Registered functions can then be loaded. If trying to load a
+     * serialised pipeline that uses functions that are not registered an error will be thrown.
+     *
+     * If not planning on serialising the pipeline then registering pipeline functions is not necessary.
+     */
+    class Pipeline {
+        registeredFunctions: {[label: string]: Function};
+
+
+        /**
+         * Register a function with the pipeline.
+         *
+         * Functions that are used in the pipeline should be registered if the pipeline needs to be
+         * serialised, or a serialised pipeline needs to be loaded.
+         *
+         * Registering a function does not add it to a pipeline, functions must still be added to instances
+         * of the pipeline for them to be used when running a pipeline.
+         *
+         * @param fn     The function to check for.
+         * @param label  The label to register this function with
+         */
+        registerFunction(fn: IPipelineFunction, label: string): void;
+
+
+        /**
+         * Warns if the function is not registered as a Pipeline function.
+         *
+         * @param fn  The function to check for.
+         */
+        warnIfFunctionNotRegistered(fn: IPipelineFunction): void;
+
+
+        /**
+         * Adds new functions to the end of the pipeline.
+         *
+         * Logs a warning if the function has not been registered.
+         *
+         * @param functions  Any number of functions to add to the pipeline.
+         */
+        add(...functions: IPipelineFunction[]): void;
+
+
+        /**
+         * Adds a single function after a function that already exists in the pipeline.
+         *
+         * Logs a warning if the function has not been registered.
+         *
+         * @param existingFn  A function that already exists in the pipeline.
+         * @param newFn       The new function to add to the pipeline.
+         */
+        after(existingFn: IPipelineFunction, newFn: IPipelineFunction): void;
+
+
+        /**
+         * Adds a single function before a function that already exists in the pipeline.
+         *
+         * Logs a warning if the function has not been registered.
+         *
+         * @param existingFn  A function that already exists in the pipeline.
+         * @param newFn       The new function to add to the pipeline.
+         */
+        before(existingFn: IPipelineFunction, newFn: IPipelineFunction): void;
+
+
+        /**
+         * Removes a function from the pipeline.
+         *
+         * @param fn  The function to remove from the pipeline.
+         */
+        remove(fn: IPipelineFunction): void;
+
+
+        /**
+         * Runs the current list of functions that make up the pipeline against
+         * the passed tokens.
+         *
+         * @param tokens  The tokens to run through the pipeline.
+         */
+        run(tokens: string[]): string[];
+
+
+        /**
+         * Resets the pipeline by removing any existing processors.
+         */
+        reset(): void;
+
+
+        /**
+         * Returns a representation of the pipeline ready for serialisation.
+         */
+        toJSON(): any;
+
+
+        /**
+         * Loads a previously serialised pipeline.
+         *
+         * All functions to be loaded must already be registered with lunr.Pipeline. If any function from
+         * the serialised data has not been registered then an error will be thrown.
+         *
+         * @param serialised  The serialised pipeline to load.
+         */
+        static load(serialised: any): Pipeline;
+    }
+
+
+    /**
+     * lunr.Vectors implement vector related operations for a series of elements.
+     */
+    class Vector {
+        list: Node;
+
+
+        /**
+         * Calculates the magnitude of this vector.
+         */
+        magnitude(): number;
+
+
+        /**
+         * Calculates the dot product of this vector and another vector.
+         * @param otherVector  The vector to compute the dot product with.
+         */
+        dot(otherVector: Vector): number;
+
+
+        /**
+         * Calculates the cosine similarity between this vector and another vector.
+         *
+         * @param otherVector  The other vector to calculate the
+         */
+        similarity(otherVector: Vector): number;
+    }
+
+
+    /**
+     * lunr.Vector.Node is a simple struct for each node in a lunr.Vector.
+     */
+    class Node {
+        /**
+         * The index of the node in the vector.
+         */
+        idx: number;
+
+        /**
+         * The data at this node in the vector.
+         */
+        val: number;
+
+        /**
+         * The node directly after this node in the vector.
+         */
+        next: Node;
+
+
+        /**
+         * @param idx   The index of the node in the vector.
+         * @param val   The data at this node in the vector.
+         * @param next  The node directly after this node in the vector.
+         */
+        constructor(idx: number, val: number, next: Node);
+    }
+
+
+    /**
+     * lunr.SortedSets are used to maintain an array of unique values in a sorted order.
+     */
+    class SortedSet<T> {
+        elements: T[];
+
+        length: number;
+
+
+        /**
+         * Inserts new items into the set in the correct position to maintain the order.
+         *
+         * @param values  The objects to add to this set.
+         */
+        add(...values: T[]): void;
+
+
+        /**
+         * Converts this sorted set into an array.
+         */
+        toArray(): T[];
+
+
+        /**
+         * Creates a new array with the results of calling a provided function on
+         * every element in this sorted set.
+         *
+         * Delegates to Array.prototype.map and has the same signature.
+         *
+         * @param fn   The function that is called on each element of the
+         * @param ctx  An optional object that can be used as the context
+         */
+        map(fn: Function, ctx: any): T[];
+
+
+        /**
+         * Executes a provided function once per sorted set element.
+         *
+         * Delegates to Array.prototype.forEach and has the same signature.
+         *
+         * @param fn   The function that is called on each element of the
+         * @param ctx  An optional object that can be used as the context
+         */
+        forEach(fn: Function, ctx: any): any;
+
+
+        /**
+         * Returns the index at which a given element can be found in the sorted
+         * set, or -1 if it is not present.
+         *
+         * @param elem   The object to locate in the sorted set.
+         * @param start  An optional index at which to start searching from
+         * @param end    An optional index at which to stop search from within
+         */
+        indexOf(elem: T, start?: number, end?: number): number;
+
+
+        /**
+         * Returns the position within the sorted set that an element should be
+         * inserted at to maintain the current order of the set.
+         *
+         * This function assumes that the element to search for does not already exist
+         * in the sorted set.
+         *
+         * @param elem - The elem to find the position for in the set
+         * @param start - An optional index at which to start searching from
+         * @param end - An optional index at which to stop search from within
+         */
+        locationFor(elem: T, start?: number, end?: number): number;
+
+
+        /**
+         * Creates a new lunr.SortedSet that contains the elements in the
+         * intersection of this set and the passed set.
+         *
+         * @param otherSet  The set to intersect with this set.
+         */
+        intersect(otherSet: SortedSet<T>): SortedSet<T>;
+
+
+        /**
+         * Creates a new lunr.SortedSet that contains the elements in the union of this
+         * set and the passed set.
+         *
+         * @param otherSet  The set to union with this set.
+         */
+        union(otherSet: SortedSet<T>): SortedSet<T>;
+
+
+        /**
+         * Makes a copy of this set
+         */
+        clone(): SortedSet<T>;
+
+
+        /**
+         * Returns a representation of the sorted set ready for serialisation.
+         */
+        toJSON(): any;
+
+
+        /**
+         * Loads a previously serialised sorted set.
+         *
+         * @param serialisedData  The serialised set to load.
+         */
+        static load<T>(serialisedData: T[]): SortedSet<T>;
+    }
+
+
+    interface IIndexField {
+        /**
+         * The name of the field within the document that
+         */
+        name: string;
+
+        /**
+         * An optional boost that can be applied to terms in this field.
+         */
+        boost: number;
+    }
+
+
+    interface IIndexSearchResult {
+        ref: any;
+
+        score: number;
+    }
+
+
+
+    /**
      * lunr.Store is a simple key-value store used for storing sets of tokens for documents
      * stored in index.
      */
@@ -770,16 +770,17 @@ declare namespace lunr {
 
 
     /**
-     * lunr.TokenStore is used for efficient storing and lookup of the reverse index of token
+     * lunr.TokenSet is used for efficient storing and lookup of the reverse index of token
      * to document ref.
      */
-    class TokenStore
-    {
-        root: {[token: string]: TokenStore};
+    class TokenSet {
+        public length: number;
 
-        docs: {[ref: string]: ITokenDocument};
+        public root: {[token: string]: TokenSet};
 
-        length: number;
+        public docs: {[ref: string]: ITokenDocument};
+
+        public toArray(): string[];
 
 
         /**
@@ -792,15 +793,15 @@ declare namespace lunr {
          * @param doc    The doc to store against the token
          * @param root   An optional node at which to start looking for the
          */
-        add(token: string, doc: ITokenDocument, root?: TokenStore): void;
+        public add(token: string, doc: ITokenDocument, root?: TokenSet): void;
 
 
         /**
-         * Checks whether this key is contained within this lunr.TokenStore.
+         * Checks whether this key is contained within this lunr.TokenSet.
          *
          * @param token  The token to check for
          */
-        has(token: string): boolean;
+        public has(token: string): boolean;
 
 
         /**
@@ -808,7 +809,7 @@ declare namespace lunr {
          *
          * @param token  The token to get the node for.
          */
-        getNode(token: string): TokenStore;
+        getNode(token: string): TokenSet;
 
 
         /**
@@ -820,10 +821,10 @@ declare namespace lunr {
          * @param token  The token to get the documents for.
          * @param root   An optional node at which to start.
          */
-        get(token: string, root: TokenStore): {[ref: string]: ITokenDocument};
+        get(token: string, root: TokenSet): {[ref: string]: ITokenDocument};
 
 
-        count(token: string, root: TokenStore): number;
+        count(token: string, root: TokenSet): number;
 
 
         /**
@@ -856,7 +857,7 @@ declare namespace lunr {
          *
          * @param serialisedData  The serialised token store to load.
          */
-        static load(serialisedData: any): TokenStore;
+        static load(serialisedData: any): TokenSet;
     }
 
     /**
