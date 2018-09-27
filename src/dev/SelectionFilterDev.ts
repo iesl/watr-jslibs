@@ -5,10 +5,10 @@ import { t } from "../client/lib/jstags.js";
 import * as SelectionFilter from "../client/lib/SelectionFilter";
 
 export function run()  {
-    let rootFrame = spu.createRootFrame("#main");
+    const rootFrame = spu.createRootFrame("#main");
     rootFrame.setDirection(spu.row);
 
-    let [paneLeft, paneRight] = rootFrame.addPanes(2);
+    const [paneLeft, paneRight] = rootFrame.addPanes(2);
 
 
     $(paneLeft.clientAreaSelector()).append(

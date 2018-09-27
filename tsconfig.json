@@ -16,16 +16,19 @@
         "target": "es6",
         "diagnostics": true,
 
-        "module": "commonjs"
-
+        "module": "commonjs",
+        "typeRoots" : ["typings", "node_modules/@types" ]
     },
+    "files" : [
+        "typings/lunr/index.d.ts"
+    ],
+
     "include": [
         "src/**/*"
     ],
     "exclude": [
         "webpack.config.js",
         "./node_modules/**/*",
-        "./spec/**/*",
         "./dist/**/*"
     ]
 }

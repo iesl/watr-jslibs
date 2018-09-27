@@ -1,6 +1,3 @@
-
-
-
 /* global require beforeEach _ d3 fixture describe */
 
 
