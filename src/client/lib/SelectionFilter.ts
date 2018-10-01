@@ -5,6 +5,7 @@
 import * as _ from "lodash";
 import * as lunr from "lunr";
 import {t, htm} from "./jstags";
+import { SelectionFilteringEngine } from "./SelectionFilteringEngine";
 import * as rx from "rxjs";
 import * as rxop from "rxjs/operators";
 
@@ -19,11 +20,13 @@ export class SelectionFilter {
     private tracelogs: object;
     private uniqLogTitles: string[];
     private indexTokens: any;
+    private filteringEngine: SelectionFilteringEngine;
 
     constructor(tracelogs: object) {
         this.tracelogs = tracelogs;
         this.lunrIndex = this.initIndex(tracelogs);
         this.indexTokens = this.lunrIndex.tokenSet.toArray();
+        this.filteringEngine = new SelectionFilteringEngine();
 
         const allLogEntries = _.map(tracelogs, a => formatLogEntry(a));
         this.uniqLogTitles = _.uniq(allLogEntries);

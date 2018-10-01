@@ -5,8 +5,7 @@
     ],
     "linterOptions": {
         "exclude": [
-            "node_modules/**/*.ts",
-            "src/@types/lunr/*.d.ts"
+            "node_modules/**/*"
         ]
     },
     "jsRules": {},
@@ -17,6 +16,7 @@
         "max-classes-per-file": false,
         "ordered-imports": false,
         "arrow-parens": false,
+        "interface-name": false,
         "whitespace": [true,
                        "check-branch",
                        "check-decl",

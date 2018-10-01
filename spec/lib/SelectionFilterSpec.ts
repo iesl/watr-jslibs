@@ -1,35 +1,66 @@
 
-import * as sf from "../../src/client/lib/SelectionFilterEngine";
-// let sf = require("../../src/client/lib/SelectionFilter");
-// let sf = require("../../../src/client/lib/SelectionFilter");
+/* tslint:disable: no-console */
 
-// const geometryLog = {
-//     page: 0,
-//     logType: "Geometry",
-//     body: [],
-//     headers: {
-//         timestamp: 1537553328946,
-//         tags: "Deleted Intersect Image Bounds",
-//         callSite: "indexImageRegionsAndDeleteOverlaps",
-//         name: ""
-//     }
-// };
+import * as _ from "lodash";
 
-// const relationLog = {
-//     page: 0,
-//     logType: "Relation",
-//     body: [22972, [["MOOKAP+AdvPSTimx99", 0, 45]]],
-//     headers: {
-//         timestamp: 1537553328946,
-//         tags: "Deleted Intersect Image Bounds",
-//         callSite: "indexImageRegionsAndDeleteOverlaps",
-//         name: ""
-//     }
-// };
+import { SelectionFilteringEngine, CandidateGroup } from "../../src/client/lib/SelectionFilteringEngine";
+import { pp } from "../../src/client/lib/utils";
+
+interface IHeaders {
+    tags: string;
+    name: string;
+}
+
+interface ILogEntry {
+    logType: string;
+    page: number;
+    headers: IHeaders;
+}
+
+function candidateGroup(name: string, tags: string): CandidateGroup {
+    const candidates = _.map(
+        _.range(0, 10), (i) => {
+            return {
+                page: i,
+                logType: "Geometry",
+                headers: {
+                    tags: `${tags} #${i}`,
+                    name: `${name}${i+1}`
+                }
+            };
+        });
+
+    const cset: CandidateGroup = {
+        name,
+        candidates,
+        keyFunc: (c: ILogEntry) => {
+            return `page=${c.page} tags=${c.headers.tags}`;
+        }
+    };
+
+    return cset;
+}
+
 
 describe("Selection Narrowing/Filtering", () => {
-    it("should construct a filtering engine", () => {
-        const filterEngine = new sf.SelectionFilteringEngine();
+
+    it("return correct # of results", () => {
+        const cs1 = candidateGroup("foo", "alex");
+        const cs2 = candidateGroup("bar", "blob");
+        const cs3 = candidateGroup("foo", "alex");
+
+        const filterEngine = new SelectionFilteringEngine([cs1, cs2]);
+
+
+        expect(filterEngine.search("al").length).toEqual(10);
+        expect(filterEngine.search("ex #3").length).toEqual(1);
+        expect(filterEngine.search("3").length).toEqual(2);
+        expect(filterEngine.search("l").length).toEqual(20);
+
+        // TODO empty query should not return results.
+        const r = filterEngine.query("3");
+
+        console.log("queryResults", pp(r));
+
     });
 });
-

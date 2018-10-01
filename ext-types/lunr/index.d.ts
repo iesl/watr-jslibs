@@ -8,14 +8,48 @@
  * @license
  */
 
+/* tslint:disable: interface-name no-namespace max-line-length member-access member-ordering */
+
+
 export = lunr;
 
 declare namespace lunr {
     let version: string;
 
+    interface Clause {
+        fields?: string[];
+        boost?: number;
+        editDistance?: number;
+        usePipeline?: boolean;
+        wildcard?: number;
+        presence?: number;
+        term?: string;
+    }
+
+    interface Query extends Clause {
+        clauses: any[];
+        allFields: string[];
+
+        clause(c: Clause): Query;
+    }
+
+    namespace Query {
+        namespace presence {
+            const REQUIRED: number;
+            const PROHIBITED: number;
+            const OPTIONAL: number;
+        }
+        namespace wildcard {
+            const NONE: number;
+            const LEADING: number;
+            const TRAILING: number;
+        }
+        // const wildcard: string;
+    }
+
     namespace Index {
         interface Result {
-            ref: string;
+            ref: any;
             score: number;
             matchData: object;
         }
@@ -27,7 +61,7 @@ declare namespace lunr {
      */
     export class Index {
         public invertedIndex: object;
-        public fieldVectors: Object<string, Vector>;
+        public fieldVectors: object;
         public tokenSet: TokenSet;
         public fields: string[];
         public pipeline: Pipeline;
@@ -176,7 +210,9 @@ declare namespace lunr {
          *
          * @param query  The query to search the index with.
          */
-        search(query: string): IIndexSearchResult[];
+        search(query: string): Index.Result[];
+
+        query(qb: (c: Query) => void): Index.Result[];
 
 
         /**
@@ -225,7 +261,7 @@ declare namespace lunr {
          * @param plugin  The plugin to apply.
          * @param args
          */
-        use(plugin: Function, ...args: any[]): void;
+        use(plugin: () => void, ...args: any[]): void;
 
 
         /**
@@ -252,13 +288,13 @@ declare namespace lunr {
      */
     function tokenizer(obj: any): string[];
 
-    interface TokenizerFunction {
-        // obj is usually a string, but the default lunr tokenizer handles null,
-        // undefined and arrays of objects with a .toString() method.
-        (obj: any): string[];
-    }
+    // interface TokenizerFunction {
+    //     // obj is usually a string, but the default lunr tokenizer handles null,
+    //     // undefined and arrays of objects with a .toString() method.
+    // }
+    type TokenizerFunction = (obj: any) => string[];
 
-    module tokenizer {
+    namespace tokenizer {
         /**
          * The sperator used to split a string into tokens. Override this property to change the behaviour of
          * `lunr.tokenizer` behaviour when tokenizing strings. By default this splits on whitespace and hyphens.
@@ -349,11 +385,11 @@ declare namespace lunr {
          * @param handler    The function to call when an event is fired. Binds a handler
          *                   function to a specific event(s).
          */
-        addListener(eventName: string, handler: Function): void;
-        addListener(eventName: string, eventName2: string, handler: Function): void;
-        addListener(eventName: string, eventName2: string, eventName3: string, handler: Function): void;
-        addListener(eventName: string, eventName2: string, eventName3: string, eventName4: string, handler: Function): void;
-        addListener(eventName: string, eventName2: string, eventName3: string, eventName4: string, eventName5: string, handler: Function): void;
+        addListener(eventName: string, handler: () => void): void;
+        addListener(eventName: string, eventName2: string, handler: () => void): void;
+        addListener(eventName: string, eventName2: string, eventName3: string, handler: () => void): void;
+        addListener(eventName: string, eventName2: string, eventName3: string, eventName4: string, handler: () => void): void;
+        addListener(eventName: string, eventName2: string, eventName3: string, eventName4: string, eventName5: string, handler: () => void): void;
 
 
         /**
@@ -362,7 +398,7 @@ declare namespace lunr {
          * @param eventName  The name of the event to remove this function from.
          * @param handler    The function to remove from an event.
          */
-        removeListener(eventName: string, handler: Function): void;
+        removeListener(eventName: string, handler: () => void): void;
 
 
         /**
@@ -385,11 +421,11 @@ declare namespace lunr {
     }
 
 
-    interface IPipelineFunction {
-        (token: string): string;
-        (token: string, tokenIndex: number): string;
-        (token: string, tokenIndex: number, tokens: string[]): string;
-    }
+    // interface IPipelineFunction {
+    //     // (token: string): string;
+    //     // (token: string, tokenIndex: number): string;
+    // }
+    type IPipelineFunction = (token: string, tokenIndex?: number, tokens?: string[]) => string;
 
 
     /**
@@ -414,7 +450,7 @@ declare namespace lunr {
      * If not planning on serialising the pipeline then registering pipeline functions is not necessary.
      */
     class Pipeline {
-        registeredFunctions: {[label: string]: Function};
+        registeredFunctions: {[label: string]: () => void};
 
 
         /**
@@ -603,7 +639,7 @@ declare namespace lunr {
          * @param fn   The function that is called on each element of the
          * @param ctx  An optional object that can be used as the context
          */
-        map(fn: Function, ctx: any): T[];
+        map(fn: (...args: any[]) => any, ctx: any): T[];
 
 
         /**
@@ -614,7 +650,7 @@ declare namespace lunr {
          * @param fn   The function that is called on each element of the
          * @param ctx  An optional object that can be used as the context
          */
-        forEach(fn: Function, ctx: any): any;
+        forEach(fn: (...args: any[]) => any, ctx: any): any;
 
 
         /**
@@ -694,20 +730,13 @@ declare namespace lunr {
     }
 
 
-    interface IIndexSearchResult {
-        ref: any;
-
-        score: number;
-    }
-
 
 
     /**
      * lunr.Store is a simple key-value store used for storing sets of tokens for documents
      * stored in index.
      */
-    class Store<T>
-    {
+    class Store<T> {
         store: {[id: string]: SortedSet<T>};
 
         length: number;
@@ -761,8 +790,7 @@ declare namespace lunr {
     }
 
 
-    interface ITokenDocument
-    {
+    interface ITokenDocument {
         ref: number;
 
         tf: number;
@@ -863,7 +891,7 @@ declare namespace lunr {
     /**
      * A namespace containing utils for the rest of the lunr library
      */
-    module utils {
+    namespace utils {
         /**
          * Print a warning message to the console.
          *
@@ -915,4 +943,4 @@ declare namespace lunr {
  * });
  * ```
  */
-declare function lunr(config: Function): lunr.Index;
+declare function lunr(config: () => void): lunr.Index;
