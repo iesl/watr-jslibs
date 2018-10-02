@@ -2,8 +2,8 @@
 {
     "compilerOptions": {
         "baseUrl": ".",
-        "removeComments": true,
-        "sourceMap": true,
+        "removeComments": false,
+        "inlineSourceMap": true,
         "moduleResolution": "node",
 
         "allowSyntheticDefaultImports": false,
@@ -20,7 +20,7 @@
     },
 
     "exclude": [
-        "webpack.config.js",
+        "./webpack.config.js",
         "./ext-types/**/*",
         "./node_modules/**/*",
         "./dist/**/*"
