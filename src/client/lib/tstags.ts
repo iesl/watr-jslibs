@@ -5,7 +5,7 @@
 import * as _ from "lodash";
 import * as $ from "jquery";
 
-import {zipWithIndex} from "./lodash-plus";
+import {zipWithIndex} from "./LodashPlus";
 
 type JQArgs = string | object;
 

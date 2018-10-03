@@ -11,6 +11,7 @@
 import * as _ from "lodash";
 import * as lunr from "lunr";
 import { pp } from "./utils";
+import { sortedUniqCountBy } from "./LodashPlus";
 
 type Candidate = object;
 
@@ -53,8 +54,8 @@ export class SelectionFilteringEngine {
         // this.debugOutputIndex();
     }
 
-    public getCandidateList(): string[] {
-        return _.uniq(_.map(this.keyedRecords, (kr) => kr.keystr));
+    public getCandidateList(): Array<[string, number]> {
+        return sortedUniqCountBy(_.map(this.keyedRecords, (kr) => kr.keystr));
     }
 
 

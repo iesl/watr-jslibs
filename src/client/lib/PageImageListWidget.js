@@ -14,7 +14,7 @@ import * as coords from './coord-sys';
 
 import { PageImageWidget } from './PageImageWidget.js';
 import * as rtrees from './rtrees.js';
-import {zipWithIndex} from './lodash-plus';
+import {zipWithIndex} from './LodashPlus';
 import {ServerDataExchange} from  './ServerDataExchange.js';
 
 
