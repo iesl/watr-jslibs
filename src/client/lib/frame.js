@@ -2,7 +2,7 @@
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
-import {t} from './jstags.js';
+import {t} from "./tstags";
 import * as auth from './auth.js';
 import {shared} from './shared-state';
 import * as server from './serverApi.js';

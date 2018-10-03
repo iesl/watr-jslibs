@@ -11,7 +11,7 @@ import * as d3 from 'd3';
 import * as mhs from './MouseHandlerSets';
 
 import * as coords from './coord-sys';
-import { $id, t, htm } from './jstags.js';
+import { $id, t, htm } from "./tstags";
 let rtree = require('rbush');
 import {shared} from './shared-state';
 

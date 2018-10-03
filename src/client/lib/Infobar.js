@@ -1,10 +1,11 @@
 /**
+ * Widget to display a grid of reactive info variables, primarily used for debugging
  */
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 
-import {t, htm, $id} from './jstags.js';
+import {t, htm, $id} from "./tstags";
 
 export default class Infobar {
 

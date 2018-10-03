@@ -4,9 +4,8 @@
 
 /* global require _ watr  */
 
-import {shared} from './shared-state';
+import { shared } from './shared-state';
 import * as ReflowWidget from  './ReflowWidget.js';
-import * as rtrees from  './rtrees.js';
 
 let TextGridCompanion = watr.textgrid.TextGrid.Companion;
 const TGI = watr.textgrid.TextGridInterop;

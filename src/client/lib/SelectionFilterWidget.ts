@@ -4,32 +4,49 @@
 
 import * as _ from "lodash";
 import * as lunr from "lunr";
-import {t, htm} from "./jstags";
-import { SelectionFilteringEngine } from "./SelectionFilteringEngine";
+import {t, htm} from "./tstags";
+import { SelectionFilteringEngine, CandidateGroup, Results } from "./SelectionFilteringEngine";
 import * as rx from "rxjs";
 import * as rxop from "rxjs/operators";
 
 
+export function createFilter(cgs: CandidateGroup[]) {
+    return new SelectionFilteringEngine(cgs);
+}
 
-export class SelectionFilter {
+export function createCandidateGroup(rawCandidates: object[], f: (a: object) => string[]): CandidateGroup {
+    const g: CandidateGroup = {
+        candidates: rawCandidates,
+        groupKeyFunc: f
+    };
+    return g;
+}
+
+export class SelectionFilterWidget {
 
     public selectedTraceLogs = new rx.Subject<object[]>();
     public clearLogs = new rx.Subject<number>();
 
-    private lunrIndex: lunr.Index;
-    private tracelogs: object;
-    private uniqLogTitles: string[];
-    private indexTokens: any;
+    // private lunrIndex: lunr.Index;
+    // private tracelogs: object;
+    // private uniqLogTitles: string[];
     private filteringEngine: SelectionFilteringEngine;
+    // private candidateGroups: CandidateGroup[] = [];
 
-    constructor(tracelogs: object) {
-        this.tracelogs = tracelogs;
-        this.lunrIndex = this.initIndex(tracelogs);
-        this.indexTokens = this.lunrIndex.tokenSet.toArray();
-        this.filteringEngine = new SelectionFilteringEngine();
+    constructor(candidateGroups: CandidateGroup[]) {
+        this.filteringEngine = new SelectionFilteringEngine(candidateGroups);
+        // const candidateGroups = createCandidateGroup(
+        //     tracelogs, (l) => ["trace", `p${l.page+1}. ${l.callSite} ${l.tags}`]
+        // );
 
-        const allLogEntries = _.map(tracelogs, a => formatLogEntry(a));
-        this.uniqLogTitles = _.uniq(allLogEntries);
+        // this.filteringEngine = createFilter(candidateGroups);
+
+        // this.tracelogs = tracelogs;
+        // this.lunrIndex = this.initIndex(tracelogs);
+        // this.indexTokens = this.lunrIndex.tokenSet.toArray();
+
+        // const allLogEntries = _.map(tracelogs, a => formatLogEntry(a));
+        // this.uniqLogTitles = _.uniq(allLogEntries);
     }
 
 
@@ -53,19 +70,19 @@ export class SelectionFilter {
                 ]),
                 t.div("Other: ", [
                     t.span("#trace-menu-terms-other", [
-                        self.makeInlineList(self.indexTokens)
+                        self.makeInlineList(self.filteringEngine.indexTokens)
                     ])
                 ])
             ]),
             t.div(".thinborder", [
                 t.div("Trace Logs"),
                 t.div("#trace-menu-hits", [
-                    self.makeUL(self.uniqLogTitles)
+                    self.makeUL(self.filteringEngine.getCandidateList())
                 ])
             ])
         ]);
 
-        let hitLogs: object[] = [];
+        let hitLogs: ResultGroup = [];
 
         function filterFunc() {
             const inputVal = $("#trace-filter").val() as string;
@@ -75,10 +92,11 @@ export class SelectionFilter {
             $("#trace-menu-hits").empty();
 
             if (value.length > 0) {
-                const hitData = self.searchLogs(value) ;
-                const hitTerms = self.matchDataToIndexTerms(hitData) ;
+                const results = self.searchLogs(value) ;
+                // const hitData = self.searchLogs(value) ;
+                const hitTerms = self.matchDataToIndexTerms(results) ;
                 const hitTermUL = self.makeInlineList(hitTerms);
-                const otherTerms = _.filter(self.indexTokens, tok => {
+                const otherTerms = _.filter(self.filteringEngine.indexTokens, tok => {
                     return hitTerms.find(a => a === tok) === undefined;
                 });
                 const others = self.makeInlineList(otherTerms);
@@ -86,8 +104,8 @@ export class SelectionFilter {
                 $("#trace-menu-terms-hit").append(hitTermUL);
                 $("#trace-menu-terms-other").append(others);
 
-                hitLogs = self.getHitTracelogs(hitData);
-                const allLogEntries = _.map(hitLogs, a => formatLogEntry(a));
+                hitLogs = results.groups; //  self.getHitTracelogs(hitData);
+                const allLogEntries = _.map(hitLogs, a => a.keystr);
                 const uniqLogEntries = _.uniq(allLogEntries);
                 const hitEntries = self.makeUL(uniqLogEntries);
                 // console.log('hit entry', hitData);
@@ -96,12 +114,12 @@ export class SelectionFilter {
 
 
             } else {
-                const hitTerms = self.makeInlineList(self.indexTokens);
+                const hitTerms = self.makeInlineList(self.filteringEngine.indexTokens);
                 hitLogs = [];
 
                 $("#trace-menu-terms").append(hitTerms);
 
-                const hitEntries = self.makeUL(self.uniqLogTitles);
+                const hitEntries = self.makeUL(self.filteringEngine.getCandidateList());
                 $("#trace-menu-hits").append(hitEntries);
 
             }
@@ -123,19 +141,21 @@ export class SelectionFilter {
         return traceControls;
     }
 
-    public searchLogs(queryStr: string): lunr.Index.Result[] {
-        const hits = this.lunrIndex.query((query) => {
-            const terms = _.filter(_.split(queryStr, / +/), a => a.length > 0);
-            _.each(terms, queryTerm => {
-                query.clause({
-                    term: `*${queryTerm}*`,
-                    presence: lunr.Query.presence.REQUIRED
-                });
-            });
+    public searchLogs(queryStr: string): Results {
+        const results = this.filteringEngine.query(queryStr);
 
-        });
+        // const hits = this.lunrIndex.query((query) => {
+        //     const terms = _.filter(_.split(queryStr, / +/), a => a.length > 0);
+        //     _.each(terms, queryTerm => {
+        //         query.clause({
+        //             term: `*${queryTerm}*`,
+        //             presence: lunr.Query.presence.REQUIRED
+        //         });
+        //     });
 
-        return hits;
+        // });
+
+        return results;
     }
 
     public getHitTracelogs(hits: lunr.Index.Result[]): object[] {
@@ -149,27 +169,27 @@ export class SelectionFilter {
         return sortedLogs;
     }
 
-    private initIndex(tracelogs: object): lunr.Index {
+    // private initIndex(tracelogs: object): lunr.Index {
 
-        const lunrIndex = lunr(function() {
-            const idx = this;
-            idx.field("tags");
+    //     const lunrIndex = lunr(function() {
+    //         const idx = this;
+    //         idx.field("tags");
 
-            const pipeline = idx.pipeline;
-            pipeline.reset();
+    //         const pipeline = idx.pipeline;
+    //         pipeline.reset();
 
-            _.each(tracelogs, (tracelog, lognum) => {
-                const tags = formatLogEntry(tracelog);
-                idx.add({
-                    tags,
-                    id: lognum
-                });
-            });
+    //         _.each(tracelogs, (tracelog, lognum) => {
+    //             const tags = formatLogEntry(tracelog);
+    //             idx.add({
+    //                 tags,
+    //                 id: lognum
+    //             });
+    //         });
 
-        });
+    //     });
 
-        return lunrIndex;
-    }
+    //     return lunrIndex;
+    // }
 
 
     private makeUL(strs: string[]): HTMLUListElement {
@@ -186,12 +206,13 @@ export class SelectionFilter {
         ]);
     }
 
-    private matchDataToIndexTerms(matchData: lunr.Index.Result[]): string[] {
-        const metadata = _.flatMap(matchData, match => {
-            return _.keys(match.matchData.metadata);
-        });
+    private matchDataToIndexTerms(matchData: Results): string[] {
+        // const metadata = _.flatMap(matchData, match => {
+        //     return _.keys(match.matchData.metadata);
+        // });
 
-        return _.uniq(metadata);
+        // return _.uniq(metadata);
+        return ["todo", "todo"];
     }
 
 }
@@ -212,7 +233,7 @@ function formatLogEntry(tracelog): string {
     return entry;
 }
 
-export function displayRx(widget: SelectionFilter) {
+export function displayRx(widget: SelectionFilterWidget) {
 
     const node =
         t.div([

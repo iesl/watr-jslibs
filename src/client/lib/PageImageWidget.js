@@ -1,4 +1,5 @@
 /**
+ * Display Widget for a single PDF page image
  *
  **/
 
@@ -10,7 +11,7 @@ import * as d3x from './d3-extras';
 import * as coords from './coord-sys';
 import * as rtrees from  './rtrees.js';
 import * as rtree from 'rbush';
-import {t, $id} from './jstags.js';
+import {t, $id} from "./tstags";
 import {eventHasLeftClick} from './commons.js';
 import * as mhs from './MouseHandlerSets';
 import {awaitUserSelection} from './dragselect';

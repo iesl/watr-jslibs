@@ -10,71 +10,76 @@
 
 import * as _ from "lodash";
 import * as lunr from "lunr";
+import { pp } from "./utils";
 
 type Candidate = object;
 
 
 export interface CandidateGroup {
-    name: string;
     candidates: Candidate[];
-    keyFunc(c: Candidate): string;
+    groupKeyFunc(c: Candidate): string[];
+}
+
+
+interface KeyedRecord {
+    candidate: Candidate;
+    keys: string[];
+    keystr: string;
+    n: number;
 }
 
 export interface ResultGroup {
-    name: string;
-    candidates: Candidate[];
-    matchTerms: string[];
+    keyedRecords: KeyedRecord[];
+    keystr: string;
+    // matchTerms: string[];
 }
 
 export interface Results {
     groups: ResultGroup[];
 }
 
-interface IndexedHitResult {
-    candidate: Candidate;
-    groupNum: number;
-    logNum: number;
-}
-
 export class SelectionFilteringEngine {
 
+    public indexTokens: string[];
+
     private lunrIndex: lunr.Index;
-    private candidateSets: CandidateGroup[];
-    private indexTokens: string[];
+    private keyedRecords: KeyedRecord[];
 
 
     constructor(candidateSets: CandidateGroup[]) {
-        this.candidateSets = candidateSets;
-        this.lunrIndex = this.initIndex(candidateSets);
+        this.keyedRecords  = this.regroupCandidates(candidateSets);
+        this.lunrIndex = this.initIndex(this.keyedRecords);
         this.indexTokens = this.lunrIndex.tokenSet.toArray();
-        // const allLogEntries = _.map(tracelogs, a => formatLogEntry(a));
-        // this.uniqLogTitles = _.uniq(allLogEntries);
+        // this.debugOutputIndex();
+    }
+
+    public getCandidateList(): string[] {
+        return _.uniq(_.map(this.keyedRecords, (kr) => kr.keystr));
     }
 
 
     public query(queryStr: string): Results {
         const searchResults = this.search(queryStr);
-        const indexedResults = this.getIndexedResults(searchResults);
+        const hitRecords = _.map(searchResults, h => {
+            const id = parseInt(h.ref, 10);
+            return this.keyedRecords[id];
+        });
 
-        const groupedResults = _.groupBy(indexedResults, (ir) => ir.groupNum);
+        const groupedHits = _.groupBy(hitRecords, (rec) => {
+            return _.join(rec.keys, " ");
+        });
 
-        const groupedHits = _.map(_.keys(groupedResults), (groupNumStr) => {
-            const groupNum = parseInt(groupNumStr, 10);
-            const candidateGroup = this.candidateSets[groupNum];
-            const resultGroup = groupedResults[groupNum];
-            const candidates = _.map(resultGroup, (ir) => candidateGroup.candidates[ir.logNum]);
-
+        const groups = _.map(_.toPairs(groupedHits), ([keys, group]) => {
             const rg: ResultGroup = {
-                name: candidateGroup.name,
-                candidates,
-                matchTerms: []
+                keyedRecords: group,
+                keystr: keys // _.join(keys, "/")
+                // matchTerms: []
             };
-
             return rg;
         });
 
         const results: Results = {
-            groups: groupedHits
+            groups
         };
 
         return results;
@@ -92,60 +97,57 @@ export class SelectionFilteringEngine {
             });
 
         });
+        // console.log('hits');
 
         return hits;
     }
 
 
-    private getIndexedResults(lunrResults: lunr.Index.Result[]): IndexedHitResult[] {
-        const hits = _.map(lunrResults, h => {
-            const [n1, n2] = h.ref.split(",");
-            const r: IndexedHitResult = {
-                groupNum: parseInt(n1, 10),
-                logNum: parseInt(n2, 10),
-                candidate: h
-            };
-            return r;
+
+    private regroupCandidates(candidateSets: CandidateGroup[]): KeyedRecord[] {
+        const grouped = _.flatMap(candidateSets, (candidateSet) => {
+            return _.map(candidateSet.candidates, (candidate) => {
+                const keys = candidateSet.groupKeyFunc(candidate);
+                const rec: KeyedRecord = {
+                    candidate,
+                    keys,
+                    keystr: _.join(keys, " "),
+                    n: 0
+                };
+                return rec;
+            });
         });
-        return hits;
+
+        const groupSorted = _.sortBy(grouped, (g) => g.keys);
+        _.each(groupSorted, (g, i) => g.n = i);
+        return groupSorted;
     }
 
-    // private getHitCandidates(hits: lunr.Index.Result[]): Candidate[] {
-    //     const self = this;
-    //     const hitIndexes = _.map(hits, h => {
-    //         const [n1, n2] = h.ref.split(",");
-    //         const l1 = parseInt(n1, 10);
-    //         const l2 = parseInt(n2, 10);
-    //         return [l1, l2];
-    //     });
+    private initIndex(keyedRecords: KeyedRecord[]): lunr.Index {
 
-    //     const hitLogs = _.map(hitIndexes, ([setNum, logNum]) => {
-    //         return self.candidateSets[setNum].candidates[logNum];
-    //     });
-
-    //     const sortedLogs = hitLogs; //  _.sortBy(hitLogs, log => log.headers.timestamp);
-    //     return sortedLogs;
-    // }
-
-
-    private initIndex(candidateSets: CandidateGroup[]): lunr.Index {
-        return lunr(function(this: lunr.Index) {
+        const lunrIndex = lunr(function(this: lunr.Index) {
             const idx = this;
             idx.field("tags");
             idx.pipeline.reset();
-
-            _.each(candidateSets, (candidateSet, setNum) => {
-                // console.log('idx', idx);
-                _.each(candidateSet.candidates, (candidate, logNum) => {
-                    // const tags = this.formatLogEntry(candidate);
-                    const tags = candidateSet.keyFunc(candidate);
-                    idx.add({
-                        tags,
-                        id: [setNum, logNum]
-                    });
+            _.each(keyedRecords, (rec, num) => {
+                const keystr = rec.keystr;
+                idx.add({
+                    tags: keystr,
+                    id: num
                 });
             });
         });
+
+
+        return lunrIndex;
+    }
+
+    private debugOutputIndex(): void {
+        /* tslint:disable: no-console */
+        console.log("lunr Index");
+        console.log(pp(this.lunrIndex));
+        console.log("lunr token set");
+        console.log(pp(this.indexTokens));
     }
 
 

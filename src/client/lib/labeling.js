@@ -13,13 +13,13 @@ import * as server from './serverApi.js';
 import * as modals from './modals.js';
 import * as d3x from './d3-extras';
 
-import {t} from './jstags.js';
+import {t} from "./tstags";
 import * as coords from './coord-sys';
 
 // export function updateAnnotationShapes() {
 //     return server.getDocumentAnnotations()
 //         .then(zoneRecs => {
-//             return refreshZoneHightlights(zoneRecs.zones);
+//             return refreshZoneHighlights(zoneRecs.zones);
 //         });
 // }
 
@@ -41,7 +41,7 @@ function mapGlyphLociToGridDataPts(glyphsLoci) {
 }
 
 
-function refreshZoneHightlights(zones) {
+function refreshZoneHighlights(zones) {
     shared.zones = zones;
 
     rtrees.initPageLabelRTrees(zones);

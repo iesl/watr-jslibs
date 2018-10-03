@@ -4,7 +4,7 @@
 
 import * as $ from 'jquery';
 import * as frame from '../lib/frame.js';
-import {t} from '../lib/jstags.js';
+import {t} from '../lib/tstags';
 
 function setupPage() {
     let page = t.div('.page-frame', [

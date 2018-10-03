@@ -6,8 +6,8 @@
 
 import * as Cookies from  'js-cookie';
 
-import {makeModal} from './jstags.js';
-import {t, htm} from './jstags.js';
+import {makeModal} from "./tstags";
+import {t, htm} from "./tstags";
 import * as server from './serverApi.js';
 
 function labeledPasswordInput(label, key) {

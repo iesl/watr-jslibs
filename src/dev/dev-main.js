@@ -12,7 +12,7 @@ import * as TextgridWidgetDev from  './TextgridWidgetDev';
 import * as SelectionFilterDev from  './SelectionFilterDev';
 import * as PageImageWidgetDev from  './PageImageWidgetDev.js';
 import * as SplitPaneDev from  './split-pane.dev.js';
-import * as jst  from '../client/lib/jstags.js';
+import * as jst  from '../client/lib/tstags';
 const t = jst.t;
 
 

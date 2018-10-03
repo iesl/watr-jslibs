@@ -7,7 +7,7 @@ import * as rx from "rxjs";
 import * as rxop from "rxjs/operators";
 
 import * as frame from '../lib/frame.js';
-import {t, icon} from '../lib/jstags.js';
+import {t, icon} from '../lib/tstags';
 
 import * as server from '../lib/serverApi.js';
 import * as qs from 'query-string';

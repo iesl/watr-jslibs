@@ -6,77 +6,103 @@ import * as _ from "lodash";
 import { SelectionFilteringEngine, CandidateGroup } from "../../src/client/lib/SelectionFilteringEngine";
 import { pp } from "../../src/client/lib/utils";
 
-interface IHeaders {
-    tags: string;
-    name: string;
-}
 
 interface ILogEntry {
     logType: string;
     page: number;
-    headers: IHeaders;
+    tags: string;
+    name: string;
 }
 
-function candidateGroup(name: string, tags: string): CandidateGroup {
+function candidateGroupF(
+    name: string,
+    tags: string,
+    groupKeyFunc: (c: ILogEntry) => string[]
+): CandidateGroup {
     const candidates = _.map(
-        _.range(0, 10), (i) => {
+        _.range(0, 3), (i) => {
             return {
                 page: i,
                 logType: "Geometry",
-                headers: {
-                    tags: `${tags} #${i}`,
-                    name: `${name}${i+1}`
-                }
+                tags: `${tags} #${i}`,
+                name: `${name}${i+1}`
             };
         });
 
     const cset: CandidateGroup = {
-        name,
         candidates,
-        keyFunc: (c: ILogEntry) => {
-            return `page=${c.page} tags=${c.headers.tags}`;
-        }
+        groupKeyFunc
     };
 
     return cset;
 }
+function candidateGroup(
+    name: string,
+    tags: string
+): CandidateGroup {
+    return candidateGroupF(
+        name, tags,
+        (c: ILogEntry) => {
+            return [name, `page=${c.page}`, `${c.tags}`];
+        }
+    );
+}
 
+function createFilter(cgs: CandidateGroup[]) {
+    return new SelectionFilteringEngine(cgs);
+}
 
 describe("Selection Narrowing/Filtering", () => {
-
-    it("return correct # of results", () => {
-        const cs1 = candidateGroup("foo", "alex");
-        const cs2 = candidateGroup("bar", "blob");
-        const cs3 = candidateGroup("foo", "alex");
-
-        const filterEngine = new SelectionFilteringEngine([cs1, cs2]);
+    const cs1 = candidateGroup("foo", "alex");
+    const cs2 = candidateGroup("bar", "blob");
+    const cs3 = candidateGroup("foo", "alex");
 
 
-        expect(filterEngine.search("al").length).toEqual(10);
-        expect(filterEngine.search("ex #3").length).toEqual(1);
-        expect(filterEngine.search("3").length).toEqual(2);
-        expect(filterEngine.search("l").length).toEqual(20);
+    const g1 = candidateGroupF("foo", "alex", (g) => ["foo", g.page.toString()]);
+    const g2 = candidateGroupF("foo", "greg", (g) => ["foo", g.page.toString()]);
+    const g3 = candidateGroupF("bar", "greg", (g) => ["bar", g.page.toString()]);
 
-        // TODO empty query should not return results.
-        const r = filterEngine.query("3");
+    it("raw search should return correct # of results", () => {
 
-        console.log("queryResults", pp(r));
+        const filterEngine = createFilter([cs1, cs2]);
+
+        expect(filterEngine.search("al").length).toEqual(3);
+        expect(filterEngine.search("ex #2").length).toEqual(1);
+        expect(filterEngine.search("2").length).toEqual(2);
+        expect(filterEngine.search("l").length).toEqual(6);
 
     });
+
+    it("groups entries together based on group key function", () => {
+
+
+        expect(createFilter([g1, g2, g3]).query("2").groups.length)
+            .toEqual(2);
+
+        expect(createFilter([g1, g2]).query("2").groups.length)
+            .toEqual(1);
+
+    });
+
+    it("reports the unique (grouped) entry names", () => {
+        const groupNames = _.map(createFilter([g1, g2, g3]).query("2").groups, (g) => g.keystr);
+        expect(groupNames).toEqual(["bar 2", "foo 2"]);
+    });
+
+    it("reports the unique (grouped) entry names", () => {
+        const groupNames = _.map(createFilter([g1, g2]).query("2").groups, (g) => g.keystr);
+        expect(groupNames).toEqual(["foo 2"]);
+    });
+
+    it("reports the available query terms, both hit and miss", () => {
+        const filterEngine = createFilter([g1, g2, g3]);
+        const r = filterEngine.query("2");
+        console.log(pp(r));
+        //
+    });
+
+    it("properly parses queries, strips whitespace", () => {
+        // TODO empty query should not return results.
+        //
+    });
 });
-
-// beforeEach(function () {
-//     jasmine.addMatchers({
-//         toBePlaying: function () {
-//             return {
-//                 compare: function (actual, expected) {
-//                     var player = actual;
-
-//                     return {
-//                         pass: player.currentlyPlayingSong === expected && player.isPlaying
-//                     }
-//                 }
-//             };
-//         }
-//     });
-// });

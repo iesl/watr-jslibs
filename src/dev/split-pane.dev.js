@@ -3,7 +3,7 @@
 import * as spu  from '../client/lib/SplitWin';
 import * as util  from '../client/lib/commons';
 import * as _ from 'lodash';
-import { $id, t, htm } from '../client/lib//jstags.js';
+import { $id, t, htm } from '../client/lib/tstags';
 
 export function runSplitPane() {
     let rootFrame = spu.createRootFrame("#main");

@@ -8,7 +8,7 @@
 /* global  _ $ */
 
 // import * as coords from './coord-sys';
-// import {t} from './jstags.js';
+// import {t} from "./tstags";
 
 // import * as d3x from './d3-extras';
 // import * as d3 from 'd3';

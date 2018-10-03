@@ -7,7 +7,7 @@ import * as $ from 'jquery';
 import * as _ from 'lodash';
 
 import * as frame from '../lib/frame.js';
-import {t} from '../lib/jstags.js';
+import {t} from '../lib/tstags';
 import {shared} from '../lib/shared-state';
 import * as server from '../lib/serverApi.js';
 const rest = server.rest;

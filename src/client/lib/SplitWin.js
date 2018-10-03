@@ -15,7 +15,7 @@ import * as _ from 'lodash';
 import * as $ from 'jquery';
 
 import Split from 'split.js';
-import { $id, t, htm } from './jstags.js';
+import { $id, t, htm } from "./tstags";
 
 const noop = function() { return; };
 

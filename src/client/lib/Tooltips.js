@@ -6,7 +6,7 @@
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 
-import { $id } from './jstags.js';
+import { $id } from "./tstags";
 
 import Tippy from 'tippy.js';
 

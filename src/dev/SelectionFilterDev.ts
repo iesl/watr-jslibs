@@ -1,9 +1,20 @@
 
 import * as $ from "jquery";
 import * as spu from "../client/lib/SplitWin.js";
-import { t } from "../client/lib/jstags.js";
-import * as SelectionFilter from "../client/lib/SelectionFilter";
+import { t } from "../client/lib/tstags";
+import * as sfw from "../client/lib/SelectionFilterWidget";
+import { CandidateGroup } from "../client/lib/SelectionFilteringEngine";
 
+interface Headers {
+    tags: string;
+    name: string;
+    callSite: string;
+}
+interface LogEntry {
+    logType: string;
+    page: number;
+    headers: Headers;
+}
 export function run()  {
     const rootFrame = spu.createRootFrame("#main");
     rootFrame.setDirection(spu.row);
@@ -17,27 +28,24 @@ export function run()  {
         ])
     );
 
-    $.getJSON("/data/tracelog/2", tracelogs => {
-        const traceLogs = new SelectionFilter.SelectionFilter(tracelogs);
+    $.getJSON("/data/tracelog/2", (tracelogs: LogEntry[]) => {
+        // const traceLogs = new sfw.SelectionFilterWidget(tracelogs);
 
-        const n = traceLogs.getNode();
+        const g: CandidateGroup = {
+            candidates: tracelogs,
+            groupKeyFunc: (l: LogEntry) => ["trace", `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`]
+        };
+        // filterWidget.addCandidates(g);
+        // filterWidget.doIndexing();
+        const filterWidget = new sfw.SelectionFilterWidget([g]);
+
+
+        const n = filterWidget.getNode();
         $("#tracelog-menu").append(n);
-        const rxDisplay = SelectionFilter.displayRx(traceLogs);
+        const rxDisplay = sfw.displayRx(filterWidget);
         paneRight.clientArea().append(
             rxDisplay
         );
     });
 
 }
-
-
-
-
-
-
-
-
-
-
-
-

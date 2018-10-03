@@ -6,7 +6,7 @@
 
 import * as util from  '../lib/commons.js';
 import * as $ from 'jquery';
-import {t} from '../lib/jstags.js';
+import {t} from '../lib/tstags';
 
 export function addViewLinkOptions() {
     let entry = util.corpusEntry();

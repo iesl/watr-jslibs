@@ -33,7 +33,6 @@ export function getTracelog(entryName) {
 }
 
 export function getCorpusArtifactTextgrid(entryName) {
-    // return apiGet(`/api/v1/corpus/artifacts/vtrace/json/${entryName}/${show}`);
     return apiGet(`/api/v1/corpus/artifacts/entry/${entryName}/text`);
 }
 

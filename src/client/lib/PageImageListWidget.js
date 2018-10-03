@@ -1,18 +1,17 @@
 /**
- *
+ * Display Widget for list of PDF page images
  *
  */
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 
-import {t, $id, icon} from './jstags.js';
+import {t, $id, icon} from "./tstags";
 import * as reflowWidgetInit from  './ReflowWidgetInit.js';
 import {shared} from './shared-state';
 import * as schema from './schemas';
 import * as coords from './coord-sys';
 
-import * as spu  from './SplitWin.js';
 import { PageImageWidget } from './PageImageWidget.js';
 import * as rtrees from './rtrees.js';
 import {zipWithIndex} from './lodash-plus';

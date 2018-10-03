@@ -21,7 +21,7 @@ import * as coords from '../lib/coord-sys';
 
 import * as TraceLogs from '../lib/TraceLogs';
 
-import { t } from '../lib/jstags.js';
+import { t } from '../lib/tstags';
 
 import {addViewLinkOptions} from './shared-main';
 
@@ -257,7 +257,7 @@ export function runMain() {
 
         pageImageListWidget = setupPageImages('page-image-list', textGridJson, gridData);
 
-        const traceLogFilter = new TraceLogs.SelectionFilter(tracelogJson);
+        const traceLogFilter = new TraceLogs.SelectionFilterWidget(tracelogJson);
 
         const n = traceLogFilter.getNode();
         $("#tracelog-menu").append(n);

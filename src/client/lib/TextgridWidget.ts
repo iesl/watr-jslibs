@@ -5,7 +5,7 @@
 import * as _ from "lodash";
 import * as coords from "./coord-sys";
 import * as d3x from "./d3-extras";
-import {$id, t} from "./jstags.js";
+import {$id, t} from "./tstags";
 import * as mhs from "./MouseHandlerSets";
 import * as rtrees from "./rtrees";
 
