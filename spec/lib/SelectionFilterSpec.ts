@@ -76,21 +76,21 @@ describe("Selection Narrowing/Filtering", () => {
     it("groups entries together based on group key function", () => {
 
 
-        expect(createFilter([g1, g2, g3]).query("2").groups.length)
+        expect(createFilter([g1, g2, g3]).query("2").length)
             .toEqual(2);
 
-        expect(createFilter([g1, g2]).query("2").groups.length)
+        expect(createFilter([g1, g2]).query("2").length)
             .toEqual(1);
 
     });
 
     it("reports the unique (grouped) entry names", () => {
-        const groupNames = _.map(createFilter([g1, g2, g3]).query("2").groups, (g) => g.keystr);
+        const groupNames = _.map(createFilter([g1, g2, g3]).query("2"), (g) => g.keystr);
         expect(groupNames).toEqual(["bar 2", "foo 2"]);
     });
 
     it("reports the unique (grouped) entry names", () => {
-        const groupNames = _.map(createFilter([g1, g2]).query("2").groups, (g) => g.keystr);
+        const groupNames = _.map(createFilter([g1, g2]).query("2"), (g) => g.keystr);
         expect(groupNames).toEqual(["foo 2"]);
     });
 

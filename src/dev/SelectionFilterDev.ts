@@ -40,8 +40,16 @@ export function run()  {
         const filterWidget = new sfw.SelectionFilterWidget([g]);
 
 
-        const n = filterWidget.getNode();
-        $("#tracelog-menu").append(n);
+        // const n = filterWidget.getNode();
+        const vueNode = filterWidget.getVueNode();
+        console.log(vueNode);
+        // const el = vueNode.$mount("#tracelog-menu");
+        const el = vueNode.$mount();
+        const node = el.$el;
+        console.log("el", el);
+        console.log("el.node", node);
+
+        $("#tracelog-menu").append(node);
         const rxDisplay = sfw.displayRx(filterWidget);
         paneRight.clientArea().append(
             rxDisplay

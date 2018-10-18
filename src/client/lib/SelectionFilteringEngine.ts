@@ -11,7 +11,7 @@
 import * as _ from "lodash";
 import * as lunr from "lunr";
 import { pp } from "./utils";
-import { sortedUniqCountBy } from "./LodashPlus";
+// import { sortedUniqCountBy } from "./LodashPlus";
 
 type Candidate = object;
 
@@ -22,17 +22,21 @@ export interface CandidateGroup {
 }
 
 
-interface KeyedRecord {
+export interface KeyedRecord {
     candidate: Candidate;
     keys: string[];
     keystr: string;
     n: number;
 }
 
+export interface KeyedRecords {
+    records: KeyedRecord[];
+    keystr: string;
+}
+
 export interface ResultGroup {
     keyedRecords: KeyedRecord[];
     keystr: string;
-    // matchTerms: string[];
 }
 
 export interface Results {
@@ -42,48 +46,42 @@ export interface Results {
 export class SelectionFilteringEngine {
 
     public indexTokens: string[];
-
     private lunrIndex: lunr.Index;
     private keyedRecords: KeyedRecord[];
+    private keyedRecordGroups: KeyedRecords[];
 
 
     constructor(candidateSets: CandidateGroup[]) {
         this.keyedRecords  = this.regroupCandidates(candidateSets);
+        this.keyedRecordGroups  = this.groupRecordsByKey(this.keyedRecords);
         this.lunrIndex = this.initIndex(this.keyedRecords);
         this.indexTokens = this.lunrIndex.tokenSet.toArray();
         // this.debugOutputIndex();
     }
 
-    public getCandidateList(): Array<[string, number]> {
-        return sortedUniqCountBy(_.map(this.keyedRecords, (kr) => kr.keystr));
+    public groupRecordsByKey(records: KeyedRecord[]): KeyedRecords[] {
+        const groups = _.groupBy(records, (r) => r.keystr);
+        return _.map(_.toPairs(groups), ([keystr, recs]) => {
+            return {
+                records: _.sortBy(recs, r => r.n),
+                keystr
+            } as KeyedRecords;
+        });
+    }
+
+    public getKeyedRecordGroups(): KeyedRecords[] {
+        return this.keyedRecordGroups;
     }
 
 
-    public query(queryStr: string): Results {
+    public query(queryStr: string): KeyedRecords[] {
         const searchResults = this.search(queryStr);
         const hitRecords = _.map(searchResults, h => {
             const id = parseInt(h.ref, 10);
             return this.keyedRecords[id];
         });
 
-        const groupedHits = _.groupBy(hitRecords, (rec) => {
-            return _.join(rec.keys, " ");
-        });
-
-        const groups = _.map(_.toPairs(groupedHits), ([keys, group]) => {
-            const rg: ResultGroup = {
-                keyedRecords: group,
-                keystr: keys // _.join(keys, "/")
-                // matchTerms: []
-            };
-            return rg;
-        });
-
-        const results: Results = {
-            groups
-        };
-
-        return results;
+        return this.groupRecordsByKey(hitRecords);
     }
 
     public search(queryStr: string): lunr.Index.Result[] {
@@ -98,7 +96,6 @@ export class SelectionFilteringEngine {
             });
 
         });
-        // console.log('hits');
 
         return hits;
     }
@@ -153,3 +150,30 @@ export class SelectionFilteringEngine {
 
 
 }
+
+// public query2(queryStr: string): Results {
+//     const searchResults = this.search(queryStr);
+//     const hitRecords = _.map(searchResults, h => {
+//         const id = parseInt(h.ref, 10);
+//         return this.keyedRecords[id];
+//     });
+
+//     const groupedHits = _.groupBy(hitRecords, (rec) => {
+//         return _.join(rec.keys, " ");
+//     });
+
+//     const groups = _.map(_.toPairs(groupedHits), ([keys, group]) => {
+//         const rg: ResultGroup = {
+//             keyedRecords: group,
+//             keystr: keys // _.join(keys, "/")
+//             // matchTerms: []
+//         };
+//         return rg;
+//     });
+
+//     const results: Results = {
+//         groups
+//     };
+
+//     return results;
+// }

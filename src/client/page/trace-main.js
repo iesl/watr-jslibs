@@ -19,7 +19,7 @@ import { setupPageImages } from '../lib/PageImageListWidget.js';
 import * as stepper from  '../lib/d3-stepper.js';
 import * as coords from '../lib/coord-sys';
 
-import * as TraceLogs from '../lib/TraceLogs';
+import * as sfw from '../lib/SelectionFilterWidget';
 
 import { t } from '../lib/tstags';
 
@@ -257,7 +257,7 @@ export function runMain() {
 
         pageImageListWidget = setupPageImages('page-image-list', textGridJson, gridData);
 
-        const traceLogFilter = new TraceLogs.SelectionFilterWidget(tracelogJson);
+        const traceLogFilter = new sfw.SelectionFilterWidget([tracelogJson]);
 
         const n = traceLogFilter.getNode();
         $("#tracelog-menu").append(n);

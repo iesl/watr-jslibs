@@ -3,7 +3,6 @@
  */
 
 import * as _ from "lodash";
-import { pp } from "./utils";
 
 export function zipWithIndex(vs: any[], ibegin: number) {
     const i = ibegin || 0;
@@ -11,6 +10,9 @@ export function zipWithIndex(vs: any[], ibegin: number) {
 }
 
 
+export function sortedUniqCount<T>(array: T[]): Array<[T, number]> {
+    return sortedUniqCountBy(array);
+}
 
 /**
  *
@@ -35,8 +37,6 @@ function baseSortedUniqCount<T, U>(array: T[], iteratee?: (t: T) => U): Array<[T
     let index = -1;
     let resIndex = 0;
 
-    // console.log(`baseSortedUniqCount(${pp(array)}, ${iteratee})`);
-
     const { length } = array;
     const result: Array<[T, number]> = [];
 
@@ -44,14 +44,10 @@ function baseSortedUniqCount<T, U>(array: T[], iteratee?: (t: T) => U): Array<[T
         const value = array[index];
         const computed = iteratee ? iteratee(value) : value;
 
-        // console.log(`result=${pp(result)} next=${resIndex}`);
         if (!index || !_.eq(computed, seen)) {
             seen = computed;
             result[resIndex++] = [value, 1];
         } else {
-            // const [v, i] = result[resIndex-1];
-            // console.log(`@${index}: [${v}, ${i}]`);
-            // result[resIndex-1] = [v, i+1];
             ++result[resIndex-1][1];
         }
     }

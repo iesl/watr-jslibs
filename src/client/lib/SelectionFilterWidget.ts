@@ -3,11 +3,15 @@
  */
 
 import * as _ from "lodash";
-import * as lunr from "lunr";
-import {t, htm} from "./tstags";
-import { SelectionFilteringEngine, CandidateGroup, Results } from "./SelectionFilteringEngine";
+import { t, htm } from "./tstags";
+import { vtags } from "./vtags";
+import { SelectionFilteringEngine, CandidateGroup, KeyedRecords } from "./SelectionFilteringEngine";
 import * as rx from "rxjs";
 import * as rxop from "rxjs/operators";
+import Vue from "vue";
+import { CreateElement, VNode } from "vue";
+import * as vuem from "vue";
+// import { Observable } from "rxjs";
 
 
 export function createFilter(cgs: CandidateGroup[]) {
@@ -22,42 +26,163 @@ export function createCandidateGroup(rawCandidates: object[], f: (a: object) => 
     return g;
 }
 
+/* tslint:disable: object-literal-shorthand  */
+
 export class SelectionFilterWidget {
 
     public selectedTraceLogs = new rx.Subject<object[]>();
     public clearLogs = new rx.Subject<number>();
 
-    // private lunrIndex: lunr.Index;
-    // private tracelogs: object;
-    // private uniqLogTitles: string[];
+
+    /// TESTING
+    public currentSelection = new rx.Subject<KeyedRecords[]>();
+
+
     private filteringEngine: SelectionFilteringEngine;
-    // private candidateGroups: CandidateGroup[] = [];
 
     constructor(candidateGroups: CandidateGroup[]) {
         this.filteringEngine = new SelectionFilteringEngine(candidateGroups);
-        // const candidateGroups = createCandidateGroup(
-        //     tracelogs, (l) => ["trace", `p${l.page+1}. ${l.callSite} ${l.tags}`]
+
+    }
+
+    public getVueNode(): Vue {
+
+        // console.log("x: elem: vue: ", Vue);
+        // console.log("x: elem: vnode: ", ({} instanceof (typeof VNode)));
+        // console.log("x: elem: vuem*: ", vuem);
+
+        const self = this;
+
+        // rx.fromEvent(clearButton, "click").pipe(
+        //     rxop.scan<Event, number>(count => count + 1, 0),
+        //     rxop.multicast(self.clearLogs),
+        //     rxop.refCount()
         // );
 
-        // this.filteringEngine = createFilter(candidateGroups);
 
-        // this.tracelogs = tracelogs;
-        // this.lunrIndex = this.initIndex(tracelogs);
-        // this.indexTokens = this.lunrIndex.tokenSet.toArray();
+        const vue = new Vue({
+            data: {
+                message: "Hello Vue!",
+                message2: "Hello Vue (2)!"
+            },
+            computed: {
+                currentMessage: function() {
+                    return `${this.message} ++ ${this.message2}`;
+                }
+            },
 
-        // const allLogEntries = _.map(tracelogs, a => formatLogEntry(a));
-        // this.uniqLogTitles = _.uniq(allLogEntries);
+
+
+            created: function(this: Vue) { // mounted, updated, destroyed
+                // don't use arrow functions
+            },
+            methods: {
+                nextmessage: function f(event) {
+                    const vm = this;
+                    const data = vm.$data;
+                    console.log("nextmessage", data);
+                    data.message = "next!";
+                    data.message2 = "next!";
+                }
+            },
+
+            render: function create(createElement): VNode {
+                const div = createElement(
+                    "div",
+                    {},
+                    [
+                        this.message,
+                        createElement(
+                            "button", {
+                                on: {
+                                    click: this.nextmessage
+                                }
+                            })
+                    ]);
+                return div;
+            }
+
+        });
+
+        // console.log('vuetmp', vuetmp);
+
+        const vuex = new Vue({
+            data: {
+                message: "Hello Vue!",
+                message2: "Hello Vue (2)!"
+            },
+
+            methods: {
+                nextmessage: function f(event) {
+                    const vm = this;
+                    const data = vm.$data;
+                    console.log("nextmessage", data);
+                    data.message = "next!";
+                    data.message2 = "next!";
+                }
+            },
+
+            render: function create(): VNode {
+                const vm = this;
+                const v = vtags(this);
+                const createElement = vm.$createElement;
+
+                // const filterMenu = htm.labeledTextInput("Filter", "trace-filter");
+                // const clearButton = t.button(".btn-lightlink", "Reset");
+                const key = "trace-filter";
+                const label = "Filter";
+
+                const node = v.div([
+                    v.span([
+                        v.span([
+                            v.input(":text", `@${key}`, `#${key}`),
+                            v.label({for: `${key}`}, label)
+                        ]),
+                        // createElement("button")
+                        v.button(".btn-lightlink",
+                                 "Reset",
+                                 { "v-on:click": "alert('hello')" })
+
+                    ]),
+                    v.div(".thinborder", [
+                        v.div("Query Terms"),
+                        v.div("Hit: ", [
+                            v.span("#trace-menu-terms-hit", []),
+                        ]),
+                        v.div("Other: ", [
+                            v.span("#trace-menu-terms-other", [
+                                "message=" + vm.$data.message
+                                // self.makeInlineList(self.filteringEngine.indexTokens)
+                            ])
+                        ])
+                    ]),
+                    v.div(".thinborder", [
+                        v.div("Trace Logs"),
+                        v.div("#trace-menu-hits", [
+                            "message2=" + vm.$data.message2
+                        ])
+                    ])
+                ]);
+
+                return node;
+            }
+        });
+
+        return vue;
+
+
     }
 
 
-    public getNode(): HTMLElement {
+    public getNode(): JQuery<HTMLElement> {
         const self = this;
         const filterMenu = htm.labeledTextInput("Filter", "trace-filter");
         const clearButton = t.button(".btn-lightlink", "Reset");
 
-        self.clearLogs = rx.fromEvent(clearButton, "click").pipe(
-            rxop.share(),
-            rxop.scan(count => count + 1, 0)
+        rx.fromEvent(clearButton, "click").pipe(
+            rxop.scan<Event, number>(count => count + 1, 0),
+            rxop.multicast(self.clearLogs),
+            rxop.refCount()
         );
 
 
@@ -66,7 +191,8 @@ export class SelectionFilterWidget {
             t.div(".thinborder", [
                 t.div("Query Terms"),
                 t.div("Hit: ", [
-                    t.span("#trace-menu-terms-hit"),
+                    t.span("#trace-menu-terms-hit", [
+                    ]),
                 ]),
                 t.div("Other: ", [
                     t.span("#trace-menu-terms-other", [
@@ -77,128 +203,79 @@ export class SelectionFilterWidget {
             t.div(".thinborder", [
                 t.div("Trace Logs"),
                 t.div("#trace-menu-hits", [
-                    self.makeUL(self.filteringEngine.getCandidateList())
+                    self.makeUL(self.getCountedTitles())
                 ])
             ])
         ]);
 
-        let hitLogs: ResultGroup = [];
-
-        function filterFunc() {
-            const inputVal = $("#trace-filter").val() as string;
-            const value = inputVal ? inputVal : "";
-            $("#trace-menu-terms-hit").empty();
-            $("#trace-menu-terms-other").empty();
-            $("#trace-menu-hits").empty();
-
-            if (value.length > 0) {
-                const results = self.searchLogs(value) ;
-                // const hitData = self.searchLogs(value) ;
-                const hitTerms = self.matchDataToIndexTerms(results) ;
-                const hitTermUL = self.makeInlineList(hitTerms);
-                const otherTerms = _.filter(self.filteringEngine.indexTokens, tok => {
-                    return hitTerms.find(a => a === tok) === undefined;
-                });
-                const others = self.makeInlineList(otherTerms);
-
-                $("#trace-menu-terms-hit").append(hitTermUL);
-                $("#trace-menu-terms-other").append(others);
-
-                hitLogs = results.groups; //  self.getHitTracelogs(hitData);
-                const allLogEntries = _.map(hitLogs, a => a.keystr);
-                const uniqLogEntries = _.uniq(allLogEntries);
-                const hitEntries = self.makeUL(uniqLogEntries);
-                // console.log('hit entry', hitData);
-
-                $("#trace-menu-hits").append(hitEntries);
 
 
-            } else {
-                const hitTerms = self.makeInlineList(self.filteringEngine.indexTokens);
-                hitLogs = [];
+        /// New Style
+        const inputRx = rx.fromEvent($(filterMenu), "input").pipe(
+            rxop.debounceTime(250),
+            rxop.map(ev => {
+                console.log("NewStyle query", ev);
 
-                $("#trace-menu-terms").append(hitTerms);
+                const query: string = ev.target.value;
+                let res: KeyedRecords[] = self.filteringEngine.getKeyedRecordGroups();
+                if (query.length > 0) {
+                    const results = self.searchLogs(query);
+                    // const hitData = self.searchLogs(value) ;
+                    // const hitTerms = self.matchDataToIndexTerms(results) ;
+                    // const hitTermUL = self.makeInlineList(hitTerms);
+                    // const otherTerms = _.filter(self.filteringEngine.indexTokens, tok => {
+                    //     return hitTerms.find(a => a === tok) === undefined;
+                    // });
 
-                const hitEntries = self.makeUL(self.filteringEngine.getCandidateList());
-                $("#trace-menu-hits").append(hitEntries);
+                    res = results;
+                } else {
+                    // const hitTerms = self.makeInlineList(self.filteringEngine.indexTokens);
+                    // hitLogs = [];
+                    // const hitEntries = self.makeUL(self.filteringEngine.getCountedCandidateTitles());
+                }
 
-            }
-        }
+                // console.log("results", res);
 
-        const debouncedFilter = _.debounce(filterFunc, 200);
+                return res;
+            })
+        );
 
-        $(filterMenu).on("keypress", (e) => {
-            if (e.keyCode === 13) {
-                debouncedFilter.cancel();
-                self.selectedTraceLogs.next(hitLogs);
-                return false;
-            }
-            return true;
+
+        const keypressRx = rx.fromEvent(filterMenu, "keypress").pipe(
+            rxop.filter((ev: Event) => (ev as any).keyCode === 13)
+        );
+
+        // const merged = rxop.mergeAll([inputRx, keypressRx]).pipe(
+        //     // rxop.scan((acc, e) => )
+        // );
+
+        inputRx.subscribe((x) => {
+            self.updateUI(x);
         });
-
-        $(filterMenu).on("input", debouncedFilter);
 
         return traceControls;
     }
 
-    public searchLogs(queryStr: string): Results {
-        const results = this.filteringEngine.query(queryStr);
-
-        // const hits = this.lunrIndex.query((query) => {
-        //     const terms = _.filter(_.split(queryStr, / +/), a => a.length > 0);
-        //     _.each(terms, queryTerm => {
-        //         query.clause({
-        //             term: `*${queryTerm}*`,
-        //             presence: lunr.Query.presence.REQUIRED
-        //         });
-        //     });
-
-        // });
-
-        return results;
+    public searchLogs(queryStr: string): KeyedRecords[] {
+        return this.filteringEngine.query(queryStr);
     }
 
-    public getHitTracelogs(hits: lunr.Index.Result[]): object[] {
-        const self = this;
-        const hitIndexes = _.map(hits, h => parseInt(h.ref, 10));
-        const hitLogs = _.map(hitIndexes, i => {
-            return self.tracelogs[i];
-        });
+    private updateUI(records: KeyedRecords[]) {
+        $("#trace-menu-terms-hit").empty();
+        $("#trace-menu-terms-other").empty();
+        $("#trace-menu-hits").empty();
 
-        const sortedLogs = _.sortBy(hitLogs, log => log.headers.timestamp);
-        return sortedLogs;
+        const hitEntries = this.makeUL(this.formatKeyedRecordGroups(records));
+        $("#trace-menu-hits").append(hitEntries);
     }
 
-    // private initIndex(tracelogs: object): lunr.Index {
-
-    //     const lunrIndex = lunr(function() {
-    //         const idx = this;
-    //         idx.field("tags");
-
-    //         const pipeline = idx.pipeline;
-    //         pipeline.reset();
-
-    //         _.each(tracelogs, (tracelog, lognum) => {
-    //             const tags = formatLogEntry(tracelog);
-    //             idx.add({
-    //                 tags,
-    //                 id: lognum
-    //             });
-    //         });
-
-    //     });
-
-    //     return lunrIndex;
-    // }
-
-
-    private makeUL(strs: string[]): HTMLUListElement {
+    private makeUL(strs: string[]): JQuery<HTMLElement> {
         return t.ul([
             _.map(strs, st => t.li([st]))
         ]);
     }
 
-    private makeInlineList(strs: string[]): HTMLUListElement {
+    private makeInlineList(strs: string[]): JQuery<HTMLElement> {
         return t.ul(".inline-ul", [
             _.map(strs, st => t.li([
                 t.span(".dimmed", [st])
@@ -206,32 +283,22 @@ export class SelectionFilterWidget {
         ]);
     }
 
-    private matchDataToIndexTerms(matchData: Results): string[] {
-        // const metadata = _.flatMap(matchData, match => {
-        //     return _.keys(match.matchData.metadata);
-        // });
-
-        // return _.uniq(metadata);
+    private matchDataToIndexTerms(matchData: KeyedRecords[]): string[] {
         return ["todo", "todo"];
     }
 
-}
-
-function formatLogEntry(tracelog): string {
-    let entry = "";
-
-    switch (tracelog.logType) {
-        case "Geometry" :
-            const { page, headers: { timestamp, tags, callSite, name } } = tracelog;
-
-            entry = `p${page+1}. ${callSite} ${tags}`;
-
-            break;
+    private formatKeyedRecordGroups(recordGroups: KeyedRecords[]): string[] {
+        return _.map(recordGroups, (group: KeyedRecords) => {
+            return `${group.keystr} (${group.records.length})`;
+        });
     }
 
+    private getCountedTitles(): string[] {
+        return this.formatKeyedRecordGroups(this.filteringEngine.getKeyedRecordGroups());
+    }
 
-    return entry;
 }
+
 
 export function displayRx(widget: SelectionFilterWidget) {
 
@@ -261,12 +328,69 @@ export function displayRx(widget: SelectionFilterWidget) {
     });
 
     widget.selectedTraceLogs.subscribe((traceLogs) => {
-        const output = _.join(_.map(traceLogs, log => formatLogEntry(log)), "\n");
-        $("#SelectedLogs").empty();
-        $("#SelectedLogs").append(
-            t.pre(output)
-        );
+        // const output = _.join(_.map(traceLogs, log => formatLogEntry(log)), "\n");
+        // $("#SelectedLogs").empty();
+        // $("#SelectedLogs").append(
+        //     t.pre(output)
+        // );
     });
     return node;
 
 }
+
+
+        // let hitLogs: KeyedRecords[] = [];
+
+        // function filterFunc() {
+        //     const inputVal = $("#trace-filter").val() as string;
+        //     const value = inputVal ? inputVal : "";
+        //     $("#trace-menu-terms-hit").empty();
+        //     $("#trace-menu-terms-other").empty();
+        //     $("#trace-menu-hits").empty();
+
+        //     if (value.length > 0) {
+        //         const results = self.searchLogs(value) ;
+        //         // const hitData = self.searchLogs(value) ;
+        //         const hitTerms = self.matchDataToIndexTerms(results) ;
+        //         const hitTermUL = self.makeInlineList(hitTerms);
+        //         const otherTerms = _.filter(self.filteringEngine.indexTokens, tok => {
+        //             return hitTerms.find(a => a === tok) === undefined;
+        //         });
+        //         const others = self.makeInlineList(otherTerms);
+
+        //         $("#trace-menu-terms-hit").append(hitTermUL);
+        //         $("#trace-menu-terms-other").append(others);
+
+        //         hitLogs = results; //  self.getHitTracelogs(hitData);
+        //         const allLogEntries = _.map(hitLogs, a => a.keystr);
+        //         const uniqLogEntries = _.uniq(allLogEntries);
+        //         const hitEntries = self.makeUL(uniqLogEntries);
+        //         // console.log('hit entry', hitData);
+
+        //         $("#trace-menu-hits").append(hitEntries);
+
+
+        //     } else {
+        //         const hitTerms = self.makeInlineList(self.filteringEngine.indexTokens);
+        //         hitLogs = [];
+
+        //         $("#trace-menu-terms").append(hitTerms);
+
+        //         const hitEntries = self.makeUL(self.getCountedTitles());
+        //         $("#trace-menu-hits").append(hitEntries);
+
+        //     }
+        // }
+
+        // const debouncedFilter = _.debounce(filterFunc, 200);
+
+        // $(filterMenu).on("keypress", (e) => {
+        //     if (e.keyCode === 13) {
+        //         debouncedFilter.cancel();
+        //         self.selectedTraceLogs.next(hitLogs);
+        //         return false;
+        //     }
+        //     return true;
+        // });
+
+        // $(filterMenu).on("input", debouncedFilter);
