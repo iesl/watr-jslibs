@@ -7,15 +7,17 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import makeFilter from '@/components/filter-engine/FilterWidget.vue';
+import { makeFilter } from '@/components/filter-engine/index.vue';
+import FilterWidget from '@/components/filter-engine/index.vue';
 
-const FilterWidget = makeFilter([{}, {}], x => ['TODO']);
-console.log('FilterWidget', FilterWidget);
+// const FilterWidget = makeFilter([{}, {}], x => ['TODO']);
+// console.log('FilterWidget', FilterWidget);
+
 
 export default Vue.extend({
-  name: 'about',
+  name: 'About',
   components: {
-    FilterWidget: makeFilter([{}, {}], x => ['TODO']),
+    FilterWidget
   },
 });
 

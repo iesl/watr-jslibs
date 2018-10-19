@@ -7,12 +7,14 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
+import HelloWorld from '@/components/HelloWorld.vue'; 
+import About from '@/views/About.vue';
 
 export default Vue.extend({
-  name: 'home',
-  components: {
-    HelloWorld,
-  },
+    name: 'Home',
+    components: {
+        HelloWorld,
+        About
+    },
 });
 </script>

@@ -9,6 +9,7 @@ import * as rx from "rxjs";
 // import { Observable } from "rxjs";
 import Vue, { VueConstructor } from 'vue';
 
+
 function createFilter(cgs: CandidateGroup[]) {
   return new SelectionFilteringEngine(cgs);
 }
@@ -50,6 +51,10 @@ export function makeFilter(rawCandidates: object[], f: (a: object) => string[]):
   return FW;
 }
 
+export default Vue.extend({
+    name: 'FilterWidget',
+    components: {},
+});
 
 // class SelectionFilterWidget extends Vue {
 
