@@ -5,56 +5,29 @@
 import * as _ from 'lodash';
 import { SelectionFilteringEngine, CandidateGroup, KeyedRecords } from './FilterEngine';
 import * as rx from "rxjs";
-// import * as rxop from "rxjs/operators";
-// import { Observable } from "rxjs";
-import Vue, { VueConstructor } from 'vue';
+import Vue from 'vue';
 
-
-function createFilter(cgs: CandidateGroup[]) {
-  return new SelectionFilteringEngine(cgs);
-}
-
-export function makeGroup(rawCandidates: object[], f: (a: object) => string[]): CandidateGroup {
-  const g: CandidateGroup = {
-    candidates: rawCandidates,
-    groupKeyFunc: f,
-  };
-  return g;
-}
-
-
-
-export function makeFilter(rawCandidates: object[], f: (a: object) => string[]): VueConstructor<Vue> {
-  const g: CandidateGroup = {
-    candidates: rawCandidates,
-    groupKeyFunc: f,
-  };
-
-  const filteringEngine = createFilter([g]);
-
-  const FW = Vue.extend({
-    name: 'FilterWidget',
-    props: {
-    },
-    created() {
-
-    },
-    mounted() {},
-    updated() {},
-    destroyed() {},
-    data() {
-      return {
-      };
-    },
-  });
-
-  return FW;
-}
-
-export default Vue.extend({
+const ext = Vue.extend({
     name: 'FilterWidget',
     components: {},
+    props: {
+        filteringEngine: {
+            type: SelectionFilteringEngine,
+            default: () => { return new SelectionFilteringEngine([]); }
+        }
+    },
+    created() {
+        // this.$props.filteringEngine = new SelectionFilteringEngine([])
+        // this.filteringEngine = new SelectionFilteringEngine([])
+
+    },
+    data: function() {
+        return {
+        }
+    }
 });
+
+export default ext;
 
 // class SelectionFilterWidget extends Vue {
 

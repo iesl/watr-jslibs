@@ -1,23 +1,19 @@
 <template>
   <div class="about">
-    <FilterWidget />
+    <ComponentGallery />
   </div>
 </template>
 
 
 <script lang="ts">
+
 import Vue from 'vue';
-import { makeFilter } from '@/components/filter-engine/index.vue';
-import FilterWidget from '@/components/filter-engine/index.vue';
-
-// const FilterWidget = makeFilter([{}, {}], x => ['TODO']);
-// console.log('FilterWidget', FilterWidget);
-
+import ComponentGallery from '@/components/gallery/gallery.vue';
 
 export default Vue.extend({
   name: 'About',
   components: {
-    FilterWidget
+      ComponentGallery
   },
 });
 
