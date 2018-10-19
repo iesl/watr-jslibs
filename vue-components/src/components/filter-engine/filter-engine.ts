@@ -192,3 +192,5 @@ export default Vue.extend({
 //     }
 
 // }
+
+// $.getJSON("/data/tracelog/2", (tracelogs: LogEntry[]) => {

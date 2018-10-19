@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/chai": "^4.1.0",
+    "@types/jquery": "^3.3.21",
     "@types/lodash": "^4.14.117",
     "@types/lunr": "file:ext-types/lunr",
     "@types/mocha": "^5.2.4",
@@ -32,6 +33,7 @@
     "@vue/eslint-config-typescript": "^3.0.5",
     "@vue/test-utils": "^1.0.0-beta.20",
     "chai": "^4.1.2",
+    "jquery": "^3.3.1",
     "less": "^3.0.4",
     "less-loader": "^4.1.0",
     "lint-staged": "^7.2.2",
