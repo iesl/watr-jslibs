@@ -5,11 +5,14 @@ import * as _ from "lodash";
 
 import { SelectionFilteringEngine, CandidateGroup } from "./FilterEngine";
 // import { pp } from "../../src/client/lib/utils";
-import { expect } from 'chai';
+// import { expect } from 'chai';
+
+import Mocha from 'mocha';
+import 'chai/register-should';
+
 export function pp(a: any): string {
     return JSON.stringify(a, undefined, 2);
 }
-
 
 interface ILogEntry {
     logType: string;
@@ -56,7 +59,10 @@ function createFilter(cgs: CandidateGroup[]) {
     return new SelectionFilteringEngine(cgs);
 }
 
-describe("Selection Narrowing/Filtering", () => {
+describe("Selection Narrowing/Filtering", function() {
+    const self = this;
+    console.log('this', self.ctx);
+
     const cs1 = candidateGroup("foo", "alex");
     const cs2 = candidateGroup("bar", "blob");
     const cs3 = candidateGroup("foo", "alex");
@@ -70,38 +76,38 @@ describe("Selection Narrowing/Filtering", () => {
 
         const filterEngine = createFilter([cs1, cs2]);
 
-        expect(filterEngine.search("al").length).to.equal(3);
-        expect(filterEngine.search("ex #2").length).to.equal(1);
-        expect(filterEngine.search("2").length).to.equal(2);
-        expect(filterEngine.search("l").length).to.equal(6);
+        filterEngine.search("al").length.should.equal(3);
+        filterEngine.search("ex #2").length.should.equal(1);
+        filterEngine.search("2").length.should.equal(2);
+        filterEngine.search("l").length.should.equal(6);
 
     });
 
     it("groups entries together based on group key function", () => {
 
 
-        expect(createFilter([g1, g2, g3]).query("2").length)
-            .to.equal(2);
+        createFilter([g1, g2, g3]).query("2").length
+            .should.equal(2);
 
-        expect(createFilter([g1, g2]).query("2").length)
-            .to.equal(1);
+        createFilter([g1, g2]).query("2").length
+            .should.equal(1);
 
     });
 
     it("reports the unique (grouped) entry names", () => {
         const groupNames = _.map(createFilter([g1, g2, g3]).query("2"), (g) => g.keystr);
-        expect(groupNames).to.eql(["bar 2", "foo 2"]);
+        groupNames.should.eql(["bar 2", "foo 2"]);
     });
 
     it("reports the unique (grouped) entry names", () => {
         const groupNames = _.map(createFilter([g1, g2]).query("2"), (g) => g.keystr);
-        expect(groupNames).to.deep.equal(["foo 2"]);
+        groupNames.should.deep.equal(["foo 2"]);
     });
 
     it("reports the available query terms, both hit and miss", () => {
         const filterEngine = createFilter([g1, g2, g3]);
         const r = filterEngine.query("2");
-        console.log(pp(r));
+        // console.log(pp(r));
         //
     });
 
@@ -110,3 +116,5 @@ describe("Selection Narrowing/Filtering", () => {
         //
     });
 });
+
+

@@ -1,16 +1,24 @@
+
 import Vue from 'vue';
 import Vuex from 'vuex';
 
+import {
+  // ActionContext,
+  Store
+} from "vuex"
+
+import { getStoreBuilder } from "vuex-typex"
+
+import { FilterEngineState } from "./components/filter-engine/filter-engine-state";
+
 Vue.use(Vuex);
 
-export default new Vuex.Store({
-  state: {
 
-  },
-  mutations: {
+export interface RootState {
+  filterEngine: FilterEngineState
+}
 
-  },
-  actions: {
 
-  },
-});
+const store: Store<RootState> = getStoreBuilder<RootState>().vuexStore();
+export default store;
+

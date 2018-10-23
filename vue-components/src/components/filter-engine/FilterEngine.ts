@@ -10,11 +10,16 @@
 
 import _ from 'lodash';
 import lunr from 'lunr';
-// import { pp } from "./utils";
-// import { sortedUniqCountBy } from "./LodashPlus";
 
 type Candidate = object;
 
+export interface SelectionCandidate {
+    candidate: Candidate;
+    multikey: string[];
+    displayTitle: string;
+}
+
+export type SelectionCandidates = Array<SelectionCandidate>;
 
 export interface CandidateGroup {
     candidates: Candidate[];

@@ -1,0 +1,76 @@
+// http://css-tricks.com/centering-in-the-unknown/
+
+/* This parent can be any width and height */
+.block {
+  text-align: center;
+}
+
+/* The ghost, nudged to maintain perfect centering */
+.block:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -0.25em; /* Adjusts for spacing */
+}
+
+/* The element to be centered, can
+   also be of any width and height */
+.vcentered {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.bottom {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.top {
+  display: inline-block;
+  vertical-align: top;
+  text-align: top;
+}
+
+
+.spacedout {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.right {
+  text-align: right;
+}
+
+.left {
+  text-align: left;
+}
+
+.inlineblock {
+  display: inline-block
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.wrapok {
+  white-space: normal;
+}
+
+.center {
+  text-align: center;
+}
+
+.tdright {
+  align: right;
+}
+
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+}

@@ -1,8 +1,11 @@
 
 <div>
     <span>
-        <input>Filter</input>
+
+        <input v-model="state.queryString">Filter</input>
+
         <button>Reset</button>
+        <span>Echo: {{ state.queryString }}</span>
     </span>
     <div class="thinborder">
         <div>Query Term</div>
