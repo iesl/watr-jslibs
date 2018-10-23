@@ -136,39 +136,5 @@ export class SelectionFilteringEngine {
 
       return lunrIndex;
     }
-
-    // private debugOutputIndex(): void {
-    //     /* tslint:disable: no-console */
-    //     console.log("lunr Index");
-    //     // console.log(pp(this.lunrIndex));
-    //     console.log("lunr token set");
-    //     // console.log(pp(this.indexTokens));
-    // }
 }
 
-// public query2(queryStr: string): Results {
-//     const searchResults = this.search(queryStr);
-//     const hitRecords = _.map(searchResults, h => {
-//         const id = parseInt(h.ref, 10);
-//         return this.keyedRecords[id];
-//     });
-
-//     const groupedHits = _.groupBy(hitRecords, (rec) => {
-//         return _.join(rec.keys, " ");
-//     });
-
-//     const groups = _.map(_.toPairs(groupedHits), ([keys, group]) => {
-//         const rg: ResultGroup = {
-//             keyedRecords: group,
-//             keystr: keys // _.join(keys, "/")
-//             // matchTerms: []
-//         };
-//         return rg;
-//     });
-
-//     const results: Results = {
-//         groups
-//     };
-
-//     return results;
-// }

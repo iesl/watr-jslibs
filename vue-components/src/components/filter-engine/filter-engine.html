@@ -1,7 +1,6 @@
 
 <div>
     <span>
-
         <input v-model="state.queryString">Filter</input>
 
         <button>Reset</button>
@@ -14,6 +13,11 @@
     </div>
     <div class="thinborder">
         <div>Trace Logs</div>
-        <div>Hit: <span id="trace-menu-hits"></span> </div>
+        <ul>
+
+            <li v-for="item in read.allCandidates">
+                {{ item.displayTitle }}
+            </li>
+        </ul>
     </div>
 </div>

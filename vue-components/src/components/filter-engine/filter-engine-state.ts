@@ -5,32 +5,54 @@
 import { getStoreBuilder } from "vuex-typex"
 import { RootState } from "../../store";
 
+import {
+  SelectionCandidate,
+} from './FilterEngine';
+
+
 export interface FilterEngineState {
   queryString: string;
+  candidates: Array<SelectionCandidate>;
 }
 
 const initFilterEngineState: FilterEngineState = {
-  queryString: ""
+  queryString: "",
+  candidates: [],
 }
 
 const st = getStoreBuilder<RootState>().module("filterEngine", initFilterEngineState);
 
-// state
-const stateGetter = st.state();
+// mutations
+function setCandidates_(state: FilterEngineState, candidates: SelectionCandidate[]) {
+  state.candidates = candidates;
+}
 
+const readCandidates_ = st.read(s => {
+  return s.candidates;
+}, "readCandidates");
+
+const stateGetter = st.state();
 
 export default {
   // state
-  get state() { return stateGetter() },
 
-  // // getters (wrapped as real getters)
+  get state() { return stateGetter(); },
+
+
+  // getters (wrapped as real getters)
   // get items() { return itemsGetter() },
   // get numberOfItems() { return numberOfItemsGetter() },
 
-  // // mutations
-  // commitAppendItem: b.commit(appendItem),
-  // commitSetIsLoading: b.commit(setIsLoading),
+  mod: {
+    setCandidates: st.commit(setCandidates_),
+  },
 
-  // // actions
+
+  read: {
+    get allCandidates() {
+      return readCandidates_();
+    },
+  }
+
   // dispatchRestoreSavedBasket: b.dispatch(restoreSavedBasket)
 }

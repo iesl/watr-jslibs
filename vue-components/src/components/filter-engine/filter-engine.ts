@@ -2,17 +2,16 @@
  *
  */
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 
-import { SelectionFilteringEngine,
-         CandidateGroup,
-         KeyedRecords,
-         SelectionCandidate,
-         SelectionCandidates } from './FilterEngine';
+import {
+  SelectionFilteringEngine,
+} from './FilterEngine';
 
-import * as rx from "rxjs";
+// import * as rx from "rxjs";
 import Vue from 'vue';
 import feState from './filter-engine-state';
+// feState.state().candidates
 
 export default Vue.extend({
   name: 'FilterWidget',
@@ -33,8 +32,9 @@ export default Vue.extend({
   },
   data: function() {
     // let selectionCandidates: SelectionCandidates = [];
-    return {
-      ...feState,
-    }
+    return feState;
+    // return {
+    //   ...feState,
+    // }
   }
 });
