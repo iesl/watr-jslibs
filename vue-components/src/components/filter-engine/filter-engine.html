@@ -15,8 +15,8 @@
         <div>Trace Logs</div>
         <ul>
 
-            <li v-for="item in read.allCandidates">
-                {{ item.displayTitle }}
+            <li v-for="item in state.selectedGroups">
+                {{ item.keystr }} ({{ item.records.length }})
             </li>
         </ul>
     </div>

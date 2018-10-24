@@ -3,15 +3,13 @@
  */
 
 import _ from 'lodash';
+import Vue from 'vue';
 
 import {
   SelectionFilteringEngine,
 } from './FilterEngine';
 
-// import * as rx from "rxjs";
-import Vue from 'vue';
 import feState from './filter-engine-state';
-// feState.state().candidates
 
 export default Vue.extend({
   name: 'FilterWidget',
@@ -24,17 +22,29 @@ export default Vue.extend({
     }
 
   },
+
   created() {
-    // Populate #trace-menu-hits with :
-    //   self.makeUL(self.getCountedTitles())
-    //   getCountedTitles(): return this.formatKeyedRecordGroups(this.filteringEngine.getKeyedRecordGroups());
 
   },
+
+  watch: {
+
+    'state.candidateGroups': function (val, oldVal) {
+      console.log('new candidateGroup', val, oldVal);
+      const engine: SelectionFilteringEngine = this.$props.filteringEngine;
+      engine.setCandidateGroups(val);
+      const recordGroups = engine.getKeyedRecordGroups();
+      feState.mod.setSelectedGroups(recordGroups);
+    },
+
+    'state.queryString': function (val, oldVal) {
+      const engine: SelectionFilteringEngine = this.$props.filteringEngine;
+      const hitRecs = engine.query(val);
+      feState.mod.setSelectedGroups(hitRecs);
+    }
+  },
+
   data: function() {
-    // let selectionCandidates: SelectionCandidates = [];
     return feState;
-    // return {
-    //   ...feState,
-    // }
   }
 });

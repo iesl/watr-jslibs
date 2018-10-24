@@ -13,128 +13,132 @@ import lunr from 'lunr';
 
 type Candidate = object;
 
-export interface SelectionCandidate {
-    candidate: Candidate;
-    multikey: string[];
-    displayTitle: string;
-}
-
-export type SelectionCandidates = Array<SelectionCandidate>;
-
+/**
+ * User input into the selection engine:
+ */
 export interface CandidateGroup {
-    candidates: Candidate[];
-    groupKeyFunc(c: Candidate): string[];
+  candidates: Candidate[];
+  groupKeyFunc(c: Candidate): GroupKey;
 }
 
+/**
+ *
+ */
+export interface GroupKey {
+  multikey: string[];
+  displayTitle: string;
+}
 
+/**
+ * Result of applying the groupKeyfunc to a candidate
+ */
 export interface KeyedRecord {
-    candidate: Candidate;
-    keys: string[];
-    keystr: string;
-    n: number;
+  candidate: Candidate;
+  keys: string[];
+  keystr: string;
+  n: number;
 }
 
 export interface KeyedRecords {
-    records: KeyedRecord[];
-    keystr: string;
-}
-
-export interface ResultGroup {
-    keyedRecords: KeyedRecord[];
-    keystr: string;
-}
-
-export interface Results {
-    groups: ResultGroup[];
+  records: KeyedRecord[];
+  keystr: string;
 }
 
 export class SelectionFilteringEngine {
-    public indexTokens: string[];
-    private lunrIndex: lunr.Index;
-    private keyedRecords: KeyedRecord[];
-    private keyedRecordGroups: KeyedRecords[];
+  public indexTokens: string[];
+  private lunrIndex: lunr.Index;
+  private keyedRecords: KeyedRecord[];
+  private keyedRecordGroups: KeyedRecords[];
 
 
-    constructor(candidateSets: CandidateGroup[]) {
-      this.keyedRecords = this.regroupCandidates(candidateSets);
-      this.keyedRecordGroups = this.groupRecordsByKey(this.keyedRecords);
-      this.lunrIndex = this.initIndex(this.keyedRecords);
-      this.indexTokens = this.lunrIndex.tokenSet.toArray();
-      // this.debugOutputIndex();
-    }
+  constructor(candidateSets: CandidateGroup[]) {
+    this.keyedRecords = this.regroupCandidates(candidateSets);
+    this.keyedRecordGroups = this.groupRecordsByKey(this.keyedRecords);
+    this.lunrIndex = this.initIndex(this.keyedRecords);
+    this.indexTokens = this.lunrIndex.tokenSet.toArray();
+    // this.debugOutputIndex();
+  }
 
-    public groupRecordsByKey(records: KeyedRecord[]): KeyedRecords[] {
-      const groups = _.groupBy(records, r => r.keystr);
-      return _.map(_.toPairs(groups), ([keystr, recs]) => ({
-        records: _.sortBy(recs, r => r.n),
-        keystr,
-      } as KeyedRecords));
-    }
+  public setCandidateGroups(candidateSets: CandidateGroup[]) {
+    this.keyedRecords = this.regroupCandidates(candidateSets);
+    this.keyedRecordGroups = this.groupRecordsByKey(this.keyedRecords);
+    this.lunrIndex = this.initIndex(this.keyedRecords);
+    this.indexTokens = this.lunrIndex.tokenSet.toArray();
+  }
 
-    public getKeyedRecordGroups(): KeyedRecords[] {
-      return this.keyedRecordGroups;
-    }
+  public groupRecordsByKey(records: KeyedRecord[]): KeyedRecords[] {
+    const groups = _.groupBy(records, r => r.keystr);
+    return _.map(_.toPairs(groups), ([keystr, recs]) => ({
+      records: _.sortBy(recs, r => r.n),
+      keystr,
+    } as KeyedRecords));
+  }
 
-
-    public query(queryStr: string): KeyedRecords[] {
-      const searchResults = this.search(queryStr);
-      const hitRecords = _.map(searchResults, (h) => {
-        const id = parseInt(h.ref, 10);
-        return this.keyedRecords[id];
-      });
-
-      return this.groupRecordsByKey(hitRecords);
-    }
-
-    public search(queryStr: string): lunr.Index.Result[] {
-      const hits = this.lunrIndex.query((query) => {
-        const terms = _.filter(_.split(queryStr, / +/), a => a.length > 0);
-        _.each(terms, (queryTerm) => {
-          const clause: lunr.Clause = {
-            term: `*${queryTerm}*`,
-            presence: lunr.Query.presence.REQUIRED,
-          };
-          query.clause(clause);
-        });
-      });
-
-      return hits;
-    }
+  public getKeyedRecordGroups(): KeyedRecords[] {
+    return this.keyedRecordGroups;
+  }
 
 
-    private regroupCandidates(candidateSets: CandidateGroup[]): KeyedRecord[] {
-      const grouped = _.flatMap(candidateSets, candidateSet => _.map(candidateSet.candidates, (candidate) => {
-        const keys = candidateSet.groupKeyFunc(candidate);
-        const rec: KeyedRecord = {
-          candidate,
-          keys,
-          keystr: _.join(keys, ' '),
-          n: 0,
+  public query(queryStr: string): KeyedRecords[] {
+    const searchResults = this.search(queryStr);
+    const hitRecords = _.map(searchResults, (h) => {
+      const id = parseInt(h.ref, 10);
+      return this.keyedRecords[id];
+    });
+
+    return this.groupRecordsByKey(hitRecords);
+  }
+
+  public search(queryStr: string): lunr.Index.Result[] {
+    const hits = this.lunrIndex.query((query) => {
+      const terms = _.filter(_.split(queryStr, / +/), a => a.length > 0);
+      _.each(terms, (queryTerm) => {
+        const clause: lunr.Clause = {
+          term: `*${queryTerm}*`,
+          presence: lunr.Query.presence.REQUIRED,
         };
-        return rec;
-      }));
+        query.clause(clause);
+      });
+    });
 
-      const groupSorted = _.sortBy(grouped, g => g.keys);
-      _.each(groupSorted, (g, i) => g.n = i);
-      return groupSorted;
-    }
+    return hits;
+  }
 
-    private initIndex(keyedRecords: KeyedRecord[]): lunr.Index {
-      const lunrIndex = lunr(function (this: lunr.Index) {
-        const idx = this;
-        idx.field('tags');
-        idx.pipeline.reset();
-        _.each(keyedRecords, (rec, num) => {
-          const keystr = rec.keystr;
-          idx.add({
-            tags: keystr,
-            id: num,
-          });
+
+  private regroupCandidates(candidateSets: CandidateGroup[]): KeyedRecord[] {
+    const grouped = _.flatMap(candidateSets, candidateSet => _.map(candidateSet.candidates, candidate => {
+      const groupKey = candidateSet.groupKeyFunc(candidate);
+      const multikey = groupKey.multikey;
+      const multikeystr = _.join(multikey, ' ');
+      const rec: KeyedRecord = {
+        candidate,
+        keys: multikey,
+        keystr: multikeystr,
+        n: 0,
+      };
+      return rec;
+    }));
+
+    const groupSorted = _.sortBy(grouped, g => g.keys);
+    _.each(groupSorted, (g, i) => g.n = i);
+    return groupSorted;
+  }
+
+  private initIndex(keyedRecords: KeyedRecord[]): lunr.Index {
+    const lunrIndex = lunr(function (this: lunr.Index) {
+      const idx = this;
+      idx.field('tags');
+      idx.pipeline.reset();
+      _.each(keyedRecords, (rec, num) => {
+        const keystr = rec.keystr;
+        idx.add({
+          tags: keystr,
+          id: num,
         });
       });
+    });
 
 
-      return lunrIndex;
-    }
+    return lunrIndex;
+  }
 }
-
