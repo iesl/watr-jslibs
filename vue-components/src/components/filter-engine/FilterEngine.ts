@@ -8,6 +8,7 @@
  *
  */
 
+
 import _ from 'lodash';
 import lunr from 'lunr';
 
@@ -20,6 +21,9 @@ export interface CandidateGroup {
   candidates: Candidate[];
   groupKeyFunc(c: Candidate): GroupKey;
 }
+
+export type CandidateGroups = CandidateGroup[];
+
 
 /**
  *
@@ -69,8 +73,8 @@ export class SelectionFilteringEngine {
   public groupRecordsByKey(records: KeyedRecord[]): KeyedRecords[] {
     const groups = _.groupBy(records, r => r.keystr);
     return _.map(_.toPairs(groups), ([keystr, recs]) => ({
-      records: _.sortBy(recs, r => r.n),
       keystr,
+      records: _.sortBy(recs, r => r.n),
     } as KeyedRecords));
   }
 
@@ -106,18 +110,19 @@ export class SelectionFilteringEngine {
 
 
   private regroupCandidates(candidateSets: CandidateGroup[]): KeyedRecord[] {
-    const grouped = _.flatMap(candidateSets, candidateSet => _.map(candidateSet.candidates, candidate => {
-      const groupKey = candidateSet.groupKeyFunc(candidate);
-      const multikey = groupKey.multikey;
-      const multikeystr = _.join(multikey, ' ');
-      const rec: KeyedRecord = {
-        candidate,
-        keys: multikey,
-        keystr: multikeystr,
-        n: 0,
-      };
-      return rec;
-    }));
+    const grouped = _.flatMap(candidateSets, candidateSet =>
+                              _.map(candidateSet.candidates, (candidate) => {
+                                const groupKey = candidateSet.groupKeyFunc(candidate);
+                                const multikey = groupKey.multikey;
+                                const multikeystr = _.join(multikey, ' ');
+                                const rec: KeyedRecord = {
+                                  candidate,
+                                  keys: multikey,
+                                  keystr: multikeystr,
+                                  n: 0,
+                                };
+                                return rec;
+                              }));
 
     const groupSorted = _.sortBy(grouped, g => g.keys);
     _.each(groupSorted, (g, i) => g.n = i);
@@ -126,12 +131,11 @@ export class SelectionFilteringEngine {
 
   private initIndex(keyedRecords: KeyedRecord[]): lunr.Index {
     const lunrIndex = lunr(function (this: lunr.Index) {
-      const idx = this;
-      idx.field('tags');
-      idx.pipeline.reset();
+      this.field('tags');
+      this.pipeline.reset();
       _.each(keyedRecords, (rec, num) => {
         const keystr = rec.keystr;
-        idx.add({
+        this.add({
           tags: keystr,
           id: num,
         });

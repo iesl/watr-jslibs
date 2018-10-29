@@ -1,9 +1,11 @@
 
 /* tslint:disable: no-console */
 
+
 import _ from "lodash";
 
 import { CandidateGroup, GroupKey } from "./FilterEngine";
+
 
 export function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);
@@ -49,7 +51,6 @@ export function candidateGroup(
       const multikey = [name, `page=${c.page}`, `${c.tags}`];
       const displayTitle = "Todo??"
       return { multikey, displayTitle };
-      // return [name, `page=${c.page}`, `${c.tags}`];
     }
   );
 }

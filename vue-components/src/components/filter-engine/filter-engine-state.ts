@@ -1,12 +1,9 @@
-// import Vue from 'vue';
-// import Vuex from 'vuex';
-
-// import { ActionContext, Store } from "vuex"
 import { getStoreBuilder } from "vuex-typex"
 import { RootState } from "../../store";
 
 import {
-  KeyedRecord,
+  // KeyedRecord,
+  SelectionFilteringEngine,
   KeyedRecords,
   CandidateGroup
 } from './FilterEngine';
@@ -14,28 +11,27 @@ import {
 
 export interface FilterEngineState {
   queryString: string;
-
-  candidates: Array<KeyedRecord>;
-  candidateGroups: Array<CandidateGroup>;
-
-  selectedGroups: Array<KeyedRecords>;
+  candidateGroups: CandidateGroup[];
+  selectedGroups: KeyedRecords[];
+  filteringEngine: SelectionFilteringEngine;
 }
 
 const initFilterEngineState: FilterEngineState = {
   queryString: "",
-  candidates: [],
   candidateGroups: [],
   selectedGroups: [],
+  filteringEngine: new SelectionFilteringEngine([])
 }
 
 const st = getStoreBuilder<RootState>().module("filterEngine", initFilterEngineState);
 
 // mutations
-function setCandidates_(state: FilterEngineState, candidates: KeyedRecord[]) {
-  state.candidates = candidates;
-}
+// function setCandidates_(state: FilterEngineState, candidates: KeyedRecord[]) {
+//   state.candidates = candidates;
+// }
 
 function addCandidateGroup_(state: FilterEngineState, group: CandidateGroup) {
+  // console.log('addCandidateGroup_', group);
   state.candidateGroups.push(group);
 }
 function clearCandidateGroups_(state: FilterEngineState) {
@@ -46,26 +42,20 @@ function setSelectedGroups_(state: FilterEngineState, groups: KeyedRecords[]) {
   state.selectedGroups = groups;
 }
 
-const readCandidates_ = st.read(s => {
-  return s.candidates;
-}, "readCandidates");
 
 const stateGetter = st.state();
 
-const read = {
-  get allCandidates() {
-    return readCandidates_();
-  },
+const getters = {
+
 };
 
-const mod = {
-  setCandidates: st.commit(setCandidates_),
+const mutations = {
   addCandidateGroup: st.commit(addCandidateGroup_),
   clearCandidateGroups: st.commit(clearCandidateGroups_),
   setSelectedGroups: st.commit(setSelectedGroups_),
 };
 
-const action = {
+const actions = {
 
 };
 
@@ -73,8 +63,8 @@ export default {
 
   get state() { return stateGetter(); },
 
-  read,
-  mod,
-  action
+  getters,
+  mutations,
+  actions
 
 }

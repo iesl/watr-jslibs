@@ -1,10 +1,10 @@
 
 <div>
     <span>
-        <input v-model="state.queryString">Filter</input>
+        <input v-model="queryString">Filter</input>
 
         <button>Reset</button>
-        <span>Echo: {{ state.queryString }}</span>
+        <span>Echo: {{ queryString }}</span>
     </span>
     <div class="thinborder">
         <div>Query Term</div>
@@ -14,8 +14,9 @@
     <div class="thinborder">
         <div>Trace Logs</div>
         <ul>
+            <span>???</span> | <br/>
 
-            <li v-for="item in state.selectedGroups">
+            <li v-for="item in selectedGroups">
                 {{ item.keystr }} ({{ item.records.length }})
             </li>
         </ul>

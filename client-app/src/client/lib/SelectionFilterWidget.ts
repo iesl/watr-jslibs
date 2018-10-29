@@ -47,80 +47,12 @@ export class SelectionFilterWidget {
 
     public getVueNode(): Vue {
 
-        // console.log("x: elem: vue: ", Vue);
-        // console.log("x: elem: vnode: ", ({} instanceof (typeof VNode)));
-        // console.log("x: elem: vuem*: ", vuem);
-
         const self = this;
-
-        // rx.fromEvent(clearButton, "click").pipe(
-        //     rxop.scan<Event, number>(count => count + 1, 0),
-        //     rxop.multicast(self.clearLogs),
-        //     rxop.refCount()
-        // );
-
-
-        const vue = new Vue({
-            data: {
-                message: "Hello Vue!",
-                message2: "Hello Vue (2)!"
-            },
-            computed: {
-                currentMessage: function() {
-                    return `${this.message} ++ ${this.message2}`;
-                }
-            },
-
-
-
-            created: function(this: Vue) { // mounted, updated, destroyed
-                // don't use arrow functions
-            },
-            methods: {
-                nextmessage: function f(event) {
-                    const vm = this;
-                    const data = vm.$data;
-                    console.log("nextmessage", data);
-                    data.message = "next!";
-                    data.message2 = "next!";
-                }
-            },
-
-            render: function create(createElement): VNode {
-                const div = createElement(
-                    "div",
-                    {},
-                    [
-                        this.message,
-                        createElement(
-                            "button", {
-                                on: {
-                                    click: this.nextmessage
-                                }
-                            })
-                    ]);
-                return div;
-            }
-
-        });
 
         // console.log('vuetmp', vuetmp);
 
         const vuex = new Vue({
-            data: {
-                message: "Hello Vue!",
-                message2: "Hello Vue (2)!"
-            },
 
-            methods: {
-                nextmessage: function f(event) {
-                    const vm = this;
-                    const data = vm.$data;
-                    console.log("nextmessage", data);
-                    data.message = "next!";
-                    data.message2 = "next!";
-                }
-            },
 
             render: function create(): VNode {
                 const vm = this;

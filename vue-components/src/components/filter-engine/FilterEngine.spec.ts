@@ -1,16 +1,13 @@
 
 /* tslint:disable: no-console */
 
-import * as _ from "lodash";
+import _ from "lodash";
 
 import { SelectionFilteringEngine, CandidateGroup } from "./FilterEngine";
-// import { pp } from "../../src/client/lib/utils";
-// import { expect } from 'chai';
 
-import Mocha from 'mocha';
 import 'chai/register-should';
 
-import { candidateGroupF, candidateGroup, pp, ILogEntry } from './dev-helpers';
+import { candidateGroupF, candidateGroup } from './dev-helpers';
 
 
 function createFilter(cgs: CandidateGroup[]) {
@@ -23,7 +20,7 @@ describe("Selection Narrowing/Filtering", function() {
 
     const cs1 = candidateGroup("foo", "alex");
     const cs2 = candidateGroup("bar", "blob");
-    const cs3 = candidateGroup("foo", "alex");
+    // const cs3 = candidateGroup("foo", "alex");
 
 
   const g1 = candidateGroupF("foo", "alex", (g) => ({ multikey: ["foo", g.page.toString()], displayTitle: "??"  }));
@@ -66,8 +63,8 @@ describe("Selection Narrowing/Filtering", function() {
     });
 
     it("reports the available query terms, both hit and miss", () => {
-        const filterEngine = createFilter([g1, g2, g3]);
-        const r = filterEngine.query("2");
+        // const filterEngine = createFilter([g1, g2, g3]);
+        // const r = filterEngine.query("2");
         // console.log(pp(r));
         //
     });
