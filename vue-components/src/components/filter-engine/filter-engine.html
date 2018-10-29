@@ -16,9 +16,10 @@
         <ul>
             <span>???</span> | <br/>
 
-            <li v-for="item in selectedGroups">
+            <li v-for="item in this.selectedGroups">
                 {{ item.keystr }} ({{ item.records.length }})
             </li>
+            <span>/done</span>
         </ul>
     </div>
 </div>

@@ -1,8 +1,7 @@
 
 import Vue from 'vue';
-import Vuex from 'vuex';
 
-import {
+import Vuex, {
   // ActionContext,
   Store
 } from "vuex"

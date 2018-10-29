@@ -2,7 +2,7 @@ import Vue from 'vue';
 import $ from "jquery";
 
 import FilterWidget from '@/components/filter-engine/filter-engine.vue';
-import feState from './filter-engine-state';
+import filterEngineState from './filter-engine-state';
 
 import { candidateGroupF } from './dev-helpers';
 
@@ -27,10 +27,6 @@ export default Vue.extend({
   name: 'FilterEngineDev',
 
   props: {
-    // candidateGroups: {
-    //   type: Array<CandidateGroup>,
-    //   default() { return []; },
-    // },
   },
 
   components: {
@@ -52,14 +48,14 @@ export default Vue.extend({
       };
 
 
-      feState.mutations.addCandidateGroup(g);
+      filterEngineState.mutations.addCandidateGroup(g);
 
       const candidates1 = candidateGroupF("foo", "alex", (g) => {
         const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
         return r;
       });
 
-      feState.mutations.addCandidateGroup(candidates1);
+      filterEngineState.mutations.addCandidateGroup(candidates1);
 
     }, (err) => {
       console.log("err", err);

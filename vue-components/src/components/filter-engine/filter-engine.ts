@@ -6,63 +6,24 @@ import _ from 'lodash';
 import Vue from 'vue';
 import { mapMutations, mapState } from 'vuex';
 
-import {
-  // SelectionFilteringEngine,
-  // CandidateGroup,
-  // CandidateGroups
-} from './FilterEngine';
 
 import filterEngineState, { FilterEngineState } from './filter-engine-state';
 
-
-// interface FilterWidgetFields {
-//   filteringEngine: SelectionFilteringEngine;
-//   debouncedQuery: () => void;
-// }
-
-// function extraFields(o: any): FilterWidgetFields {
-//   return o as FilterWidgetFields;
-// }
-
-// export filterCandidatePlugin(src) {
-//       const filterEngine = new SelectionFilteringEngine([]);
-//   return (store) => {
-
-//   }
-// }
 
 
 export default Vue.extend({
   name: 'FilterWidget',
   components: {},
   props: {
-    // candidateGroups: {
-    //   type: CandidateGroups,
-    //   default() { return []; },
-    // },
-    // filteringEngine: {
-    //   type: SelectionFilteringEngine,
-    //   default() { return new SelectionFilteringEngine([]); }
-    // }
-
   },
 
   created() {
     console.log('created');
-    // extraFields(this).debouncedQuery = _.debounce(this.query, 350);
-    // extraFields(this).filteringEngine = new SelectionFilteringEngine([]);
+    this.query = this.debouncedQuery();
   },
 
-  // self() { return extraFields(this); },
 
   watch: {
-
-    // 'this.$store.state.filterEngine.candidateGroups'() {
-
-    // candidateGroups: function () {
-    //   console.log("watch: candidateGroups");
-    //   return filterEngineState.state.candidateGroups;
-    // },
 
     // 'state.candidateGroups': function(val) {
     //   console.log("watch: candidateGroups");
@@ -73,19 +34,16 @@ export default Vue.extend({
     // },
 
     queryString () {
-      extraFields(this).debouncedQuery();
+      this.query();
     },
 
-    // ...mapState({
-    //   candidateGroups: (s: {filterEngine: FilterEngineState } ) => {
+    ...mapState({
+      candidateGroups: (s: {filterEngine: FilterEngineState } ) => {
+        // const groups = s.filterEngine.candidateGroups;
+        // return s.filterEngine.candidateGroups;
 
-    //     console.log('watch: s.filterEngine', s.filterEngine);
-    //     const groups = s.filterEngine.candidateGroups;
-    //     console.log('watch: groups', groups);
-    //     return s.filterEngine.candidateGroups;
-
-    //   }
-    // })
+      }
+    })
   },
 
   computed: {
@@ -93,33 +51,42 @@ export default Vue.extend({
       console.log(filterEngineState.state.selectedGroups);
       return filterEngineState.state.selectedGroups;
     },
-    ...mapState({
-      candidateGroups: (s) => {
-        console.log('computed: s', s);
-        console.log('computed: s.filterEngine', s.filterEngine);
-        const groups = s.filterEngine.candidateGroups;
-        console.log('groups', groups);
 
-        // const engine = extraFields(thisComponent).filteringEngine;
-        const self = () => () => this;
-        const engine = extraFields(self()());
-        // const engine = self().filteringEngine;
+    ...mapState({
+      candidateGroups: function f(s: {filterEngineState: FilterEngineState}) {
+        // console.log('computed: s', s);
+        // console.log('computed: s.filterEngine', s.filterEngine);
+        const engine = s.filterEngine.filteringEngine;
+        const groups = s.filterEngine.candidateGroups;
         console.log('engine', engine);
-        // engine.setCandidateGroups(groups);
-          // const recordGroups = engine.getKeyedRecordGroups();
-        //   filterEngineState.mutations.setSelectedGroups(recordGroups);
+        console.log('groups', groups);
+        engine.setCandidateGroups(groups);
+        const recordGroups = engine.getKeyedRecordGroups();
+        filterEngineState.mutations.setSelectedGroups(recordGroups);
         return s.filterEngine.candidateGroups;
       }
     })
+
   },
 
   methods: {
-    query() {
-      const querystr = this.queryString;
-      console.log('querying', querystr);
-      const engine = extraFields(this).filteringEngine;
-      const hitRecs = engine.query(querystr);
-      filterEngineState.mutations.setSelectedGroups(hitRecs);
+    query(): (void & _.Cancelable) {
+      throw new Error("uninitialized query function");
+    },
+
+    debouncedQuery: function q(): ((() => void) & _.Cancelable) {
+      console.log('deb:querying', this.queryString);
+      const qfunc = () => {
+        const querystr = this.queryString;
+        console.log('querying', querystr, filterEngineState.state.filteringEngine);
+        const engine = filterEngineState.state.filteringEngine;
+        const hitRecs = engine.query(querystr);
+        filterEngineState.mutations.setSelectedGroups(hitRecs);
+      }
+
+      const debouncedQfunc: (() => void) & _.Cancelable = _.debounce(qfunc, 350)
+
+      return debouncedQfunc;
     }
 
   },
@@ -127,7 +94,7 @@ export default Vue.extend({
   data() {
     // return filterEngineState;
     return {
-      queryString: ''
+      queryString: filterEngineState.state.queryString
     };
   }
 });

@@ -25,13 +25,8 @@ const initFilterEngineState: FilterEngineState = {
 
 const st = getStoreBuilder<RootState>().module("filterEngine", initFilterEngineState);
 
-// mutations
-// function setCandidates_(state: FilterEngineState, candidates: KeyedRecord[]) {
-//   state.candidates = candidates;
-// }
-
 function addCandidateGroup_(state: FilterEngineState, group: CandidateGroup) {
-  // console.log('addCandidateGroup_', group);
+  console.log('addCandidateGroup_', group);
   state.candidateGroups.push(group);
 }
 function clearCandidateGroups_(state: FilterEngineState) {
