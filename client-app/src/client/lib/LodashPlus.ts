@@ -4,9 +4,8 @@
 
 import * as _ from "lodash";
 
-export function zipWithIndex(vs: any[], ibegin: number) {
-    const i = ibegin || 0;
-    return _.zip(vs, _.range(i, vs.length+i));
+export function zipWithIndex(vs: any[], ibegin = 0) {
+    return _.zip(vs, _.range(ibegin, vs.length+i));
 }
 
 

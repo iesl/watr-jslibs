@@ -58,5 +58,6 @@
       "vue-cli-service lint",
       "git add"
     ]
-  }
+  },
+  "main": "src/index.ts"
 }

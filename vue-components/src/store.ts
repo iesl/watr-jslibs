@@ -3,21 +3,28 @@ import Vue from 'vue';
 
 import Vuex, {
   // ActionContext,
-  Store
+  // Store
 } from "vuex"
 
-import { getStoreBuilder } from "vuex-typex"
+// import { getStoreBuilder } from "vuex-typex"
 
-import { FilterEngineState } from "./components/filter-engine/filter-engine-state";
+import { FilteringStateModule, FilteringState } from "./components/filter-engine/filter-engine-state";
 
 Vue.use(Vuex);
 
+export default new Vuex.Store({
+
+  modules: {
+    filteringState: new FilteringStateModule()
+  }
+
+});
+
 
 export interface RootState {
-  filterEngine: FilterEngineState
+  filteringState: FilteringState
 }
 
 
-const store: Store<RootState> = getStoreBuilder<RootState>().vuexStore();
-export default store;
-
+// const store: Store<RootState> = getStoreBuilder<RootState>().vuexStore();
+// export default store;

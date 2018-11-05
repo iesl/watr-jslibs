@@ -2,15 +2,11 @@ import Vue from 'vue';
 import $ from "jquery";
 
 import FilterWidget from '@/components/filter-engine/filter-engine.vue';
-import filterEngineState from './filter-engine-state';
+// import filterEngineState from './filter-engine-state';
 
 import { candidateGroupF } from './dev-helpers';
 
-import {
-  // SelectionFilteringEngine,
-  CandidateGroup,
-  // CandidateGroups
-} from './FilterEngine';
+import { CandidateGroup } from './FilterEngine';
 
 interface Headers {
   tags: string;
@@ -38,6 +34,7 @@ export default Vue.extend({
   },
 
   mounted() {
+    console.log('dev:mounted', this.$store.getters['filteringState/all']);
 
     $.getJSON("http://localhost:3000/tracelog-2.json", (tracelogs: LogEntry[]) => {
       // console.log("tracelogs", pp(tracelogs[0]));
@@ -47,15 +44,16 @@ export default Vue.extend({
         groupKeyFunc: (l: LogEntry) => ({ multikey: ["trace", `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: "todo" })
       };
 
+      this.$store.commit('filteringState/addCandidateGroup', g);
 
-      filterEngineState.mutations.addCandidateGroup(g);
+      // filterEngineState.mutations.addCandidateGroup(g);
 
       const candidates1 = candidateGroupF("foo", "alex", (g) => {
         const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
         return r;
       });
 
-      filterEngineState.mutations.addCandidateGroup(candidates1);
+      // this.$store.commit('filteringState/addCandidateGroup', candidates1);
 
     }, (err) => {
       console.log("err", err);

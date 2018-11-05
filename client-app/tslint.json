@@ -1,32 +1,11 @@
 {
-    "defaultSeverity": "error",
     "extends": [
-        "tslint:recommended"
+      "../shared/tslint.json"
     ],
     "linterOptions": {
-        "exclude": [
-            "node_modules/**/*"
-        ]
     },
     "jsRules": {},
     "rules": {
-        "object-literal-sort-keys": false,
-        "trailing-comma": [true, {"multiline": "ignore", "singleline": "never"}],
-        "no-consecutive-blank-lines": false,
-        "max-classes-per-file": false,
-        "ordered-imports": false,
-        "arrow-parens": false,
-        "interface-name": false,
-        "whitespace": [true,
-                       "check-branch",
-                       "check-decl",
-                       "check-separator",
-                       "check-rest-spread",
-                       "check-type",
-                       "check-typecast",
-                       "check-type-operator",
-                       "check-preblock"
-                      ]
     },
     "rulesDirectory": []
 }

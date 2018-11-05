@@ -19,7 +19,7 @@ import { setupPageImages } from '../lib/PageImageListWidget.js';
 import * as stepper from  '../lib/d3-stepper.js';
 import * as coords from '../lib/coord-sys';
 
-import * as sfw from '../lib/SelectionFilterWidget';
+// import * as sfw from '../lib/SelectionFilterWidget';
 
 import { t } from '../lib/tstags';
 
@@ -104,7 +104,7 @@ function getCls(data) {
 
 }
 
-function dataToColor(d) {
+function dataToColor() {
     let color = 'black';
     // if (d.stroke !== undefined) {
     //     color = d.stroke;
@@ -209,6 +209,7 @@ function runAllTraces(tracelogs) {
     });
 }
 
+
 function runTrace(tracelog) {
     let pageNum =  tracelog.page;
 
@@ -257,22 +258,22 @@ export function runMain() {
 
         pageImageListWidget = setupPageImages('page-image-list', textGridJson, gridData);
 
-        const traceLogFilter = new sfw.SelectionFilterWidget([tracelogJson]);
+        // const traceLogFilter = new sfw.SelectionFilterWidget([tracelogJson]);
 
-        const n = traceLogFilter.getNode();
-        $("#tracelog-menu").append(n);
+        // const n = traceLogFilter.getNode();
+        // $("#tracelog-menu").append(n);
 
-        traceLogFilter.clearLogs.subscribe((i) => {
-            d3.selectAll('image')
-                .attr('opacity', 1.0);
+        // traceLogFilter.clearLogs.subscribe((i) => {
+        //     d3.selectAll('image')
+        //         .attr('opacity', 1.0);
 
-            d3.selectAll(".shape")
-                .remove();
-        });
+        //     d3.selectAll(".shape")
+        //         .remove();
+        // });
 
-        traceLogFilter.selectedTraceLogs.subscribe((selectedLogs) => {
-            runAllTraces(selectedLogs);
-        });
+        // traceLogFilter.selectedTraceLogs.subscribe((selectedLogs) => {
+        //     runAllTraces(selectedLogs);
+        // });
 
     }) .catch(error => {
         $('.content-pane').append(`<div><p>ERROR: ${error}: ${error}</p></div>`);
