@@ -24,7 +24,6 @@ export interface CandidateGroup {
 
 export type CandidateGroups = CandidateGroup[];
 
-
 /**
  *
  */
@@ -43,7 +42,7 @@ export interface KeyedRecord {
   n: number;
 }
 
-export interface KeyedRecords {
+export interface KeyedRecordGroup {
   records: KeyedRecord[];
   keystr: string;
 }
@@ -52,7 +51,7 @@ export class SelectionFilteringEngine {
   public indexTokens: string[];
   private lunrIndex: lunr.Index;
   private keyedRecords: KeyedRecord[];
-  private keyedRecordGroups: KeyedRecords[];
+  private keyedRecordGroups: KeyedRecordGroup[];
 
 
   constructor(candidateSets: CandidateGroup[]) {
@@ -60,7 +59,6 @@ export class SelectionFilteringEngine {
     this.keyedRecordGroups = this.groupRecordsByKey(this.keyedRecords);
     this.lunrIndex = this.initIndex(this.keyedRecords);
     this.indexTokens = this.lunrIndex.tokenSet.toArray();
-    // this.debugOutputIndex();
   }
 
   public setCandidateGroups(candidateSets: CandidateGroup[]) {
@@ -70,20 +68,20 @@ export class SelectionFilteringEngine {
     this.indexTokens = this.lunrIndex.tokenSet.toArray();
   }
 
-  public groupRecordsByKey(records: KeyedRecord[]): KeyedRecords[] {
+  public groupRecordsByKey(records: KeyedRecord[]): KeyedRecordGroup[] {
     const groups = _.groupBy(records, r => r.keystr);
     return _.map(_.toPairs(groups), ([keystr, recs]) => ({
       keystr,
       records: _.sortBy(recs, r => r.n),
-    } as KeyedRecords));
+    } as KeyedRecordGroup));
   }
 
-  public getKeyedRecordGroups(): KeyedRecords[] {
+  public getKeyedRecordGroups(): KeyedRecordGroup[] {
     return this.keyedRecordGroups;
   }
 
 
-  public query(queryStr: string): KeyedRecords[] {
+  public query(queryStr: string): KeyedRecordGroup[] {
     const searchResults = this.search(queryStr);
     const hitRecords = _.map(searchResults, (h) => {
       const id = parseInt(h.ref, 10);
@@ -107,7 +105,6 @@ export class SelectionFilteringEngine {
 
     return hits;
   }
-
 
   private regroupCandidates(candidateSets: CandidateGroup[]): KeyedRecord[] {
     const grouped = _.flatMap(candidateSets, candidateSet =>

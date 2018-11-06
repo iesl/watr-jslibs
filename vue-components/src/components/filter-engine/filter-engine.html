@@ -1,11 +1,12 @@
 
 <div>
     <span>
-        <input v-model="queryString">Filter</input>
 
-        <button>Reset</button>
-        <span>Echo: {{ queryString }}</span>
+        <input v-on:keyup.enter="filterUpdated" v-model="queryString">Filter</input>
+        <button @click="filterReset">Reset</button>
+
     </span>
+
     <div class="thinborder">
         <div>Query Term</div>
         <div>Hit: <span id="trace-menu-terms-hit"></span> </div>
@@ -14,14 +15,12 @@
     <div class="thinborder">
         <div>Trace Logs</div>
         <ul>
-            <span>???</span> | <br/>
 
-            <li v-for="item in this.selectedGroups">
+            <li v-for="item in currentSelections">
                 {{ item.keystr }} ({{ item.records.length }})
             </li>
             <span>/done</span>
         </ul>
     </div>
 </div>
-
 

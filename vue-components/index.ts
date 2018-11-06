@@ -9,7 +9,7 @@
 //   CandidateGroup,
 //   CandidateGroups,
 //   KeyedRecord,
-//   KeyedRecords,
+//   KeyedRecordGroup,
 //   SelectionFilteringEngine
 // } from './filter-engine/FilterEngine';
 
@@ -22,7 +22,7 @@
 // export interface CandidateGroup;
 // export interface CandidateGroups;
 // export interface KeyedRecord;
-// export interface KeyedRecords;
+// export interface KeyedRecordGroup;
 // export interface FilterEngineState;
 
 // export default components;

@@ -1,39 +1,41 @@
 
 import {
   SelectionFilteringEngine,
-  KeyedRecords,
+  KeyedRecordGroup,
   CandidateGroup
 } from './FilterEngine';
 
 import { Module, GetterTree, MutationTree, ActionTree, Plugin } from 'vuex'
 
-// Alt version
 export class FilteringState {
-  // queryString: string = "";
-  candidateGroups: CandidateGroup[] = [];
-  selectedGroups: KeyedRecords[] = [];
+  allCandidateGroups: CandidateGroup[] = [];
+  currentSelections: KeyedRecordGroup[] = [];
+  filteredRecords: KeyedRecordGroup[] = [];
   filteringEngine: SelectionFilteringEngine = new SelectionFilteringEngine([]);
 }
 
 export function all(state: FilteringState): FilteringState {
   return state;
 }
-export function selectedGroups(state: FilteringState): KeyedRecords[] {
-  return state.selectedGroups;
+
+export function currentSelections(state: FilteringState): KeyedRecordGroup[] {
+  return state.currentSelections;
 }
 
-/**
- * Mutations
- */
 function addCandidateGroup(state: FilteringState, group: CandidateGroup) {
-  state.candidateGroups.push(group);
-}
-function clearCandidateGroups(state: FilteringState) {
-  state.candidateGroups = [];
+  state.allCandidateGroups.push(group);
 }
 
-function setSelectedGroups(state: FilteringState, groups: KeyedRecords[]) {
-  state.selectedGroups = groups;
+function clearCandidateGroups(state: FilteringState) {
+  state.allCandidateGroups = [];
+}
+
+function setCurrentSelections(state: FilteringState, groups: KeyedRecordGroup[]) {
+  state.currentSelections = groups;
+}
+
+function setFilteredRecords(state: FilteringState, groups: KeyedRecordGroup[]) {
+  state.filteredRecords = groups;
 }
 
 export class FilteringStateModule implements Module<FilteringState, any> {
@@ -46,7 +48,7 @@ export class FilteringStateModule implements Module<FilteringState, any> {
   }
 
   mutations = <MutationTree<FilteringState>> {
-    addCandidateGroup, clearCandidateGroups, setSelectedGroups
+    addCandidateGroup, clearCandidateGroups, setCurrentSelections, setFilteredRecords
   }
 
   getters = <GetterTree<FilteringState, any>> {
@@ -55,84 +57,8 @@ export class FilteringStateModule implements Module<FilteringState, any> {
 
   plugins: Plugin<FilteringState>[] = []
 
-  // create everything
   constructor(plugins?: Plugin<FilteringState>[]) {
     this.state = new FilteringState();
     this.plugins = plugins ? plugins : [];
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// export interface FilterEngineState {
-//   queryString: string;
-//   candidateGroups: CandidateGroup[];
-//   selectedGroups: KeyedRecords[];
-//   filteringEngine: SelectionFilteringEngine;
-// }
-//
-// const initFilterEngineState: FilterEngineState = {
-//   queryString: "",
-//   candidateGroups: [],
-//   selectedGroups: [],
-//   filteringEngine: new SelectionFilteringEngine([])
-// }
-//
-// const st = getStoreBuilder<RootState>().module("filterEngine", initFilterEngineState);
-//
-// function addCandidateGroup_(state: FilterEngineState, group: CandidateGroup) {
-//   console.log('addCandidateGroup_', group);
-//   state.candidateGroups.push(group);
-// }
-// function clearCandidateGroups_(state: FilterEngineState) {
-//   state.candidateGroups = [];
-// }
-//
-// function setSelectedGroups_(state: FilterEngineState, groups: KeyedRecords[]) {
-//   state.selectedGroups = groups;
-// }
-//
-//
-// const stateGetter = st.state();
-//
-// const getters = {
-//
-// };
-//
-// const mutations = {
-//   addCandidateGroup: st.commit(addCandidateGroup_),
-//   clearCandidateGroups: st.commit(clearCandidateGroups_),
-//   setSelectedGroups: st.commit(setSelectedGroups_),
-// };
-//
-// const actions = {
-//
-// };
-//
-// export default {
-//
-//   get state() { return stateGetter(); },
-//
-//   getters,
-//   mutations,
-//   actions
-//
-// }
-//

@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue, { CreateElement, VNode } from 'vue';
 import $ from "jquery";
 
 import FilterWidget from '@/components/filter-engine/filter-engine.vue';
@@ -6,7 +6,7 @@ import FilterWidget from '@/components/filter-engine/filter-engine.vue';
 
 import { candidateGroupF } from './dev-helpers';
 
-import { CandidateGroup } from './FilterEngine';
+import { CandidateGroup, KeyedRecordGroup } from './FilterEngine';
 
 interface Headers {
   tags: string;
@@ -26,10 +26,26 @@ export default Vue.extend({
   },
 
   components: {
-    FilterWidget
+    FilterWidget,
   },
 
   created() {
+
+  },
+
+  methods: {
+
+    onFilterUpdate() {
+      console.log('onFilterUpdate');
+    }
+  },
+
+  computed: {
+
+    filteredRecords(): KeyedRecordGroup[] {
+      const { filteredRecords } = this.$store.getters['filteringState/all']
+      return filteredRecords;
+    },
 
   },
 
@@ -46,14 +62,13 @@ export default Vue.extend({
 
       this.$store.commit('filteringState/addCandidateGroup', g);
 
-      // filterEngineState.mutations.addCandidateGroup(g);
 
       const candidates1 = candidateGroupF("foo", "alex", (g) => {
         const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
         return r;
       });
 
-      // this.$store.commit('filteringState/addCandidateGroup', candidates1);
+      this.$store.commit('filteringState/addCandidateGroup', candidates1);
 
     }, (err) => {
       console.log("err", err);

@@ -8,53 +8,44 @@ import Vue, {
   // ComponentOptions,
 } from 'vue';
 
-// import {
-//   mapState
-// } from 'vuex';
-
-
 import { FilteringState } from './filter-engine-state';
 
 import {
   CandidateGroup,
-  KeyedRecords,
-  // GroupKey
+  KeyedRecordGroup,
 } from "./FilterEngine";
 
 
 const component = Vue.extend({
   name: 'FilterWidget',
   components: {},
-  props: {
-    myprop: {
 
-    }
+  props: {
   },
 
   methods: {
     query(): void {
-    }
-    // query: (throw new Error("uninitialized query function")) as ((() => void) & _.Cancelable),
-    // query: null as any as ((() => void) & _.Cancelable),
+    },
 
+    filterReset(): void {
+      this.$store.commit('filteringState/setFilteredRecords', []);
+    },
 
+    filterUpdated(): void {
+      const { currentSelections } = this.$store.getters['filteringState/all']
+      this.$store.commit('filteringState/setFilteredRecords', currentSelections);
+    },
   },
 
   created() {
     console.log('created');
 
-    // debouncedQuery: function q(): ((() => void) & _.Cancelable) {
-    // console.log('deb:querying', this.queryString);
     const store = this.$store;
 
     const qfunc = () => {
-      // console.log('querying', querystr, filterEngineState.state.filteringEngine);
-      const { filteringEngine, candidateGroups } = store.getters['filteringState/all']
-      // console.log('querying this=', this);
+      const { filteringEngine, allCandidateGroups } = store.getters['filteringState/all']
       const hitRecs = filteringEngine.query(this.queryString);
-      // store.commit
-      this.$store.commit('filteringState/setSelectedGroups', hitRecs);
-
+      this.$store.commit('filteringState/setCurrentSelections', hitRecs);
     }
 
     const debouncedQfunc: (() => void) & _.Cancelable = _.debounce(qfunc, 350)
@@ -67,55 +58,25 @@ const component = Vue.extend({
     queryString () {
       this.query();
     },
-    candidateGroups: (s: {filterEngine: FilteringState } ) => {
-      // const groups = s.filterEngine.candidateGroups;
-      // return s.filterEngine.candidateGroups;
-    },
 
-    // ...mapState({
-    //   candidateGroups: (s: {filterEngine: FilteringState } ) => {
-    //     // const groups = s.filterEngine.candidateGroups;
-    //     // return s.filterEngine.candidateGroups;
-    //   }
-    // })
+    allCandidateGroups: () => {}
+
   },
 
   computed: {
 
-    selectedGroups(): KeyedRecords[] {
-      // const groups = this.$store.getters['filteringState/selectedGroups'];
-      const { selectedGroups } = this.$store.getters['filteringState/all']
-      console.log('computed:selectedGroups()', selectedGroups);
-      return selectedGroups;
+    currentSelections(): KeyedRecordGroup[] {
+      const { currentSelections } = this.$store.getters['filteringState/all']
+      return currentSelections;
     },
 
-    candidateGroups(): CandidateGroup  {
-      console.log('computed:candidateGroups');
-      // console.log('computed: s.filterEngine', s.filterEngine);
-      // this.$store.state
-      const { filteringEngine, candidateGroups } = this.$store.getters['filteringState/all']
-      console.log('engine', filteringEngine);
-      console.log('candidateGroups', candidateGroups);
-      filteringEngine.setCandidateGroups(candidateGroups);
+    allCandidateGroups(): CandidateGroup  {
+      const { filteringEngine, allCandidateGroups } = this.$store.getters['filteringState/all']
+      filteringEngine.setCandidateGroups(allCandidateGroups);
       const recordGroups = filteringEngine.getKeyedRecordGroups();
-      this.$store.commit('filteringState/setSelectedGroups', recordGroups);
-      return candidateGroups;
+      this.$store.commit('filteringState/setCurrentSelections', recordGroups);
+      return allCandidateGroups;
     }
-
-    // ...mapState({
-    //   candidateGroups: function f(s: { filterEngine: FilteringState }) {
-    //     // console.log('computed: s', s);
-    //     // console.log('computed: s.filterEngine', s.filterEngine);
-    //     const engine = s.filterEngine.filteringEngine;
-    //     const groups = s.filterEngine.candidateGroups;
-    //     // console.log('engine', engine);
-    //     // console.log('groups', groups);
-    //     engine.setCandidateGroups(groups);
-    //     const recordGroups = engine.getKeyedRecordGroups();
-    //     // filterEngineState.mutations.setSelectedGroups(recordGroups);
-    //     return s.filterEngine.candidateGroups;
-    //   }
-    // })
 
   },
 

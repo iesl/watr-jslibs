@@ -1,11 +1,22 @@
-<div>
+<div >
     <span>
         Filter Engine Dev:
     </span>
     <br/> <br/> <br/>
 
-    <div class="frame">
-        <FilterWidget> </FilterWidget>
-    </div>
-</div>
+    <div class="container" >
 
+        <div class="frame filter">
+            <FilterWidget> </FilterWidget>
+        </div>
+
+        <div class="frame dbg-panel">
+            Debug Panel
+            <li v-for="item in filteredRecords">
+                {{ item.keystr }} ({{ item.records.length }})
+            </li>
+        </div>
+
+    </div>
+
+</div>
