@@ -29,7 +29,7 @@
 
 export {
   default as FilterWidget,
-} from "./src/components/filter-engine/filter-engine";
+} from "./src/components/filter-engine/filter-engine.vue";
 
 export {
   SelectionFilteringEngine,

@@ -16,7 +16,7 @@ export let shared = {
     TextGridLineHeight:  20,
     TextGridOriginPt: coords.mkPoint.fromXy(20, 20),
 
-    currentDocument: undefined,
+    currentDocument: "",
 
     currMouseClientPt: {x: -1, y: -1},
 

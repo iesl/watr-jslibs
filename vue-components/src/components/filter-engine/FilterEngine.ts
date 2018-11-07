@@ -9,7 +9,8 @@
  */
 
 
-import _ from 'lodash';
+import * as _ from 'lodash';
+// import * as lunr from 'lunr';
 import lunr from 'lunr';
 
 type Candidate = object;

@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build-lib": "vue-cli-service build --target lib --name vueComponentLib",
     "dev": "vue-cli-service build --mode development",
     "watch": "vue-cli-service build --mode development --watch",
     "lint": "vue-cli-service lint",
@@ -16,8 +17,7 @@
     "register-service-worker": "^1.0.0",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
-    "vuex": "^3.0.1",
-    "vuex-typex": "^3.0.1"
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "@types/chai": "^4.1.0",

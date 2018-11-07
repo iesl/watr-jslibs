@@ -21,6 +21,7 @@ export function mkNbsp(n: number): Text {
 }
 
 class JQNodeCtors {
+  nbsp = mkNbsp;
   /* tslint:disable: member-access */
   a          = nodeCtr("a");
   abbr       = nodeCtr("abbr");

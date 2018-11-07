@@ -5,11 +5,11 @@
 import * as _ from "lodash";
 
 export function zipWithIndex(vs: any[], ibegin = 0) {
-    return _.zip(vs, _.range(ibegin, vs.length+i));
+    return _.zip(vs, _.range(ibegin, vs.length+ibegin));
 }
 
 
-export function sortedUniqCount<T>(array: T[]): Array<[T, number]> {
+export function sortedUniqCount<T>(array: T[]): [T, number][] {
     return sortedUniqCountBy(array);
 }
 
@@ -21,7 +21,7 @@ export function sortedUniqCount<T>(array: T[]): Array<[T, number]> {
  * sortedUniqCountBy([1.1, 1.2, 2.3, 2.4], Math.floor)
  * // => [[1.1, 2], [2.3, 2]]
  */
-export function sortedUniqCountBy<T, U>(array: T[], iteratee?: (t: T) => U): Array<[T, number]> {
+export function sortedUniqCountBy<T, U>(array: T[], iteratee?: (t: T) => U): [T, number][] {
     return (array != null && array.length)
         ? baseSortedUniqCount(array, iteratee)
         : [];
@@ -29,26 +29,28 @@ export function sortedUniqCountBy<T, U>(array: T[], iteratee?: (t: T) => U): Arr
 
 
 /**
- *
+ * TODO test me after refactor
  */
-function baseSortedUniqCount<T, U>(array: T[], iteratee?: (t: T) => U): Array<[T, number]> {
-    let seen: T | U | undefined;
-    let index = -1;
-    let resIndex = 0;
+function baseSortedUniqCount<T, U>(array: T[], iteratee?: (t: T) => U): [T, number][] {
+  let seen: T | U | undefined;
+  let index = 0;
+  let resIndex = 0;
 
-    const { length } = array;
-    const result: Array<[T, number]> = [];
+  const { length } = array;
+  const result: [T, number][] = [];
 
-    while (++index < length) {
-        const value = array[index];
-        const computed = iteratee ? iteratee(value) : value;
+  while (index < length) {
+    const value = array[index];
+    const computed = iteratee ? iteratee(value) : value;
 
-        if (!index || !_.eq(computed, seen)) {
-            seen = computed;
-            result[resIndex++] = [value, 1];
-        } else {
-            ++result[resIndex-1][1];
-        }
+    if (!index || !_.eq(computed, seen)) {
+      seen = computed;
+      result[resIndex] = [value, 1];
+      resIndex += 1;
+    } else {
+      result[resIndex-1][1] += 1;
     }
-    return result;
+    index += 1;
+  }
+  return result;
 }

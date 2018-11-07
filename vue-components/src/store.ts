@@ -4,7 +4,7 @@ import Vue from 'vue';
 import Vuex, {
   // ActionContext,
   // Store
-} from "vuex"
+} from "vuex";
 
 // import { getStoreBuilder } from "vuex-typex"
 

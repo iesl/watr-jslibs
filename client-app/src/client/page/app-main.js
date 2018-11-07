@@ -6,7 +6,7 @@ import * as annot from  './annot-main.js';
 import * as browse from './browse-main.js';
 import * as login from  './login-main.js';
 import * as curate from './curate-main.js';
-import * as trace from './trace-main.js';
+import * as trace from './trace-main';
 import {shared} from '../lib/shared-state';
 import {getParameterByName} from '../lib/commons';
 

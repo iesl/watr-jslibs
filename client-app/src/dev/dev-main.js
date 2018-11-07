@@ -9,7 +9,7 @@ import '../style/app-main.less';
 import {shared} from '../client/lib/shared-state';
 import * as ReflowWidgetDev from  './reflow-widget.dev.js';
 import * as TextgridWidgetDev from  './TextgridWidgetDev';
-import * as SelectionFilterDev from  './SelectionFilterDev';
+// import * as SelectionFilterDev from  './SelectionFilterDev';
 import * as PageImageWidgetDev from  './PageImageWidgetDev.js';
 import * as SplitPaneDev from  './split-pane.dev.js';
 import * as jst  from '../client/lib/tstags';
@@ -60,9 +60,9 @@ function dispatch() {
         TextgridWidgetDev.run();
         break;
 
-    case "traceview":
-        SelectionFilterDev.run();
-        break;
+    // case "traceview":
+    //     SelectionFilterDev.run();
+    //     break;
 
     }
 

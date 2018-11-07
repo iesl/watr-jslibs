@@ -19,7 +19,7 @@ import { $id, t, htm } from "./tstags";
 
 const noop = function() { return; };
 
-const SplitOptions = {
+export const SplitOptions = {
     sizes        : [],           //	Array 		                      Initial sizes of each element in percents or CSS values.
     minSize      : [],           //	Number or Array 	100 	        Minimum size of each element.
     gutterSize   : 0,            //	Number 	          10 	          Gutter size in pixels.
@@ -33,6 +33,7 @@ const SplitOptions = {
     onDragStart  : noop,         //	Function 		                    Callback on drag start.
     onDragEnd    : noop          //	Function 		                    Callback on drag end.
 };
+
 const splitPaneRootId = 'splitwin_root';
 
 export const row = 'row';

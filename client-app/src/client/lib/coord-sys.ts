@@ -124,6 +124,9 @@ class Trapezoid {
     }
 }
 
+
+export type AnyShape = Point | Line | Trapezoid | BBox;
+
 export let mkPoint = {
     fromXy: (x: number, y: number, sys: CoordSys) => {
         return new Point(x, y, sys);
@@ -265,7 +268,7 @@ export function boxCenteredAt(p: Point, width: number, height: number) {
     return mk.fromLtwh(left, top, width, height);
 }
 
-export function fromFigure(fig: any) {
+export function fromFigure(fig: any): AnyShape {
     let shape;
 
 
@@ -294,6 +297,8 @@ export function fromFigure(fig: any) {
         const bottom = new Line(bottomP1, bottomP2);
 
         shape = new Trapezoid(top, bottom);
+    } else {
+      throw new Error(`could not construct shape from figure ${fig}`)
     }
 
     return shape;
