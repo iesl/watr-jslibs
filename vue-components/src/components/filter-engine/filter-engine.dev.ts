@@ -1,4 +1,4 @@
-import Vue, { CreateElement, VNode } from 'vue';
+import Vue from 'vue';
 import $ from "jquery";
 
 import FilterWidget from '@/components/filter-engine/filter-engine.vue';
@@ -43,14 +43,15 @@ export default Vue.extend({
   computed: {
 
     filteredRecords(): KeyedRecordGroup[] {
-      const { filteredRecords } = this.$store.getters['filteringState/all']
+      // const { filteredRecords } = this.$store.getters['filteringState/all']
+      const { filteredRecords } = this.$store.state.filteringState;
       return filteredRecords;
     },
 
   },
 
   mounted() {
-    console.log('dev:mounted', this.$store.getters['filteringState/all']);
+    console.log('dev:mounted');
 
     $.getJSON("http://localhost:3000/tracelog-2.json", (tracelogs: LogEntry[]) => {
       // console.log("tracelogs", pp(tracelogs[0]));

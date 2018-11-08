@@ -14,15 +14,10 @@ export class FilteringState {
   filteringEngine: SelectionFilteringEngine = new SelectionFilteringEngine([]);
 }
 
-export function all(state: FilteringState): FilteringState {
-  return state;
-}
-
-export function currentSelections(state: FilteringState): KeyedRecordGroup[] {
-  return state.currentSelections;
-}
 
 function addCandidateGroup(state: FilteringState, group: CandidateGroup) {
+  console.log("state:addCandidateGroup");
+
   state.allCandidateGroups.push(group);
 }
 
@@ -31,6 +26,7 @@ function clearCandidateGroups(state: FilteringState) {
 }
 
 function setCurrentSelections(state: FilteringState, groups: KeyedRecordGroup[]) {
+  console.log("state:setCurrentSelections");
   state.currentSelections = groups;
 }
 
@@ -52,7 +48,7 @@ export class FilteringStateModule implements Module<FilteringState, any> {
   }
 
   getters = <GetterTree<FilteringState, any>> {
-    all
+    // all
   }
 
   plugins: Plugin<FilteringState>[] = []

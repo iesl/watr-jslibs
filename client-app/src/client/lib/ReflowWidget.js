@@ -13,6 +13,7 @@ import * as mhs from './MouseHandlerSets';
 import * as coords from './coord-sys';
 import { $id, t, htm } from "./tstags";
 let rtree = require('rbush');
+// import rtree from "rbush";
 import {shared} from './shared-state';
 
 import * as d3x from './d3-extras';

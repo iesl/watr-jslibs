@@ -241,11 +241,19 @@ Vue.use(Vuex);
 import {
   FilterWidget,
   FilteringStateModule,
-  FilteringState
-} from 'watr-vue-comps';
+  // FilteringState,
+  CandidateGroup
+} from 'vueComponentLib';
 
-export interface RootState {
-  filteringState: FilteringState
+interface Headers {
+  tags: string;
+  name: string;
+  callSite: string;
+}
+interface LogEntry {
+  logType: string;
+  page: number;
+  headers: Headers;
 }
 
 export function runMain() {
@@ -263,7 +271,7 @@ export function runMain() {
   const rootVue = new Vue({
     store,
     components: {
-      // 'filter-widget': FilterWidget,
+      'filter-widget': FilterWidget,
     },
 
     render: function(h) {
@@ -295,7 +303,27 @@ export function runMain() {
 
     pageImageListWidget = setupPageImages('page-image-list', textGridJson, gridData);
 
+
     rootVue.$mount('#vue-root');
+
+    const g: CandidateGroup = {
+      candidates: tracelogJson,
+      groupKeyFunc: (l: LogEntry) => ({ multikey: ["trace", `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: "todo" })
+    };
+
+    rootVue.$store.commit('filteringState/addCandidateGroup', g);
+
+    console.log('commited tracelog candidate groups');
+
+    // rootVue.$nextTick((vm) => {
+    //   rootVue.$store.commit('filteringState/addCandidateGroup', g);
+    // });
+
+
+    // console.log('CandidateGroup', g.candidates);
+    // console.log('CandidateGroup(keyed)', _.map(g.candidates, c => g.groupKeyFunc(c));
+
+
 
 
 
