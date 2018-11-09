@@ -6,15 +6,20 @@ import * as _ from 'lodash';
 
 import Vue from 'vue';
 
-// import { FilteringState } from './filter-engine-state';
-
 import {
+  SelectionFilteringEngine,
   CandidateGroup,
   KeyedRecordGroup,
 } from "./FilterEngine";
-import { mapState } from 'vuex';
 
+// import { mapState } from 'vuex';
 
+function getFilteringEngine(v: any): SelectionFilteringEngine {
+  return v.$_selectionFilteringEngine;
+}
+function setFilteringEngine(v: any, e: SelectionFilteringEngine): void {
+  v.$_selectionFilteringEngine = e;
+}
 const component = Vue.extend({
   name: 'FilterWidget',
   components: {},
@@ -31,19 +36,19 @@ const component = Vue.extend({
     },
 
     filterUpdated(): void {
-      // const { currentSelections } = this.$store.getters['filteringState/all']
       const { currentSelections } = this.$store.state.filteringState;
       this.$store.commit('filteringState/setFilteredRecords', currentSelections);
     },
   },
 
   created() {
-
     const store = this.$store;
 
+    setFilteringEngine(this, new SelectionFilteringEngine([]));
+
     const qfunc = () => {
-      // const { filteringEngine } = store.getters['filteringState/all']
-      const { filteringEngine } = this.$store.state.filteringState;
+      const filteringEngine = getFilteringEngine(this);
+      // const { $filteringEngine } = this.$store.state.filteringState;
       const hitRecs = filteringEngine.query(this.queryString);
       store.commit('filteringState/setCurrentSelections', hitRecs);
     }
@@ -60,10 +65,15 @@ const component = Vue.extend({
       this.query();
     },
 
+    currentSelections() {
+      console.log('watch; currentSelections')
+    },
+
     allCandidateGroups() {
       console.log('watch: allCandidateGroups');
-      const { filteringEngine, allCandidateGroups } = this.$store.state.filteringState;
-      console.log('computed: allCandidateGroups', this.$store.state.filteringState);
+      const filteringEngine = getFilteringEngine(this);
+      const { allCandidateGroups } = this.$store.state.filteringState;
+      console.log('computed: allCandidateGroups', filteringEngine, allCandidateGroups);
       filteringEngine.setCandidateGroups(allCandidateGroups);
       const recordGroups = filteringEngine.getKeyedRecordGroups();
       this.$store.commit('filteringState/setCurrentSelections', recordGroups);
@@ -72,11 +82,20 @@ const component = Vue.extend({
   },
 
   computed: {
-    ...mapState('filteringState', [
-      'currentSelections',
-      'allCandidateGroups',
-      'filteredRecords'
-    ]),
+    filteredRecords(): KeyedRecordGroup[] {
+      return this.$store.state.filteringState.filteredRecords;
+    },
+    currentSelections(): KeyedRecordGroup[] {
+      return this.$store.state.filteringState.currentSelections;
+    },
+    allCandidateGroups(): CandidateGroup[] {
+      return this.$store.state.filteringState.allCandidateGroups;
+    },
+    // ...mapState('filteringState', [
+    //   'currentSelections',
+    //   'allCandidateGroups',
+    //   'filteredRecords'
+    // ]),
   },
 
 

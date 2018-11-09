@@ -5,7 +5,7 @@
 
 import * as _ from 'lodash';
 import * as d3 from 'd3';
-import * as $ from 'jquery';
+import $ from 'jquery';
 
 import * as d3x from '../lib/d3-extras';
 import * as util from  '../lib/commons.js';
@@ -35,8 +35,6 @@ function setupFrameLayout() {
 
   $(paneLeft.clientAreaSelector()).attr('id', 'page-image-list');
   $(paneLeft.clientAreaSelector()).addClass('client-content');
-
-  // const filterWidget = $(`<filter-widget />`);
 
   paneRight.clientArea().append(
     t.div('.scrollable-pane', [
@@ -311,13 +309,13 @@ export function runMain() {
       groupKeyFunc: (l: LogEntry) => ({ multikey: ["trace", `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: "todo" })
     };
 
-    rootVue.$store.commit('filteringState/addCandidateGroup', g);
 
+
+    rootVue.$nextTick((vm) => {
+      rootVue.$store.dispatch('filteringState/addCandidates', g);
+      // rootVue.$store.commit('filteringState/addCandidateGroup', g);
+    });
     console.log('commited tracelog candidate groups');
-
-    // rootVue.$nextTick((vm) => {
-    //   rootVue.$store.commit('filteringState/addCandidateGroup', g);
-    // });
 
 
     // console.log('CandidateGroup', g.candidates);

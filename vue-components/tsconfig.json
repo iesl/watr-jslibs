@@ -1,31 +1,35 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+    "baseUrl": ".",
+
     "strict": true,
-    "jsx": "preserve",
+    "removeComments": false,
     "importHelpers": true,
+
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "inlineSourceMap": true,
+
     "allowSyntheticDefaultImports": true,
-    "sourceMap": true,
-    "baseUrl": ".",
+
+    "preserveConstEnums": true,
+
+
+    "target": "es6",
+    "module": "es6",
+
     "types": [
       "webpack-env",
       "mocha",
       "chai"
     ],
+
     "paths": {
       "@/*": [
         "src/*"
       ]
-    },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
+    }
+
   },
   "include": [
     "src/**/*.ts",

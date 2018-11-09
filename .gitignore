@@ -41,3 +41,6 @@ dist
 *debuglog.txt
 
 *.d/
+
+## packaged lib
+vueComponentLib-*.tgz     

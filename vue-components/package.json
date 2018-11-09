@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "build-lib": "vue-cli-service build --target lib --name vueComponentLib ./src/index.ts",
+    "build:lib:prod": "vue-cli-service build --target lib --name vueComponentLib ./src/index.ts",
+    "build:lib:dev": "vue-cli-service build --mode development --target lib --name vueComponentLib ./src/index.ts",
     "dev": "vue-cli-service build --mode development",
     "watch": "vue-cli-service build --mode development --watch",
     "lint": "vue-cli-service lint",
@@ -59,13 +60,5 @@
       "git add"
     ]
   },
-  "main": "./dist/vueComponentLib.common.js",
-  "files": [
-    "dist/*",
-    "src/*",
-    "public/*",
-    "*.json",
-    "*.js",
-    "*.ts"
-  ]
+  "main": "./dist/vueComponentLib.umd.js"
 }

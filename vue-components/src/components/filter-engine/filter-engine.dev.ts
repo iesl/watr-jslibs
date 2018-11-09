@@ -40,10 +40,16 @@ export default Vue.extend({
     }
   },
 
+  watch: {
+    filteredRecords(): void {
+      console.log("watch: filteredRecords")
+
+    }
+  },
+
   computed: {
 
     filteredRecords(): KeyedRecordGroup[] {
-      // const { filteredRecords } = this.$store.getters['filteringState/all']
       const { filteredRecords } = this.$store.state.filteringState;
       return filteredRecords;
     },
@@ -61,7 +67,7 @@ export default Vue.extend({
         groupKeyFunc: (l: LogEntry) => ({ multikey: ["trace", `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: "todo" })
       };
 
-      this.$store.commit('filteringState/addCandidateGroup', g);
+      this.$store.dispatch('filteringState/addCandidates', g);
 
 
       const candidates1 = candidateGroupF("foo", "alex", (g) => {
@@ -69,8 +75,8 @@ export default Vue.extend({
         return r;
       });
 
-      this.$store.commit('filteringState/addCandidateGroup', candidates1);
 
+      this.$store.dispatch('filteringState/addCandidates', candidates1);
     }, (err) => {
       console.log("err", err);
 
