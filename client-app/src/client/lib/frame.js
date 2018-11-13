@@ -104,17 +104,6 @@ function setUserLoginInfo(loginInfo) {
 
 
 export function setupFrameLayout() {
-  // let layout =
-  //     t.div('#vue-root', [
-  //       t.div(`.main`, [
-  //         t.div(`.menu`, [
-  //           t.div(`.topbar`)
-  //         ]),
-  //         t.div(`.content #main-content`)
-  //       ])
-  //     ])
-  // ;
-  // t.div('#vue-root'),
   let layout =
       t.div(`.main`, [
         t.div(`.menu`, [

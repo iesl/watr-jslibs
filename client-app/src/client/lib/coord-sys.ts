@@ -51,15 +51,6 @@ export interface ILTBounds extends rbush.BBox {
     topLeft: Point;
 }
 
-// export let coordSys = {
-//     unknown: Symbol("unknown"),
-//     screen: Symbol("screen"),
-//     div: Symbol("div"),
-//     graphUnits: Symbol("graphUnits"),
-//     pdfMedia: Symbol("pdf-media")
-// };
-
-
 class Point {
     public x: number;
     public y: number;
@@ -251,15 +242,6 @@ export let mk = {
             CoordSys.PdfMedia
         );
     },
-    // fromXy12: (xy12) => {
-    //     return new BBox(
-    //         xy12.x1,
-    //         xy12.y1,
-    //         xy12.x2 - xy12.x1,
-    //         xy12.y2 - xy12.y1,
-    //         CoordSys.Unknown
-    //     );
-    // }
 };
 
 export function boxCenteredAt(p: Point, width: number, height: number) {

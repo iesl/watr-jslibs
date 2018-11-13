@@ -125,7 +125,6 @@ function setDefaultFillColor() {
 
 function initShapeAttrs(r: any) {
   const shape = r.node().nodeName.toLowerCase();
-  console.log('initShapeAttrs');
 
   switch (shape) {
     case "rect":
@@ -205,7 +204,8 @@ function selectShapes(dataBlock: any) {
 
 
 function runAllTraces(tracelogs: any): void {
-  _.each(tracelogs, t => {
+  const geometryLogs = _.filter(tracelogs, t => t.logType === "Geometry");
+  _.each(geometryLogs, t => {
     runTrace(t);
   });
 }
@@ -221,7 +221,6 @@ function runTrace(tracelog: any): void {
   const mapf = (s: any) => coords.fromFigure(s).svgShape();
 
   const decodedShapes = _.map(body, mapf);
-  // console.log('runTrace: decodedShapes', decodedShapes);
 
   stepper.stepThrough(doDrawShapes, [decodedShapes]);
 }
@@ -327,7 +326,7 @@ export function runMain() {
 
 
     store.subscribe((mutation, state) => {
-      console.log("subscribe: mutation ", mutation, state);
+
 
       switch (mutation.type) {
         case "filteringState/setFilteredRecords":

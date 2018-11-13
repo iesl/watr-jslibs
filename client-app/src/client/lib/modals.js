@@ -7,7 +7,7 @@
 
 /* global $ */
 
-import {t, icon, $id} from "./tstags";
+import { t, icon } from "./tstags";
 
 
 export function makeFormPromise($form) {

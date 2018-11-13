@@ -28,7 +28,11 @@
                        "check-type-operator",
                        "check-preblock"
                       ],
-      "import-name": false
+      "import-name": false,
+      "no-this-assignment": [true,
+                             { "allowed-names": ["^self$"],
+                               "allow-destructuring": true
+                             }]
     },
     "rulesDirectory": []
 }

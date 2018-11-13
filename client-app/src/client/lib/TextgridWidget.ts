@@ -104,67 +104,68 @@ export class TextgridWidget {
     }
 
     public init() {
-        const widget = this;
+        const self = this;
 
-        const options = widget.options;
+
+        const options = self.options;
 
         const computeGridHeight = (grid: ITextGrid) => {
             return (grid.rows.length * options.TextGridLineHeight) + options.TextGridOriginPt.y + 10;
         };
 
         const fixedTextgridWidth = 900;
-        const textgrid = widget.textgrid;
-        const gridNum = widget.gridNum;
+        const textgrid = self.textgrid;
+        const gridNum = self.gridNum;
         const gridHeight = computeGridHeight(textgrid);
 
         const gridNodes =
-            t.div(`.textgrid #${widget.frameId}`, {
+            t.div(`.textgrid #${self.frameId}`, {
                 style: `width: 900px; height:${gridHeight}px`,
                 // width: fixedTextgridWidth,
                 // height: gridHeight,
             }, [
-                    t.canvas(`.textgrid #${widget.canvasId}`, {
+                    t.canvas(`.textgrid #${self.canvasId}`, {
                         page: gridNum,
                         width: fixedTextgridWidth,
                         height: gridHeight,
                     })
                 ]) ;
         // const gridNodes =
-        //     t.div(`.textgrid #${widget.frameId}`, [
-        //             t.canvas(`.textgrid #${widget.canvasId}`, {
+        //     t.div(`.textgrid #${self.frameId}`, [
+        //             t.canvas(`.textgrid #${self.canvasId}`, {
         //                 page: gridNum,
         //                 width: fixedTextgridWidth,
         //                 height: gridHeight,
         //             })
         //         ]) ;
 
-        // console.log("appending", gridNodes, "to", widget.containerId);
+        // console.log("appending", gridNodes, "to", self.containerId);
 
-        $id(widget.containerId).append(gridNodes);
+        $id(self.containerId).append(gridNodes);
 
-        d3x.d3$id(widget.frameId)
+        d3x.d3$id(self.frameId)
             .append("svg").classed("textgrid", true)
-            .attr("id", widget.svgId)
+            .attr("id", self.svgId)
             .attr("page", gridNum)
             .attr("width", fixedTextgridWidth)
             .attr("height", gridHeight)
         ;
-        $id(widget.frameId).width(
-            $id(widget.frameId).width()
+        $id(self.frameId).width(
+            $id(self.frameId).width()
         );
-        $id(widget.frameId).height(
-            $id(widget.frameId).height()
+        $id(self.frameId).height(
+            $id(self.frameId).height()
         );
-        // console.log('the height is', $id(widget.frameId).height());
+        // console.log('the height is', $id(self.frameId).height());
 
-        widget.textgridRTree = rtree();
-        widget.initHoverReticles();
+        self.textgridRTree = rtree();
+        self.initHoverReticles();
 
-        widget.setMouseHandlers([
+        self.setMouseHandlers([
             defaultMouseHandlers,
         ]);
 
-        const canvas = $id(widget.canvasId)[0] as HTMLCanvasElement;
+        const canvas = $id(self.canvasId)[0] as HTMLCanvasElement;
         const context2d = canvas.getContext("2d");
 
         if (context2d === null) {
@@ -177,9 +178,9 @@ export class TextgridWidget {
 
             // console.log("gridData", gridData);
 
-            widget.textgridRTree.load(gridData[0]);
-            widget.hoveringText.subscribe((ev: IHoverTextEvent) => {
-                widget.showGlyphHoverReticles(ev);
+            self.textgridRTree.load(gridData[0]);
+            self.hoveringText.subscribe((ev: IHoverTextEvent) => {
+                self.showGlyphHoverReticles(ev);
             });
 
         }
@@ -191,7 +192,7 @@ export class TextgridWidget {
     }
 
 
-    public setMouseHandlers(handlers: Array<(widget: TextgridWidget) => IMouseHandlers>) {
+  public setMouseHandlers(handlers: ((widget: TextgridWidget) => IMouseHandlers)[]) {
         mhs.setMouseHandlers(this, this.frameId, handlers);
     }
 

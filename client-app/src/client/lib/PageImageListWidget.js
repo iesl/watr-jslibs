@@ -16,7 +16,7 @@ import * as coords from './coord-sys';
 import { PageImageWidget } from './PageImageWidget.js';
 import * as rtrees from './rtrees.js';
 import {zipWithIndex} from './LodashPlus';
-import {ServerDataExchange} from  './ServerDataExchange.js';
+import { ServerDataExchange } from  './ServerDataExchange.js';
 
 
 export class PageImageListWidget {
