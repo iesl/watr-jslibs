@@ -76,6 +76,7 @@
     "watch": "webpack --mode development --watch",
     "start": "webpack-dev-server --mode development",
     "server": "node src/dev/dev-server.js",
-    "test": "ts-node node_modules/jasmine/bin/jasmine"
+    "test": "ts-node node_modules/jasmine/bin/jasmine",
+    "develop": "npm install ../vue-components/vueComponentLib-0.1.0.tgz && npm run watch"
   }
 }

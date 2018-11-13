@@ -12,7 +12,7 @@ import {
   KeyedRecordGroup,
 } from "./FilterEngine";
 
-// import { mapState } from 'vuex';
+import { mapState } from 'vuex';
 
 function getFilteringEngine(v: any): SelectionFilteringEngine {
   return v.$_selectionFilteringEngine;
@@ -48,7 +48,6 @@ const component = Vue.extend({
 
     const qfunc = () => {
       const filteringEngine = getFilteringEngine(this);
-      // const { $filteringEngine } = this.$store.state.filteringState;
       const hitRecs = filteringEngine.query(this.queryString);
       store.commit('filteringState/setCurrentSelections', hitRecs);
     }
@@ -61,12 +60,10 @@ const component = Vue.extend({
   watch: {
 
     queryString() {
-      console.log('watch: queryString');
       this.query();
     },
 
     currentSelections() {
-      console.log('watch; currentSelections')
     },
 
     allCandidateGroups() {
@@ -82,20 +79,11 @@ const component = Vue.extend({
   },
 
   computed: {
-    filteredRecords(): KeyedRecordGroup[] {
-      return this.$store.state.filteringState.filteredRecords;
-    },
-    currentSelections(): KeyedRecordGroup[] {
-      return this.$store.state.filteringState.currentSelections;
-    },
-    allCandidateGroups(): CandidateGroup[] {
-      return this.$store.state.filteringState.allCandidateGroups;
-    },
-    // ...mapState('filteringState', [
-    //   'currentSelections',
-    //   'allCandidateGroups',
-    //   'filteredRecords'
-    // ]),
+    ...mapState('filteringState', [
+      'currentSelections',
+      'allCandidateGroups',
+      'filteredRecords'
+    ]),
   },
 
 

@@ -59,8 +59,7 @@ export default Vue.extend({
   mounted() {
     console.log('dev:mounted');
 
-    $.getJSON("http://localhost:3000/tracelog-2.json", (tracelogs: LogEntry[]) => {
-      // console.log("tracelogs", pp(tracelogs[0]));
+    $.getJSON("http://localhost:3100/tracelog-2.json", (tracelogs: LogEntry[]) => {
 
       const g: CandidateGroup = {
         candidates: tracelogs,

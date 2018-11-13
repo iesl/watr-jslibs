@@ -10,7 +10,7 @@ import $ from 'jquery';
 import * as d3x from '../lib/d3-extras';
 import * as util from  '../lib/commons.js';
 import * as frame from '../lib/frame.js';
-import {shared} from '../lib/shared-state';
+import { shared } from '../lib/shared-state';
 import * as global from '../lib/shared-state';
 import * as server from '../lib/serverApi.js';
 import * as spu  from '../lib/SplitWin.js';
@@ -48,14 +48,14 @@ function setupFrameLayout() {
  *
  */
 function addTooltip(r: any) {
-  return r.on("mouseover", function () {
+  return r.on("mouseover", () => {
     r .call(d3x.initStroke, 'yellow', 1, 2.0)
       .transition().duration(200)
       .call(d3x.initStroke, 'red', 1.0)
       .call(d3x.initFill, 'red', 0.2)
     ;
 
-  }) .on("mouseout", function () {
+  }) .on("mouseout", () => {
     r .transition().duration(300)
       .call(d3x.initStroke, 'black', 1, 0.3)
       .call(d3x.initFill, 'blue', 0.2)
@@ -79,12 +79,16 @@ function getId(data: any): string {
     switch (shape) {
       case "rect":
         id =  `r_${data.x}_${data.y}_${data.width}_${data.height}`;
+        break;
       case "circle":
         id =  `c_${data.cx}_${data.cy}_${data.r}`;
+        break;
       case "line":
         id =  `l_${data.x1}_${data.y1}_${data.x2}_${data.y2}`;
+        break;
       case "path":
         id =  `p_${data.d}`;
+        break;
       default:
         throw new Error(`getId(shape=${data}) could not construct id`);
     }
@@ -121,13 +125,14 @@ function setDefaultFillColor() {
 
 function initShapeAttrs(r: any) {
   const shape = r.node().nodeName.toLowerCase();
+  console.log('initShapeAttrs');
 
   switch (shape) {
     case "rect":
-      return r.attr("x", function(d: any) { return d.x; })
-        .attr("y", function(d: any) { return d.y; })
-        .attr("width", function(d: any) { return d.width; })
-        .attr("height", function(d: any) { return d.height; })
+      return r.attr("x", (d: any) => d.x)
+        .attr("y", (d: any) => d.y)
+        .attr("width", (d: any) => d.width)
+        .attr("height", (d: any) => d.height)
         .attr("id", getId)
         .attr("class", getCls)
         .attr("label", getCls)
@@ -141,9 +146,9 @@ function initShapeAttrs(r: any) {
       ;
 
     case "circle":
-      return r.attr("cx", function(d: any) { return d.cx; })
-        .attr("cy", function(d: any) { return d.cy; })
-        .attr("r", function(d: any) { return d.r; })
+      return r.attr("cx", (d: any) => d.cx)
+        .attr("cy", (d: any) => d.cy)
+        .attr("r", (d: any) => d.r)
         .attr("id", getId)
         .attr("class", getCls)
         .attr("label", getCls)
@@ -155,10 +160,10 @@ function initShapeAttrs(r: any) {
       ;
 
     case "line":
-      return r.attr("x1", function(d: any) { return d.x1; })
-        .attr("y1", function(d: any) { return d.y1; })
-        .attr("x2", function(d: any) { return d.x2; })
-        .attr("y2", function(d: any) { return d.y2; })
+      return r.attr("x1", (d: any) => d.x1)
+        .attr("y1", (d: any) => d.y1)
+        .attr("x2", (d: any) => d.x2)
+        .attr("y2", (d: any) => d.y2)
         .attr("id", getId)
         .attr("class", getCls)
         .attr("label", getCls)
@@ -168,7 +173,7 @@ function initShapeAttrs(r: any) {
         .call(addTooltip)
       ;
     case "path":
-      return r.attr("d", function(d: any) { return d.d; })
+      return r.attr("d", (d: any) => d.d)
         .attr("class", getCls)
         .attr("label", getCls)
         .attr("stroke-width", 1)
@@ -207,20 +212,25 @@ function runAllTraces(tracelogs: any): void {
 
 
 function runTrace(tracelog: any): void {
+
   const pageNum =  tracelog.page;
+  // console.log('runTrace', tracelog);
 
   pageImageWidget = pageImageListWidget.pageImageWidgets[pageNum];
   const body: any[] = tracelog.body;
   const mapf = (s: any) => coords.fromFigure(s).svgShape();
 
   const decodedShapes = _.map(body, mapf);
+  // console.log('runTrace: decodedShapes', decodedShapes);
 
   stepper.stepThrough(doDrawShapes, [decodedShapes]);
 }
 
 function doDrawShapes(dataBlock: any) {
 
+  // console.log('doDrawShapes: dataBlock', dataBlock);
   const shapes = selectShapes(dataBlock);
+  // console.log('doDrawShapes: shapes', shapes);
 
   return shapes.enter()
     .each(function (shape) {
@@ -272,7 +282,7 @@ export function runMain() {
       'filter-widget': FilterWidget,
     },
 
-    render: function(h) {
+    render(h) {
       return h('filter-widget');
     }
   });
@@ -313,34 +323,29 @@ export function runMain() {
 
     rootVue.$nextTick((vm) => {
       rootVue.$store.dispatch('filteringState/addCandidates', g);
-      // rootVue.$store.commit('filteringState/addCandidateGroup', g);
     });
-    console.log('commited tracelog candidate groups');
 
 
-    // console.log('CandidateGroup', g.candidates);
-    // console.log('CandidateGroup(keyed)', _.map(g.candidates, c => g.groupKeyFunc(c));
+    store.subscribe((mutation, state) => {
+      console.log("subscribe: mutation ", mutation, state);
 
+      switch (mutation.type) {
+        case "filteringState/setFilteredRecords":
+          const recs1 = _.map(mutation.payload, r => r.records);
+          const hitLogs = _.flatMap(recs1, r => _.map(r, r0 => r0.candidate));
+          if (hitLogs.length > 0) {
+            runAllTraces(hitLogs);
+          } else {
+            d3.selectAll('image')
+              .attr('opacity', 1.0);
 
+            d3.selectAll(".shape")
+              .remove();
 
-
-
-    // const traceLogFilter = new sfw.SelectionFilterWidget([tracelogJson]);
-
-    // const n = traceLogFilter.getNode();
-    // $("#tracelog-menu").append(n);
-
-    // traceLogFilter.clearLogs.subscribe((i) => {
-    //     d3.selectAll('image')
-    //         .attr('opacity', 1.0);
-
-    //     d3.selectAll(".shape")
-    //         .remove();
-    // });
-
-    // traceLogFilter.selectedTraceLogs.subscribe((selectedLogs) => {
-    //     runAllTraces(selectedLogs);
-    // });
+          }
+          break;
+      }
+    });
 
   }) .catch(error => {
     $('.content-pane').append(`<div><p>ERROR: ${error}: ${error}</p></div>`);

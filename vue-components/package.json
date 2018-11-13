@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build:lib:prod": "vue-cli-service build --target lib --name vueComponentLib ./src/index.ts",
     "build:lib:dev": "vue-cli-service build --mode development --target lib --name vueComponentLib ./src/index.ts",
@@ -11,7 +10,10 @@
     "watch": "vue-cli-service build --mode development --watch",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit 'src/**/**/*.spec.ts'",
-    "devserver:tracelogs": "json-server src/components/filter-engine/__dev-data/db.json --static ./src/components/filter-engine/__dev-data/tracelogs"
+    "serve": "vue-cli-service serve",
+    "serve:json": "json-server --port 3100 src/components/filter-engine/__dev-data/db.json --static ./src/components/filter-engine/__dev-data/tracelogs",
+    "dist:dev": "npm-run-all build:lib:dev && npm pack",
+    "develop": "npm-run-all -p -r serve serve:json"
   },
   "dependencies": {
     "lunr": "^2.3.5",
