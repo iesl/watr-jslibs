@@ -6,7 +6,7 @@ import * as $ from 'jquery';
 import { shared } from './shared-state';
 import * as coords from './coord-sys';
 let rtree = require('rbush');
-import * as util from  './commons.js';
+import * as util from  './utils';
 
 
 /** return min-bounding rect for rtree search hits */
@@ -65,7 +65,7 @@ export function initPageLabelRTrees(zones) {
 export function initPageAndGridRTrees(textgrids) {
     // Assumes that the divs+canvas+svgs are all in place in the DOM
     _.each(textgrids, (textgrid, gridNum) => {
-        let idGen = util.IdGenerator();
+        let idGen = util.newIdGenerator();
         let pageImageRTree = rtree();
         let textGridRTree = rtree();
         shared.pageImageRTrees[gridNum] = pageImageRTree;
@@ -99,8 +99,8 @@ export function initPageAndGridRTrees(textgrids) {
                 charDef.gridDataPt = gridDataPt;
 
 
-                // let isGlyphData = typeof charDef[0] == typeof [];
-                let isGlyphData = charDef.g != undefined;
+                // let isGlyphData = typeof charDef[0] === typeof [];
+                let isGlyphData = charDef.g !== undefined;
                 if (isGlyphData) {
                     let charBBox = charDef.g[0][2];
                     let glyphDataPt = coords.mk.fromArray(charBBox);
@@ -147,10 +147,10 @@ export function gridDataToGlyphData(gridDataPts) {
 export function initGridData(textgrids, canvasContexts, gridTextOrigin, gridTextHeight) {
 
     return _.map(textgrids, (textgrid, gridNum) => {
-        let idGen = util.IdGenerator();
+        let idGen = util.newIdGenerator();
 
         let context;
-        if (canvasContexts != undefined) {
+        if (canvasContexts !== undefined) {
             context = canvasContexts[gridNum];
         } else {
             context = {
@@ -159,10 +159,10 @@ export function initGridData(textgrids, canvasContexts, gridTextOrigin, gridText
             };
         }
 
-        if (gridTextHeight == undefined) {
+        if (gridTextHeight === undefined) {
             gridTextHeight = 20;
         }
-        if (gridTextOrigin == undefined) {
+        if (gridTextOrigin === undefined) {
             gridTextOrigin = coords.mkPoint.fromXy(0, 0);
         }
 
@@ -189,7 +189,7 @@ export function initGridData(textgrids, canvasContexts, gridTextOrigin, gridText
                 gridDataPt.locus = charDef;
                 charDef.gridDataPt = gridDataPt;
 
-                let isGlyphData = charDef.g != undefined;
+                let isGlyphData = charDef.g !== undefined;
                 if (isGlyphData) {
                     let charBBox = charDef.g[0][2];
                     let glyphDataPt = coords.mk.fromArray(charBBox);

@@ -1,58 +1,63 @@
 
 
-** Current file set
-*** auth.js
+
+** Watrcolor client file organization
+
+*** Vue Components
+**** filter-engine
+
+
+*** Client UI current file set
+**** frame.js
+    common page element setup for UI: topbar, menubar, site nav
+    - [ ] Vue-ify
+
+**** auth.js
     login/signup forms
     tsec-based cookie set/remove functions
+    
+    - [ ] Integrate auth0, Vue-ify
 
-*** colors.js
+**** colors.js
     consts for rgb/solarized/etc color themes
 
-*** commons.js
-    misc. util functions
-
-*** coord-sys.ts
+**** coord-sys.ts
     Geometric shape classes, conversions, constructors.
  
-*** d3-extras.js
+**** d3-extras.js
     d3.js helper functions
+    stepper transition animation helper functions (prob. obsolete)
 
-*** d3-stepper.js
-    d3.js transition animation helper functions (prob. obsolete)
-
-*** dragselect.js
+**** dragselect.js
     d3.js based rect. selection function
 
-*** frame.js
-    common page element setup for UI: topbar, menubar, site nav
-
-*** graphpaper-variants.js
+**** graphpaper-variants.js
     graph paper like classes that use cell-based addressing to render grid-like visualizations
     used for textgrid rendering.
     has canvas, svg, fabric.js implementations
 
-*** Infobar.js
+**** Infobar.js
     Cell-based output widget, mostly used as an in-app debug and dev logging tool
 
-*** labeling.js
+**** labeling.js
     label chooser dialog.
     annotation shape updates on PDF page images
 
-*** LodashPlus.ts
+**** LodashPlus.ts
     util funcs based on lodash
 
-*** modals.js
+**** modals.js
     create a modal dialog, get user input, return as json via promise
 
-*** MouseHandlerSets.js
-    abstraction over sets of mouse handling funcs, for easier use when making tools
+**** MouseHandlerSets.js
+    abstraction over sets of mouse handling funcs, for easier use when making textgrid based tools
 
-*** PageImageListWidget.js
+**** PageImageListWidget.js
     Wrapper around list of PageImageWidget 
     instantiates each PageImageWidget, has own status bar
     communicates with server on updates/deletions to labeling
 
-*** PageImageWidget.js
+**** PageImageWidget.js
     Individual page image 
     RTree for glyphs, annotations, 
     tooltips on hover
@@ -60,47 +65,46 @@
     glyph hover broadcast
     selection rect for region-based labeling
 
-
-*** ReflowTools.js
+**** ReflowTools.js
     TextReflow helper tools: labeling, slicing, joining, reordering
 
-*** ReflowWidgetInit.js
+**** ReflowWidgetInit.js
     Initialize or show/hide a text reflow widget for area-based label
 
-*** ReflowWidget.js
+**** ReflowWidget.js
     text reflow labeling widget
 
-*** rtrees.js
+**** rtrees.js
     helper functions for initializing rtrees with glyph and label data  
 
-*** schemas.js
+**** schemas.js
     json validation functions for checking incoming data
 
-*** serverApi.js
+**** serverApi.js
     rest crud server helper stuff
 
-*** ServerDataExchange.js
+**** ServerDataExchange.js
     wrapper around server crud api, allows pub/sub to changes in server data
 
-*** shared-state.js
+**** shared-state.js
     globally accessible data, consts, global mouse tracking init.
 
-*** SplitWin.js
+**** SplitWin.js
     window splitting, creation, deletion library
 
-*** TextgridWidget.ts
+**** TextgridWidget.ts
     classes to display extracted PDF text, with highlights over labeled spans,
     glyph hovering, click sync to pdf page images.
-    
 
-*** Tooltips.js
+**** Tooltips.js
     tippy.js based tooltip class. not working atm.
 
-*** tstags.ts
+**** tstags.ts
     jquery-based html tag creation library
 
-*** utils.ts
-    misc. utility functions. or rather, one utility function
+**** utils.ts
+    misc. utility functions
 
-*** view-pdf-text.js
+**** view-pdf-text.js
     commented out early version of TextgridWidget
+    contains sync-scroll code (commented out)

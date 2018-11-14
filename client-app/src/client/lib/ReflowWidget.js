@@ -1,107 +1,78 @@
+"use strict";
 /**
  *
  **/
-
+exports.__esModule = true;
 /* global require watr fabric */
-
-import * as $ from 'jquery';
-import * as _ from 'lodash';
-import * as d3 from 'd3';
-
-import * as mhs from './MouseHandlerSets';
-
-import * as coords from './coord-sys';
-import { $id, t, htm } from "./tstags";
-let rtree = require('rbush');
+var $ = require("jquery");
+var _ = require("lodash");
+var d3 = require("d3");
+var mhs = require("./MouseHandlerSets");
+var coords = require("./coord-sys");
+var tstags_1 = require("./tstags");
+var rtree = require('rbush');
 // import rtree from "rbush";
-import {shared} from './shared-state';
-
-import * as d3x from './d3-extras';
-
-import * as gp from './graphpaper-variants';
-import * as colors from './colors';
-
-const JsArray = watr.utils.JsArray;
-const TGI = watr.textgrid.TextGridInterop;
-
-import * as reflowTools from './ReflowTools.js';
-
-import Infobar from './Infobar';
-
-export function unshowGrid() {
-    if (shared.activeReflowWidget != undefined) {
-        let widget = shared.activeReflowWidget;
-        $id(widget.containerId).empty();
-        shared.activeReflowWidget = undefined;
+var shared_state_1 = require("./shared-state");
+var d3x = require("./d3-extras");
+var gp = require("./graphpaper-variants");
+var colors = require("./colors");
+var JsArray = watr.utils.JsArray;
+var TGI = watr.textgrid.TextGridInterop;
+var reflowTools = require("./ReflowTools");
+var Infobar_1 = require("./Infobar");
+function unshowGrid() {
+    if (shared_state_1.shared.activeReflowWidget !== undefined) {
+        var widget = shared_state_1.shared.activeReflowWidget;
+        tstags_1.$id(widget.containerId).empty();
+        shared_state_1.shared.activeReflowWidget = undefined;
     }
 }
-
-
-export class ReflowWidget {
-
+exports.unshowGrid = unshowGrid;
+var ReflowWidget = /** @class */ (function () {
     /**
      * @param {ServerDataExchange}  serverExchange
      */
-    constructor (containerId, textGrid, labelSchema, zoneId, zoneLabel, serverExchange) {
-
-        let gridNum = 1000;
+    function ReflowWidget(containerId, textGrid, labelSchema, zoneId, zoneLabel, serverExchange) {
+        var gridNum = 1000;
         this.containerId = containerId;
         this.gridNum = gridNum;
         this.textGrid = textGrid; // .trimRights().padRights();
         this.textHeight = 20;
         this.labelSchema = labelSchema;
-
-        this.frameId  = `textgrid-frame-${gridNum}`;
-        this.canvasId = `textgrid-canvas-${gridNum}`;
-        this.svgId    = `textgrid-svg-${gridNum}`;
+        this.frameId = "textgrid-frame-" + gridNum;
+        this.canvasId = "textgrid-canvas-" + gridNum;
+        this.svgId = "textgrid-svg-" + gridNum;
         this.zoneId = zoneId;
         this.zoneLabel = zoneLabel;
-        this.infoBar = new Infobar(this.containerId, 2, 3);
+        this.infoBar = new Infobar_1["default"](this.containerId, 2, 3);
         this.serverExchange = serverExchange;
-
     }
-
-
-
-    setupTopStatusBar() {
-        let widget = this;
-        let setTool = h => {
-            return function (){
+    ReflowWidget.prototype.setupTopStatusBar = function () {
+        var widget = this;
+        var setTool = function (h) {
+            return function () {
                 return widget.setMouseHandlers([reflowTools.updateUserPosition, h]);
             };
         };
-
-        let controls = [
-            [ 'labeler'    , 'pencil'             , true,  'Labeling tool'        , setTool( reflowTools.labelingTool )  ],
-            [ 'slicer'     , 'scissors'           , false, 'Text slicing'         , setTool( reflowTools.slicerTool   )  ],
-            [ 'move'       , 'arrows-v'           , false, 'Move line up or down' , setTool( reflowTools.moveLine     )  ]
-       ];
-
-        let leftControls = htm.makeRadios('shapers', controls);
-
-        let infoToggle = this.infoBar.getToggle();
-
-        let closeButton = t.span(
-            '.spacedout',
-            htm.iconButton('close')
-        );
-
-        let rightControls = t.span(
-            '.pull-right .spacedout',
-            infoToggle, closeButton
-        );
+        var controls = [
+            ['labeler', 'pencil', true, 'Labeling tool', setTool(reflowTools.labelingTool)],
+            ['slicer', 'scissors', false, 'Text slicing', setTool(reflowTools.slicerTool)],
+            ['move', 'arrows-v', false, 'Move line up or down', setTool(reflowTools.moveLine)]
+        ];
+        var leftControls = tstags_1.htm.makeRadios('shapers', controls);
+        var infoToggle = this.infoBar.getToggle();
+        var closeButton = tstags_1.t.span('.spacedout', tstags_1.htm.iconButton('close'));
+        var rightControls = tstags_1.t.span('.pull-right .spacedout', infoToggle, closeButton);
         // unshowWidget
-        $(`#${this.containerId} .status-top`)
+        $("#" + this.containerId + " .status-top")
             .append(leftControls)
             .append(rightControls);
-    }
-
-    init () {
-
-        return new Promise((resolve) => {
-            let initWidth = 400;
-            let gridHeight = 300; // this.gridBounds.bottom;
-
+    };
+    ReflowWidget.prototype.init = function () {
+        var _this = this;
+        return new Promise(function (resolve) {
+            var initWidth = 400;
+            var gridHeight = 300; // this.gridBounds.bottom;
             /**
              * Structure:
              *    div.gridwidget
@@ -114,179 +85,146 @@ export class ReflowWidget {
              *        div.right-gutter
              *        div.status-bottom
              */
-
-            let gridNodes =
-                t.div(`.textgrid #${this.frameId}`, {style: `width: ${initWidth}px; height: ${gridHeight}px;`}, [
-                    t.canvas(`.textgrid #${this.canvasId}`, {page: this.gridNum, width: initWidth, height: gridHeight})
-                ]) ;
-
-            let infobarElem = this.infoBar.getElem();
-
-            let widgetNode =
-                t.div(`.gridwidget`, [
-                    t.div(`.status-top`),
-                    t.div(`.left-gutter`),
-                    infobarElem,
-                    t.div(`.gridcontent`, [
-                        gridNodes
-                    ]),
-                    t.div(`.right-gutter`),
-                    t.div(`.status-bottom`)
-                ]);
-
-            $id(this.containerId).append(widgetNode);
-
+            var gridNodes = tstags_1.t.div(".textgrid #" + _this.frameId, { style: "width: " + initWidth + "px; height: " + gridHeight + "px;" }, [
+                tstags_1.t.canvas(".textgrid #" + _this.canvasId, { page: _this.gridNum, width: initWidth, height: gridHeight })
+            ]);
+            var infobarElem = _this.infoBar.getElem();
+            var widgetNode = tstags_1.t.div(".gridwidget", [
+                tstags_1.t.div(".status-top"),
+                tstags_1.t.div(".left-gutter"),
+                infobarElem,
+                tstags_1.t.div(".gridcontent", [
+                    gridNodes
+                ]),
+                tstags_1.t.div(".right-gutter"),
+                tstags_1.t.div(".status-bottom")
+            ]);
+            tstags_1.$id(_this.containerId).append(widgetNode);
             // Setup status bar
-            this.setupTopStatusBar();
-
-            this.d3$textgridSvg = d3.select('#'+this.frameId)
+            _this.setupTopStatusBar();
+            _this.d3$textgridSvg = d3.select('#' + _this.frameId)
                 .append('svg').classed('textgrid', true)
-                .datum(this.textGrid.gridData)
-                .attr('id', `${this.svgId}`)
-                .attr('page', this.gridNum)
+                .datum(_this.textGrid.gridData)
+                .attr('id', "" + _this.svgId)
+                .attr('page', _this.gridNum)
                 .attr('width', initWidth)
                 .attr('height', gridHeight)
-                .call(() => resolve())
-            ;
-
-        }).then(() => {
-            this.setMouseHandlers([
+                .call(function () { return resolve(); });
+        }).then(function () {
+            _this.setMouseHandlers([
                 reflowTools.updateUserPosition,
                 reflowTools.labelingTool
             ]);
-
-            return this.redrawAll();
+            return _this.redrawAll();
         });
-
-    }
-
-    printToInfobar(slot, label, value) {
+    };
+    ReflowWidget.prototype.printToInfobar = function (slot, label, value) {
         this.infoBar.printToInfobar(slot, label, value);
-    }
-
-    updateDomNodeDimensions() {
-        return new Promise((resolve) => {
-            let height = this.rowCount * this.cellHeight;
-            let width = this.colCount * this.cellWidth;
-
-            $id(this.frameId).width(width).height(height);
-
-            this.drawingApi.setDimensions(width, height, this.colCount, this.rowCount);
-
-            this.d3$textgridSvg
+    };
+    ReflowWidget.prototype.updateDomNodeDimensions = function () {
+        var _this = this;
+        return new Promise(function (resolve) {
+            var height = _this.rowCount * _this.cellHeight;
+            var width = _this.colCount * _this.cellWidth;
+            tstags_1.$id(_this.frameId).width(width).height(height);
+            _this.drawingApi.setDimensions(width, height, _this.colCount, _this.rowCount);
+            _this.d3$textgridSvg
                 .attr('width', width)
                 .attr('height', height)
-                .call(() => resolve())
-            ;
+                .call(function () { return resolve(); });
         });
-    }
-
-    saveTextGrid() {
-        shared.activeReflowWidget = this;
-        let gridAsJson = JSON.parse(this.textGrid.toJson().toString());
-
-        if (! shared.DEV_MODE) {
+    };
+    ReflowWidget.prototype.saveTextGrid = function () {
+        shared_state_1.shared.activeReflowWidget = this;
+        var gridAsJson = JSON.parse(this.textGrid.toJson().toString());
+        if (!shared_state_1.shared.DEV_MODE) {
             this.serverExchange.setAnnotationText(this.zoneId, gridAsJson);
         }
-    }
-
-    makeRTreeBox(region) {
-        let {left, top, width, height} = region.bounds;
-        let box = new coords.BBox(
-            left*4, top*4, width*4,height*4
-        );
+    };
+    ReflowWidget.prototype.makeRTreeBox = function (region) {
+        var _a = region.bounds, left = _a.left, top = _a.top, width = _a.width, height = _a.height;
+        var box = new coords.BBox(left * 4, top * 4, width * 4, height * 4);
         box.region = region;
         return box;
-    }
-
-
-    drawGridShapes() {
-        let gridProps = this.gridProps;
-
+    };
+    ReflowWidget.prototype.drawGridShapes = function () {
+        var _this = this;
+        var gridProps = this.gridProps;
         this.cellRowToDisplayRegion = {};
-
         this.drawingApi.applyCanvasStripes();
-
-        let gridRegions = TGI.widgetDisplayGridProps.gridRegions(gridProps);
-        let allClasses = TGI.labelSchemas.allLabels(this.labelSchema);
-        let colorMap = _.zipObject(allClasses, colors.HighContrast);
-
-        let rtreeBoxes = _.map(gridRegions, region => {
-            let classes = TGI.gridRegions.labels(region);
-            let cls = classes[classes.length-1];
-            let box = region.gridBox;
-            let bounds = region.bounds;
-            let {left, top, width, height} = this.scaleLTBounds(bounds);
+        var gridRegions = TGI.widgetDisplayGridProps.gridRegions(gridProps);
+        var allClasses = TGI.labelSchemas.allLabels(this.labelSchema);
+        var colorMap = _.zipObject(allClasses, colors.HighContrast);
+        var rtreeBoxes = _.map(gridRegions, function (region) {
+            var classes = TGI.gridRegions.labels(region);
+            var cls = classes[classes.length - 1];
+            var box = region.gridBox;
+            var bounds = region.bounds;
+            var _a = _this.scaleLTBounds(bounds), left = _a.left, top = _a.top, width = _a.width, height = _a.height;
             if (region.isLabelKey()) {
-                let label = region.labelIdent;
-                let text = new fabric.Text(label, {
+                var label = region.labelIdent;
+                var text = new fabric.Text(label, {
                     objectCaching: false,
                     left: left, top: top,
-                    fontSize: this.textHeight,
+                    fontSize: _this.textHeight,
                     fontStyle: 'normal',
                     fontFamily: 'Courier New',
                     fontWeight: 'bold',
                     textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.5).toRgba()
                 });
-                this.drawingApi.fabricCanvas.add(text);
-
-
-            } else if (region.isCells()) {
-                let cells = JsArray.fromScala(region.cells);
+                _this.drawingApi.fabricCanvas.add(text);
+            }
+            else if (region.isCells()) {
+                var cells = JsArray.fromScala(region.cells);
                 // Create a mapping between textgrid rows and displaygrid rows
-                let cellRow = region.row;
-                this.cellRowToDisplayRegion[cellRow] = this.scaleLTBounds(bounds);
-
-                let cellChrs = _.map(cells, c => c.char.toString());
-                if (cellChrs[0] == ' ') {
+                var cellRow = region.row;
+                _this.cellRowToDisplayRegion[cellRow] = _this.scaleLTBounds(bounds);
+                var cellChrs = _.map(cells, function (c) { return c.char.toString(); });
+                if (cellChrs[0] === ' ') {
                     cellChrs[0] = '░';
                 }
-                if (cellChrs[cellChrs.length-1] == ' ') {
-                    cellChrs[cellChrs.length-1] = '░';
+                if (cellChrs[cellChrs.length - 1] === ' ') {
+                    cellChrs[cellChrs.length - 1] = '░';
                 }
-                let cellStr = cellChrs.join('');
-
-                let text = new fabric.Text(cellStr, {
+                var cellStr = cellChrs.join('');
+                var text = new fabric.Text(cellStr, {
                     objectCaching: false,
                     left: left, top: top,
-                    fontSize: this.textHeight,
+                    fontSize: _this.textHeight,
                     fontStyle: 'normal',
                     fontFamily: 'Courier New'
                     // fontWeight: 'bold',
                     // textBackgroundColor: new fabric.Color(colorMap[cls]).setAlpha(0.5).toRgba()
                 });
-                this.drawingApi.fabricCanvas.add(text);
-
-            } else if (region.isLabelCover()) {
-
-                this.drawingApi.fillBox(box, (rect) => {
+                _this.drawingApi.fabricCanvas.add(text);
+            }
+            else if (region.isLabelCover()) {
+                _this.drawingApi.fillBox(box, function (rect) {
                     rect.setGradient('fill', {
                         x1: 0, y1: 0,
                         x2: 0, y2: height,
                         colorStops: {
-                            0:  new fabric.Color('rgb(255, 255, 255').setAlpha(0).toRgba(),
-                            0.6:  new fabric.Color('rgb(255, 255, 255').setAlpha(0.1).toRgba(),
-                            1:  new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba()
+                            0: new fabric.Color('rgb(255, 255, 255').setAlpha(0).toRgba(),
+                            0.6: new fabric.Color('rgb(255, 255, 255').setAlpha(0.1).toRgba(),
+                            1: new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba()
                         }
                     });
                 });
-
-                this.drawingApi.fillBox(box, (rect) => {
+                _this.drawingApi.fillBox(box, function (rect) {
                     rect.setGradient('fill', {
                         x1: 0, y1: 0,
                         x2: 0, y2: height,
                         colorStops: {
-                            0:  new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba(),
+                            0: new fabric.Color(colorMap[cls]).setAlpha(0.8).toRgba(),
                             0.2: new fabric.Color('rgb(255, 255, 255').setAlpha(0).toRgba()
                         }
                     });
                 });
-
-                let abbrev = TGI.labelSchemas.abbrevFor(this.labelSchema, cls);
-                let text = new fabric.Text(abbrev, {
+                var abbrev = TGI.labelSchemas.abbrevFor(_this.labelSchema, cls);
+                var text = new fabric.Text(abbrev, {
                     objectCaching: false,
                     left: left, top: top,
-                    fontSize: this.textHeight,
+                    fontSize: _this.textHeight,
                     fontStyle: 'normal',
                     fontFamily: 'Courier New',
                     fontWeight: 'bolder',
@@ -296,14 +234,13 @@ export class ReflowWidget {
                     // linethrough: '',
                     // overline: ''
                 });
-
-                this.drawingApi.fabricCanvas.add(text);
-
-            } else if (region.isHeading()) {
-                let text = new fabric.Text(region.heading, {
+                _this.drawingApi.fabricCanvas.add(text);
+            }
+            else if (region.isHeading()) {
+                var text = new fabric.Text(region.heading, {
                     objectCaching: false,
                     left: left, top: top,
-                    fontSize: this.textHeight,
+                    fontSize: _this.textHeight,
                     fontStyle: 'italic',
                     fontFamily: 'Courier New',
                     fontWeight: 'bolder',
@@ -312,164 +249,132 @@ export class ReflowWidget {
                     // linethrough: '',
                     // overline: ''
                 });
-                this.drawingApi.fabricCanvas.add(text);
+                _this.drawingApi.fabricCanvas.add(text);
             }
-            return this.makeRTreeBox(region);
+            return _this.makeRTreeBox(region);
         });
-
         this.drawingApi.fabricCanvas.renderAll();
-
         this.reflowRTree = rtree();
-
         this.reflowRTree.load(rtreeBoxes);
-
         this.d3$textgridSvg
-            .selectAll(`rect`)
+            .selectAll("rect")
             .remove();
-
-        _.each(this.reflowRTree.all(), data => {
-            let region = data.region;
-            let bounds = region.bounds;
-            let scaled = this.scaleLTBounds(bounds);
-            let classes = TGI.gridRegions.labels(region);
-
-            let regionType;
+        _.each(this.reflowRTree.all(), function (data) {
+            var region = data.region;
+            var bounds = region.bounds;
+            var scaled = _this.scaleLTBounds(bounds);
+            var classes = TGI.gridRegions.labels(region);
+            var regionType;
             if (region.isLabelKey()) {
                 regionType = 'LabelKey';
-            } else if (region.isCells()) {
+            }
+            else if (region.isCells()) {
                 regionType = 'Cell';
-            } else if (region.isLabelCover()) {
+            }
+            else if (region.isLabelCover()) {
                 regionType = 'LabelCover';
-            } else if (region.isHeading()) {
+            }
+            else if (region.isHeading()) {
                 regionType = 'Heading';
             }
-            let cls = classes[classes.length-1];
-
-            this.d3$textgridSvg
+            var cls = classes[classes.length - 1];
+            _this.d3$textgridSvg
                 .append('rect')
-                .classed(`${regionType}`, true)
-                .classed(`${cls}`, true)
-                .call(d3x.initRect, () => scaled)
-                .call(d3x.initFill, 'yellow', 0.0)
-            ;
+                .classed("" + regionType, true)
+                .classed("" + cls, true)
+                .call(d3x.initRect, function () { return scaled; })
+                .call(d3x.initFill, 'yellow', 0.0);
         });
-
-    }
-
-    redrawAll() {
+    };
+    ReflowWidget.prototype.redrawAll = function () {
+        var _this = this;
         this.gridProps = TGI.textGrids.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
-        let rowCount = Math.max(this.gridProps.getGridRowCount(), 40);
-        let colCount = Math.max(this.gridProps.getGridColCount(), 100);
-
-
+        var rowCount = Math.max(this.gridProps.getGridRowCount(), 40);
+        var colCount = Math.max(this.gridProps.getGridColCount(), 100);
         this.rowCount = rowCount;
         this.colCount = colCount;
-        let drawingApi = new gp.FabricJsGraphPaper(this.canvasId, this.textHeight);
-
+        var drawingApi = new gp.FabricJsGraphPaper(this.canvasId, this.textHeight);
         this.cellWidth = drawingApi.cellWidth;
         this.cellHeight = drawingApi.cellHeight;
         this.drawingApi = drawingApi;
-
-
         return this.updateDomNodeDimensions()
-            .then(() => this.drawGridShapes())
-            .then(() => this.saveTextGrid());
-
-    }
-
-    graphCellToClientBounds(graphCell) {
+            .then(function () { return _this.drawGridShapes(); })
+            .then(function () { return _this.saveTextGrid(); });
+    };
+    ReflowWidget.prototype.graphCellToClientBounds = function (graphCell) {
         // Construct a query box that aligns with grid
-        let cellLeft = graphCell.x * this.cellWidth;
-        let cellTop = graphCell.y * this.cellHeight;
+        var cellLeft = graphCell.x * this.cellWidth;
+        var cellTop = graphCell.y * this.cellHeight;
         return coords.mk.fromLtwh(cellLeft, cellTop, this.cellWidth, this.cellHeight);
-    }
-
-
-    clientPointToGraphCell(clientPt) {
-        let cellCol = Math.floor(clientPt.x / this.cellWidth);
-        let cellRow = Math.floor(clientPt.y / this.cellHeight);
+    };
+    ReflowWidget.prototype.clientPointToGraphCell = function (clientPt) {
+        var cellCol = Math.floor(clientPt.x / this.cellWidth);
+        var cellRow = Math.floor(clientPt.y / this.cellHeight);
         return coords.mkPoint.fromXy(cellCol, cellRow);
-    }
-
-    scaleLTBounds(bb) {
-        let x = bb.left*this.cellWidth;
-        let y = bb.top* this.cellHeight;
-        let w = bb.width * this.cellWidth;
-        let h = bb.height* this.cellHeight;
+    };
+    ReflowWidget.prototype.scaleLTBounds = function (bb) {
+        var x = bb.left * this.cellWidth;
+        var y = bb.top * this.cellHeight;
+        var w = bb.width * this.cellWidth;
+        var h = bb.height * this.cellHeight;
         return coords.mk.fromLtwh(x, y, w, h);
-    }
-
-    getCellContent(graphCell) {
-        let reflowRTree = this.reflowRTree;
+    };
+    ReflowWidget.prototype.getCellContent = function (graphCell) {
+        var reflowRTree = this.reflowRTree;
         // RTree cells are 4x4 for indexing purposes, this query is centered within the cell (not touching the edges)
-        let rtreeQuery = coords.mk.fromLtwh(graphCell.x*4+1, graphCell.y*4+1, 1, 1);
-        let cellContent = reflowRTree.search(rtreeQuery);
+        var rtreeQuery = coords.mk.fromLtwh(graphCell.x * 4 + 1, graphCell.y * 4 + 1, 1, 1);
+        var cellContent = reflowRTree.search(rtreeQuery);
         if (cellContent.length > 1) {
             console.error("more than one thing found at grid cell ", graphCell);
         }
         return cellContent[0];
-    }
-
-    getBoxContent(cellBox) {
-        return this.reflowRTree.search(
-            coords.mk.fromLtwh(
-                cellBox.left*4+1, cellBox.top*4+1,
-                ((cellBox.spanRight+1)*4)-2,
-                ((cellBox.spanDown+1)*4)-2
-            )
-        );
-    }
-
-    getCellNum(graphCell) {
+    };
+    ReflowWidget.prototype.getBoxContent = function (cellBox) {
+        return this.reflowRTree.search(coords.mk.fromLtwh(cellBox.left * 4 + 1, cellBox.top * 4 + 1, ((cellBox.spanRight + 1) * 4) - 2, ((cellBox.spanDown + 1) * 4) - 2));
+    };
+    ReflowWidget.prototype.getCellNum = function (graphCell) {
         return graphCell.y * this.colCount + graphCell.x;
-    }
-
-    setMouseHandlers(handlers) {
+    };
+    ReflowWidget.prototype.setMouseHandlers = function (handlers) {
         mhs.setMouseHandlers(this, this.frameId, handlers);
-    }
-
-    updateCellHoverHighlight(hoverGraphCell) {
+    };
+    ReflowWidget.prototype.updateCellHoverHighlight = function (hoverGraphCell) {
+        var _this = this;
         this.d3$textgridSvg
             .selectAll('.cell-focus')
-            .remove() ;
-
+            .remove();
         this.d3$textgridSvg
             .append('rect')
             .classed('cell-focus', true)
-            .call(d3x.initRect, () => this.graphCellToClientBounds(hoverGraphCell))
+            .call(d3x.initRect, function () { return _this.graphCellToClientBounds(hoverGraphCell); })
             .call(d3x.initStroke, 'blue', 1, 0.4)
-            .call(d3x.initFill, 'yellow', 0.4)
-        ;
-    }
-
-    clearLabelHighlights() {
-        _.each(['LabelCover', 'Heading', 'Cell', 'LabelKey'], cls => {
-            this.d3$textgridSvg
-                .selectAll(`rect.${cls}`)
-                .attr('fill-opacity', 0)
-            ;
+            .call(d3x.initFill, 'yellow', 0.4);
+    };
+    ReflowWidget.prototype.clearLabelHighlights = function () {
+        var _this = this;
+        _.each(['LabelCover', 'Heading', 'Cell', 'LabelKey'], function (cls) {
+            _this.d3$textgridSvg
+                .selectAll("rect." + cls)
+                .attr('fill-opacity', 0);
         });
-    }
-
-    showLabelHighlights(cell) {
-        let classes = TGI.gridRegions.labels(cell.region);
-        let cls = classes[classes.length-1];
+    };
+    ReflowWidget.prototype.showLabelHighlights = function (cell) {
+        var classes = TGI.gridRegions.labels(cell.region);
+        var cls = classes[classes.length - 1];
         // console.log('hovering', classes);
-
         if (cell.region.isLabelCover() || cell.region.isHeading()) {
             this.clearLabelHighlights();
             this.d3$textgridSvg
-                .selectAll(`rect.${cls}`)
-                .attr('fill-opacity', 0.5)
-            ;
+                .selectAll("rect." + cls)
+                .attr('fill-opacity', 0.5);
         }
         else if (cell.region.isLabelKey()) {
             this.clearLabelHighlights();
             this.d3$textgridSvg
-                .selectAll(`rect.${cls}`)
-                .attr('fill-opacity', 0.5)
-            ;
+                .selectAll("rect." + cls)
+                .attr('fill-opacity', 0.5);
         }
-
-    }
-}
+    };
+    return ReflowWidget;
+}());
+exports.ReflowWidget = ReflowWidget;

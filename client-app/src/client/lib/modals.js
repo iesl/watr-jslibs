@@ -46,7 +46,7 @@ export function makeModalPromise(context, innerPromise, body, header, footer) {
 
         // When the user clicks anywhere outside of the modal, close it
         window.onclick = function(event) {
-            if (event.target == modal) {
+            if (event.target === modal) {
                 $modal.remove();
                 reject();
             }

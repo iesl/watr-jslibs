@@ -170,7 +170,7 @@ export function allValid(sname) {
 
 export function isValid(sname) {
     let validator = ajv.getSchema(schemaName(sname));
-    if (validator == undefined) {
+    if (validator === undefined) {
         let schemas = _.map(
             _.filter(_.keys(ajv._schemas), k => /watrworks.net/.test(k)),
             shortSchemaName

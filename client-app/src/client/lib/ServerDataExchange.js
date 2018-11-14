@@ -6,7 +6,7 @@
 import * as _ from 'lodash';
 
 import * as Rx from 'rxjs';
-import * as server from './serverApi.js';
+import * as server from './serverApi';
 
 export class ServerDataExchange {
 
@@ -89,7 +89,7 @@ export class ServerDataExchange {
         // d3.selectAll('.glyph-zone-highlight') .remove();
 
         // _.each(annots, annot => {
-        //     if (annot.glyphDefs != null) {
+        //     if (annot.glyphDefs !== null) {
         //         let glyphsLoci = _.flatMap(annot.glyphDefs.rows, r => r.loci);
 
         //         let gridDataPts = self.mapGlyphLociToGridDataPts(glyphsLoci);

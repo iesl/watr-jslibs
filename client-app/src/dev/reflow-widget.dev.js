@@ -1,7 +1,7 @@
 
 /* global require $   watr */
 import * as Shared from '../client/lib/shared-state';
-import * as ReflowWidget from  '../client/lib/ReflowWidget.js';
+import * as ReflowWidget from  '../client/lib/ReflowWidget';
 
 export function runReflow()  {
     console.log('running runReflow');

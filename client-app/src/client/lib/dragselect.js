@@ -50,7 +50,7 @@ export function awaitUserSelection(d3$svg, initSvgPt) {
 
         d3$svg.on("mouseup", function() {
             // return either point or rect
-            if (selectionRect != null) {
+            if (selectionRect !== null) {
                 selectionRect.remove();
                 if (currentPt !== originPt) {
                     d3.event.preventDefault();
@@ -78,7 +78,7 @@ export function awaitUserSelection(d3$svg, initSvgPt) {
             }
         });
         d3$svg.on("mousemove", function() {
-            if (selectionRect != null && userWithinPageBounds) {
+            if (selectionRect !== null && userWithinPageBounds) {
                 // let p = d3.mouse(this);
                 let mouseEvent = d3.event;
                 let clickPt = coords.mkPoint.fromXy(mouseEvent.offsetX, mouseEvent.offsetY);

@@ -22,7 +22,7 @@ export function sortedUniqCount<T>(array: T[]): [T, number][] {
  * // => [[1.1, 2], [2.3, 2]]
  */
 export function sortedUniqCountBy<T, U>(array: T[], iteratee?: (t: T) => U): [T, number][] {
-    return (array != null && array.length)
+    return (array !== null && array.length)
         ? baseSortedUniqCount(array, iteratee)
         : [];
 }

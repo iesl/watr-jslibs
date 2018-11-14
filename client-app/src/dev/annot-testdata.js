@@ -48,7 +48,7 @@ export function annotData() {
         return _.map(_.range(0, annotsPerPage), annotNum => {
             let id = (pageNum * annotsPerPage) + annotNum;
             let template = annotTemplate;
-            if (annotNum % 2 == 0) {
+            if (annotNum % 2 === 0) {
                 template = annotTemplate2;
             }
 

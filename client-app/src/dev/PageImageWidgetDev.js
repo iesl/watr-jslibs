@@ -1,18 +1,18 @@
 
 /* global require $  _ watr */
 import * as Shared from '../client/lib/shared-state';
-import * as PageImageWidget from  '../client/lib/PageImageWidget.js';
-import { PageImageListWidget, setupPageImages } from '../client/lib/PageImageListWidget.js';
-import {ServerDataExchange} from  '../client/lib/ServerDataExchange.js';
-import * as rtrees from  '../client/lib/rtrees.js';
+import * as PageImageWidget from  '../client/lib/PageImageWidget';
+import { PageImageListWidget, setupPageImages } from '../client/lib/PageImageListWidget';
+import {ServerDataExchange} from  '../client/lib/ServerDataExchange';
+import * as rtrees from  '../client/lib/rtrees';
 import * as coords from '../client/lib/coord-sys';
-import * as testdata from './annot-testdata.js';
-import * as spu  from '../client/lib/SplitWin.js';
+import * as testdata from './annot-testdata';
+import * as spu  from '../client/lib/SplitWin';
 
 export function run()  {
 
     let rootFrame = spu.createRootFrame("#main");
-    rootFrame.setDirection(spu.row);
+    rootFrame.setDirection(spu.FrameFlowDir.Row);
 
     let [paneLeft, paneRight] = rootFrame.addPanes(2);
 

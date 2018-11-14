@@ -31,7 +31,7 @@ export let d3select = {
 export function getId(data) {
     let shape = data.type;
 
-    if (data.id != undefined) {
+    if (data.id !== undefined) {
         return data.id;
     } else {
         switch (shape) {
@@ -48,4 +48,37 @@ export function getId(data) {
 
 export function d3$id(selector) {
     return d3.select('#'+selector);
+}
+
+/**
+ *
+ * Allow sequencing of d3 animations by waiting for all transitions to end before moving to the next "step"
+ *
+ */
+
+function onEndAll (transition, callback) {
+  if (transition.empty()) {
+    callback();
+  } else {
+    let n = transition.size();
+    transition.on("end", function () {
+      n--;
+      if (n === 0) {
+        callback();
+      }
+    });
+  }
+}
+
+export function stepThrough(interpFunc, steps) {
+  if (steps.length > 0) {
+    let step = steps[0];
+
+    interpFunc(step)
+      .transition()
+      .delay(300)
+      .call(onEndAll, function(){
+        stepThrough(interpFunc, steps.slice(1));
+      });
+  }
 }

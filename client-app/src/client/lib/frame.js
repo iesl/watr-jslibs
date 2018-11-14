@@ -3,9 +3,9 @@
 import * as $ from 'jquery';
 import * as _ from 'lodash';
 import {t} from "./tstags";
-import * as auth from './auth.js';
+import * as auth from './auth';
 import {shared} from './shared-state';
-import * as server from './serverApi.js';
+import * as server from './serverApi';
 const rest = server.rest;
 
 
@@ -15,7 +15,7 @@ function siteNavMenu() {
     ['Curate', '/curate']
   ];
   let choices = _.map(
-    _.filter(pages, p => p[0] != shared.page),
+    _.filter(pages, p => p[0] !== shared.page),
     p => {
       return t.a({href: '/'}, p), t.a({href: p[1]}, p[0]);
     });

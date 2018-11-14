@@ -7,11 +7,11 @@
 import '../style/app-main.less';
 
 import {shared} from '../client/lib/shared-state';
-import * as ReflowWidgetDev from  './reflow-widget.dev.js';
+import * as ReflowWidgetDev from  './reflow-widget.dev';
 import * as TextgridWidgetDev from  './TextgridWidgetDev';
 // import * as SelectionFilterDev from  './SelectionFilterDev';
-import * as PageImageWidgetDev from  './PageImageWidgetDev.js';
-import * as SplitPaneDev from  './split-pane.dev.js';
+import * as PageImageWidgetDev from  './PageImageWidgetDev';
+import * as SplitPaneDev from  './split-pane.dev';
 import * as jst  from '../client/lib/tstags';
 const t = jst.t;
 

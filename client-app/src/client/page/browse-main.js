@@ -6,12 +6,12 @@ import * as $ from 'jquery';
 import * as rx from "rxjs";
 import * as rxop from "rxjs/operators";
 
-import * as frame from '../lib/frame.js';
+import * as frame from '../lib/frame';
 import {t, icon} from '../lib/tstags';
 
-import * as server from '../lib/serverApi.js';
+import * as server from '../lib/serverApi';
 import * as qs from 'query-string';
-import * as spu  from '../lib/SplitWin.js';
+import * as spu  from '../lib/SplitWin';
 
 
 const DefaultListingLength = 50;
@@ -125,7 +125,7 @@ function updatePage(corpusEntries) {
 
 function createEntryListingFrame() {
     let rootFrame = spu.createRootFrame("#main-content");
-    rootFrame.setDirection(spu.row);
+    rootFrame.setDirection(spu.FrameFlowDir.Row);
 
     let [contentPane] = rootFrame.addPanes(1);
 

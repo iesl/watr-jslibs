@@ -8,15 +8,15 @@ import * as $ from 'jquery';
 import * as _ from 'lodash';
 
 import {t, $id, icon} from "./tstags";
-import * as reflowWidgetInit from  './ReflowWidgetInit.js';
+import * as reflowWidgetInit from  './ReflowWidgetInit';
 import {shared} from './shared-state';
 import * as schema from './schemas';
 import * as coords from './coord-sys';
 
-import { PageImageWidget } from './PageImageWidget.js';
-import * as rtrees from './rtrees.js';
+import { PageImageWidget } from './PageImageWidget';
+import * as rtrees from './rtrees';
 import {zipWithIndex} from './LodashPlus';
-import { ServerDataExchange } from  './ServerDataExchange.js';
+import { ServerDataExchange } from  './ServerDataExchange';
 
 
 export class PageImageListWidget {
@@ -93,7 +93,7 @@ export class PageImageListWidget {
             $id(widget.selectionStatusId)
                 .append(t.span(`Selected: ${selectedAnnots.length} del: `));
 
-            if (selectedAnnots.length == 1) {
+            if (selectedAnnots.length === 1) {
                 let selection = selectedAnnots[0];
                 let gridForSelection = reflowWidgetInit.getTextGridForSelectedZone(selection);
                 let deleteBtn = t.button([icon.trash]);

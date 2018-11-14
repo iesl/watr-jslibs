@@ -267,7 +267,7 @@ declare namespace lunr {
         /**
          * Loads a previously serialised index.
          *
-         * Issues a warning if the index being imported was serialised by a different version
+         * Issues a warning if the index being imported was serialised by a different version
          * of lunr.
          *
          * @param serialisedData  The serialised set to load.

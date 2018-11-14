@@ -4,7 +4,7 @@
 
 /* global */
 
-import * as util from  '../lib/commons.js';
+import * as util from  '../lib/utils';
 import * as $ from 'jquery';
 import {t} from '../lib/tstags';
 

@@ -2,12 +2,12 @@
 
 import * as Shared from '../client/lib/shared-state';
 import * as TextgridWidget from  '../client/lib/TextgridWidget';
-import * as spu  from '../client/lib/SplitWin.js';
+import * as spu  from '../client/lib/SplitWin';
 
 export function run()  {
 
     let rootFrame = spu.createRootFrame("#main");
-    rootFrame.setDirection(spu.row);
+    rootFrame.setDirection(spu.FrameFlowDir.Row);
 
 
     let [paneLeft, paneRight] = rootFrame.addPanes(2);

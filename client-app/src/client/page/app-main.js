@@ -2,13 +2,13 @@
  * Dispatch to one of the other main modules
  **/
 
-import * as annot from  './annot-main.js';
-import * as browse from './browse-main.js';
-import * as login from  './login-main.js';
-import * as curate from './curate-main.js';
+import * as annot from  './annot-main';
+import * as browse from './browse-main';
+import * as login from  './login-main';
+import * as curate from './curate-main';
 import * as trace from './trace-main';
 import {shared} from '../lib/shared-state';
-import {getParameterByName} from '../lib/commons';
+import {getParameterByName} from '../lib/utils';
 
 import '../../style/app-main.less';
 
@@ -27,7 +27,7 @@ function dispatch() {
         break;
 
     case "document":
-        if (view == 'tracelog') {
+        if (view === 'tracelog') {
             shared.page = "Trace";
             trace.runMain();
         } else {

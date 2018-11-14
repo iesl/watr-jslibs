@@ -3,13 +3,11 @@
  * tooltip engine won't suffice.
  */
 
-import * as $ from 'jquery';
 import * as _ from 'lodash';
 
 import { $id } from "./tstags";
 
 import Tippy from 'tippy.js';
-
 
 export default class ToolTips {
 
@@ -34,7 +32,7 @@ export default class ToolTips {
             let $elem = $id(id);
             $elem.attr('title', label);
 
-            let tooltip = _.remove(widget.tooltips, tt => tt.id == hoverHit.id)[0];
+            let tooltip = _.remove(widget.tooltips, tt => tt.id === hoverHit.id)[0];
 
             if (tooltip === undefined) {
                 tooltip = $elem.prop('_tippy');

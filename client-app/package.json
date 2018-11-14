@@ -72,9 +72,9 @@
   },
   "scripts": {
     "build": "webpack --mode production",
-    "dev": "webpack --mode development",
+    "dev": "webpack --mode development --log-level=debug",
     "build-v": "webpack --display-modules",
-    "watch": "webpack --mode development --watch",
+    "watch": "webpack --mode development --watch --log-level=debug",
     "start": "webpack-dev-server --mode development",
     "server": "node src/dev/dev-server.js",
     "test": "ts-node node_modules/jasmine/bin/jasmine",

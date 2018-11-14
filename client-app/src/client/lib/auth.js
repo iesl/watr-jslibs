@@ -8,7 +8,7 @@ import * as Cookies from  'js-cookie';
 
 import {makeModal} from "./tstags";
 import {t, htm} from "./tstags";
-import * as server from './serverApi.js';
+import * as server from './serverApi';
 
 function labeledPasswordInput(label, key) {
     return t.div([

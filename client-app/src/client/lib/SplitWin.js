@@ -1,3 +1,4 @@
+"use strict";
 /**
  *
  * Construct a tree of nested windowed panes, where each intermediate node holds a list of child panes,
@@ -10,233 +11,191 @@
  *
  *
  */
-
-import * as _ from 'lodash';
-import * as $ from 'jquery';
-
-import Split from 'split.js';
-import { $id, t, htm } from "./tstags";
-
-const noop = function() { return; };
-
-export const SplitOptions = {
-    sizes        : [],           //	Array 		                      Initial sizes of each element in percents or CSS values.
-    minSize      : [],           //	Number or Array 	100 	        Minimum size of each element.
-    gutterSize   : 0,            //	Number 	          10 	          Gutter size in pixels.
-    snapOffset   : 0,            //	Number 	          30  	        Snap to minimum size offset in pixels.
-    direction    : 'vertical',   //	String 	         'horizontal' 	Direction to split: horizontal or vertical.
-    cursor       : 'col-resize', //	String 	         'col-resize' 	Cursor to display while dragging.
-    gutter       : noop,         //	Function 		                    Called to create each gutter element
-    elementStyle : noop,         //	Function 		                    Called to set the style of each element.
-    gutterStyle  : noop,         //	Function 		                    Called to set the style of the gutter.
-    onDrag       : noop,         //	Function 		                    Callback on drag.
-    onDragStart  : noop,         //	Function 		                    Callback on drag start.
-    onDragEnd    : noop          //	Function 		                    Callback on drag end.
+exports.__esModule = true;
+var _ = require("lodash");
+var $ = require("jquery");
+var split_1 = require("split");
+var tstags_1 = require("./tstags");
+var noop = function () { return; };
+exports.SPLIT_OPTIONS = {
+    sizes: [],
+    minSize: [],
+    gutterSize: 0,
+    snapOffset: 0,
+    direction: 'vertical',
+    cursor: 'col-resize',
+    gutter: noop,
+    elementStyle: noop,
+    gutterStyle: noop,
+    onDrag: noop,
+    onDragStart: noop,
+    onDragEnd: noop // Function 		                    Callback on drag end.
 };
-
-const splitPaneRootId = 'splitwin_root';
-
-export const row = 'row';
-export const col = 'column';
-
-class Frame {
-    constructor($elem) {
+var splitPaneRootId = 'splitwin_root';
+var FrameFlowDir;
+(function (FrameFlowDir) {
+    FrameFlowDir[FrameFlowDir["Row"] = 0] = "Row";
+    FrameFlowDir[FrameFlowDir["Col"] = 1] = "Col";
+})(FrameFlowDir = exports.FrameFlowDir || (exports.FrameFlowDir = {}));
+// export const row = 'row';
+// export const col = 'column';
+var Frame = /** @class */ (function () {
+    function Frame($elem) {
+        this.panes = [];
+        this.paneIds = [];
         this.elem = $elem;
         this.frameId = $elem.attr('id');
-        this.direction = col;
+        this.direction = FrameFlowDir.Col;
     }
-
-    setDirection(dir) {
-        let cdiv = this.childrenDiv();
+    Frame.prototype.setDirection = function (dir) {
+        var cdiv = this.childrenDiv();
         this.direction = dir;
-        if (dir == row) {
+        if (dir === FrameFlowDir.Row) {
             cdiv.addClass('splitwin-row');
             cdiv.removeClass('splitwin-column');
-        } else if (dir == col) {
+        }
+        else if (dir === FrameFlowDir.Col) {
             cdiv.addClass('splitwin-column');
             cdiv.removeClass('splitwin-row');
-        } else {
-            throw Error('unknown direction', dir);
         }
-    }
-
-    clientAreaSelector() {
-        return `#${this.frameId} > .frame-content`;
-    }
-
-    clientArea() {
+        else {
+            throw Error("unknown direction " + dir);
+        }
+    };
+    Frame.prototype.clientAreaSelector = function () {
+        return "#" + this.frameId + " > .frame-content";
+    };
+    Frame.prototype.clientArea = function () {
         return $(this.clientAreaSelector());
-    }
-
-    childrenDiv() {
-        return $id(this.frameId).children('.frame-content');
-    }
-    getChildren() {
+    };
+    Frame.prototype.childrenDiv = function () {
+        return tstags_1.$id(this.frameId).children('.frame-content');
+    };
+    Frame.prototype.getChildren = function () {
         return this.panes;
-    }
-
-    getSplitDir() {
-        return this.direction == 'column' ? 'vertical' : 'horizontal';
-    }
-
-    getParentPane() {
+    };
+    Frame.prototype.getSplitDir = function () {
+        return this.direction === FrameFlowDir.Col ? 'vertical' : 'horizontal';
+    };
+    Frame.prototype.getParentPane = function () {
         // console.log('getParentPane', this.frameId);
-
-        let idParts = this.frameId.split(/__/);
+        var idParts = this.frameId.split(/__/);
         // console.log('idParts', idParts);
-        let parentId = idParts.slice(0, idParts.length-1).join('__');
+        var parentId = idParts.slice(0, idParts.length - 1).join('__');
         // console.log('parentId', parentId);
         return parentId;
-    }
-
-    addPanes(n) {
-        let paneIds = generatePaneIds(this.frameId, n);
-        let panes = _.map(paneIds, id =>  mkPane(id));
-        let paneElems = _.map(panes, p => p.elem);
-
+    };
+    Frame.prototype.addPanes = function (n) {
+        var paneIds = generatePaneIds(this.frameId, n);
+        var panes = _.map(paneIds, function (id) { return mkPane(id); });
+        var paneElems = _.map(panes, function (p) { return p.elem; });
         this.childrenDiv().append(paneElems);
-
         this.rebuild();
         return panes;
-    }
-
-    rebuild() {
-        let ch = this.childrenDiv().children();
+    };
+    Frame.prototype.rebuild = function () {
+        var ch = this.childrenDiv().children();
         // console.log('rebuild: ch', ch);
-
-
-        let childPanes = ch.filter(function () {
+        var childPanes = ch.filter(function () {
             return $(this).is('.splitwin-pane');
         });
-
         // console.log('rebuild: childPanes len=', childPanes.length);
-
-        let paneIds = _.map(childPanes.toArray(), p => {
+        var paneIds = _.map(childPanes.toArray(), function (p) {
             return $(p).attr('id');
         });
-
-        let panes = _.map(childPanes.toArray(), p => {
+        var panes = _.map(childPanes.toArray(), function (p) {
             return $(p).prop('SplitWin');
         });
         // console.log('rebuild: panes', panes);
-
-        let paneSelectors = _.map(paneIds, id => `#${id}`);
-
-        // let paneElems = _.map(panes, p => p.elem);
-
-
+        var paneSelectors = _.map(paneIds, function (id) { return "#" + id; });
+        // const paneElems = _.map(panes, p => p.elem);
         // console.log('rebuild: paneSelectors = ', paneSelectors.join(', '));
-
-        let size = Math.floor(100 / paneIds.length);
-
-        let sizes = _.map(_.range(0, paneIds.length), () => size);
-
+        var size = Math.floor(100 / paneIds.length);
+        var sizes = _.map(_.range(0, paneIds.length), function () { return size; });
         // console.log('rebuild: sizes = ', sizes.join(', '));
-
-        if (this.split != undefined) {
+        if (this.split !== undefined) {
             this.split.destroy();
         }
-
         // $e.children('.children').empty();
         // $e.children('.children').append(paneElems);
-
-        this.split = Split(paneSelectors, {
+        this.split = split_1["default"](paneSelectors, {
             sizes: sizes,
             direction: this.getSplitDir(),
             gutterSize: 6,
             minSize: 10
         });
-
-
         this.paneIds = paneIds;
         this.panes = panes;
         // this.updateSplit(split);
-    }
-
-    updateSplit(split) {
-        if (this.split != undefined) {
+    };
+    Frame.prototype.updateSplit = function (split) {
+        if (this.split !== undefined) {
             this.split.destroy();
         }
         this.split = split;
-    }
-
-
-    addPaneControls() {
-        let self = this;
-        let exp = htm.iconButton('expand');
-        let comp = htm.iconButton('compress');
-        let del = htm.iconButton('times');
-        let controls = t.div('.splitwin-controls', [
+    };
+    Frame.prototype.addPaneControls = function () {
+        var self = this;
+        var exp = tstags_1.htm.iconButton('expand');
+        var comp = tstags_1.htm.iconButton('compress');
+        var del = tstags_1.htm.iconButton('times');
+        var controls = tstags_1.t.div('.splitwin-controls', [
             exp, comp, del
         ]);
-
-
-        del.on('click', function() {
-            self.delete();
+        del.on('click', function () {
+            self["delete"]();
         });
-
-        $id(this.frameId).addClass('controls');
-
-        $id(this.frameId).children('.status-top').append(controls);
-    }
-
-    delete() {
+        tstags_1.$id(this.frameId).addClass('controls');
+        tstags_1.$id(this.frameId).children('.status-top').append(controls);
+    };
+    Frame.prototype["delete"] = function () {
         this.updateSplit(undefined);
-        $id(this.frameId).remove();
-        let parentPaneId = this.getParentPane();
-        let parentSplitWin = $id(parentPaneId).prop('SplitWin');
+        tstags_1.$id(this.frameId).remove();
+        var parentPaneId = this.getParentPane();
+        var parentSplitWin = tstags_1.$id(parentPaneId).prop('SplitWin');
         parentSplitWin.rebuild();
-    }
-
-    maximize() {
-
-    }
-
-    restoreSize() {
-
-    }
-
-
-}
-
-export function createRootFrame(containerId)  {
-    let root = mkPane(splitPaneRootId);
+    };
+    Frame.prototype.maximize = function () {
+    };
+    Frame.prototype.restoreSize = function () {
+    };
+    return Frame;
+}());
+function createRootFrame(containerId) {
+    var root = mkPane(splitPaneRootId);
     root.elem.addClass('splitwin-root');
     $(containerId).append(root.elem);
     $(containerId).css({
         overflow: 'hidden'
     });
-
     return root;
 }
-
+exports.createRootFrame = createRootFrame;
 function mkPane(id) {
-    let elem =
-        t.div(`#${id} .splitwin-pane`, [
-            t.div(`.status-top`),
-            t.div(`.left-gutter`),
-            t.div(`.frame-content`),
-            t.div(`.right-gutter`),
-            t.div(`.status-bottom`)
-        ]);
-
-    let frame = new Frame(elem);
+    var elem = tstags_1.t.div("#" + id + " .splitwin-pane", [
+        tstags_1.t.div(".status-top"),
+        tstags_1.t.div(".left-gutter"),
+        tstags_1.t.div(".frame-content"),
+        tstags_1.t.div(".right-gutter"),
+        tstags_1.t.div(".status-bottom")
+    ]);
+    var frame = new Frame(elem);
     elem.prop('SplitWin', frame);
     return frame;
 }
-
-export function makePaneId(...indexes) {
-    let paneId = _.join(
-        _.map(indexes, i => {
-            return `pane-${i}`;
-        }),
-        '__'
-    );
-    return splitPaneRootId + '__' + paneId;
+function makePaneId() {
+    var indexes = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        indexes[_i] = arguments[_i];
+    }
+    var paneId = _.join(_.map(indexes, function (i) {
+        return "pane-" + i;
+    }), '__');
+    return splitPaneRootId + "__" + paneId;
 }
-
+exports.makePaneId = makePaneId;
 function generatePaneIds(parentId, n) {
-    return _.map(_.range(0, n), id => {
-        return `${parentId}__pane-${id}`;
+    return _.map(_.range(0, n), function (id) {
+        return parentId + "__pane-" + id;
     });
 }

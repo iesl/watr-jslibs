@@ -3,7 +3,7 @@
  **/
 
 import * as $ from 'jquery';
-import * as frame from '../lib/frame.js';
+import * as frame from '../lib/frame';
 import {t} from '../lib/tstags';
 
 function setupPage() {

@@ -9,8 +9,8 @@ import * as d3 from 'd3';
 
 import {shared} from './shared-state';
 import * as rtrees from './rtrees';
-import * as server from './serverApi.js';
-import * as modals from './modals.js';
+import * as server from './serverApi';
+import * as modals from './modals';
 import * as d3x from './d3-extras';
 
 import {t} from "./tstags";
@@ -53,7 +53,7 @@ function refreshZoneHighlights(zones) {
          .remove();
 
     _.each(zones, zone => {
-        if (zone.glyphDefs != null) {
+        if (zone.glyphDefs !== null) {
             let glyphsLoci = _.flatMap(zone.glyphDefs.rows, r => r.loci);
 
             let gridDataPts = mapGlyphLociToGridDataPts(glyphsLoci);
@@ -139,7 +139,7 @@ let labelButton = (label) => {
 export function createLabelChoiceWidget(labelNames, containerId) {
 
     let buttons = _.map(labelNames, n => {
-        if (n[0] == '#') {
+        if (n[0] === '#') {
             return t.span(n.slice(1));
         } else {
             return labelButton(n);

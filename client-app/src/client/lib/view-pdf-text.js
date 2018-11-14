@@ -5,8 +5,6 @@
  *
  */
 
-/* global  _ $ */
-
 // import * as coords from './coord-sys';
 // import {t} from "./tstags";
 
@@ -201,7 +199,7 @@
 //             let hits = neighborHits = textgridRTree.search(queryBox);
 
 //             neighborHits = _.sortBy(
-//                 _.filter(hits, hit => hit.glyphDataPt != undefined),
+//                 _.filter(hits, hit => hit.glyphDataPt !== undefined),
 //                 hit => [hit.bottom, hit.left]
 //             );
 

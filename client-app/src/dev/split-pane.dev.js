@@ -1,21 +1,21 @@
 /* global require */
 
 import * as spu  from '../client/lib/SplitWin';
-import * as util  from '../client/lib/commons';
+import * as util  from '../client/lib/utils';
 import * as _ from 'lodash';
 import { $id, t, htm } from '../client/lib/tstags';
 
 export function runSplitPane() {
     let rootFrame = spu.createRootFrame("#main");
-    rootFrame.setDirection(spu.col);
-    // rootFrame.setDirection(spu.row);
+    rootFrame.setDirection(spu.FrameFlowDir.Col);
+    // rootFrame.setDirection(spu.FrameFlowDir.Row);
 
     rootFrame.addPanes(4);
     let panes1 = rootFrame.getChildren();
 
     _.each(panes1, (p, i) => {
         p.addPaneControls();
-        p.setDirection(spu.row);
+        p.setDirection(spu.FrameFlowDir.Row);
         p.addPanes(i + 2);
         _.each(p.getChildren(), (p2, i2) => {
             p2.addPaneControls();

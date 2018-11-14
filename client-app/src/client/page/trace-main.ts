@@ -8,15 +8,14 @@ import * as d3 from 'd3';
 import $ from 'jquery';
 
 import * as d3x from '../lib/d3-extras';
-import * as util from  '../lib/commons.js';
-import * as frame from '../lib/frame.js';
+import * as util from  '../lib/utils';
+import * as frame from '../lib/frame';
 import { shared } from '../lib/shared-state';
 import * as global from '../lib/shared-state';
-import * as server from '../lib/serverApi.js';
-import * as spu  from '../lib/SplitWin.js';
-import * as rtrees from  '../lib/rtrees.js';
-import { setupPageImages } from '../lib/PageImageListWidget.js';
-import * as stepper from  '../lib/d3-stepper.js';
+import * as server from '../lib/serverApi';
+import * as spu  from '../lib/SplitWin';
+import * as rtrees from  '../lib/rtrees';
+import { setupPageImages } from '../lib/PageImageListWidget';
 import * as coords from '../lib/coord-sys';
 
 
@@ -29,7 +28,7 @@ import {addViewLinkOptions} from './shared-main';
 function setupFrameLayout() {
 
   const rootFrame = spu.createRootFrame("#main-content");
-  rootFrame.setDirection(spu.row);
+  rootFrame.setDirection(spu.FrameFlowDir.Row);
 
   const [paneLeft, paneRight] = rootFrame.addPanes(2);
 
@@ -222,7 +221,7 @@ function runTrace(tracelog: any): void {
 
   const decodedShapes = _.map(body, mapf);
 
-  stepper.stepThrough(doDrawShapes, [decodedShapes]);
+  d3x.stepThrough(doDrawShapes, [decodedShapes]);
 }
 
 function doDrawShapes(dataBlock: any) {

@@ -10,7 +10,7 @@ const send = require('koa-send');
 const json = require('koa-json');
 // const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpack = require('webpack');
-const config = require('../../webpack.config.js');
+const config = require('../../webpack.config');
 const compiler = webpack(config);
 
 const router = new Router();

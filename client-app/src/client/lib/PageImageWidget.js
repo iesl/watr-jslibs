@@ -9,16 +9,16 @@ import * as d3 from 'd3';
 import * as d3x from './d3-extras';
 
 import * as coords from './coord-sys';
-import * as rtrees from  './rtrees.js';
+import * as rtrees from  './rtrees';
 import * as rtree from 'rbush';
 import {t, $id} from "./tstags";
-import {eventHasLeftClick} from './commons.js';
+import {eventHasLeftClick} from './utils';
 import * as mhs from './MouseHandlerSets';
 import {awaitUserSelection} from './dragselect';
 import * as lbl from './labeling';
 import * as Rx from 'rxjs';
 import * as knn from 'rbush-knn';
-import * as util from  './commons.js';
+import * as util from  './utils';
 import ToolTips from './Tooltips';
 import Infobar from './Infobar';
 
@@ -144,7 +144,7 @@ export class PageImageWidget {
         widget.d3select().selectAll('.annotation-rect')
             .classed('annotation-selected', false);
 
-        let filtered = _.filter(selections, s => s.pageNum == widget.pageNum);
+        let filtered = _.filter(selections, s => s.pageNum === widget.pageNum);
 
         _.each(filtered , sel => {
             widget.d3select()

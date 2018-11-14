@@ -1,365 +1,307 @@
+"use strict";
 /**
  * Mouse handlers for ReflowWidget
  **/
-
+exports.__esModule = true;
 /* global require watr */
-import * as _ from 'lodash';
-
-import * as coords from './coord-sys';
-const GraphPaper = watr.utils.GraphPaper;
-const Options = watr.utils.Options;
-const TGI = watr.textgrid.TextGridInterop;
-const LTBounds = watr.geometry.LTBounds_Companion;
-const Labels = watr.watrmarks.Labels;
-
-import * as lbl from './labeling';
-import * as d3x from './d3-extras';
-
-export function updateUserPosition(widget) {
-    let handlers = {
-
-        mouseover: function() {
+var _ = require("lodash");
+var coords = require("./coord-sys");
+var GraphPaper = watr.utils.GraphPaper;
+var Options = watr.utils.Options;
+var TGI = watr.textgrid.TextGridInterop;
+var LTBounds = watr.geometry.LTBounds_Companion;
+var Labels = watr.watrmarks.Labels;
+var lbl = require("./labeling");
+var d3x = require("./d3-extras");
+function updateUserPosition(widget) {
+    var handlers = {
+        mouseover: function () {
             widget.hoverCell = null;
-            widget.printToInfobar(2, `dim`, `${widget.colCount}x${widget.rowCount}`);
+            widget.printToInfobar(2, "dim", widget.colCount + "x" + widget.rowCount);
         },
-
-
-        mousemove: function (event){
-
-            let userPt = coords.mkPoint.fromXy(event.offsetX, event.offsetY);
-            let clientX = Math.floor(userPt.x);
-            let clientY = Math.floor(userPt.y);
-
+        mousemove: function (event) {
+            var userPt = coords.mkPoint.fromXy(event.offsetX, event.offsetY);
+            var clientX = Math.floor(userPt.x);
+            var clientY = Math.floor(userPt.y);
             // console.log('event', event);
-            let focalGraphCell = widget.clientPointToGraphCell(userPt);
-            let cellContent = widget.getCellContent(focalGraphCell);
-
-            widget.printToInfobar(0, `@client`, ` (${clientX}, ${clientY})`);
-
+            var focalGraphCell = widget.clientPointToGraphCell(userPt);
+            var cellContent = widget.getCellContent(focalGraphCell);
+            widget.printToInfobar(0, "@client", " (" + clientX + ", " + clientY + ")");
             focalGraphCell.id = widget.getCellNum(focalGraphCell);
-            widget.printToInfobar(1, '@dispcell', ` (${focalGraphCell.x}, ${focalGraphCell.y}) #${focalGraphCell.id}`);
-
+            widget.printToInfobar(1, '@dispcell', " (" + focalGraphCell.x + ", " + focalGraphCell.y + ") #" + focalGraphCell.id);
             widget.userGridLocation = {
-                userPt,
-                clientX, clientY,
-                focalGraphCell,
-                cellContent
+                userPt: userPt,
+                clientX: clientX, clientY: clientY,
+                focalGraphCell: focalGraphCell,
+                cellContent: cellContent
             };
-            if (widget.hoverCell != null) {
-                if (focalGraphCell.id != widget.hoverCell.id) {
+            if (widget.hoverCell !== null) {
+                if (focalGraphCell.id !== widget.hoverCell.id) {
                     widget.hoverCell = focalGraphCell;
                     widget.updateCellHoverHighlight(focalGraphCell);
                 }
-            } else {
+            }
+            else {
                 widget.hoverCell = focalGraphCell;
                 widget.updateCellHoverHighlight(focalGraphCell);
             }
-
             if (cellContent) {
-                let focalBox = GraphPaper.boundsToBox(LTBounds.FromInts(
-                    cellContent.region.bounds.left,
-                    cellContent.region.bounds.top,
-                    cellContent.region.bounds.width,
-                    cellContent.region.bounds.height
-                ));
+                var focalBox = GraphPaper.boundsToBox(LTBounds.FromInts(cellContent.region.bounds.left, cellContent.region.bounds.top, cellContent.region.bounds.width, cellContent.region.bounds.height));
                 widget.userGridLocation.focalBox = focalBox;
-
                 if (cellContent.region.isCells()) {
-                    let row = cellContent.region.row;
-                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                    let col = focalCellIndex;
-                    widget.printToInfobar(3, '@gridcell', ` (${row}, ${col})`);
-                } else {
-                    widget.printToInfobar(3, '@gridcell', ` --`);
+                    var row = cellContent.region.row;
+                    var focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                    var col = focalCellIndex;
+                    widget.printToInfobar(3, '@gridcell', " (" + row + ", " + col + ")");
+                }
+                else {
+                    widget.printToInfobar(3, '@gridcell', " --");
                 }
                 widget.showLabelHighlights(cellContent);
-            } else {
+            }
+            else {
                 widget.clearLabelHighlights();
-                widget.printToInfobar(3, '@gridcell', ` --`);
+                widget.printToInfobar(3, '@gridcell', " --");
             }
         }
     };
-
     return handlers;
 }
-
-export function labelingTool(widget) {
+exports.updateUserPosition = updateUserPosition;
+function labelingTool(widget) {
     return {
-        mousedown: function($event) {
-
+        mousedown: function ($event) {
             foldCellContent(widget.userGridLocation.cellContent, {
-                onCells: () => {
-                    let { focalGraphCell,
-                          focalBox,
-                          cellContent  } = widget.userGridLocation;
-
-                    let cellRow = cellContent.region.row;
-                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                    let cellCol = focalCellIndex;
-
+                onCells: function () {
+                    var _a = widget.userGridLocation, focalGraphCell = _a.focalGraphCell, focalBox = _a.focalBox, cellContent = _a.cellContent;
+                    var cellRow = cellContent.region.row;
+                    var focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                    var cellCol = focalCellIndex;
                     if ($event.shiftKey) {
                         maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
-                    } else if ($event.ctrlKey) {
+                    }
+                    else if ($event.ctrlKey) {
                         maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));
-                    } else {
+                    }
+                    else {
                         // Add a label to the clicked row of text
-                        let focalClasses = TGI.gridRegions.labels(cellContent.region);
-                        let focalLabel = _.last(focalClasses) || '';
-                        let childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
+                        var focalClasses = TGI.gridRegions.labels(cellContent.region);
+                        var focalLabel = _.last(focalClasses) || '';
+                        var childLabels = TGI.labelSchemas.childLabelsFor(widget.labelSchema, focalLabel);
                         lbl.createLabelChoiceWidget(childLabels, widget.containerId)
-                            .then(choice => {
-                                let labelChoice = choice.selectedLabel;
-                                widget.textGrid.labelRow(cellRow, Labels.forString(labelChoice));
-                                widget.redrawAll();
-                            }, () => { /* Ok, user cancelled label selection */ });
+                            .then(function (choice) {
+                            var labelChoice = choice.selectedLabel;
+                            widget.textGrid.labelRow(cellRow, Labels.forString(labelChoice));
+                            widget.redrawAll();
+                        }, function () { });
                     }
                 },
-
-                onLabelCover: () => {
+                onLabelCover: function () {
                     // If user clicks on a leaf (right-most) label cover indicator, delete that label
-                    let { focalBox,
-                          cellContent
-                        } = widget.userGridLocation;
-                    let focalLabels = TGI.gridRegions.labels(cellContent.region);
-
-                    let boxRight = focalBox.shiftOrigin(2, 0);
-                    let contentRight = widget.getBoxContent(boxRight);
-                    let rightLabelCovers = _.filter(contentRight, c => c.region.isLabelCover());
-                    let isLeafLabelCover = rightLabelCovers.length == 0;
-
+                    var _a = widget.userGridLocation, focalBox = _a.focalBox, cellContent = _a.cellContent;
+                    var focalLabels = TGI.gridRegions.labels(cellContent.region);
+                    var boxRight = focalBox.shiftOrigin(2, 0);
+                    var contentRight = widget.getBoxContent(boxRight);
+                    var rightLabelCovers = _.filter(contentRight, function (c) { return c.region.isLabelCover(); });
+                    var isLeafLabelCover = rightLabelCovers.length === 0;
                     if (isLeafLabelCover) {
-                        let queryRight = boxRight.modifySpan(widget.colCount, 0);
-                        let rightContents = widget.getBoxContent(queryRight);
-                        let rightCells0 = _.filter(rightContents, c => c.region.isCells());
-
-                        let rightCells = _.map(rightCells0, r => r.region);
-                        let region0 = _.head(rightCells);
+                        var queryRight = boxRight.modifySpan(widget.colCount, 0);
+                        var rightContents = widget.getBoxContent(queryRight);
+                        var rightCells0 = _.filter(rightContents, function (c) { return c.region.isCells(); });
+                        var rightCells = _.map(rightCells0, function (r) { return r.region; });
+                        var region0 = _.head(rightCells);
                         widget.textGrid.unlabelNear(region0.row, 0, Labels.forString(focalLabels[0]));
                         widget.redrawAll();
                     }
-
                 }
             });
-
         }
     };
 }
-
-
-export function slicerTool(widget) {
+exports.labelingTool = labelingTool;
+function slicerTool(widget) {
     return {
-        mousedown: function($event) {
-
+        mousedown: function ($event) {
             foldCellContent(widget.userGridLocation.cellContent, {
-                onCells: () => {
-                    let { focalGraphCell,
-                          focalBox,
-                          cellContent  } = widget.userGridLocation;
-
-                    let cellRow = cellContent.region.row;
-                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                    let cellCol = focalCellIndex;
-
+                onCells: function () {
+                    var _a = widget.userGridLocation, focalGraphCell = _a.focalGraphCell, focalBox = _a.focalBox, cellContent = _a.cellContent;
+                    var cellRow = cellContent.region.row;
+                    var focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                    var cellCol = focalCellIndex;
                     if ($event.shiftKey) {
                         maybeUpdateGrid(widget, widget.textGrid.slurp(cellRow));
-                    } else {
+                    }
+                    else {
                         maybeUpdateGrid(widget, widget.textGrid.split(cellRow, cellCol));
                     }
                 }
             });
-
         }
     };
 }
-
-
+exports.slicerTool = slicerTool;
 function doReorderDragDrop(widget) {
-    let dragTextRow = widget.textReorderingState.dragSubjectTextRow;
-    let dropTextRows = widget.textReorderingState.dropTargetsTextRows;
-    let dragRegion = widget.cellRowToDisplayRegion[dragTextRow];
+    var dragTextRow = widget.textReorderingState.dragSubjectTextRow;
+    var dropTextRows = widget.textReorderingState.dropTargetsTextRows;
+    var dragRegion = widget.cellRowToDisplayRegion[dragTextRow];
     widget.textReorderingState.dragRegion = dragRegion;
-
     // mouse cursor := closed hand
-
     return {
-        mousedown: function() {},
-
-        mousemove: function() {
-            let { clientX, clientY } = widget.userGridLocation;
+        mousedown: function () { },
+        mousemove: function () {
+            var _a = widget.userGridLocation, clientX = _a.clientX, clientY = _a.clientY;
             widget.d3$textgridSvg
                 .select('.reorder-subject')
                 .attr('x', clientX)
-                .attr('y', clientY)
-            ;
+                .attr('y', clientY);
             foldCellContent(widget.userGridLocation.cellContent, {
-                onCells: () => {
-
-                    let { cellContent  } = widget.userGridLocation;
-                    let focalTextRow = cellContent.region.row;
-                    let hoveringDropTarget = _.some(dropTextRows, r => r == focalTextRow);
-
+                onCells: function () {
+                    var cellContent = widget.userGridLocation.cellContent;
+                    var focalTextRow = cellContent.region.row;
+                    var hoveringDropTarget = _.some(dropTextRows, function (r) { return r === focalTextRow; });
                     if (hoveringDropTarget) {
                         widget.textReorderingState.currentDropRow = focalTextRow;
                         widget.d3$textgridSvg
                             .select('.reorder-subject')
-                            .attr('opacity', 0.1) ;
-                    } else {
+                            .attr('opacity', 0.1);
+                    }
+                    else {
                         widget.textReorderingState.currentDropRow = undefined;
                         widget.d3$textgridSvg
                             .select('.reorder-subject')
-                            .attr('opacity', 0.4) ;
+                            .attr('opacity', 0.4);
                     }
-
                 },
-                elseRun: () => {
+                elseRun: function () {
                     widget.textReorderingState.currentDropRow = undefined;
                     widget.d3$textgridSvg
                         .select('.reorder-subject')
-                        .attr('opacity', 0.4) ;
-
+                        .attr('opacity', 0.4);
                 }
             });
-
         },
-        mouseup: function() {
+        mouseup: function () {
             // Either drop on legal point or cancel
-            let dropRow = widget.textReorderingState.currentDropRow;
+            var dropRow = widget.textReorderingState.currentDropRow;
             if (dropRow !== undefined) {
-                let newOrdering = _.flatMap(dropTextRows, r => {
-                    if (r == dropRow) {
+                var newOrdering = _.flatMap(dropTextRows, function (r) {
+                    if (r === dropRow) {
                         if (dragTextRow < dropRow) {
                             return [dropRow, dragTextRow];
-                        } else {
+                        }
+                        else {
                             return [dragTextRow, dropRow];
                         }
-                    } else {
+                    }
+                    else {
                         return [r];
                     }
                 });
-
-                let minRow = _.min(newOrdering);
-
-
-                let maybeNewTextGrid = TGI.textGrids.reorderRows(widget.textGrid, minRow, newOrdering);
-
+                var minRow = _.min(newOrdering);
+                var maybeNewTextGrid = TGI.textGrids.reorderRows(widget.textGrid, minRow, newOrdering);
                 maybeUpdateGrid(widget, maybeNewTextGrid);
             }
             widget.d3$textgridSvg
                 .selectAll('.reorder-region')
                 .remove();
-
             widget.setMouseHandlers([
                 updateUserPosition,
                 moveLine
             ]);
         }
     };
-
 }
-export function moveLine(widget) {
+function moveLine(widget) {
     return {
-        mousedown: function() {
+        mousedown: function () {
             if (widget.textReorderingState !== undefined) {
-
                 widget.setMouseHandlers([
                     updateUserPosition,
                     doReorderDragDrop
                 ]);
             }
         },
-
-        mousemove: function() {
+        mousemove: function () {
             // Update drag object and drop point indicator
             foldCellContent(widget.userGridLocation.cellContent, {
-                onCells: () => {
-                    let { focalGraphCell,
-                          focalBox,
-                          cellContent  } = widget.userGridLocation;
-                    let cellRow = cellContent.region.row;
-                    let focalCellIndex = focalGraphCell.x - focalBox.origin.x;
-                    let cellCol = focalCellIndex;
+                onCells: function () {
+                    var _a = widget.userGridLocation, focalGraphCell = _a.focalGraphCell, focalBox = _a.focalBox, cellContent = _a.cellContent;
+                    var cellRow = cellContent.region.row;
+                    var focalCellIndex = focalGraphCell.x - focalBox.origin.x;
+                    var cellCol = focalCellIndex;
                     // Determine legal drop points for this line
-                    let possibleTextRows = TGI.textGrids.findLegalReorderingRows(widget.textGrid, cellRow, cellCol);
+                    var possibleTextRows = TGI.textGrids.findLegalReorderingRows(widget.textGrid, cellRow, cellCol);
                     // console.log('possibleTextRows', possibleTextRows);
-
                     if (possibleTextRows.length > 1) {
                         // Legal reorderable textGrid rows
-                        let dropTargetTextRows = _.filter(possibleTextRows, r => r != cellRow);
-
+                        var dropTargetTextRows = _.filter(possibleTextRows, function (r) { return r !== cellRow; });
                         widget.textReorderingState = {
                             dragSubjectTextRow: cellRow,
                             dropTargetsTextRows: dropTargetTextRows
                         };
-
-                    } else {
+                    }
+                    else {
                         widget.textReorderingState = undefined;
                     }
                     updateDropRegionIndicators(widget);
                 },
-                elseRun: () => {
+                elseRun: function () {
                     widget.textReorderingState = undefined;
                     updateDropRegionIndicators(widget);
                 }
             });
         },
-
-        mouseup: function() {
+        mouseup: function () {
             // Either drop on legal point or cancel
         }
     };
 }
-
+exports.moveLine = moveLine;
 function updateDropRegionIndicators(widget) {
     widget.d3$textgridSvg
         .selectAll('.reorder-region')
         .remove();
     if (widget.textReorderingState !== undefined) {
-
-        let dragTextRow = widget.textReorderingState.dragSubjectTextRow;
-        let dropTextRows = widget.textReorderingState.dropTargetsTextRows;
-
-        let dragRegion = widget.cellRowToDisplayRegion[dragTextRow];
-        let dropRegions = _.map(dropTextRows, textRow => {
+        var dragTextRow = widget.textReorderingState.dragSubjectTextRow;
+        var dropTextRows = widget.textReorderingState.dropTargetsTextRows;
+        var dragRegion_1 = widget.cellRowToDisplayRegion[dragTextRow];
+        var dropRegions = _.map(dropTextRows, function (textRow) {
             return widget.cellRowToDisplayRegion[textRow];
         });
-
-
-        _.each(dropRegions, dropRegion => {
+        _.each(dropRegions, function (dropRegion) {
             widget.d3$textgridSvg
                 .append('rect')
                 .classed('reorder-region', true)
                 .classed('reorder-drop', true)
-                .call(d3x.initRect, () => dropRegion)
-                .call(d3x.initFill, 'blue', 0.3)
-            ;
+                .call(d3x.initRect, function () { return dropRegion; })
+                .call(d3x.initFill, 'blue', 0.3);
         });
-
         // Construct the 'grabbed' region
         widget.d3$textgridSvg
             .append('rect')
             .classed('reorder-region', true)
             .classed('reorder-subject', true)
-            .call(d3x.initRect, () => dragRegion)
-            .call(d3x.initFill, 'green', 0.4)
-        ;
-
+            .call(d3x.initRect, function () { return dragRegion_1; })
+            .call(d3x.initFill, 'green', 0.4);
     }
 }
-
-function foldCellContent(cellContent, { onLabelCover, onCells, onLabelKey, onHeading, elseRun }) {
-    let handlerRan = false;
-
+function foldCellContent(cellContent, _a) {
+    var onLabelCover = _a.onLabelCover, onCells = _a.onCells, onLabelKey = _a.onLabelKey, onHeading = _a.onHeading, elseRun = _a.elseRun;
+    var handlerRan = false;
     if (cellContent !== undefined) {
         if (cellContent.region.isLabelCover() && onLabelCover !== undefined) {
             handlerRan = true;
             onLabelCover();
-        } else if (cellContent.region.isCells() && onCells !== undefined) {
+        }
+        else if (cellContent.region.isCells() && onCells !== undefined) {
             handlerRan = true;
             onCells();
-        } else if (cellContent.region.isHeading() && onHeading !== undefined) {
+        }
+        else if (cellContent.region.isHeading() && onHeading !== undefined) {
             handlerRan = true;
             onHeading();
-        } else if (cellContent.region.isLabelKey() && onLabelKey !== undefined) {
+        }
+        else if (cellContent.region.isLabelKey() && onLabelKey !== undefined) {
             handlerRan = true;
             onLabelKey();
         }
@@ -368,12 +310,9 @@ function foldCellContent(cellContent, { onLabelCover, onCells, onLabelKey, onHea
         elseRun();
     }
 }
-
 function maybeUpdateGrid(widget, maybeGrid) {
-    Options.fold(
-        maybeGrid, () => {},
-        newGrid => {
-            widget.textGrid = newGrid;
-            widget.redrawAll();
-        });
+    Options.fold(maybeGrid, function () { }, function (newGrid) {
+        widget.textGrid = newGrid;
+        widget.redrawAll();
+    });
 }
