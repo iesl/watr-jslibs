@@ -18,7 +18,6 @@ import * as rtrees from './rtrees';
 import {zipWithIndex} from './LodashPlus';
 import { ServerDataExchange } from  './ServerDataExchange';
 
-
 export class PageImageListWidget {
 
     /**

@@ -16,9 +16,8 @@ const htmlProd = new HtmlWebpackPlugin({
   chunks: ["app"]
 });
 
-const WebpackMd5Hash = require('webpack-md5-hash');
-
 const TSLintPlugin = require('tslint-webpack-plugin');
+
 const tslinterPlugin = new TSLintPlugin({
   files: ['./src/**/*.ts'],
   config: "./tslint.json"
