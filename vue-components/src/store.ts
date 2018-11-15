@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import Vuex from "vuex";
+import Vuex from 'vuex';
 
-import { FilteringStateModule } from "./components/filter-engine/filter-engine-state";
+import { FilteringStateModule } from './components/filter-engine/filter-engine-state';
 
 Vue.use(Vuex);
 

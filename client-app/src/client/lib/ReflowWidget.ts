@@ -12,7 +12,7 @@ import * as mhs from './MouseHandlerSets';
 
 import * as coords from './coord-sys';
 import { $id, t, htm } from "./tstags";
-let rtree = require('rbush');
+// let rtree = require('rbush');
 // import rtree from "rbush";
 import {shared} from './shared-state';
 
@@ -220,8 +220,8 @@ export class ReflowWidget {
       if (region.isLabelKey()) {
         const label = region.labelIdent;
         const text = new fabric.Text(label, {
+          left, top,
           objectCaching: false,
-          left: left, top: top,
           fontSize: this.textHeight,
           fontStyle: 'normal',
           fontFamily: 'Courier New',
@@ -247,8 +247,8 @@ export class ReflowWidget {
         const cellStr = cellChrs.join('');
 
         const text = new fabric.Text(cellStr, {
+          left, top,
           objectCaching: false,
-          left: left, top: top,
           fontSize: this.textHeight,
           fontStyle: 'normal',
           fontFamily: 'Courier New'
@@ -284,8 +284,8 @@ export class ReflowWidget {
 
         const abbrev = TGI.labelSchemas.abbrevFor(this.labelSchema, cls);
         const text = new fabric.Text(abbrev, {
+          left, top,
           objectCaching: false,
-          left: left, top: top,
           fontSize: this.textHeight,
           fontStyle: 'normal',
           fontFamily: 'Courier New',
@@ -301,8 +301,8 @@ export class ReflowWidget {
 
       } else if (region.isHeading()) {
         const text = new fabric.Text(region.heading, {
+          left, top,
           objectCaching: false,
-          left: left, top: top,
           fontSize: this.textHeight,
           fontStyle: 'italic',
           fontFamily: 'Courier New',
@@ -328,6 +328,7 @@ export class ReflowWidget {
       .remove();
 
     _.each(this.reflowRTree.all(), data => {
+
       const region = data.region;
       const bounds = region.bounds;
       const scaled = this.scaleLTBounds(bounds);

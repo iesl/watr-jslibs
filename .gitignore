@@ -44,3 +44,5 @@ dist
 
 ## packaged lib
 vueComponentLib-*.tgz     
+
+.cache

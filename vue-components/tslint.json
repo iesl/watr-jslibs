@@ -2,5 +2,5 @@
     "extends": [
       "../shared/tslint.json"
     ],
-    "rules": {},
+    "rules": {}
 }

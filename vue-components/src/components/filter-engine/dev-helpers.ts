@@ -2,9 +2,9 @@
 /* tslint:disable: no-console */
 
 
-import _ from "lodash";
+import _ from 'lodash';
 
-import { CandidateGroup, GroupKey } from "./FilterEngine";
+import { CandidateGroup, GroupKey } from './FilterEngine';
 
 
 export function pp(a: any): string {
@@ -24,14 +24,13 @@ export function candidateGroupF(
   groupKeyFunc: (c: ILogEntry) => GroupKey
 ): CandidateGroup {
   const candidates = _.map(
-    _.range(0, 3), (i) => {
-      return {
-        page: i,
-        logType: "Geometry",
-        tags: `${tags} #${i}`,
-        name: `${name}${i+1}`
-      };
-    });
+    _.range(0, 3), i => ({
+      page: i,
+      logType: 'Geometry',
+      tags: `${tags} #${i}`,
+      name: `${name}${i+1}`
+    })
+  );
 
   const cset: CandidateGroup = {
     candidates,
@@ -49,7 +48,7 @@ export function candidateGroup(
     name, tags,
     (c: ILogEntry) => {
       const multikey = [name, `page=${c.page}`, `${c.tags}`];
-      const displayTitle = "Todo??"
+      const displayTitle = 'Todo??';
       return { multikey, displayTitle };
     }
   );

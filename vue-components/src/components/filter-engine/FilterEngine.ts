@@ -50,8 +50,11 @@ export interface KeyedRecordGroup {
 
 export class SelectionFilteringEngine {
   public indexTokens: string[];
+
   private lunrIndex: lunr.Index;
+
   private keyedRecords: KeyedRecord[];
+
   private keyedRecordGroups: KeyedRecordGroup[];
 
 
@@ -108,19 +111,18 @@ export class SelectionFilteringEngine {
   }
 
   private regroupCandidates(candidateSets: CandidateGroup[]): KeyedRecord[] {
-    const grouped = _.flatMap(candidateSets, candidateSet =>
-                              _.map(candidateSet.candidates, (candidate) => {
-                                const groupKey = candidateSet.groupKeyFunc(candidate);
-                                const multikey = groupKey.multikey;
-                                const multikeystr = _.join(multikey, ' ');
-                                const rec: KeyedRecord = {
-                                  candidate,
-                                  keys: multikey,
-                                  keystr: multikeystr,
-                                  n: 0,
-                                };
-                                return rec;
-                              }));
+    const grouped = _.flatMap(candidateSets, candidateSet => _.map(candidateSet.candidates, (candidate) => {
+      const groupKey = candidateSet.groupKeyFunc(candidate);
+      const multikey = groupKey.multikey;
+      const multikeystr = _.join(multikey, ' ');
+      const rec: KeyedRecord = {
+        candidate,
+        keys: multikey,
+        keystr: multikeystr,
+        n: 0,
+      };
+      return rec;
+    }));
 
     const groupSorted = _.sortBy(grouped, g => g.keys);
     _.each(groupSorted, (g, i) => g.n = i);

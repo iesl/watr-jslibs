@@ -6,13 +6,13 @@ import * as _ from 'lodash';
 
 import Vue from 'vue';
 
+import { mapState } from 'vuex';
 import {
   SelectionFilteringEngine,
   CandidateGroup,
   KeyedRecordGroup,
-} from "./FilterEngine";
+} from './FilterEngine';
 
-import { mapState } from 'vuex';
 
 function getFilteringEngine(v: any): SelectionFilteringEngine {
   return v.$_selectionFilteringEngine;
@@ -50,11 +50,10 @@ const component = Vue.extend({
       const filteringEngine = getFilteringEngine(this);
       const hitRecs = filteringEngine.query(this.queryString);
       store.commit('filteringState/setCurrentSelections', hitRecs);
-    }
+    };
 
-    const debouncedQfunc: (() => void) & _.Cancelable = _.debounce(qfunc, 350)
+    const debouncedQfunc: (() => void) & _.Cancelable = _.debounce(qfunc, 350);
     this.query = debouncedQfunc;
-
   },
 
   watch: {
@@ -89,7 +88,7 @@ const component = Vue.extend({
 
   data() {
     return {
-      queryString: ""
+      queryString: ''
     };
   }
 });

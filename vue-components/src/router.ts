@@ -8,17 +8,16 @@ Vue.use(Router);
 export default new Router({
   mode: 'history',
   base: process.env.BASE_URL,
-    routes: [
-        {
-            path: '/',
-            name: 'gallery',
-            component: ComponentGallery,
-        },
-        {
-            path: '/other',
-            name: 'home',
-            component: Home,
-        },
-    ],
+  routes: [
+    {
+      path: '/',
+      name: 'gallery',
+      component: ComponentGallery,
+    },
+    {
+      path: '/other',
+      name: 'home',
+      component: Home,
+    },
+  ],
 });
-

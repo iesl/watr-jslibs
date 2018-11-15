@@ -12,9 +12,10 @@
  */
 
 import * as _ from 'lodash';
-import * as $ from 'jquery';
+// import * as $ from 'jquery';
+import $ from 'jquery';
 
-import Split from 'split';
+import Split from 'split.js';
 import { $id, t, htm } from "./tstags";
 
 const noop = function() { return; };
@@ -41,20 +42,18 @@ export enum FrameFlowDir {
   Col
 }
 
-// export const row = 'row';
-// export const col = 'column';
 
 class Frame {
-  private elem: JQuery<Element>;
+  public elem: JQuery<Element>;
   private frameId: string;
   private direction: FrameFlowDir;
-  private split: typeof Split;
+  private split?: Split.Instance;
   private panes: Frame[] = [];
-  private paneIds: string[] = [];
+  // private paneIds: string[] = [];
 
-  constructor($elem) {
+  constructor($elem: JQuery) {
     this.elem = $elem;
-    this.frameId = $elem.attr('id');
+    this.frameId = $elem.attr('id')!;
     this.direction = FrameFlowDir.Col;
   }
 
@@ -102,7 +101,7 @@ class Frame {
     return parentId;
   }
 
-  addPanes(n) {
+  addPanes(n: number) {
     const paneIds = generatePaneIds(this.frameId, n);
     const panes = _.map(paneIds, id =>  mkPane(id));
     const paneElems = _.map(panes, p => p.elem);
@@ -161,12 +160,12 @@ class Frame {
     });
 
 
-    this.paneIds = paneIds;
+    // this.paneIds = paneIds;
     this.panes = panes;
     // this.updateSplit(split);
   }
 
-  updateSplit(split) {
+  updateSplit(split?: Split.Instance) {
     if (this.split !== undefined) {
       this.split.destroy();
     }
@@ -211,7 +210,7 @@ class Frame {
 
 }
 
-export function createRootFrame(containerId)  {
+export function createRootFrame(containerId: string)  {
   const root = mkPane(splitPaneRootId);
   root.elem.addClass('splitwin-root');
   $(containerId).append(root.elem);
@@ -222,7 +221,7 @@ export function createRootFrame(containerId)  {
   return root;
 }
 
-function mkPane(id) {
+function mkPane(id: string) {
   const elem =
     t.div(`#${id} .splitwin-pane`, [
       t.div(`.status-top`),
@@ -237,17 +236,17 @@ function mkPane(id) {
   return frame;
 }
 
-export function makePaneId(...indexes) {
-  const paneId = _.join(
-    _.map(indexes, i => {
-      return `pane-${i}`;
-    }),
-    '__'
-  );
-  return `${splitPaneRootId}__${paneId}`;
-}
+// export function makePaneId(...indexes) {
+//   const paneId = _.join(
+//     _.map(indexes, i => {
+//       return `pane-${i}`;
+//     }),
+//     '__'
+//   );
+//   return `${splitPaneRootId}__${paneId}`;
+// }
 
-function generatePaneIds(parentId, n) {
+function generatePaneIds(parentId: string, n: number): string[] {
   return _.map(_.range(0, n), id => {
     return `${parentId}__pane-${id}`;
   });

@@ -1,7 +1,7 @@
 import Vue from 'vue';
-import $ from "jquery";
+import $ from 'jquery';
 
-import FilterWidget from '@/components/filter-engine/filter-engine.vue';
+import FilterWidget from './filter-engine.vue';
 // import filterEngineState from './filter-engine-state';
 
 import { candidateGroupF } from './dev-helpers';
@@ -42,8 +42,7 @@ export default Vue.extend({
 
   watch: {
     filteredRecords(): void {
-      console.log("watch: filteredRecords")
-
+      console.log('watch: filteredRecords');
     }
   },
 
@@ -57,19 +56,17 @@ export default Vue.extend({
   },
 
   mounted() {
-    console.log('dev:mounted');
 
-    $.getJSON("http://localhost:3100/tracelog-2.json", (tracelogs: LogEntry[]) => {
-
+    $.getJSON('http://localhost:3100/tracelog-2.json', (tracelogs: LogEntry[]) => {
       const g: CandidateGroup = {
         candidates: tracelogs,
-        groupKeyFunc: (l: LogEntry) => ({ multikey: ["trace", `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: "todo" })
+        groupKeyFunc: (l: LogEntry) => ({ multikey: ['trace', `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: 'todo' })
       };
 
       this.$store.dispatch('filteringState/addCandidates', g);
 
 
-      const candidates1 = candidateGroupF("foo", "alex", (g) => {
+      const candidates1 = candidateGroupF('foo', 'alex', (g) => {
         const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
         return r;
       });
@@ -77,10 +74,7 @@ export default Vue.extend({
 
       this.$store.dispatch('filteringState/addCandidates', candidates1);
     }, (err) => {
-      console.log("err", err);
-
+      console.log('err', err);
     });
-
-
   }
 });
