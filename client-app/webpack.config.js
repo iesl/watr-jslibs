@@ -17,7 +17,6 @@ const htmlProd = new HtmlWebpackPlugin({
 });
 
 const WebpackMd5Hash = require('webpack-md5-hash');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 const TSLintPlugin = require('tslint-webpack-plugin');
 const tslinterPlugin = new TSLintPlugin({
