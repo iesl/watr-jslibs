@@ -13,32 +13,22 @@ import {
   ActionTree,
   Action,
   ActionContext,
-  // Commit,
   Plugin
 } from 'vuex';
 
 export class FilteringState {
-  allCandidateGroups: CandidateGroup[] = [];
   currentSelections: KeyedRecordGroup[] = [];
   filteredRecords: KeyedRecordGroup[] = [];
+  initialCandidatesReady: Boolean = false;
 }
 
-const addCandidates: Action<FilteringState, any> = async function (ctx: ActionContext<FilteringState, any>, group: CandidateGroup) {
-  ctx.commit('addCandidateGroup', group);
-}
-
-function addCandidateGroup(state: FilteringState, group: CandidateGroup) {
-  console.log("state:addCandidateGroup", group);
-
-  state.allCandidateGroups.push(group);
-}
-
-function clearCandidateGroups(state: FilteringState) {
-  state.allCandidateGroups = [];
-}
 
 function setCurrentSelections(state: FilteringState, groups: KeyedRecordGroup[]) {
   state.currentSelections = groups;
+}
+
+function setInitialCandidatesReady(state: FilteringState) {
+  state.initialCandidatesReady = true;
 }
 
 function setFilteredRecords(state: FilteringState, groups: KeyedRecordGroup[]) {
@@ -52,11 +42,13 @@ export class FilteringStateModule implements Module<FilteringState, any> {
   state: FilteringState
 
   actions = <ActionTree<FilteringState, any>> {
-    addCandidates
+    // addCandidates
   }
 
   mutations = <MutationTree<FilteringState>> {
-    addCandidateGroup, clearCandidateGroups, setCurrentSelections, setFilteredRecords
+    // addCandidateGroup, clearCandidateGroups,
+    setCurrentSelections, setFilteredRecords,
+    setInitialCandidatesReady
   }
 
   getters = <GetterTree<FilteringState, any>> {
@@ -66,7 +58,7 @@ export class FilteringStateModule implements Module<FilteringState, any> {
   plugins: Plugin<FilteringState>[] = []
 
   constructor(plugins?: Plugin<FilteringState>[]) {
-    this.state = new FilteringState(); // initFilteringState();
+    this.state = new FilteringState();
     this.plugins = plugins ? plugins : [];
   }
 }

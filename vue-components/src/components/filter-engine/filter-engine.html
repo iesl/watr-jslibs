@@ -13,13 +13,16 @@
         <div>Other: <span id="trace-menu-terms-other"></span> </div>
     </div>
     <div class="thinborder">
-        <div>Trace Logs</div>
-        <ul>
-
-            <li v-for="item in this.currentSelections">
-                {{ item.keystr }} ({{ item.records.length }})
-            </li>
-        </ul>
+        <div v-if="initialCandidatesReady">
+            <div>Trace Logs</div>
+            <ul>
+                <li v-for="item in this.currentSelections">
+                    {{ item.keystr }} ({{ item.records.length }})
+                </li>
+            </ul>
+        </div>
+        <div v-else>
+            Loading...
+        </div>
     </div>
 </div>
-

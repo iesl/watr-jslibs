@@ -11,6 +11,7 @@ import {
   SelectionFilteringEngine,
   CandidateGroup,
   KeyedRecordGroup,
+  emptyCandidateGroup
 } from './FilterEngine';
 
 
@@ -20,11 +21,18 @@ function getFilteringEngine(v: any): SelectionFilteringEngine {
 function setFilteringEngine(v: any, e: SelectionFilteringEngine): void {
   v.$_selectionFilteringEngine = e;
 }
+
 const component = Vue.extend({
   name: 'FilterWidget',
   components: {},
 
   props: {
+    initialCandidateGroups: {
+      type: Array,
+      required: true,
+      default: () => []
+    },
+
   },
 
   methods: {
@@ -54,9 +62,26 @@ const component = Vue.extend({
 
     const debouncedQfunc: (() => void) & _.Cancelable = _.debounce(qfunc, 350);
     this.query = debouncedQfunc;
+
+  },
+
+  mounted() {
   },
 
   watch: {
+    initialCandidatesReady() {
+      // _.each(this.initialCandidateGroups, g => {
+      //   console.log("group", g);
+      //   this.$store.dispatch('filteringState/addCandidates', g);
+      // });
+
+      const filteringEngine = getFilteringEngine(this);
+      const { allCandidateGroups } = this.$store.state.filteringState;
+      filteringEngine.setCandidateGroups(this.initialCandidateGroups);
+      const recordGroups = filteringEngine.getKeyedRecordGroups();
+      this.$store.commit('filteringState/setCurrentSelections', recordGroups);
+
+    },
 
     queryString() {
       this.query();
@@ -65,23 +90,13 @@ const component = Vue.extend({
     currentSelections() {
     },
 
-    allCandidateGroups() {
-      console.log('watch: allCandidateGroups');
-      const filteringEngine = getFilteringEngine(this);
-      const { allCandidateGroups } = this.$store.state.filteringState;
-      console.log('computed: allCandidateGroups', filteringEngine, allCandidateGroups);
-      filteringEngine.setCandidateGroups(allCandidateGroups);
-      const recordGroups = filteringEngine.getKeyedRecordGroups();
-      this.$store.commit('filteringState/setCurrentSelections', recordGroups);
-    }
-
   },
 
   computed: {
     ...mapState('filteringState', [
       'currentSelections',
-      'allCandidateGroups',
-      'filteredRecords'
+      'filteredRecords',
+      'initialCandidatesReady'
     ]),
   },
 

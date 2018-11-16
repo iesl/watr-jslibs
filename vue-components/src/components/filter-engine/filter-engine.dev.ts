@@ -8,6 +8,7 @@ import { candidateGroupF } from './dev-helpers';
 
 import { CandidateGroup, KeyedRecordGroup } from './FilterEngine';
 
+
 interface Headers {
   tags: string;
   name: string;
@@ -22,6 +23,11 @@ interface LogEntry {
 export default Vue.extend({
   name: 'FilterEngineDev',
 
+  data() {
+    return {
+    };
+  },
+
   props: {
   },
 
@@ -30,20 +36,18 @@ export default Vue.extend({
   },
 
   created() {
-
   },
 
   methods: {
 
     onFilterUpdate() {
       console.log('onFilterUpdate');
-    }
+    },
+
   },
 
   watch: {
-    filteredRecords(): void {
-      console.log('watch: filteredRecords');
-    }
+
   },
 
   computed: {
@@ -53,28 +57,67 @@ export default Vue.extend({
       return filteredRecords;
     },
 
+    initialCandidates(): CandidateGroup[] {
+      const groups: CandidateGroup[] = [];
+
+      const qwer = $.getJSON('http://localhost:3100/tracelog-2.json', (tracelogs: LogEntry[]) => {
+        const g: CandidateGroup = {
+          candidates: tracelogs,
+          groupKeyFunc: (l: LogEntry) => ({ multikey: ['trace', `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: 'todo' })
+        };
+
+        groups.push(g);
+
+        const candidates1 = candidateGroupF('foo', 'alex', (g) => {
+          const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
+          return r;
+        });
+
+        groups.push(candidates1);
+
+        this.$store.commit('filteringState/setInitialCandidatesReady');
+
+      }, (err) => {
+        console.log('err', err);
+      });
+
+      return groups;
+    }
+
   },
 
   mounted() {
 
-    $.getJSON('http://localhost:3100/tracelog-2.json', (tracelogs: LogEntry[]) => {
-      const g: CandidateGroup = {
-        candidates: tracelogs,
-        groupKeyFunc: (l: LogEntry) => ({ multikey: ['trace', `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: 'todo' })
-      };
-
-      this.$store.dispatch('filteringState/addCandidates', g);
-
-
-      const candidates1 = candidateGroupF('foo', 'alex', (g) => {
-        const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
-        return r;
-      });
-
-
-      this.$store.dispatch('filteringState/addCandidates', candidates1);
-    }, (err) => {
-      console.log('err', err);
-    });
   }
 });
+
+
+
+
+
+
+
+
+
+
+// $.getJSON('http://localhost:3100/tracelog-2.json', (tracelogs: LogEntry[]) => {
+//   const g: CandidateGroup = {
+//     candidates: tracelogs,
+//     groupKeyFunc: (l: LogEntry) => ({ multikey: ['trace', `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: 'todo' })
+//   };
+
+//   this.$store.dispatch('filteringState/addCandidates', g);
+
+
+//   const candidates1 = candidateGroupF('foo', 'alex', (g) => {
+//     const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
+//     return r;
+//   });
+
+
+//   this.$store.dispatch('filteringState/addCandidates', candidates1);
+// }, (err) => {
+//   console.log('err', err);
+// });
+
+// TODO npm install search-query-parser

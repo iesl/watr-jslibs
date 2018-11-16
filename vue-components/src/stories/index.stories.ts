@@ -30,4 +30,5 @@ storiesOf('FilterWidget', module)
     components: { FilterEngineDev },
     template: '<FilterEngineDev />',
     methods: {}
-  }));
+  }))
+;

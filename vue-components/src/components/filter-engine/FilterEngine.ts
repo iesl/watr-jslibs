@@ -10,7 +10,6 @@
 
 
 import * as _ from 'lodash';
-// import * as lunr from 'lunr';
 import lunr from 'lunr';
 
 type Candidate = object;
@@ -23,7 +22,12 @@ export interface CandidateGroup {
   groupKeyFunc(c: Candidate): GroupKey;
 }
 
-export type CandidateGroups = CandidateGroup[];
+// export function emptyCandidateGroup(): CandidateGroup {
+//   return {
+//     candidates: [],
+//     groupKeyFunc: c => ({ multikey: [], displayTitle: ''})
+//   };
+// }
 
 /**
  *
