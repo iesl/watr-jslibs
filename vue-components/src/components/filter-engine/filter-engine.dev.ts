@@ -1,13 +1,20 @@
-import Vue from 'vue';
+import {
+  Vue,
+  Component,
+} from 'vue-property-decorator'
+
+import {
+  namespace
+} from 'vuex-class'
+
 import $ from 'jquery';
 
 import FilterWidget from './filter-engine.vue';
-// import filterEngineState from './filter-engine-state';
 
 import { candidateGroupF } from './dev-helpers';
-
 import { CandidateGroup, KeyedRecordGroup } from './FilterEngine';
 
+const filterState = namespace('filteringState')
 
 interface Headers {
   tags: string;
@@ -20,104 +27,41 @@ interface LogEntry {
   headers: Headers;
 }
 
-export default Vue.extend({
-  name: 'FilterEngineDev',
-
-  data() {
-    return {
-    };
-  },
-
-  props: {
-  },
-
+@Component({
   components: {
     FilterWidget,
-  },
+  }
+})
+export default class FilterEngineDev extends Vue {
 
-  created() {
-  },
+  @filterState.State filteredRecords!: KeyedRecordGroup[];
+  @filterState.Mutation('setInitialCandidatesReady') setInitialCandidatesReady!: () => void;
 
-  methods: {
+  get initialCandidates(): CandidateGroup[] {
+    const groups: CandidateGroup[] = [];
 
-    onFilterUpdate() {
-      console.log('onFilterUpdate');
-    },
+    $.getJSON('http://localhost:3100/tracelog-2.json', (tracelogs: LogEntry[]) => {
+      const g: CandidateGroup = {
+        candidates: tracelogs,
+        groupKeyFunc: (l: LogEntry) => ({ multikey: ['trace', `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: 'todo' })
+      };
 
-  },
+      groups.push(g);
 
-  watch: {
-
-  },
-
-  computed: {
-
-    filteredRecords(): KeyedRecordGroup[] {
-      const { filteredRecords } = this.$store.state.filteringState;
-      return filteredRecords;
-    },
-
-    initialCandidates(): CandidateGroup[] {
-      const groups: CandidateGroup[] = [];
-
-      const qwer = $.getJSON('http://localhost:3100/tracelog-2.json', (tracelogs: LogEntry[]) => {
-        const g: CandidateGroup = {
-          candidates: tracelogs,
-          groupKeyFunc: (l: LogEntry) => ({ multikey: ['trace', `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: 'todo' })
-        };
-
-        groups.push(g);
-
-        const candidates1 = candidateGroupF('foo', 'alex', (g) => {
-          const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
-          return r;
-        });
-
-        groups.push(candidates1);
-
-        this.$store.commit('filteringState/setInitialCandidatesReady');
-
-      }, (err) => {
-        console.log('err', err);
+      const candidates1 = candidateGroupF('foo', 'alex', (g) => {
+        const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
+        return r;
       });
 
-      return groups;
-    }
+      groups.push(candidates1);
 
-  },
+      this.setInitialCandidatesReady();
 
-  mounted() {
+    }, (err) => {
+      console.log('err', err);
+    });
 
+    return groups;
   }
-});
 
-
-
-
-
-
-
-
-
-
-// $.getJSON('http://localhost:3100/tracelog-2.json', (tracelogs: LogEntry[]) => {
-//   const g: CandidateGroup = {
-//     candidates: tracelogs,
-//     groupKeyFunc: (l: LogEntry) => ({ multikey: ['trace', `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: 'todo' })
-//   };
-
-//   this.$store.dispatch('filteringState/addCandidates', g);
-
-
-//   const candidates1 = candidateGroupF('foo', 'alex', (g) => {
-//     const r = { candidate: {}, multikey: ['annot', g.name, g.tags], displayTitle: g.logType };
-//     return r;
-//   });
-
-
-//   this.$store.dispatch('filteringState/addCandidates', candidates1);
-// }, (err) => {
-//   console.log('err', err);
-// });
-
-// TODO npm install search-query-parser
+}

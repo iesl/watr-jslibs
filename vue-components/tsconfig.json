@@ -11,9 +11,11 @@
     "inlineSourceMap": true,
 
     "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
 
     "preserveConstEnums": true,
-
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
 
     "target": "es6",
     "module": "es6",

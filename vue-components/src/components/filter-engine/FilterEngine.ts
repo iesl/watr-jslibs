@@ -22,13 +22,6 @@ export interface CandidateGroup {
   groupKeyFunc(c: Candidate): GroupKey;
 }
 
-// export function emptyCandidateGroup(): CandidateGroup {
-//   return {
-//     candidates: [],
-//     groupKeyFunc: c => ({ multikey: [], displayTitle: ''})
-//   };
-// }
-
 /**
  *
  */
@@ -53,20 +46,16 @@ export interface KeyedRecordGroup {
 }
 
 export class SelectionFilteringEngine {
-  public indexTokens: string[];
+  public indexTokens: string[] = [];
 
-  private lunrIndex: lunr.Index;
+  private lunrIndex: lunr.Index = this.initIndex([]);
 
-  private keyedRecords: KeyedRecord[];
+  private keyedRecords: KeyedRecord[] = [];
 
-  private keyedRecordGroups: KeyedRecordGroup[];
-
+  private keyedRecordGroups: KeyedRecordGroup[] = [];
 
   constructor(candidateSets: CandidateGroup[]) {
-    this.keyedRecords = this.regroupCandidates(candidateSets);
-    this.keyedRecordGroups = this.groupRecordsByKey(this.keyedRecords);
-    this.lunrIndex = this.initIndex(this.keyedRecords);
-    this.indexTokens = this.lunrIndex.tokenSet.toArray();
+    this.setCandidateGroups(candidateSets);
   }
 
   public setCandidateGroups(candidateSets: CandidateGroup[]) {

@@ -4,108 +4,84 @@
 
 import * as _ from 'lodash';
 
-import Vue from 'vue';
+import {
+  Vue,
+  Component,
+  Prop,
+  Watch,
+} from 'vue-property-decorator'
 
-import { mapState } from 'vuex';
+import {
+  namespace
+} from 'vuex-class'
+
+
 import {
   SelectionFilteringEngine,
   CandidateGroup,
-  KeyedRecordGroup,
-  emptyCandidateGroup
+  KeyedRecordGroup
 } from './FilterEngine';
 
 
-function getFilteringEngine(v: any): SelectionFilteringEngine {
-  return v.$_selectionFilteringEngine;
-}
-function setFilteringEngine(v: any, e: SelectionFilteringEngine): void {
-  v.$_selectionFilteringEngine = e;
-}
+const filterState = namespace('filteringState')
 
-const component = Vue.extend({
-  name: 'FilterWidget',
-  components: {},
 
-  props: {
-    initialCandidateGroups: {
-      type: Array,
-      required: true,
-      default: () => []
-    },
+@Component
+export default class FilterWidget extends Vue {
 
-  },
+  @Prop(Array) initialCandidateGroups!: CandidateGroup[];
 
-  methods: {
-    query(): void {
-    },
+  queryString: string = '';
 
-    filterReset(): void {
-      this.$store.commit('filteringState/setFilteredRecords', []);
-    },
+  @filterState.State currentSelections!: KeyedRecordGroup[];
+  @filterState.State filteredRecords!: KeyedRecordGroup[];
+  @filterState.State initialCandidatesReady!: Boolean;
 
-    filterUpdated(): void {
-      const { currentSelections } = this.$store.state.filteringState;
-      this.$store.commit('filteringState/setFilteredRecords', currentSelections);
-    },
-  },
+  @filterState.Mutation('setFilteredRecords') setFilteredRecords!: (recs: KeyedRecordGroup[]) => void;
+  @filterState.Mutation('setCurrentSelections') setCurrentSelections!: (recs: KeyedRecordGroup[]) => void;
+
+  private engine = new SelectionFilteringEngine([]);
+
+  query(): void {
+  }
+
+  filterReset(): void {
+    this.setFilteredRecords([]);
+  }
+
+  filterUpdated(): void {
+    this.setFilteredRecords(this.currentSelections);
+  }
+
 
   created() {
-    const store = this.$store;
-
-    setFilteringEngine(this, new SelectionFilteringEngine([]));
 
     const qfunc = () => {
-      const filteringEngine = getFilteringEngine(this);
+      const filteringEngine = this.engine;
       const hitRecs = filteringEngine.query(this.queryString);
-      store.commit('filteringState/setCurrentSelections', hitRecs);
+      this.setCurrentSelections(hitRecs);
     };
 
     const debouncedQfunc: (() => void) & _.Cancelable = _.debounce(qfunc, 350);
     this.query = debouncedQfunc;
 
-  },
-
-  mounted() {
-  },
-
-  watch: {
-    initialCandidatesReady() {
-      // _.each(this.initialCandidateGroups, g => {
-      //   console.log("group", g);
-      //   this.$store.dispatch('filteringState/addCandidates', g);
-      // });
-
-      const filteringEngine = getFilteringEngine(this);
-      const { allCandidateGroups } = this.$store.state.filteringState;
-      filteringEngine.setCandidateGroups(this.initialCandidateGroups);
-      const recordGroups = filteringEngine.getKeyedRecordGroups();
-      this.$store.commit('filteringState/setCurrentSelections', recordGroups);
-
-    },
-
-    queryString() {
-      this.query();
-    },
-
-    currentSelections() {
-    },
-
-  },
-
-  computed: {
-    ...mapState('filteringState', [
-      'currentSelections',
-      'filteredRecords',
-      'initialCandidatesReady'
-    ]),
-  },
-
-
-  data() {
-    return {
-      queryString: ''
-    };
   }
-});
 
-export default component;
+  @Watch('initialCandidatesReady')
+  onInitialCandidatesReady() {
+    const filteringEngine = this.engine;
+    filteringEngine.setCandidateGroups(this.initialCandidateGroups);
+    const recordGroups = filteringEngine.getKeyedRecordGroups();
+    this.setCurrentSelections(recordGroups);
+  }
+
+  @Watch('queryString')
+  onQueryString() {
+    this.query();
+  }
+
+  // @Watch('currentSelections')
+  // onCurrentSelections() {
+  // }
+
+}

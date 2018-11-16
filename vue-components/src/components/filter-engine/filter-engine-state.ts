@@ -1,9 +1,6 @@
 
-import Vue from 'vue';
-
 import {
   KeyedRecordGroup,
-  CandidateGroup
 } from './FilterEngine';
 
 import {
@@ -11,8 +8,6 @@ import {
   GetterTree,
   MutationTree,
   ActionTree,
-  Action,
-  ActionContext,
   Plugin
 } from 'vuex';
 
