@@ -17,38 +17,29 @@ export class FilteringState {
   initialCandidatesReady: Boolean = false;
 }
 
-
-function setCurrentSelections(state: FilteringState, groups: KeyedRecordGroup[]) {
-  state.currentSelections = groups;
-}
-
-function setInitialCandidatesReady(state: FilteringState) {
-  state.initialCandidatesReady = true;
-}
-
-function setFilteredRecords(state: FilteringState, groups: KeyedRecordGroup[]) {
-  state.filteredRecords = groups;
-}
-
 export class FilteringStateModule implements Module<FilteringState, any> {
 
   namespaced: boolean = true
 
   state: FilteringState
 
-  actions = <ActionTree<FilteringState, any>> {
-    // addCandidates
-  }
+  actions = <ActionTree<FilteringState, any>> {}
 
   mutations = <MutationTree<FilteringState>> {
-    // addCandidateGroup, clearCandidateGroups,
-    setCurrentSelections, setFilteredRecords,
-    setInitialCandidatesReady
+    setCurrentSelections(state: FilteringState, groups: KeyedRecordGroup[]) {
+      state.currentSelections = groups;
+    },
+
+    setInitialCandidatesReady(state: FilteringState) {
+      state.initialCandidatesReady = true;
+    },
+
+    setFilteredRecords(state: FilteringState, groups: KeyedRecordGroup[]) {
+      state.filteredRecords = groups;
+    }
   }
 
-  getters = <GetterTree<FilteringState, any>> {
-    // all
-  }
+  getters = <GetterTree<FilteringState, any>> {}
 
   plugins: Plugin<FilteringState>[] = []
 

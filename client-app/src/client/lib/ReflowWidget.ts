@@ -2,7 +2,7 @@
  *
  **/
 
-/* global require watr fabric */
+/* global require fabric */
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
@@ -12,8 +12,6 @@ import * as mhs from './MouseHandlerSets';
 
 import * as coords from './coord-sys';
 import { $id, t, htm } from "./tstags";
-// let rtree = require('rbush');
-// import rtree from "rbush";
 import {shared} from './shared-state';
 
 import * as d3x from './d3-extras';
@@ -21,12 +19,14 @@ import * as d3x from './d3-extras';
 import * as gp from './graphpaper-variants';
 import * as colors from './colors';
 
-const JsArray = watr.utils.JsArray;
+import watr from '../../watr';
+
 const TGI = watr.textgrid.TextGridInterop;
 
 import * as reflowTools from './ReflowTools';
 
 import Infobar from './Infobar';
+import { ServerDataExchange } from './ServerDataExchange';
 
 export function unshowGrid() {
   if (shared.activeReflowWidget !== undefined) {
@@ -38,11 +38,28 @@ export function unshowGrid() {
 
 
 export class ReflowWidget {
+  containerId: string;
+  gridNum: number;
+  textGrid: TextGrid;
+  textHeight: number;
+  labelSchema: LabelSchema;
+  frameId: string;
+  canvasId: string;
+  svgId: string;
+  zoneId: string;
+  zoneLabel: string;
+  infoBar: Infobar;
+  serverExchange: ServerDataExchange;
+  rowCount?: number;
+  colCount?: number;
+  cellHeight?: number;
+  cellWidth?: number;
+
 
   /**
    * @param {ServerDataExchange}  serverExchange
    */
-  constructor (containerId, textGrid, labelSchema, zoneId, zoneLabel, serverExchange) {
+  constructor (containerId: string, textGrid: TextGrid, labelSchema: LabelSchema, zoneId: string, zoneLabel: string, serverExchange: ServerDataExchange) {
 
     const gridNum = 1000;
     this.containerId = containerId;
@@ -64,10 +81,10 @@ export class ReflowWidget {
 
 
   setupTopStatusBar() {
-    const widget = this;
+    const self = this;
     const setTool = h => {
-      return function (){
-        return widget.setMouseHandlers([reflowTools.updateUserPosition, h]);
+      return function () {
+        return self.setMouseHandlers([reflowTools.updateUserPosition, h]);
       };
     };
 
@@ -160,7 +177,7 @@ export class ReflowWidget {
 
   }
 
-  printToInfobar(slot, label, value) {
+  printToInfobar(slot: number, label: string, value: any) {
     this.infoBar.printToInfobar(slot, label, value);
   }
 
@@ -193,7 +210,7 @@ export class ReflowWidget {
   makeRTreeBox(region) {
     const {left, top, width, height} = region.bounds;
     const box = new coords.BBox(
-      left*4, top*4, width*4,height*4
+      left*4, top*4, width*4, height*4
     );
     box.region = region;
     return box;

@@ -21,6 +21,7 @@ interface Headers {
   name: string;
   callSite: string;
 }
+
 interface LogEntry {
   logType: string;
   page: number;
@@ -32,6 +33,7 @@ interface LogEntry {
     FilterWidget,
   }
 })
+
 export default class FilterEngineDev extends Vue {
 
   @filterState.State filteredRecords!: KeyedRecordGroup[];

@@ -11,8 +11,6 @@
     "esModuleInterop": true,
     "inlineSourceMap": true,
 
-    "allowSyntheticDefaultImports": true,
-
     "preserveConstEnums": true,
 
     "noEmit": true,
