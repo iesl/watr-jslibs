@@ -1,0 +1,11 @@
+{
+  "bundleDependencies": false,
+  "dependencies": {},
+  "deprecated": false,
+  "description": "TypeScript definitions for watr works",
+  "name": "@types/watr",
+  "peerDependencies": {},
+  "scripts": {},
+  "typings": "index.d.ts",
+  "version": "0.0.1"
+}

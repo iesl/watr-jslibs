@@ -1,4 +1,3 @@
-
 /**
  * Define and translate between the various coordinate systems used:
  *
@@ -13,58 +12,22 @@
  *    event page/client/screen/offset explanations:
  *       https://stackoverflow.com/questions/6073505/what-is-the-difference-between-screenx-y-clientx-y-and-pagex-y
  */
-
-
-
-export enum CoordSys {
-    Unknown,
-    Screen,
-    Div,
-    GraphUnits,
-    PdfMedia
-}
-
-interface ILTBoundsIntRep {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-}
-
-export interface ILTBounds extends rbush.BBox {
-    left: number;
-    top: number;
-    width: number;
-    height: number;
-    minX: number;
-    minY: number;
-    maxX: number;
-    maxY: number;
-    x: number;
-    y: number;
-    x1: number;
-    x2: number;
-    y1: number;
-    y2: number;
-    bottom: number;
-    right: number;
-    topLeft: Point;
-}
-
+export var CoordSys;
+(function (CoordSys) {
+    CoordSys[CoordSys["Unknown"] = 0] = "Unknown";
+    CoordSys[CoordSys["Screen"] = 1] = "Screen";
+    CoordSys[CoordSys["Div"] = 2] = "Div";
+    CoordSys[CoordSys["GraphUnits"] = 3] = "GraphUnits";
+    CoordSys[CoordSys["PdfMedia"] = 4] = "PdfMedia";
+})(CoordSys || (CoordSys = {}));
 export class Point {
-    public x: number;
-    public y: number;
-    public sys: CoordSys;
-
-    public constructor(x: number, y: number, sys: CoordSys) {
-
+    constructor(x, y, sys) {
         this.x = x;
         this.y = y;
         this.sys = sys ? sys : CoordSys.Unknown;
         // this.type = "Point";
     }
-
-    public svgShape() {
+    svgShape() {
         return {
             type: "circle",
             r: 3,
@@ -73,18 +36,13 @@ export class Point {
         };
     }
 }
-
 class Line {
-    public p1: Point;
-    public p2: Point;
-    public sys: CoordSys = CoordSys.Unknown;
-
-    public constructor(p1: Point, p2: Point) {
+    constructor(p1, p2) {
+        this.sys = CoordSys.Unknown;
         this.p1 = p1;
         this.p2 = p2;
     }
-
-    public svgShape() {
+    svgShape() {
         return {
             type: "line",
             x1: this.p1.x,
@@ -95,15 +53,11 @@ class Line {
     }
 }
 class Trapezoid {
-    public topLine: Line;
-    public bottomLine: Line;
-
-    public constructor(top: Line, bottom: Line) {
+    constructor(top, bottom) {
         this.topLine = top;
         this.bottomLine = bottom;
     }
-
-    public svgShape() {
+    svgShape() {
         const p1 = this.topLine.p1;
         const p2 = this.topLine.p2;
         const p3 = this.bottomLine.p2;
@@ -114,79 +68,55 @@ class Trapezoid {
         };
     }
 }
-
-
-export type AnyShape = Point | Line | Trapezoid | BBox;
-
 export let mkPoint = {
-    fromXy: (x: number, y: number, sys: CoordSys = CoordSys.Unknown) => {
+    fromXy: (x, y, sys = CoordSys.Unknown) => {
         return new Point(x, y, sys);
     },
-
-    fromD3Mouse: (d3Mouse: [number, number]) => {
+    fromD3Mouse: (d3Mouse) => {
         return new Point(d3Mouse[0], d3Mouse[1], CoordSys.Screen);
     },
-
-    offsetFromJqEvent: (event: any) => {
+    offsetFromJqEvent: (event) => {
         return mkPoint.fromXy(event.offsetX, event.offsetY, CoordSys.Screen);
     },
-
-    fromFloatReps: (o: any) => {
-        return new Point(o.x / 100.0, o.y  / 100.0, CoordSys.PdfMedia);
+    fromFloatReps: (o) => {
+        return new Point(o.x / 100.0, o.y / 100.0, CoordSys.PdfMedia);
     }
 };
-
-export function pointFloor(p: Point) {
-    return mkPoint.fromXy(
-        Math.floor(p.x), Math.floor(p.y), p.sys
-    );
+export function pointFloor(p) {
+    return mkPoint.fromXy(Math.floor(p.x), Math.floor(p.y), p.sys);
 }
-
 /**
  *  General purpose bounding box data that meets the interface requirements
  *  for the various libraries in use
  */
-export class BBox implements ILTBounds {
-    public left: number;
-    public top: number;
-    public width: number;
-    public height: number;
-    public sys: CoordSys;
+export class BBox {
     // public bottom: number;
     // public minX: number;
     // public minY: number;
     // public maxX: number;
     // public maxY: number;
-
-    public constructor(l: number, t: number, w: number, h: number, sys: CoordSys) {
+    constructor(l, t, w, h, sys) {
         this.left = l;
         this.top = t;
         this.width = w;
         this.height = h;
         this.sys = sys ? sys : CoordSys.Unknown;
     }
-
     get minX() { return this.left; }
     get minY() { return this.top; }
     get maxX() { return this.left + this.width; }
     get maxY() { return this.top + this.height; }
-
     get x() { return this.left; }
     get y() { return this.top; }
-
     get x1() { return this.left; }
     get x2() { return this.left + this.width; }
     get y1() { return this.top; }
     get y2() { return this.top + this.height; }
-
     get bottom() { return this.top + this.height; }
-    get right()  { return this.left + this.width; }
-
-    get topLeft()  { return mkPoint.fromXy(this.left,  this.top, this.sys); }
-
+    get right() { return this.left + this.width; }
+    get topLeft() { return mkPoint.fromXy(this.left, this.top, this.sys); }
     // set system(s)  { this._system = s; }
     // get system()   { return this._system; }
-
     get intRep() {
         return [
             Math.trunc(this.left * 100.0),
@@ -195,12 +125,10 @@ export class BBox implements ILTBounds {
             Math.trunc(this.height * 100.0)
         ];
     }
-
-    public toString() {
+    toString() {
         return `BBox(${this.left}, ${this.top}, ${this.width}, ${this.height})`;
     }
-
-    public svgShape() {
+    svgShape() {
         return {
             type: "rect",
             x: this.x,
@@ -210,78 +138,60 @@ export class BBox implements ILTBounds {
         };
     }
 }
-
-
 export let mk = {
-    fromLtwhFloatReps: (o: ILTBoundsIntRep) => {
-        return new BBox(
-            o.left / 100.0,
-            o.top  / 100.0,
-            o.width  / 100.0,
-            o.height / 100.0,
-            CoordSys.Unknown
-        );
-
+    fromLtwhFloatReps: (o) => {
+        return new BBox(o.left / 100.0, o.top / 100.0, o.width / 100.0, o.height / 100.0, CoordSys.Unknown);
     },
-
-    fromLtwh: (l: number, t: number, w: number, h: number) => {
+    fromLtwh: (l, t, w, h) => {
         return new BBox(l, t, w, h, CoordSys.Unknown);
     },
-
-    fromLtwhObj: (o: ILTBounds) => {
+    fromLtwhObj: (o) => {
         return new BBox(o.left, o.top, o.width, o.height, CoordSys.Unknown);
     },
-
-    fromArray: (ltwh: [number, number, number, number]) => {
-        const left   = ltwh[0] / 100.0;
-        const top    = ltwh[1] / 100.0;
-        const width  = ltwh[2] / 100.0;
+    fromArray: (ltwh) => {
+        const left = ltwh[0] / 100.0;
+        const top = ltwh[1] / 100.0;
+        const width = ltwh[2] / 100.0;
         const height = ltwh[3] / 100.0;
-        return new BBox(
-            left, top, width, height,
-            CoordSys.PdfMedia
-        );
+        return new BBox(left, top, width, height, CoordSys.PdfMedia);
     },
 };
-
-export function boxCenteredAt(p: Point, width: number, height: number) {
+export function boxCenteredAt(p, width, height) {
     const left = p.x - (width / 2);
     const top = p.y - (height / 2);
     return mk.fromLtwh(left, top, width, height);
 }
-
-export function fromFigure(fig: any): AnyShape {
+export function fromFigure(fig) {
     let shape;
-
-
     if (fig.LTBounds) {
         shape = mk.fromArray(fig.LTBounds);
-    } else if (fig.Line) {
+    }
+    else if (fig.Line) {
         const p1 = mkPoint.fromFloatReps(fig.Line.p1);
         const p2 = mkPoint.fromFloatReps(fig.Line.p2);
         shape = new Line(p1, p2);
-    } else if (fig.Point) {
+    }
+    else if (fig.Point) {
         shape = mkPoint.fromFloatReps(fig.Point);
-    } else if (fig.Trapezoid) {
+    }
+    else if (fig.Trapezoid) {
         const topP1 = mkPoint.fromFloatReps(fig.Trapezoid.topLeft);
         const topP2 = mkPoint.fromFloatReps({
             x: fig.Trapezoid.topLeft.x + fig.Trapezoid.topWidth,
             y: fig.Trapezoid.topLeft.y
         });
-
         const bottomP1 = mkPoint.fromFloatReps(fig.Trapezoid.bottomLeft);
         const bottomP2 = mkPoint.fromFloatReps({
             x: fig.Trapezoid.bottomLeft.x + fig.Trapezoid.bottomWidth,
             y: fig.Trapezoid.bottomLeft.y
         });
-
         const top = new Line(topP1, topP2);
         const bottom = new Line(bottomP1, bottomP2);
-
         shape = new Trapezoid(top, bottom);
-    } else {
-      throw new Error(`could not construct shape from figure ${fig}`)
     }
-
+    else {
+        throw new Error(`could not construct shape from figure ${fig}`);
+    }
     return shape;
 }
+//# sourceMappingURL=coord-sys.js.map

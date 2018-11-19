@@ -1,13 +1,13 @@
 
 
 
-** Watrcolor client file organization
+* Watrcolor client file organization
 
-*** Vue Components
+** Vue Components
 **** filter-engine
 
 
-*** Client UI current file set
+** Client UI current file set
 **** frame.js
     common page element setup for UI: topbar, menubar, site nav
     - [ ] Vue-ify
@@ -52,31 +52,6 @@
 **** MouseHandlerSets.js
     abstraction over sets of mouse handling funcs, for easier use when making textgrid based tools
 
-**** PageImageListWidget.js
-    Wrapper around list of PageImageWidget 
-    instantiates each PageImageWidget, has own status bar
-    communicates with server on updates/deletions to labeling
-
-**** PageImageWidget.js
-    Individual page image 
-    RTree for glyphs, annotations, 
-    tooltips on hover
-    glyph hover reticles
-    glyph hover broadcast
-    selection rect for region-based labeling
-
-**** ReflowTools.js
-    TextReflow helper tools: labeling, slicing, joining, reordering
-
-**** ReflowWidgetInit.js
-    Initialize or show/hide a text reflow widget for area-based label
-
-**** ReflowWidget.js
-    text reflow labeling widget
-
-**** rtrees.js
-    helper functions for initializing rtrees with glyph and label data  
-
 **** schemas.js
     json validation functions for checking incoming data
 
@@ -92,9 +67,6 @@
 **** SplitWin.js
     window splitting, creation, deletion library
 
-**** TextgridWidget.ts
-    classes to display extracted PDF text, with highlights over labeled spans,
-    glyph hovering, click sync to pdf page images.
 
 **** Tooltips.js
     tippy.js based tooltip class. not working atm.
@@ -105,6 +77,41 @@
 **** utils.ts
     misc. utility functions
 
+
+*** Extracted Text Visualizers (Page Image Overlays)
+
+**** PageImageListWidget.js
+    Wrapper around list of PageImageWidget 
+    instantiates each PageImageWidget, has own status bar
+    communicates with server on updates/deletions to labeling
+
+**** PageImageWidget.js
+    Individual page image 
+    RTree for glyphs, annotations, 
+    tooltips on hover
+    glyph hover reticles
+    glyph hover broadcast
+    selection rect for region-based labeling
+
+
+
+*** Extracted Text Visualizers (Plain Text)
 **** view-pdf-text.js
     commented out early version of TextgridWidget
     contains sync-scroll code (commented out)
+
+**** ReflowTools.js
+    TextReflow helper tools: labeling, slicing, joining, reordering
+
+**** ReflowWidgetInit.js
+    Initialize or show/hide a text reflow widget for area-based label
+
+**** ReflowWidget.js
+    text reflow labeling widget
+
+**** TextgridWidget.ts
+    classes to display extracted PDF text, with highlights over labeled spans,
+    glyph hovering, click sync to pdf page images.
+
+**** rtrees.js
+    helper functions for initializing rtrees with glyph and label data  

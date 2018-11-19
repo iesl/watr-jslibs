@@ -6,6 +6,7 @@
 
 import * as $ from 'jquery';
 import * as _ from 'lodash';
+import * as fabric from 'fabric';
 import * as d3 from 'd3';
 
 import * as mhs from './MouseHandlerSets';
@@ -19,9 +20,10 @@ import * as d3x from './d3-extras';
 import * as gp from './graphpaper-variants';
 import * as colors from './colors';
 
-import watr from '../../watr';
+import { JsArray } from 'watr.utils';
 
-const TGI = watr.textgrid.TextGridInterop;
+// const TGI = watr.textgrid.TextGridInterop;
+import TGI from 'watr.textgrid.TextGridInterop';
 
 import * as reflowTools from './ReflowTools';
 
@@ -233,7 +235,7 @@ export class ReflowWidget {
       const cls = classes[classes.length-1];
       const box = region.gridBox;
       const bounds = region.bounds;
-      const {left, top, width, height} = this.scaleLTBounds(bounds);
+      const {left, top, height} = this.scaleLTBounds(bounds);
       if (region.isLabelKey()) {
         const label = region.labelIdent;
         const text = new fabric.Text(label, {
