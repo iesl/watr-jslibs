@@ -31,7 +31,8 @@ interface ILTBoundsIntRep {
     height: number;
 }
 
-export interface ILTBounds extends rbush.BBox {
+// export interface ILTBounds extends rbush.BBox {
+export interface ILTBounds {
     left: number;
     top: number;
     width: number;
@@ -158,7 +159,7 @@ export class BBox implements ILTBounds {
     // public maxX: number;
     // public maxY: number;
 
-    public constructor(l: number, t: number, w: number, h: number, sys: CoordSys) {
+    public constructor(l: number, t: number, w: number, h: number, sys?: CoordSys) {
         this.left = l;
         this.top = t;
         this.width = w;

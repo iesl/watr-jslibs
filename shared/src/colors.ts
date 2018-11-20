@@ -35,7 +35,7 @@ export let colorMap = {
     "OutlineBox"             : "magenta"
 } ;
 
-function rgb(r, g, b) {
+function rgb(r: number, g: number, b: number) {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
