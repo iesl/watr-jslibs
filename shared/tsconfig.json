@@ -8,6 +8,9 @@
     "importHelpers": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "forceConsistentCasingInFilenames": true,
 
     "inlineSourceMap": true,
     "baseUrl": ".",
@@ -22,12 +25,10 @@
         "src/*"
       ]
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
+
+    "declaration": true,
+    "outDir": "./dist"
+
   },
 
   "include": [

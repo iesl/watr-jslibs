@@ -2,40 +2,59 @@
  * Helper functions to install/update mouse handlers
  */
 
-import * as $ from 'jquery';
 import * as _ from 'lodash';
 import { $id } from "./tstags";
 
-export function setMouseHandlers(bindThis, targetDivId, handlers) {
-    $id(targetDivId).off();
+const MOUSE_EVENTS = [
+  'mouseover',
+  'mouseout',
+  'mousemove',
+  'mouseup',
+  'mousedown',
+  'click'
+];
 
-    let mouseHandlers = _.map(handlers, handler => {
-        const init = {
-            mouseover: function() {},
-            mouseout: function() {},
-            mousemove: function() {},
-            mouseup: function() {},
-            mousedown: function() {},
-            click: function() {}
-        };
-        Object.assign(init, handler(bindThis));
-        return init;
+interface MouseHandlerSet0 {
+  mouseover (event: JQueryMouseEventObject): void ;
+  mouseout (event: JQueryMouseEventObject): void ;
+  mousemove (event: JQueryMouseEventObject): void ;
+  mouseup (event: JQueryMouseEventObject): void ;
+  mousedown (event: JQueryMouseEventObject): void ;
+  click (event: JQueryMouseEventObject): void;
+
+}
+
+interface MouseHandlerSet extends MouseHandlerSet0 {
+  [K: string]: ((event: JQueryMouseEventObject) => void);
+
+}
+
+type MouseHandlerInit = (t: any) => MouseHandlerSet;
+
+
+
+export function setMouseHandlers<T>(bindThis: T, targetDivId: string, handlers: MouseHandlerInit[]) {
+  $id(targetDivId).off();
+
+  const mouseHandlers: MouseHandlerSet[] = _.map(handlers, handler => {
+    const init: MouseHandlerSet = {
+      mouseover () {},
+      mouseout () {},
+      mousemove () {},
+      mouseup () {},
+      mousedown () {},
+      click () {}
+    };
+    Object.assign(init, handler(bindThis));
+    return init;
+  });
+
+
+  _.each(MOUSE_EVENTS, eventType => {
+    $id(targetDivId).on(eventType, (event: JQueryMouseEventObject) => {
+      _.each(mouseHandlers, (h: MouseHandlerSet) => {
+        h[eventType](event);
+      });
     });
-    let events = [
-        'mouseover',
-        'mouseout',
-        'mousemove',
-        'mouseup',
-        'mousedown',
-        'click'
-    ];
-
-
-    _.each(events, eventType => {
-        $id(targetDivId).on(eventType, function(event) {
-            _.each(mouseHandlers, h => {
-                h[eventType](event);
-            });
-        });
-    });
+  });
 }

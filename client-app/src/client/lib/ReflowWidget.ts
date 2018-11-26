@@ -158,7 +158,7 @@ export class ReflowWidget {
       // Setup status bar
       this.setupTopStatusBar();
 
-      this.d3$textgridSvg = d3.select('#'+this.frameId)
+      this.d3$textgridSvg = d3.select(`#${this.frameId}`)
         .append('svg').classed('textgrid', true)
         .datum(this.textGrid.gridData)
         .attr('id', `${this.svgId}`)
@@ -380,7 +380,6 @@ export class ReflowWidget {
     this.gridProps = TGI.textGrids.textGridToWidgetGrid(this.textGrid, this.labelSchema, 2, 2);
     const rowCount = Math.max(this.gridProps.getGridRowCount(), 40);
     const colCount = Math.max(this.gridProps.getGridColCount(), 100);
-
 
     this.rowCount = rowCount;
     this.colCount = colCount;
