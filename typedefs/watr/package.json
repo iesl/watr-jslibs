@@ -5,7 +5,6 @@
   "dependencies": {},
   "deprecated": false,
   "description": "TypeScript definitions for watr works",
-  "peerDependencies": {},
   "scripts": {},
   "typings": "index.d.ts"
 }

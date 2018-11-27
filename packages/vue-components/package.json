@@ -14,9 +14,10 @@
     "test:unit": "vue-cli-service test:unit 'src/**/**/*.spec.ts'"
   },
   "dependencies": {
+    "@types/lunr": "^0.1.0",
+    "jquery": "^3.3.1",
     "lodash": "^4.17.11",
     "lunr": "^2.3.5",
-    "jquery": "^3.3.1",
     "register-service-worker": "^1.0.0",
     "sharedLib": "^0.1.0",
     "vue": "^2.5.17",
