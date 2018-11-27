@@ -8,8 +8,8 @@
  *
  */
 
-mport _ from "lodash";
-import lunr from "lunr";
+import * as _ from "lodash";
+import * as lunr from "lunr";
 
 type Candidate = object;
 

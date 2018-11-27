@@ -2,14 +2,12 @@
 
 import * as coords from "./coord-sys";
 import * as colors from "./colors";
-
-export * from "./index";
-export * from "./LodashPlus";
-export * from "./MouseHandlerSets";
+import * as LodashPlus from "./LodashPlus";
+import * as MouseHandlerSets from "./MouseHandlerSets";
+import * as SplitWin from "./SplitWin";
+import * as tstags from "./tstags";
+import * as utils from "./utils";
 // export * from './rtrees';
 // export * from './schemas';
-export * from "./SplitWin";
-export * from "./tstags";
-export * from "./utils";
 
-export {coords, colors};
+export {coords, colors, LodashPlus, MouseHandlerSets, SplitWin, tstags, utils};

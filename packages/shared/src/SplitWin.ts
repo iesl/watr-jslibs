@@ -11,10 +11,10 @@
  *
  */
 
-import _ from "lodash";
-import $ from "jquery";
+import * as _ from "lodash";
+import * as $ from "jquery";
 
-import Split from "split.js";
+import * as Split from "split.js";
 import {$id, t, htm} from "./tstags";
 
 const noop = function() {

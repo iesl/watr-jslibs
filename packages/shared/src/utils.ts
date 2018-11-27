@@ -2,8 +2,8 @@
  * Various Utility functions
  */
 
-import $ from 'jquery';
-import _ from 'lodash';
+import * as _ from "lodash";
+import * as $ from "jquery";
 
 import 'watr';
 import { Tree } from 'watr.scalazed';

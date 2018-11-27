@@ -4,10 +4,8 @@
 
     "strict": true,
     "removeComments": false,
-    "importHelpers": true,
 
     "moduleResolution": "node",
-    "esModuleInterop": true,
     "inlineSourceMap": true,
 
     "preserveConstEnums": true,

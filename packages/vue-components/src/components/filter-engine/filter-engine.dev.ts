@@ -1,3 +1,6 @@
+
+import * as $ from 'jquery';
+
 import {
   Vue,
   Component,
@@ -7,7 +10,6 @@ import {
   namespace
 } from 'vuex-class'
 
-import $ from 'jquery';
 
 import FilterWidget from './filter-engine.vue';
 

@@ -2,7 +2,7 @@
  * Helper functions to install/update mouse handlers
  */
 
-import _ from "lodash";
+import * as _ from "lodash";
 import {$id} from "./tstags";
 
 const MOUSE_EVENTS = [

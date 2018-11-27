@@ -3,11 +3,9 @@
 
     "target": "es6",
     "module": "es6",
+    "moduleResolution": "node",
 
     "strict": true,
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
 

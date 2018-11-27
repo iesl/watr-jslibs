@@ -14,7 +14,6 @@
     "test:unit": "vue-cli-service test:unit 'src/**/**/*.spec.ts'"
   },
   "dependencies": {
-    "@types/lunr": "^0.1.0",
     "jquery": "^3.3.1",
     "lodash": "^4.17.11",
     "lunr": "^2.3.5",
@@ -48,7 +47,9 @@
     "json-server": "^0.14.0",
     "vue-cli-plugin-storybook": "^0.4.8",
     "vue-template-compiler": "^2.5.17",
-    "webpack-merge": "^4.1.4"
+    "webpack-merge": "^4.1.4",
+    "npm-run-all": "^4.1.5",
+    "@types/lunr": "^0.1.0"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"

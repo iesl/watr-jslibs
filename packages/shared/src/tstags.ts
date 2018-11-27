@@ -2,8 +2,8 @@
  * Some helper functions for working with client-side html
  */
 
-import _ from "lodash";
-import $ from "jquery";
+import * as _ from "lodash";
+import * as $ from "jquery";
 
 import {zipWithIndex} from "./LodashPlus";
 
