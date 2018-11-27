@@ -5,7 +5,8 @@
         "noImplicitAny": true,
         "strictNullChecks": false,
         "strictFunctionTypes": true,
-        "baseUrl": ".",
+        "baseUrl": "../",
+        "typeRoots": "../",
         "noEmit": true,
         "forceConsistentCasingInFileNames": true
     },

@@ -1,4 +1,3 @@
-
 /**
  * Helper functions and classes to construct shapes that conform to a 'graph paper' setup,
  * e.g., rows and columns of equally sized cells, addressable by (row, col) coords.
@@ -9,9 +8,8 @@
  *
  **/
 
-
-import * as coords from './coord-sys';
-import * as colors from './colors';
+import {coords, colors} from "sharedLib";
+import _ from "lodash";
 
 declare namespace fabric {
   export namespace StaticCanvas {
@@ -20,30 +18,43 @@ declare namespace fabric {
   export class StaticCanvas {
     constructor(id: string, props: object);
     getContext(): CanvasRenderingContext2D;
-    setDimensions(d: any, e: any = {}): void;
+    setDimensions(d: any): void;
+    setDimensions(d: any, e: any): void;
+    add(d: any): void;
+  }
+  export class Text {
+    constructor(id: string, props: object);
+  }
+  export class Rect {
+    constructor(bbox: coords.BBox, props: object);
+    constructor(props: object);
+    constructor(bbox: coords.BBox);
 
-
+    setGradient(color: string, props: object): void;
   }
   // export type StaticCanvas = any;
-
 }
 
 /**
  * Set of functions to  convert between cell-based and cartesian geometries
  */
-export class GraphPaper  {
-  rowCount : number;
-  colCount : number;
+export class GraphPaper {
+  rowCount: number;
+  colCount: number;
   cellWidth: number;
   cellHeight: number;
 
-  constructor (rowCount: number, colCount: number, cellWidth: number, cellHeight: number) {
+  constructor(
+    rowCount: number,
+    colCount: number,
+    cellWidth: number,
+    cellHeight: number,
+  ) {
     this.rowCount = rowCount;
     this.colCount = colCount;
     this.cellWidth = cellWidth;
     this.cellHeight = cellHeight;
   }
-
 
   cellAt(x: number, y: number) {
     return new GraphCell(x, y, this);
@@ -54,12 +65,12 @@ export class GraphPaper  {
   }
 }
 
-class GraphCell  {
+class GraphCell {
   x: number;
   y: number;
   graphPaper: GraphPaper;
 
-  constructor (x: number, y: number, graphPaper: GraphPaper) {
+  constructor(x: number, y: number, graphPaper: GraphPaper) {
     this.x = x;
     this.y = y;
     this.graphPaper = graphPaper;
@@ -68,42 +79,51 @@ class GraphCell  {
   getBounds() {
     const w = this.graphPaper.cellWidth;
     const h = this.graphPaper.cellHeight;
-    return new coords.BBox(
-      this.x * w,
-      this.y * h,
-      w, h
-    );
+    return new coords.BBox(this.x * w, this.y * h, w, h);
   }
+
+  // toLTBounds(): BBox {
+  //   LTBounds.Ints(left, top, spanRight + 1, spanDown + 1);
+  // }
 }
 
-class GraphBox  {
+class GraphBox {
   originCell: GraphCell;
   spanRight: number;
   spanDown: number;
   graphPaper: GraphPaper;
   bounds: coords.BBox;
 
-  constructor (originCell: GraphCell, spanRight: number, spanDown: number, graphPaper: GraphPaper) {
+  constructor(
+    originCell: GraphCell,
+    spanRight: number,
+    spanDown: number,
+    graphPaper: GraphPaper,
+  ) {
     this.originCell = originCell;
     this.spanRight = spanRight;
     this.spanDown = spanDown;
     this.graphPaper = graphPaper;
 
     this.bounds = new coords.BBox(
-      this.originCell.x*graphPaper.cellWidth,
-      this.originCell.y*graphPaper.cellHeight,
-      (this.spanRight-1)*graphPaper.cellWidth,
-      (this.spanDown-1)*graphPaper.cellHeight
+      this.originCell.x * graphPaper.cellWidth,
+      this.originCell.y * graphPaper.cellHeight,
+      (this.spanRight - 1) * graphPaper.cellWidth,
+      (this.spanDown - 1) * graphPaper.cellHeight,
     );
+  }
+
+  toBBox() {
+    return this.bounds;
   }
 }
 
-type Style = 'normal';
-type Weight = 'normal' | 'bold';
+type Style = "normal";
+type Weight = "normal" | "bold";
 
 class FontProps {
-  style: Style = 'normal';
-  weight: Weight = 'normal';
+  style: Style = "normal";
+  weight: Weight = "normal";
   size: number = 20;
 }
 
@@ -112,13 +132,15 @@ export class FabricJsGraphPaper {
   fontSize: number;
   gridCanvas?: Element;
   graphPaper?: GraphPaper;
+  textHeight: number = 18;
+  cellWidth: number = 20;
+  cellHeight: number = 20;
 
   fabricCanvas?: fabric.StaticCanvas;
 
-
   fontProps: FontProps = new FontProps();
 
-  constructor (canvasId: string, fontSize: number) {
+  constructor(canvasId: string, fontSize: number) {
     this.canvasId = canvasId;
     this.fontSize = fontSize;
   }
@@ -128,157 +150,171 @@ export class FabricJsGraphPaper {
     if (gridCanvas) {
       this.gridCanvas = gridCanvas!;
     } else {
-      throw new Error(`FabricJsGraphPaper could not mount at ${canvasId}`)
+      throw new Error(`FabricJsGraphPaper could not mount at ${canvasId}`);
     }
     this.fabricCanvas = new fabric.StaticCanvas(canvasId, {
-      renderOnAddRemove: false
+      renderOnAddRemove: false,
     });
 
     const fontFace = this.makeFontFace();
     const context = this.fabricCanvas.getContext();
     context.font = fontFace;
-    context.measureText('A').width;
+    context.measureText("A").width;
 
-    const w = context.measureText('A').width;
-    const h = this.fontSize+4;
+    const w = context.measureText("A").width;
+    const h = this.fontSize + 4;
+    // this.textHeight = h;
 
     this.graphPaper = new GraphPaper(0, 0, w, h);
   }
 
   setDimensions(rows: number, cols: number, w: number, h: number) {
     this.graphPaper = new GraphPaper(rows, cols, w, h);
-    this.fabricCanvas.setDimensions({width: w, height: h});
-    this.fabricCanvas.setDimensions({width: `${w}px`, height: `${h}px`}, {cssOnly: true});
-
+    this.staticCanvas.setDimensions({width: w, height: h});
+    this.staticCanvas.setDimensions(
+      {width: `${w}px`, height: `${h}px`},
+      {cssOnly: true},
+    );
   }
 
   initContext() {
-    // let context = this.gridCanvas.getContext('2d');
+    // const context = this.gridCanvas.getContext('2d');
     // context.font = this.fontFace;
     // Object.assign(context, this.contextProps);
     // return context;
-    return this.fabricCanvas.getContext();
+    return this.staticCanvas.getContext();
   }
   makeFontFace() {
-    let p = this.fontProps;
+    const p = this.fontProps;
     return `${p.style} normal ${p.weight} ${p.size}px Courier New`;
   }
 
-  set contextProp(p) {
-    // Object.assign(this.contextProps, p);
+  // set contextProp(p) {
+  //   // Object.assign(this.contextProps, p);
+  // }
+
+  // set alpha(w) {
+  //   // this.contextProps.globalAlpha = w;
+  // }
+
+  get staticCanvas() {
+    return this.fabricCanvas!;
   }
 
-  set alpha(w) {
-    // this.contextProps.globalAlpha = w;
-  }
-
-  set fontWeight(w) {
+  set fontWeight(w: Weight) {
     this.fontProps.weight = w;
     this.makeFontFace();
   }
-  set fontStyle(w) {
+  set fontStyle(w: Style) {
     this.fontProps.style = w;
     this.makeFontFace();
   }
 
-  get textFont     () { return this._textFont; }
-  get textHeight   () { return this._textHeight; }
-  get cellWidth    () { return this._cellWidth; }
-  get cellHeight   () { return this._cellHeight; }
+  // get textFont() {
+  //   return this._textFont;
+  // }
 
-  get context2d    () {
-    return this.fabricCanvas.getContext();
+  get context2d() {
+    return this.staticCanvas.getContext();
     // return this.context;
     // return this.initContext();
   }
 
-  cellToBounds(cell) {
-    let x = cell.x * this.cellWidth;
-    let y = cell.y * this.cellHeight;
-    let w = this.cellWidth;
-    let h = this.cellHeight;
+  cellToBounds(cell: GraphCell): coords.BBox {
+    const x = cell.x * this.cellWidth;
+    const y = cell.y * this.cellHeight;
+    const w = this.cellWidth;
+    const h = this.cellHeight;
     return coords.mk.fromLtwh(x, y, w, h);
   }
 
-  boxToBounds(box) {
-    let bb = box.toLTBounds();
-    let x = bb.left*this.cellWidth;
-    let y = bb.top* this.cellHeight;
-    let w = bb.width * this.cellWidth;
-    let h = bb.height * this.cellHeight;
+  boxToBounds(box: GraphBox): coords.BBox {
+    const bb = box.toBBox();
+    const x = bb.left * this.cellWidth;
+    const y = bb.top * this.cellHeight;
+    const w = bb.width * this.cellWidth;
+    const h = bb.height * this.cellHeight;
     return coords.mk.fromLtwh(x, y, w, h);
   }
 
-  drawString(box, str) {
-    let {left, top, width, height} = this.cellToBounds(box.origin);
-    let text = new fabric.Text(str, {
+  drawString(box: GraphBox, str: string): void {
+    const {left, top} = this.cellToBounds(box.originCell);
+    const text = new fabric.Text(str, {
+      left,
+      top,
       objectCaching: false,
-      left: left, top: top,
       fontSize: 20,
-      fontStyle: 'normal',
-      fontFamily: 'Courier New'
+      fontStyle: "normal",
+      fontFamily: "Courier New",
     });
-    this.fabricCanvas.add(text);
+    this.staticCanvas.add(text);
   }
 
-  drawChar(cell, char) {
-    let {left, top, width, height} = this.cellToBounds(cell);
+  drawChar(cell: GraphCell, char: string) {
+    const {left, top} = this.cellToBounds(cell);
     // this.context2d.fillStyle = 'black';
     // this.context2d.fillText(char, left, top+height);
-    let text = new fabric.Text(char, {
+    const text = new fabric.Text(char, {
+      left,
+      top,
       objectCaching: false,
-      left: left, top: top,
       fontSize: 20,
-      fontStyle: 'normal',
-      fontFamily: 'Courier New'
+      fontStyle: "normal",
+      fontFamily: "Courier New",
     });
-    this.fabricCanvas.add(text);
+    this.staticCanvas.add(text);
   }
 
-  drawBox(box, border) {
-    // let {left, top, width, height} = this.boxToBounds(box);
-    let bounds = this.boxToBounds(box);
+  drawBox(box: GraphBox) {
+    // const {left, top, width, height} = this.boxToBounds(box);
+    const bounds = this.boxToBounds(box);
 
-    var rect = new fabric.Rect(bounds);
-    this.fabricCanvas.add(rect);
+    const rect = new fabric.Rect(bounds);
+    this.staticCanvas.add(rect);
     // this.context2d.rect(left, top, width, height);
     // this.context2d.stroke();
   }
 
-  fillBox(box, modCtx) {
-    let bounds = this.boxToBounds(box);
-    var rect = new fabric.Rect(bounds, {
-      objectCaching: false
+  fillBox(box: GraphBox, modCtx: any) {
+    const bounds = this.boxToBounds(box);
+    const rect = new fabric.Rect(bounds, {
+      objectCaching: false,
     });
     modCtx(rect);
 
-    this.fabricCanvas.add(rect);
+    this.staticCanvas.add(rect);
   }
 
-
+  get colCount() {
+    return this.graphPaper!.colCount;
+  }
+  get rowCount() {
+    return this.graphPaper!.rowCount;
+  }
   applyCanvasStripes() {
-    let rowWidth = this.cellWidth * (this.colCount+8);
-    _.each(_.range(this.rowCount+10), row => {
-      let rtop = row * this.cellHeight;
-      let h = this.cellHeight;
-      var rect = new fabric.Rect({
+    const rowWidth = this.cellWidth * (this.colCount + 8);
+    _.each(_.range(this.rowCount + 10), row => {
+      const rtop = row * this.cellHeight;
+      const h = this.cellHeight;
+      const rect = new fabric.Rect({
         left: 0,
         top: rtop,
         width: rowWidth,
-        height: h
+        height: h,
       });
-      rect.setGradient('fill', {
+      rect.setGradient("fill", {
         x1: 0,
         y1: 0,
-        x2: 0, y2: h,
+        x2: 0,
+        y2: h,
         colorStops: {
-          0 : colors.Color.GhostWhite,
+          0: colors.Color.GhostWhite,
           0.9: colors.Color.Linen,
-          1: colors.Color.Cornsilk
-        }
+          1: colors.Color.Cornsilk,
+        },
       });
 
-      this.fabricCanvas.add(rect);
+      this.staticCanvas.add(rect);
     });
   }
 }

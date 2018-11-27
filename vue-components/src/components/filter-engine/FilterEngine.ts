@@ -8,9 +8,8 @@
  *
  */
 
-
-import * as _ from 'lodash';
-import lunr from 'lunr';
+mport _ from "lodash";
+import lunr from "lunr";
 
 type Candidate = object;
 
@@ -67,20 +66,23 @@ export class SelectionFilteringEngine {
 
   public groupRecordsByKey(records: KeyedRecord[]): KeyedRecordGroup[] {
     const groups = _.groupBy(records, r => r.keystr);
-    return _.map(_.toPairs(groups), ([keystr, recs]) => ({
-      keystr,
-      records: _.sortBy(recs, r => r.n),
-    } as KeyedRecordGroup));
+    return _.map(
+      _.toPairs(groups),
+      ([keystr, recs]) =>
+        ({
+          keystr,
+          records: _.sortBy(recs, r => r.n),
+        } as KeyedRecordGroup),
+    );
   }
 
   public getKeyedRecordGroups(): KeyedRecordGroup[] {
     return this.keyedRecordGroups;
   }
 
-
   public query(queryStr: string): KeyedRecordGroup[] {
     const searchResults = this.search(queryStr);
-    const hitRecords = _.map(searchResults, (h) => {
+    const hitRecords = _.map(searchResults, h => {
       const id = parseInt(h.ref, 10);
       return this.keyedRecords[id];
     });
@@ -89,9 +91,9 @@ export class SelectionFilteringEngine {
   }
 
   public search(queryStr: string): lunr.Index.Result[] {
-    const hits = this.lunrIndex.query((query) => {
+    const hits = this.lunrIndex.query(query => {
       const terms = _.filter(_.split(queryStr, / +/), a => a.length > 0);
-      _.each(terms, (queryTerm) => {
+      _.each(terms, queryTerm => {
         const clause: lunr.Clause = {
           term: `*${queryTerm}*`,
           presence: lunr.Query.presence.REQUIRED,
@@ -104,27 +106,29 @@ export class SelectionFilteringEngine {
   }
 
   private regroupCandidates(candidateSets: CandidateGroup[]): KeyedRecord[] {
-    const grouped = _.flatMap(candidateSets, candidateSet => _.map(candidateSet.candidates, (candidate) => {
-      const groupKey = candidateSet.groupKeyFunc(candidate);
-      const multikey = groupKey.multikey;
-      const multikeystr = _.join(multikey, ' ');
-      const rec: KeyedRecord = {
-        candidate,
-        keys: multikey,
-        keystr: multikeystr,
-        n: 0,
-      };
-      return rec;
-    }));
+    const grouped = _.flatMap(candidateSets, candidateSet =>
+      _.map(candidateSet.candidates, candidate => {
+        const groupKey = candidateSet.groupKeyFunc(candidate);
+        const multikey = groupKey.multikey;
+        const multikeystr = _.join(multikey, " ");
+        const rec: KeyedRecord = {
+          candidate,
+          keys: multikey,
+          keystr: multikeystr,
+          n: 0,
+        };
+        return rec;
+      }),
+    );
 
     const groupSorted = _.sortBy(grouped, g => g.keys);
-    _.each(groupSorted, (g, i) => g.n = i);
+    _.each(groupSorted, (g, i) => (g.n = i));
     return groupSorted;
   }
 
   private initIndex(keyedRecords: KeyedRecord[]): lunr.Index {
-    const lunrIndex = lunr(function (this: lunr.Index) {
-      this.field('tags');
+    const lunrIndex = lunr(function(this: lunr.Index) {
+      this.field("tags");
       this.pipeline.reset();
       _.each(keyedRecords, (rec, num) => {
         const keystr = rec.keystr;
@@ -134,7 +138,6 @@ export class SelectionFilteringEngine {
         });
       });
     });
-
 
     return lunrIndex;
   }

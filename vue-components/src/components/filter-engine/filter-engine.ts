@@ -2,48 +2,40 @@
  *
  */
 
-import * as _ from 'lodash';
+import _ from "lodash";
 
-import {
-  Vue,
-  Component,
-  Prop,
-  Watch,
-} from 'vue-property-decorator'
+import {Vue, Component, Prop, Watch} from "vue-property-decorator";
 
-import {
-  namespace
-} from 'vuex-class'
-
+import {namespace} from "vuex-class";
 
 import {
   SelectionFilteringEngine,
   CandidateGroup,
-  KeyedRecordGroup
-} from './FilterEngine';
+  KeyedRecordGroup,
+} from "./FilterEngine";
 
-
-const filterState = namespace('filteringState')
-
+const filterState = namespace("filteringState");
 
 @Component
 export default class FilterWidget extends Vue {
-
   @Prop(Array) initialCandidateGroups!: CandidateGroup[];
 
-  queryString: string = '';
+  queryString: string = "";
 
   @filterState.State currentSelections!: KeyedRecordGroup[];
   @filterState.State filteredRecords!: KeyedRecordGroup[];
   @filterState.State initialCandidatesReady!: Boolean;
 
-  @filterState.Mutation('setFilteredRecords') setFilteredRecords!: (recs: KeyedRecordGroup[]) => void;
-  @filterState.Mutation('setCurrentSelections') setCurrentSelections!: (recs: KeyedRecordGroup[]) => void;
+  @filterState.Mutation("setFilteredRecords") setFilteredRecords!: (
+    recs: KeyedRecordGroup[],
+  ) => void;
+  @filterState.Mutation("setCurrentSelections") setCurrentSelections!: (
+    recs: KeyedRecordGroup[],
+  ) => void;
 
   private engine = new SelectionFilteringEngine([]);
 
-  query(): void {
-  }
+  query(): void {}
 
   filterReset(): void {
     this.setFilteredRecords([]);
@@ -53,9 +45,7 @@ export default class FilterWidget extends Vue {
     this.setFilteredRecords(this.currentSelections);
   }
 
-
   created() {
-
     const qfunc = () => {
       const filteringEngine = this.engine;
       const hitRecs = filteringEngine.query(this.queryString);
@@ -64,10 +54,9 @@ export default class FilterWidget extends Vue {
 
     const debouncedQfunc: (() => void) & _.Cancelable = _.debounce(qfunc, 350);
     this.query = debouncedQfunc;
-
   }
 
-  @Watch('initialCandidatesReady')
+  @Watch("initialCandidatesReady")
   onInitialCandidatesReady() {
     const filteringEngine = this.engine;
     filteringEngine.setCandidateGroups(this.initialCandidateGroups);
@@ -75,7 +64,7 @@ export default class FilterWidget extends Vue {
     this.setCurrentSelections(recordGroups);
   }
 
-  @Watch('queryString')
+  @Watch("queryString")
   onQueryString() {
     this.query();
   }
@@ -83,5 +72,4 @@ export default class FilterWidget extends Vue {
   // @Watch('currentSelections')
   // onCurrentSelections() {
   // }
-
 }

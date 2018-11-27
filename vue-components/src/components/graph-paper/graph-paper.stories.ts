@@ -1,9 +1,6 @@
-//
 import {storiesOf} from "@storybook/vue";
-// import { action } from '@storybook/addon-actions';
-// import { linkTo } from '@storybook/addon-links';
 
-import FilterEngineDev from "./filter-engine.dev.vue";
+import FilterEngineDev from "./graph-paper.dev.vue";
 
 import store from "../../store";
 

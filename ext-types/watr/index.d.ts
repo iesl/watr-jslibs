@@ -1,5 +1,7 @@
 
-declare namespace utils {
+
+
+declare namespace watr.utils {
   export interface JsArray {
   }
 }
@@ -21,8 +23,25 @@ declare namespace TextGridInterop {
   }
 }
 
+
+declare module "watr" {
+  // export = utils;
+}
 declare module "watr.utils" {
-  export = utils;
+  // export = utils;
+}
+
+declare module "watr.scalazed" {
+  class Node {}
+  class Leaf {}
+  type Tree = Node | Leaf;
+
+  namespace Tree {
+    function Node(label: any, ch: Tree[]): Tree;
+    function Leaf(label: any): Tree;
+
+    function drawTree(desc: Tree): string;
+  }
 }
 
 declare module "watr.textgrid.TextGridInterop" {

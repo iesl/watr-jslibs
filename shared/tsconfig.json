@@ -10,12 +10,11 @@
     "esModuleInterop": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "forceConsistentCasingInFilenames": true,
 
     "inlineSourceMap": true,
     "baseUrl": ".",
 
-    "noEmit": true,
+    "noEmit": false,
     "diagnostics": true,
 
     "types": [],
@@ -32,7 +31,11 @@
   },
 
   "include": [
-    "src/**/*",
+    "src/**/*"
+  ],
+
+  "exclude": [
+    "node_modules/**/*"
   ]
 
 }

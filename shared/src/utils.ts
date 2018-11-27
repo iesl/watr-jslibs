@@ -2,17 +2,18 @@
  * Various Utility functions
  */
 
-import * as $ from 'jquery';
-import * as _ from 'lodash';
+import $ from 'jquery';
+import _ from 'lodash';
 
-/* global require location watr */
+import 'watr';
+import { Tree } from 'watr.scalazed';
 
 export function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);
 }
 
 
-const Tree = watr.scalazed.Tree;
+// const Tree = watr.scalazed.Tree;
 
 /**
  */
@@ -70,7 +71,7 @@ export function getDescendantTree(rootSelector: string): any {
   return loop($(rootSelector));
 }
 
-export function getDescendantTreeString(rootSelector) {
+export function getDescendantTreeString(rootSelector: string): string {
   const desc = getDescendantTree(rootSelector);
   return Tree.drawTree(desc);
 }
