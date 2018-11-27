@@ -1,6 +1,5 @@
 
 
-
 declare namespace watr.utils {
   export interface JsArray {
   }
