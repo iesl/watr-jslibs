@@ -1,5 +1,6 @@
 /**
  * Widget to display a grid of reactive info variables, primarily used for debugging
+ * TODO move this to vue component lib
  */
 
 import * as $ from 'jquery';
