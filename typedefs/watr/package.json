@@ -1,6 +1,7 @@
 {
   "name": "@types/watr",
   "version": "0.1.0",
+  "private": true,
   "bundleDependencies": false,
   "dependencies": {},
   "deprecated": false,

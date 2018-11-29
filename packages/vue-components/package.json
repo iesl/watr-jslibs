@@ -1,7 +1,7 @@
 {
-  "name": "vueComponentLib",
+  "name": "watr-vue-components",
   "version": "0.1.0",
-  "private": false,
+  "private": true,
   "scripts": {
     "lint": "vue-cli-service lint",
     "build:lib:dev": "vue-cli-service build --mode development --target lib --name vueComponentLib ./src/index.ts",
@@ -27,29 +27,30 @@
     "vuex-class": "^0.3.1"
   },
   "devDependencies": {
+    "typescript": "^3.1.6",
     "@storybook/addon-actions": "4.0.0-alpha.20",
     "@storybook/addon-links": "4.0.0-alpha.20",
     "@storybook/vue": "^4.0.9",
+    "@types/lunr": "^0.1.0",
     "@types/storybook__addon-actions": "^3.4.1",
     "@types/storybook__addon-links": "^3.3.3",
     "@types/storybook__vue": "^3.3.1",
-    "@vue/cli-plugin-babel": "^3.1.1",
-    "@vue/cli-plugin-eslint": "^3.1.5",
-    "@vue/cli-plugin-pwa": "^3.1.2",
-    "@vue/cli-plugin-typescript": "^3.1.1",
-    "@vue/cli-plugin-unit-mocha": "^3.1.1",
-    "@vue/cli-service": "^3.1.4",
+    "@vue/cli-plugin-babel": "^3.2.0",
+    "@vue/cli-plugin-eslint": "^3.2.1",
+    "@vue/cli-plugin-pwa": "^3.2.0",
+    "@vue/cli-plugin-typescript": "^3.2.0",
+    "@vue/cli-plugin-unit-mocha": "^3.2.0",
+    "@vue/cli-service": "^3.2.0",
     "@vue/eslint-config-airbnb": "^4.0.0",
-    "@vue/eslint-config-typescript": "^3.1.1",
+    "@vue/eslint-config-typescript": "^3.2.0",
     "@vue/test-utils": "^1.0.0-beta.26",
     "babel-preset-vue": "^2.0.2",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "json-server": "^0.14.0",
+    "npm-run-all": "^4.1.5",
     "vue-cli-plugin-storybook": "^0.4.8",
     "vue-template-compiler": "^2.5.17",
-    "webpack-merge": "^4.1.4",
-    "npm-run-all": "^4.1.5",
-    "@types/lunr": "^0.1.0"
+    "webpack-merge": "^4.1.4"
   },
   "gitHooks": {
     "pre-commit": "lint-staged"

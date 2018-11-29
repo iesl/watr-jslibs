@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "private": false,
   "dependencies": {
-    "@types/lunr": "^0.1.0",
     "fabric": "^2.4.4",
     "jquery": "^3.3.1",
     "jquery-serializejson": "^2.9.0",
@@ -21,11 +20,12 @@
     "split.js": "^1.5.10",
     "tippy.js": "^3.2.0",
     "vue": "^2.5.17",
-    "vueComponentLib": "^0.1.0",
+    "watr-vue-components": "^0.1.0",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
-    "ajv": "^6.5.5",
+    "@types/lunr": "^0.1.0",
+    "ajv": "^6.6.1",
     "d3": "^4.13.0",
     "dts-gen": "^0.5.7",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",

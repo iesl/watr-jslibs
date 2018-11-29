@@ -5,14 +5,6 @@
  *
  */
 
-// import * as coords from './coord-sys';
-// import {t} from "./tstags";
-
-// import * as d3x from './d3-extras';
-// import * as d3 from 'd3';
-
-// import { shared } from './shared-state';
-
 // /** Page sync flashing indicator dot */
 // function scrollSyncIndicator(parentSelection, indicatorPoint) {
 //     d3.select(parentSelection)
@@ -37,8 +29,6 @@
 //     let reticleGroup = d3$textgridSvg
 //         .append('g')
 //         .classed('reticles', true);
-
-
 //     reticleGroup
 //         .append('rect')
 //         .classed('query-reticle', true)

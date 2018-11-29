@@ -1,7 +1,7 @@
 {
   "name": "sharedLib",
   "version": "0.1.0",
-  "private": false,
+  "private": true,
   "dependencies": {
     "jquery": "^3.3.1",
     "lodash": "^4.17.11",

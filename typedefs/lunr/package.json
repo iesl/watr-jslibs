@@ -1,6 +1,7 @@
 {
   "name": "@types/lunr",
   "version": "0.1.0",
+  "private": true,
   "bundleDependencies": false,
   "dependencies": {},
   "deprecated": false,

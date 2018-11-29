@@ -35,6 +35,7 @@ declare namespace fabric {
   // export type StaticCanvas = any;
 }
 
+
 /**
  * Set of functions to  convert between cell-based and cartesian geometries
  */
@@ -216,7 +217,6 @@ export class FabricJsGraphPaper {
 
   get context2d() {
     return this.staticCanvas.getContext();
-    // return this.context;
     // return this.initContext();
   }
 
@@ -252,8 +252,6 @@ export class FabricJsGraphPaper {
 
   drawChar(cell: GraphCell, char: string) {
     const {left, top} = this.cellToBounds(cell);
-    // this.context2d.fillStyle = 'black';
-    // this.context2d.fillText(char, left, top+height);
     const text = new fabric.Text(char, {
       left,
       top,
@@ -266,13 +264,9 @@ export class FabricJsGraphPaper {
   }
 
   drawBox(box: GraphBox) {
-    // const {left, top, width, height} = this.boxToBounds(box);
     const bounds = this.boxToBounds(box);
-
     const rect = new fabric.Rect(bounds);
     this.staticCanvas.add(rect);
-    // this.context2d.rect(left, top, width, height);
-    // this.context2d.stroke();
   }
 
   fillBox(box: GraphBox, modCtx: any) {
