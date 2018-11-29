@@ -35,7 +35,6 @@ interface LogEntry {
     FilterWidget,
   }
 })
-
 export default class FilterEngineDev extends Vue {
 
   @filterState.State filteredRecords!: KeyedRecordGroup[];

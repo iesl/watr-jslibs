@@ -122,8 +122,6 @@ export class TextgridWidget {
     const gridNodes =
       t.div(`.textgrid #${self.frameId}`, {
         style: `width: 900px; height:${gridHeight}px`,
-        // width: fixedTextgridWidth,
-        // height: gridHeight,
       }, [
         t.canvas(`.textgrid #${self.canvasId}`, {
           page: gridNum,
@@ -131,16 +129,6 @@ export class TextgridWidget {
           height: gridHeight,
         })
       ]) ;
-    // const gridNodes =
-    //     t.div(`.textgrid #${self.frameId}`, [
-    //             t.canvas(`.textgrid #${self.canvasId}`, {
-    //                 page: gridNum,
-    //                 width: fixedTextgridWidth,
-    //                 height: gridHeight,
-    //             })
-    //         ]) ;
-
-    // console.log("appending", gridNodes, "to", self.containerId);
 
     $id(self.containerId).append(gridNodes);
 
