@@ -6,7 +6,7 @@ import * as _ from "lodash";
 import * as $ from "jquery";
 
 import 'watr';
-import { Tree } from 'watr.scalazed';
+import { scalazed_Tree as Tree } from 'watr-marks.js';
 
 export function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);

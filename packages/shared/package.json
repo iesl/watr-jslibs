@@ -26,10 +26,8 @@
   },
   "scripts": {
     "build:prod": "tsc",
-    "build:dev": "tsc",
+    "build": "tsc",
     "watch": "tsc --watch",
-    "dist:dev": "npm-run-all build:dev && npm pack",
-    "dist:prod": "npm-run-all build:prod && npm pack",
 
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"

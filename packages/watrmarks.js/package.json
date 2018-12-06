@@ -13,8 +13,9 @@
     "dist": "npm run clean && npm run fetchlib"
   },
   "files": [
-    "lib",
-    "src"
+    "index.d.ts",
+    "lib/watrmarks-fastopt.js",
+    "lib/watrmarks-fastopt.js.map"
   ],
   "keywords": [
     "scala",
