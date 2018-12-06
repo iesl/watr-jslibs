@@ -1,7 +1,7 @@
 
 /* tslint:disable: no-console */
 
-import { sortedUniqCountBy } from "../../src/client/lib/LodashPlus";
+import { sortedUniqCountBy } from "./LodashPlus";
 import * as _ from "lodash";
 
 describe("Sorted Uniq Counting", () => {

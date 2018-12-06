@@ -15,7 +15,10 @@
     "noEmit": false,
     "diagnostics": true,
 
-    "types": [],
+    "types": [
+      "jasmine",
+      "chai"
+    ],
 
     "paths": {
       "@/*": [
@@ -33,7 +36,8 @@
   ],
 
   "exclude": [
-    "node_modules/**/*"
+    "node_modules",
+    "dist"
   ]
 
 }

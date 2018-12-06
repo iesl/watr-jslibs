@@ -122,6 +122,7 @@ export class TextgridWidget {
     const gridNodes =
       t.div(`.textgrid #${self.frameId}`, {
         style: `width: 900px; height:${gridHeight}px`,
+        // height: gridHeight,
       }, [
         t.canvas(`.textgrid #${self.canvasId}`, {
           page: gridNum,

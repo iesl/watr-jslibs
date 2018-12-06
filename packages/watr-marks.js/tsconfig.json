@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "es6",
+    "lib": [
+      "es6",
+      "dom"
+    ],
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": false,
+    "strictFunctionTypes": true,
+    "baseUrl": "../",
+    "typeRoots": "../",
+    "noEmit": true
+  },
+
+  "files": [
+    "index.d.ts",
+    "lib/watrmarks-fastopt.js",
+    "lib/watrmarks-fastopt.js.map"
+  ]
+
+}

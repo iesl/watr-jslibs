@@ -18,10 +18,10 @@
     "rxjs": "^6.3.3",
     "simple-ajax-uploader": "^2.5.5",
     "split.js": "^1.5.10",
-    "tippy.js": "^3.2.0",
+    "tippy.js": "^3.3.0",
     "vue": "^2.5.17",
-    "watr-vue-components": "^0.1.0",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "watr-vue-components": "^0.1.0"
   },
   "devDependencies": {
     "@types/lunr": "^0.1.0",

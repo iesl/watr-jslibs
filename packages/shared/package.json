@@ -7,13 +7,20 @@
     "lodash": "^4.17.11",
     "rbush": "^2.0.1",
     "rbush-knn": "^2.1.0",
+    "watrmarks.js": "^0.1.0",
     "split.js": "^1.5.10"
   },
   "devDependencies": {
-    "@types/watr": "^0.1.0",
     "@types/lunr": "^0.1.0",
+    "@types/chai": "^4.1.7",
+    "@types/jasmine": "^2.8.12",
+    "jasmine": "^3.3.0",
+    "jasmine-core": "^3.3.0",
+    "chai": "^4.1.2",
     "npm-run-all": "^4.1.5",
-    "prettier": "^1.15.2",
+    "prettier": "^1.15.3",
+    "typescript": "^3.1.6",
+    "tslint": "^5.11.0",
     "tslint-config-airbnb": "^5.11.1",
     "tslint-config-prettier": "^1.17.0"
   },
@@ -22,7 +29,11 @@
     "build:dev": "tsc",
     "watch": "tsc --watch",
     "dist:dev": "npm-run-all build:dev && npm pack",
-    "dist:prod": "npm-run-all build:prod && npm pack"
+    "dist:prod": "npm-run-all build:prod && npm pack",
+
+    "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+    "lint": "tslint -p tsconfig.json"
+
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts"
