@@ -1,20 +1,3 @@
-// GridRegion
-// RTreeRect
-// TextGridCompanion
-// TextGridConstructor_Companion
-// TextGridLabelWidget
-// WidgetDisplayGridProps
-// GraphPaper
-// Labels
-// scOptions
-// TextGridConstructor
-// LTBoundsCompanion
-// TextBoxing
-// LabelSchemasCompanion
-// Box
-// LabelSchema
-// LabelSchemas
-// LTBounds
 
 
 export interface JsArray {

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "es6",
+    "module": "commonjs",
     "target": "es6",
     "lib": [
       "es6",
@@ -12,5 +12,8 @@
     "noEmit": false,
     "outDir": "dist",
     "typeRoots": ["./node_modules/@types"]
-  }
+  },
+  "include": [
+    "src/**/*"
+  ]
 }

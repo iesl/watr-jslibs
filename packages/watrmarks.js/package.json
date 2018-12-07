@@ -5,8 +5,8 @@
   "bundleDependencies": false,
   "deprecated": false,
   "description": "NPM package for WatrMarks",
-  "main": "./lib/watrmarks-fastopt.js",
-  "types": "index.d.ts",
+  "main": "./src/index.ts",
+  "types": "./src/watrmarks.d.ts",
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib && mkdir lib",
@@ -15,7 +15,10 @@
     "test": "jest"
   },
   "files": [
-    "index.d.ts"
+    "src/watrmarks.d.ts",
+    "src/watrmarks-fastopt.js",
+    "lib/watrmarks-fastopt.js.map",
+    "src/index.ts"
   ],
   "keywords": [
     "scala",
@@ -31,12 +34,21 @@
     "typescript": "^3.2.1"
   },
   "jest": {
-    "preset": "ts-jest",
     "verbose": true,
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
     "globals": {
       "ts-jest": {
         "tsConfigFile": "tsconfig.json"
       }
-    }
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json",
+      "node"
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(js)$"
   }
 }
