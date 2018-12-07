@@ -5,20 +5,18 @@
   "bundleDependencies": false,
   "deprecated": false,
   "description": "NPM package for WatrMarks",
-  "main": "./src/index.ts",
-  "types": "./src/watrmarks.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/watrmarks.d.ts",
   "scripts": {
     "build": "tsc",
-    "clean": "rimraf lib && mkdir lib",
-    "fetchlib": "cp ../../../watr-marks/js/target/scala-2.12/watrmarks-fastopt.js* lib/",
-    "dist": "npm run clean && npm run fetchlib",
+    "clean": "rimraf dist && mkdir dist && rimraf lib.d && mkdir lib.d",
+    "fetchlib": "cp ../../../watr-marks/js/target/scala-2.12/watrmarks-fastopt.js* lib.d/",
+    "cplib": "cp lib.d/watrmarks-fastopt.js.map dist/ && cp src/watrmarks.d.ts dist/",
+    "dist": "npm run clean && npm run fetchlib && npm run build && npm run cplib",
     "test": "jest"
   },
-  "files": [
-    "src/watrmarks.d.ts",
-    "src/watrmarks-fastopt.js",
-    "lib/watrmarks-fastopt.js.map",
-    "src/index.ts"
+  "include": [
+    "src/**/*"
   ],
   "keywords": [
     "scala",

@@ -1,3 +1,4 @@
+
 import {
   GridRegion,
   RTreeRect,
@@ -16,11 +17,11 @@ import {
   LabelSchema,
   LabelSchemas,
   LTBounds,
-  scalazed_Tree
+  scalazed_Tree as Tree
 } from "./watrmarks-fastopt";
 
 export {
-  scalazed_Tree as Tree,
+  Tree,
   GridRegion,
   RTreeRect,
   TextGridCompanion,
