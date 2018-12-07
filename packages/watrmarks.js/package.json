@@ -8,14 +8,14 @@
   "main": "./lib/watrmarks-fastopt.js",
   "types": "index.d.ts",
   "scripts": {
+    "build": "tsc",
     "clean": "rimraf lib && mkdir lib",
     "fetchlib": "cp ../../../watr-marks/js/target/scala-2.12/watrmarks-fastopt.js* lib/",
-    "dist": "npm run clean && npm run fetchlib"
+    "dist": "npm run clean && npm run fetchlib",
+    "test": "jest"
   },
   "files": [
-    "index.d.ts",
-    "lib/watrmarks-fastopt.js",
-    "lib/watrmarks-fastopt.js.map"
+    "index.d.ts"
   ],
   "keywords": [
     "scala",
@@ -23,6 +23,20 @@
     "WatrMarks"
   ],
   "devDependencies": {
-    "rimraf": "^2.6.2"
+    "@types/jest": "^23.3.10",
+    "babel-preset-env": "^1.7.0",
+    "jest": "^23.6.0",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.1"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "verbose": true,
+    "globals": {
+      "ts-jest": {
+        "tsConfigFile": "tsconfig.json"
+      }
+    }
   }
 }

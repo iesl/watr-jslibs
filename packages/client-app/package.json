@@ -24,6 +24,14 @@
     "watr-vue-components": "^0.1.0"
   },
   "devDependencies": {
+
+    "@types/jest": "^23.3.10",
+    "babel-preset-env": "^1.7.0",
+    "jest": "^23.6.0",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.1",
+
     "@types/lunr": "^0.1.0",
     "ajv": "^6.6.1",
     "d3": "^4.13.0",
@@ -54,7 +62,10 @@
     "watch": "webpack --mode development --watch --log-level=debug",
     "start": "webpack-dev-server --mode development",
     "server": "node src/dev/dev-server.js",
-    "test": "ts-node node_modules/jasmine/bin/jasmine",
+    "test": "jest",
     "develop": "npm install ../vue-components/vueComponentLib-0.1.0.tgz && npm run watch"
+  },
+  "jest": {
+    "preset": "ts-jest"
   }
 }
