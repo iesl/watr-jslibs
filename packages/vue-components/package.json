@@ -4,14 +4,17 @@
   "private": true,
   "scripts": {
     "lint": "vue-cli-service lint",
+    "build": "vue-cli-service build --mode development ./src/index.ts",
     "build:lib:dev": "vue-cli-service build --mode development --target lib --name vueComponentLib ./src/index.ts",
     "build:lib:prod": "vue-cli-service build --target lib --name vueComponentLib ./src/index.ts",
     "develop": "npm-run-all -p -r storybook serve:json",
     "dist:dev": "npm-run-all build:lib:dev && npm pack",
     "dist:prod": "npm-run-all build:lib:prod && npm pack",
-    "serve:json": "json-server --port 3100 src/components/filter-engine/__dev-data/db.json --static ./src/components/filter-engine/__dev-data/tracelogs",
+    "serve:json": "json-server --port 3100 ./dev-data/db.json --static ./dev-data",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "test:unit": "vue-cli-service test:unit 'src/**/**/*.spec.ts'"
+    "test": "npm-run-all test:unit test:spec",
+    "test:unit": "vue-cli-service test:unit --timeout 10000 'src/**/*.test.ts'",
+    "test:spec": "vue-cli-service test:unit 'src/**/*.spec.ts'"
   },
   "dependencies": {
     "jquery": "^3.3.1",
@@ -30,6 +33,14 @@
     "vuex-class": "^0.3.1"
   },
   "devDependencies": {
+
+    "@types/jest": "^23.3.10",
+    "babel-preset-env": "^1.7.0",
+    "jest": "^23.6.0",
+    "ts-jest": "^23.10.5",
+    "chai": "^4.1.2",
+    "@types/chai": "^4.1.7",
+
     "@storybook/addon-actions": "4.0.0-alpha.20",
     "@storybook/addon-links": "4.0.0-alpha.20",
     "@storybook/vue": "^4.0.9",
@@ -68,5 +79,31 @@
       "git add"
     ]
   },
-  "main": "./dist/vueComponentLib.umd.js"
+  "main": "./dist/vueComponentLib.umd.js",
+
+  "jest": {
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json",
+        "diagnostics": {
+          "ignoreCodes": [ 151001, 7016 ]
+        }
+      }
+    },
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
 }

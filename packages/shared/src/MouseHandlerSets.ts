@@ -23,11 +23,11 @@ interface MouseHandlerSet0 {
   click(event: JQueryMouseEventObject): void;
 }
 
-interface MouseHandlerSet extends MouseHandlerSet0 {
+export interface MouseHandlerSet extends MouseHandlerSet0 {
   [K: string]: ((event: JQueryMouseEventObject) => void);
 }
 
-type MouseHandlerInit = (t: any) => MouseHandlerSet;
+export type MouseHandlerInit = (t: any) => MouseHandlerSet;
 
 export function setMouseHandlers<T>(
   bindThis: T,
@@ -57,6 +57,7 @@ export function setMouseHandlers<T>(
     });
   });
 }
+
 
 // export function setMouseHandlers(bindThis, targetDivId, handlers) {
 //   $id(targetDivId).off();

@@ -9,14 +9,13 @@ import 'chai/register-should';
 
 import { candidateGroupF, candidateGroup } from './dev-helpers';
 
-
 function createFilter(cgs: CandidateGroup[]) {
   return new SelectionFilteringEngine(cgs);
 }
 
 describe('Selection Narrowing/Filtering', function () {
-  const self = this;
-  console.log('this', self.ctx);
+  // const self = this;
+  // console.log('this', self.ctx);
 
   const cs1 = candidateGroup('foo', 'alex');
   const cs2 = candidateGroup('bar', 'blob');

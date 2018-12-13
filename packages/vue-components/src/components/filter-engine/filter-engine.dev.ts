@@ -43,7 +43,7 @@ export default class FilterEngineDev extends Vue {
   get initialCandidates(): CandidateGroup[] {
     const groups: CandidateGroup[] = [];
 
-    $.getJSON('http://localhost:3100/tracelog-2.json', (tracelogs: LogEntry[]) => {
+    $.getJSON('http://localhost:3100/tracelogs/tracelog-2.json', (tracelogs: LogEntry[]) => {
       const g: CandidateGroup = {
         candidates: tracelogs,
         groupKeyFunc: (l: LogEntry) => ({ multikey: ['trace', `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`], displayTitle: 'todo' })

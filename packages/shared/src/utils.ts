@@ -69,5 +69,5 @@ export function getDescendantTree(rootSelector: string): any {
 
 export function getDescendantTreeString(rootSelector: string): string {
   const desc = getDescendantTree(rootSelector);
-  return Tree.drawTree(desc);
+  return Tree.drawTree(desc).toString();
 }
