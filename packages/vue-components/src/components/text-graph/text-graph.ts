@@ -36,7 +36,7 @@ interface GridCellData {
   row: number;
   col: number;
   page: number;
-  gridRow: GridTypes.Row;
+  // gridRow: GridTypes.Row;
 }
 
 interface GlyphCellData {
@@ -59,7 +59,24 @@ interface TextDataPoint extends rbush.BBox {
 
 }
 
-// canvasContext: CanvasRenderingContext2D,
+export function gridDataToGlyphData(
+  textDataPoints: TextDataPoint[]
+): TextDataPoint[] {
+  return _.map(textDataPoints, (t: TextDataPoint) => {
+    const bbox = t.glyphData ?
+      t.glyphData.glyphBounds
+      : new coords.BBox(0, 0, 0, 0, coords.CoordSys.Unknown);
+
+    const updated: TextDataPoint = {
+      ...t,
+      minX: bbox.minX,
+      minY: bbox.minY,
+      maxX: bbox.maxX,
+      maxY: bbox.maxY
+    };
+    return updated;
+  });
+}
 export function initGridData(
   textgrid: GridTypes.Textgrid,
   gridNum: number,
@@ -76,8 +93,8 @@ export function initGridData(
     const x = gridTextOrigin.x;
     const text = gridRow.text;
     let currLeft = x;
+
     const gridDataPts = _.map(text.split(''), (ch, chi) => {
-      // const chWidth = canvasContext.measureText(ch).width;
       const chWidth = measureTextWidth(ch);
       const charLocus = gridRow.loci[chi];
 
@@ -86,14 +103,10 @@ export function initGridData(
       );
 
       const textCellData = {
-        gridRow,
         row: rowNum,
         col: chi,
-        char: ch,
-        page: gridNum,
-        // cellBounds:
-        locus: charLocus,
-      };// charDef.gridDataPt = gridDataPt; ow = gridRow; // gridDataPt.row = rowNum; // gridDataPt.col = chi; // gridDataPt.char = ch; // gridDataPt.page = gridNum; // gridDataPt.locus = charDef; // charDef.gridDataPt = gridDataPt;
+        page: gridNum
+      };
 
       const textDataPoint: TextDataPoint = {
         id: idGen(),
@@ -108,30 +121,17 @@ export function initGridData(
       const isGlyphData = GridTypes.locusIsGlyph(charLocus); // .g !== undefined;
 
       if (isGlyphData) {
-        // GridTypes.lo
         const charBBox = charLocus.g![0][2];
         textDataPoint.glyphData = {
           glyphBounds: mk.fromArray(charBBox),
           page: charLocus.g![0][1]
         };
-        // glyphDataPt.id = gridDataPt.id;
-        // glyphDataPt.gridDataPt = gridDataPt;
-        // glyphDataPt.page = gridNum;
-        // glyphDataPt.locus = charDef;
-        // gridDataPt.glyphDataPt = glyphDataPt;
       }
 
       currLeft += chWidth;
 
       return textDataPoint;
     });
-
-    // try {
-    //   canvasContext.fillText(text, x, y);
-    // }
-    // catch (error) {
-    //   console.log('error', error);
-    // }
 
     return gridDataPts;
   });
