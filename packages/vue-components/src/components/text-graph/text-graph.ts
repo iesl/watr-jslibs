@@ -5,20 +5,19 @@ import * as _ from 'lodash';
 import {Vue, Component, Prop } from "vue-property-decorator";
 
 import * as rtree from "rbush";
+
 import {
   coords,
   utils,
   MouseHandlerSets as mhs,
   MouseHandlerSet,
-  // mkPoint,
   mk,
   GridTypes,
+  Point,
+  BBox,
+  tstags
 } from "sharedLib";
 
-type Point = coords.Point;
-type BBox = coords.BBox;
-
-// const fixedTextgridWidth = 900;
 
 /**
  * Given TextGrid data, produce a list of pairs of bounding box data, one
@@ -27,16 +26,13 @@ type BBox = coords.BBox;
  */
 
 type Width = number;
-// type Height = number;
 type MeasureTextWidth = (ch: string) => Width;
 
 
 interface GridCellData {
-  // cellBounds: BBox;
   row: number;
   col: number;
   page: number;
-  // gridRow: GridTypes.Row;
 }
 
 interface GlyphCellData {
@@ -44,7 +40,6 @@ interface GlyphCellData {
   page: number;
 }
 
-// type GridCellData = TextCellData | GlyphCellData | TextCellData & GlyphCellData
 
 interface TextDataPoint extends rbush.BBox {
   id: number;
@@ -56,8 +51,14 @@ interface TextDataPoint extends rbush.BBox {
   minY: number;
   maxX: number;
   maxY: number;
-
 }
+export function getOrDie<T>(v: T | null, msg: string = "null|undef"): T {
+  if (v === null || v === undefined) {
+    throw new Error(`Error: ${msg}`);
+  }
+  return v;
+}
+
 
 export function gridDataToGlyphData(
   textDataPoints: TextDataPoint[]
@@ -89,7 +90,7 @@ export function initGridData(
 
   const gridRowsDataPts = _.map(textgrid.rows, (gridRow, rowNum) => {
 
-    const y = gridTextOrigin.y + (rowNum * gridTextHeight);
+    const y = gridTextOrigin.y + ((rowNum+1) * gridTextHeight);
     const x = gridTextOrigin.x;
     const text = gridRow.text;
     let currLeft = x;
@@ -144,7 +145,8 @@ export function initGridData(
 @Component
 export default class TextGraph extends Vue {
   @Prop({default: 0}) gridNum!: number;
-  @Prop({default: 0}) initialGridWidth!: number;
+  @Prop({default: 900}) initialGridWidth!: number;
+  @Prop({default: 20}) lineHeight!: number;
 
   public textgridRTree: rbush.RBush<TextDataPoint> = rtree<TextDataPoint>();
 
@@ -153,9 +155,21 @@ export default class TextGraph extends Vue {
   get canvasId(): string { return `textgrid-canvas-${this.gridNum}`; }
   get svgId(): string { return `textgrid-svg-${this.gridNum}`; }
 
-  get gridHeight(): number {
-    return 200;
+  get canvasElement(): HTMLCanvasElement {
+    return tstags.$id(this.canvasId)[0] as HTMLCanvasElement;
   }
+
+  get canvasContext2D(): CanvasRenderingContext2D {
+    return getOrDie<CanvasRenderingContext2D>(this.canvasElement.getContext("2d"), "error getting canvas.getContext(2d)");
+  }
+
+  get gridHeight(): number {
+    return 900;
+  }
+  get gridWidth(): number {
+    return this.initialGridWidth;
+  }
+
 
   get frameStyle(): string {
     return `width: ${this.initialGridWidth}px; height: ${this.gridHeight}px; background: red;`;
@@ -172,20 +186,22 @@ export default class TextGraph extends Vue {
   }
   initialCandidates(): void {
 
-    console.log('initialCandidates?');
     $.getJSON('http://localhost:3100/textgrids/textgrid-00.json', (textgrid: GridTypes.Grid) => {
       const pages = textgrid.pages;
-      const textgrids = _.map(pages, p => p.textgrid);
-      const textgrid0 = textgrids[0];
+      this.initCanvasContext();
 
-      console.log('textGrid', textgrid0);
+      const context2d = this.canvasContext2D;
 
-      // const textgridWidgets = new TextgridWidget.TextgridWidgets();
-      // const root = textgridWidgets.getRootNode();
-      // console.log('root', root);
-      // $(paneLeft.clientAreaSelector()).append(
-      //   root
-      // );
+      const textWidth = (s: string) => context2d.measureText(s).width;
+      const textHeight = this.lineHeight;
+      const origin = new Point(20, 20, coords.CoordSys.GraphUnits);
+      const textgrids = _.map(pages, (p, pageNum) => {
+        const textgrid = initGridData(p.textgrid, pageNum, textWidth, origin, textHeight);
+
+        return textgrid;
+      });
+
+      this.drawGlyphs(textgrids[0]);
 
       // textgridWidgets.append(textgrid0);
 
@@ -193,6 +209,24 @@ export default class TextGraph extends Vue {
     }, (err) => {
       console.log('err', err);
     });
+
+  }
+
+  initCanvasContext(): void {
+    const context2d = this.canvasContext2D;
+    context2d.font = `normal normal normal ${this.lineHeight}px/normal Times New Roman`;
+  }
+
+  drawGlyphs(textDataPoints: TextDataPoint[]): void {
+    const context2d = this.canvasContext2D;
+
+    _.each(textDataPoints, textDataPoint => {
+      const c = textDataPoint.char;
+      const x = textDataPoint.minX;
+      const y = textDataPoint.maxY;
+      context2d.fillText(c, x, y);
+    });
+
 
   }
 

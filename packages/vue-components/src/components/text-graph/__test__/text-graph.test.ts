@@ -3,7 +3,7 @@ import {
   initGridData,
   gridDataToGlyphData
 } from '../text-graph';
-// import * as fs from 'file-system';
+
 const fs = require('file-system');
 
 import {
@@ -12,7 +12,6 @@ import {
   Point,
 } from "sharedLib";
 
-// import textGrid00 from '../../../../dev-data/textgrids/textgrid-00.json';
 const textGrid00File = './dev-data/textgrids/textgrid-00.json';
 
 const textGrid00: string = fs.readFileSync(textGrid00File, { encoding: 'utf8' });
@@ -20,11 +19,8 @@ const textGrid00: string = fs.readFileSync(textGrid00File, { encoding: 'utf8' })
 function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);
 }
-describe("initGridData function", () => {
-
 
   it("should produce both PDF and gridview data", () => {
-    // console.log("resp", textGrid00);
     const textWidth = (s: String) => 10;
     const textHeight = 20;
     const origin = new Point(10, 10, coords.CoordSys.GraphUnits);
