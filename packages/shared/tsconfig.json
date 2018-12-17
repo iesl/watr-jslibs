@@ -16,7 +16,7 @@
     "diagnostics": true,
 
     "types": [
-      "jasmine",
+      "jest",
       "chai"
     ],
 

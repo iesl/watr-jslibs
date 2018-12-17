@@ -12,6 +12,7 @@ export * from './MouseHandlerSets';
 import * as SplitWin from "./SplitWin";
 import * as tstags from "./tstags";
 import * as utils from "./utils";
+import * as d3x from "./d3-extras";
 
 // import * as DataTypes from "./DataTypes";
 // export * from './DataTypes';
@@ -19,4 +20,4 @@ import * as utils from "./utils";
 import * as GridTypes from "./TextGridTypes";
 // export * from './TextGridTypes';
 
-export { coords, colors, LodashPlus, MouseHandlerSets, SplitWin, tstags, utils, GridTypes };
+export { coords, colors, LodashPlus, MouseHandlerSets, SplitWin, tstags, utils, GridTypes, d3x };

@@ -30,9 +30,12 @@
     "rbush": "^2.0.1",
     "rbush-knn": "^2.1.0",
     "watrmarks.js": "^0.1.0",
-    "vuex-class": "^0.3.1"
+    "vuex-class": "^0.3.1",
+    "d3": "^4.13.0"
   },
   "devDependencies": {
+
+    "@types/d3": "^4.13.1",
 
     "@types/jest": "^23.3.10",
     "babel-preset-env": "^1.7.0",

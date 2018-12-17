@@ -28,7 +28,6 @@ interface ILTBoundsIntRep {
   height: number;
 }
 
-// export interface ILTBounds extends rbush.BBox {
 export interface ILTBounds {
   left: number;
   top: number;
@@ -210,6 +209,12 @@ export class BBox implements ILTBounds {
 
   get topLeft() {
     return mkPoint.fromXy(this.left, this.top, this.sys);
+  }
+
+  get centerPoint() {
+    const x = this.minX + this.width / 2;
+    const y = this.minY + this.height / 2;
+    return mkPoint.fromXy(x, y, this.sys);
   }
 
   // set system(s)  { this._system = s; }

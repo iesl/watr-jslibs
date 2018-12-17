@@ -26,12 +26,8 @@ export default class FilterWidget extends Vue {
   @filterState.State filteredRecords!: KeyedRecordGroup[];
   @filterState.State initialCandidatesReady!: Boolean;
 
-  @filterState.Mutation("setFilteredRecords") setFilteredRecords!: (
-    recs: KeyedRecordGroup[],
-  ) => void;
-  @filterState.Mutation("setCurrentSelections") setCurrentSelections!: (
-    recs: KeyedRecordGroup[],
-  ) => void;
+  @filterState.Mutation("setFilteredRecords") setFilteredRecords!: (recs: KeyedRecordGroup[]) => void;
+  @filterState.Mutation("setCurrentSelections") setCurrentSelections!: (recs: KeyedRecordGroup[]) => void;
 
   private engine = new SelectionFilteringEngine([]);
 

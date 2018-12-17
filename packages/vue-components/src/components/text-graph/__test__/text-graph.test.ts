@@ -20,8 +20,10 @@ function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);
 }
 
+describe("initGridData function", () => {
+
   it("should produce both PDF and gridview data", () => {
-    const textWidth = (s: String) => 10;
+    const textWidth = (_: String) => 10;
     const textHeight = 20;
     const origin = new Point(10, 10, coords.CoordSys.GraphUnits);
     const grids: GridTypes.Grid = GridTypes.Convert.toGrid(textGrid00);

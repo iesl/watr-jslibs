@@ -166,8 +166,6 @@ export class TextgridWidget {
       const gridDatas: any = rtrees.initGridData([textgrid], [context2d], gridTextOrigin);
       const gridData: IGridDataPt[][] = gridDatas as IGridDataPt[][];
 
-      // console.log("gridData", gridData);
-
       self.textgridRTree.load(gridData[0]);
       self.hoveringText.subscribe((ev: IHoverTextEvent) => {
         self.showGlyphHoverReticles(ev);
