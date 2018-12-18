@@ -1,9 +1,9 @@
 import {Vue, Component} from "vue-property-decorator";
 
-import TextGraph from "./text-graph.vue";
+import TextGraphList from "./text-graphs.vue";
 
 @Component({
-  components: {TextGraph},
+  components: {TextGraphList},
 })
 export default class TextGraphDev extends Vue {
   // @Prop(Array) initialCandidateGroups!: CandidateGroup[];
