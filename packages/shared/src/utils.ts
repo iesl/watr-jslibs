@@ -11,6 +11,12 @@ export function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);
 }
 
+export function getOrDie<T>(v: T | null, msg: string = "null|undef"): T {
+  if (v === null || v === undefined) {
+    throw new Error(`Error: ${msg}`);
+  }
+  return v;
+}
 /**
  */
 export function corpusEntry(): string {

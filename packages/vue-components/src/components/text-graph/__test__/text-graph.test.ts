@@ -2,7 +2,7 @@
 import {
   initGridData,
   gridDataToGlyphData
-} from '../text-graph';
+} from '@/lib/TextGlyphDataTypes'
 
 const fs = require('file-system');
 
@@ -30,8 +30,9 @@ describe("initGridData function", () => {
     const pageNum = 0;
     const grid = grids.pages[0].textgrid;
     const gridData = initGridData(grid, pageNum, textWidth, origin, textHeight);
-    const glyphData = gridDataToGlyphData(gridData);
-    const g03 = gridData.slice(0, 2);
+    const textDataPoints = gridData.textDataPoints
+    const glyphData = gridDataToGlyphData(textDataPoints);
+    const g03 = textDataPoints.slice(0, 2);
     const gl03 = glyphData.slice(0, 2);
     console.log("gridData", pp(g03));
     console.log("glyphData", pp(gl03));
