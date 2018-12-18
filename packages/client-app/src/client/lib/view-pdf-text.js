@@ -7,35 +7,10 @@
 
 // /** Page sync flashing indicator dot */
 // function scrollSyncIndicator(parentSelection, indicatorPoint) {
-//     d3.select(parentSelection)
-//         .append('circle')
-//         .attr("cx", indicatorPoint.x)
-//         .attr("cy", indicatorPoint.y)
-//         .attr("r", 20)
-//         .call(d3x.initStroke, 'black', 1, 0)
-//         .call(d3x.initFill, 'red', 1)
-//         .transition()
-//         .duration(300)
-//         .attr("r", 2)
-//         .attr("fill-opacity", 0)
-//         .attr("stroke-opacity", 1)
-//         .delay(10)
-//         .remove()
-//     ;
 // }
 
 
 // export function initHoverReticles(d3$textgridSvg) {
-//     let reticleGroup = d3$textgridSvg
-//         .append('g')
-//         .classed('reticles', true);
-//     reticleGroup
-//         .append('rect')
-//         .classed('query-reticle', true)
-//         .call(d3x.initStroke, 'blue', 1, 0.6)
-//         .call(d3x.initFill, 'blue', 0.2)
-//     ;
-//     return reticleGroup;
 // }
 
 // export function showGlyphHoverReticles(d3$textgridSvg, queryBox, queryHits) {
@@ -59,26 +34,6 @@
 // }
 
 // export function showTexgridHoverReticles(d3$textgridSvg, gridDataPts) {
-
-//     let d3$hitReticles = d3$textgridSvg.select('g.reticles')
-//         .selectAll('.hit-reticle')
-//         .data(gridDataPts, (d) => d.id)
-//     ;
-
-//     d3$hitReticles
-//         .enter()
-//         .append('rect')
-//         .classed('hit-reticle', true)
-//         .attr('id', d => d.id)
-//         .call(d3x.initRect, d => d)
-//         .call(d3x.initStroke, 'green', 1, 0.2)
-//         .call(d3x.initFill, 'yellow', 0.7)
-//     ;
-
-//     d3$hitReticles
-//         .exit()
-//         .remove() ;
-// }
 
 
 // /**
@@ -131,7 +86,6 @@
 // }
 
 // // function showSelectionHighlight(d3$textgridSvg, selections) {
-
 // //     let sel = d3$textgridSvg
 // //         .selectAll("rect.glyph-selection")
 // //         .data(selections, d=> d.id)
@@ -144,7 +98,6 @@
 // //         .call(d3x.initStroke, 'black', 1, 0.1)
 // //         .call(d3x.initFill, 'blue', 0.1)
 // //     ;
-
 // //     sel.exit().remove() ;
 // // }
 
@@ -196,7 +149,6 @@
 //             showGlyphHoverReticles(d3$textgridSvg, queryBox, neighborHits);
 //         })
 //     ;
-
 // }
 
 
