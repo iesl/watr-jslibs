@@ -22,6 +22,15 @@ import {
 } from '../../lib/TextGlyphDataTypes'
 
 import {
+  resizeCanvas
+} from '../../lib/CanvasUtils'
+
+
+// import {
+//   GraphPaper
+// } from '../../lib/GraphPaper'
+
+import {
   coords,
   MouseHandlerSets as mhs,
   MouseHandlers,
@@ -152,6 +161,7 @@ export default class TextGraph extends Vue {
   @Prop({default: 0}) gridNum!: number;
   @Prop({default: 400}) initialGridWidth!: number;
   @Prop({default: 20}) lineHeight!: number;
+  @Prop({default: 20}) pageMargin!: number;
 
 
 
@@ -249,21 +259,25 @@ export default class TextGraph extends Vue {
     return getOrDie<CanvasRenderingContext2D>(this.canvasElement.getContext("2d"), "error getting canvas.getContext(2d)");
   }
 
+  protected zgridHeight: number = 10;
   get gridHeight(): number {
-    return 900;
+    return this.zgridHeight;
   }
 
-  protected _gridWidth: number = this.initialGridWidth;
+  set gridHeight(w: number) {
+    this.zgridHeight = w;
+  }
 
+  protected zgridWidth: number = this.initialGridWidth;
   get gridWidth(): number {
-    return this._gridWidth;
+    return this.zgridWidth;
   }
   set gridWidth(w: number) {
-    this._gridWidth = w;
+    this.zgridWidth = w;
   }
 
 
-  get frameStyle(): string {
+  get dimensionStyle(): string {
     return `width: ${this.gridWidth}px; height: ${this.gridHeight}px;`;
   }
 
@@ -278,6 +292,18 @@ export default class TextGraph extends Vue {
 
   }
 
+  resizeElements(w: number, h: number): void {
+    resizeCanvas(this.canvasElement, w, h);
+    const frameElem = getOrDie(document.getElementById(this.frameId));
+    const svgElem = <SVGElement> getOrDie(document.getElementById(this.svgId)) ;
+
+    svgElem.setAttribute('width', w.toString());
+    svgElem.setAttribute('height', h.toString());
+
+    this.gridWidth = w;
+    this.gridHeight = h;
+  }
+
   initialCandidates(): void {
 
     $.getJSON('http://localhost:3100/textgrids/textgrid-00.json', (textgrid: GridTypes.Grid) => {
@@ -288,11 +314,14 @@ export default class TextGraph extends Vue {
 
       const textWidth = (s: string) => context2d.measureText(s).width;
       const textHeight = this.lineHeight;
-      const origin = new Point(20, 20, coords.CoordSys.GraphUnits);
+      const origin = new Point(this.pageMargin, this.pageMargin, coords.CoordSys.GraphUnits);
       const textgrids = _.map(pages, (p, pageNum) => {
         return initGridData(p.textgrid, pageNum, textWidth, origin, textHeight);
       });
-      this.gridWidth = textgrids[0].maxLineWidth;
+      const gridWidth = textgrids[0].maxLineWidth + this.pageMargin;
+      const gridHeight = textgrids[0].totalLineHeight + this.pageMargin;
+
+      this.resizeElements(gridWidth, gridHeight);
 
       this.drawGlyphs(textgrids[0].textDataPoints);
 
