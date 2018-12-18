@@ -1,15 +1,25 @@
 //
 import * as $ from 'jquery';
 import * as _ from 'lodash';
-// import * as d3 from 'd3';
 
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 
+import {
+  Module,
+  GetterTree,
+  MutationTree,
+  ActionTree,
+  Plugin
+} from 'vuex';
+
+import {namespace} from "vuex-class";
+
 import * as rtree from "rbush";
+
 import {
   TextDataPoint,
   initGridData
-} from '@/lib/TextGlyphDataTypes'
+} from '../../lib/TextGlyphDataTypes'
 
 import {
   coords,
@@ -81,15 +91,6 @@ function defaultMouseHandlers(widget: TextGraph): MouseHandlers {
 
 }
 
-import {
-  Module,
-  GetterTree,
-  MutationTree,
-  ActionTree,
-  Plugin
-} from 'vuex';
-
-import {namespace} from "vuex-class";
 
 const textGraphState = namespace("textGraphState");
 
@@ -104,8 +105,7 @@ export class TextGraphStateModule implements Module<TextGraphState, any> {
 
   state: TextGraphState =  new TextGraphState();
 
-  actions = <ActionTree<TextGraphState, any>> {
-  }
+  actions = <ActionTree<TextGraphState, any>> {}
 
   mutations = <MutationTree<TextGraphState>> {
     setHoveredText(state: TextGraphState, hoveredText: TextDataPoint[]) {
@@ -117,8 +117,7 @@ export class TextGraphStateModule implements Module<TextGraphState, any> {
     }
   }
 
-  getters = <GetterTree<TextGraphState, any>> {
-  }
+  getters = <GetterTree<TextGraphState, any>> {}
 
   plugins: Plugin<TextGraphState>[] = []
 
@@ -230,10 +229,8 @@ export default class TextGraph extends Vue {
       ;
 
       d3$hitReticles.exit()
-        .remove() ;
-
+        .remove();
     }
-
   }
 
   get frameId(): string { return `textgrid-frame-${this.gridNum}`; }
