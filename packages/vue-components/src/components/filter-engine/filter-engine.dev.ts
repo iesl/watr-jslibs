@@ -13,8 +13,8 @@ import {
 
 import FilterWidget from './filter-engine.vue';
 
-import { candidateGroupF } from './dev-helpers';
-import { CandidateGroup, KeyedRecordGroup } from './FilterEngine';
+import { candidateGroupF } from '@/lib/dev-helpers';
+import { CandidateGroup, KeyedRecordGroup } from '@/lib/FilterEngine';
 
 const filterState = namespace('filteringState')
 

@@ -12,7 +12,7 @@ import {
   SelectionFilteringEngine,
   CandidateGroup,
   KeyedRecordGroup,
-} from "./FilterEngine";
+} from "../../lib/FilterEngine";
 
 const filterState = namespace("filteringState");
 

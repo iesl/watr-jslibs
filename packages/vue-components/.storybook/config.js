@@ -6,7 +6,6 @@ import Vuex from 'vuex';
 
 Vue.use(Vuex);
 
-// const req = require.context('../src/stories', true, /.stories.ts$/);
 const req = require.context('../src', true, /.stories.ts$/);
 
 function loadStories() {

@@ -1,5 +1,7 @@
 
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const configPathsPlugin = new TsconfigPathsPlugin({ configFile: './tsconfig.json' });
 
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const extractLess = new ExtractTextPlugin({
@@ -41,6 +43,18 @@ module.exports = (storybookBaseConfig, configType, config) => {
 
   config.plugins.push(new ForkTsCheckerWebpackPlugin());
   config.plugins.push(extractLess);
+  config.resolve.plugins = config.resolve.plugins || [];
+  config.resolve.plugins.push(configPathsPlugin);
 
   return config;
 };
+
+
+
+
+
+
+
+
+
+

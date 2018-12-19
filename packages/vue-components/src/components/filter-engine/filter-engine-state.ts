@@ -1,7 +1,7 @@
 
 import {
   KeyedRecordGroup,
-} from './FilterEngine';
+} from '../../lib/FilterEngine';
 
 import {
   Module,

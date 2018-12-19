@@ -10,7 +10,7 @@ export {
 
 export {
   SelectionFilteringEngine,
-} from './components/filter-engine/FilterEngine';
+} from './lib/FilterEngine';
 
 
 export * from './components/filter-engine/filter-engine-state';
