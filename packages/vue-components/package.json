@@ -3,39 +3,36 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "lint": "vue-cli-service lint",
     "build": "vue-cli-service build --mode development ./src/index.ts",
+    "lint": "vue-cli-service lint",
     "build:lib:dev": "vue-cli-service build --mode development --target lib --name vueComponentLib ./src/index.ts",
     "build:lib:prod": "vue-cli-service build --target lib --name vueComponentLib ./src/index.ts",
-    "develop": "npm-run-all -p -r storybook serve:json",
-    "dist:dev": "npm-run-all build:lib:dev && npm pack",
-    "dist:prod": "npm-run-all build:lib:prod && npm pack",
     "serve:json": "json-server --port 3100 ./dev-data/db.json --static ./dev-data",
     "storybook": "start-storybook -p 9001 -c .storybook",
-    "test": "npm-run-all test:unit test:spec",
-    "test:unit": "vue-cli-service test:unit --timeout 10000 'src/**/*.test.ts'"
+    "develop": "npm-run-all -p -r storybook serve:json",
+    "test": "vue-cli-service test:unit --timeout 10000 'src/**/*.test.ts'"
   },
   "dependencies": {
+    "d3": "^4.13.0",
     "jquery": "^3.3.1",
     "lodash": "^4.17.11",
     "lunr": "^2.3.5",
+    "rbush": "^2.0.1",
+    "rbush-knn": "^2.1.0",
     "register-service-worker": "^1.0.0",
     "sharedLib": "^0.1.0",
-    "vue": "^2.5.17",
+    "vue": "^2.5.21",
     "vue-class-component": "^6.3.2",
     "vue-property-decorator": "^7.2.0",
     "vue-router": "^3.0.2",
     "vuex": "^3.0.1",
-    "rbush": "^2.0.1",
-    "rbush-knn": "^2.1.0",
-    "watrmarks.js": "^0.1.0",
     "vuex-class": "^0.3.1",
-    "d3": "^4.13.0"
+    "watrmarks.js": "^0.1.0"
   },
   "devDependencies": {
     "@storybook/addon-actions": "4.0.0-alpha.20",
     "@storybook/addon-links": "4.0.0-alpha.20",
-    "@storybook/vue": "^4.0.9",
+    "@storybook/vue": "^4.1.2",
     "@types/chai": "^4.1.7",
     "@types/d3": "^4.13.1",
     "@types/jest": "^23.3.10",
@@ -51,7 +48,7 @@
     "@vue/cli-service": "^3.2.0",
     "@vue/eslint-config-airbnb": "^4.0.0",
     "@vue/eslint-config-typescript": "^3.2.0",
-    "@vue/test-utils": "^1.0.0-beta.26",
+    "@vue/test-utils": "^1.0.0-beta.27",
     "babel-preset-env": "^1.7.0",
     "babel-preset-vue": "^2.0.2",
     "chai": "^4.1.2",
@@ -62,23 +59,10 @@
     "npm-run-all": "^4.1.5",
     "ts-jest": "^23.10.5",
     "tsconfig-paths-webpack-plugin": "^3.2.0",
-    "typescript": "^3.2.1",
+    "typescript": "^3.2.2",
     "vue-cli-plugin-storybook": "^0.4.8",
-    "vue-template-compiler": "^2.5.17",
-    "webpack-merge": "^4.1.4"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "lint-staged": {
-    "*.js": [
-      "vue-cli-service lint",
-      "git add"
-    ],
-    "*.vue": [
-      "vue-cli-service lint",
-      "git add"
-    ]
+    "vue-template-compiler": "^2.5.21",
+    "webpack-merge": "^4.1.5"
   },
   "main": "./dist/vueComponentLib.umd.js",
   "jest": {
