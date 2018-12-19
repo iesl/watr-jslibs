@@ -200,6 +200,7 @@ export default class TextGraph extends Vue {
     const queryBoxSel = this.selectSvg()
       .select("g.reticles")
       .selectAll("rect.query-reticle")
+    // @ts-ignore
       .data(newVal, (d: BBox) => [d.x, d.y] )
     ;
 
@@ -294,11 +295,9 @@ export default class TextGraph extends Vue {
 
   resizeElements(w: number, h: number): void {
     resizeCanvas(this.canvasElement, w, h);
-    const frameElem = getOrDie(document.getElementById(this.frameId));
-    const svgElem = <SVGElement> getOrDie(document.getElementById(this.svgId)) ;
-
-    svgElem.setAttribute('width', w.toString());
-    svgElem.setAttribute('height', h.toString());
+    // const svgElem = getOrDie(document.getElementById(this.svgId)) ;
+    // svgElem.setAttribute('width', w.toString());
+    // svgElem.setAttribute('height', h.toString());
 
     this.gridWidth = w;
     this.gridHeight = h;
@@ -316,10 +315,7 @@ export default class TextGraph extends Vue {
       const textWidth = (s: string) => context2d.measureText(s).width;
       const textHeight = this.lineHeight;
       const origin = new Point(this.pageMargin, this.pageMargin, coords.CoordSys.GraphUnits);
-      // const textgrids = _.map(pages, (p, pageNum) => {
-      //   return initGridData(p.textgrid, pageNum, textWidth, origin, textHeight);
-      // });
-      const textgrid = initGridData(this.textgrid, this.pageNum, textWidth, origin, textHeight);
+      const textgrid = initGridData(this.textgrid, this.gridNum, textWidth, origin, textHeight);
       const gridWidth = textgrid.maxLineWidth + this.pageMargin;
       const gridHeight = textgrid.totalLineHeight + this.pageMargin;
 
