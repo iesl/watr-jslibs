@@ -26,10 +26,6 @@ import {
 } from '../../lib/CanvasUtils'
 
 
-// import {
-//   GraphPaper
-// } from '../../lib/GraphPaper'
-
 import {
   coords,
   MouseHandlerSets as mhs,
