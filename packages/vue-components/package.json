@@ -13,8 +13,7 @@
     "serve:json": "json-server --port 3100 ./dev-data/db.json --static ./dev-data",
     "storybook": "start-storybook -p 9001 -c .storybook",
     "test": "npm-run-all test:unit test:spec",
-    "test:unit": "vue-cli-service test:unit --timeout 10000 'src/**/*.test.ts'",
-    "test:spec": "vue-cli-service test:unit 'src/**/*.spec.ts'"
+    "test:unit": "vue-cli-service test:unit --timeout 10000 'src/**/*.test.ts'"
   },
   "dependencies": {
     "jquery": "^3.3.1",
@@ -57,6 +56,7 @@
     "babel-preset-vue": "^2.0.2",
     "chai": "^4.1.2",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
+    "file-system": "^2.2.2",
     "jest": "^23.6.0",
     "json-server": "^0.14.0",
     "npm-run-all": "^4.1.5",
@@ -85,6 +85,9 @@
     "roots": [
       "<rootDir>/src"
     ],
+    "moduleNameMapper": {
+      "@": "<rootDir>/src"
+    },
     "globals": {
       "ts-jest": {
         "tsConfig": "tsconfig.json",
