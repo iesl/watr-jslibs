@@ -18,7 +18,8 @@ import * as rtree from "rbush";
 
 import {
   TextDataPoint,
-  initGridData
+  initGridData,
+  GridData
 } from '../../lib/TextGlyphDataTypes'
 
 import {
@@ -301,30 +302,22 @@ export default class TextGraph extends Vue {
 
   initialCandidates(): void {
 
-    // $.getJSON('http://localhost:3100/textgrids/textgrid-00.json', (textgrid: GridTypes.Grid) => {
-      // this.textgrid
-      // const pages = textgrid.pages;
-      this.initCanvasContext();
+    this.initCanvasContext();
 
-      const context2d = this.canvasContext2D;
+    const context2d = this.canvasContext2D;
 
-      const textWidth = (s: string) => context2d.measureText(s).width;
-      const textHeight = this.lineHeight;
-      const origin = new Point(this.pageMargin, this.pageMargin, coords.CoordSys.GraphUnits);
-      const textgrid = initGridData(this.textgrid, this.gridNum, textWidth, origin, textHeight);
-      const gridWidth = textgrid.maxLineWidth + this.pageMargin;
-      const gridHeight = textgrid.totalLineHeight + this.pageMargin;
+    const textWidth = (s: string) => context2d.measureText(s).width;
+    const textHeight = this.lineHeight;
+    const origin = new Point(this.pageMargin, this.pageMargin, coords.CoordSys.GraphUnits);
+    const textgrid: GridData = initGridData(this.textgrid, this.gridNum, textWidth, origin, textHeight);
+    const gridWidth = textgrid.maxLineWidth + this.pageMargin;
+    const gridHeight = textgrid.totalLineHeight + this.pageMargin;
 
-      this.resizeElements(gridWidth, gridHeight);
+    this.resizeElements(gridWidth, gridHeight);
 
-      this.drawGlyphs(textgrid.textDataPoints);
+    this.drawGlyphs(textgrid.textDataPoints);
 
-      this.textgridRTree.load(textgrid.textDataPoints);
-
-
-    // }, (err) => {
-    //   console.log('err', err);
-    // });
+    this.textgridRTree.load(textgrid.textDataPoints);
 
   }
 

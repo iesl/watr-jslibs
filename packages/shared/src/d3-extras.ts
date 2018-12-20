@@ -2,16 +2,24 @@
  *
  */
 
-import * as d3 from 'd3';
+// import * as d3 from 'd3';
+import {
+  Selection,
+  BaseType,
+  select
+} from "d3-selection";
+
+import 'd3-transition';
+
 import { BBox } from './coord-sys';
 
 // Sel Elem type, Sel Data Type, Parent Elem type, parent data type
-// type D3Selection = d3.Selection<d3.BaseType, any, HTMLElement, any>;
-// type D3Selection = d3.Selection;
+// type D3Selection = Selection<BaseType, any, HTMLElement, any>;
+// type D3Selection = Selection;
 // export interface Selection<GElement extends BaseType, Datum, PElement extends BaseType, PDatum> {
 
-export function initRect <GElement extends d3.BaseType, Datum, PElement extends d3.BaseType, PDatum> (
-  sel: d3.Selection<GElement, Datum, PElement, PDatum>,
+export function initRect <GElement extends BaseType, Datum, PElement extends BaseType, PDatum> (
+  sel: Selection<GElement, Datum, PElement, PDatum>,
   fbbox: (d: any) => BBox
 ) {
     sel .attr("x"      , d => fbbox(d).left)
@@ -20,15 +28,15 @@ export function initRect <GElement extends d3.BaseType, Datum, PElement extends 
         .attr("height" , d => fbbox(d).height);
 }
 
-export function initStroke <GElement extends d3.BaseType, Datum, PElement extends d3.BaseType, PDatum> (
-  sel: d3.Selection<GElement, Datum, PElement, PDatum>,
+export function initStroke <GElement extends BaseType, Datum, PElement extends BaseType, PDatum> (
+  sel: Selection<GElement, Datum, PElement, PDatum>,
   stroke: string, strokeWidth: number, strokeOpacity: number) {
     sel .attr("stroke", stroke)
         .attr("stroke-width", strokeWidth)
         .attr("stroke-opacity", strokeOpacity);
 }
-export function initFill <GElement extends d3.BaseType, Datum, PElement extends d3.BaseType, PDatum> (
-    sel: d3.Selection<GElement, Datum, PElement, PDatum>,
+export function initFill <GElement extends BaseType, Datum, PElement extends BaseType, PDatum> (
+    sel: Selection<GElement, Datum, PElement, PDatum>,
   fill: string, fillOpacity: number
 ) {
     sel .attr("fill", fill)
@@ -37,7 +45,7 @@ export function initFill <GElement extends d3.BaseType, Datum, PElement extends 
 
 export let d3select = {
   pageTextgridSvg: (n: number) => {
-        return d3.select('div.page-textgrids').select(`svg#textgrid-svg-${n}`);
+        return select('div.page-textgrids').select(`svg#textgrid-svg-${n}`);
     },
 };
 
@@ -61,10 +69,10 @@ export function getId(data: any) {
 }
 
 // export function select<GElement extends BaseType, OldDatum>(selector: string): Selection<GElement, OldDatum, HTMLElement, any>;
-export function d3id<GElement extends d3.BaseType>(
+export function d3id<GElement extends BaseType>(
   selector: string
-): d3.Selection<GElement, any, HTMLElement, any> {
-  return d3.select<GElement, any>(`#${selector}`);
+): Selection<GElement, any, HTMLElement, any> {
+  return select<GElement, any>(`#${selector}`);
 }
 
 /**
