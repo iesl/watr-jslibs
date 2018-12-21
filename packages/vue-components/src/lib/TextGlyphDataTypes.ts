@@ -66,7 +66,6 @@ export function gridDataToGlyphData(
     return updated;
   });
 
-  // {textDataPoints}
   return dataPoints;
 }
 

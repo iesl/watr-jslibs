@@ -4,36 +4,45 @@ import PdfPage from "./pdf-page.vue";
 
 import store from "@/store";
 
-// import * as fs from 'file-system';
 import * as $ from 'jquery';
 import { GridTypes } from "sharedLib";
-
-const textGrid00File = './dev-data/textgrids/textgrid-00.json';
-// const textGrid00: string = fs.readFileSync(textGrid00File, { encoding: 'utf8' });
-// const grids: GridTypes.Grid = GridTypes.Convert.toGrid(textGrid00);
-
 
 
 storiesOf("Pdf Page(s)", module)
   .add("single page", () => ({
     store,
     components: {PdfPage},
-    template: "<PdfPage :textgrid='textgrid'/>",
-    data: {
-
+    template: `
+<div v-if="initDataReady">
+    <PdfPage :initDataReady='initDataReady' :textgrid='textgrid'/>
+</div>
+<div v-else="">
+    Loading...
+</div>
+`,
+    data () {
+      return {
+        initDataReady: false,
+      };
     },
     methods: {
-      get textgrid(): GridTypes.Textgrid { return this.textgrid; },
+      textgrid(): GridTypes.Textgrid {
+        const self = this as any;
+        console.log('getting textgrid');
+        return self.textgrid;
+      },
 
-      mounted() {
 
-        $.getJSON('http://localhost:3100/textgrids/textgrid-00.json', (textgrid: GridTypes.Grid) => {
-          // console.log('textgrid', textgrid);
-        }, (err) => {
-          console.log('err', err);
-        });
-
-      }
     },
+
+    created() {
+      $.getJSON('http://localhost:3100/textgrids/textgrid-00.json', (textgrid: GridTypes.Grid) => {
+        const self = this as any;
+        self.textgrid = textgrid;
+        this.initDataReady = true;
+      }, (err) => {
+        console.log('err', err);
+      });
+    }
   }))
 ;

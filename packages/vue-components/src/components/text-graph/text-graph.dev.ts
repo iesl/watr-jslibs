@@ -1,6 +1,6 @@
 import {Vue, Component} from "vue-property-decorator";
 
-import TextGraphList from "./text-graphs.vue";
+import TextGraphList from "./text-graph-list.vue";
 
 @Component({
   components: {TextGraphList},
