@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
-    "@types/jest": "^23.3.10",
+    "@types/jest": "^23.3.11",
     "@types/lunr": "^0.1.0",
     "chai": "^4.1.2",
     "jest": "^23.6.0",
