@@ -85,7 +85,7 @@ export function createNewZone(labelData) {
 export function getDocumentAnnotations () {
     return apiGet(apiUri(`labeling/zones/${shared.currentDocument}`))
         .then(res => {
-            console.log('getDocumentAnnotations', res);
+            // console.log('getDocumentAnnotations', res);
             return schema.allValid('Annotation')(res);
         });
 }

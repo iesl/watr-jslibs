@@ -39,7 +39,7 @@ storiesOf("Pdf Page(s)", module)
       $.getJSON('http://localhost:3100/textgrids/textgrid-00.json', (textgrid: GridTypes.Grid) => {
         const self = this as any;
         self.textgrid = textgrid;
-        this.initDataReady = true;
+        self.initDataReady = true;
       }, (err) => {
         console.log('err', err);
       });

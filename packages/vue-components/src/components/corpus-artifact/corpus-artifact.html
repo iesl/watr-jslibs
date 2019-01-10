@@ -1,3 +1,23 @@
-<div>
-    
+<div class="listing-entry">
+
+    <div class="listing-entry-grid">
+        <div class="listing-title">
+            <span>{{ num }} {{ entryName }}</span>
+        </div>
+    </div>
+
+
+    <div class="listing-image">
+        <a :href="docUrl">
+            <img :src="thumbnailUrl"/>
+        </a>
+    </div>
+
+    <div class="listing-info">
+        <a href="docUrl">
+            <span>Tracelogs</span>
+        </a>
+    </div>
+
 </div>
+

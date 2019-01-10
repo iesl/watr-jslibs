@@ -124,7 +124,7 @@ function defaultMouseHandlers(widget: PdfPage): MouseHandlers {
 export default class PdfPage extends Vue {
   @Prop({default: 0}) pageNum!: number;
   @Prop() textgrid!: GridTypes.Textgrid;
-  @Prop() initDataReady: boolean;
+  @Prop({default: false}) initDataReady!: boolean;
 
   @pdfPageState.State hoveredText!: TextDataPoint[];
   @pdfPageState.State clickedText!: TextDataPoint[];
