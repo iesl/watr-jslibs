@@ -13,19 +13,13 @@ import {
 
 // import {namespace} from "vuex-class";
 
-// import {
-//   SelectionFilteringEngine,
-//   CandidateGroup,
-//   KeyedRecordGroup,
-// } from "../../lib/FilterEngine";
-
 // const filterState = namespace("filteringState");
 
 @Component
 export default class CorpusArtifact extends Vue {
   // @Prop(Array) initialCandidateGroups!: CandidateGroup[];
 
-  const num: number = 10;
+  num: number = 10;
 
   entryName: string = "name-todo";
 

@@ -13,8 +13,10 @@ module.exports = (storybookBaseConfig, configType, config) => {
 
   config.resolve.extensions.push('.ts', '.tsx', '.vue', '.css', '.less', '.html');
 
+  // test: /\.ts$/,
+
   config.module.rules.push({
-    test: /\.ts$/,
+    test: /(?!flycheck_)(?:\.ts$)/,
     exclude: /node_modules/,
     use: [
       {

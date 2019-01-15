@@ -1,4 +1,5 @@
 import {storiesOf} from "@storybook/vue";
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 
 import PdfPage from "./pdf-page.vue";
 
@@ -8,8 +9,7 @@ import * as $ from 'jquery';
 import { GridTypes } from "sharedLib";
 
 
-storiesOf("Pdf Page(s)", module)
-  .add("single page", () => ({
+const singlePageStory = {
     store,
     components: {PdfPage},
     template: `
@@ -44,5 +44,8 @@ storiesOf("Pdf Page(s)", module)
         console.log('err', err);
       });
     }
-  }))
-;
+};
+
+
+storiesOf("Pdf Page(s)", module)
+  .add("s page", () => singlePageStory) ;

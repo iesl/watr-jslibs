@@ -6,7 +6,9 @@ import Vuex from 'vuex';
 
 Vue.use(Vuex);
 
-const req = require.context('../src', true, /.stories.ts$/);
+// const req = require.context('../src', true, /.stories.ts$/);
+const req = require.context('../src', true, /(?!flycheck_)(\.stories\.ts$)/);
+// test:
 
 function loadStories() {
   req.keys().forEach(filename => req(filename));

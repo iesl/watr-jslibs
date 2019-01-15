@@ -31,7 +31,6 @@
     "watch": "tsc --watch",
     "test": "jest",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-    "outdated": "npm outdated",
     "lint": "tslint -p tsconfig.json"
   },
   "main": "dist/index.js",
