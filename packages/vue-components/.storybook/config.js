@@ -11,7 +11,14 @@ const req = require.context('../src', true, /(?!flycheck_)(\.stories\.ts$)/);
 // test:
 
 function loadStories() {
-  req.keys().forEach(filename => req(filename));
+  req.keys().forEach(filename => {
+    if (!filename.includes("flycheck_")) {
+      console.log(`loadStories: ${filename}`);
+      req(filename);
+    } else {
+      console.log(`Not loadStories: ${filename}`);
+    }
+  });
 }
 
 configure(loadStories, module);

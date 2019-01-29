@@ -1,0 +1,38 @@
+{
+
+  "corpusEntries": [
+    {
+      "stableId": "xx.pdf.d",
+      "entryName": "Derived Title XX",
+      "index": 3,
+      "pageCount": 8,
+      "artifacts": [
+        "/pdf",
+        "/page-images",
+        "/thumbnails",
+        "/tracelogs",
+        "/texts",
+        "/annotations",
+
+      ]
+    }
+
+  ],
+
+
+
+
+  "scenarios": [
+    {
+      "call": "/corpus-entries",
+      "response": {
+        "entryCount": 10
+      }
+    },
+    {
+      "call": "/corpus-entries/0",
+      "response": {"$ref": "corpusEntries[0]"}
+    },
+  ]
+
+}

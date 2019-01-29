@@ -7,7 +7,7 @@ import * as _ from "lodash";
 import {
   Vue,
   Component,
-  // Prop,
+  Prop,
   // Watch
 } from "vue-property-decorator";
 
@@ -19,14 +19,11 @@ import {
 export default class CorpusArtifact extends Vue {
   // @Prop(Array) initialCandidateGroups!: CandidateGroup[];
 
-  num: number = 10;
+  @Prop() index!: number;
+  @Prop() entryName!: string;
+  @Prop() stableId!: string;
 
-  entryName: string = "name-todo";
-
-  stableId: string = "11-00ABC.pdf";
-
-  thumbnailUrl: string = `/api/v1/corpus/artifacts/entry/${this.stableId}/image/thumb/1`;
+  thumbnailUrl: string = `/api/v1/corpus/artifacts/entry/{{  this.stableId  }}/image/thumb/1`;
   docUrl = `/document/{{stableId}}?show=textgrid.json`;
-
 
 }

@@ -1,6 +1,5 @@
 
 
-
 * Watrcolor client file organization
 
 ** Vue Components
