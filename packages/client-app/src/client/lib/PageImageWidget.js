@@ -40,7 +40,7 @@ export class PageImageWidget {
     this.containerId = containerId;
     this.glyphRtree = rtree();
 
-    this._tooltipHoversRx = new Rx.Subject();
+    this._tooltipHovejjrsRx = new Rx.Subject();
     this._tooltips = new ToolTips(this.frameSelector, this._tooltipHoversRx);
     this.selectedRegionRx = new Rx.Subject();
   }
