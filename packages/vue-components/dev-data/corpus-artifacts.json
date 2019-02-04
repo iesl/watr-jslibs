@@ -12,7 +12,7 @@
         "/thumbnails",
         "/tracelogs",
         "/texts",
-        "/annotations",
+        "/annotations"
 
       ]
     }
@@ -32,7 +32,7 @@
     {
       "call": "/corpus-entries/0",
       "response": {"$ref": "corpusEntries[0]"}
-    },
+    }
   ]
 
 }
