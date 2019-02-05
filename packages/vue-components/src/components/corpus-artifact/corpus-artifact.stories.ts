@@ -61,7 +61,7 @@ const finalAsyncComp = asyncGetJson('http://localhost:3100/corpus-artifacts.json
       @Prop({default: entry0}) data!: any;
 
       mounted() {
-        
+
       }
 
       render(h) {

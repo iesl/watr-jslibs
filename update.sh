@@ -1,24 +1,66 @@
-#!/bin/sh
+#!/bin/bash
 
 root=$(pwd)
 
-echo watrmarks.js
-cd packages/watrmarks.js && npm outdated
-cd $root
+PROJECTS=(
+    'watrmarks.js'
+    'shared'
+    'vue-components'
+    'client-app'
+    '.'
+)
 
-echo shared
-cd packages/shared && npm outdated
-cd $root
+oneach() {
+    op1=$1;
+    op2=$2;
 
-echo vue-components
-cd packages/vue-components && npm outdated
-cd $root
+    for proj in "${PROJECTS[@]}"
+    do
+        echo ">> $proj"
+        cd "packages/$proj"
+        if [[ ! -z "$op1" ]]; then
+            echo "running $op1"
+            eval $op1
+        else
+            echo "no op1 specified "
+        fi
 
-echo client-app
-cd packages/client-app && npm outdated
-cd $root
+        cd $root
 
-npm outdated
+        if [[ ! -z "$op2" ]]; then
+            echo "running $op2"
+            eval $op2
+        else
+            echo "no op2 specified "
+        fi
+
+        echo -e "\n\n"
+    done
+}
+
+# oneach "npm outdated"
+oneach "npm install -D @types/jest@latest"
+# oneach "npm update" "lerna bootstrap"
+
+
+
+# echo watrmarks.js
+# cd packages/watrmarks.js && npm outdated
+# cd $root
+
+# echo shared
+# cd packages/shared && npm outdated
+# cd $root
+
+# echo vue-components
+# cd packages/vue-components && npm outdated
+# cd $root
+
+# echo client-app
+# cd packages/client-app && npm outdated
+# cd $root
+
+# npm outdated
 
 
 # echo watrmarks.js
