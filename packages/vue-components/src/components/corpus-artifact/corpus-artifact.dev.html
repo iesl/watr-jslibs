@@ -1,3 +1,9 @@
-<div>
-    <CorpusArtifact />
-</div>
+<v-app>
+    <v-layout>
+        <v-flex xs12 sm6 offset-sm1>
+            <div v-if="">
+                <CorpusArtifact v-bind="data" />
+            </div>
+        </v-flex>
+    </v-layout>
+</v-app>

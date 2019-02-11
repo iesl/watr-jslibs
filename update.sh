@@ -1,5 +1,23 @@
 #!/bin/bash
 
+
+showhelp() {
+    echo "Usage: $SCRIPT: "
+    echo "  todo  "
+    exit 2
+}
+
+# default arg vals
+install=
+
+while getopts "ih" name; do
+    case $name in
+        i)    install=1;;
+        h)    showhelp $0;;
+        [?])  showhelp $0;;
+    esac
+done
+
 root=$(pwd)
 
 PROJECTS=(
@@ -38,50 +56,12 @@ oneach() {
     done
 }
 
-# oneach "npm outdated"
-oneach "npm install -D @types/jest@latest"
+if [ -z "$install" ]; then
+    ## ...
+    oneach "npm outdated"
+else
+    oneach "npm update" "lerna bootstrap"
+
+fi
+# oneach "npm install -D @types/jest@latest"
 # oneach "npm update" "lerna bootstrap"
-
-
-
-# echo watrmarks.js
-# cd packages/watrmarks.js && npm outdated
-# cd $root
-
-# echo shared
-# cd packages/shared && npm outdated
-# cd $root
-
-# echo vue-components
-# cd packages/vue-components && npm outdated
-# cd $root
-
-# echo client-app
-# cd packages/client-app && npm outdated
-# cd $root
-
-# npm outdated
-
-
-# echo watrmarks.js
-# cd packages/watrmarks.js && npm update
-# cd $root
-# lerna bootstrap
-
-# echo shared
-# cd packages/shared && npm update
-# cd $root
-# lerna bootstrap
-
-# echo vue-components
-# cd packages/vue-components && npm update
-# cd $root
-# lerna bootstrap
-
-# echo client-app
-# cd packages/client-app && npm update
-# cd $root
-# lerna bootstrap
-
-# npm update
-# lerna bootstrap

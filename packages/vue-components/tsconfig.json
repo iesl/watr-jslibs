@@ -13,13 +13,16 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
+    "allowSyntheticDefaultImports": true,
+
     "target": "es6",
     "module": "es6",
 
     "types": [
       "webpack-env",
       "jest",
-      "chai"
+      "chai",
+      "vuetify"
     ],
 
     "paths": {

@@ -3,12 +3,28 @@
  */
 
 import * as _ from "lodash";
+import { CreateElement } from 'vue';
 
 import {
   Vue,
   Component,
   Prop,
 } from "vue-property-decorator";
+
+
+@Component
+export class LoadingComponent extends Vue {
+  render(h: CreateElement) {
+    return h(`div`, "Loading");
+  }
+}
+
+@Component
+export class ErrorComponent extends Vue {
+  render(h: CreateElement) {
+    return h(`div`, "Error");
+  }
+}
 
 @Component
 export default class CorpusArtifact extends Vue {

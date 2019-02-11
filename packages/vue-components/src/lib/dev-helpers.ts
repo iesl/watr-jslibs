@@ -3,12 +3,21 @@
 
 
 import * as _ from "lodash";
+import * as $ from 'jquery';
 
 import { CandidateGroup, GroupKey } from './FilterEngine';
 
 
 export function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);
+}
+
+export function asyncGetJson<T>(url: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    $.getJSON(url, (response: any) => {
+      return resolve(response)
+    }).fail((xhr, status, err) => reject(`Server Error (${status}): ${err}`));
+  });
 }
 
 export interface ILogEntry {

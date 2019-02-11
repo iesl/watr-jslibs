@@ -5,12 +5,13 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import VueRouter from 'vue-router';
 
+
+import "../src/plugins/vuetify";
+
 Vue.use(VueRouter);
 Vue.use(Vuex);
 
-// const req = require.context('../src', true, /.stories.ts$/);
 const req = require.context('../src', true, /(?!(.*flycheck.*))(\.stories\.ts$)/);
-// test:
 
 function loadStories() {
   req.keys().forEach(filename => {
