@@ -15,10 +15,9 @@ import CorpusArtifact from "./corpus-artifact.vue";
   }
 })
 export default class CorpusArtifactDev extends Vue {
-  @Prop() story: string;
+  @Prop() story!: string;
 
-  get data(): any[] {
-
-  }
+  // get data(): any[] {
+  // }
 }
 
