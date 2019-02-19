@@ -63,5 +63,8 @@ else
     oneach "npm update" "lerna bootstrap"
 
 fi
-# oneach "npm install -D @types/jest@latest"
+
+oneach "npm install -D ts-jest@latest"
+# oneach "npm install -D ts-node@latest"
+# oneach "npm install -D tippy.js@latest"
 # oneach "npm update" "lerna bootstrap"
