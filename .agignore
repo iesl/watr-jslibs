@@ -1,3 +1,5 @@
 dist/*
 package-lock.json
 **/dev/data/**
+*.js.map
+**/watrmarks-fastopt.js

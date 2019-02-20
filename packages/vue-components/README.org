@@ -1,0 +1,14 @@
+* Vue Components
+  WatrColors UI Components and Application
+
+** Development
+
+*** Vue components
+    To develop individual vue.js components, (via storybook.js with mockup json server as backend), run: 
+
+    > npm run develop
+
+
+*** Integrated App mockup
+    > ..
+    Runs fully configured application but with mockup data backend

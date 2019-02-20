@@ -5,9 +5,6 @@
   "scripts": {
     "build": "vue-cli-service build --mode development ./src/main.ts",
     "test": "vue-cli-service test:unit --timeout 10000 'src/**/*.test.ts'",
-    "lint": "vue-cli-service lint",
-    "build:lib:dev": "vue-cli-service build --mode development --target lib --name vueComponentLib ./src/index.ts",
-    "build:lib:prod": "vue-cli-service build --target lib --name vueComponentLib ./src/index.ts",
     "develop": "npm-run-all -p -r storybook serve:json",
     "serve:json": "json-server --port 3100 ./dev-data/db.json --static ./dev-data",
     "storybook": "start-storybook -p 9001 -c .storybook"
@@ -51,6 +48,8 @@
     "@vue/eslint-config-airbnb": "^4.0.0",
     "@vue/eslint-config-typescript": "^4.0.0",
     "@vue/test-utils": "^1.0.0-beta.29",
+    "vue-cli-plugin-storybook": "^0.5.2",
+    "vue-cli-plugin-vuetify": "^0.4.6",
     "babel-preset-env": "^1.7.0",
     "babel-preset-vue": "^2.0.2",
     "chai": "^4.1.2",
@@ -64,8 +63,6 @@
     "ts-jest": "^24.0.0",
     "tsconfig-paths-webpack-plugin": "^3.2.0",
     "typescript": "^3.3.3",
-    "vue-cli-plugin-storybook": "^0.5.2",
-    "vue-cli-plugin-vuetify": "^0.4.6",
     "vuetify-loader": "^1.2.1",
     "webpack-merge": "^4.2.1"
   },
@@ -100,5 +97,5 @@
       "node"
     ]
   },
-  "main": "./dist/vueComponentLib.umd.js"
+  "main": "./src/main.ts"
 }

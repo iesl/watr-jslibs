@@ -46,3 +46,7 @@ dist
 *.tgz     
 
 .cache
+
+asdf.*
+qwer.*
+tmp*
