@@ -1,10 +1,10 @@
 //
 
 import { Tree } from "./index";
-// import { scalazed_Tree as Tree } from "../watrmarks.js";
+// import { scalazed_Tree as Tree } from "../watrmarksJs";
 // import { scalazed_Tree as Tree } from "../index";
 
-describe("loading watrmarks.js modules", () => {
+describe("loading watrmarksJs modules", () => {
 
   it("draw trees", () => {
     const leaf1 = Tree.Leaf("1");

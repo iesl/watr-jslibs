@@ -1,0 +1,15 @@
+
+** Subprobjects
+
+*** ClientApp
+    The first production version of WatrColors. 
+
+*** shared
+    library of assorted utilities
+
+*** VueComponents
+    Web UI components (mostly based on Vue.js), and updated UI moved and refactored
+    from ClientApp
+
+*** WatrmarksJs
+    Scala code cross-compiled to javascript and used as a helper library

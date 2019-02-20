@@ -7,7 +7,7 @@
     "lodash": "^4.17.11",
     "rbush": "^2.0.1",
     "rbush-knn": "^2.1.0",
-    "watrmarks.js": "^0.1.0",
+    "watrmarksJs": "^0.1.0",
     "split.js": "^1.5.10",
     "d3": "^4.13.0"
   },
@@ -39,6 +39,17 @@
     "roots": [
       "<rootDir>/src"
     ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json",
+        "diagnostics": {
+          "ignoreCodes": [
+            151001,
+            7016
+          ]
+        }
+      }
+    },
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },

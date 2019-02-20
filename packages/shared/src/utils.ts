@@ -5,7 +5,7 @@
 import * as _ from "lodash";
 import * as $ from "jquery";
 
-import { Tree } from 'watrmarks.js';
+import { Tree } from 'watrmarksJs';
 
 export function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);
