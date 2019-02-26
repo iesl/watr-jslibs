@@ -12,7 +12,7 @@ import CorpusArtifact, {
 
 import { asyncGetJson } from '@/lib/dev-helpers'
 
-const finalAsyncComp = asyncGetJson('http://localhost:3100/corpus-artifacts.json')
+const finalAsyncComp = () => asyncGetJson('http://localhost:3100/corpus-artifacts.json')
   .then( (jsval: any) => {
     const entry0 = () => jsval.corpusEntries[0]
 
@@ -40,9 +40,14 @@ const asyncLoadingComponent = Vue.component('async-fetch', () => ({
 @Component({
   components: {
     CorpusArtifact,
+    // nav, listing
   }
 })
 export default class CorpusArtifactList extends Vue {
+
+  mounted() {
+    
+  }
 
 }
 

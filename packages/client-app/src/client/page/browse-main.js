@@ -104,8 +104,6 @@ function setupPaginationRx(corpusEntries) {
 function updatePage(corpusEntries) {
     let entryItems = createEntryItems(corpusEntries.entries);
 
-    console.log('updatePage', corpusEntries);
-
     $('.listing-main').empty();
     $('.listing-main').append(
         entryItems
