@@ -1,10 +1,10 @@
+<script lang="ts" src="./corpus-artifact-list.ts" />
+
 <template lang="html">
 
-  <div v-bind="(entry, i) in corpusEntries">
-    <CorpusArtifact v-bind="entry" />
-  </div>
+<CorpusArtifact />
+
 
 </template>
 
-<script   lang="ts"   src="./corpus-artifact-list.ts"        ></script>
-<style    lang="less" src="./corpus-artifact-list.less" scoped></style>
+<style lang="less" scoped></style>

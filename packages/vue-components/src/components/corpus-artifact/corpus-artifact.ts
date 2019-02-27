@@ -36,4 +36,18 @@ export default class CorpusArtifact extends Vue {
   thumbnailUrl: string = `/api/v1/corpus/artifacts/entry/{{this.stableId}}/image/thumb/1`;
   docUrl = `/document/{{stableId}}?show=textgrid.json`;
 
+
 }
+
+/*
+
+  <!-- <a :href="docUrl">
+  <v-img
+  :src="thumbnailUrl"
+  max-height="250px"
+  height="200"
+  width="200"
+  ></v-img>
+  </a>
+  -->
+  */

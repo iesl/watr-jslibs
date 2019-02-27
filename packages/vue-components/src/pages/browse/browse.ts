@@ -1,8 +1,8 @@
 import {Vue, Component, Prop, Watch} from "vue-property-decorator";
 
 import {
-  LoadingComponent,
-  ErrorComponent,
+  // @ts-ignore: Module '"*.vue"' has no exported member ...
+  LoadingComponent, ErrorComponent,
   default as CorpusArtifact
 } from '@/components/corpus-artifact/corpus-artifact.vue';
 

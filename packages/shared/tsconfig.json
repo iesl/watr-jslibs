@@ -1,34 +1,18 @@
 {
+  "extends": "./tsconfig-base.json",
+
   "compilerOptions": {
-
-    "target": "es6",
-    "module": "es6",
-    "moduleResolution": "node",
-
-    "strict": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-
-    "inlineSourceMap": true,
     "baseUrl": ".",
 
     "noEmit": false,
-    "diagnostics": true,
 
     "types": [
       "jest",
       "chai"
     ],
 
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
-
     "declaration": true,
     "outDir": "./dist"
-
   },
 
   "include": [

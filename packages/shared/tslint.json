@@ -38,6 +38,7 @@
                            { "allowed-names": ["^self$"],
                              "allow-destructuring": true
                            }]
+
   },
   "rulesDirectory": []
 }

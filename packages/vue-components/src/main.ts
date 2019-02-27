@@ -29,4 +29,6 @@ const app = new Vue({
   render(h: CreateElement): VNode {
     return h("App");
   },
-}).$mount("#app");
+});
+
+app.$mount("#app");

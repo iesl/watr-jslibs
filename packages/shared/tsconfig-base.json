@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+
+    "target": "es6",
+    "module": "es6",
+    "moduleResolution": "node",
+    "noEmit": true,
+
+    "strict": true,
+    "noImplicitReturns": true,
+
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+
+    "inlineSourceMap": true,
+    "preserveConstEnums": true,
+
+    "diagnostics": true,
+
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+
+    "types": [
+      "jest",
+      "chai"
+    ],
+
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
+  }
+
+
+}

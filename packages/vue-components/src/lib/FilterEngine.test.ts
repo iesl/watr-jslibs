@@ -13,7 +13,7 @@ function createFilter(cgs: CandidateGroup[]) {
   return new SelectionFilteringEngine(cgs);
 }
 
-describe('Selection Narrowing/Filtering', function () {
+describe('Selection Narrowing/Filtering',  () => {
   // const self = this;
   // console.log('this', self.ctx);
 

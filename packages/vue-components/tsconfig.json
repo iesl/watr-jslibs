@@ -1,43 +1,26 @@
 {
+  "extends": "../shared/tsconfig-base.json",
+
   "compilerOptions": {
     "baseUrl": ".",
 
-    "strict": true,
-    "removeComments": false,
-
-    "moduleResolution": "node",
-    "inlineSourceMap": true,
-    "resolveJsonModule": true,
-
-    "preserveConstEnums": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-
-    "allowSyntheticDefaultImports": true,
-
-    "target": "es6",
-    "module": "es6",
 
     "types": [
       "webpack-env",
       "jest",
       "chai",
       "vuetify"
-    ],
-
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
+    ]
 
   },
+
   "include": [
-    "src/**/*.ts",
-    "src/**/*.vue",
-    "tests/**/*.ts"
+    "src/**/*"
   ],
+
   "exclude": [
-    "node_modules/**/*"
+    "node_modules"
   ]
 }
