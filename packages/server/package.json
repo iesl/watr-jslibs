@@ -12,6 +12,7 @@
   "author": "Adam Saunders <saunders@cs.umass.edu>",
   "homepage": "https://github.com/iesl/watr-jslibs#readme",
   "dependencies": {
+    "commander": "^2.19.0",
     "koa": "^2.7.0",
     "koa-body": "^4.0.8",
     "koa-bodyparser": "^4.2.1",
@@ -19,13 +20,17 @@
     "koa-json": "^2.0.2",
     "koa-router": "^7.4.0",
     "koa-send": "^5.0.0",
+    "nodemon": "^1.18.10",
     "tslib": "^1.9.3"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/koa": "^2.0.48",
+    "@types/koa-json": "^2.0.18",
     "@types/koa-router": "^7.0.40",
+    "@types/koa-send": "^4.1.1",
     "@types/node": "^11.9.6",
+    "npm-run-all": "^4.1.5",
     "chai": "^4.1.2",
     "jest": "^24.1.0",
     "ts-jest": "^24.0.0"
@@ -46,7 +51,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "serve": "node dist/server.js"
+    "serve": "nodemon -w dist dist/server.js"
   },
   "bugs": {
     "url": "https://github.com/iesl/watr-jslibs/issues"
