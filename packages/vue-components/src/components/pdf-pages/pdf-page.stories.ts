@@ -1,5 +1,5 @@
 import {storiesOf} from "@storybook/vue";
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+// import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 
 import PdfPage from "./pdf-page.vue";
 

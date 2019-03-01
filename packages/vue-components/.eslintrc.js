@@ -14,8 +14,7 @@ module.exports = {
     'no-param-reassign': 'off',
     'comma-dangle': 'off',
 
-  },
-  parserOptions: {
+  }, parserOptions: {
     parser: 'typescript-eslint-parser',
   },
 };

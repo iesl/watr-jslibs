@@ -10,5 +10,8 @@
 
 
 *** Integrated App mockup
-    > ..
-    Runs fully configured application but with mockup data backend
+    Run fully configured application but with mockup data backend:
+
+    > npm run ui
+
+** Production / Deployment

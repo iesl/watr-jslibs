@@ -2,7 +2,11 @@
 import * as _ from 'lodash';
 import * as $ from 'jquery';
 
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import {
+  Vue,
+  Component,
+} from "vue-property-decorator";
+
 import TextGraph from "./text-graph.vue";
 
 import {
@@ -16,7 +20,6 @@ import {
   // d3x,
   // getOrDie
 } from "sharedLib";
-
 
 @Component({
   components: {TextGraph},
