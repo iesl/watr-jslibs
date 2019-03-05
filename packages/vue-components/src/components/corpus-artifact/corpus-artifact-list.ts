@@ -2,7 +2,7 @@
 import {
   Vue,
   Component,
-  Prop,
+  // Prop,
   Watch
 } from "vue-property-decorator";
 
@@ -10,8 +10,6 @@ import CorpusArtifact, {
   // @ts-ignore: Module '"*.vue"' has no exported member ...
   LoadingComponent, ErrorComponent,
 } from "./corpus-artifact.vue";
-
-import { asyncGetJson } from '@/lib/dev-helpers'
 
 
 @Component({
@@ -33,19 +31,8 @@ export default class CorpusArtifactList extends Vue {
   mounted() {
     // TODO Display a placeholder...
 
-    const finalAsyncComp = () => asyncGetJson('http://localhost:3100/corpus-artifacts.json')
-      .then( (jsval: any) => {
-        const entry0 = () => jsval.corpusEntries[0]
-
-        @Component({
-          components: {CorpusArtifact},
-          template: "<CorpusArtifact v-bind='data' />"
-        }) class Thunk extends Vue {
-          @Prop({default: entry0}) data!: any;
-        }
-
-        return Thunk;
-      })
+    const finalAsyncComp = () => this.$getJson('/corpus-artifacts.json')
+      .then((jsval: any) => this.corpusEntries = jsval.corpusEntries)
       .catch((err) => {
         console.log('error!: ', err);
       });

@@ -7,8 +7,15 @@ import "@/plugins/vuetify";
 import App from "./app/App.vue";
 import Browse from "./pages/browse/browse.vue";
 
+// import { GlobalProps } from '@/globals';
+
 Vue.use(VueRouter);
 Vue.use(Vuex);
+
+Vue.prototype.$globalProps = {
+  serverRestEndpoint: "http://localhost:9000"
+};
+
 
 const routes = [
   {path: "/", component: Browse},

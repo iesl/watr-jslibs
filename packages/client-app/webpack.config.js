@@ -2,9 +2,9 @@
 
 const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const devMode = process.env.NODE_ENV !== 'production';
 
 const htmlDev = new HtmlWebpackPlugin({
   filename: "dev-index.html",
@@ -23,11 +23,13 @@ const tslinterPlugin = new TSLintPlugin({
   config: "./tslint.json"
 });
 
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-
-const extractLess = new ExtractTextPlugin({
+const extractLessPlugin = new MiniCssExtractPlugin({
+  // Options similar to the same options in webpackOptions.output
+  // both options are optional
   filename: "[name].css",
-  disable: process.env.NODE_ENV === "development"
+  chunkFilename: "[id].css"
 });
 
 const config = {
@@ -65,18 +67,18 @@ const config = {
          },
        ],
       },
-      { test: /\.(css|scss)$/,                   use: ['style-loader', 'css-loader']},
-      { test: /\.less$/,
-        use: extractLess.extract({
-          use: [{
-            loader: "css-loader"
-          }, {
-            loader: "less-loader"
-          }],
-          // use style-loader in development
-          fallback: "style-loader"
-        })
-      },
+      { test: /\.(css|scss)$/, use: [
+        devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+        'css-loader',
+        'postcss-loader',
+        'sass-loader'
+
+      ]},
+      { test: /\.less$/, use: [
+        devMode ? 'style-loader' : MiniCssExtractPlugin.loader,
+        'css-loader',
+        'less-loader',
+      ]},
       { test: /\.(woff|woff2|eot|ttf|otf|svg)$/, use: ['url-loader']},
       { test: /test\.js$/,                       use: ['mocha-loader'], exclude: /node_modules/},
       { test: /\.(jpe?g|png|gif|svg)$/i,         use: ['url-loader?limit=10000', 'img-loader']}
@@ -89,7 +91,7 @@ const config = {
 
   plugins: [
     tslinterPlugin,
-    extractLess,
+    extractLessPlugin,
     htmlDev, htmlProd,
     new ForkTsCheckerWebpackPlugin()
   ],

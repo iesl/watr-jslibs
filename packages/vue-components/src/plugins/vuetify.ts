@@ -1,5 +1,13 @@
 import Vue from "vue";
 
+import { asyncGetJson } from '@/lib/dev-helpers';
+
+Vue.prototype.$getJson = (loc: string) => {
+  const endpoint = Vue.prototype.$globalProps.serverRestEndpoint;
+  return asyncGetJson(`${endpoint}/${loc}`);
+};
+
+
 import Vuetify, {
   VApp,
   VContent,
@@ -38,9 +46,7 @@ import '@/../node_modules/material-design-icons-iconfont/dist/material-design-ic
 // import "vue-awesome/icons/flag";
 // or import all icons if you don't care about bundle size
 // import "vue-awesome/icons";
-
 // import Icon from "@/../node_modules/vue-awesome/components/Icon.vue";
-
 // Vue.component("v-icon", Icon);
 
 Vue.use(Vuetify, {

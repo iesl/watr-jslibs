@@ -1,0 +1,5 @@
+
+interface GlobalProps {
+  serverRestEndpoint: string;
+
+}
