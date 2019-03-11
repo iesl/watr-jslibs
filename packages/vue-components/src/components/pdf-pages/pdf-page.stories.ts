@@ -5,7 +5,9 @@ import PdfPage from "./pdf-page.vue";
 
 import store from "@/store";
 
-import * as $ from 'jquery';
+import { asyncGetJson } from "@/lib/dev-helpers";
+
+// import * as $ from 'jquery';
 import { GridTypes } from "sharedLib";
 
 
@@ -36,16 +38,18 @@ const singlePageStory = {
     },
 
     created() {
-      $.getJSON('http://localhost:3100/textgrids/textgrid-00.json', (textgrid: GridTypes.Grid) => {
-        const self = this as any;
-        self.textgrid = textgrid;
-        self.initDataReady = true;
-      }, (err) => {
-        console.log('err', err);
-      });
+      const self = this as any;
+      asyncGetJson('http://localhost:3100/textgrids/textgrid-00.json')
+        .then((textgrid: GridTypes.Grid) => {
+          self.textgrid = textgrid;
+          console.log('textgrid?', textgrid);
+          self.initDataReady = true;
+        })
+        .catch(err => console.log('err', err))
+      ;
     }
 };
 
 
 storiesOf("Pdf Page(s)", module)
-  .add("s page", () => singlePageStory) ;
+  .add("single page", () => singlePageStory) ;

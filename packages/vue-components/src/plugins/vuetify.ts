@@ -1,13 +1,5 @@
 import Vue from "vue";
 
-import { asyncGetJson } from '@/lib/dev-helpers';
-
-Vue.prototype.$getJson = (loc: string) => {
-  const endpoint = Vue.prototype.$globalProps.serverRestEndpoint;
-  return asyncGetJson(`${endpoint}/${loc}`);
-};
-
-
 import Vuetify, {
   VApp,
   VContent,
@@ -19,6 +11,8 @@ import Vuetify, {
   VCardActions,
   VBtn,
   VImg,
+  VInput,
+  VTextField,
   VNavigationDrawer,
   VContainer,
   VFooter,
@@ -59,8 +53,10 @@ Vue.use(Vuetify, {
     VCard,
     VCardTitle,
     VCardActions,
+    VTextField,
     VBtn,
     VImg,
+    VInput,
     VNavigationDrawer,
     VToolbar,
     VContainer,

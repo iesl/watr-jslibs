@@ -10,7 +10,7 @@ const stories = storiesOf("Corpus Artifacts", module);
 
 stories.add("paginated listing", () => ({
   store,
-  template: '<CorpusArtifactList />',
+  template: '<v-app> <CorpusArtifactList /> </v-app>',
   data: () => {
     return {
       artifacts: []

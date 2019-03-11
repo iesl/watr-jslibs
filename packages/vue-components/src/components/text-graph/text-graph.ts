@@ -229,7 +229,7 @@ export default class TextGraph extends Vue {
       d3$hitReticles .enter()
         .append("rect")
         .classed("hit-reticle", true)
-        .attr("id", (d) => d.id)
+        .attr("id", (d: any) => d.id)
         .attr("pointer-events", "none")
         .call(d3x.initRect, (d: any) => d.gridBBox)
         .call(d3x.initStroke, "green", 1, 0.5)

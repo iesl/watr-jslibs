@@ -6,8 +6,9 @@ import  send   from 'koa-send';
 import  json   from 'koa-json';
 import opts from 'commander';
 
+import { initFileBasedRoutes } from './corpusRoutes';
 
-const router = new Router();
+const rootRouter = new Router();
 const app = new Koa();
 
 opts
@@ -18,8 +19,9 @@ opts
 ;
 
 const distRoot =  opts.public;
+const corpusRoot =  opts.corpus;
 
-router
+rootRouter
   .get('/', async function (ctx: Context) {
     await send(ctx, 'index.html', { root: distRoot  });
   })
@@ -29,14 +31,17 @@ router
   .get('/fonts/:file', async function(ctx: Context) {
     await send(ctx, ctx.params.file, { root: path.join(distRoot, 'fonts') });
   })
-  // .get('/app.js', async function (ctx: Context) {
-  //   await send(ctx, 'app.js', { root: distRoot  });
-  // })
 ;
 
+const apiRouter = initFileBasedRoutes(corpusRoot);
+
+rootRouter.use(async function (_: Context, next) {
+  return next();
+}, apiRouter.routes());
+
 app
-  .use(router.routes())
-  .use(router.allowedMethods())
+  .use(rootRouter.routes())
+  .use(rootRouter.allowedMethods())
   .use(json())
 ;
 

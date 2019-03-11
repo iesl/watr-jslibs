@@ -1,22 +1,45 @@
-<div >
-    <span>
-        Filter Engine Dev:
-    </span>
-    <br/> <br/> <br/>
 
-    <div class="container" >
+<v-app>
 
-        <div class="frame filter">
-            <FilterWidget v-bind:initialCandidateGroups="initialCandidates"> </FilterWidget>
-        </div>
+    <div >
+        <span>
+            Filter Engine Dev:
+        </span>
+        <br/> <br/> <br/>
 
-        <div class="frame dbg-panel">
-            Debug Panel
-            <li v-for="item in filteredRecords">
-                {{ item.keystr }} ({{ item.records.length }})
-            </li>
-        </div>
+        <v-container>
+
+            <v-layout row>
+                <v-flex>
+                    <div class="frame filter">
+                        <FilterWidget v-bind:initialCandidateGroups="initialCandidates"> </FilterWidget>
+                    </div>
+                </v-flex>
+
+                <v-flex>
+                    <v-layout column>
+                        <v-flex>
+
+                            Debug Panel
+                        </v-flex>
+                        <v-flex>
+
+                            <div class="frame dbg-panel">
+                                <li v-for="item in filteredRecords">
+                                    {{ item.keystr }} ({{ item.records.length }})
+                                </li>
+                            </div>
+                            Debug Panel
+                        </v-flex>
+                    </v-layout>
+
+                </v-flex>
+            </v-layout>
+
+
+
+        </v-container>
 
     </div>
 
-</div>
+</v-app>

@@ -29,7 +29,6 @@ import {
   Point,
   BBox,
   d3x,
-  // getOrDie
 } from "sharedLib";
 
 import * as rtree from "rbush";
@@ -47,7 +46,6 @@ export class PdfPageStateModule implements Module<PdfPageState, any> {
   state: PdfPageState =  new PdfPageState();
 
   actions = <ActionTree<PdfPageState, any>> {}
-
 
   mutations = <MutationTree<PdfPageState>> {
     setHoveredText(state: PdfPageState, hoveredText: TextDataPoint[]) {
@@ -111,7 +109,6 @@ function defaultMouseHandlers(widget: PdfPage): MouseHandlers {
         (hit) => [hit.minY, hit.minX]
       );
 
-
       widget.hoverQuery = [ queryBox ];
       widget.setHoveredText(queryHits);
     },
@@ -138,7 +135,7 @@ export default class PdfPage extends Vue {
   get frameId(): string { return `page-image-frame-${this.pageNum}`; }
   get imageContentId(): string { return `page-image-content-${this.pageNum}`; }
   get svgId(): string { return `page-image-svg-${this.pageNum}`; }
-  get imageHref(): string { return `http://localhost:3100//corpus-entry-0/page-images/page-1.opt.png`; }
+  get imageHref(): string { return `http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`; }
 
   selectSvg() {
     return d3x.d3id(this.svgId);
@@ -172,7 +169,7 @@ export default class PdfPage extends Vue {
       d3$hitReticles .enter()
         .append("rect")
         .classed("hit-reticle", true)
-        .attr("id", (d) => d.id)
+        .attr("id", (d: any) => d.id)
         .attr("pointer-events", "none")
         .call(d3x.initRect, (d: any) => d.gridBBox)
         .call(d3x.initStroke, "green", 1, 0.5)
@@ -183,8 +180,10 @@ export default class PdfPage extends Vue {
         .remove();
     }
   }
+
   @Watch("initDataReady")
   onInitDataReady(newVal: boolean): void {
+    console.log('initDataReady');
     if (newVal) {
       this.initialCandidates();
     }
@@ -192,9 +191,14 @@ export default class PdfPage extends Vue {
 
   mounted() {
 
-    this.setMouseHandlers([
-      defaultMouseHandlers,
-    ]);
+    this.$nextTick(() => {
+      console.log('mounted');
+      this.initialCandidates();
+      this.setMouseHandlers([
+        defaultMouseHandlers,
+      ]);
+
+    })
   }
 
   @Watch("hoverQuery")

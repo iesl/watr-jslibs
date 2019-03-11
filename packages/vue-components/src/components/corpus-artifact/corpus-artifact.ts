@@ -30,12 +30,14 @@ export class ErrorComponent extends Vue {
 export default class CorpusArtifact extends Vue {
 
   @Prop() index!: number;
-  @Prop() entryName!: string;
   @Prop() stableId!: string;
 
-  thumbnailUrl: string = `/api/v1/corpus/artifacts/entry/{{this.stableId}}/image/thumb/1`;
-  docUrl = `/document/{{stableId}}?show=textgrid.json`;
+  thumbnailUrl: string = `/api/v1/corpus/artifacts/entry/${this.stableId}/image/thumb/1`;
+  docUrl = `/document/${this.stableId}?show=textgrid.json`;
 
+  entryName(): string {
+    return this.stableId.replace(/\.pdf\.d/, '');
+  }
 
 }
 

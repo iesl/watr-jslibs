@@ -3,19 +3,15 @@ import Vue, {VNode, CreateElement} from "vue";
 import Vuex from "vuex";
 import VueRouter from "vue-router";
 import "@/plugins/vuetify";
+import installVueGlobals from "@/plugins/globals";
 
 import App from "./app/App.vue";
 import Browse from "./pages/browse/browse.vue";
 
-// import { GlobalProps } from '@/globals';
 
 Vue.use(VueRouter);
 Vue.use(Vuex);
-
-Vue.prototype.$globalProps = {
-  serverRestEndpoint: "http://localhost:9000"
-};
-
+Vue.use(installVueGlobals, {endpoint: 'http://localhost:9000'});
 
 const routes = [
   {path: "/", component: Browse},

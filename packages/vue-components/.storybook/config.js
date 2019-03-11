@@ -1,28 +1,25 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { configure } from '@storybook/vue';
+import { addParameters, configure } from '@storybook/vue';
+// import { themes } from '@storybook/theming';
+import '@storybook/addon-console';
 
 import Vue from 'vue';
 import Vuex from 'vuex';
 import VueRouter from 'vue-router';
+import installVueGlobals from "@/plugins/globals";
 
-import { GlobalProps } from '@/globals';
-import { asyncGetJson } from '@/lib/dev-helpers';
-
-import "../src/plugins/vuetify";
+import "@/plugins/vuetify";
 
 Vue.use(VueRouter);
 Vue.use(Vuex);
+Vue.use(installVueGlobals, {endpoint: 'http://localhost:3100'});
 
-Vue.prototype.$globalProps = {
-  serverRestEndpoint = "http://localhost:3100";
-};
 
 const req = require.context('../src', true, /(?!(.*flycheck.*))(\.stories\.ts$)/);
-
 function loadStories() {
   req.keys().forEach(filename => {
     if (!filename.includes("flycheck_")) {
-      console.log(`loading: ${filename}`);
+      // console.log(`loading: ${filename}`);
       req(filename);
     } else {
       console.log(`skipping: ${filename}`);

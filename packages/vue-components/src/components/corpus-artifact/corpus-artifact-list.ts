@@ -1,9 +1,10 @@
 //
+import * as _ from "lodash";
+
 import {
   Vue,
   Component,
-  // Prop,
-  Watch
+  Watch,
 } from "vue-property-decorator";
 
 import CorpusArtifact, {
@@ -15,35 +16,32 @@ import CorpusArtifact, {
 @Component({
   components: {
     CorpusArtifact,
-    // nav, listing
   }
 })
 export default class CorpusArtifactList extends Vue {
 
   corpusEntries: object[] = [];
-  entryListingReady: boolean = false;
-
-  @Watch('entryListingReady')
-  populateListing() {
-
-  }
+  start: number = 20;
+  last: number = 20;
+  corpusSize: number = 340;
 
   mounted() {
-    // TODO Display a placeholder...
 
-    const finalAsyncComp = () => this.$getJson('/corpus-artifacts.json')
-      .then((jsval: any) => this.corpusEntries = jsval.corpusEntries)
-      .catch((err) => {
+    this.$getJson('/corpus-artifacts.json')
+      .then((jsval: any) => {
+        const corpusEntries = jsval.paginatedEntries.entries;
+        const start = jsval.paginatedEntries.start;
+        this.start = start;
+        this.last = start + corpusEntries.length - 1;
+        _.each(corpusEntries, (e, i) => {
+          e.index = i + start;
+        });
+
+        this.corpusEntries = jsval.paginatedEntries.entries;
+      })
+      .catch((err: any) => {
         console.log('error!: ', err);
       });
-
-    // const asyncLoadingComponent = Vue.component('async-fetch', () => ({
-    //   component: finalAsyncComp,
-    //   loading: LoadingComponent,
-    //   error: ErrorComponent,
-    //   delay: 0, // Delay before showing the loading component. Default: 200ms.
-    //   timeout: 30000 // Timeout before displaying error component
-    // }));
 
   }
 
