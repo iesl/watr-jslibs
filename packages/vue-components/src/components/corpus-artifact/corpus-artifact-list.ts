@@ -27,7 +27,7 @@ export default class CorpusArtifactList extends Vue {
 
   mounted() {
 
-    this.$getJson('/corpus-artifacts.json')
+    this.$getJson('/api/corpus/entries?start=0&len=10')
       .then((jsval: any) => {
         const corpusEntries = jsval.paginatedEntries.entries;
         const start = jsval.paginatedEntries.start;

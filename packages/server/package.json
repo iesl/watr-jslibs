@@ -15,6 +15,7 @@
     "commander": "^2.19.0",
     "fs-extra": "^7.0.1",
     "klaw": "^3.0.0",
+    "klaw-sync": "^6.0.0",
     "koa": "^2.7.0",
     "koa-body": "^4.0.8",
     "koa-bodyparser": "^4.2.1",
@@ -29,13 +30,16 @@
     "@types/chai": "^4.1.7",
     "@types/fs-extra": "^5.0.5",
     "@types/klaw": "^3.0.0",
+    "@types/klaw-sync": "^6.0.0",
     "@types/koa": "^2.0.48",
     "@types/koa-json": "^2.0.18",
     "@types/koa-router": "^7.0.40",
     "@types/koa-send": "^4.1.1",
+    "@types/memory-fs": "^0.3.2",
     "@types/node": "^11.9.6",
     "chai": "^4.1.2",
     "jest": "^24.1.0",
+    "memory-fs": "^0.4.1",
     "npm-run-all": "^4.1.5",
     "ts-jest": "^24.0.0"
   },
@@ -55,9 +59,38 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "serve": "nodemon -w dist dist/server.js"
+    "serve": "nodemon -w dist dist/server.js",
+    "test": "jest"
   },
   "bugs": {
     "url": "https://github.com/iesl/watr-jslibs/issues"
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.json",
+        "diagnostics": {
+          "ignoreCodes": [
+            151001,
+            7016
+          ]
+        }
+      }
+    },
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   }
 }
