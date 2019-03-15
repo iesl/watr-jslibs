@@ -7,11 +7,23 @@ import installVueGlobals from "@/plugins/globals";
 
 import App from "./app/App.vue";
 import Browse from "./pages/browse/browse.vue";
+import { ServerAPI } from "@/lib/ServerAPI";
 
+export class ProductionServerAPI extends ServerAPI {
+  getCorpusListing(start: number, len: number): any[] {
+
+  }
+
+  constructor() {}
+
+}
 
 Vue.use(VueRouter);
 Vue.use(Vuex);
-Vue.use(installVueGlobals, {endpoint: 'http://localhost:9000'});
+Vue.use(installVueGlobals, {
+  endpoint: 'http://localhost:9000',
+  serverApi: null
+});
 
 const routes = [
   {path: "/", component: Browse},

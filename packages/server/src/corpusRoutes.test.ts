@@ -1,11 +1,14 @@
 //
-import MemoryFileSystem from "memory-fs";
-var fs = new MemoryFileSystem();
+// import MemoryFileSystem from "memory-fs";
+// var fs = new MemoryFileSystem();
 import path from "path";
 // import { readCorpusEntries } from "./corpusRoutes";
+import fs, {  } from "fs-extra";
 
+const ScratchDir = path.join(".", "scratch.d");
 
-const CORPUS_ROOT_DIR = path.join(__dirname, 'corpus-root.d')
+const CORPUS_ROOT_DIR = path.join(ScratchDir, 'corpus-root.d')
+
 // after(() => fs.rmdirSync(CORPUS_ROOT_DIR))
 
 describe("read corpus entries", () => {

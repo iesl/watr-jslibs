@@ -10,7 +10,7 @@
     "jwt-client": "^0.2.1",
     "keyboardjs": "^2.4.1",
     "lunr": "^2.3.6",
-    "query-string": "^6.3.0",
+    "query-string": "^6.4.0",
     "rbush": "^2.0.1",
     "rbush-knn": "^2.1.0",
     "register-service-worker": "^1.6.2",
@@ -19,7 +19,7 @@
     "simple-ajax-uploader": "^2.5.5",
     "split.js": "^1.5.10",
     "tippy.js": "^4.2.0",
-    "vue": "^2.6.8",
+    "vue": "^2.6.9",
     "vuex": "^3.1.0",
     "watr-vue-components": "^0.1.0"
   },
