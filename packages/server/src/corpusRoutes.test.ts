@@ -1,35 +1,56 @@
-//
-// import MemoryFileSystem from "memory-fs";
-// var fs = new MemoryFileSystem();
+import * as _ from 'lodash';
 import path from "path";
-// import { readCorpusEntries } from "./corpusRoutes";
-import fs, {  } from "fs-extra";
 
-const ScratchDir = path.join(".", "scratch.d");
+import { readCorpusEntries } from "./corpusRoutes";
+import fs from "fs-extra";
 
-const CORPUS_ROOT_DIR = path.join(ScratchDir, 'corpus-root.d')
+const scratchDir = path.join(".", "scratch.d");
 
-// after(() => fs.rmdirSync(CORPUS_ROOT_DIR))
+const corpusRoot = path.join(scratchDir, 'corpus-root.d')
+
 
 describe("read corpus entries", () => {
-  const dirnames = ['dir1', 'dir2', 'dir2/dir2_1', 'dir2/dir2_1/dir2_1_1'];
-  const filenames = ['dir1/file1_2', 'dir2/dir2_1/file2_1_1', 'file1'];
-  fs.mkdirpSync(CORPUS_ROOT_DIR);
+  const dirnames = _.map(_.range(1, 10), (i) => `entry_${i}.d`);
+  const artifactPaths = [
+    "page-images",
+    "page-thumbs",
+    "textgrids",
+    "tracelogs",
+  ];
+
+  fs.mkdirpSync(corpusRoot);
+
+  // afterEach(() => fs.rmdirSync(corpusRoot))
+  // afterAll(() => fs.rmdirSync(corpusRoot))
 
   beforeEach(() => {
-    console.log("CORPUS_ROOT_DIR", CORPUS_ROOT_DIR);
-    fs.rmdirSync(CORPUS_ROOT_DIR)
-    fs.mkdirpSync(CORPUS_ROOT_DIR)
-    const DIRS = dirnames.map(dir => path.join(CORPUS_ROOT_DIR, dir))
-    const FILES = filenames.map(f => path.join(CORPUS_ROOT_DIR, f))
-    DIRS.forEach(dir => fs.mkdirpSync(dir))
-    FILES.forEach((f, i) => fs.writeFileSync(f, i.toString()))
+    fs.emptyDirSync(corpusRoot);
+    fs.rmdirSync(corpusRoot);
+    fs.mkdirpSync(corpusRoot);
+    const dirs = dirnames.map(dir => path.join(corpusRoot, dir));
+
+    _.each(dirs, (dir, i) => {
+      fs.mkdirpSync(dir);
+
+      _.each(artifactPaths, (p, i) => {
+        const artifactPath = path.join(dir, p);
+        fs.mkdirpSync(artifactPath);
+        _.each(_.range(0, i), num => {
+          const artifact = path.join(artifactPath, `artifact-#${num}`);
+          fs.writeFileSync(artifact, '');
+        });
+      });
+
+      const pdfArtifact = path.join(dir, `the-paper-${i}.pdf`);
+      fs.writeFileSync(pdfArtifact, 'pdf content');
+    });
+
   });
 
+
   it("read entries", () => {
-    console.log('hello, jest!');
-    // const entries = readCorpusEntries(CORPUS_ROOT_DIR);
-    // console.log(entries);
+    const entries = readCorpusEntries(corpusRoot, 0, 20);
+    console.log(entries);
   });
 
 });
