@@ -10,7 +10,7 @@
     "@types/webpack": "^4.4.25",
     "@typescript-eslint/eslint-plugin": "^1.4.2",
     "css-loader": "^2.1.1",
-    "eslint": "^5.15.1",
+    "eslint": "^5.15.3",
     "eslint-loader": "^2.1.2",
     "lerna": "^3.13.1",
     "less": "^3.9.0",
