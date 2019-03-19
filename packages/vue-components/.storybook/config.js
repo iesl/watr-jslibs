@@ -12,7 +12,7 @@ import "@/plugins/vuetify";
 
 Vue.use(VueRouter);
 Vue.use(Vuex);
-Vue.use(installVueGlobals, {endpoint: 'http://localhost:3100'});
+Vue.use(installVueGlobals, {endpoint: 'http://localhost:9000'});
 
 
 const req = require.context('../src', true, /(?!(.*flycheck.*))(\.stories\.ts$)/);

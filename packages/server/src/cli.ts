@@ -5,18 +5,17 @@ import path from "path";
 
 import { readCorpusEntries } from './corpusRoutes';
 
+function pp(a: any): string {
+  return JSON.stringify(a, undefined, 2);
+}
+
 function range(val: string): [number, number] {
   const [start, len] = val.split('..').map(Number);
   return [start, len];
 }
 
 function asFile(s: string): string {
-  const normalPath = path.normalize(s);
-
-  // const exists = fs.existsSync(normalPath);
-  // const stat = fs.statSync(normalPath);
-  // const isDir = stat.isDirectory();
-  return normalPath;
+  return path.normalize(s);
 }
 
 opts
@@ -30,7 +29,7 @@ opts
     console.log(`listCorpusEntries ${rbegin} - ${rend}`);
 
     const entries = readCorpusEntries(corpusRoot, rbegin, rend);
-    console.log(entries);
+    console.log(pp(entries));
   })
 ;
 

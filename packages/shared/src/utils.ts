@@ -2,8 +2,8 @@
  * Various Utility functions
  */
 
-import * as _ from "lodash";
-import * as $ from "jquery";
+import _ from "lodash";
+import $ from "jquery";
 
 import { Tree } from 'watrmarksJs';
 

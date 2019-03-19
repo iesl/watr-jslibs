@@ -29,15 +29,15 @@ export default class CorpusArtifactList extends Vue {
 
     this.$getJson('/api/corpus/entries?start=0&len=10')
       .then((jsval: any) => {
-        const corpusEntries = jsval.paginatedEntries.entries;
-        const start = jsval.paginatedEntries.start;
+        const corpusEntries = jsval.corpusEntries;
+        const start = jsval.offset;
         this.start = start;
         this.last = start + corpusEntries.length - 1;
         _.each(corpusEntries, (e, i) => {
           e.index = i + start;
         });
 
-        this.corpusEntries = jsval.paginatedEntries.entries;
+        this.corpusEntries = corpusEntries;
       })
       .catch((err: any) => {
         console.log('error!: ', err);

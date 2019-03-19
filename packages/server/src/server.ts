@@ -35,7 +35,8 @@ rootRouter
 
 const apiRouter = initFileBasedRoutes(corpusRoot);
 
-rootRouter.use(async function (_: Context, next) {
+rootRouter.use(async function (ctx: Context, next) {
+  ctx.set('Access-Control-Allow-Origin', '*');
   return next();
 }, apiRouter.routes());
 
