@@ -1,40 +1,32 @@
 import Vue, {VNode, CreateElement} from "vue";
 
 import Vuex from "vuex";
-import VueRouter from "vue-router";
 import "@/plugins/vuetify";
 import installVueGlobals from "@/plugins/globals";
 
+import AuthPlugin from "@/plugins/auth";
+
 import App from "./app/App.vue";
-import Browse from "./pages/browse/browse.vue";
 import { ServerAPI } from "@/lib/ServerAPI";
+import router from "@/routes";
 
-export class ProductionServerAPI extends ServerAPI {
+export class ProductionServerAPI implements ServerAPI {
   getCorpusListing(start: number, len: number): any[] {
-
+    return [`TODO: ${start}, ${len}`];
   }
 
   constructor() {}
-
 }
 
-Vue.use(VueRouter);
 Vue.use(Vuex);
 Vue.use(installVueGlobals, {
   endpoint: 'http://localhost:9000',
   serverApi: null
 });
 
-const routes = [
-  {path: "/", component: Browse},
-  // {path: "/document", component: Foo},
-  // {path: "/login", component: Foo},
-  // {path: "/curate", component: Foo},
-];
+Vue.use(AuthPlugin);
+Vue.config.productionTip = false;
 
-const router = new VueRouter({
-  routes,
-});
 
 const app = new Vue({
   router,

@@ -1,5 +1,5 @@
 
-import * as $ from 'jquery';
+import $ from 'jquery';
 
 import {
   Vue,

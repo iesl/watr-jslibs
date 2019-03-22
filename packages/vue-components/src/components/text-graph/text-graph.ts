@@ -1,6 +1,6 @@
 //
 // import * as $ from 'jquery';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 
@@ -14,7 +14,7 @@ import {
 
 import {namespace} from "vuex-class";
 
-import * as rtree from "rbush";
+import rtree from "rbush";
 
 import {
   TextDataPoint,

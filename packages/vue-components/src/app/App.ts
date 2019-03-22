@@ -1,6 +1,14 @@
 import {Vue, Component, Prop} from "vue-property-decorator";
 
-@Component
+import LoginPanel from "@/components/auth/login";
+import Callback from "@/components/auth/callback";
+
+@Component({
+  components: {
+    LoginPanel,
+    Callback
+  }
+})
 export default class App extends Vue {
   @Prop() source!: string;
 

@@ -2,7 +2,7 @@
 import Vue, { PluginObject } from "vue";
 
 import { asyncGetJson } from '@/lib/dev-helpers';
-import { ServerAPI } from '@/lib/ServerAPI';
+// import { ServerAPI } from '@/lib/ServerAPI';
 
 
 const installVueGlobals: PluginObject<any> = {
@@ -12,7 +12,7 @@ const installVueGlobals: PluginObject<any> = {
     vue.prototype.$serverApi = serverApi;
 
     function getJson<T>(loc: string): Promise<T> {
-      const _endpoint = endpoint;
+      // const _endpoint = endpoint;
       return asyncGetJson<T>(`${endpoint}${loc}`);
     };
 

@@ -21,7 +21,7 @@
     <span> Displaying ${start} to ${last} of ${count} </span>
 
     <div>
-      <CorpusArtifact v-bind="data" />
+      <!-- <CorpusArtifact v-bind="data" /> -->
     </div>
   </div>
 

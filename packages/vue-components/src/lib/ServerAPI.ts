@@ -1,18 +1,7 @@
 
-type CorpusEntry = any;
 
 export interface ServerAPI {
   getCorpusListing(start: number, len: number): any[];
-}
-
-
-export class XXServerAPI extends ServerAPI {
-  getCorpusListing(start: number, len: number): any[] {
-
-  }
-
-  constructor() {}
-
 }
 
 // export function getCorpusListing(start, len) {

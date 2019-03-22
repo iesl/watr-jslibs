@@ -1,10 +1,9 @@
 //
-import * as _ from "lodash";
+import _ from "lodash";
 
 import {
   Vue,
   Component,
-  Watch,
 } from "vue-property-decorator";
 
 import CorpusArtifact, {

@@ -39,7 +39,7 @@ const singlePageStory = {
 
     created() {
       const self = this as any;
-      asyncGetJson('http://localhost:3100/textgrids/textgrid-00.json')
+      asyncGetJson<GridTypes.Grid>('http://localhost:3100/textgrids/textgrid-00.json')
         .then((textgrid: GridTypes.Grid) => {
           self.textgrid = textgrid;
           console.log('textgrid?', textgrid);

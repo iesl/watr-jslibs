@@ -2,7 +2,7 @@
  *
  */
 
-import * as _ from "lodash";
+import _ from "lodash";
 import { CreateElement } from 'vue';
 
 import {

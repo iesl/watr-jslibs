@@ -4,7 +4,8 @@ import {
   gridDataToGlyphData
 } from '@/lib/TextGlyphDataTypes'
 
-const fs = require('file-system');
+// import * as fs from 'file-system';
+import fs, {  } from "fs-extra";
 
 import {
   coords,

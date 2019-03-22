@@ -1,7 +1,7 @@
 
 /* tslint:disable: no-console */
 
-import * as _ from "lodash";
+import _ from "lodash";
 
 import { SelectionFilteringEngine, CandidateGroup } from './FilterEngine';
 

@@ -51,3 +51,5 @@ asdf.*
 qwer.*
 tmp*
 .vscode
+
+auth_config.json

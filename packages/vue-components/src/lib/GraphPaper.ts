@@ -9,7 +9,7 @@
  **/
 
 import { coords } from "sharedLib";
-import * as _ from "lodash";
+import _ from "lodash";
 
 
 /**

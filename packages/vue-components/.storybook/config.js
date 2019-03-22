@@ -1,16 +1,18 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { addParameters, configure } from '@storybook/vue';
-// import { themes } from '@storybook/theming';
 import '@storybook/addon-console';
 
 import Vue from 'vue';
 import Vuex from 'vuex';
-import VueRouter from 'vue-router';
 import installVueGlobals from "@/plugins/globals";
+
+import router from "@/routes";
 
 import "@/plugins/vuetify";
 
-Vue.use(VueRouter);
+import AuthPlugin from "@/plugins/auth";
+Vue.use(AuthPlugin);
+
 Vue.use(Vuex);
 Vue.use(installVueGlobals, {endpoint: 'http://localhost:9000'});
 

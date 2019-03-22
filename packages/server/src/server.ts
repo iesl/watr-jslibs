@@ -25,11 +25,19 @@ rootRouter
   .get('/', async function (ctx: Context) {
     await send(ctx, 'index.html', { root: distRoot  });
   })
-  .get('/:file', async function(ctx: Context) {
-    await send(ctx, ctx.params.file, { root: distRoot  });
+  .get('/app.js', async function(ctx: Context) {
+    // console.log('getting file ', ctx.params.file)
+    await send(ctx, 'app.js', { root: distRoot  });
   })
+  // .get('/:file', async function(ctx: Context) {
+  //   console.log('getting file ', cts.params.file)
+  //   await send(ctx, ctx.params.file, { root: distRoot  });
+  // })
   .get('/fonts/:file', async function(ctx: Context) {
     await send(ctx, ctx.params.file, { root: path.join(distRoot, 'fonts') });
+  })
+  .get('/*', async function (ctx: Context) {
+    await send(ctx, 'index.html', { root: distRoot  });
   })
 ;
 

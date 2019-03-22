@@ -1,23 +1,20 @@
 
+// import * as vue from "vue";
+import Vue from "vue";
 
-import * as vue from "vue";
-
-declare module "vue" {
+declare module "vue/types/vue" {
   interface Vue {
     $serverRestEndpoint: string;
     $getJson<T>(loc: string): Promise<T>;
+    handleLoginEvent(data: any): void;
+    handleLogoutEvent(data: any): void;
+    $auth: any;
   }
 
 
   interface VueConstructor {
     $serverRestEndpoint: string;
     $getJson<T>(loc: string): Promise<T>;
-    // $globalProps: GlobalProps;
+    handleLoginEvent(): void;
   }
 }
-
-// declare module "vue/types/options" {
-//   interface ComponentOptions<V extends Vue> {
-//     $globalProps: GlobalProps;
-//   }
-// }

@@ -1,5 +1,5 @@
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 
@@ -31,7 +31,7 @@ import {
   d3x,
 } from "sharedLib";
 
-import * as rtree from "rbush";
+import rtree from "rbush";
 
 const pdfPageState = namespace("pdfPageState");
 

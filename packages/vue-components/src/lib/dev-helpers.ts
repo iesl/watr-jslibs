@@ -2,8 +2,8 @@
 /* tslint:disable: no-console */
 
 
-import * as _ from "lodash";
-import * as $ from 'jquery';
+import _ from "lodash";
+import $ from 'jquery';
 
 import { CandidateGroup, GroupKey } from './FilterEngine';
 
