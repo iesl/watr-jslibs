@@ -1,5 +1,6 @@
 
 import _ from 'lodash';
+import * as rbush from "rbush";
 
 import {
   coords,
