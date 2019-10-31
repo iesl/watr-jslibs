@@ -1,6 +1,7 @@
 {
   "packages": [
-    "packages/*"
+    "packages/*",
+    "typedefs/*"
   ],
   "version": "0.1.0"
 }

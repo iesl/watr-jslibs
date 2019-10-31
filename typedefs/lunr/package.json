@@ -1,11 +1,7 @@
 {
-  "name": "lunr.js.d",
+  "name": "@types/lunr",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-  },
-  "devDependencies": {
-  },
-  "scripts": {
-  }
+  "description": "TypeScript definitions for lunr 2.3.3",
+  "typings": "index.d.ts"
 }
