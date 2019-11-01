@@ -1,5 +1,8 @@
 dist/*
 package-lock.json
-**/dev/data/**
+dev/data/**/*.json
+dev-data/**/*.json
 *.js.map
 **/watrmarks-fastopt.js
+tracelog.*
+textgrid.*
