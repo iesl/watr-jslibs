@@ -31,7 +31,7 @@ import {
   d3x,
 } from "sharedLib";
 
-import rtree from "rbush";
+import RBush from "rbush";
 
 const pdfPageState = namespace("pdfPageState");
 
@@ -130,7 +130,7 @@ export default class PdfPage extends Vue {
 
   hoverQuery: BBox[] = [];
 
-  public glyphRTree: rbush.RBush<TextDataPoint> = rtree<TextDataPoint>();
+  public glyphRTree: RBush<TextDataPoint> = new RBush<TextDataPoint>();
 
   get frameId(): string { return `page-image-frame-${this.pageNum}`; }
   get imageContentId(): string { return `page-image-content-${this.pageNum}`; }
@@ -204,6 +204,7 @@ export default class PdfPage extends Vue {
   @Watch("hoverQuery")
   onHoverQueryChange(newVal: BBox[], _: BBox[]): void {
 
+    // @ts-ignore
     const queryBoxSel = this.selectSvg()
       .select("g.reticles")
       .selectAll("rect.query-reticle")

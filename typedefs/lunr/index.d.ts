@@ -14,7 +14,9 @@ export = lunr;
  * @license
  */
 declare namespace lunr {
-    namespace Builder {
+  const version: string;
+
+  namespace Builder {
         /**
          * A plugin is a function that is called with the index builder as its context.
          * Plugins can be used to customise or extend the behaviour of the index
@@ -303,6 +305,26 @@ declare namespace lunr {
      * used to load previously built and serialized indexes.
      */
     class Index {
+      /**
+       * An index of term/field to document reference.
+       */
+      invertedIndex: object;
+      /**
+       * Document vectors keyed by document reference.
+       */
+      documentVectors: { [docRef: string]: Vector };
+      /**
+       * An set of all corpus tokens.
+       */
+      tokenSet: TokenSet;
+      /**
+       * The names of indexed document fields.
+       */
+      fields: string[];
+      /**
+       * The pipeline to use for search terms.
+       */
+      pipeline: Pipeline;
         /**
          * @param attrs The attributes of the built search index.
          */
@@ -566,15 +588,17 @@ declare namespace lunr {
         interface Clause {
             term: string;
             /** The fields in an index this clause should be matched against. */
-            fields: string[];
+            fields?: string[];
             /** Any boost that should be applied when matching this clause. */
-            boost: number;
+            boost?: number;
             /** Whether the term should have fuzzy matching applied, and how fuzzy the match should be. */
-            editDistance: number;
+            editDistance?: number;
             /** Whether the term should be passed through the search pipeline. */
-            usePipeline: boolean;
+            usePipeline?: boolean;
             /** Whether the term should have wildcards appended or prepended. */
-            wildcard: number;
+            wildcard?: number;
+
+          presence?: presence;
         }
     }
 
@@ -974,7 +998,6 @@ declare namespace lunr {
         toJSON(): number[];
     }
 
-    const version: string;
     type ConfigFunction = (this: Builder, builder: Builder) => void;
 }
 

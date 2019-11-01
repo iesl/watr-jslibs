@@ -94,7 +94,7 @@ export class SelectionFilteringEngine {
     const hits = this.lunrIndex.query(query => {
       const terms = _.filter(_.split(queryStr, / +/), a => a.length > 0);
       _.each(terms, queryTerm => {
-        const clause: lunr.Clause = {
+        const clause: lunr.Query.Clause = {
           term: `*${queryTerm}*`,
           presence: lunr.Query.presence.REQUIRED,
         };
@@ -127,7 +127,7 @@ export class SelectionFilteringEngine {
   }
 
   private initIndex(keyedRecords: KeyedRecord[]): lunr.Index {
-    const lunrIndex = lunr(function(this: lunr.Index) {
+    const lunrIndex = lunr(function(this: lunr.Builder) {
       this.field("tags");
       this.pipeline.reset();
       _.each(keyedRecords, (rec, num) => {

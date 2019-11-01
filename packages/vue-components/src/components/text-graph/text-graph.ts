@@ -14,7 +14,8 @@ import {
 
 import {namespace} from "vuex-class";
 
-import rtree from "rbush";
+// import rtree from "rbush";
+import RBush from "rbush";
 
 import {
   TextDataPoint,
@@ -162,7 +163,7 @@ export default class TextGraph extends Vue {
   @Prop() textgrid!: GridTypes.Textgrid;
 
 
-  public textgridRTree: rbush.RBush<TextDataPoint> = rtree<TextDataPoint>();
+  public textgridRTree: RBush<TextDataPoint> = new RBush<TextDataPoint>();
 
 
   @textGraphState.State hoveredText!: TextDataPoint[];
@@ -194,6 +195,7 @@ export default class TextGraph extends Vue {
   @Watch("hoverQuery")
   onHoverQueryChange(newVal: BBox[], _: BBox[]): void {
 
+    // @ts-ignore
     const queryBoxSel = this.selectSvg()
       .select("g.reticles")
       .selectAll("rect.query-reticle")
