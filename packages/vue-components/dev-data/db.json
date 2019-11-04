@@ -9,9 +9,8 @@
         {"stableId": "78-1088803.pdf.d"}
       ]
     }
-  }
+  },
 
-  "//": "Format for list of corpus entries",
   "paginatedEntries" : {
     "start": 20,
     "corpusSize": 1000,

@@ -17,9 +17,9 @@ module.exports = ({config, mode}) => {
 
   config.resolve.extensions.push('.ts', '.tsx', '.vue', '.css', '.less', '.html');
 
-  config.resolve.alias = {
-    '@': path.resolve(__dirname, "src")
-  };
+  // config.resolve.alias = {
+  //   '@': path.resolve(__dirname, "src")
+  // };
 
   const rules = [
     {test: /(?!flycheck_)(?:\.ts$)/,

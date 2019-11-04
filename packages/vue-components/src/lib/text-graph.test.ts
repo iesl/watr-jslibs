@@ -4,8 +4,6 @@ import {
   gridDataToGlyphData
 } from './TextGlyphDataTypes'
 
-// } from 'Src/lib/TextGlyphDataTypes'
-
 import fs, {  } from "fs-extra";
 
 import {
