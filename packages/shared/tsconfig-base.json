@@ -22,17 +22,11 @@
 
     "diagnostics": true,
 
-
     "types": [
       "jest",
       "chai"
-    ],
+    ]
 
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
   }
 
 

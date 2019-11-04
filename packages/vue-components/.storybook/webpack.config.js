@@ -17,6 +17,10 @@ module.exports = ({config, mode}) => {
 
   config.resolve.extensions.push('.ts', '.tsx', '.vue', '.css', '.less', '.html');
 
+  config.resolve.alias = {
+    '@': path.resolve(__dirname, "src")
+  };
+
   const rules = [
     {test: /(?!flycheck_)(?:\.ts$)/,
       exclude: /node_modules/,
@@ -52,17 +56,6 @@ module.exports = ({config, mode}) => {
   config.resolve.plugins = config.resolve.plugins || [];
   config.resolve.plugins.push(configPathsPlugin);
 
+
   return config;
 };
-
-
-
-
-
-
-
-
-
-
-
-

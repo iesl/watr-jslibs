@@ -2,9 +2,10 @@
 import {
   initGridData,
   gridDataToGlyphData
-} from '@/lib/TextGlyphDataTypes'
+} from './TextGlyphDataTypes'
 
-// import * as fs from 'file-system';
+// } from 'Src/lib/TextGlyphDataTypes'
+
 import fs, {  } from "fs-extra";
 
 import {
