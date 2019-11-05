@@ -2,7 +2,7 @@
 import auth0, { AuthorizeOptions } from "auth0-js";
 
 import { EventEmitter } from "events";
-import authConfig from "@/../auth_config.json";
+import authConfig from "../../auth_config.json";
 
 const localStorageKey = "loggedIn";
 const loginEvent = "loginEvent";

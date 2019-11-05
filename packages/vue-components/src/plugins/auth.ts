@@ -1,7 +1,7 @@
 
 //
 import Vue, { PluginObject, VueConstructor } from "vue";
-import authService from "@/auth/authService";
+import authService from "../auth/authService";
 
 const plugin: PluginObject<{}> = {
   install(vue: VueConstructor) {

@@ -8,8 +8,9 @@
  *
  */
 
+
+
 import _ from "lodash";
-import lunr from "lunr";
 
 type Candidate = object;
 
@@ -62,6 +63,8 @@ export class SelectionFilteringEngine {
     this.keyedRecordGroups = this.groupRecordsByKey(this.keyedRecords);
     this.lunrIndex = this.initIndex(this.keyedRecords);
     this.indexTokens = this.lunrIndex.tokenSet.toArray();
+
+    this.lunrIndex
   }
 
   public groupRecordsByKey(records: KeyedRecord[]): KeyedRecordGroup[] {

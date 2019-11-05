@@ -1,7 +1,7 @@
 
 import Vue, { PluginObject } from "vue";
 
-import { asyncGetJson } from '@/lib/dev-helpers';
+import { asyncGetJson } from '../lib/dev-helpers';
 // import { ServerAPI } from '@/lib/ServerAPI';
 
 

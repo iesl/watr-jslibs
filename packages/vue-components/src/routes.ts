@@ -4,7 +4,7 @@ import VueRouter from "vue-router";
 
 import Browse from "./pages/browse/browse.vue";
 import Callback from "./components/auth/callback";
-import authService from "@/auth/authService";
+import authService from "./auth/authService";
 
 Vue.use(VueRouter);
 

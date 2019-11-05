@@ -4,7 +4,7 @@ import {
   default as CorpusArtifactList
 } from "./corpus-artifact-list.vue";
 
-import store from "@/store";
+import store from "../../store";
 
 const stories = storiesOf("Corpus Artifacts", module);
 

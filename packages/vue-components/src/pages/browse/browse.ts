@@ -4,7 +4,7 @@ import {
   // @ts-ignore: Module '"*.vue"' has no exported member ...
   LoadingComponent, ErrorComponent,
   default as CorpusArtifact
-} from '@/components/corpus-artifact/corpus-artifact.vue';
+} from '../../components/corpus-artifact/corpus-artifact.vue';
 
 
 @Component({

@@ -3,9 +3,9 @@ import {storiesOf} from "@storybook/vue";
 
 import PdfPage from "./pdf-page.vue";
 
-import store from "@/store";
+import store from "../../store";
 
-import { asyncGetJson } from "@/lib/dev-helpers";
+import { asyncGetJson } from "../../lib/dev-helpers";
 
 // import * as $ from 'jquery';
 import { GridTypes } from "sharedLib";

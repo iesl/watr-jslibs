@@ -1,7 +1,7 @@
 import {Vue, Component, Prop} from "vue-property-decorator";
 
-import LoginPanel from "@/components/auth/login";
-import Callback from "@/components/auth/callback";
+import LoginPanel from "../components/auth/login";
+import Callback from "../components/auth/callback";
 
 @Component({
   components: {

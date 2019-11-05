@@ -12,14 +12,17 @@
       "webpack-env",
       "jest",
       "chai",
-      "vuetify"
+      "vuetify",
     ]
 
   },
 
   "paths": {
     "@/*": [
-      "src/*"
+      "./src/*"
+    ],
+    "Src/*": [
+      "./src/*"
     ]
   },
 

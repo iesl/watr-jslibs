@@ -53,8 +53,8 @@ module.exports = ({config, mode}) => {
   config.plugins.push(new ForkTsCheckerWebpackPlugin());
   // config.plugins.push(extractLess);
 
-  config.resolve.plugins = config.resolve.plugins || [];
-  config.resolve.plugins.push(configPathsPlugin);
+  // config.resolve.plugins = config.resolve.plugins || [];
+  // config.resolve.plugins.push(configPathsPlugin);
 
 
   return config;

@@ -1,14 +1,14 @@
 import Vue, {VNode, CreateElement} from "vue";
 
 import Vuex from "vuex";
-import "@/plugins/vuetify";
-import installVueGlobals from "@/plugins/globals";
+import "./plugins/vuetify";
+import installVueGlobals from "./plugins/globals";
 
-import AuthPlugin from "@/plugins/auth";
+import AuthPlugin from "./plugins/auth";
 
 import App from "./app/App.vue";
-import { ServerAPI } from "@/lib/ServerAPI";
-import router from "@/routes";
+import { ServerAPI } from "./lib/ServerAPI";
+import router from "./routes";
 
 export class ProductionServerAPI implements ServerAPI {
   getCorpusListing(start: number, len: number): any[] {

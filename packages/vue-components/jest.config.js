@@ -13,7 +13,6 @@ module.exports = {
       }
     }
   },
-  setupFiles: ['./src/module-alias/index.ts'],
   "transform": {
     "^.+\\.tsx?$": "ts-jest"
   },
@@ -28,8 +27,8 @@ module.exports = {
   ],
 
   "moduleNameMapper": {
-    // "^Config(.*)$": "<rootDir>/src/config$1",
-    "^@/lib/(.*)$": "./src/lib/$1"
+    "^@/(.*)$": "<rootDir>/src/$1",
+    "^Src/(.*)": "<rootDir>/src/$1"
   }
 
 };
