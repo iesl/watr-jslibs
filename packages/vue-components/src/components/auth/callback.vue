@@ -20,6 +20,6 @@
 
 <template lang="html">
   <div class="spinner">
-    <img src="@/assets/loading.svg" alt="Loading">
+    <!-- <img src="@/assets/loading.svg" alt="Loading"> -->
   </div>
 </template>

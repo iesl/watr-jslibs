@@ -18,7 +18,7 @@
     "rxjs": "^6.5.3",
     "simple-ajax-uploader": "^2.6.7",
     "split.js": "^1.5.11",
-    "tippy.js": "^5.1.0",
+    "tippy.js": "^5.1.1",
     "vue": "^2.6.10",
     "vuex": "^3.1.1",
     "watr-vue-components": "^0.1.0"

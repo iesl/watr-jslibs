@@ -11,6 +11,7 @@
 
 
 import _ from "lodash";
+import lunr from "lunr";
 
 type Candidate = object;
 
@@ -62,7 +63,8 @@ export class SelectionFilteringEngine {
     this.keyedRecords = this.regroupCandidates(candidateSets);
     this.keyedRecordGroups = this.groupRecordsByKey(this.keyedRecords);
     this.lunrIndex = this.initIndex(this.keyedRecords);
-    this.indexTokens = this.lunrIndex.tokenSet.toArray();
+    const tokenSet = (<any>this.lunrIndex).tokenSet;
+    this.indexTokens = tokenSet.toArray();
 
     this.lunrIndex
   }
@@ -99,7 +101,12 @@ export class SelectionFilteringEngine {
       _.each(terms, queryTerm => {
         const clause: lunr.Query.Clause = {
           term: `*${queryTerm}*`,
-          presence: lunr.Query.presence.REQUIRED,
+          // presence: lunr.Query.presence.REQUIRED,
+          fields: [],
+          boost: 1,
+          editDistance: 0,
+          usePipeline: true,
+          wildcard: 0
         };
         query.clause(clause);
       });

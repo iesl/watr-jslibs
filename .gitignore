@@ -53,3 +53,5 @@ tmp*
 .vscode
 
 auth_config.json
+
+.nuxt

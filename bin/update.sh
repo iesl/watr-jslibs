@@ -1,70 +1,67 @@
 #!/bin/bash
 
+lerna exec -- ncu --loglevel verbose
 
-showhelp() {
-    echo "Usage: $SCRIPT: "
-    echo "  todo  "
-    exit 2
-}
 
-# default arg vals
-install=
+# showhelp() {
+#     echo "Usage: $SCRIPT: "
+#     echo "  todo  "
+#     exit 2
+# }
 
-while getopts "ih" name; do
-    case $name in
-        i)    install=1;;
-        h)    showhelp $0;;
-        [?])  showhelp $0;;
-    esac
-done
+# # default arg vals
+# install=
 
-root=$(pwd)
+# while getopts "ih" name; do
+#     case $name in
+#         i)    install=1;;
+#         h)    showhelp $0;;
+#         [?])  showhelp $0;;
+#     esac
+# done
 
-PROJECTS=(
-    'watrmarks.js'
-    'shared'
-    'vue-components'
-    'client-app'
-    '.'
-)
+# root=$(pwd)
 
-oneach() {
-    op1=$1;
-    op2=$2;
+# PROJECTS=(
+#     'watrmarks.js'
+#     'shared'
+#     'vue-components'
+#     'client-app'
+#     '.'
+# )
 
-    for proj in "${PROJECTS[@]}"
-    do
-        echo ">> $proj"
-        cd "packages/$proj"
-        if [[ ! -z "$op1" ]]; then
-            echo "running $op1"
-            eval $op1
-        else
-            echo "no op1 specified "
-        fi
+# oneach() {
+#     op1=$1;
+#     op2=$2;
 
-        cd $root
+#     for proj in "${PROJECTS[@]}"
+#     do
+#         echo ">> $proj"
+#         cd "packages/$proj"
+#         if [[ ! -z "$op1" ]]; then
+#             echo "running $op1"
+#             eval $op1
+#         else
+#             echo "no op1 specified "
+#         fi
 
-        if [[ ! -z "$op2" ]]; then
-            echo "running $op2"
-            eval $op2
-        else
-            echo "no op2 specified "
-        fi
+#         cd $root
 
-        echo -e "\n\n"
-    done
-}
+#         if [[ ! -z "$op2" ]]; then
+#             echo "running $op2"
+#             eval $op2
+#         else
+#             echo "no op2 specified "
+#         fi
 
-if [ -z "$install" ]; then
-    ## ...
-    oneach "npm outdated"
-else
-    oneach "npm update" "lerna bootstrap"
+#         echo -e "\n\n"
+#     done
+# }
 
-fi
+# if [ -z "$install" ]; then
+#     ## ...
+#     oneach "npm outdated"
+# else
+#     oneach "npm update" "lerna bootstrap"
 
-# oneach "npm install -D ts-jest@latest"
-# oneach "npm install -D ts-node@latest"
-# oneach "npm install -D tippy.js@latest"
-# oneach "npm update" "lerna bootstrap"
+# fi
