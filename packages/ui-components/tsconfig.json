@@ -1,0 +1,34 @@
+{
+  "extends": "../shared/tsconfig-base.json",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
+
+    "types": [
+      "webpack-env",
+      "jest",
+      "chai",
+      "vuetify",
+      "@types/node",
+      "@nuxt/types"
+    ]
+
+  },
+
+  "paths": {
+    "@/*": ["./*"],
+    "~/*": ["./*"]
+  },
+
+  "include": [
+    "src/**/*"
+  ],
+
+  "exclude": [
+    "node_modules"
+  ]
+}
