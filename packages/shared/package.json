@@ -34,7 +34,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"
   },
-  "main": "./src/index.ts",
+  "main": "dist/index.js",
   "jest": {
     "roots": [
       "<rootDir>/src"
