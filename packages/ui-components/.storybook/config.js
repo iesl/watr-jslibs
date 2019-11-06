@@ -9,7 +9,7 @@ import Vuex from 'vuex';
 // Vue.use(installVueGlobals, {endpoint: 'http://localhost:9000'});
 
 import { addParameters, configure } from '@storybook/vue';
-import '../assets/css/tailwind.css'
+import '~/assets/css/tailwind.css'
 
 
 
@@ -20,7 +20,7 @@ Vue.use(Vuex);
 
 // Vue.component('List', List);
 
-const req = require.context('../components', true, /(?!(.*flycheck.*))(\.stories\.[tj]s$)/);
+const req = require.context('../src', true, /(?!(.*flycheck.*))(\.stories\.[tj]s$)/);
 function loadStories() {
   req.keys().forEach(filename => {
     if (!filename.includes("flycheck_")) {

@@ -1,6 +1,9 @@
-const colors = require('vuetify/es5/util/colors').default
 
-module.exports = {
+const path = require('path')
+const colors = require('vuetify/es5/util/colors').default
+const tailwindJS = path.join(__dirname, 'tailwind.js')
+
+const config = {
   mode: 'universal',
   /*
    ** Headers of the page
@@ -19,6 +22,9 @@ module.exports = {
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
   },
+
+  srcDir: 'src/',
+
   /*
    ** Customize the progress-bar color
    */
@@ -26,9 +32,7 @@ module.exports = {
   /*
    ** Global CSS
    */
-  css: [
-    '~/assets/css/tailwind.css'
-  ],
+  css: ['~/assets/css/tailwind.css'],
   /*
    ** Plugins to load before mounting the App
    */
@@ -54,8 +58,7 @@ module.exports = {
    ** Axios module configuration
    ** See https://axios.nuxtjs.org/options
    */
-  axios: {
-  },
+  axios: {},
   /*
    ** vuetify module configuration
    ** https://github.com/nuxt-community/vuetify-module
@@ -81,6 +84,21 @@ module.exports = {
    ** Build configuration
    */
   build: {
+    babel: {
+      plugins: [
+        ['@babel/plugin-proposal-decorators', { legacy: true }]
+        // 'transform-decorators-legacy',
+        // 'transform-class-properties'
+      ]
+    },
+
+    postcss: {
+      plugins: [
+        require('tailwindcss')(tailwindJS),
+        require('autoprefixer')
+      ]
+    },
+
     /*
      ** You can extend webpack config here
      */
@@ -97,3 +115,5 @@ module.exports = {
     }
   }
 }
+
+module.exports = config

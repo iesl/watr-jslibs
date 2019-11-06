@@ -2,7 +2,7 @@
 import Vue from 'vue';
 import { storiesOf } from '@storybook/vue'
 
-import store from '../../.storybook/store'
+import store from '~/../.storybook/store'
 import List from './List'
 
 

@@ -9,7 +9,11 @@
               "node": "current"
             }
           }
-        ]
+        ],
+        "babel-preset-vue",
+      ],
+      "plugins": [
+        ["@babel/plugin-proposal-decorators", { "legacy": true }],
       ]
     }
   }

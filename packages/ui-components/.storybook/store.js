@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 
 import axios from 'axios'
 
-import actions from '../store/actions'
+import actions from '../src/store/actions'
 
 
 let store = new Vuex.Store({

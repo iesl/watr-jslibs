@@ -1,0 +1,21 @@
+@import '~/assets/sass/inc/_solarized';
+
+div.textgrid {
+    margin: 10px;
+    position: relative;
+    background: $base3;
+
+    // canvas.textgrid and svg.textgrid are superimposed
+    canvas.textgrid {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    svg.textgrid {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+}
+
