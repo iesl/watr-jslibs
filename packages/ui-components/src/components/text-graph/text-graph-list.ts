@@ -2,25 +2,12 @@ import _ from 'lodash';
 import $ from 'jquery';
 
 import Vue from 'vue'
-import Component from 'nuxt-class-component'
-
-// import {
-//   Vue,
-//   Component,
-// } from "vue-property-decorator";
+import { Component } from "nuxt-property-decorator";
 
 import TextGraph from "./text-graph";
 
 import {
-  // coords,
-  // MouseHandlerSets as mhs,
-  // MouseHandlers,
   GridTypes,
-  // Point,
-  // BBox,
-  // tstags,
-  // d3x,
-  // getOrDie
 } from "sharedLib";
 
 @Component({

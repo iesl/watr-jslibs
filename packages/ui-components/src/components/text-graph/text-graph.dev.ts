@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import Component from 'nuxt-class-component'
+import { Component } from "nuxt-property-decorator";
 
 import TextGraphList from "./text-graph-list";
 

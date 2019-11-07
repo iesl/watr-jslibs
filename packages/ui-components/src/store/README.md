@@ -1,39 +1,10 @@
 # STORE
 
-src/store.ts
-// import Vue from 'vue';
-// import Vuex from 'vuex';
+**This directory is not required, you can delete it if you don't want to use it.**
 
-// // import { FilteringStateModule } from './components/filter-engine/filter-engine-state';
-// import { TextGraphStateModule } from './components/text-graph/text-graph';
-// // import { PdfPageStateModule } from './components/pdf-pages/pdf-page';
+This directory contains your Vuex Store files.
+Vuex Store option is implemented in the Nuxt.js framework.
 
-// Vue.use(Vuex);
+Creating a file in this directory automatically activates the option in the framework.
 
-// export default new Vuex.Store({
-
-//   modules: {
-//     // filteringState: new FilteringStateModule(),
-//     textGraphState: new TextGraphStateModule(),
-//     // pdfPageState: new PdfPageStateModule()
-//   }
-
-// });
-
-
-.storybook/store.js
-import Vue from 'vue'
-import Vuex from 'vuex'
-
-import axios from 'axios'
-
-import actions from '../src/store/actions'
-
-let store = new Vuex.Store({
-  actions: actions
-})
-
- Bind Axios to Store as we don't have access to Nuxt's $axios instance here
-store.$axios = axios
-
-export default store
+More information about the usage of this directory in [the documentation](https://nuxtjs.org/guide/vuex-store).

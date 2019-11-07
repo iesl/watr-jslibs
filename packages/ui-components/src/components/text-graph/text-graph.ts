@@ -1,8 +1,7 @@
-//
-// import * as $ from 'jquery';
 import _ from 'lodash';
 
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import Vue from 'vue'
+import { Component, Prop, Watch } from "nuxt-property-decorator";
 
 import {
   Module,
@@ -21,7 +20,7 @@ import {
   TextDataPoint,
   initGridData,
   GridData
-} from '../../lib/TextGlyphDataTypes'
+} from '~/lib/TextGlyphDataTypes'
 
 import {
   resizeCanvas
@@ -30,7 +29,7 @@ import {
 
 import {
   coords,
-  MouseHandlerSets as mhs,
+  // MouseHandlerSets as mhs,
   MouseHandlers,
   GridTypes,
   Point,
@@ -341,8 +340,9 @@ export default class TextGraph extends Vue {
 
   }
 
-  setMouseHandlers(handlers: ((widget: TextGraph) => MouseHandlers)[]) {
-    mhs.setMouseHandlers(this, this.frameId, handlers);
+  // setMouseHandlers(handlers: ((widget: TextGraph) => MouseHandlers)[]) {
+  setMouseHandlers(_: ((widget: TextGraph) => MouseHandlers)[]) {
+    // mhs.setMouseHandlers(this, this.frameId, handlers);
   }
 
 

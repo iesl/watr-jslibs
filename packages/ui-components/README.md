@@ -1,6 +1,6 @@
-# ui-components
+# ui-comp
 
-> My astonishing Nuxt.js project
+> testing nuxt gen
 
 ## Build Setup
 

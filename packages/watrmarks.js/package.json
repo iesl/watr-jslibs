@@ -5,15 +5,20 @@
   "bundleDependencies": false,
   "deprecated": false,
   "description": "NPM package for WatrMarks",
-  "main": "./dist/index.js",
+  "main": "./dist/watrmarks-fastopt.js",
   "types": "./dist/watrmarks.d.ts",
   "scripts": {
-    "build": "tsc",
+    "test": "jest",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
     "clean": "rimraf dist && mkdir dist && rimraf lib.d && mkdir lib.d",
-    "fetchlib": "cp ../../../watr-marks/js/target/scala-2.12/watrmarks-fastopt.js* lib.d/",
-    "cplib": "cp lib.d/watrmarks-fastopt.js.map dist/ && cp src/watrmarks.d.ts dist/",
-    "dist": "npm-run-all clean fetchlib build cplib",
-    "test": "jest"
+    "fetchlib": "xx cp ../../../watr-marks/js/target/scala-2.12/watrmarks-fastopt.js* lib.d/",
+    "cplib": "xx cp lib.d/watrmarks-fastopt.js.map dist/ && cp src/watrmarks.d.ts dist/",
+
+    "dist": "xx npm-run-all clean fetchlib build cplib",
+    "build": "npm-run-all clean build:types build:js",
+    "build:types": "tsc --emitDeclarationOnly --declaration",
+    "build:js": "babel src --out-dir dist"
   },
   "include": [
     "src/**/*"
@@ -24,8 +29,10 @@
     "WatrMarks"
   ],
   "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-typescript": "^7.7.2",
     "@types/jest": "^24.0.21",
-    "babel-preset-env": "^1.7.0",
     "jest": "^24.9.0",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.0",

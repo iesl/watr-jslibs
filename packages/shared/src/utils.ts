@@ -5,8 +5,8 @@
 import _ from "lodash";
 import $ from "jquery";
 
-// @ts-ignore 
-import { Tree } from "watrmarksJs";
+// @ts-ignore
+import { scalazed_Tree as Tree } from "watrmarksJs";
 
 export function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);

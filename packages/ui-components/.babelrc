@@ -5,15 +5,13 @@
         [
           "@babel/preset-env",
           {
+            modules: false,
+            loose: true,
             "targets": {
-              "node": "current"
+              "node": "10.16.0"
             }
           }
-        ],
-        "babel-preset-vue",
-      ],
-      "plugins": [
-        ["@babel/plugin-proposal-decorators", { "legacy": true }],
+        ]
       ]
     }
   }

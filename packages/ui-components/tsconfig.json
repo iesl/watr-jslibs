@@ -1,13 +1,29 @@
 {
-  "extends": "../shared/tsconfig-base.json",
-
   "compilerOptions": {
     "baseUrl": ".",
-
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "resolveJsonModule": true,
     "allowJs": true,
+
+    "target": "es6",
+    "module": "es6",
+    "moduleResolution": "node",
+
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
+
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+
+    "noImplicitReturns": true,
+
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+
+    "inlineSourceMap": true,
+    "preserveConstEnums": true,
+
+    "diagnostics": true,
 
     "types": [
       "webpack-env",
@@ -16,18 +32,20 @@
       "vuetify",
       "@types/node",
       "@nuxt/types"
-    ]
+    ],
+
+    "paths": {
+      "~/*":  ["./src/*"],
+      "@/*":  ["./src/*"],
+      "~~/*": ["./src/*"],
+      "@@/*": ["./src/*"]
+    }
 
   },
 
-  "paths": {
-    "@/*": ["./src/*"],
-    "~/*": ["./src/*"]
-  },
+  "exclude": ["node_modules", ".nuxt", "dist"],
 
   "include": [
     "src/**/*"
   ],
-
-  "exclude": ["node_modules", ".nuxt", "dist"]
 }
