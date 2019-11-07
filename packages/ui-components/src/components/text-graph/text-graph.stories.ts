@@ -1,12 +1,12 @@
 import {storiesOf} from "@storybook/vue";
 
-import TextGraphDev from "./text-graph.dev.vue";
+import TextGraphDev from "./text-graph.dev";
 
-import store from "~/../.storybook/store";
-
+// 
+// import store from "~/../.storybook/store";
 
 storiesOf("TextGraphDev", module).add("basic", () => ({
-  store,
+  // store,
   components: {TextGraphDev},
   template: "<TextGraphDev />",
   methods: {},

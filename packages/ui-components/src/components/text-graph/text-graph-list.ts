@@ -1,4 +1,3 @@
-
 import _ from 'lodash';
 import $ from 'jquery';
 
@@ -10,7 +9,7 @@ import Component from 'nuxt-class-component'
 //   Component,
 // } from "vue-property-decorator";
 
-import TextGraph from "./text-graph.vue";
+import TextGraph from "./text-graph";
 
 import {
   // coords,
