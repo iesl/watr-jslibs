@@ -3,11 +3,10 @@
         <div class="status-top"> </div>
         <div class="infobar-pane"> </div>
 
-        <div :id="imageContentId" class="frame-content">
-            <div :style="dimensionStyle" :width="pageWidth" :height="pageHeight" class="page-image">
-                <svg :style="dimensionStyle" :width="pageWidth" :height="pageHeight" class="page-image">
-                    <image :width="pageWidth" :height="pageHeight" :style="dimensionStyle" :href="imageHref"></image>
-                </svg>
+        <div class="frame-content">
+
+            <div :id="imageContentId" :style="dimensionStyle" :width="pageWidth" :height="pageHeight" class="page-image">
+                <img :width="pageWidth" :height="pageHeight" :style="dimensionStyle" :src="imageHref"></img>
             </div>
         </div>
 

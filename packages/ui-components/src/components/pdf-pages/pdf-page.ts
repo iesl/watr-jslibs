@@ -4,11 +4,9 @@ import _ from 'lodash';
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 
 import {
-  Module,
-  GetterTree,
   MutationTree,
-  ActionTree,
-  Plugin
+  // ActionTree,
+  // Plugin
 } from 'vuex';
 
 import {namespace} from "vuex-class";
@@ -18,8 +16,7 @@ import {
   GridData,
   initGridData,
   gridDataToGlyphData
-} from '../../lib/TextGlyphDataTypes'
-
+} from '~/lib/TextGlyphDataTypes'
 
 import {
   coords,
@@ -40,31 +37,33 @@ export class PdfPageState {
   clickedText: [ TextDataPoint ] | [] = [];
 }
 
-export class PdfPageStateModule implements Module<PdfPageState, any> {
-  namespaced: boolean = true
+export const PdfPageMutations = <MutationTree<PdfPageState>> {
+  setHoveredText(state: PdfPageState, hoveredText: TextDataPoint[]) {
+    // console.log('setting hover', state);
+    state.hoveredText = hoveredText;
+  },
 
-  state: PdfPageState =  new PdfPageState();
-
-  actions = <ActionTree<PdfPageState, any>> {}
-
-  mutations = <MutationTree<PdfPageState>> {
-    setHoveredText(state: PdfPageState, hoveredText: TextDataPoint[]) {
-      state.hoveredText = hoveredText;
-    },
-
-    setClickedText(state: PdfPageState, newVal: TextDataPoint) {
-      state.clickedText = [newVal];
-    }
+  setClickedText(state: PdfPageState, newVal: TextDataPoint) {
+    state.clickedText = [newVal];
   }
-
-  getters = <GetterTree<PdfPageState, any>> {}
-
-  plugins: Plugin<PdfPageState>[] = []
-
-  constructor() {
-  }
-
 }
+
+// export class PdfPageStateModule implements Module<PdfPageState, any> {
+//   namespaced: boolean = true
+//   state: PdfPageState =  new PdfPageState();
+//   actions = <ActionTree<PdfPageState, any>> {}
+//   mutations = <MutationTree<PdfPageState>> {
+//     setHoveredText(state: PdfPageState, hoveredText: TextDataPoint[]) {
+//       state.hoveredText = hoveredText;
+//     },
+//     setClickedText(state: PdfPageState, newVal: TextDataPoint) {
+//       state.clickedText = [newVal];
+//     }
+//   }
+//   getters = <GetterTree<PdfPageState, any>> {}
+//   plugins: Plugin<PdfPageState>[] = []
+//   constructor() {}
+// }
 
 function defaultMouseHandlers(widget: PdfPage): MouseHandlers {
   return {
@@ -93,6 +92,7 @@ function defaultMouseHandlers(widget: PdfPage): MouseHandlers {
     },
     mousemove: (event: object)  => {
       const userPt = coords.mkPoint.offsetFromJqEvent(event);
+      console.log('mouse @', userPt);
 
       const glyphRTree = widget.glyphRTree;
 
@@ -103,6 +103,7 @@ function defaultMouseHandlers(widget: PdfPage): MouseHandlers {
       const queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
 
       const hits: TextDataPoint[] = glyphRTree.search(queryBox);
+      console.log('hits', hits);
 
       const queryHits = _.sortBy(
         _.filter(hits, (hit) => hit.glyphData !== undefined),
@@ -155,6 +156,8 @@ export default class PdfPage extends Vue {
 
   @Watch("hoveredText")
   onHoveredText(newVal: TextDataPoint[], oldVal: TextDataPoint[]): void {
+    console.log('on hover', newVal);
+
     const newIds = new Set(_.map(newVal, v => v.id));
     const oldIds = new Set(_.map(oldVal, v => v.id));
     const eqIds = _.isEqual(newIds, oldIds);
@@ -183,16 +186,31 @@ export default class PdfPage extends Vue {
 
   @Watch("initDataReady")
   onInitDataReady(newVal: boolean): void {
-    console.log('initDataReady');
+    // console.log('initDataReady');
     if (newVal) {
       this.initialCandidates();
     }
   }
+    // <svg :id="svgId" :style="dimensionStyle" :width="pageWidth" :height="pageHeight" class="page-image">
+    // <image :width="pageWidth" :height="pageHeight" :style="dimensionStyle" :href="imageHref"></image>
+    // </svg>
 
   mounted() {
 
     this.$nextTick(() => {
       console.log('mounted');
+
+      d3x.d3id(this.imageContentId)
+        .append("svg").classed("page-image", true)
+        .attr("id", this.svgId)
+        .attr("page", this.pageNum)
+        .attr("width", this.pageWidth)
+        .attr("height", this.pageHeight)
+        .attr("style", this.dimensionStyle)
+      ;
+
+      this.initHoverReticles();
+
       this.initialCandidates();
       this.setMouseHandlers([
         defaultMouseHandlers,
@@ -201,15 +219,35 @@ export default class PdfPage extends Vue {
     })
   }
 
+  initHoverReticles() {
+    const reticleGroup = this.selectSvg()
+      .append("g")
+      .classed("reticles", true);
+
+    reticleGroup
+      .append("rect")
+      .classed("query-reticle", true)
+      .call(d3x.initStroke, "blue", 1, 0.6)
+      .call(d3x.initFill, "blue", 0.3)
+    ;
+
+    return reticleGroup;
+  }
+
   @Watch("hoverQuery")
   onHoverQueryChange(newVal: BBox[], _: BBox[]): void {
+    console.log('onHoverQueryChange', newVal)
 
     // @ts-ignore
     const queryBoxSel = this.selectSvg()
       .select("g.reticles")
       .selectAll("rect.query-reticle")
     // @ts-ignore
-      .data(newVal, (d: BBox) => [d.x, d.y] )
+      .data(newVal, (d: BBox) => {
+        console.log('onHoverQueryChange: (d)', d)
+
+        return [d.left, d.top];
+      })
     ;
 
     queryBoxSel.enter()
@@ -228,14 +266,20 @@ export default class PdfPage extends Vue {
   }
 
   initialCandidates(): void {
+    const textgridData = this.$props.textgrid;
+    const textGridPage0 = textgridData.pages[0].textgrid;
     const tmpPageMargin = 10;
     const origin = new Point(tmpPageMargin, tmpPageMargin, coords.CoordSys.GraphUnits);
-    const textgrid: GridData = initGridData(this.textgrid, this.pageNum, _ => 10, origin, 10);
+    // console.log('textgrid input= ', textgridData);
+    // const textgrid: GridData = initGridData(textgridData, this.pageNum, _ => 10, origin, 10);
+    const textgrid: GridData = initGridData(textGridPage0, this.pageNum, _ => 10, origin, 10);
+    // console.log('textgrid output= ', textgrid);
+
     // this.drawGlyphs(textgrid.textDataPoints);
     const glyphData = gridDataToGlyphData(textgrid.textDataPoints);
 
-    console.log('init grid data', textgrid.textDataPoints.slice(0, 10));
-    console.log('init glyph data', glyphData.slice(0, 10));
+    // console.log('init grid data', textgrid.textDataPoints.slice(0, 10));
+    // console.log('init glyph data', glyphData.slice(0, 10));
     this.glyphRTree.load(glyphData);
 
   }

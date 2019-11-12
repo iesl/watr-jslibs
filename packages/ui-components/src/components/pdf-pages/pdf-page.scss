@@ -1,6 +1,6 @@
 
-@import '../../style/inc/_solarized.less';
-@import '../../style/inc/_alignment.less';
+@import '~/assets/sass/inc/_solarized';
+@import '~/assets/sass/inc/_alignment';
 
 div.page-image-widget {
 
@@ -8,13 +8,13 @@ div.page-image-widget {
     margin-top: 1px;
 
     div.status-top {
-        background: @base01;
+        background: $base01;
 
         font-size: 1.1em;
         font-weight: bold;
         color: white;
 
-        .noselect();
+        // ACS .noselect();
     }
 
     border-style: solid;
