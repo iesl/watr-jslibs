@@ -1,10 +1,6 @@
 <template>
   <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6>
-      <div class="text-center">
-        <logo />
-        <vuetify-logo />
-      </div>
       <div>
         <TextGraphDev />
       </div>
@@ -41,14 +37,6 @@ const cs = {
   VuetifyLogo,
   TextGraphDev
 };
-// let cs = {}
-// if (process.client) {
-// } else {
-//   cs = {
-//     Logo,
-//     VuetifyLogo,
-//   }
-// }
 
 export default {
   components: cs

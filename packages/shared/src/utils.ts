@@ -3,10 +3,9 @@
  */
 
 import _ from "lodash";
-import $ from "jquery";
 
 // @ts-ignore
-import { scalazed_Tree as Tree } from "watrmarksJs";
+// import { scalazed_Tree as Tree } from "watrmarksJs";
 
 export function pp(a: any): string {
   return JSON.stringify(a, undefined, 2);
@@ -54,27 +53,27 @@ export function eventHasLeftClick(event: JQuery.Event) {
   return b === 1;
 }
 
-export function getDescendantTree(rootSelector: string): any {
+// export function getDescendantTree(rootSelector: string): any {
 
-  function loop($elem: JQuery): any {
+//   function loop($elem: JQuery): any {
 
-    const maybeId = $elem.attr('id');
-    const cls = $elem.attr('class');
-    const id = maybeId === undefined ? '' : `#${maybeId}`;
+//     const maybeId = $elem.attr('id');
+//     const cls = $elem.attr('class');
+//     const id = maybeId === undefined ? '' : `#${maybeId}`;
 
-    const childs = _.map($elem.children(), (elemChild: JQuery) => {
-      return loop(elemChild);
-    });
-    if (childs.length > 0) {
-      return Tree.Node(`${id}.${cls}`, childs);
-    }
-    return Tree.Leaf(`${id}.${cls}`);
-  }
+//     const childs = _.map($elem.children(), (elemChild: JQuery) => {
+//       return loop(elemChild);
+//     });
+//     if (childs.length > 0) {
+//       return Tree.Node(`${id}.${cls}`, childs);
+//     }
+//     return Tree.Leaf(`${id}.${cls}`);
+//   }
 
-  return loop($(rootSelector));
-}
+//   return loop($(rootSelector));
+// }
 
-export function getDescendantTreeString(rootSelector: string): string {
-  const desc = getDescendantTree(rootSelector);
-  return Tree.drawTree(desc).toString();
-}
+// export function getDescendantTreeString(rootSelector: string): string {
+//   const desc = getDescendantTree(rootSelector);
+//   return Tree.drawTree(desc).toString();
+// }

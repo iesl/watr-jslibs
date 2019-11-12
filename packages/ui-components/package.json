@@ -10,7 +10,9 @@
     "start": "nuxt start",
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
-    "test": "jest"
+    "test": "jest",
+    "serve:json": "json-server --port 3100 ./dev-data/db.json --static ./dev-data --routes ./dev-data/routes.json",
+    "serve:dev": "ts-node src/server.ts --corpus ../../../datasets.d/corpus-test.d --public ../vue-components/dist"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.3.6",
@@ -47,6 +49,7 @@
     "eslint-config-prettier": "^4.1.0",
     "eslint-plugin-nuxt": ">=0.4.2",
     "eslint-plugin-prettier": "^3.0.1",
+    "json-server": "^0.15.1",
     "jest": "^24.1.0",
     "prettier": "^1.16.4",
     "vue-jest": "^4.0.0-0"

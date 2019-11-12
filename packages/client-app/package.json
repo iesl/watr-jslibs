@@ -20,8 +20,7 @@
     "split.js": "^1.5.11",
     "tippy.js": "^5.1.1",
     "vue": "^2.6.10",
-    "vuex": "^3.1.1",
-    "watr-vue-components": "^0.1.0"
+    "vuex": "^3.1.1"
   },
   "devDependencies": {
     "@types/jest": "^24.0.21",
