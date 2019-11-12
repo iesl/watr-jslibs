@@ -4,7 +4,7 @@
   "singleQuote": true,
   "overrides": [
     {
-      "files": ["*.html"],
+      "files": ["*.html", "*.vue"],
       "html-whitespace-sensitivity": "ignore"
     }
   ]

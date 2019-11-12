@@ -9,17 +9,21 @@ module.exports = {
   },
   extends: [
     '@nuxtjs',
-    'prettier',
-    'prettier/vue',
-    'plugin:prettier/recommended',
     'plugin:nuxt/recommended'
   ],
   plugins: [
-    'prettier'
   ],
   // add your custom rules here
   rules: {
-    'no-unused-vars': 'off',
-    'vue/no-unused-components': 'off'
+    'no-unused-vars': 0,
+    'vue/no-unused-components': 0,
+    'vue/html-self-closing': ['warn', {
+      'html': {
+        void: 'any',
+        normal: 'any'
+      }
+
+    }],
+    'space-before-function-paren': ['off']
   }
 }
