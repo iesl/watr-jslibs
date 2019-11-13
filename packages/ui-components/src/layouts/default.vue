@@ -26,18 +26,18 @@
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app>
         <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-        <v-btn icon @click.stop="miniVariant = !miniVariant">
+        <v-btn @click.stop="miniVariant = !miniVariant" icon>
             <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
         </v-btn>
-        <v-btn icon @click.stop="clipped = !clipped">
+        <v-btn @click.stop="clipped = !clipped" icon>
             <v-icon>mdi-application</v-icon>
         </v-btn>
-        <v-btn icon @click.stop="fixed = !fixed">
+        <v-btn @click.stop="fixed = !fixed" icon>
             <v-icon>mdi-minus</v-icon>
         </v-btn>
         <v-toolbar-title v-text="title" />
         <v-spacer />
-        <v-btn icon @click.stop="rightDrawer = !rightDrawer">
+        <v-btn @click.stop="rightDrawer = !rightDrawer" icon>
             <v-icon>mdi-menu</v-icon>
         </v-btn>
     </v-app-bar>
@@ -79,14 +79,29 @@ export default {
         },
         {
           icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire'
+          title: 'Pdf Page',
+          to: '/components/pdf-page'
+        },
+        {
+          icon: 'mdi-chart-bubble',
+          title: 'Text Graph',
+          to: '/components/text-graph'
+        },
+        {
+          icon: 'mdi-chart-bubble',
+          title: 'Component Api tests',
+          to: '/components/comp-api'
+        },
+        {
+          icon: 'mdi-chart-bubble',
+          title: 'W EventLib',
+          to: '/components/w-eventlib'
         }
       ],
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: 'Vuetify.js'
+      title: 'UI Component Dev'
     }
   }
 }

@@ -5,8 +5,6 @@ import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 
 import {
   MutationTree,
-  // ActionTree,
-  // Plugin
 } from 'vuex';
 
 import {namespace} from "vuex-class";
@@ -47,23 +45,6 @@ export const PdfPageMutations = <MutationTree<PdfPageState>> {
     state.clickedText = [newVal];
   }
 }
-
-// export class PdfPageStateModule implements Module<PdfPageState, any> {
-//   namespaced: boolean = true
-//   state: PdfPageState =  new PdfPageState();
-//   actions = <ActionTree<PdfPageState, any>> {}
-//   mutations = <MutationTree<PdfPageState>> {
-//     setHoveredText(state: PdfPageState, hoveredText: TextDataPoint[]) {
-//       state.hoveredText = hoveredText;
-//     },
-//     setClickedText(state: PdfPageState, newVal: TextDataPoint) {
-//       state.clickedText = [newVal];
-//     }
-//   }
-//   getters = <GetterTree<PdfPageState, any>> {}
-//   plugins: Plugin<PdfPageState>[] = []
-//   constructor() {}
-// }
 
 function defaultMouseHandlers(widget: PdfPage): MouseHandlers {
   return {

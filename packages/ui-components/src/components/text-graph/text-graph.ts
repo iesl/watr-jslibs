@@ -268,6 +268,7 @@ export default class TextGraph extends Vue {
   }
 
   protected zgridWidth: number = this.initialGridWidth;
+
   get gridWidth(): number {
     return this.zgridWidth;
   }

@@ -1,6 +1,7 @@
 
 @import '~/assets/sass/inc/_solarized';
 @import '~/assets/sass/inc/_alignment';
+@import '~/assets/sass/inc/_noselect';
 
 div.page-image-widget {
 
@@ -14,7 +15,7 @@ div.page-image-widget {
         font-weight: bold;
         color: white;
 
-        // ACS .noselect();
+        @include noselect();
     }
 
     border-style: solid;

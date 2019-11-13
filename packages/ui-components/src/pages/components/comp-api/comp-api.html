@@ -1,17 +1,12 @@
-<template>
 <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6>
         <v-card>
             <v-card-title class="headline">
-                UI Component and Interface Dev
+                Component Api Tests
             </v-card-title>
-            <v-card-text>
-                Use Sidebar to select component
-            </v-card-text>
+            <button @click="increment">
+                Count is: {{ state.count }}, double is: {{ state.double }}
+            </button>
         </v-card>
     </v-flex>
 </v-layout>
-</template>
-
-<script lang="ts">
-</script>
