@@ -4,6 +4,11 @@ import _ from 'lodash';
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 
 import {
+  createComponent,
+  ref,
+} from '@vue/composition-api';
+
+import {
   MutationTree,
 } from 'vuex';
 
@@ -29,6 +34,10 @@ import {
 import RBush from "rbush";
 
 const pdfPageState = namespace("pdfPageState");
+
+// import {
+//   useWEventLib,
+// } from '~/components/w-eventlib/w-eventlib'
 
 export class PdfPageState {
   hoveredText: TextDataPoint[] = [];
@@ -99,8 +108,9 @@ function defaultMouseHandlers(widget: PdfPage): MouseHandlers {
 }
 
 
+
 @Component
-export default class PdfPage extends Vue {
+class PdfPage extends Vue {
   @Prop({default: 0}) pageNum!: number;
   @Prop() textgrid!: GridTypes.Textgrid;
   @Prop({default: false}) initDataReady!: boolean;
@@ -217,31 +227,32 @@ export default class PdfPage extends Vue {
 
   @Watch("hoverQuery")
   onHoverQueryChange(newVal: BBox[], _: BBox[]): void {
-    console.log('onHoverQueryChange', newVal)
+    // console.log('onHoverQueryChange', newVal)
 
-    // @ts-ignore
-    const queryBoxSel = this.selectSvg()
-      .select("g.reticles")
-      .selectAll("rect.query-reticle")
-    // @ts-ignore
-      .data(newVal, (d: BBox) => {
-        console.log('onHoverQueryChange: (d)', d)
+    // // @ts-ignore
+    // const queryBoxSel = this.selectSvg()
+    //   .select("g.reticles")
+    //   .selectAll("rect.query-reticle")
+    // // @ts-ignore
+    //   .data(newVal, (d: BBox) => {
+    //     console.log('onHoverQueryChange: (d)', d)
 
-        return [d.left, d.top];
-      })
-    ;
+    //     return [d.left, d.top];
+    //   })
+    // ;
 
-    queryBoxSel.enter()
-      .append("rect")
-      .classed("query-reticle", true)
-      .attr("pointer-events", "none")
-      .call(d3x.initStroke, "blue", 1, 0.6)
-      .call(d3x.initFill, "blue", 0.3)
-      .call(d3x.initRect, (d: any) => d)
-    ;
+    // queryBoxSel.enter()
+    //   .append("rect")
+    //   .classed("query-reticle", true)
+    //   .attr("pointer-events", "none")
+    //   .call(d3x.initStroke, "blue", 1, 0.6)
+    //   .call(d3x.initFill, "blue", 0.3)
+    //   .call(d3x.initRect, (d: any) => d)
+    // ;
 
-    queryBoxSel.exit().remove();
+    // queryBoxSel.exit().remove();
   }
+
   setMouseHandlers(handlers: ((widget: PdfPage) => MouseHandlers)[]) {
     mhs.setMouseHandlers(this, this.frameId, handlers);
   }
@@ -265,6 +276,7 @@ export default class PdfPage extends Vue {
 
   }
 
+
   // drawGlyphs(textDataPoints: TextDataPoint[]): void {
   //   _.each(textDataPoints, textDataPoint => {
   //     const c = textDataPoint.char;
@@ -273,4 +285,35 @@ export default class PdfPage extends Vue {
   //     // context2d.fillText(c, x, y);
   //   });
   // }
+
 }
+
+function useSvgCanvasDivOverlays(divId: string) {
+
+  return {
+
+  };
+}
+
+// eventDiv = document.getElementById(eventDivId);
+export default createComponent({
+  components: {
+  },
+
+  props: {
+    pageNum: Number,
+    textgrid: Object,
+    initDataReady: Boolean
+  },
+
+  setup(props, ctx) {
+    console.log('we are being set up!')
+    console.log('props', props);
+    // console.log('props', props);
+    const root = ref(null);
+    return {
+
+    };
+  }
+
+})

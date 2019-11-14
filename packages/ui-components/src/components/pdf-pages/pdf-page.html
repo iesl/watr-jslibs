@@ -1,10 +1,9 @@
 <div>
-    <div :id="frameId" class="page-image-widget">
+    <div ref="frame" :id="frameId" class="page-image-widget">
         <div class="status-top"> </div>
         <div class="infobar-pane"> </div>
 
         <div class="frame-content">
-
             <div :id="imageContentId" :style="dimensionStyle" :width="pageWidth" :height="pageHeight" class="page-image">
                 <img :width="pageWidth" :height="pageHeight" :style="dimensionStyle" :src="imageHref"></img>
             </div>

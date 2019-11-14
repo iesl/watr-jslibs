@@ -94,8 +94,8 @@ export default {
         },
         {
           icon: 'mdi-chart-bubble',
-          title: 'W EventLib',
-          to: '/components/w-eventlib'
+          title: 'WEventLib Dev',
+          to: '/components/w-eventdev'
         }
       ],
       miniVariant: false,

@@ -1,25 +1,23 @@
 
-// import * as _ from 'lodash';
-// import { BBox, mk, mkPoint, Point } from './coord-sys';
-// import * as rbush from 'rbush';
-// import * as util from './utils';
+import _ from 'lodash';
+import { BBox, mk } from './coord-sys';
 
 
-// /** return min-bounding rect for rtree search hits */
-// export function queryHitsMBR(hits: BBox[]): BBox | undefined {
-//   if (hits.length === 0 ) {
-//     return undefined;
-//   }
-//   const minX = _.min(_.map(hits, 'minX'));
-//   const maxX = _.max(_.map(hits, 'maxX'));
-//   const minY = _.min(_.map(hits, 'minY'));
-//   const maxY = _.max(_.map(hits, 'maxY'));
-//   const width = maxX! - minX!;
-//   const height = maxY! - minY!;
+/** return min-bounding rect for rtree search hits */
+export function queryHitsMBR(hits: BBox[]): BBox | undefined {
+  if (hits.length === 0 ) {
+    return undefined;
+  }
+  const minX = _.min(_.map(hits, 'minX'));
+  const maxX = _.max(_.map(hits, 'maxX'));
+  const minY = _.min(_.map(hits, 'minY'));
+  const maxY = _.max(_.map(hits, 'maxY'));
+  const width = maxX! - minX!;
+  const height = maxY! - minY!;
 
-//   return mk.fromLtwh(minX!, minY!, width, height);
+  return mk.fromLtwh(minX!, minY!, width, height);
 
-// }
+}
 
 // export function initPageLabelRTrees(zones: Zone[]): [number, rbush.RBush<BBox>][] {
 

@@ -1,0 +1,45 @@
+
+@import '~/assets/sass/inc/_solarized';
+@import '~/assets/sass/inc/_alignment';
+@import '~/assets/sass/inc/_noselect';
+
+div.frame {
+
+    display: inline-block;
+    margin-top: 1px;
+
+    border-style: solid;
+    border-width: 10px 12px 13px 14px;
+    border-color: black red blue green;
+
+    .frame-content {
+        display: block;
+
+        div.layers {
+            margin: 10px auto;
+            position: relative;
+            background: white;
+
+            // canvas.textgrid and svg.textgrid are superimposed
+            canvas.layer {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            img.layer {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+
+            svg.layer {
+                position: absolute;
+                top: 0;
+                left: 0;
+            }
+        }
+
+    }
+}
+
