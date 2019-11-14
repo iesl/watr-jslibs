@@ -1,14 +1,29 @@
+import {
+  // reactive,
+  ref,
+  Ref,
+  onMounted,
+} from '@vue/composition-api';
 
-import { useElemOverlays } from '~/components/elem-overlays/elem-overlays'
+
+import { useElemOverlays, OverlayType } from '~/components/elem-overlays/elem-overlays'
 
 export default {
   setup() {
 
-    const divId = 'todo';
-    const elemOverlays = useElemOverlays(divId);
+    const layerRoot: Ref<HTMLDivElement> = ref(null);
+
+    onMounted(() => {
+      const ret = useElemOverlays(layerRoot.value, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
+
+
+
+    });
+
 
 
     return {
+      layerRoot
     };
   }
 }

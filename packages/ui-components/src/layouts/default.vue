@@ -96,6 +96,11 @@ export default {
           icon: 'mdi-chart-bubble',
           title: 'WEventLib Dev',
           to: '/components/w-eventdev'
+        },
+        {
+          icon: 'mdi-chart-bubble',
+          title: 'Layered image/svg/canvas',
+          to: '/components/elem-overlay'
         }
       ],
       miniVariant: false,

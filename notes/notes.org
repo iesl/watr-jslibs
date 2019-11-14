@@ -1,0 +1,55 @@
+* Dev Notes
+
+  
+  
+** Current Goal
+*** Tracelog visualizer 
+**** Pdf Image viewer
+    Display a pdf page as an image, with overlayed text
+
+    - text glyphs highlight on hover and/or nearness
+    - regions of text can be selected 
+    - blocks of text can be copied
+
+***** Elem Overlays (layering) 
+      (div elem) => [...]
+
+      The image/canvas/svg overlay structure
+      - Make sure overlays are aligned and z-stacked correctly
+      - Draw shapes to svg and canvas
+        - Try to take out any helper libraries (d3 and fabric)
+      - Zoom in/out, properly modifying geometry of the layers (new feature)
+
+***** WEvent system
+      (div elem) => [...]
+
+      The hover/knn event system 
+      RTree-based event system lives here
+      Permit registration of mouse/keyboard handlers
+      Useful for glyph highlighting/selection
+      Will be used for graph paper variants (regular grid vs. free-form glyph placement)
+      
+
+**** Tooltips
+**** Filtering/selection engine
+     Search/sort/select log entries to display
+     
+**** Infobar
+     Simple cell-based informational display
+     (optional, review this before implementing)
+     
+
+** Upcoming Goals
+*** Text Viewer for TextWorks
+*** Annotation Viewer
+*** Annotation Labeler
+*** Auth/login implementation using Auth0
+*** File-based server local development (no db required)
+   
+   
+** Incidental Tasks/goals
+
+
+** Client-app notes
+   Client app is the original version, which is being overhauled 
+   [[file:~/projects/the-livingroom/rexa-text-extractors/watr-jslibs/packages/client-app/notes/dev-notes.org::*Watrcolor%20client%20file%20organization][Watrcolor client file organization]]

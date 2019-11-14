@@ -288,12 +288,10 @@ class PdfPage extends Vue {
 
 }
 
-function useSvgCanvasDivOverlays(divId: string) {
-
-  return {
-
-  };
-}
+// function useSvgCanvasDivOverlays(divId: string) {
+//   return {
+//   };
+// }
 
 // eventDiv = document.getElementById(eventDivId);
 export default createComponent({

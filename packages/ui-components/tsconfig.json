@@ -17,7 +17,7 @@
 
     "noImplicitReturns": true,
 
-    "noUnusedParameters": true,
+    "noUnusedParameters": false,
     "noUnusedLocals": false,
 
     "inlineSourceMap": true,

@@ -1,0 +1,32 @@
+div.layers {
+
+    // margin: 10px auto;
+    position: relative;
+    background: white;
+    display: block;
+    overflow: auto;
+
+    z-index: 10 ;
+
+    canvas.layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0 ;
+    }
+
+    img.layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        opacity: 0.3;
+        z-index: 0 ;
+    }
+
+    svg.layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0 ;
+    }
+}
