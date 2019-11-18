@@ -6,7 +6,7 @@ import {
 } from '@vue/composition-api';
 
 
-import { useElemOverlays, OverlayType } from '~/components/elem-overlays/elem-overlays'
+import { useElemOverlays, OverlayType } from '~/components/elem-overlays'
 
 export default {
   setup() {

@@ -4,18 +4,16 @@
 import _ from 'lodash';
 
 import { onMounted, ref } from '@vue/composition-api';
-import { useWEventLib } from '~/components/eventlib-core/eventlib-core'
+import { useEventlibCore } from '~/components/eventlib-core'
 import { coords } from "sharedLib";
 
 
-import { useElemOverlays, OverlayType } from '~/components/elem-overlays/elem-overlays'
+import { useElemOverlays, OverlayType } from '~/components/elem-overlays'
 
 function setup() {
   const overlayRoot = ref(null)
 
-  const {
-    mousePosRef, loadShapes, hoveringRef
-  } = useWEventLib(overlayRoot);
+  const eventlibCore = useEventlibCore(overlayRoot);
 
   const elemOverlay = useElemOverlays(overlayRoot, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
 
@@ -25,11 +23,11 @@ function setup() {
 
     const bbox = coords.mk.fromLtwh(20, 40, 200, 444);
 
-    loadShapes([bbox]);
+    // loadShapes([bbox]);
   });
 
   return {
-    mousePosRef, loadShapes, hoveringRef, overlayRoot
+    // mousePosRef, loadShapes, hoveringRef, overlayRoot
   }
 }
 

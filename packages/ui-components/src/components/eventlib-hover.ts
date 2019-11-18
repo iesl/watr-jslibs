@@ -44,7 +44,7 @@ class EventRTree<T extends RBBox> extends RBush<T> {
 }
 
 
-export function useWEventLib<BoxT extends RBBox>(targetDivRef: Ref<HTMLDivElement>) {
+export function useEventlibCore<BoxT extends RBBox>(targetDivRef: Ref<HTMLDivElement>) {
 
   const mousePosRef = reactive({
     x: 0,
