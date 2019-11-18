@@ -4,7 +4,7 @@
 import _ from 'lodash';
 
 import { onMounted, ref } from '@vue/composition-api';
-import { useWEventLib } from '~/components/w-eventlib/w-eventlib'
+import { useWEventLib } from '~/components/eventlib-core/eventlib-core'
 import { coords } from "sharedLib";
 
 

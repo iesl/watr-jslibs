@@ -75,10 +75,6 @@ export function useWEventLib<BoxT extends RBBox>(targetDivRef: Ref<HTMLDivElemen
     hovered.splice(0, hovered.length, ...hits);
   }
 
-  // function setDiv(eventDivId: string) {
-  //   eventDiv = document.getElementById(eventDivId);
-  // }
-
   onMounted(() => {
     console.log('onMounted');
     targetDivRef.value.addEventListener('mousemove', onMouseMove);
@@ -96,7 +92,6 @@ export function useWEventLib<BoxT extends RBBox>(targetDivRef: Ref<HTMLDivElemen
     mousePosRef,
     loadShapes,
     hoveringRef,
-    // setDiv,
   }
 }
 

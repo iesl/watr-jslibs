@@ -22,6 +22,10 @@ const stories: StoryEntry[] = [
     to: 'eventlib-core'
   },
   {
+    title: 'Hover EventLib',
+    to: 'hover-eventlib'
+  },
+  {
     title: 'Layered image/svg/canvas',
     to: 'elem-overlay'
   }

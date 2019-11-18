@@ -280,7 +280,7 @@ class PdfPage extends Vue {
 }
 
 import { createComponent, onMounted, ref } from '@vue/composition-api';
-import { useWEventLib } from '~/components/w-eventlib/w-eventlib'
+import { useWEventLib } from '~/components/eventlib-core/eventlib-core'
 import { useElemOverlays, OverlayType } from '~/components/elem-overlays/elem-overlays'
 
 export default createComponent({
