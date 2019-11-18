@@ -1,5 +1,5 @@
 
-// import { onMounted, ref } from '@vue/composition-api';
+import { onMounted } from '@vue/composition-api';
 
 import PdfPage from '~/components/pdf-pages/pdf-page'
 
@@ -43,6 +43,17 @@ export default {
   },
 
   setup() {
+    onMounted(() => {
+      asyncGetJson<GridTypes.Grid>('http://localhost:3100/textgrids/textgrid-00.json')
+        .then((textgrid: GridTypes.Grid) => {
+          console.log('textgrid description:', textgrid.description);
+          // this.loadShapes()
+          // self.initDataReady = true;
+        })
+        .catch(err => console.log('err', err))
+      ;
+
+    });
 
   }
 }

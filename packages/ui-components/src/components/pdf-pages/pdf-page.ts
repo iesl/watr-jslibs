@@ -297,19 +297,20 @@ export default createComponent({
 
     const pageOverlays = ref(null);
     const eventLib = useWEventLib(pageOverlays);
+    const elemOverlay = useElemOverlays(pageOverlays, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
+
+    elemOverlay.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
+
+    // arbitrary starting dim
+    elemOverlay.setDimensions(600, 800);
+    // - Load testgrid data for glyph hovering
+    // - Load tracelog shape data
+    // - use selection rect module
 
     onMounted(() => {
-      const elemOverlay = useElemOverlays(pageOverlays, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
-
-      // Draw the page image
-      elemOverlay.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
-
-      // arbitrary starting dim
-      elemOverlay.setDimensions(800, 800);
-
       // testing data
-      const bbox = coords.mk.fromLtwh(20, 40, 200, 444);
-      eventLib.loadShapes([bbox]);
+      // const bbox = coords.mk.fromLtwh(20, 40, 200, 444);
+      // eventLib.loadShapes([bbox]);
     });
 
     return {

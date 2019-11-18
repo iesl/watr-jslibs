@@ -36,7 +36,7 @@ export function useElemOverlays(overlayContainerRef: Ref<HTMLDivElement>, ...ove
   const imgElem: Ref<HTMLImageElement> = ref(null);
   const svgElem: Ref<SVGElement> = ref(null);
   const canvasElem: Ref<HTMLCanvasElement> = ref(null);
-  const imgElemSource: Ref<string> = ref(placeholderImage());
+  const imgElemSource: Ref<string> = ref(null);
 
 
   if (hasImg) {
@@ -103,9 +103,8 @@ export function useElemOverlays(overlayContainerRef: Ref<HTMLDivElement>, ...ove
 
   watch(() => {
     const overlayContainer = overlayContainerRef.value;
-    const [height, width] = dimensions.value;
-    const w = `${width}px`;
-    const h = `${height}px`;
+    const w = `${width()}px`;
+    const h = `${height()}px`;
 
     if (overlayContainer) {
       overlayContainer.style.width = w;
@@ -120,8 +119,12 @@ export function useElemOverlays(overlayContainerRef: Ref<HTMLDivElement>, ...ove
         svgElem.value.setAttribute('height', h);
       }
       if (imgElem) {
-        imgElem.value.width = width;
-        imgElem.value.height = height;
+        if (imgElemSource.value) {
+          imgElem.value.width = width();
+          imgElem.value.height = height();
+        } else {
+          imgElem.value.src = placeholderImage();
+        }
       }
     }
   });
