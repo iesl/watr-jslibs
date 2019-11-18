@@ -13,13 +13,13 @@ export default {
 
     const layerRoot: Ref<HTMLDivElement> = ref(null);
 
+    const elemOverlay = useElemOverlays(layerRoot, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
+
+    elemOverlay.setDimensions(300, 350);
+
     onMounted(() => {
-      const ret = useElemOverlays(layerRoot.value, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
-
-
 
     });
-
 
 
     return {

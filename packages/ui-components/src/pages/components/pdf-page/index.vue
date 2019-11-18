@@ -1,12 +1,13 @@
 <template>
 <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6>
-        <div v-if="initDataReady">
-            <PdfPage :init-data-ready="initDataReady" :textgrid="textgrid" />
-        </div>
-        <div v-else="">
-            Still Loading...
-        </div>
+        <PdfPage />
+        <!-- <div v-if="initDataReady"> -->
+        <!-- <PdfPage :init-data-ready="initDataReady" :textgrid="textgrid" /> -->
+        <!-- </div> -->
+        <!-- <div v-else=""> -->
+        <!-- Still Loading... -->
+        <!-- </div> -->
     </v-flex>
 </v-layout>
 </template>

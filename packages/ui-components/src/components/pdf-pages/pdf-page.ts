@@ -1,12 +1,7 @@
-
 import _ from 'lodash';
 
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 
-import {
-  createComponent,
-  ref,
-} from '@vue/composition-api';
 
 import {
   MutationTree,
@@ -34,10 +29,6 @@ import {
 import RBush from "rbush";
 
 const pdfPageState = namespace("pdfPageState");
-
-// import {
-//   useWEventLib,
-// } from '~/components/w-eventlib/w-eventlib'
 
 export class PdfPageState {
   hoveredText: TextDataPoint[] = [];
@@ -288,29 +279,41 @@ class PdfPage extends Vue {
 
 }
 
-// function useSvgCanvasDivOverlays(divId: string) {
-//   return {
-//   };
-// }
+import { createComponent, onMounted, ref } from '@vue/composition-api';
+import { useWEventLib } from '~/components/w-eventlib/w-eventlib'
+import { useElemOverlays, OverlayType } from '~/components/elem-overlays/elem-overlays'
 
-// eventDiv = document.getElementById(eventDivId);
 export default createComponent({
-  components: {
-  },
+  // components: {},
 
   props: {
     pageNum: Number,
     textgrid: Object,
-    initDataReady: Boolean
+    initDataReady: Boolean,
+    frameId: String
   },
 
-  setup(props, ctx) {
-    console.log('we are being set up!')
-    console.log('props', props);
-    // console.log('props', props);
-    const root = ref(null);
-    return {
+  setup() {
 
+    const pageOverlays = ref(null);
+    const eventLib = useWEventLib(pageOverlays);
+
+    onMounted(() => {
+      const elemOverlay = useElemOverlays(pageOverlays, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
+
+      // Draw the page image
+      elemOverlay.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
+
+      // arbitrary starting dim
+      elemOverlay.setDimensions(800, 800);
+
+      // testing data
+      const bbox = coords.mk.fromLtwh(20, 40, 200, 444);
+      eventLib.loadShapes([bbox]);
+    });
+
+    return {
+      pageOverlays
     };
   }
 

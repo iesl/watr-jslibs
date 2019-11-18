@@ -4,9 +4,7 @@
         <div class="infobar-pane"> </div>
 
         <div class="frame-content">
-            <div :id="imageContentId" :style="dimensionStyle" :width="pageWidth" :height="pageHeight" class="page-image">
-                <img :width="pageWidth" :height="pageHeight" :style="dimensionStyle" :src="imageHref"></img>
-            </div>
+            <div ref="pageOverlays"></div>
         </div>
 
     </div>

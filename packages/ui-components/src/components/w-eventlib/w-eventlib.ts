@@ -12,6 +12,7 @@ import {
   ref,
   onMounted,
   onUnmounted,
+  Ref,
   // onBeforeMount,
   // onMounted,
   // onBeforeUpdate,
@@ -43,7 +44,8 @@ class EventRTree<T extends RBBox> extends RBush<T> {
 }
 
 
-export function useWEventLib<BoxT extends RBBox>() {
+export function useWEventLib<BoxT extends RBBox>(targetDivRef: Ref<HTMLDivElement>) {
+
   const mousePosRef = reactive({
     x: 0,
     y: 0
@@ -51,13 +53,13 @@ export function useWEventLib<BoxT extends RBBox>() {
 
   const hovered: BoxT[] = [];
   const hoveringRef = ref(hovered);
-  let eventDiv: HTMLElement;
+  // let eventDiv: HTMLElement;
 
 
   const eventRTree: EventRTree<BoxT> = new EventRTree<BoxT>();
 
   function onMouseMove(e: MouseEvent) {
-    const {x, y} = getCursorPosition(eventDiv, e);
+    const {x, y} = getCursorPosition(targetDivRef.value, e);
     mousePosRef.x = x;
     mousePosRef.y = y;
 
@@ -73,19 +75,17 @@ export function useWEventLib<BoxT extends RBBox>() {
     hovered.splice(0, hovered.length, ...hits);
   }
 
-  function setDiv(eventDivId: string) {
-    eventDiv = document.getElementById(eventDivId);
-    eventDiv.addEventListener('mousemove', onMouseMove);
-  }
+  // function setDiv(eventDivId: string) {
+  //   eventDiv = document.getElementById(eventDivId);
+  // }
 
   onMounted(() => {
     console.log('onMounted');
+    targetDivRef.value.addEventListener('mousemove', onMouseMove);
   })
 
   onUnmounted(() => {
-    if (eventDiv) {
-      eventDiv.removeEventListener('mousemove', onMouseMove);
-    }
+    targetDivRef.value.removeEventListener('mousemove', onMouseMove);
   })
 
   function loadShapes(shapes: BoxT[]) {
@@ -96,7 +96,7 @@ export function useWEventLib<BoxT extends RBBox>() {
     mousePosRef,
     loadShapes,
     hoveringRef,
-    setDiv,
+    // setDiv,
   }
 }
 

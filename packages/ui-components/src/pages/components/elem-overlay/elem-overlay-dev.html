@@ -1,6 +1,24 @@
 <v-layout column justify-center align-center>
     <v-flex xs12 sm8 md6>
-        <div>Elem Overlay</div>
-        <div class="layerRoot" ref="layerRoot"></div>
+        <v-card>
+            <v-card-title class="headline">
+                Elem Overlay
+            </v-card-title>
+            <v-card-text>
+                <p>
+                    Compositional component to create overlay of img, HtmlCanvas, and SVG elements, aligned such that
+                    Canvas and Svg elements may be used to draw on the underlying image.
+                </p>
+            </v-card-text>
+        </v-card>
+        <v-card>
+            <div class="layerRoot" ref="layerRoot"></div>
+            <span>TODO:</span>
+            <ul>
+                <li>Show that elements are perfectly aligned</li>
+                <li>Show that drawing on Svg and Canvas produces perfectly aligned shapes</li>
+            </ul>
+        </v-card>
+
     </v-flex>
 </v-layout>
