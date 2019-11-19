@@ -11,23 +11,23 @@ type StoryEntry = {
 const stories: StoryEntry[] = [
   {
     title: 'Pdf Page',
-    to: 'pdf-page'
+    to: 'pdf-page-story'
   },
   {
     title: 'TextGraph',
-    to: 'text-graph'
+    to: 'text-graph-story'
   },
   {
     title: 'EventLib Core',
-    to: 'eventlib-core'
+    to: 'eventlib/core-story'
   },
   {
     title: 'Hover EventLib',
-    to: 'hover-eventlib'
+    to: 'eventlib/hover-story'
   },
   {
     title: 'Layered image/svg/canvas',
-    to: 'elem-overlay'
+    to: 'elem-overlay-story'
   }
 ];
 
