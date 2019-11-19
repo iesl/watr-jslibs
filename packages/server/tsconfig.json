@@ -4,20 +4,29 @@
   "compilerOptions": {
     "baseUrl": ".",
 
-    "esModuleInterop": true,
-    "module": "commonjs",
     "target": "es6",
+    "module": "commonjs",
     "moduleResolution": "node",
+
+    "esModuleInterop": true,
     "noEmit": false,
+    "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
 
     "types": [
       "jest",
       "chai",
       "node"
     ],
+    "noImplicitReturns": true,
 
-    "allowSyntheticDefaultImports": true,
-    "importHelpers": true,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false,
+
+    "inlineSourceMap": true,
+    "preserveConstEnums": true,
+
+    "diagnostics": true,
 
     "outDir": "./dist"
   },

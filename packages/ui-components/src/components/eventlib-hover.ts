@@ -1,10 +1,6 @@
-//
 /**
-  * - pass in div by id to useXX()
-  * -
-  * - Set mouse handlers
-  *   -
-  */
+ *
+ */
 import _ from 'lodash';
 
 import {
@@ -13,16 +9,9 @@ import {
   onMounted,
   onUnmounted,
   Ref,
-  // onBeforeMount,
-  // onMounted,
-  // onBeforeUpdate,
-  // onUpdated,
-  // onBeforeUnmount,
-  // onUnmounted,
-  // onErrorCaptured,
-  // onActivated,
-  // onDeactivated,
 } from '@vue/composition-api';
+
+import { useEventlibCore } from '~/components/eventlib-core'
 
 import RBush, { BBox as RBBox } from "rbush";
 // import RBushKnn from 'rbush-knn';
@@ -44,7 +33,8 @@ class EventRTree<T extends RBBox> extends RBush<T> {
 }
 
 
-export function useEventlibCore<BoxT extends RBBox>(targetDivRef: Ref<HTMLDivElement>) {
+export function useEventlibHover<BoxT extends RBBox>(targetDivRef: Ref<HTMLDivElement>) {
+  useEventlibCore(targetDivRef)
 
   const mousePosRef = reactive({
     x: 0,
@@ -53,8 +43,6 @@ export function useEventlibCore<BoxT extends RBBox>(targetDivRef: Ref<HTMLDivEle
 
   const hovered: BoxT[] = [];
   const hoveringRef = ref(hovered);
-  // let eventDiv: HTMLElement;
-
 
   const eventRTree: EventRTree<BoxT> = new EventRTree<BoxT>();
 

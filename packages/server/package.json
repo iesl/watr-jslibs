@@ -63,8 +63,9 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
+    "morph": "node dist/cli.js",
     "serve": "nodemon -w dist dist/server.js",
-    "asdf": "ts-node src/util/test.ts",
+    "main": "npm-run-all --serial build \"morph -- {@}\" --",
     "test": "jest"
   },
   "bugs": {
