@@ -41,10 +41,10 @@
     "type-check:watch": "npm run type-check -- --watch",
     "build:types": "tsc --emitDeclarationOnly --declaration",
     "build:types:watch": "npm run build:types -- --watch",
-    "build:js": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline"
+    "build:js": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
     "build:js:watch": "npm run build:js -- --watch",
     "build": "npm-run-all clean build:types build:js",
-    "build:watch": "npm-run-all build:types:watch build:js:watch",
+    "build:watch": "npm-run-all build:types:watch build:js:watch"
   },
   "main": "src/index.ts",
   "jest": {
