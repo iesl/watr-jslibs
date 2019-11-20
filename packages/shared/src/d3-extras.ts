@@ -22,6 +22,10 @@ export function initRect <GElement extends BaseType, Datum, PElement extends Bas
   sel: Selection<GElement, Datum, PElement, PDatum>,
   fbbox: (d: any) => BBox
 ) {
+
+  // console.log('initRect: sel', sel);
+  // console.log('initRect: fbbox', fbbox);
+
     sel .attr("x"      , d => fbbox(d).left)
         .attr("y"      , d => fbbox(d).top)
         .attr("width"  , d => fbbox(d).width)

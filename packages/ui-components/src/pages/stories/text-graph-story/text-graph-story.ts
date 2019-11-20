@@ -1,5 +1,5 @@
 
-import TextGraphDev from '~/components/text-graph/text-graph.dev.vue'
+import TextGraphDev from '~/components/text-graph/text-graph.dev'
 
 const cs = {
   TextGraphDev

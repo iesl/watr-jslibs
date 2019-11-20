@@ -21,6 +21,14 @@ export enum CoordSys {
   PdfMedia,
 }
 
+/** Same interface used by RTree (as implemented in RBush library) */
+export interface MinMaxBox {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+}
+
 interface ILTBoundsIntRep {
   left: number;
   top: number;
@@ -147,11 +155,6 @@ export class BBox implements ILTBounds {
   public width: number;
   public height: number;
   public sys: CoordSys;
-  // public bottom: number;
-  // public minX: number;
-  // public minY: number;
-  // public maxX: number;
-  // public maxY: number;
 
   public constructor(
     l: number,
@@ -217,9 +220,6 @@ export class BBox implements ILTBounds {
     return mkPoint.fromXy(x, y, this.sys);
   }
 
-  // set system(s)  { this._system = s; }
-  // get system()   { return this._system; }
-
   get intRep() {
     return [
       Math.trunc(this.left * 100.0),
@@ -271,6 +271,24 @@ export let mk = {
     return new BBox(left, top, width, height, CoordSys.PdfMedia);
   },
 };
+
+export function toBox(mm: MinMaxBox): BBox {
+  const { minX, minY, maxX, maxY } = mm;
+  const x = minX;
+  const y = minY;
+  const width = maxX - minX;
+  const height = maxY - minY;
+  return new BBox(x, y, width, height)
+}
+
+
+export function centerBoxAt(box: BBox, p: Point): void {
+  const { width, height } = box;
+  const left = p.x - width / 2;
+  const top = p.y - height / 2;
+  box.left = left;
+  box.top = top;
+}
 
 export function boxCenteredAt(p: Point, width: number, height: number) {
   const left = p.x - width / 2;

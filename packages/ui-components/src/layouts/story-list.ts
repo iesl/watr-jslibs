@@ -28,6 +28,10 @@ const stories: StoryEntry[] = [
   {
     title: 'Layered image/svg/canvas',
     to: 'elem-overlay-story'
+  },
+  {
+    title: 'SVG Drawing',
+    to: 'drawto/drawto-svg-story'
   }
 ];
 

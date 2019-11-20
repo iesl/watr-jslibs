@@ -27,6 +27,7 @@ export function useElemOverlays(overlayContainerRef: Ref<HTMLDivElement>, ...ove
   const hasCanvas = overlays.includes(OverlayType.Canvas)
 
   const dimensions: Ref<[number, number]> = ref([10, 10]);
+  const isInitialized = ref(false);
 
   const width = () => dimensions.value[0];
   const height = () => dimensions.value[1];
@@ -38,75 +39,44 @@ export function useElemOverlays(overlayContainerRef: Ref<HTMLDivElement>, ...ove
   const canvasElem: Ref<HTMLCanvasElement> = ref(null);
   const imgElemSource: Ref<string> = ref(null);
 
-
-  if (hasImg) {
-    const el = document.createElement('img');
-    el.classList.add('layer');
-    imgElem.value = el;
-  }
-
-  if (hasCanvas) {
-    const el = document.createElement('canvas');
-    el.classList.add('layer');
-    canvasElem.value = el;
-  }
-
-  if (hasSvg) {
-    const el = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    el.classList.add('layer');
-    el.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
-    svgElem.value = el;
-  }
-
-  watch(() => {
+  watch(overlayContainerRef, () => {
     const overlayContainer = overlayContainerRef.value;
-    const img = imgElem.value
-    const src = imgElemSource.value
-    if (overlayContainer && img && src) {
-      img.src = src;
-    }
-  });
+    if (overlayContainer === null) return;
 
-  watch(() => {
-    const overlayContainer = overlayContainerRef.value;
+    overlayContainer.classList.add('layers');
 
-    if (overlayContainer) {
-      overlayContainer.classList.add('layers');
-    }
-  });
-  watch(() => {
-    const overlayContainer = overlayContainerRef.value;
-    const el = imgElem.value;
-
-    if (overlayContainer && el) {
+    if (hasImg) {
+      const el = imgElem.value = document.createElement('img');
+      el.classList.add('layer');
       overlayContainer.append(el);
     }
-  });
 
-  watch(() => {
-    const overlayContainer = overlayContainerRef.value;
-    const el = svgElem.value;
-
-    if (overlayContainer && el) {
+    if (hasCanvas) {
+      const el = canvasElem.value = document.createElement('canvas');
+      el.classList.add('layer');
       overlayContainer.append(el);
     }
-  });
 
-  watch(() => {
-    const overlayContainer = overlayContainerRef.value;
-    const el = canvasElem.value;
-
-    if (overlayContainer && el) {
+    if (hasSvg) {
+      const el = svgElem.value = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      el.classList.add('layer');
+      el.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
       overlayContainer.append(el);
     }
-  });
 
-  watch(() => {
-    const overlayContainer = overlayContainerRef.value;
-    const w = `${width()}px`;
-    const h = `${height()}px`;
+    watch([imgElem, imgElemSource], () => {
+      const img = imgElem.value
+      const src = imgElemSource.value
+      if (img && src) {
+        img.src = src;
+      }
+    });
 
-    if (overlayContainer) {
+    watch(dimensions, ([width, height]) => {
+
+      const w = `${width}px`;
+      const h = `${height}px`;
+
       overlayContainer.style.width = w;
       overlayContainer.style.height = h;
 
@@ -120,14 +90,21 @@ export function useElemOverlays(overlayContainerRef: Ref<HTMLDivElement>, ...ove
       }
       if (imgElem) {
         if (imgElemSource.value) {
-          imgElem.value.width = width();
-          imgElem.value.height = height();
+          imgElem.value.width = width;
+          imgElem.value.height = height;
         } else {
           imgElem.value.src = placeholderImage();
         }
       }
-    }
+    });
+
+    isInitialized.value = true
+
   });
+
+
+
+
 
   function setImageSource(src: string) {
     imgElemSource.value = src;
@@ -140,6 +117,7 @@ export function useElemOverlays(overlayContainerRef: Ref<HTMLDivElement>, ...ove
   return {
     elems: { imgElem, svgElem, canvasElem },
     setDimensions,
-    setImageSource
+    setImageSource,
+    isInitialized
   };
 }

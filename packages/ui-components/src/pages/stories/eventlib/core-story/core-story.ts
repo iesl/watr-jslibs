@@ -14,7 +14,7 @@ function setup() {
   const overlayRoot = ref(null)
 
   const {
-    mousePosRef, loadShapes, hoveringRef
+    mousePosRef, loadShapes
   } = useEventlibCore(overlayRoot);
 
   const elemOverlay = useElemOverlays(overlayRoot, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
@@ -23,13 +23,13 @@ function setup() {
 
     elemOverlay.setDimensions(800, 800);
 
-    const bbox = coords.mk.fromLtwh(20, 40, 200, 444);
+    // const bbox = coords.mk.fromLtwh(20, 40, 200, 444);
 
-    loadShapes([bbox]);
+    // loadShapes([bbox]);
   });
 
   return {
-    mousePosRef, loadShapes, hoveringRef, overlayRoot
+    mousePosRef, loadShapes, overlayRoot
   }
 }
 

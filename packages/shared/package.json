@@ -35,13 +35,16 @@
     "typescript": "^3.7.2"
   },
   "scripts": {
+    "clean": "rimraf dist",
     "test": "jest",
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
-    "clean": "rimraf dist",
-    "build": "npm-run-all clean build:types build:js",
     "build:types": "tsc --emitDeclarationOnly --declaration",
+    "build:types:watch": "npm run build:types -- --watch",
     "build:js": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline"
+    "build:js:watch": "npm run build:js -- --watch",
+    "build": "npm-run-all clean build:types build:js",
+    "build:watch": "npm-run-all build:types:watch build:js:watch",
   },
   "main": "src/index.ts",
   "jest": {

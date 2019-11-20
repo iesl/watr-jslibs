@@ -8,12 +8,21 @@ import {
   mk,
   GridTypes,
   Point,
-  BBox
+  BBox,
+  MinMaxBox
 } from "sharedLib";
 
 export type Width = number;
 export type MeasureTextWidth = (ch: string) => Width;
 
+
+
+/**
+ * Minimal interface required for RTree index
+ */
+export interface RTreeIndexable extends MinMaxBox {
+  id: number;
+}
 
 export interface GridCellData {
   row: number;
@@ -27,18 +36,12 @@ export interface GlyphCellData {
 }
 
 
-export interface TextDataPoint extends rbush.BBox {
-  id: number;
+export interface TextDataPoint extends RTreeIndexable {
   char: string;
   glyphData?: GlyphCellData;
   gridCell: GridCellData;
 
   gridBBox: BBox;
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-
 }
 
 export interface GridData {
