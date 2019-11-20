@@ -30,8 +30,8 @@ const stories: StoryEntry[] = [
     to: 'elem-overlay-story'
   },
   {
-    title: 'SVG Drawing',
-    to: 'drawto/drawto-svg-story'
+    title: 'Canvas Drawing',
+    to: 'drawto/drawto-canvas-story'
   }
 ];
 
