@@ -3,12 +3,12 @@ import * as PIXI from 'pixi.js';
 import { Application } from 'pixi.js';
 
 
-export function initPixiJs(canvasElem: HTMLCanvasElement): Application {
+export function initPixiJs(canvasElem: HTMLCanvasElement, containerDiv: HTMLDivElement): Application {
 
   const app = new PIXI.Application({
     // autoStart?: boolean;
-    width: canvasElem.width, // number;
-    height: canvasElem.height, // number;
+    // width: canvasElem.width, // number;
+    // height: canvasElem.height, // number;
     view: canvasElem,
     // transparent?: boolean;
     // autoDensity?: boolean;
@@ -22,7 +22,7 @@ export function initPixiJs(canvasElem: HTMLCanvasElement): Application {
     // powerPreference?: string;
     // sharedTicker?: boolean;
     // sharedLoader?: boolean;
-    // resizeTo: canvasElem // Window | HTMLElement;
+    resizeTo: containerDiv
   });
   return app;
 }

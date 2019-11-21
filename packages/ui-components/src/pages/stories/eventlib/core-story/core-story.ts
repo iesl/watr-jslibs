@@ -8,7 +8,7 @@ import { useEventlibCore } from '~/components/eventlib-core'
 import { coords } from "sharedLib";
 
 
-import { useElemOverlays, OverlayType } from '~/components/elem-overlays'
+import { useImgCanvasSvgOverlays } from '~/components/elem-overlays'
 
 function setup() {
   const overlayRoot = ref(null)
@@ -17,7 +17,7 @@ function setup() {
     mousePosRef, loadShapes
   } = useEventlibCore(overlayRoot);
 
-  const elemOverlay = useElemOverlays(overlayRoot, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
+  const elemOverlay = useImgCanvasSvgOverlays(overlayRoot);
 
   onMounted(() => {
 

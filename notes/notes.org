@@ -1,7 +1,12 @@
 * Dev Notes
   
+** Now: 
+   - Create a pixijs version of img/canvas overly component
+     - Create rect. selection system
   
-** Current Goal
+
+  
+** Current Goal(s)
 *** Tracelog visualizer 
 **** Pdf Image viewer
     Display a pdf page as an image
@@ -52,9 +57,10 @@
 *** File-based server local development (no db required)
    
    
-** Incidental Tasks/goals
-
-
 ** Client-app notes
    Client app is the original version, which is being overhauled 
    [[file:~/projects/the-livingroom/rexa-text-extractors/watr-jslibs/packages/client-app/notes/dev-notes.org::*Watrcolor%20client%20file%20organization][Watrcolor client file organization]]
+
+
+** Possible RBush replacement, a bit faster:
+   https://github.com/mourner/flatbush

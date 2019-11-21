@@ -30,9 +30,9 @@ const stories: StoryEntry[] = [
     to: 'elem-overlay-story'
   },
   {
-    title: 'PixiJs DrawTo',
-    to: 'drawto/pixijs-story'
-  }
+    title: 'Canvas Drawto',
+    to: 'drawto/drawto-canvas-story'
+  },
 ];
 
 

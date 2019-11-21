@@ -6,14 +6,14 @@ import {
 } from '@vue/composition-api';
 
 
-import { useElemOverlays, OverlayType } from '~/components/elem-overlays'
+import { useImgCanvasSvgOverlays  } from '~/components/elem-overlays'
 
 export default {
   setup() {
 
     const layerRoot: Ref<HTMLDivElement> = ref(null);
 
-    const elemOverlay = useElemOverlays(layerRoot, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
+    const elemOverlay = useImgCanvasSvgOverlays(layerRoot);
 
     elemOverlay.setDimensions(300, 350);
 

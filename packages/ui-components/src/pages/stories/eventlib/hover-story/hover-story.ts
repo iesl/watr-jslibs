@@ -17,7 +17,7 @@ import { onMounted, ref, watch } from '@vue/composition-api';
 import { useEventlibHover } from '~/components/eventlib-hover'
 import { coords, d3x, GridTypes, Point, toBox } from "sharedLib";
 
-import { useElemOverlays, OverlayType } from '~/components/elem-overlays'
+import { useImgCanvasSvgOverlays  } from '~/components/elem-overlays'
 
 function setup() {
   const overlayRoot = ref(null);
@@ -27,7 +27,7 @@ function setup() {
   const { hoveringRef, eventlibCore } = eventlibHover;
   const { loadShapes, mousePosRef } = eventlibCore;
 
-  const elemOverlay = useElemOverlays(overlayRoot, OverlayType.Img, OverlayType.Canvas, OverlayType.Svg);
+  const elemOverlay = useImgCanvasSvgOverlays(overlayRoot);
 
   watch(elemOverlay.elems.svgElem, (svgElem) => {
     if (svgElem === null) return;
