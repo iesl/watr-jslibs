@@ -23,8 +23,6 @@ import { t } from '../lib/tstags';
 
 import {addViewLinkOptions} from './shared-main';
 
-// TODO reinstate tooltips
-
 function setupFrameLayout() {
 
   const rootFrame = spu.createRootFrame("#main-content");
@@ -43,6 +41,7 @@ function setupFrameLayout() {
 
   addViewLinkOptions();
 }
+
 /**
  *
  */
@@ -226,9 +225,7 @@ function runTrace(tracelog: any): void {
 
 function doDrawShapes(dataBlock: any) {
 
-  // console.log('doDrawShapes: dataBlock', dataBlock);
   const shapes = selectShapes(dataBlock);
-  // console.log('doDrawShapes: shapes', shapes);
 
   return shapes.enter()
     .each(function (shape) {
@@ -299,6 +296,7 @@ export function runMain() {
   ]) .then(([tracelogJson, textGridJson]) => {
 
     const pages = textGridJson.pages;
+
     const textgrids = _.map(pages, p => p.textgrid);
 
     const gridData = rtrees.initGridData(textgrids);

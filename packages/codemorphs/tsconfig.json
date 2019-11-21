@@ -1,6 +1,4 @@
 {
-  "extends": "../shared/tsconfig-base.json",
-
   "compilerOptions": {
     "baseUrl": ".",
 
@@ -15,8 +13,7 @@
 
     "types": [
       "jest",
-      "chai",
-      "node"
+      "chai"
     ],
     "noImplicitReturns": true,
 

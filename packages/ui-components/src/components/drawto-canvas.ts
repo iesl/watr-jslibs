@@ -1,5 +1,3 @@
-//
-
 import _ from 'lodash';
 
 import {
@@ -10,11 +8,14 @@ import {
 import * as PIXI from 'pixi.js';
 
 import {
-  initPixiJs
+ initPixiJs
 } from '~/lib/pixijs';
 
+export interface DrawToCanvas {
 
-export function useCanvasDrawto(canvasRef: Ref<HTMLCanvasElement>) {
+}
+
+export function useCanvasDrawto(canvasRef: Ref<HTMLCanvasElement>): DrawToCanvas {
   watch(canvasRef, () => {
     const canvasElem = canvasRef.value;
     if (canvasElem === null) return;
@@ -44,4 +45,3 @@ export function useCanvasDrawto(canvasRef: Ref<HTMLCanvasElement>) {
 
   };
 }
-

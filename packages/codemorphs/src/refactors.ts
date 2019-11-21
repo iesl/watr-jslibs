@@ -1,6 +1,6 @@
 // Try out refactorings...
 import _ from 'lodash';
-import path from "path";
+import * as path from "path";
 
 import { Project } from "ts-morph";
 
@@ -12,10 +12,6 @@ export function listSrcFiles() {
   const srcFiles = project.getSourceFiles()
   const names = _.map(srcFiles, s => s.getBaseName())
   console.log('src', names);
-
-  _.each(srcFiles, s => {
-    // s.organizeImports();
-  });
 }
 
 
@@ -36,6 +32,7 @@ export function organizeImports(tsconfigPath: string, componentName: string, roo
 
 
 }
+
 export function setupVueComponent(tsconfigPath: string, componentName: string, rootPath: string) {
 
   const project = new Project({
@@ -50,12 +47,9 @@ export function setupVueComponent(tsconfigPath: string, componentName: string, r
     return p;
   }
 
-
   const vueFile = at('index.vue');
 
-
-  const vueContent = `
-<template lang="html" src="./${componentName}.html"></template>
+  const vueContent = `<template lang="html" src="./${componentName}.html"></template>
 <script lang="ts" src="./${componentName}.ts"></script>
 <style lang="scss" src="./${componentName}.scss" scoped></style>
 `;
@@ -64,6 +58,5 @@ export function setupVueComponent(tsconfigPath: string, componentName: string, r
   const tsSource = project.createSourceFile(at(`${componentName}.ts`), '// TODO \n').saveSync();
   const htmlSource = project.createSourceFile(at(`${componentName}.html`), '<div> TODO </div>\n').saveSync();
   const styleSource = project.createSourceFile(at(`${componentName}.scss`), '.todo {}\n').saveSync();
-
 
 }

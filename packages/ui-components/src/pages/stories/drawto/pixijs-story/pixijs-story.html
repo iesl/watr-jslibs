@@ -2,14 +2,16 @@
     <v-flex xs12 sm8 md6>
         <v-card>
             <v-card-title class="headline">
-                SVG Drawing
+                Canvas Drawing via PixiJS
             </v-card-title>
             <v-card-text>
-                <p> Drawing primitives for SVG </p>
+                <p> Drawing primitives for Canvas </p>
             </v-card-text>
         </v-card>
         <v-card>
-            <div class="layerRoot" ref="layerRoot"></div>
+            <div ref="containerDivRef">
+                <canvas ref="canvasElemRef"></canvas>
+            </div>
         </v-card>
 
     </v-flex>

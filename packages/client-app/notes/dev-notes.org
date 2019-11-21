@@ -16,7 +16,7 @@
     - [ ] Integrate auth0, Vue-ify
 
 **** colors.js
-    consts for rgb/solarized/etc color themes
+    consts for rgb/solarized/etc color themes (replace with chroma.js)
 
 **** coord-sys.ts
     Geometric shape classes, conversions, constructors.
@@ -63,7 +63,6 @@
 
 **** SplitWin.js
     window splitting, creation, deletion library
-
 
 **** Tooltips.js
     tippy.js based tooltip class. not working atm.

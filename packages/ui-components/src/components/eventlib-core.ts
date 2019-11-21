@@ -1,9 +1,4 @@
-//
 /**
-  * - pass in div by id to useXX()
-  * -
-  * - Set mouse handlers
-  *   -
   */
 import _ from 'lodash';
 
@@ -17,12 +12,8 @@ import {
 
 import RBush, {} from "rbush";
 
-import {
-  ILTBounds,
-} from "sharedLib";
 import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
-
-
+import { UnwrapRef } from '@vue/composition-api/dist/reactivity';
 
 
 function getCursorPosition(elem: Element, event: MouseEvent) {
@@ -33,22 +24,55 @@ function getCursorPosition(elem: Element, event: MouseEvent) {
 }
 
 
-export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<HTMLDivElement>) {
+// export interface EventlibCore {
+//   mousePosRef: UnwrapRef<Point>;
+//   loadShapes: (shapes: T[]) => void;
+//   eventRTree: RBush<T>;
+// }
 
-  // class EventRTree<BoxT extends RTreeIndexable> extends RBush<BoxT> {}
+interface Point {
+  x: number;
+  y: number;
+}
 
-  const mousePosRef = reactive({
+export interface EventlibMouse {
+  mousePosRef: UnwrapRef<Point>;
+}
+
+export interface MouseHandlers {
+  mouseover?(event: MouseEvent): void;
+  mouseout?(event: MouseEvent): void;
+  mousemove?(event: MouseEvent): void;
+  mouseup?(event: MouseEvent): void;
+  mousedown?(event: MouseEvent): void;
+  click?(event: MouseEvent): void;
+}
+
+export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<HTMLDivElement>)  {
+
+  const mousePosRef: UnwrapRef<Point> = reactive({
     x: 0,
     y: 0
   })
 
   const eventRTree: RBush<BoxT> = new RBush<BoxT>();
 
+  function addMouseHandlers(h: MouseHandlers): void {
+
+  }
+
   function onMouseMove(e: MouseEvent) {
     const {x, y} = getCursorPosition(targetDivRef.value, e);
     mousePosRef.x = x;
     mousePosRef.y = y;
   }
+  // "mousedown": MouseEvent;
+  // "mouseenter": MouseEvent;
+  // "mouseleave": MouseEvent;
+  // "mousemove": MouseEvent;
+  // "mouseout": MouseEvent;
+  // "mouseover": MouseEvent;
+  // "mouseup": MouseEvent;
 
 
   onMounted(() => {
@@ -66,7 +90,7 @@ export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<H
     }
   })
 
-  function loadShapes(shapes: BoxT[]) {
+  function loadShapes(shapes: BoxT[]): void {
     eventRTree.load(shapes);
   }
 

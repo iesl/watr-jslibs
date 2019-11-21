@@ -22,7 +22,7 @@ export function initPixiJs(canvasElem: HTMLCanvasElement): Application {
     // powerPreference?: string;
     // sharedTicker?: boolean;
     // sharedLoader?: boolean;
-    resizeTo: canvasElem // Window | HTMLElement;
+    // resizeTo: canvasElem // Window | HTMLElement;
   });
   return app;
 }

@@ -1,15 +1,16 @@
 * Dev Notes
-
   
   
 ** Current Goal
 *** Tracelog visualizer 
 **** Pdf Image viewer
-    Display a pdf page as an image, with overlayed text
-
-    - text glyphs highlight on hover and/or nearness
-    - regions of text can be selected 
-    - blocks of text can be copied
+    Display a pdf page as an image
+    - [ ] Image overlay, allowing for ... 
+      - [ ] Draw shape overlays for tracelog visualization
+ 
+    - [ ] Text overlay, allowing for ... 
+      - [ ] Glyphs highlighting 
+      - [ ] Text select/copy 
 
 ***** Elem Overlays (layering) 
       (div elem) => [...]
@@ -20,17 +21,21 @@
         - Try to take out any helper libraries (d3 and fabric)
       - Zoom in/out, properly modifying geometry of the layers (new feature)
 
-***** WEvent system
-      (div elem) => [...]
-
+***** Eventlib system
       The hover/knn event system 
       RTree-based event system lives here
       Allow registration of mouse/keyboard handlers
       Use for glyph highlighting/selection
       Will be used for graph paper variants (regular grid vs. free-form glyph placement)
       
+***** Selection system 
+      Rectangular selection events.
+
+***** Run Trace 
+      Given a tracelog, display the shapes as pdf image overlays
 
 **** Tooltips
+
 **** Filtering/selection engine
      Search/sort/select log entries to display
      

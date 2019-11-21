@@ -1,5 +1,5 @@
 
-import { storyItems } from './story-list';
+import { storyItems } from '~/pages/stories/story-list';
 
 export default {
 
@@ -13,9 +13,9 @@ export default {
         ...storyItems
       ],
       miniVariant: false,
-      right: true,
+      right: false,
       rightDrawer: false,
-      title: 'UI Component Dev'
+      title: 'UI Component Development Stories'
     }
   }
 }
