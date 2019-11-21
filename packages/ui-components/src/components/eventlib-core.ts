@@ -13,67 +13,40 @@ import {
 import RBush, {} from "rbush";
 
 import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
+
+import {
+  // MouseHandlers,
+  MouseHandlerInit,
+  setMouseHandlers as _setMouseHandlers,
+  EventlibPoint,
+  getCursorPosition
+} from '~/lib/EventlibHandlers';
+
 import { UnwrapRef } from '@vue/composition-api/dist/reactivity';
 
 
-function getCursorPosition(elem: Element, event: MouseEvent) {
-  const rect: DOMRect | ClientRect = elem.getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const y = event.clientY - rect.top
-  return {x, y};
-}
 
-
-// export interface EventlibCore {
-//   mousePosRef: UnwrapRef<Point>;
-//   loadShapes: (shapes: T[]) => void;
-//   eventRTree: RBush<T>;
-// }
-
-interface Point {
-  x: number;
-  y: number;
-}
-
-export interface EventlibMouse {
-  mousePosRef: UnwrapRef<Point>;
-}
-
-export interface MouseHandlers {
-  mouseover?(event: MouseEvent): void;
-  mouseout?(event: MouseEvent): void;
-  mousemove?(event: MouseEvent): void;
-  mouseup?(event: MouseEvent): void;
-  mousedown?(event: MouseEvent): void;
-  click?(event: MouseEvent): void;
+export interface EventlibCore {
+  mousePosRef: UnwrapRef<EventlibPoint>;
+  loadShapes: <T extends RTreeIndexable>(shapes: T[]) => void;
+  eventRTree: RBush<RTreeIndexable>;
+  setMouseHandlers: (h: MouseHandlerInit) => void;
 }
 
 export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<HTMLDivElement>)  {
 
-  const mousePosRef: UnwrapRef<Point> = reactive({
+  const mousePosRef: UnwrapRef<EventlibPoint> = reactive({
     x: 0,
     y: 0
   })
 
   const eventRTree: RBush<BoxT> = new RBush<BoxT>();
 
-  function addMouseHandlers(h: MouseHandlers): void {
-
-  }
-
   function onMouseMove(e: MouseEvent) {
     const {x, y} = getCursorPosition(targetDivRef.value, e);
     mousePosRef.x = x;
     mousePosRef.y = y;
   }
-  // "mousedown": MouseEvent;
-  // "mouseenter": MouseEvent;
-  // "mouseleave": MouseEvent;
-  // "mousemove": MouseEvent;
-  // "mouseout": MouseEvent;
-  // "mouseover": MouseEvent;
-  // "mouseup": MouseEvent;
-
 
   onMounted(() => {
     watch(targetDivRef, (targetDiv) => {
@@ -94,9 +67,14 @@ export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<H
     eventRTree.load(shapes);
   }
 
+  const setMouseHandlers: (h: MouseHandlerInit[]) => void =
+    _.bind(_setMouseHandlers, null, targetDivRef);
+
+
   return {
     mousePosRef,
     loadShapes,
     eventRTree,
+    setMouseHandlers,
   }
 }

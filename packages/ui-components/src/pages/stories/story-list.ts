@@ -33,6 +33,10 @@ const stories: StoryEntry[] = [
     title: 'Canvas Drawto',
     to: 'drawto/drawto-canvas-story'
   },
+  {
+    title: 'SketchLib Core',
+    to: 'sketchlib/sketchlib-core-story'
+  },
 ];
 
 

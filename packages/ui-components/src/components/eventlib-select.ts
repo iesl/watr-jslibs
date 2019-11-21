@@ -8,7 +8,9 @@ import {
 } from '@vue/composition-api';
 
 // import { DrawToCanvas } from './drawto-canvas';
-import { EventlibMouse } from './eventlib-core';
+
+
+import { EventlibMouse } from '~/lib/EventlibHandlers';
 
 
 
