@@ -26,7 +26,7 @@ export function useEventlibHover<BoxT extends RTreeIndexable>(targetDivRef: Ref<
   const { eventRTree } = eventlibCore;
 
   // const isInitialized = ref(false);
-  const hovered: BoxT[] = [];
+  const hovered: RTreeIndexable[] = [];
   const hoveringRef = ref(hovered);
 
   watch(() => {
@@ -40,7 +40,7 @@ export function useEventlibHover<BoxT extends RTreeIndexable>(targetDivRef: Ref<
     const queryTop = userPt.y - queryBoxHeight;
     const queryBox = coords.mk.fromLtwh(queryLeft, queryTop, queryWidth, queryBoxHeight);
 
-    const hits: BoxT[] = eventRTree.search(queryBox);
+    const hits: RTreeIndexable[] = eventRTree.search(queryBox);
     _.each(hits, h => {
       const hany: any = h;
       hany.id = 1;

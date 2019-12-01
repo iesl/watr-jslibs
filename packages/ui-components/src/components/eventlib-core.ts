@@ -28,12 +28,12 @@ import { UnwrapRef } from '@vue/composition-api/dist/reactivity';
 
 export interface EventlibCore {
   mousePosRef: UnwrapRef<EventlibPoint>;
-  loadShapes: <T extends RTreeIndexable>(shapes: T[]) => void;
+  loadShapes: (shapes: RTreeIndexable[]) => void;
   eventRTree: RBush<RTreeIndexable>;
-  setMouseHandlers: (h: MouseHandlerInit) => void;
+  setMouseHandlers: (hs: MouseHandlerInit[]) => void;
 }
 
-export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<HTMLDivElement>)  {
+export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<HTMLDivElement>): EventlibCore {
 
   const mousePosRef: UnwrapRef<EventlibPoint> = reactive({
     x: 0,

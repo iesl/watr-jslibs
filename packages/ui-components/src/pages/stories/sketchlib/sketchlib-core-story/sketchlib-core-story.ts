@@ -25,7 +25,7 @@ export default {
     const elemOverlay = useImgCanvasOverlays(layerRoot);
     const canvasElemRef = elemOverlay.elems.canvasElem
     const canvasDrawto = useCanvasDrawto(canvasElemRef, layerRoot);
-    const sketchlibCore = useSketchlibCore(canvasDrawto);
+    // const sketchlibCore = useSketchlibCore(canvasDrawto);
 
     const pixiJsAppRef = canvasDrawto.pixiJsAppRef;
 

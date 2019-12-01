@@ -14,9 +14,9 @@ export enum OverlayType {
   Canvas,
 }
 export interface OverlayElement {
-  canvasElem?: HTMLCanvasElement;
-  svgElem?: SVGElement;
-  imgElem?: HTMLImageElement;
+  canvasElem?: Ref<HTMLCanvasElement>;
+  svgElem?: Ref<SVGElement>;
+  imgElem?: Ref<HTMLImageElement>;
 }
 
 export function useImgCanvasOverlays(containerRef: Ref<HTMLDivElement>) {

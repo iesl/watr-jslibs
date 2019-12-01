@@ -3,8 +3,10 @@
  */
 import _ from 'lodash';
 
-import { onMounted, ref } from '@vue/composition-api';
+import { onMounted, ref, watch } from '@vue/composition-api';
 import { useEventlibCore } from '~/components/eventlib-core'
+import { useEventlibSelect } from '~/components/eventlib-select'
+import { useCanvasDrawto } from '~/components/drawto-canvas';
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";
 
 import { useImgCanvasOverlays } from '~/components/elem-overlays'
@@ -13,12 +15,22 @@ function setup() {
   const overlayRoot = ref(null)
 
   const eventlibCore = useEventlibCore(overlayRoot);
-  const { mousePosRef, loadShapes, setMouseHandlers } = eventlibCore;
+  const { setMouseHandlers } = eventlibCore;
 
   const mouseActivity = ref('<none>');
   const mouseActivity2 = ref('<none>');
 
   const elemOverlay = useImgCanvasOverlays(overlayRoot);
+  const canvasElemRef = elemOverlay.elems.canvasElem;
+  watch(canvasElemRef, (el) => {
+    if (el === null) return;
+
+    const drawTo = useCanvasDrawto(canvasElemRef, overlayRoot);
+    const eventlibSelect = useEventlibSelect(eventlibCore, drawTo);
+
+  });
+
+
 
   function shEvent(e: EMouseEvent) {
     const etype = e.origMouseEvent.type;
@@ -35,13 +47,14 @@ function setup() {
     mouseActivity2.value = `mouse is ${etype}-ing at ${x}, ${y}`;
 
   }
-  const myHandlers0: MouseHandlerInit = () =>  {
+
+  const myHandlers0: MouseHandlerInit = (t?: any) =>  {
     return {
       mousemove   : e => shEvent(e),
     }
   }
 
-  const myHandlers1: MouseHandlerInit = () =>  {
+  const myHandlers1: MouseHandlerInit = (t?: any) =>  {
     return {
       mousedown   : e => shEvent2(e),
       mouseenter  : e => shEvent2(e),
@@ -66,7 +79,7 @@ function setup() {
   });
 
   return {
-    mousePosRef, loadShapes, overlayRoot, mouseActivity, mouseActivity2
+    overlayRoot, mouseActivity, mouseActivity2
   }
 }
 

@@ -61,7 +61,7 @@ export class Point {
   public y: number;
   public sys: CoordSys;
 
-  public constructor(x: number, y: number, sys: CoordSys) {
+  public constructor(x: number, y: number, sys?: CoordSys) {
     this.x = x;
     this.y = y;
     this.sys = sys ? sys : CoordSys.Unknown;
