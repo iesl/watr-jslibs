@@ -27,6 +27,7 @@ export function useCanvasDrawto(
     if (canvasElem === null || divElem === null) return;
 
     pixiJsAppRef.value = initPixiJs(canvasElem, divElem);
+    pixiJsAppRef.value.resize();
 
   });
 

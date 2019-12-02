@@ -29,13 +29,14 @@ const stories: StoryEntry[] = [
     title: 'Layered image/svg/canvas',
     to: 'elem-overlay-story'
   },
-  {
-    title: 'Canvas Drawto',
+  { title: 'Canvas Drawto',
     to: 'drawto/drawto-canvas-story'
   },
-  {
-    title: 'SketchLib Core',
+  { title: 'SketchLib Core',
     to: 'sketchlib/sketchlib-core-story'
+  },
+  { title: 'Filter Selection',
+    to: 'filter-select'
   },
 ];
 

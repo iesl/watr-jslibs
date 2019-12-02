@@ -6,6 +6,7 @@ import _ from 'lodash';
 import {
   watch,
   onMounted,
+  ref,
 } from '@vue/composition-api';
 
 // import { DrawToCanvas } from './drawto-canvas';
@@ -32,60 +33,77 @@ export function useEventlibSelect(eventlibCore: EventlibCore, drawTo: DrawToCanv
 
   const { setMouseHandlers } = eventlibCore;
   const { pixiJsAppRef } = drawTo;
+
+  const selectionRef = ref(new BBox(0, 0, 0, 0));
+
+  let selecting = false;
+  let originPt: Point = new Point(0, 0);
+  let currentPt: Point = new Point(0, 0);
+
+
   watch(pixiJsAppRef, (pixiJsApp) => {
     if (pixiJsApp === null) return;
 
-    let userWithinPageBounds = true;
-    let selecting = false;
-    let originPt: Point = new Point(0, 0);
-    let currentPt: Point = new Point(0, 0);
-    const emptyRect: BBox = new BBox(originPt.x, originPt.y, 0, 0);
-
     const pgRect = new PIXI.Graphics();
 
-    // let drawRect: PIXI.Graphics;
+    function drawCurrentRect() {
+      const currBBox = pointsToRect(originPt, currentPt);
+      pgRect.clear();
+      pgRect.beginFill(0x650A5A);
+      pgRect.lineStyle(4, 0xFEEB77, 1);
+      pgRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
+      pgRect.endFill();
+    }
 
-    emptyRect.width += 2;
-
-    const initSelect = (e: EMouseEvent) => {
+    const onMouseDown = (e: EMouseEvent) => {
       const {x, y} = e.pos;
       originPt = currentPt = new Point(x, y);
       // Rectangle
-      const currBBox = pointsToRect(originPt, currentPt);
-      pgRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
-      pgRect.lineStyle(2, 0xFEEB77, 1);
-      pgRect.beginFill(0x650A5A);
-      pgRect.endFill();
-
       pixiJsApp.stage.addChild(pgRect)
+      drawCurrentRect();
+
       selecting = true;
     };
 
-    const onMove = (e: EMouseEvent) => {
+    const onMouseMove = (e: EMouseEvent) => {
       if (selecting) {
         const {x, y} = e.pos;
         currentPt = new Point(x, y);
-        const currBBox = pointsToRect(originPt, currentPt);
-        pgRect.clear()
-        pgRect.lineStyle(2, 0xFEEB77, 1);
-        pgRect.beginFill(0x650A5A);
-        pgRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
-        pgRect.endFill();
+        drawCurrentRect();
       }
+    }
+
+    const onMouseUp = (e: EMouseEvent) => {
+      if (currentPt !== originPt) {
+        const currBBox = pointsToRect(originPt, currentPt);
+        selectionRef.value = currBBox;
+        pixiJsApp.stage.removeChild(pgRect);
+      }
+    }
+
+    const onMouseOut = (e: EMouseEvent) => {
+      // userWithinPageBounds = false;
+      if (selecting) {
+        const {x, y} = e.pos;
+        currentPt = new Point(x, y);
+        drawCurrentRect();
+      }
+    }
+
+    const onMouseOver = (e: EMouseEvent) => {
+      // userWithinPageBounds = false;
+
     }
 
     const myHandlers1: MouseHandlerInit = () =>  {
       return {
-        mousedown   : initSelect,
-        mousemove   : onMove,
+        mousedown   : onMouseDown,
+        mousemove   : onMouseMove,
         // mouseenter  : e => shEvent2(e),
         // mouseleave  : e => shEvent2(e),
-        mouseout    : () => userWithinPageBounds = false,
-        mouseover   : () => userWithinPageBounds = true,
-        // mouseup     : e => shEvent2(e),
-        // click       : e => shEvent2(e),
-        // dblclick    : e => shEvent2(e),
-        // contextmenu : e => shEvent2(e),
+        mouseup     : onMouseUp,
+        mouseout    : onMouseOut,
+        mouseover   : onMouseOver,
       }
     }
 
@@ -94,6 +112,6 @@ export function useEventlibSelect(eventlibCore: EventlibCore, drawTo: DrawToCanv
   });
 
   return {
-
+    selectionRef
   }
 }

@@ -99,7 +99,6 @@ function defaultMouseHandlers(widget: PdfPage): MouseHandlers {
 }
 
 
-
 @Component
 class PdfPage extends Vue {
   @Prop({default: 0}) pageNum!: number;
@@ -318,4 +317,4 @@ export default createComponent({
     };
   }
 
-})
+});

@@ -2,7 +2,7 @@
     <v-flex xs12 sm8 md6>
         <v-card>
             <v-card-title class="headline">
-                WEventlib tests
+                EventLib Functionality
             </v-card-title>
             <div ref="overlayRoot" id="event-div" class="eventbox"> </div>
 
@@ -10,8 +10,24 @@
 
         <v-card>
             <v-card-text>
-                <h3>Mouse Activity: {{ mouseActivity }}</h3>
-                <h3>Mouse Activity: {{ mouseActivity2 }}</h3>
+                <ul>
+                    <li>
+                        <h3>Mouse Position: {{ mouseActivity }}</h3>
+                    </li>
+                    <li>
+                        <h3>Mouse Events: {{ mouseActivity2 }}</h3>
+                    </li>
+                    <li>
+                        <h3>Last Selection Rect: {{ selectionRef }}</h3>
+                    </li>
+
+                    <li>
+                        <h3> Drag-selection </h3>
+                        <ul>
+                            <li></li>
+                        </ul>
+                    </li>
+                </ul>
             </v-card-text>
 
         </v-card>

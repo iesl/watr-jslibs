@@ -22,40 +22,37 @@ function setup() {
 
   const elemOverlay = useImgCanvasOverlays(overlayRoot);
   const canvasElemRef = elemOverlay.elems.canvasElem;
+
+  const drawTo = useCanvasDrawto(canvasElemRef, overlayRoot);
+  const eventlibSelect = useEventlibSelect(eventlibCore, drawTo);
+
+  const { selectionRef }  = eventlibSelect;
+
   watch(canvasElemRef, (el) => {
     if (el === null) return;
-
-    const drawTo = useCanvasDrawto(canvasElemRef, overlayRoot);
-    const eventlibSelect = useEventlibSelect(eventlibCore, drawTo);
-
   });
-
 
 
   function shEvent(e: EMouseEvent) {
     const etype = e.origMouseEvent.type;
     const {x, y} = e.pos;
-    mouseActivity.value = `mouse is ${etype}-ing at ${x}, ${y}`;
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
+    mouseActivity.value = `mouse ${etype} @${xi},${yi}`;
   }
 
   function shEvent2(e: EMouseEvent) {
     const etype = e.origMouseEvent.type;
     const {x, y} = e.pos;
-    // const ct = e.origMouseEvent.currentTarget
-    // const rt = e.origMouseEvent.relatedTarget
-    // const t = e.origMouseEvent.target
-    mouseActivity2.value = `mouse is ${etype}-ing at ${x}, ${y}`;
+    const xi = Math.floor(x);
+    const yi = Math.floor(y);
+    mouseActivity2.value = `mouse ${etype} @${xi}, ${yi}`;
 
-  }
-
-  const myHandlers0: MouseHandlerInit = (t?: any) =>  {
-    return {
-      mousemove   : e => shEvent(e),
-    }
   }
 
   const myHandlers1: MouseHandlerInit = (t?: any) =>  {
     return {
+      mousemove   : e => shEvent(e),
       mousedown   : e => shEvent2(e),
       mouseenter  : e => shEvent2(e),
       mouseleave  : e => shEvent2(e),
@@ -70,16 +67,13 @@ function setup() {
 
   onMounted(() => {
 
-    elemOverlay.setDimensions(800, 800);
-    setMouseHandlers([myHandlers0, myHandlers1]);
+    elemOverlay.setDimensions(600, 500);
+    setMouseHandlers([myHandlers1]);
 
-    // const bbox = coords.mk.fromLtwh(20, 40, 200, 444);
-
-    // loadShapes([bbox]);
   });
 
   return {
-    overlayRoot, mouseActivity, mouseActivity2
+    overlayRoot, mouseActivity, mouseActivity2, selectionRef
   }
 }
 
