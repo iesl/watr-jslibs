@@ -66,7 +66,7 @@ export function candidateGroup(
   return candidateGroupF(
     name, tags,
     (c: ILogEntry) => {
-      const multikey = [name, `page=${c.page}`, `${c.tags}`];
+      const multikey = [name, `page=${c.page}`, `${c.headers.tags}`];
       const displayTitle = 'Todo??';
       return { multikey, displayTitle };
     }

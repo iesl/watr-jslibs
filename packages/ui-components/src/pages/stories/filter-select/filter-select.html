@@ -1,22 +1,23 @@
-<v-layout column justify-center align-center>
+<v-layout column >
     <v-flex xs12 sm8 md6>
         <v-card>
             <v-card-title class="headline">
-                Filter Selection/Narrowing 
+                Filter Selection/Narrowing
             </v-card-title>
-            <v-card-text>
-                <p>
-                    Compositional component to create overlay of img, HtmlCanvas, and SVG elements, aligned such that
-                    Canvas and Svg elements may be used to draw on the underlying image.
-                </p>
-            </v-card-text>
-        </v-card>
-        <v-card>
-            <div class="layerRoot" ref="layerRoot"></div>
-            <span>TODO:</span>
-            <ul>
-                <li>...</li>
+
+            <v-text-field
+                label="Query"
+                single-line
+                filled
+                v-model="queryTextRef"
+            ></v-text-field>
+            <ul class="selection">
+                <li v-for="(item, i) in currSelectionRef"
+                    :key="i">
+                    {{item}}
+                </li>
             </ul>
+
         </v-card>
 
     </v-flex>

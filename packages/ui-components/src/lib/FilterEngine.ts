@@ -8,8 +8,6 @@
  *
  */
 
-
-
 import _ from "lodash";
 import lunr from "lunr";
 
@@ -65,8 +63,6 @@ export class SelectionFilteringEngine {
     this.lunrIndex = this.initIndex(this.keyedRecords);
     const tokenSet = (<any>this.lunrIndex).tokenSet;
     this.indexTokens = tokenSet.toArray();
-
-    this.lunrIndex
   }
 
   public groupRecordsByKey(records: KeyedRecord[]): KeyedRecordGroup[] {
@@ -98,18 +94,23 @@ export class SelectionFilteringEngine {
   public search(queryStr: string): lunr.Index.Result[] {
     const hits = this.lunrIndex.query(query => {
       const terms = _.filter(_.split(queryStr, / +/), a => a.length > 0);
+
       _.each(terms, queryTerm => {
         const clause: lunr.Query.Clause = {
           term: `*${queryTerm}*`,
           // presence: lunr.Query.presence.REQUIRED,
-          fields: [],
-          boost: 1,
-          editDistance: 0,
-          usePipeline: true,
-          wildcard: 0
+          // @ts-ignore
+          presence: 2,
+          // fields: ['tags'],
+          // boost: 1,
+          // editDistance: 0,
+          usePipeline: false,
+          // wildcard: 3
         };
+        console.log('clause', clause);
         query.clause(clause);
       });
+
     });
 
     return hits;
@@ -139,7 +140,11 @@ export class SelectionFilteringEngine {
   private initIndex(keyedRecords: KeyedRecord[]): lunr.Index {
     const lunrIndex = lunr(function(this: lunr.Builder) {
       this.field("tags");
+      this.field("id");
+
       this.pipeline.reset();
+      console.log('pipeline', this.pipeline);
+
       _.each(keyedRecords, (rec, num) => {
         const keystr = rec.keystr;
         this.add({

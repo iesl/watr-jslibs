@@ -1,67 +1,28 @@
 #!/bin/bash
 
-lerna exec -- ncu --loglevel verbose
+showhelp() {
+    echo "Usage: $SCRIPT: "
+    echo "  todo  "
+    exit 2
+}
 
+# default arg vals
+install=
 
-# showhelp() {
-#     echo "Usage: $SCRIPT: "
-#     echo "  todo  "
-#     exit 2
-# }
+while getopts "ih" name; do
+    case $name in
+        i)    install=1;;
+        h)    showhelp $0;;
+        [?])  showhelp $0;;
+    esac
+done
 
-# # default arg vals
-# install=
+root=$(pwd)
 
-# while getopts "ih" name; do
-#     case $name in
-#         i)    install=1;;
-#         h)    showhelp $0;;
-#         [?])  showhelp $0;;
-#     esac
-# done
+if [ -z "$install" ]; then
+    ## ...
+    lerna --concurrency 1 exec -- ncu --loglevel verbose
+else
+    lerna --concurrency 1 exec -- ncu --loglevel verbose -ui
 
-# root=$(pwd)
-
-# PROJECTS=(
-#     'watrmarks.js'
-#     'shared'
-#     'vue-components'
-#     'client-app'
-#     '.'
-# )
-
-# oneach() {
-#     op1=$1;
-#     op2=$2;
-
-#     for proj in "${PROJECTS[@]}"
-#     do
-#         echo ">> $proj"
-#         cd "packages/$proj"
-#         if [[ ! -z "$op1" ]]; then
-#             echo "running $op1"
-#             eval $op1
-#         else
-#             echo "no op1 specified "
-#         fi
-
-#         cd $root
-
-#         if [[ ! -z "$op2" ]]; then
-#             echo "running $op2"
-#             eval $op2
-#         else
-#             echo "no op2 specified "
-#         fi
-
-#         echo -e "\n\n"
-#     done
-# }
-
-# if [ -z "$install" ]; then
-#     ## ...
-#     oneach "npm outdated"
-# else
-#     oneach "npm update" "lerna bootstrap"
-
-# fi
+fi

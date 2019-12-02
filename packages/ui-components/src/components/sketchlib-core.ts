@@ -2,13 +2,13 @@
   */
 import _ from 'lodash';
 
-import {
-  reactive,
-  onMounted,
-  onUnmounted,
-  Ref,
-  watch,
-} from '@vue/composition-api';
+// import {
+//   reactive,
+//   onMounted,
+//   onUnmounted,
+//   Ref,
+//   watch,
+// } from '@vue/composition-api';
 
 import { DrawToCanvas } from './drawto-canvas';
 import { EventlibCore } from './eventlib-core';
