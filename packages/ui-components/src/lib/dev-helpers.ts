@@ -20,11 +20,21 @@ export function asyncGetJson<T>(url: string): Promise<T> {
   });
 }
 
-export interface ILogEntry {
-  logType: string;
-  page: number;
+export interface ILogHeaders {
   tags: string;
   name: string;
+  callSite: string;
+  timestamp: number;
+}
+
+export interface ILogBody {
+}
+
+export interface ILogEntry {
+  headers: ILogHeaders;
+  body: ILogBody;
+  logType: string;
+  page: number;
 }
 
 export function candidateGroupF(

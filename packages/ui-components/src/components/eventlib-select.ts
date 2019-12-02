@@ -5,11 +5,8 @@ import _ from 'lodash';
 
 import {
   watch,
-  onMounted,
   ref,
 } from '@vue/composition-api';
-
-// import { DrawToCanvas } from './drawto-canvas';
 
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
