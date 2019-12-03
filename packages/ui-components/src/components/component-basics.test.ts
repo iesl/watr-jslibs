@@ -19,28 +19,29 @@ describe('Component Basics',  () => {
     // console.log('every1', every1);
     // console.log('some', some1);
 
-    const state = initState();
+    // const state = initState();
 
-    expect(state.isReady.value).toBe(true);
+    // expect(state.isReady.value).toBe(true);
 
-    state.register('comp-a');
-    expect(state.isReady.value).toBe(false);
+    // state.register('comp-a');
+    // expect(state.isReady.value).toBe(false);
 
-    state.setReady('comp-a');
-    expect(state.isReady.value).toBe(true);
+    // state.setReady('comp-a');
+    // expect(state.isReady.value).toBe(true);
 
-    state.register('comp-b');
-    expect(state.isReady.value).toBe(false);
-    state.register('comp-c');
-    expect(state.isReady.value).toBe(false);
+    // state.register('comp-b');
+    // expect(state.isReady.value).toBe(false);
+    // state.register('comp-c');
+    // expect(state.isReady.value).toBe(false);
 
-    state.setReady('comp-b');
-    expect(state.isReady.value).toBe(false);
-    state.setReady('comp-c');
-    expect(state.isReady.value).toBe(true);
+    // state.setReady('comp-b');
+    // expect(state.isReady.value).toBe(false);
+    // state.setReady('comp-c');
+    // expect(state.isReady.value).toBe(true);
 
   });
-  it('waitFor should ...  ', () => {
+
+  it('waitFor should should monitor upstream and downstream dependencies', () => {
     const state = initState();
     expect(state.isReady.value).toBe(true);
 

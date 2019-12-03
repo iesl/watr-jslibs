@@ -75,6 +75,7 @@ export function useEventlibCore<BoxT extends RTreeIndexable>({
   }
 
   onMounted(() => {
+    // TODO make this
     watch(targetDivRef, (targetDiv) => {
       if (targetDiv) {
         targetDivRef.value.addEventListener('mousemove', onMouseMove);
@@ -82,6 +83,7 @@ export function useEventlibCore<BoxT extends RTreeIndexable>({
     })
   })
 
+  // TODO switch to beforeUnmounted ??
   onUnmounted(() => {
     const targetDiv = targetDivRef.value;
     if (targetDiv) {

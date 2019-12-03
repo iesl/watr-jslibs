@@ -44,9 +44,6 @@ export function useImgCanvasOverlays({
   }, () => {
 
     const overlayContainer = containerRef.value;
-    // watch(containerRef, (overlayContainer) => {
-    // });
-    // if (overlayContainer === null) return;
 
     overlayContainer.classList.add('layers');
 
@@ -85,8 +82,6 @@ export function useImgCanvasOverlays({
         imgElem.value.src = placeholderImage();
       }
     });
-
-
   });
 
   function setImageSource(src: string) {
@@ -105,15 +100,12 @@ export function useImgCanvasOverlays({
   };
 }
 
-// export function useImgCanvasSvgOverlays(containerRef: Ref<HTMLDivElement>) {
 export function useImgCanvasSvgOverlays({
   containerRef, state
 }: Args) {
   const imgCanvasOverlays = useImgCanvasOverlays({ containerRef, state });
   const { setImageSource, elems, setDimensions, dimensions } = imgCanvasOverlays;
   const { imgElem, canvasElem } = elems;
-
-  // const isInitialized = ref(false);
 
   const svgElem: Ref<SVGElement> = ref(null);
 

@@ -6,14 +6,15 @@ import {
   ref,
   computed,
   watch,
+  isRef,
 } from '@vue/composition-api';
 
 type ComponentName = string;
-type ComponentInitRec = [ComponentName, Ref<boolean>];
+type ComponentInitRec = [ComponentName, boolean];
 
 export interface ComponentState {
   setReady(name: string): void;
-  register(name: string): void;
+  // register(name: string): void;
   isRegistered(name: string): boolean;
   isReady: Ref<boolean>;
   currentState(): [ComponentName, boolean][];
@@ -29,60 +30,56 @@ export interface WaitForOptions {
   ensureTruthy?: Array<Ref<any>>;
 };
 
+function checkReactivity(a: Array<Ref<and>>, msg:string): void {
+  const depsAreRefs = _.every(a, dep => isRef(dep));
+
+  if (!depsAreRefs) {
+    throw new Error(`Non-reactive member: ${msg}`);
+  }
+}
 export function waitFor(
   name: string,
   { state, dependsOn, ensureTruthy }: WaitForOptions,
-  f: () => void
+  userFunc: () => void
 ) {
+  checkReactivity(dependsOn, `${name}:dependsOn`);
+  checkReactivity(ensureTruthy, `${name}:ensureTruthy`);
 
-  let didRun = ref(false);
+  let didRun = false;
 
   const readyToGo = computed(() => {
     const isReady = state.isReady.value;
-    const didNotRun = !didRun.value;
     const upstreamsReady = _.every(dependsOn, dep => dep.value);
-    return isReady && didNotRun && upstreamsReady;
+    console.log(`${name} recomputing readyToGo!`);
+    const ready = isReady && !didRun && upstreamsReady;
+    if (ready) {
+      didRun = true;
+    }
+    return ready;
   });
 
-  // const stop = watch([state.isReady, didRun], () => {
   watch(readyToGo, (ready) => {
     if (!ready) return;
 
-    // const notReady = !state.isReady.value;
-    // const alreadyRan = didRun.value;
-    // if (notReady || alreadyRan) return;
+    console.log(`${name} is ready and upstreams are satisfied!`);
 
-    if (!state.isRegistered(name)) {
-      state.register(name);
-    }
 
-    console.log(`${name} is ready!`);
+    userFunc();
 
     watch(() => {
-      const allTruthy = _.every(dependsOn, dep => dep.value);
-      if (!allTruthy) return;
+      const b = _.every(ensureTruthy, dep => dep.value);
+      if (!b) return;
 
-      console.log(`${name} upstreams are satisfied!`);
+      console.log(`${name} downstreams are satisfied!`);
 
-      f();
-
-      didRun.value = true;
-
-      watch(() => {
-        const b = _.every(ensureTruthy, dep => dep.value);
-        if (!b) return;
-
-        console.log(`${name} downstreams are satisfied!`);
-
+      if (!state.isRegistered(name)) {
+        // state.register(name);
         state.setReady(name);
-      });
-
+      }
     });
+
   });
 
-  // watch(didRun, () => {
-  //   stop();
-  // });
 }
 
 export function initState(): ComponentState {
@@ -100,32 +97,41 @@ export function initState(): ComponentState {
       return _.every(vs, c => c[1]);
     });
 
-  function register(name: string): void {
-    if (isRegistered(name)) {
-      throw new Error(`Already registered component ${name}`);
-    }
-    const vs = componentList.value;
-    vs.push([name, false]);
-
-    componentList.value = vs;
-  }
-
   function setReady(name: string) {
-    if (!isRegistered(name)) {
-      throw new Error(`setReady() on unregistered component ${name}`);
+    if (isRegistered(name)) {
+      throw new Error(`setReady() on already registered component ${name}`);
     }
     const vs = componentList.value;
-    const vindex = _.findIndex(vs, c => c[0] === name);
-    vs.splice(vindex, 1, [name, true]);
+    vs.push([name, true]);
     componentList.value = vs;
   }
+
+  // function register(name: string): void {
+  //   if (isRegistered(name)) {
+  //     throw new Error(`Already registered component ${name}`);
+  //   }
+  //   const vs = componentList.value;
+  //   vs.push([name, false]);
+
+  //   componentList.value = vs;
+  // }
+
+  // function setReady(name: string) {
+  //   if (!isRegistered(name)) {
+  //     throw new Error(`setReady() on unregistered component ${name}`);
+  //   }
+  //   const vs = componentList.value;
+  //   const vindex = _.findIndex(vs, c => c[0] === name);
+  //   vs.splice(vindex, 1, [name, true]);
+  //   componentList.value = vs;
+  // }
 
   function currentState() {
     return componentList.value;
   }
 
   const st = {
-    register,
+    // register,
     isRegistered,
     setReady,
     isReady,
