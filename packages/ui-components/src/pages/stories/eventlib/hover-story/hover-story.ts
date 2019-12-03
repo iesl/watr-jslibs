@@ -18,25 +18,23 @@ import { useEventlibHover } from '~/components/eventlib-hover'
 import { coords, d3x, GridTypes, Point, toBox } from "sharedLib";
 
 import { useImgCanvasSvgOverlays  } from '~/components/elem-overlays'
+import { initState, waitFor } from '~/components/component-basics';
 
 function setup() {
-  const overlayRoot = ref(null);
-  const initialized = ref(false);
+  const state = initState();
 
-  const eventlibHover = useEventlibHover(overlayRoot);
+  const overlayRoot = ref(null);
+  const containerRef = overlayRoot;
+
+  const eventlibHover = useEventlibHover({ targetDivRef: overlayRoot, state });
   const { hoveringRef, eventlibCore } = eventlibHover;
   const { loadShapes, mousePosRef } = eventlibCore;
 
-  const elemOverlay = useImgCanvasSvgOverlays(overlayRoot);
+  const elemOverlay = useImgCanvasSvgOverlays({ containerRef, state });
 
-  watch(elemOverlay.elems.svgElem, (svgElem) => {
-    if (svgElem === null) return;
-
-    initialized.value = true;
-  });
-
-  watch(initialized, (init) => {
-    if (!init) return;
+  waitFor('HoverStory', {
+    state
+  }, () => {
 
     const svgElem = elemOverlay.elems.svgElem.value;
     const svgSelection = select(svgElem);
@@ -100,10 +98,6 @@ function setup() {
     });
 
   });
-
-
-
-
 
   onMounted(() => {
 

@@ -281,6 +281,7 @@ class PdfPage extends Vue {
 import { createComponent, onMounted, ref } from '@vue/composition-api';
 import { useEventlibCore } from '~/components/eventlib-core'
 import { useImgCanvasSvgOverlays } from '~/components/elem-overlays'
+import { initState } from '../component-basics';
 
 export default createComponent({
   // components: {},
@@ -294,9 +295,13 @@ export default createComponent({
 
   setup() {
 
+    const state = initState();
+
     const pageOverlays = ref(null);
-    const eventLib = useEventlibCore(pageOverlays);
-    const elemOverlay = useImgCanvasSvgOverlays(pageOverlays);
+    const containerRef = pageOverlays;
+
+    const eventLib = useEventlibCore({ targetDivRef: pageOverlays, state });
+    const elemOverlay = useImgCanvasSvgOverlays({ containerRef, state });
 
     elemOverlay.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
 

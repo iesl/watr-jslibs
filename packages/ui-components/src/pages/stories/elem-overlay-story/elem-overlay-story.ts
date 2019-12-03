@@ -7,13 +7,16 @@ import {
 
 
 import { useImgCanvasSvgOverlays  } from '~/components/elem-overlays'
+import { initState } from '~/components/component-basics';
 
 export default {
   setup() {
 
-    const layerRoot: Ref<HTMLDivElement> = ref(null);
+    const state = initState();
 
-    const elemOverlay = useImgCanvasSvgOverlays(layerRoot);
+    const layerRoot: Ref<HTMLDivElement> = ref(null);
+    const containerRef = layerRoot;
+    const elemOverlay = useImgCanvasSvgOverlays({ containerRef, state });
 
     elemOverlay.setDimensions(300, 350);
 

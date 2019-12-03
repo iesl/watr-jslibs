@@ -1,5 +1,3 @@
-// TODO
-
 
 import {
   ref,
@@ -14,50 +12,30 @@ import * as PIXI from 'pixi.js';
 import { useImgCanvasOverlays } from '~/components/elem-overlays'
 import { useCanvasDrawto } from '~/components/drawto-canvas';
 import { useSketchlibCore } from '~/components/sketchlib-core';
-
-
+import { useEventlibCore } from '~/components/eventlib-core';
+import { useEventlibSelect } from '~/components/eventlib-select'
+import { initState, waitFor } from '~/components/component-basics'
 
 export default {
   setup() {
 
+    const state = initState();
+
     const layerRoot: Ref<HTMLDivElement> = ref(null);
+    const containerRef = layerRoot;
 
-    const elemOverlay = useImgCanvasOverlays(layerRoot);
-    const canvasElemRef = elemOverlay.elems.canvasElem
-    const canvasDrawto = useCanvasDrawto(canvasElemRef, layerRoot);
-    // const sketchlibCore = useSketchlibCore(canvasDrawto);
+    const eventlibCore = useEventlibCore({ targetDivRef: layerRoot, state } );
+    const elemOverlay = useImgCanvasOverlays({ containerRef, state });
+    const canvasRef = elemOverlay.elems.canvasElem
+    const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
+    const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
 
-    const pixiJsAppRef = canvasDrawto.pixiJsAppRef;
+    const sketchlibCore = useSketchlibCore({ state, canvasDrawto, eventlibCore, eventlibSelect });
+    console.log('state', state.currentState());
 
-
-    // Draw a selection rectangle ..
-
-    watch(pixiJsAppRef, (pixiJsApp) => {
-      if (pixiJsApp === null) return;
-
-      elemOverlay.setDimensions(600, 800);
-
-      const pg = new PIXI.Graphics();
-
-      // Rectangle
-      pg.lineStyle(2, 0xFEEB77, 1);
-      pg.beginFill(0x650A5A);
-      pg.drawRect(200, 50, 100, 100);
-      pg.endFill();
-
-      // Circle + line style 1
-      pg.lineStyle(2, 0xFEEB77, 1);
-      pg.beginFill(0x650A5A, 1);
-      pg.drawCircle(250, 250, 50);
-      pg.endFill();
-
-      pixiJsApp.stage.addChild(pg)
+    waitFor('SketchlibCoreStory', { state }, () => {
+      elemOverlay.setDimensions(400, 600);
     });
-
-    onMounted(() => {
-
-    });
-
 
     return {
       layerRoot

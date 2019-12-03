@@ -4,14 +4,15 @@
 import _ from 'lodash';
 
 import {
-  watch,
   ref,
+  Ref,
 } from '@vue/composition-api';
 
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
 import { DrawToCanvas } from './drawto-canvas';
 import { BBox, Point } from 'sharedLib';
+import { StateArgs, waitFor } from '~/components/component-basics'
 import * as PIXI from 'pixi.js';
 
 
@@ -25,21 +26,40 @@ function pointsToRect(p1: Point, p2: Point): BBox {
   // return {left: nx, top: ny, width: nwidth, height: nheight};
 }
 
+export interface EventlibSelect {
+  selectionRef: Ref<BBox>;
+}
 
-export function useEventlibSelect(eventlibCore: EventlibCore, drawTo: DrawToCanvas) {
+type Args = StateArgs & {
+  canvasDrawto: DrawToCanvas,
+  eventlibCore: EventlibCore,
+};
 
-  const { setMouseHandlers } = eventlibCore;
-  const { pixiJsAppRef } = drawTo;
+export function useEventlibSelect({
+  state,
+  eventlibCore,
+  canvasDrawto
+}: Args) {
+
 
   const selectionRef = ref(new BBox(0, 0, 0, 0));
 
-  let selecting = false;
-  let originPt: Point = new Point(0, 0);
-  let currentPt: Point = new Point(0, 0);
+  waitFor('EventlibSelect', {
+    state,
+    // dependsOn: [targetDivRef],
+    // ensureTruthy: [targetDivRef]
+  }, () => {
 
+    const { setMouseHandlers } = eventlibCore;
+    const { pixiJsAppRef } = canvasDrawto;
 
-  watch(pixiJsAppRef, (pixiJsApp) => {
-    if (pixiJsApp === null) return;
+    // const pixiJsApp = pixiJsAppRef.value;
+
+    let selecting = false;
+    let originPt: Point = new Point(0, 0);
+    let currentPt: Point = new Point(0, 0);
+
+    // console.log('useEventlibSelect: inside watch..., pixiJsApp=');
 
     const pgRect = new PIXI.Graphics();
 
@@ -56,6 +76,7 @@ export function useEventlibSelect(eventlibCore: EventlibCore, drawTo: DrawToCanv
       const {x, y} = e.pos;
       originPt = currentPt = new Point(x, y);
       // Rectangle
+      const pixiJsApp = pixiJsAppRef.value;
       pixiJsApp.stage.addChild(pgRect)
       drawCurrentRect();
 
@@ -73,7 +94,16 @@ export function useEventlibSelect(eventlibCore: EventlibCore, drawTo: DrawToCanv
     const onMouseUp = (e: EMouseEvent) => {
       if (currentPt !== originPt) {
         const currBBox = pointsToRect(originPt, currentPt);
+        // const t = e.origMouseEvent.target;
+        // const ct = e.origMouseEvent.currentTarget;
+        // const b = e.origMouseEvent.bubbles;
+        // console.log('> onMouseUp: setting ', currBBox.toString());
+        // console.log('>   target ', t);
+        // console.log('>   currentTarget ', ct);
+        // console.log('>   bubbles ', b);
+
         selectionRef.value = currBBox;
+        const pixiJsApp = pixiJsAppRef.value;
         pixiJsApp.stage.removeChild(pgRect);
       }
     }
@@ -87,9 +117,8 @@ export function useEventlibSelect(eventlibCore: EventlibCore, drawTo: DrawToCanv
       }
     }
 
-    const onMouseOver = (e: EMouseEvent) => {
+    const onMouseOver = () => {
       // userWithinPageBounds = false;
-
     }
 
     const myHandlers1: MouseHandlerInit = () =>  {

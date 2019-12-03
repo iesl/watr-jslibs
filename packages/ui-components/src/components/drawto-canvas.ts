@@ -3,33 +3,46 @@ import _ from 'lodash';
 import {
   ref,
   Ref,
-  watch,
 } from '@vue/composition-api';
 
 import * as PIXI from 'pixi.js';
 import { initPixiJs } from '~/lib/pixijs-utils';
+import { StateArgs, waitFor } from '~/components/component-basics'
 
 export interface DrawToCanvas {
   pixiJsAppRef: Ref<PIXI.Application>
 }
 
-export function useCanvasDrawto(
+type Args = StateArgs & {
   canvasRef: Ref<HTMLCanvasElement>,
-  containerDivRef: Ref<HTMLDivElement>
-): DrawToCanvas {
+  containerRef: Ref<HTMLDivElement>
+};
 
+export function useCanvasDrawto({
+  state,
+  canvasRef,
+  containerRef
+}: Args): DrawToCanvas {
   let pixiJsAppRef: Ref<PIXI.Application> = ref(null);
 
-  watch([canvasRef, containerDivRef], () => {
+  waitFor('CanvasDrawto', {
+    state,
+    dependsOn: [canvasRef, containerRef],
+    ensureTruthy: [pixiJsAppRef]
+  }, () => {
     const canvasElem = canvasRef.value;
-    const divElem = containerDivRef.value;
+    const divElem = containerRef.value;
 
     if (canvasElem === null || divElem === null) return;
 
-    pixiJsAppRef.value = initPixiJs(canvasElem, divElem);
-    pixiJsAppRef.value.resize();
+    const app = initPixiJs(canvasElem, divElem);
+    app.resize();
+
+    pixiJsAppRef.value = app;
 
   });
+
+
 
   return {
     pixiJsAppRef

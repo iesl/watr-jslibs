@@ -1,8 +1,10 @@
 * Dev Notes
   
 ** Now: 
-   - Create a pixijs version of img/canvas overly component
-     - Create rect. selection system
+   - [X] Create a pixijs version of img/canvas overly component
+
+   - [ ] Create rect. selection system
+     - [ ] Still a bit flakey
   
 
   
@@ -12,11 +14,19 @@
     Display a pdf page as an image
     - [ ] Image overlay, allowing for ... 
       - [ ] Draw shape overlays for tracelog visualization
+        - via Sketchlib
  
     - [ ] Text overlay, allowing for ... 
       - [ ] Glyphs highlighting 
+        - via Eventlib/Hover
       - [ ] Text select/copy 
 
+***** Sketchlib
+      Core system which allows drawing shapes on top of an image
+      Uses: 
+      - Tracelog shape drawing
+      - Labeling regions with rectangular selection
+        
 ***** Elem Overlays (layering) 
       (div elem) => [...]
 
@@ -35,6 +45,8 @@
       
 ***** Selection system 
       Rectangular selection events.
+
+      TODO Started; still a bit flakey
 
 ***** Run Trace 
       Given a tracelog, display the shapes as pdf image overlays

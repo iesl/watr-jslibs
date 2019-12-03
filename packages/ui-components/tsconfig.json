@@ -26,7 +26,6 @@
     "diagnostics": true,
 
     "types": [
-      "webpack-env",
       "jest",
       "chai",
       "vuetify",

@@ -1,4 +1,16 @@
 {
+  "presets": [
+    [ "@babel/env",
+      {
+        modules: false,
+        loose: true,
+        targets: {
+          "node": "10.16.0"
+        }
+      }
+    ],
+    "@babel/typescript"
+  ],
   "env": {
     "test": {
       "presets": [
@@ -12,7 +24,7 @@
             }
           }
         ],
-        "@babel/typescript"
+        "@babel/preset-typescript"
       ]
     }
   }

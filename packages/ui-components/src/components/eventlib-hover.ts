@@ -10,9 +10,8 @@ import {
 } from '@vue/composition-api';
 
 import { useEventlibCore  } from '~/components/eventlib-core'
+import { StateArgs, waitFor } from '~/components/component-basics'
 
-// import { BBox as RBBox } from "rbush";
-// import RBushKnn from 'rbush-knn';
 
 import {
   coords,
@@ -20,12 +19,27 @@ import {
 
 import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
 
+type Args = StateArgs & {
+  targetDivRef: Ref<HTMLDivElement>
+};
 
-export function useEventlibHover<BoxT extends RTreeIndexable>(targetDivRef: Ref<HTMLDivElement>) {
-  const eventlibCore = useEventlibCore<BoxT>(targetDivRef);
+export function useEventlibHover<BoxT extends RTreeIndexable>({
+  state,
+  targetDivRef
+}: Args) {
+  const eventlibCore = useEventlibCore<BoxT>({ targetDivRef, state });
   const { eventRTree } = eventlibCore;
 
-  // const isInitialized = ref(false);
+  waitFor('EventlibHover', {
+    state,
+    dependsOn: [targetDivRef]
+  }, () => {
+    // watch(targetDivRef, () => {
+    // });
+    const targetDiv = targetDivRef.value;
+
+  });
+
   const hovered: RTreeIndexable[] = [];
   const hoveringRef = ref(hovered);
 

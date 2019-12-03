@@ -67,7 +67,7 @@ export class SelectionFilteringEngine {
 
   public groupRecordsByKey(records: KeyedRecord[]): KeyedRecordGroup[] {
     const groups = _.groupBy(records, r => r.keystr);
-    return _.map(
+    const keyedGroups = _.map(
       _.toPairs(groups),
       ([keystr, recs]) =>
         ({
@@ -75,6 +75,8 @@ export class SelectionFilteringEngine {
           records: _.sortBy(recs, r => r.n),
         } as KeyedRecordGroup),
     );
+    const sorted = _.sortBy(keyedGroups, k => k.keystr);
+    return sorted;
   }
 
   public getKeyedRecordGroups(): KeyedRecordGroup[] {
@@ -107,7 +109,6 @@ export class SelectionFilteringEngine {
           usePipeline: false,
           // wildcard: 3
         };
-        console.log('clause', clause);
         query.clause(clause);
       });
 
@@ -143,7 +144,6 @@ export class SelectionFilteringEngine {
       this.field("id");
 
       this.pipeline.reset();
-      console.log('pipeline', this.pipeline);
 
       _.each(keyedRecords, (rec, num) => {
         const keystr = rec.keystr;

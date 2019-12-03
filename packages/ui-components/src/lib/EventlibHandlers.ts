@@ -66,6 +66,7 @@ export function setMouseHandlers(
   targetDivRef: Ref<HTMLDivElement>,
   handlers: MouseHandlerInit[]
 ): void {
+
   const targetDiv = targetDivRef.value;
   _.each(MouseEvents, eventType => {
     _.each(handlers, (hInit: MouseHandlerInit) => {
@@ -80,7 +81,14 @@ export function setMouseHandlers(
           };
           return eventHandler(ev);
         };
-        targetDiv.addEventListener(eventType, adaptor);
+
+        const addEventListenerOptions: AddEventListenerOptions  = {
+          capture: false,
+          once: false,
+          passive: false
+        };
+
+        targetDiv.addEventListener(eventType, adaptor, addEventListenerOptions);
       }
     });
   });

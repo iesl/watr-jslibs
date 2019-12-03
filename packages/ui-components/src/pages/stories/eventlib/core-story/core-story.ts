@@ -8,27 +8,30 @@ import { useEventlibCore } from '~/components/eventlib-core'
 import { useEventlibSelect } from '~/components/eventlib-select'
 import { useCanvasDrawto } from '~/components/drawto-canvas';
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";
+import { initState } from '~/components/component-basics'
 
 import { useImgCanvasOverlays } from '~/components/elem-overlays'
 
 function setup() {
   const overlayRoot = ref(null)
+  const containerRef = overlayRoot;
+  const state = initState();
 
-  const eventlibCore = useEventlibCore(overlayRoot);
+  const eventlibCore = useEventlibCore({ targetDivRef: overlayRoot, state });
   const { setMouseHandlers } = eventlibCore;
 
   const mouseActivity = ref('<none>');
   const mouseActivity2 = ref('<none>');
 
-  const elemOverlay = useImgCanvasOverlays(overlayRoot);
-  const canvasElemRef = elemOverlay.elems.canvasElem;
+  const elemOverlay = useImgCanvasOverlays({ containerRef, state });
+  const canvasRef = elemOverlay.elems.canvasElem;
 
-  const drawTo = useCanvasDrawto(canvasElemRef, overlayRoot);
-  const eventlibSelect = useEventlibSelect(eventlibCore, drawTo);
+  const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
+  const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
 
   const { selectionRef }  = eventlibSelect;
 
-  watch(canvasElemRef, (el) => {
+  watch(canvasRef, (el) => {
     if (el === null) return;
   });
 
@@ -50,7 +53,7 @@ function setup() {
 
   }
 
-  const myHandlers1: MouseHandlerInit = (t?: any) =>  {
+  const myHandlers1: MouseHandlerInit = () =>  {
     return {
       mousemove   : e => shEvent(e),
       mousedown   : e => shEvent2(e),

@@ -7,6 +7,7 @@ import {
   ref,
 } from '@vue/composition-api';
 
+import { StateArgs, waitFor } from '~/components/component-basics'
 
 export enum OverlayType {
   Img,
@@ -19,10 +20,15 @@ export interface OverlayElement {
   imgElem?: Ref<HTMLImageElement>;
 }
 
-export function useImgCanvasOverlays(containerRef: Ref<HTMLDivElement>) {
+type Args = StateArgs & {
+  containerRef: Ref<HTMLDivElement>
+};
+
+export function useImgCanvasOverlays({
+  containerRef, state
+}: Args) {
 
   const dimensions: Ref<[number, number]> = ref([10, 10]);
-  const isInitialized = ref(false);
 
   const width = () => dimensions.value[0];
   const height = () => dimensions.value[1];
@@ -32,9 +38,15 @@ export function useImgCanvasOverlays(containerRef: Ref<HTMLDivElement>) {
   const canvasElem: Ref<HTMLCanvasElement> = ref(null);
   const imgElemSource: Ref<string> = ref(null);
 
-  watch(containerRef, () => {
+  waitFor('ImgCanvasOverlays', {
+    state,
+    dependsOn: [containerRef]
+  }, () => {
+
     const overlayContainer = containerRef.value;
-    if (overlayContainer === null) return;
+    // watch(containerRef, (overlayContainer) => {
+    // });
+    // if (overlayContainer === null) return;
 
     overlayContainer.classList.add('layers');
 
@@ -74,7 +86,6 @@ export function useImgCanvasOverlays(containerRef: Ref<HTMLDivElement>) {
       }
     });
 
-    isInitialized.value = true
 
   });
 
@@ -91,38 +102,44 @@ export function useImgCanvasOverlays(containerRef: Ref<HTMLDivElement>) {
     setDimensions,
     dimensions,
     setImageSource,
-    isInitialized
   };
 }
 
-export function useImgCanvasSvgOverlays(containerRef: Ref<HTMLDivElement>) {
-  const imgCanvasOverlays = useImgCanvasOverlays(containerRef);
+// export function useImgCanvasSvgOverlays(containerRef: Ref<HTMLDivElement>) {
+export function useImgCanvasSvgOverlays({
+  containerRef, state
+}: Args) {
+  const imgCanvasOverlays = useImgCanvasOverlays({ containerRef, state });
   const { setImageSource, elems, setDimensions, dimensions } = imgCanvasOverlays;
   const { imgElem, canvasElem } = elems;
 
-  const isInitialized = ref(false);
+  // const isInitialized = ref(false);
 
   const svgElem: Ref<SVGElement> = ref(null);
 
-  watch(imgCanvasOverlays.isInitialized, (isInit) => {
-    if (!isInit) return;
+  waitFor('ImgCanvasSvgOverlays', {
+    state,
+    dependsOn: [containerRef]
+  }, () => {
+    watch(containerRef, (overlayContainer) => {
+      if (overlayContainer === null) return;
 
-    const overlayContainer = containerRef.value;
+      // const overlayContainer = containerRef.value;
 
-    const el = svgElem.value = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    el.classList.add('layer');
-    el.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
-    overlayContainer.append(el);
+      const el = svgElem.value = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      el.classList.add('layer');
+      el.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+      overlayContainer.append(el);
 
-    watch(dimensions, ([width, height]) => {
-      const w = `${width}px`;
-      const h = `${height}px`;
+      watch(dimensions, ([width, height]) => {
+        const w = `${width}px`;
+        const h = `${height}px`;
 
-      svgElem.value.setAttribute('width', w);
-      svgElem.value.setAttribute('height', h);
+        svgElem.value.setAttribute('width', w);
+        svgElem.value.setAttribute('height', h);
+      });
+
     });
-
-    isInitialized.value = true
 
   });
 
@@ -130,6 +147,5 @@ export function useImgCanvasSvgOverlays(containerRef: Ref<HTMLDivElement>) {
     elems: { imgElem, canvasElem, svgElem },
     setDimensions,
     setImageSource,
-    isInitialized
   };
 }

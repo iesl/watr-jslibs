@@ -7,12 +7,16 @@ import {
   onMounted,
   onUnmounted,
   Ref,
+  ref,
   watch,
+  // onTrigger,
+  // onTrack,
 } from '@vue/composition-api';
 
 import RBush, {} from "rbush";
 
 import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
+import { StateArgs, waitFor } from '~/components/component-basics'
 
 import {
   // MouseHandlers,
@@ -33,7 +37,14 @@ export interface EventlibCore {
   setMouseHandlers: (hs: MouseHandlerInit[]) => void;
 }
 
-export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<HTMLDivElement>): EventlibCore {
+type Args = StateArgs & {
+  targetDivRef: Ref<HTMLDivElement>
+};
+
+export function useEventlibCore<BoxT extends RTreeIndexable>({
+  state,
+  targetDivRef
+}: Args): EventlibCore {
 
   const mousePosRef: UnwrapRef<EventlibPoint> = reactive({
     x: 0,
@@ -41,6 +52,21 @@ export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<H
   })
 
   const eventRTree: RBush<BoxT> = new RBush<BoxT>();
+
+  const handlerQueue: Ref<MouseHandlerInit[]> = ref([]);
+
+  waitFor('EventlibCore', {
+    state,
+    dependsOn: [targetDivRef],
+  }, () => {
+
+    watch(handlerQueue, (handlers) => {
+      if (handlers.length > 0) {
+        _setMouseHandlers(targetDivRef, handlers);
+        handlerQueue.value = [];
+      }
+    });
+  });
 
   function onMouseMove(e: MouseEvent) {
     const {x, y} = getCursorPosition(targetDivRef.value, e);
@@ -67,8 +93,14 @@ export function useEventlibCore<BoxT extends RTreeIndexable>(targetDivRef: Ref<H
     eventRTree.load(shapes);
   }
 
-  const setMouseHandlers: (h: MouseHandlerInit[]) => void =
-    _.bind(_setMouseHandlers, null, targetDivRef);
+
+  function setMouseHandlers(h: MouseHandlerInit[]): void {
+    const current = handlerQueue.value;
+    // console.log('eventlibCore: setMouseHandlers; h', h);
+    // console.log('eventlibCore: setMouseHandlers; curr', current);
+    handlerQueue.value = _.concat(current, h);
+    // _.bind(_setMouseHandlers, null, targetDivRef);
+  }
 
 
   return {
