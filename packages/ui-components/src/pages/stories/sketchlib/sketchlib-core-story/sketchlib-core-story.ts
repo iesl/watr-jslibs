@@ -39,8 +39,6 @@ export default {
     onMounted(() => {
 
       waitFor('SketchlibCoreStory', { state }, () => {
-        console.log('mounted and running');
-
         elemOverlay.setDimensions(400, 600);
       });
 

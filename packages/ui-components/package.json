@@ -18,6 +18,7 @@
     "@nuxtjs/axios": "^5.8.0",
     "@nuxtjs/dotenv": "^1.4.1",
     "@vue/composition-api": "^0.3.4",
+    "chroma-js": "^2.1.0",
     "d3": "^4.13.0",
     "jquery": "^3.4.1",
     "lodash": "^4.17.15",
@@ -32,12 +33,12 @@
     "typescript": "^3.7.2"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.5",
+    "@types/chai": "^4.2.6",
     "@types/d3": "^4.13.2",
     "@types/fs-extra": "^8.0.1",
     "@types/jquery": "^3.3.31",
     "@types/lunr": "^2.3.2",
-    "@nuxt/typescript-build": "^0.3.9",
+    "@nuxt/typescript-build": "^0.3.10",
     "@nuxtjs/eslint-config": "^2.0.0",
     "@nuxtjs/eslint-module": "^1.1.0",
     "@nuxtjs/vuetify": "^1.9.0",
@@ -58,7 +59,6 @@
     "prettier": "^1.19.1",
     "vue-jest": "^4.0.0-0"
   },
-
   "jest": {
     "roots": [
       "<rootDir>/src"
@@ -87,5 +87,4 @@
       "node"
     ]
   }
-
 }

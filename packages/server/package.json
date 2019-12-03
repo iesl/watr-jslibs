@@ -28,7 +28,7 @@
     "tslib": "^1.10.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.5",
+    "@types/chai": "^4.2.6",
     "@types/fs-extra": "^8.0.1",
     "@types/klaw": "^3.0.0",
     "@types/klaw-sync": "^6.0.0",

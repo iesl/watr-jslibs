@@ -16,7 +16,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
     "@babel/preset-env": "^7.7.4",
     "@babel/preset-typescript": "^7.7.4",
-    "@types/chai": "^4.2.5",
+    "@types/chai": "^4.2.6",
     "@types/d3": "^5.7.2",
     "@types/jest": "^24.0.23",
     "@types/jquery": "^3.3.31",

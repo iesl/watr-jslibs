@@ -6,7 +6,6 @@ import {
   ref,
   computed,
   watch,
-  isRef,
   reactive,
   toRefs,
 } from '@vue/composition-api';
@@ -31,14 +30,6 @@ export interface WaitForOptions {
   dependsOn?: Array<Ref<any>>;
   ensureTruthy?: Array<Ref<any>>;
 };
-
-// function checkReactivity(a: Array<Ref<any>>, msg:string): void {
-//   const depsAreRefs = _.every(a, dep => isRef(dep));
-
-//   if (!depsAreRefs) {
-//     throw new Error(`Non-reactive member: ${msg}`);
-//   }
-// }
 
 export function watchAll(rs?: Ref<any>[]) {
   if (!rs) return toRefs(reactive({
@@ -92,14 +83,13 @@ export function waitFor(
   const upstreamsReady = ref(false);
   const userFuncRan = ref(false);
 
-  const prefix = `${name}::waitFor`;
-
-  console.log(`${prefix}/Setup`);
+  // const prefix = `${name}::waitFor`;
+  // console.log(`${prefix}/Setup`);
 
   const depsReady = watchAll(dependsOn);
 
   const stopPhase1 = watch([startFlag, depsReady.done], () => {
-    console.log(`${prefix}/Phase1: checkUpstream`);
+    // console.log(`${prefix}/Phase1: checkUpstream`);
 
     const ready = depsReady.done.value;
 
@@ -114,7 +104,7 @@ export function waitFor(
     if (ready) {
       stopPhase2();
 
-      console.log(`${prefix} upstreams are satisfied, running userFunc!`);
+      // console.log(`${prefix} upstreams are satisfied, running userFunc!`);
 
       userFunc();
       userFuncRan.value = true;
@@ -128,11 +118,11 @@ export function waitFor(
 
     if (ready) {
       stopPhase3();
-      console.log(`${prefix} downstreams are satisfied!`);
+      // console.log(`${prefix} downstreams are satisfied!`);
     }
   }, { lazy: true });
 
-  console.log(`${prefix}  GO!`);
+  // console.log(`${prefix}  GO!`);
 
   startFlag.value = true;
 }

@@ -11,7 +11,7 @@
     "fs-extra": "^8.1.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.5",
+    "@types/chai": "^4.2.6",
     "@types/fs-extra": "^8.0.1",
     "chai": "^4.2.0",
     "jest": "^24.9.0",
