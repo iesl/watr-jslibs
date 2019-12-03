@@ -75,7 +75,6 @@ export function useEventlibCore<BoxT extends RTreeIndexable>({
   }
 
   onMounted(() => {
-    // TODO make this
     watch(targetDivRef, (targetDiv) => {
       if (targetDiv) {
         targetDivRef.value.addEventListener('mousemove', onMouseMove);
@@ -98,9 +97,9 @@ export function useEventlibCore<BoxT extends RTreeIndexable>({
 
   function setMouseHandlers(h: MouseHandlerInit[]): void {
     const current = handlerQueue.value;
-    // console.log('eventlibCore: setMouseHandlers; h', h);
-    // console.log('eventlibCore: setMouseHandlers; curr', current);
     handlerQueue.value = _.concat(current, h);
+
+    // console.log('eventlibCore: setMouseHandlers; h', h);
     // _.bind(_setMouseHandlers, null, targetDivRef);
   }
 

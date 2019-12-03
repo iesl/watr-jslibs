@@ -2,6 +2,7 @@
 import {
   ref,
   Ref,
+  onMounted,
 } from '@vue/composition-api';
 
 // import * as PIXI from 'pixi.js';
@@ -34,11 +35,18 @@ export default {
     const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
 
     const sketchlibCore = useSketchlibCore({ state, canvasDrawto, eventlibCore, eventlibSelect });
-    console.log('state', state.currentState());
 
-    waitFor('SketchlibCoreStory', { state }, () => {
-      elemOverlay.setDimensions(400, 600);
+    onMounted(() => {
+
+      waitFor('SketchlibCoreStory', { state }, () => {
+        console.log('mounted and running');
+
+        elemOverlay.setDimensions(400, 600);
+      });
+
     });
+
+
 
     return {
       layerRoot

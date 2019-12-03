@@ -40,7 +40,8 @@ export function useImgCanvasOverlays({
 
   waitFor('ImgCanvasOverlays', {
     state,
-    dependsOn: [containerRef]
+    dependsOn: [containerRef],
+    ensureTruthy: [imgElem, canvasElem]
   }, () => {
 
     const overlayContainer = containerRef.value;

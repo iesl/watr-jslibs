@@ -41,19 +41,20 @@ export function useEventlibSelect({
   canvasDrawto
 }: Args) {
 
-
   const selectionRef = ref(new BBox(0, 0, 0, 0));
+  const { pixiJsAppRef } = canvasDrawto;
+  console.log('useEventlibSelect: pixiJsAppRef=', pixiJsAppRef)
 
   waitFor('EventlibSelect', {
     state,
-    // dependsOn: [targetDivRef],
+    dependsOn: [canvasDrawto.pixiJsAppRef],
     // ensureTruthy: [targetDivRef]
   }, () => {
 
     const { setMouseHandlers } = eventlibCore;
-    const { pixiJsAppRef } = canvasDrawto;
 
-    // const pixiJsApp = pixiJsAppRef.value;
+    const pixiJsApp = pixiJsAppRef.value;
+    console.log('useEventlibSelect: pixiJsApp=', pixiJsApp)
 
     let selecting = false;
     let originPt: Point = new Point(0, 0);
@@ -75,7 +76,6 @@ export function useEventlibSelect({
     const onMouseDown = (e: EMouseEvent) => {
       const {x, y} = e.pos;
       originPt = currentPt = new Point(x, y);
-      // Rectangle
       const pixiJsApp = pixiJsAppRef.value;
       pixiJsApp.stage.addChild(pgRect)
       drawCurrentRect();
@@ -94,13 +94,6 @@ export function useEventlibSelect({
     const onMouseUp = (e: EMouseEvent) => {
       if (currentPt !== originPt) {
         const currBBox = pointsToRect(originPt, currentPt);
-        // const t = e.origMouseEvent.target;
-        // const ct = e.origMouseEvent.currentTarget;
-        // const b = e.origMouseEvent.bubbles;
-        // console.log('> onMouseUp: setting ', currBBox.toString());
-        // console.log('>   target ', t);
-        // console.log('>   currentTarget ', ct);
-        // console.log('>   bubbles ', b);
 
         selectionRef.value = currBBox;
         const pixiJsApp = pixiJsAppRef.value;

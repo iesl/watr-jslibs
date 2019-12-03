@@ -28,7 +28,7 @@ export function useCanvasDrawto({
   waitFor('CanvasDrawto', {
     state,
     dependsOn: [canvasRef, containerRef],
-    ensureTruthy: [pixiJsAppRef]
+    // ensureTruthy: [pixiJsAppRef]
   }, () => {
     const canvasElem = canvasRef.value;
     const divElem = containerRef.value;

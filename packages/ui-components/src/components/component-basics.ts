@@ -7,6 +7,8 @@ import {
   computed,
   watch,
   isRef,
+  reactive,
+  toRefs,
 } from '@vue/composition-api';
 
 type ComponentName = string;
@@ -30,56 +32,109 @@ export interface WaitForOptions {
   ensureTruthy?: Array<Ref<any>>;
 };
 
-function checkReactivity(a: Array<Ref<and>>, msg:string): void {
-  const depsAreRefs = _.every(a, dep => isRef(dep));
+// function checkReactivity(a: Array<Ref<any>>, msg:string): void {
+//   const depsAreRefs = _.every(a, dep => isRef(dep));
 
-  if (!depsAreRefs) {
-    throw new Error(`Non-reactive member: ${msg}`);
-  }
+//   if (!depsAreRefs) {
+//     throw new Error(`Non-reactive member: ${msg}`);
+//   }
+// }
+
+export function watchAll(rs?: Ref<any>[]) {
+  if (!rs) return toRefs(reactive({
+    done: true,
+    len: 0,
+    curr: 0
+  }));
+
+  let curr = rs;
+  const next = ref(0);
+  const state = toRefs(reactive({
+    done: false,
+    len: rs.length,
+    curr: 0
+  }));
+
+  const stop = watch(next, () => {
+    if (curr.length === 0) {
+      state.done.value = true;
+      stop();
+      return;
+    }
+
+    const startFlag = ref(false);
+    const rhead = curr.shift();
+
+    const stopInner = watch([rhead, startFlag], () => {
+      const rval = rhead.value;
+      if (rval) {
+        stopInner();
+        state.curr.value += 1;
+        next.value += 1;
+      }
+
+    }, {lazy: true});
+
+    startFlag.value = true;
+  }, { lazy: true });
+
+  next.value += 1;
+
+  return state;
 }
+
 export function waitFor(
   name: string,
   { state, dependsOn, ensureTruthy }: WaitForOptions,
   userFunc: () => void
 ) {
-  checkReactivity(dependsOn, `${name}:dependsOn`);
-  checkReactivity(ensureTruthy, `${name}:ensureTruthy`);
+  const startFlag = ref(false);
+  const upstreamsReady = ref(false);
+  const userFuncRan = ref(false);
 
-  let didRun = false;
+  const prefix = `${name}::waitFor`;
 
-  const readyToGo = computed(() => {
-    const isReady = state.isReady.value;
-    const upstreamsReady = _.every(dependsOn, dep => dep.value);
-    console.log(`${name} recomputing readyToGo!`);
-    const ready = isReady && !didRun && upstreamsReady;
+  console.log(`${prefix}/Setup`);
+
+  const depsReady = watchAll(dependsOn);
+
+  const stopPhase1 = watch([startFlag, depsReady.done], () => {
+    console.log(`${prefix}/Phase1: checkUpstream`);
+
+    const ready = depsReady.done.value;
+
     if (ready) {
-      didRun = true;
+      stopPhase1();
+      upstreamsReady.value = true;
     }
-    return ready;
-  });
-
-  watch(readyToGo, (ready) => {
-    if (!ready) return;
-
-    console.log(`${name} is ready and upstreams are satisfied!`);
+  }, { lazy: true, deep: true });
 
 
-    userFunc();
+  const stopPhase2 = watch(upstreamsReady, (ready) => {
+    if (ready) {
+      stopPhase2();
 
-    watch(() => {
-      const b = _.every(ensureTruthy, dep => dep.value);
-      if (!b) return;
+      console.log(`${prefix} upstreams are satisfied, running userFunc!`);
 
-      console.log(`${name} downstreams are satisfied!`);
+      userFunc();
+      userFuncRan.value = true;
+    }
+  }, {lazy: true, deep: true});
 
-      if (!state.isRegistered(name)) {
-        // state.register(name);
-        state.setReady(name);
-      }
-    });
+  const downstreamWatcher = watchAll(ensureTruthy);
 
-  });
+  const stopPhase3 = watch([userFuncRan, downstreamWatcher.done], () => {
+    const ready = downstreamWatcher.done.value;
 
+    if (ready) {
+      stopPhase3();
+      console.log(`${prefix} downstreams are satisfied!`);
+    }
+  }, { lazy: true });
+
+  console.log(`${prefix}  GO!`);
+
+  startFlag.value = true;
 }
 
 export function initState(): ComponentState {

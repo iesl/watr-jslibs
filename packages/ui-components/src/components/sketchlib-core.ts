@@ -1,5 +1,8 @@
 /**
-  */
+ * - Tracelog shape drawing
+ * - Labeling regions with rectangular selection
+ */
+
 import _ from 'lodash';
 
 import * as PIXI from 'pixi.js';
@@ -13,8 +16,6 @@ import { EventlibCore } from './eventlib-core';
 import { StateArgs, waitFor } from '~/components/component-basics'
 import { EventlibSelect } from './eventlib-select';
 
-// - Tracelog shape drawing
-// - Labeling regions with rectangular selection
 
 type Args = StateArgs & {
   canvasDrawto: DrawToCanvas,
@@ -23,16 +24,18 @@ type Args = StateArgs & {
 };
 
 export function useSketchlibCore({ state, canvasDrawto, eventlibCore, eventlibSelect }: Args)  {
+  const { pixiJsAppRef } = canvasDrawto;
+
   waitFor('SketchlibCore', {
-    state
+    state,
+    dependsOn: [pixiJsAppRef]
   }, () => {
 
+    const pixiJsApp = pixiJsAppRef.value;
 
     const { selectionRef }  = eventlibSelect;
 
     watch(selectionRef, (sel) => {
-      const { pixiJsAppRef } = canvasDrawto;
-      const pixiJsApp = pixiJsAppRef.value;
 
       console.log('sel', sel.toString());
 
