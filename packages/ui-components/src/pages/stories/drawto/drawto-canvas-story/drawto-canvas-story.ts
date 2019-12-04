@@ -21,14 +21,15 @@ export default {
     const elemOverlay = useImgCanvasOverlays({ containerRef, state });
     const canvasRef = elemOverlay.elems.canvasElem
     const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
+    const { pixiJsAppRef } = canvasDrawto;
 
     waitFor('CanvasDrawtoStory', {
-      state
+      state,
+      dependsOn: [pixiJsAppRef]
     }, () => {
       // watch(pixiJsAppRef, (pixiJsApp) => {
       // if (pixiJsApp === null) return;
 
-      const { pixiJsAppRef } = canvasDrawto;
 
       const pixiJsApp = pixiJsAppRef.value;
       elemOverlay.setDimensions(600, 800);

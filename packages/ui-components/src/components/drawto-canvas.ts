@@ -3,6 +3,7 @@ import _ from 'lodash';
 import {
   ref,
   Ref,
+  onMounted,
 } from '@vue/composition-api';
 
 import * as PIXI from 'pixi.js';
@@ -28,17 +29,16 @@ export function useCanvasDrawto({
   waitFor('CanvasDrawto', {
     state,
     dependsOn: [canvasRef, containerRef],
-    // ensureTruthy: [pixiJsAppRef]
   }, () => {
     const canvasElem = canvasRef.value;
     const divElem = containerRef.value;
-
-    if (canvasElem === null || divElem === null) return;
 
     const app = initPixiJs(canvasElem, divElem);
     app.resize();
 
     pixiJsAppRef.value = app;
+
+    // onMounted(() => {});
 
   });
 

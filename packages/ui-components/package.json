@@ -30,10 +30,11 @@
     "rbush": "^3.0.1",
     "rbush-knn": "^2.1.0",
     "sharedLib": "^0.1.0",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.3"
   },
   "devDependencies": {
     "@types/chai": "^4.2.6",
+    "@types/chroma-js": "^1.4.3",
     "@types/d3": "^4.13.2",
     "@types/fs-extra": "^8.0.1",
     "@types/jquery": "^3.3.31",

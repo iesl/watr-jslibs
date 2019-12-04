@@ -43,24 +43,20 @@ export function useEventlibSelect({
 
   const selectionRef = ref(new BBox(0, 0, 0, 0));
   const { pixiJsAppRef } = canvasDrawto;
-  console.log('useEventlibSelect: pixiJsAppRef=', pixiJsAppRef)
 
   waitFor('EventlibSelect', {
     state,
     dependsOn: [canvasDrawto.pixiJsAppRef],
-    // ensureTruthy: [targetDivRef]
   }, () => {
 
     const { setMouseHandlers } = eventlibCore;
 
     const pixiJsApp = pixiJsAppRef.value;
-    console.log('useEventlibSelect: pixiJsApp=', pixiJsApp)
 
     let selecting = false;
     let originPt: Point = new Point(0, 0);
     let currentPt: Point = new Point(0, 0);
 
-    // console.log('useEventlibSelect: inside watch..., pixiJsApp=');
 
     const pgRect = new PIXI.Graphics();
 
