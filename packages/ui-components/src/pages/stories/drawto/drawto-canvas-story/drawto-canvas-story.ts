@@ -27,9 +27,6 @@ export default {
       state,
       dependsOn: [pixiJsAppRef]
     }, () => {
-      // watch(pixiJsAppRef, (pixiJsApp) => {
-      // if (pixiJsApp === null) return;
-
 
       const pixiJsApp = pixiJsAppRef.value;
       elemOverlay.setDimensions(600, 800);
@@ -49,7 +46,7 @@ export default {
       pg.endFill();
 
       pixiJsApp.stage.addChild(pg)
-      // });
+
     });
 
     return {

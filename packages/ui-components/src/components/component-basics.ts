@@ -4,7 +4,6 @@ import _ from 'lodash';
 import {
   Ref,
   ref,
-  computed,
   watch,
   reactive,
   toRefs,
@@ -13,17 +12,6 @@ import {
 type ComponentName = string;
 type ComponentInitRec = [ComponentName, boolean];
 
-export interface ComponentState {
-  setReady(name: string): void;
-  // register(name: string): void;
-  isRegistered(name: string): boolean;
-  isReady: Ref<boolean>;
-  currentState(): [ComponentName, boolean][];
-}
-
-export type StateArgs = {
-  state: ComponentState
-};
 
 export interface WaitForOptions {
   state: ComponentState;
@@ -79,6 +67,8 @@ export function waitFor(
   { state, dependsOn, ensureTruthy }: WaitForOptions,
   userFunc: () => void
 ) {
+  state.register(name);
+
   const startFlag = ref(false);
   const upstreamsReady = ref(false);
   const userFuncRan = ref(false);
@@ -127,6 +117,24 @@ export function waitFor(
   startFlag.value = true;
 }
 
+export interface ComponentState {
+  // setReady(name: string): void;
+  register(name: string): void;
+  // isRegistered(name: string): boolean;
+  // isReady: Ref<boolean>;
+  // currentState(): [ComponentName, boolean][];
+}
+
+export type StateArgs = {
+  state: ComponentState
+};
+
+/**
+ * Currently unused.
+ * Implemented to track the init state of components, but I went with another
+ * implementation. I'm leaving it here because I think it may be useful for other
+ * things soon.
+ */
 export function initState(): ComponentState {
   const cs: ComponentInitRec[] = [];
   const componentList = ref(cs);
@@ -136,51 +144,39 @@ export function initState(): ComponentState {
     return _.some(vs, c => c[0] === name);
   }
 
-  const isReady: Readonly<Ref<Readonly<boolean>>> =
-    computed(() => {
-      const vs = componentList.value;
-      return _.every(vs, c => c[1]);
-    });
+  // const isReady: Readonly<Ref<Readonly<boolean>>> =
+  //   computed(() => {
+  //     const vs = componentList.value;
+  //     return _.every(vs, c => c[1]);
+  //   });
 
-  function setReady(name: string) {
+  // function setReady(name: string) {
+  //   if (isRegistered(name)) {
+  //     throw new Error(`setReady() on already registered component ${name}`);
+  //   }
+  //   const vs = componentList.value;
+  //   vs.push([name, true]);
+  //   componentList.value = vs;
+  // }
+
+  function register(name: string): void {
     if (isRegistered(name)) {
-      throw new Error(`setReady() on already registered component ${name}`);
+      throw new Error(`Already registered component ${name}`);
     }
     const vs = componentList.value;
-    vs.push([name, true]);
+    vs.push([name, false]);
     componentList.value = vs;
   }
 
-  // function register(name: string): void {
-  //   if (isRegistered(name)) {
-  //     throw new Error(`Already registered component ${name}`);
-  //   }
-  //   const vs = componentList.value;
-  //   vs.push([name, false]);
-
-  //   componentList.value = vs;
-  // }
-
-  // function setReady(name: string) {
-  //   if (!isRegistered(name)) {
-  //     throw new Error(`setReady() on unregistered component ${name}`);
-  //   }
-  //   const vs = componentList.value;
-  //   const vindex = _.findIndex(vs, c => c[0] === name);
-  //   vs.splice(vindex, 1, [name, true]);
-  //   componentList.value = vs;
-  // }
 
   function currentState() {
     return componentList.value;
   }
 
   const st = {
-    // register,
+    register,
     isRegistered,
-    setReady,
-    isReady,
-    currentState
+    currentState,
   }
 
   return st;
