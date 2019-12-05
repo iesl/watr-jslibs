@@ -7,6 +7,8 @@
   "author": "Adam Saunders <saunders@cs.umass.edu>",
   "dependencies": {
     "commander": "^4.0.1",
+    "ts-morph": "^5.0.0",
+    "typescript": "^3.7.3",
     "fs-extra": "^8.1.0"
   },
   "license": "ISC",
@@ -20,6 +22,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "ver": "tsc --version && which tsc",
     "watch": "tsc --watch",
     "morph": "node dist/main.js",
     "main": "npm-run-all --serial build \"morph -- {@}\" --",

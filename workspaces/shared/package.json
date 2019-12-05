@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@types/d3": "^5.7.2",
+    "@types/rbush": "^3.0.0",
     "d3": "^5.14.2",
     "jquery": "^3.4.1",
     "rbush": "^3.0.1",
