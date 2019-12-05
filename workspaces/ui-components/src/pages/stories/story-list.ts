@@ -10,7 +10,11 @@ type StoryEntry = {
 
 const stories: StoryEntry[] = [
   {
-    title: 'Pdf Page',
+    title: 'Pdf Pages (orig)',
+    to: 'pdf-page-old-story'
+  },
+  {
+    title: 'Pdf Page (new)',
     to: 'pdf-page-story'
   },
   {
