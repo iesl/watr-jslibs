@@ -36,8 +36,7 @@
     "nuxt-property-decorator": "^2.5.0",
     "pixi.js": "^5.2.0",
     "rbush": "^3.0.1",
-    "sharedLib": "=0.1.0",
-    "typescript": "^3.7.3"
+    "sharedLib": "=0.1.0"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^2.0.0",

@@ -11,20 +11,25 @@ const modulesDir = [
 
 const rootDir = __dirname;
 const srcDir = resolve( rootDir, 'src');
-
+const tsconfigFile = resolve( rootDir, 'tsconfig.json');
 console.log('nuxt config: srcDir', srcDir);
 console.log('nuxt config: modulesDir', modulesDir);
 
-// const asdf = path.join(__dirname, "..", "..", "..", "node_modules");
-// const qwer =  path.relative(__dirname, asdf);
-// console.log('nuxt config: asdf', asdf);
-// console.log('nuxt config: qwer', qwer);
 
 
 export default {
   rootDir,
   srcDir,
   modulesDir,
+
+  typescript: {
+    loaders: {
+      // ts-loader options
+      ts: {
+        configFile: tsconfigFile
+      }
+    }
+  },
 
   mode: 'spa',
   /*
@@ -117,4 +122,3 @@ export default {
   }
 
 }
-

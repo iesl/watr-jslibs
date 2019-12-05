@@ -17,8 +17,6 @@ import { initState, waitFor } from '~/components/component-basics'
 export default {
   setup() {
 
-    let test = new PIXI.Application();
-
     const state = initState();
 
     // waitFor rationale:

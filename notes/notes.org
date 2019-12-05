@@ -96,6 +96,14 @@
     ]
   }
 
+    "typescript": "^3.7.3"
+  "workspaces": {
+    "nohoist": [
+      "**/typescript",
+      "**/typescript/**"
+    ]
+  },
+
 //    "nohoist": [
 //    "**/*nuxt*",
 //       "**/*nuxt*/**",
