@@ -29,11 +29,12 @@ export default {
     const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
 
     onMounted(() => {
-      imgCanvasOverlay.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
+      // imgCanvasOverlay.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
+      canvasDrawto.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
       const grid: GridTypes.Grid = textgrid00 as any as GridTypes.Grid;
 
       waitFor('PdfPageStory', { state }, () => {
-        imgCanvasOverlay.setDimensions(400, 600);
+        imgCanvasOverlay.setDimensions(600, 800);
         pdfPageViewer.setGrid(grid, 0);
       });
 

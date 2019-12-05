@@ -27,9 +27,7 @@ export interface PdfPageViewer {
   imgCanvasOverlay: ImgCanvasOverlay;
   canvasDrawto: CanvasDrawto;
   setGrid: SetGrid;
-
 }
-
 
 type SetGrid = (grid: GridTypes.Grid, page: number) => void;
 
@@ -52,7 +50,6 @@ export function useGlyphOverlays({
   const textgridRef: Ref<GridTypes.Grid> = ref(null)
   const pageNumRef: Ref<number> = ref(null);
   const rtreeSearch = useRTreeSearch<TextDataPoint>({ state });
-  // GridTypes
 
   const { pixiJsAppRef } = canvasDrawto;
   const setGrid: SetGrid = (grid, page) => {
@@ -81,7 +78,6 @@ export function useGlyphOverlays({
     const glyphData = gridDataToGlyphData(gridData.textDataPoints);
     rtreeSearch.loadData(glyphData);
 
-
     const onMouseMove = (e: EMouseEvent) => {
       const pos = e.pos;
       const mousePt = coords.mkPoint.fromXy(pos.x, pos.y);
@@ -104,9 +100,6 @@ export function useGlyphOverlays({
         pixiJsApp.stage.addChild(pgRect)
       });
 
-
-
-
     }
     const glyphHandlers: MouseHandlerInit = () =>  {
       return {
@@ -115,7 +108,6 @@ export function useGlyphOverlays({
     }
 
     eventlibCore.setMouseHandlers([glyphHandlers]);
-
   });
 
   return {
