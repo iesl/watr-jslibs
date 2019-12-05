@@ -1,6 +1,25 @@
-import colors from 'vuetify/es5/util/colors'
+
+import colors from 'vuetify/es5/util/colors';
+
+const resolve = require('path').resolve;
+
+const modulesDir = [
+  resolve(__dirname, '../../node_modules/'),
+  resolve(__dirname, './node_modules/')
+];
+
+const rootDir = __dirname;
+const srcDir = resolve( rootDir, 'src');
+
+console.log('nuxt config: srcDir', srcDir);
+console.log('nuxt config: modulesDir', modulesDir);
+
 
 export default {
+  rootDir,
+  srcDir,
+  modulesDir,
+
   mode: 'spa',
   /*
    ** Headers of the page
@@ -24,7 +43,6 @@ export default {
    */
   loading: { color: '#fff' },
 
-  srcDir: 'src',
 
   /*
    ** Global CSS
@@ -80,13 +98,16 @@ export default {
       }
     }
   },
+
   /*
    ** Build configuration
    */
   build: {
-    /*
-     ** You can extend webpack config here
-     */
-    extend(config, ctx) {}
+    // You can extend webpack config here
+    extend(config, ctx) {
+
+      // config.module.rules ts-loader tsconfigFile
+    }
   }
+
 }

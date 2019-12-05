@@ -81,3 +81,17 @@
 
 ** Possible RBush replacement, a bit faster:
    https://github.com/mourner/flatbush
+
+
+  "workspaces": {
+    "packages": ["workspaces/*"],
+    "nohoist": [
+      "**/nuxt", "**/nuxt/**",
+      "**/vue", "**/vue/**",
+      "**/@vue/composition-api", "**/@vue/composition-api/**",
+      "**/typescript", "**/typescript/**",
+      "**/webpack", "**/webpack/**",
+      "**/fork-ts-checker-webpack-plugin", "**/fork-ts-checker-webpack-plugin/**",
+      "**/vue-jest", "**/vue-jest/**"
+    ]
+  }

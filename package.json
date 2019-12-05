@@ -68,7 +68,19 @@
     "webpack-command": "^0.5.0"
   },
   "scripts": {},
-  "workspaces": [
-    "workspaces/*"
-  ]
+  "workspaces": {
+    "packages": ["workspaces/*"],
+    "nohoist": [
+      "**/*nuxt*",
+      "**/*nuxt*/**",
+      "**/*vue*",
+      "**/*vue*/**",
+      "**/typescript",
+      "**/typescript/**",
+      "**/*webpack*",
+      "**/*webpack*/**",
+      "**/*loader*", "**/*loader*/**",
+      "**/*babel*", "**/*babel*/**"
+    ]
+  }
 }
