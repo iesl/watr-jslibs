@@ -46,7 +46,7 @@ export function watchAll(rs?: Ref<any>[]) {
 
     const stopInner = watch([rhead, startFlag], () => {
       const rval = rhead.value;
-      if (rval) {
+      if (rval !== null && rval !== undefined) {
         stopInner();
         state.curr.value += 1;
         next.value += 1;

@@ -3,14 +3,13 @@ import _ from 'lodash';
 import {
   ref,
   Ref,
-  onMounted,
 } from '@vue/composition-api';
 
 import * as PIXI from 'pixi.js';
 import { initPixiJs } from '~/lib/pixijs-utils';
 import { StateArgs, waitFor } from '~/components/component-basics'
 
-export interface DrawToCanvas {
+export interface CanvasDrawto {
   pixiJsAppRef: Ref<PIXI.Application>
 }
 
@@ -19,11 +18,12 @@ type Args = StateArgs & {
   containerRef: Ref<HTMLDivElement>
 };
 
+// TODO: rename to usePixiJSDrawto
 export function useCanvasDrawto({
   state,
   canvasRef,
   containerRef
-}: Args): DrawToCanvas {
+}: Args): CanvasDrawto {
   let pixiJsAppRef: Ref<PIXI.Application> = ref(null);
 
   waitFor('CanvasDrawto', {
@@ -38,11 +38,7 @@ export function useCanvasDrawto({
 
     pixiJsAppRef.value = app;
 
-    // onMounted(() => {});
-
   });
-
-
 
   return {
     pixiJsAppRef

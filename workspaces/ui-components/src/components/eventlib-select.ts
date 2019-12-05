@@ -10,10 +10,12 @@ import {
 
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
-import { DrawToCanvas } from './drawto-canvas';
+import { CanvasDrawto } from './drawto-canvas';
 import { BBox, Point } from 'sharedLib';
 import { StateArgs, waitFor } from '~/components/component-basics'
+
 import * as PIXI from 'pixi.js';
+import chroma from 'chroma-js';
 
 
 function pointsToRect(p1: Point, p2: Point): BBox {
@@ -31,7 +33,7 @@ export interface EventlibSelect {
 }
 
 type Args = StateArgs & {
-  canvasDrawto: DrawToCanvas,
+  canvasDrawto: CanvasDrawto,
   eventlibCore: EventlibCore,
 };
 
@@ -59,20 +61,18 @@ export function useEventlibSelect({
 
 
     const pgRect = new PIXI.Graphics();
+    const selectLineColor = chroma('blue').darken().num();
 
     function drawCurrentRect() {
       const currBBox = pointsToRect(originPt, currentPt);
       pgRect.clear();
-      pgRect.beginFill(0x650A5A);
-      pgRect.lineStyle(4, 0xFEEB77, 1);
+      pgRect.lineStyle(2, selectLineColor);
       pgRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
-      pgRect.endFill();
     }
 
     const onMouseDown = (e: EMouseEvent) => {
       const {x, y} = e.pos;
       originPt = currentPt = new Point(x, y);
-      const pixiJsApp = pixiJsAppRef.value;
       pixiJsApp.stage.addChild(pgRect)
       drawCurrentRect();
 
@@ -92,7 +92,6 @@ export function useEventlibSelect({
         const currBBox = pointsToRect(originPt, currentPt);
 
         selectionRef.value = currBBox;
-        const pixiJsApp = pixiJsAppRef.value;
         pixiJsApp.stage.removeChild(pgRect);
       }
     }

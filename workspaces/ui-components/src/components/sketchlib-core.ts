@@ -9,7 +9,7 @@ import {
   watch,
 } from '@vue/composition-api';
 
-import { DrawToCanvas } from './drawto-canvas';
+import { CanvasDrawto } from './drawto-canvas';
 import { EventlibCore } from './eventlib-core';
 import { StateArgs, waitFor } from '~/components/component-basics'
 import { EventlibSelect } from './eventlib-select';
@@ -17,7 +17,7 @@ import { drawRect } from '~/lib/pixijs-utils';
 
 
 type Args = StateArgs & {
-  canvasDrawto: DrawToCanvas,
+  canvasDrawto: CanvasDrawto,
   eventlibCore: EventlibCore,
   eventlibSelect: EventlibSelect,
 };

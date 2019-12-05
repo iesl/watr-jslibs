@@ -10,7 +10,7 @@ export function initPixiJs(canvasElem: HTMLCanvasElement, containerDiv: HTMLDivE
     // width: canvasElem.width, // number;
     // height: canvasElem.height, // number;
     view: canvasElem,
-    // transparent?: boolean;
+    transparent: true,
     // autoDensity?: boolean;
     // antialias?: boolean;
     // preserveDrawingBuffer?: boolean;
@@ -34,7 +34,6 @@ export function drawRect(bbox: BBox) {
 
   const { x, y, width, height } = bbox;
   const fillcolor = chroma('red').num();
-  // const fillcolor = 0x203050;
 
   pg.lineStyle(2, 0xFEEB77, 1);
   pg.beginFill(fillcolor);

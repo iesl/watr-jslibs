@@ -9,15 +9,16 @@ import {
 
 import { StateArgs, waitFor } from '~/components/component-basics'
 
-export enum OverlayType {
-  Img,
-  Svg,
-  Canvas,
+export interface OverlayElements {
+  canvasElem: Ref<HTMLCanvasElement>;
+  imgElem: Ref<HTMLImageElement>;
 }
-export interface OverlayElement {
-  canvasElem?: Ref<HTMLCanvasElement>;
-  svgElem?: Ref<SVGElement>;
-  imgElem?: Ref<HTMLImageElement>;
+
+export interface ImgCanvasOverlay {
+  elems: OverlayElements
+  setDimensions: (width: number, height: number) => void;
+  dimensions: Readonly<Ref<[number, number]>>;
+  setImageSource: (src: string) => void;
 }
 
 type Args = StateArgs & {
@@ -26,7 +27,7 @@ type Args = StateArgs & {
 
 export function useImgCanvasOverlays({
   containerRef, state
-}: Args) {
+}: Args): ImgCanvasOverlay {
 
   const dimensions: Ref<[number, number]> = ref([10, 10]);
 

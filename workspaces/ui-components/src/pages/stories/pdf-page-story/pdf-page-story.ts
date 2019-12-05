@@ -1,44 +1,40 @@
-// TODO 
-
 import {
   ref,
   Ref,
   onMounted,
 } from '@vue/composition-api';
 
-import * as PIXI from 'pixi.js';
 
-import { useImgCanvasOverlays } from '~/components/elem-overlays'
-import { useCanvasDrawto } from '~/components/drawto-canvas';
-import { useSketchlibCore } from '~/components/sketchlib-core';
-import { useEventlibCore } from '~/components/eventlib-core';
+// import onelineTextgrid from '~/../dev-data/textgrids/textgrid-oneline.json';
+import textgrid00 from '~/../dev-data/textgrids/textgrid-00.json';
+
 import { useEventlibSelect } from '~/components/eventlib-select'
 import { initState, waitFor } from '~/components/component-basics'
+import { usePdfPageViewer } from '~/components/pdf-page/pdf-page';
+import { GridTypes } from 'sharedLib';
 
 export default {
   setup() {
+    // TODO: setHoveredText
+    // TODO: setClickedText
 
     const state = initState();
 
-    // waitFor rationale:
     const layerRoot: Ref<HTMLDivElement> = ref(null);
-    const containerRef = layerRoot;
-    const eventlibCore = useEventlibCore({ targetDivRef: layerRoot, state } );
 
-    const elemOverlay = useImgCanvasOverlays({ containerRef, state });
+    const pdfPageViewer = usePdfPageViewer({ targetDivRef: layerRoot, state });
 
-    const canvasRef = elemOverlay.elems.canvasElem
+    const { imgCanvasOverlay, eventlibCore, canvasDrawto } = pdfPageViewer;
 
-    const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
     const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
 
-    const sketchlibCore = useSketchlibCore({ state, canvasDrawto, eventlibCore, eventlibSelect });
-
-
     onMounted(() => {
+      imgCanvasOverlay.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
+      const grid: GridTypes.Grid = textgrid00 as any as GridTypes.Grid;
 
-      waitFor('SketchlibCoreStory', { state }, () => {
-        elemOverlay.setDimensions(400, 600);
+      waitFor('PdfPageStory', { state }, () => {
+        imgCanvasOverlay.setDimensions(400, 600);
+        pdfPageViewer.setGrid(grid, 0);
       });
 
     });
