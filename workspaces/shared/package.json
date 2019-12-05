@@ -3,11 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@types/d3-selection": "^1.4.1",
-    "d3": "^4.13.0",
+    "@types/d3": "^5.7.2",
+    "d3": "^5.14.2",
     "jquery": "^3.4.1",
     "rbush": "^3.0.1",
-    "rbush-knn": "^2.1.0",
     "split.js": "^1.5.11"
   },
   "scripts": {
@@ -50,5 +49,7 @@
       "json",
       "node"
     ]
+  },
+  "peerDependencies": {
   }
 }

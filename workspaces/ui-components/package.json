@@ -1,6 +1,6 @@
 {
   "name": "ui-comp",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "UI component development and testing package",
   "author": "Adam Saunders",
   "private": true,
@@ -18,11 +18,10 @@
     "@nuxt/typescript-build": "^0.3.10",
     "@nuxtjs/axios": "^5.8.0",
     "@nuxtjs/dotenv": "^1.4.1",
-    "@nuxtjs/eslint-config": "^2.0.0",
-    "@nuxtjs/eslint-module": "^1.1.0",
     "@nuxtjs/vuetify": "^1.9.0",
     "@types/chroma-js": "^1.4.3",
     "@types/d3": "^5.7.2",
+    "@types/jquery": "^3.3.31",
     "@vue/composition-api": "^0.3.4",
     "@vue/test-utils": "^1.0.0-beta.27",
     "chroma-js": "^2.1.0",
@@ -35,10 +34,12 @@
     "nuxt-property-decorator": "^2.5.0",
     "pixi.js": "^5.2.0",
     "rbush": "^3.0.1",
-    "rbush-knn": "^2.1.0",
-    "sharedLib": "file:../shared",
-    "typescript": "^3.7.3",
-    "vue-jest": "^4.0.0-0"
+    "sharedLib": "=0.1.0",
+    "typescript": "^3.7.3"
+  },
+  "devDependencies": {
+    "@nuxtjs/eslint-config": "^2.0.0",
+    "@nuxtjs/eslint-module": "^1.1.0"
   },
   "jest": {
     "roots": [
@@ -67,5 +68,10 @@
       "json",
       "node"
     ]
+  },
+  "peerDependencies": {
+    "vue": "^2.5.0",
+    "vue-template-compiler": "^2.5.0",
+    "webpack": "^4.0.0"
   }
 }

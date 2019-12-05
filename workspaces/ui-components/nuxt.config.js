@@ -1,7 +1,8 @@
 
 import colors from 'vuetify/es5/util/colors';
 
-const resolve = require('path').resolve;
+const path = require('path');
+const resolve = path.resolve;
 
 const modulesDir = [
   resolve(__dirname, '../../node_modules/'),
@@ -13,6 +14,11 @@ const srcDir = resolve( rootDir, 'src');
 
 console.log('nuxt config: srcDir', srcDir);
 console.log('nuxt config: modulesDir', modulesDir);
+
+// const asdf = path.join(__dirname, "..", "..", "..", "node_modules");
+// const qwer =  path.relative(__dirname, asdf);
+// console.log('nuxt config: asdf', asdf);
+// console.log('nuxt config: qwer', qwer);
 
 
 export default {
@@ -111,3 +117,4 @@ export default {
   }
 
 }
+
