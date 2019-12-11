@@ -7,13 +7,25 @@ module.exports = {
   moduleFileExtensions: ['ts', 'js', 'vue', 'json'],
   transform: {
     '^.+\\.js$': 'babel-jest',
-    '^.+\\.ts$': 'ts-jest',
-    '.*\\.(vue)$': 'vue-jest'
+    '^.+\\.ts$': 'ts-jest'
   },
   collectCoverage: false,
   collectCoverageFrom: [
     '<rootDir>/src/**/*.ts',
-    // '<rootDir>/src/components/**/*.vue',
-    // '<rootDir>/src/pages/**/*.vue'
-  ]
-}
+  ],
+  roots: [
+    "<rootDir>/src"
+  ],
+  globals: {
+    "ts-jest": {
+      tsConfig: "tsconfig.json",
+      diagnostics: {
+        ignoreCodes: [
+          151001,
+          7016
+        ]
+      }
+    }
+  },
+  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$"
+};

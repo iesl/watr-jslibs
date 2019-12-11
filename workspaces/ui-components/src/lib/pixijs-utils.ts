@@ -15,7 +15,7 @@ export function initPixiJs(canvasElem: HTMLCanvasElement, containerDiv: HTMLDivE
     // antialias?: boolean;
     // preserveDrawingBuffer?: boolean;
     // resolution?: number;
-    // forceCanvas:true,
+    forceCanvas: true,
     // backgroundColor?: number;
     // clearBeforeRender?: boolean;
     // forceFXAA?: boolean;

@@ -60,44 +60,91 @@ export function useEventlibSelect({
     let currentPt: Point = new Point(0, 0);
 
 
-    const pgRect = new PIXI.Graphics();
+    const selectionRect = new PIXI.Graphics();
     const selectLineColor = chroma('blue').darken().num();
 
     function drawCurrentRect() {
       const currBBox = pointsToRect(originPt, currentPt);
-      pgRect.clear();
-      pgRect.lineStyle(2, selectLineColor);
-      pgRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
+      selectionRect.clear();
+      selectionRect.lineStyle(2, selectLineColor);
+      selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
+    }
+
+
+    function flashCurrentRect(color: string) {
+      let elapsed = 0;
+      let flashFill = chroma(color);
+
+      function _go() {
+        elapsed += 1;
+        if (elapsed < 10) {
+          const currBBox = pointsToRect(originPt, currentPt);
+
+          flashFill = flashFill.brighten(0.4);
+          selectionRect.clear();
+          selectionRect.beginFill(flashFill.num(), 0.4);
+          selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
+          selectionRect.endFill();
+        } else {
+          pixiJsApp.ticker.remove(_go);
+          endSelection();
+        }
+      }
+
+      const ticker = pixiJsApp.ticker.add(_go);
+
+      // selectionRect.lineStyle(2, selectLineColor);
+    }
+
+    function endSelection() {
+      selecting = false;
+      selectionRect.clear();
+      pixiJsApp.stage.removeChild(selectionRect);
     }
 
     const onMouseDown = (e: EMouseEvent) => {
       const {x, y} = e.pos;
-      originPt = currentPt = new Point(x, y);
-      pixiJsApp.stage.addChild(pgRect)
-      drawCurrentRect();
 
-      selecting = true;
+      const { ctrlKey } = e.origMouseEvent;
+      if (ctrlKey) {
+        originPt = currentPt = new Point(x, y);
+        pixiJsApp.stage.addChild(selectionRect)
+        drawCurrentRect();
+
+        selecting = true;
+      }
     };
 
     const onMouseMove = (e: EMouseEvent) => {
+      const { ctrlKey } = e.origMouseEvent;
+
       if (selecting) {
-        const {x, y} = e.pos;
-        currentPt = new Point(x, y);
-        drawCurrentRect();
+        if (ctrlKey) {
+          const {x, y} = e.pos;
+          currentPt = new Point(x, y);
+          drawCurrentRect();
+        } else {
+          endSelection();
+        }
       }
     }
 
     const onMouseUp = (e: EMouseEvent) => {
-      if (currentPt !== originPt) {
-        const currBBox = pointsToRect(originPt, currentPt);
+      const { ctrlKey } = e.origMouseEvent;
 
-        selectionRef.value = currBBox;
-        pixiJsApp.stage.removeChild(pgRect);
+      if (selecting && ctrlKey) {
+        if (currentPt !== originPt) {
+          const currBBox = pointsToRect(originPt, currentPt);
+          // Flash selection okay signal
+          flashCurrentRect('green');
+
+          selectionRef.value = currBBox;
+        }
       }
+      // endSelection();
     }
 
     const onMouseOut = (e: EMouseEvent) => {
-      // userWithinPageBounds = false;
       if (selecting) {
         const {x, y} = e.pos;
         currentPt = new Point(x, y);
@@ -105,8 +152,17 @@ export function useEventlibSelect({
       }
     }
 
-    const onMouseOver = () => {
-      // userWithinPageBounds = false;
+    const onMouseOver = (e: EMouseEvent) => {
+      const { ctrlKey } = e.origMouseEvent;
+      if (selecting) {
+        if (ctrlKey) {
+          const {x, y} = e.pos;
+          currentPt = new Point(x, y);
+          drawCurrentRect();
+        } else {
+          flashCurrentRect('red');
+        }
+      }
     }
 
     const myHandlers1: MouseHandlerInit = () =>  {

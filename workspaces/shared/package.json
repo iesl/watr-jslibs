@@ -20,9 +20,11 @@
     "build:js": "babel src --out-dir dist --extensions \".ts,.tsx\" --source-maps inline",
     "build:js:watch": "npm run build:js -- --watch",
     "build": "npm-run-all clean build:types build:js",
-    "build:watch": "npm-run-all build:types:watch build:js:watch"
+    "build:watch": "npm-run-all build:types:watch build:js:watch",
+    "ts:build": "tsc",
+    "ts:rebuild": "npm-run-all clean ts:build build:types"
   },
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "jest": {
     "roots": [
       "<rootDir>/src"

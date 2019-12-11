@@ -11,6 +11,7 @@ import {
 
 import { StateArgs } from '~/components/component-basics'
 import { BBox, Point } from 'sharedLib';
+import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 
 type LoadData<T> = (data: T[]) => void;
 type Search<T> = (query: BBox) => T[];
@@ -25,7 +26,7 @@ export interface RTreeSearch<T> {
 type Args = StateArgs & {}
 
 export function useRTreeSearch<T>({
-  state
+  state,
 }: Args): RTreeSearch<T> {
   const rtree: RBush<T> = new RBush<T>();
   const dataRef: Ref<T[]> = ref(null);
