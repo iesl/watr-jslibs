@@ -25,6 +25,9 @@
     "reset": "yarn clean && yarn"
   },
   "workspaces": {
-    "packages": ["workspaces/*"]
-  }
+    "packages": [
+      "workspaces/*"
+    ]
+  },
+  "version": "0.0.0"
 }
