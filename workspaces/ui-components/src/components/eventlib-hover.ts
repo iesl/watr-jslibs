@@ -20,23 +20,21 @@ import {
 import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
 
 type Args = StateArgs & {
-  targetDivRef: Ref<HTMLDivElement>
+  targetDivRef: Ref<HTMLDivElement|null>
 };
 
-export function useEventlibHover<BoxT extends RTreeIndexable>({
+export function useEventlibHover({
   state,
   targetDivRef
 }: Args) {
-  const eventlibCore = useEventlibCore<BoxT>({ targetDivRef, state });
+  const eventlibCore = useEventlibCore({ targetDivRef, state });
   const { eventRTree } = eventlibCore;
 
   waitFor('EventlibHover', {
     state,
     dependsOn: [targetDivRef]
   }, () => {
-    // watch(targetDivRef, () => {
-    // });
-    const targetDiv = targetDivRef.value;
+    // const targetDiv = targetDivRef.value;
 
   });
 
@@ -44,7 +42,7 @@ export function useEventlibHover<BoxT extends RTreeIndexable>({
   const hoveringRef = ref(hovered);
 
   watch(() => {
-    const pos = eventlibCore.mousePosRef;
+    const pos = eventlibCore.mousePosRef!;
 
     const userPt = coords.mkPoint.fromXy(pos.x, pos.y);
 

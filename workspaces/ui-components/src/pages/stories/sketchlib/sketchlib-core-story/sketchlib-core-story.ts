@@ -5,7 +5,6 @@ import {
   onMounted,
 } from '@vue/composition-api';
 
-import * as PIXI from 'pixi.js';
 
 import { useImgCanvasOverlays } from '~/components/elem-overlays'
 import { useCanvasDrawto } from '~/components/drawto-canvas';
@@ -20,7 +19,7 @@ export default {
     const state = initState();
 
     // waitFor rationale:
-    const layerRoot: Ref<HTMLDivElement> = ref(null);
+    const layerRoot: Ref<HTMLDivElement|null> = ref(null);
     const containerRef = layerRoot;
     const eventlibCore = useEventlibCore({ targetDivRef: layerRoot, state } );
 
@@ -31,7 +30,7 @@ export default {
     const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
     const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
 
-    const sketchlibCore = useSketchlibCore({ state, canvasDrawto, eventlibCore, eventlibSelect });
+    useSketchlibCore({ state, canvasDrawto, eventlibCore, eventlibSelect });
 
 
     onMounted(() => {

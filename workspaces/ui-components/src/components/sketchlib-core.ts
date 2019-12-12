@@ -22,7 +22,7 @@ type Args = StateArgs & {
   eventlibSelect: EventlibSelect,
 };
 
-export function useSketchlibCore({ state, canvasDrawto, eventlibCore, eventlibSelect }: Args)  {
+export function useSketchlibCore({ state, canvasDrawto, eventlibSelect }: Args)  {
   const { pixiJsAppRef } = canvasDrawto;
 
   waitFor('SketchlibCore', {
@@ -30,14 +30,15 @@ export function useSketchlibCore({ state, canvasDrawto, eventlibCore, eventlibSe
     dependsOn: [pixiJsAppRef]
   }, () => {
 
-    const pixiJsApp = pixiJsAppRef.value;
+    const pixiJsApp = pixiJsAppRef.value!;
 
     const { selectionRef }  = eventlibSelect;
 
     watch(selectionRef, (sel) => {
-      const r = drawRect(sel);
-
-      pixiJsApp.stage.addChild(r)
+      if (sel) {
+        const r = drawRect(sel);
+        pixiJsApp.stage.addChild(r)
+      }
     });
   });
 

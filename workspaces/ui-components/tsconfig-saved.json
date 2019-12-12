@@ -3,31 +3,27 @@
     "baseUrl": ".",
     "allowJs": true,
 
-    "target": "esnext",
-    "module": "esnext",
+    "target": "es6",
+    "module": "es6",
     "moduleResolution": "node",
-    "lib": [
-      "esnext",
-      "esnext.asynciterable",
-      "dom"
-    ],
 
     "esModuleInterop": true,
     "importHelpers": true,
     "allowSyntheticDefaultImports": true,
 
-    "experimentalDecorators": true,
-    "strict": true,
     "noEmit": true,
-
+    "experimentalDecorators": true,
     "resolveJsonModule": true,
 
     "noImplicitReturns": true,
+
     "noUnusedParameters": false,
     "noUnusedLocals": false,
 
     "inlineSourceMap": true,
     "preserveConstEnums": true,
+
+    "diagnostics": true,
 
     "types": [
       "jest",
@@ -46,7 +42,7 @@
 
   },
 
-  "exclude": ["node_modules", "../../node_modules", ".nuxt", "dist"],
+  "exclude": ["node_modules", ".nuxt", "dist"],
 
   "include": [
     "src/**/*"

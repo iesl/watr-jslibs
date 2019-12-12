@@ -46,9 +46,10 @@ export function useGlyphSelection({
     dependsOn: [pixiJsAppRef],
   }, () => {
 
-    const pixiJsApp = pixiJsAppRef.value;
+    const pixiJsApp = pixiJsAppRef.value!;
 
-    watch(selectionRef, (selection) => {
+    watch(selectionRef, () => {
+      const selection = selectionRef.value!;
       // search for glyphs in selection box...
       const selectedGlyphs = rtreeSearch.search(selection);
       const minBounds = queryHitsMBR(selectedGlyphs);

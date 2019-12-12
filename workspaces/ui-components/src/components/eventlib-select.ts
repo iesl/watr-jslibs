@@ -29,7 +29,7 @@ function pointsToRect(p1: Point, p2: Point): BBox {
 }
 
 export interface EventlibSelect {
-  selectionRef: Ref<BBox>;
+  selectionRef: Ref<BBox|null>;
 }
 
 type Args = StateArgs & {
@@ -53,7 +53,7 @@ export function useEventlibSelect({
 
     const { setMouseHandlers } = eventlibCore;
 
-    const pixiJsApp = pixiJsAppRef.value;
+    const pixiJsApp = pixiJsAppRef.value!;
 
     let selecting = false;
     let originPt: Point = new Point(0, 0);
@@ -91,7 +91,7 @@ export function useEventlibSelect({
         }
       }
 
-      const ticker = pixiJsApp.ticker.add(_go);
+      pixiJsApp.ticker.add(_go);
 
       // selectionRect.lineStyle(2, selectLineColor);
     }

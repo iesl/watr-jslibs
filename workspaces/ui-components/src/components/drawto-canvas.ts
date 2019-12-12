@@ -13,14 +13,14 @@ import { StateArgs, waitFor } from '~/components/component-basics'
 // type SetImageSource = void;
 
 export interface CanvasDrawto {
-  pixiJsAppRef: Ref<PIXI.Application>
+  pixiJsAppRef: Ref<PIXI.Application|null>
   setImageSource: (src: string) => void;
 }
 
 
 type Args = StateArgs & {
-  canvasRef: Ref<HTMLCanvasElement>,
-  containerRef: Ref<HTMLDivElement>
+  canvasRef: Ref<HTMLCanvasElement|null>,
+  containerRef: Ref<HTMLDivElement|null>
 };
 
 // TODO: rename to usePixiJSDrawto
@@ -29,16 +29,16 @@ export function useCanvasDrawto({
   canvasRef,
   containerRef
 }: Args): CanvasDrawto {
-  const pixiJsAppRef: Ref<PIXI.Application> = ref(null);
-  const bgImageSrc: Ref<string> = ref(null);
-  const bgImageRef: Ref<PIXI.Sprite> = ref(null);
+  const pixiJsAppRef: Ref<PIXI.Application|null> = ref(null);
+  const bgImageSrc: Ref<string|null> = ref(null);
+  const bgImageRef: Ref<PIXI.Sprite|null> = ref(null);
 
   waitFor('CanvasDrawto', {
     state,
     dependsOn: [canvasRef, containerRef],
   }, () => {
-    const canvasElem = canvasRef.value;
-    const divElem = containerRef.value;
+    const canvasElem = canvasRef.value!;
+    const divElem = containerRef.value!;
 
     const app = initPixiJs(canvasElem, divElem);
     app.resize();

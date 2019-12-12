@@ -19,11 +19,11 @@ export default {
 
     const state = initState();
 
-    const layerRoot: Ref<HTMLDivElement> = ref(null);
+    const layerRoot: Ref<HTMLDivElement|null> = ref(null);
 
     const pdfPageViewer = usePdfPageViewer({ targetDivRef: layerRoot, state });
 
-    const { imgCanvasOverlay, eventlibCore, canvasDrawto } = pdfPageViewer;
+    const { imgCanvasOverlay  } = pdfPageViewer;
 
 
     onMounted(() => {

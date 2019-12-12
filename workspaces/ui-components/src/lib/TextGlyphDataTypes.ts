@@ -4,8 +4,11 @@ import _ from 'lodash';
 import {
   coords,
   utils,
-  mk,
   GridTypes,
+} from "sharedLib";
+
+import {
+  mk,
   Point,
   BBox,
   MinMaxBox

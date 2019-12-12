@@ -15,7 +15,7 @@ export default {
 
     const state = initState();
 
-    const layerRoot: Ref<HTMLDivElement> = ref(null);
+    const layerRoot: Ref<HTMLDivElement|null> = ref(null);
     const containerRef = layerRoot;
 
     const elemOverlay = useImgCanvasOverlays({ containerRef, state });
@@ -28,7 +28,7 @@ export default {
       dependsOn: [pixiJsAppRef]
     }, () => {
 
-      const pixiJsApp = pixiJsAppRef.value;
+      const pixiJsApp = pixiJsAppRef.value!;
       elemOverlay.setDimensions(600, 800);
 
       const pg = new PIXI.Graphics();

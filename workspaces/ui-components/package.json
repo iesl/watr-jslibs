@@ -23,6 +23,7 @@
     "@types/chroma-js": "^1.4.3",
     "@types/d3": "^5.7.2",
     "@types/jquery": "^3.3.31",
+    "@types/lunr": "^2.3.2",
     "@types/rbush": "^3.0.0",
     "@types/tween.js": "^17.2.0",
     "@vue/composition-api": "^0.3.4",

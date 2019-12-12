@@ -1,7 +1,7 @@
 
 import * as PIXI from 'pixi.js';
 import { Application } from 'pixi.js';
-import { BBox } from 'sharedLib';
+import { BBox } from 'sharedLib/dist';
 
 export function initPixiJs(canvasElem: HTMLCanvasElement, containerDiv: HTMLDivElement): Application {
 

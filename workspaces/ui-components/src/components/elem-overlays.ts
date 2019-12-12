@@ -10,8 +10,8 @@ import {
 import { StateArgs, waitFor } from '~/components/component-basics'
 
 export interface OverlayElements {
-  canvasElem: Ref<HTMLCanvasElement>;
-  imgElem: Ref<HTMLImageElement>;
+  canvasElem: Ref<HTMLCanvasElement|null>;
+  imgElem: Ref<HTMLImageElement|null>;
 }
 
 export interface ImgCanvasOverlay {
@@ -22,7 +22,7 @@ export interface ImgCanvasOverlay {
 }
 
 type Args = StateArgs & {
-  containerRef: Ref<HTMLDivElement>
+  containerRef: Ref<HTMLDivElement|null>
 };
 
 export function useImgCanvasOverlays({
@@ -35,9 +35,9 @@ export function useImgCanvasOverlays({
   const height = () => dimensions.value[1];
   const placeholderImage = () => `http://via.placeholder.com/${width()}x${height()}`;
 
-  const imgElem: Ref<HTMLImageElement> = ref(null);
-  const canvasElem: Ref<HTMLCanvasElement> = ref(null);
-  const imgElemSource: Ref<string> = ref(null);
+  const imgElem: Ref<HTMLImageElement|null> = ref(null);
+  const canvasElem: Ref<HTMLCanvasElement|null> = ref(null);
+  const imgElemSource: Ref<string|null> = ref(null);
 
   waitFor('ImgCanvasOverlays', {
     state,
@@ -45,7 +45,7 @@ export function useImgCanvasOverlays({
     ensureTruthy: [imgElem, canvasElem]
   }, () => {
 
-    const overlayContainer = containerRef.value;
+    const overlayContainer = containerRef.value!;
 
     overlayContainer.classList.add('layers');
 
@@ -74,14 +74,14 @@ export function useImgCanvasOverlays({
       overlayContainer.style.width = w;
       overlayContainer.style.height = h;
 
-      canvasElem.value.setAttribute('width', w);
-      canvasElem.value.setAttribute('height', h);
+      canvasEl.setAttribute('width', w);
+      canvasEl.setAttribute('height', h);
 
       if (imgElemSource.value) {
-        imgElem.value.width = width;
-        imgElem.value.height = height;
+        imgEl.width = width;
+        imgEl.height = height;
       } else {
-        imgElem.value.src = placeholderImage();
+        imgEl.src = placeholderImage();
       }
     });
   });
@@ -109,7 +109,7 @@ export function useImgCanvasSvgOverlays({
   const { setImageSource, elems, setDimensions, dimensions } = imgCanvasOverlays;
   const { imgElem, canvasElem } = elems;
 
-  const svgElem: Ref<SVGElement> = ref(null);
+  const svgElem: Ref<SVGElement|null> = ref(null);
 
   waitFor('ImgCanvasSvgOverlays', {
     state,
@@ -129,8 +129,8 @@ export function useImgCanvasSvgOverlays({
         const w = `${width}px`;
         const h = `${height}px`;
 
-        svgElem.value.setAttribute('width', w);
-        svgElem.value.setAttribute('height', h);
+        el.setAttribute('width', w);
+        el.setAttribute('height', h);
       });
 
     });

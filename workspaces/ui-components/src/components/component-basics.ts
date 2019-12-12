@@ -42,7 +42,7 @@ export function watchAll(rs?: Ref<any>[]) {
     }
 
     const startFlag = ref(false);
-    const rhead = curr.shift();
+    const rhead = curr.shift()!;
 
     const stopInner = watch([rhead, startFlag], () => {
       const rval = rhead.value;

@@ -14,7 +14,7 @@ export default {
 
     const state = initState();
 
-    const layerRoot: Ref<HTMLDivElement> = ref(null);
+    const layerRoot: Ref<HTMLDivElement|null> = ref(null);
     const containerRef = layerRoot;
     const elemOverlay = useImgCanvasSvgOverlays({ containerRef, state });
 

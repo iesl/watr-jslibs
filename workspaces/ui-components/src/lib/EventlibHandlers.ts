@@ -1,16 +1,10 @@
-
-import * as _ from "lodash";
+import _ from "lodash";
 
 import {
   Ref,
 } from '@vue/composition-api';
 
 import { UnwrapRef } from '@vue/composition-api/dist/reactivity';
-
-
-type Partial<T> = {
-  [P in keyof T]?: T[P];
-}
 
 export function getCursorPosition(elem: Element, event: MouseEvent) {
   const rect: DOMRect | ClientRect = elem.getBoundingClientRect()
@@ -25,7 +19,7 @@ export interface EventlibPoint {
 }
 
 export interface EventlibMouse {
-  mousePosRef: UnwrapRef<EventlibPoint>;
+  mousePosRef: UnwrapRef<EventlibPoint|null>; // TODO why or null ??
 }
 
 export interface EMouseEvent {
@@ -35,7 +29,22 @@ export interface EMouseEvent {
 
 export type EMouseEventHandler = (e: EMouseEvent) => void;
 
+type GEMap = GlobalEventHandlersEventMap;
+
+// Union of all mouse event type keys "mousemove", etc..., exluding Pointer/Drag events
+export type MouseEventT = {
+  [K in keyof GEMap]:
+  GEMap[K] extends MouseEvent?
+    (GEMap[K] extends DragEvent? never : (
+      GEMap[K] extends PointerEvent? never : K
+    )) : never
+}[keyof GEMap];
+
 interface MouseEventMap {
+  auxclick    : EMouseEventHandler;
+  click       : EMouseEventHandler;
+  contextmenu : EMouseEventHandler;
+  dblclick    : EMouseEventHandler;
   mousedown   : EMouseEventHandler;
   mouseenter  : EMouseEventHandler;
   mouseleave  : EMouseEventHandler;
@@ -43,19 +52,22 @@ interface MouseEventMap {
   mouseout    : EMouseEventHandler;
   mouseover   : EMouseEventHandler;
   mouseup     : EMouseEventHandler;
-  click       : EMouseEventHandler;
-  dblclick    : EMouseEventHandler;
-  contextmenu : EMouseEventHandler;
+  wheel       : EMouseEventHandler;
 }
 
-
-const MouseEvents = [
-  "mouseover",
-  "mouseout",
-  "mousemove",
-  "mouseup",
-  "mousedown",
+const MouseEvents: MouseEventT[] = [
+  "auxclick",
   "click",
+  "contextmenu",
+  "dblclick",
+  "mousedown",
+  "mouseenter",
+  "mouseleave",
+  "mousemove",
+  "mouseout",
+  "mouseover",
+  "mouseup",
+  "wheel",
 ];
 
 export type MouseHandlers = Partial<MouseEventMap>;
@@ -63,15 +75,16 @@ export type MouseHandlers = Partial<MouseEventMap>;
 export type MouseHandlerInit = (t?: any) => MouseHandlers;
 
 export function setMouseHandlers(
-  targetDivRef: Ref<HTMLDivElement>,
+  targetDivRef: Ref<HTMLDivElement|null>,
   handlers: MouseHandlerInit[]
 ): void {
 
-  const targetDiv = targetDivRef.value;
+  const targetDiv = targetDivRef.value!;
+
   _.each(MouseEvents, eventType => {
     _.each(handlers, (hInit: MouseHandlerInit) => {
       const h: MouseHandlers = hInit(null);
-      const eventHandler: ((e: EMouseEvent) => void) = h[eventType];
+      const eventHandler: ((e: EMouseEvent) => void) | undefined = h[eventType];
 
       if (eventHandler) {
         const adaptor = (e: MouseEvent) => {

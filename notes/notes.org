@@ -1,33 +1,33 @@
 * Dev Notes
-  
-** Now: 
+
+** Now:
    - [X] Create a pixijs version of img/canvas overly component
 
    - [ ] Create rect. selection system
      - [ ] Still a bit flakey
-  
 
-  
+
+
 ** Current Goal(s)
-*** Tracelog visualizer 
+*** Tracelog visualizer
 **** Pdf Image viewer
     Display a pdf page as an image
-    - [ ] Image overlay, allowing for ... 
+    - [ ] Image overlay, allowing for ...
       - [ ] Draw shape overlays for tracelog visualization
         - via Sketchlib
- 
-    - [ ] Text overlay, allowing for ... 
-      - [ ] Glyphs highlighting 
+
+    - [ ] Text overlay, allowing for ...
+      - [ ] Glyphs highlighting
         - via Eventlib/Hover
-      - [ ] Text select/copy 
+      - [ ] Text select/copy
 
 ***** Sketchlib
       Core system which allows drawing shapes on top of an image
-      Uses: 
+      Uses:
       - Tracelog shape drawing
       - Labeling regions with rectangular selection
-        
-***** Elem Overlays (layering) 
+
+***** Elem Overlays (layering)
       (div elem) => [...]
 
       The image/canvas/svg overlay structure
@@ -37,29 +37,29 @@
       - Zoom in/out, properly modifying geometry of the layers (new feature)
 
 ***** Eventlib system
-      The hover/knn event system 
+      The hover/knn event system
       RTree-based event system lives here
       Allow registration of mouse/keyboard handlers
       Use for glyph highlighting/selection
       Will be used for graph paper variants (regular grid vs. free-form glyph placement)
-      
-***** Selection system 
+
+***** Selection system
       Rectangular selection events.
 
       TODO Started; still a bit flakey
 
-***** Run Trace 
+***** Run Trace
       Given a tracelog, display the shapes as pdf image overlays
 
 **** Tooltips
 
 **** Filtering/selection engine
      Search/sort/select log entries to display
-     
+
 **** Infobar
      Simple cell-based informational display
      (optional, review this before implementing)
-     
+
 
 ** Upcoming Goals
 *** Text Viewer for TextWorks
@@ -67,129 +67,25 @@
 *** Annotation Labeler
 *** Auth/login implementation using Auth0
 *** File-based server local development (no db required)
-    
-    
-*** Note:  
+
+
+*** Note:
     Create an initialization ref such that functional components may be sure that their dependencies are ready
 
-   
-   
+
+
 ** Client-app notes
-   Client app is the original version, which is being overhauled 
+   Client app is the original version, which is being overhauled
    [[file:~/projects/the-livingroom/rexa-text-extractors/watr-jslibs/packages/client-app/notes/dev-notes.org::*Watrcolor%20client%20file%20organization][Watrcolor client file organization]]
 
 
 ** Possible RBush replacement, a bit faster:
    https://github.com/mourner/flatbush
+   
+
+** build structure 
+   Trying to figure out why tween.js is not working under nuxt, but works under tsc in shared
+   Nuxt uses babel (I think)
+   
 
 
-  "workspaces": {
-    "packages": ["workspaces/*"],
-    "nohoist": [
-      "**/nuxt", "**/nuxt/**",
-      "**/vue", "**/vue/**",
-      "**/@vue/composition-api", "**/@vue/composition-api/**",
-      "**/typescript", "**/typescript/**",
-      "**/webpack", "**/webpack/**",
-      "**/fork-ts-checker-webpack-plugin", "**/fork-ts-checker-webpack-plugin/**",
-      "**/vue-jest", "**/vue-jest/**"
-    ]
-  }
-
-    "typescript": "^3.7.3"
-  "workspaces": {
-    "nohoist": [
-      "**/typescript",
-      "**/typescript/**"
-    ]
-  },
-
-//    "nohoist": [
-//    "**/*nuxt*",
-//       "**/*nuxt*/**",
-//       "**/*vue*",
-//            "**/*vue*/**",
-//                        "**/typescript",
-//       "**/typescript/**",
-//                        "**/*webpack*",
-//       "**/*webpack*/**",
-//       "**/*loader*", "**/*loader*/**",
-//                                     "**/*babel*", "**/*babel*/**"
-//     ]
-
-// Root package.json:
-{
-  "name": "root",
-  "private": true,
-  "devDependencies": {
-    "@babel/cli": "^7.7.4",
-    "@babel/plugin-proposal-class-properties": "^7.7.4",
-    "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
-    "@babel/preset-env": "^7.7.4",
-    "@babel/preset-typescript": "^7.7.4",
-    "@types/chai": "^4.2.6",
-    "@types/fs-extra": "^8.0.1",
-    "@types/jest": "^24.0.23",
-    "@types/jquery": "^3.3.31",
-    "@types/klaw": "^3.0.0",
-    "@types/klaw-sync": "^6.0.0",
-    "@types/koa": "^2.11.0",
-    "@types/koa-json": "^2.0.18",
-    "@types/koa-router": "^7.0.42",
-    "@types/koa-send": "^4.1.2",
-    "@types/lodash": "^4.14.144",
-    "@types/lunr": "^2.3.2",
-    "@types/memory-fs": "^0.3.2",
-    "@types/node": "^12.12.14",
-    "@types/rbush": "^3.0.0",
-    "@types/split.js": "^1.3.2",
-    "@types/webpack": "^4.39.8",
-    "@typescript-eslint/eslint-plugin": "^2.6.1",
-    "ajv": "^6.10.2",
-    "babel-eslint": "^10.0.3",
-    "babel-jest": "^24.9.0",
-    "babel-preset-env": "^1.7.0",
-    "chai": "^4.2.0",
-    "css-loader": "^3.2.0",
-    "dts-gen": "^0.5.8",
-    "eslint": "^6.7.2",
-    "eslint-config-prettier": "^6.7.0",
-    "eslint-loader": "^3.0.2",
-    "eslint-plugin-prettier": "^3.1.1",
-    "font-awesome": "^4.7.0",
-    "fork-ts-checker-webpack-plugin": "^3.1.1",
-    "form-serializer": "^2.5.0",
-    "html-webpack-plugin": "^3.2.0",
-    "jest": "^24.9.0",
-    "jshint": "^2.10.3",
-    "json-server": "^0.15.1",
-    "koa": "^2.11.0",
-    "koa-body": "^4.1.1",
-    "koa-bodyparser": "^4.2.1",
-    "koa-ejs": "^4.3.0",
-    "koa-json": "^2.0.2",
-    "koa-router": "^7.4.0",
-    "koa-send": "^5.0.0",
-    "lerna": "^3.18.3",
-    "less": "^3.10.3",
-    "less-loader": "^5.0.0",
-    "lodash": "^4.17.15",
-    "memory-fs": "^0.5.0",
-    "mini-css-extract-plugin": "^0.8.0",
-    "npm-run-all": "^4.1.5",
-    "prettier": "^1.19.1",
-    "rimraf": "^3.0.0",
-    "ts-jest": "^24.2.0",
-    "ts-morph": "^5.0.0",
-    "ts-node": "^8.5.4",
-    "typescript": "^3.7.3",
-    "url-loader": "^3.0.0",
-    "webpack": "^4.41.2",
-    "vue-jest": "^4.0.0-0", // ui-comp
-    "webpack-command": "^0.5.0"
-  },
-  "scripts": {},
-  "workspaces": {
-    "packages": ["workspaces/*"]
-  }
-}

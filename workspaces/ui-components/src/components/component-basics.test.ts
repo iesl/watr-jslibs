@@ -18,7 +18,7 @@ describe('Component Basics',  () => {
     const dep1 = ref(1);
     const dep2 = ref(2);
 
-    watch(dep1, (nv, ov, onCleanup: any) => {
+    watch(dep1, (_nv, _ov, onCleanup: any) => {
       // this should not be triggered by dep2
       const d1 = dep1.value;
       const d2 = dep2.value;
@@ -96,7 +96,7 @@ describe('Component Basics',  () => {
 
     const dep3 = ref(3);
     // self-stopping?
-    const stopMe = watch(dep3, (nv, ov, onCleanup: any) => {
+    const stopMe = watch(dep3, (_nv, _ov, onCleanup: any) => {
       // this should not be triggered by dep2
       // console.log(`explicit watch(d3) triggered! dep1=${d1} dep2=${d2}`)
       const d3 = dep3.value;

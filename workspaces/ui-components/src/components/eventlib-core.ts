@@ -38,10 +38,10 @@ export interface EventlibCore {
 }
 
 type Args = StateArgs & {
-  targetDivRef: Ref<HTMLDivElement>
+  targetDivRef: Ref<HTMLDivElement|null>
 };
 
-export function useEventlibCore<BoxT extends RTreeIndexable>({
+export function useEventlibCore({
   state,
   targetDivRef
 }: Args): EventlibCore {
@@ -51,7 +51,7 @@ export function useEventlibCore<BoxT extends RTreeIndexable>({
     y: 0
   })
 
-  const eventRTree: RBush<BoxT> = new RBush<BoxT>();
+  const eventRTree: RBush<RTreeIndexable> = new RBush<RTreeIndexable>();
 
   const handlerQueue: Ref<MouseHandlerInit[]> = ref([]);
 
@@ -59,6 +59,9 @@ export function useEventlibCore<BoxT extends RTreeIndexable>({
     state,
     dependsOn: [targetDivRef],
   }, () => {
+
+    const targetDiv = targetDivRef.value!;
+    targetDiv.addEventListener('mousemove', onMouseMove);
 
     watch(handlerQueue, (handlers) => {
       if (handlers.length > 0) {
@@ -69,28 +72,24 @@ export function useEventlibCore<BoxT extends RTreeIndexable>({
   });
 
   function onMouseMove(e: MouseEvent) {
-    const {x, y} = getCursorPosition(targetDivRef.value, e);
-    mousePosRef.x = x;
-    mousePosRef.y = y;
+    const targetDiv = targetDivRef.value;
+    if (targetDiv) {
+      const {x, y} = getCursorPosition(targetDiv, e);
+      mousePosRef.x = x;
+      mousePosRef.y = y;
+    }
   }
-
-  onMounted(() => {
-    watch(targetDivRef, (targetDiv) => {
-      if (targetDiv) {
-        targetDivRef.value.addEventListener('mousemove', onMouseMove);
-      }
-    })
-  })
 
   // TODO switch to beforeUnmounted ??
   onUnmounted(() => {
     const targetDiv = targetDivRef.value;
     if (targetDiv) {
-      targetDivRef.value.removeEventListener('mousemove', onMouseMove);
+      targetDiv.removeEventListener('mousemove', onMouseMove);
     }
   })
 
-  function loadShapes(shapes: BoxT[]): void {
+
+  function loadShapes(shapes: RTreeIndexable[]): void {
     eventRTree.load(shapes);
   }
 

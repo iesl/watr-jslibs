@@ -41,8 +41,8 @@ export function useGlyphOverlays({
 }: Args): GlyphOverlays {
   // TODO: setHoveredText
   // TODO: setClickedText
-  const textgridRef: Ref<GridTypes.Grid> = ref(null)
-  const pageNumRef: Ref<number> = ref(null);
+  const textgridRef: Ref<GridTypes.Grid|null> = ref(null)
+  const pageNumRef: Ref<number|null> = ref(null);
   const rtreeSearch = useRTreeSearch<TextDataPoint>({ state });
 
   const { pixiJsAppRef } = canvasDrawto;
@@ -57,11 +57,11 @@ export function useGlyphOverlays({
     dependsOn: [textgridRef, pageNumRef, pixiJsAppRef],
   }, () => {
 
-    const pixiJsApp = pixiJsAppRef.value;
+    const pixiJsApp = pixiJsAppRef.value!;
 
     // TODO: don't make glyph data overlays depend on textgrid data loading
-    const pageNum = pageNumRef.value;
-    const textgrid = textgridRef.value;
+    const pageNum = pageNumRef.value!;
+    const textgrid = textgridRef.value!;
     const page = textgrid.pages[pageNum];
     const [l, t, w, h] = page.pageGeometry;
     const pageBounds = coords.mk.fromArray([l, t, w, h]);
@@ -94,15 +94,31 @@ export function useGlyphOverlays({
       // Show hit reticles:
       const selectLineColor = chroma('gray').num();
       pixiJsApp.stage.removeChild(...glyphReticles);
+      glyphReticles = [];
 
-      glyphReticles = _.map(queryHits, (q) => {
-        const pgRect = new PIXI.Graphics();
-        pgRect.lineStyle(2, selectLineColor);
-        const box = q.glyphData.glyphBounds;
-        pgRect.drawRect(box.x, box.y, box.width, box.height);
-        pixiJsApp.stage.addChild(pgRect)
-        return pgRect;
+      _.each(queryHits, (q) => {
+        const glyphData = q.glyphData;
+        if (glyphData) {
+          const box = glyphData.glyphBounds;
+          const pgRect = new PIXI.Graphics();
+          pgRect.lineStyle(1, selectLineColor);
+          pgRect.drawRect(box.x, box.y, box.width, box.height);
+          pixiJsApp.stage.addChild(pgRect)
+          glyphReticles.push(pgRect);
+        }
       });
+      // glyphReticles = _.map(queryHits, (q) => {
+      //   const glyphData = q.glyphData;
+      //   if (glyphData) {
+      //     const box = glyphData.glyphBounds;
+      //     const pgRect = new PIXI.Graphics();
+      //     pgRect.lineStyle(1, selectLineColor);
+      //     pgRect.drawRect(box.x, box.y, box.width, box.height);
+      //     pixiJsApp.stage.addChild(pgRect)
+      //     return pgRect;
+      //   }
+      //   return undefined;
+      // });
 
     }
     const glyphHandlers: MouseHandlerInit = () =>  {

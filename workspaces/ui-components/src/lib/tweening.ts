@@ -3,10 +3,11 @@ import { Tween, Easing, update as updateTween } from '@tweenjs/tween.js';
 // import * as TWEEN from '@tweenjs/tween.js';
 // const { Tween, Easing, update } = TWEEN;
 import { BBox, coords } from 'sharedLib';
-// import { prettyPrint } from './pretty-print';
+import { prettyPrint } from './pretty-print';
 
 export function tweenBBox(start: BBox, end: BBox, onUpdate: (bbox: BBox) => void): Promise<BBox> {
 
+  prettyPrint({ m: 'tweenBBox', Tween, Easing });
   const p = new Promise<BBox>((resolve) => {
     const initial = {
       x: start.x,
@@ -22,6 +23,7 @@ export function tweenBBox(start: BBox, end: BBox, onUpdate: (bbox: BBox) => void
     };
 
     let done = false;
+
 
     const tween = new Tween(initial)
       .to(target, 2000)

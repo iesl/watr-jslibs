@@ -15,7 +15,7 @@ import { useEventlibSelect } from '../eventlib-select';
 
 
 type Args = StateArgs & {
-  targetDivRef: Ref<HTMLDivElement>;
+  targetDivRef: Ref<HTMLDivElement|null>;
 };
 
 export interface PdfPageViewer {
@@ -42,7 +42,7 @@ export function usePdfPageViewer({
   const glyphOverlays = useGlyphOverlays({ state, eventlibCore, canvasDrawto, imgCanvasOverlay });
   const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
   const { rtreeSearch } = glyphOverlays;
-  const glyphSelection = useGlyphSelection({ canvasDrawto, rtreeSearch, eventlibSelect, state });
+  useGlyphSelection({ canvasDrawto, rtreeSearch, eventlibSelect, state });
 
   const setGrid = glyphOverlays.setGrid;
 

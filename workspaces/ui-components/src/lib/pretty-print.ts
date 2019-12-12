@@ -9,7 +9,7 @@ function getCallerContext() {
 
   // Get caller context
   const err = getErrorObject();
-  let lines = err.stack.split("\n");
+  let lines = err.stack!.split("\n");
   lines = _.dropWhile(lines, (l) => !l.includes('at prettyPrint'));
   lines = _.drop(lines, 1);
   lines = _.takeWhile(lines, l => !l.includes('node_modules'));
@@ -134,7 +134,9 @@ export function prettyPrint(vsobj: object, options: Partial<InspectOptions> = {}
   const props = Object.getOwnPropertyNames(vsobj);
 
   const fmt = _.join(_.map(props, p => {
-    const ins = util.inspect(vsobj[p], opts);
+    const o = vsobj as any;
+    const v = o[p];
+    const ins = util.inspect(v, opts);
     return p + ': ' + ins;
   }), '\n');
 
