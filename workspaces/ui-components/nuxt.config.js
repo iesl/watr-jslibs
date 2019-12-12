@@ -1,8 +1,8 @@
-var util = require('util');
 import colors from 'vuetify/es5/util/colors';
 
 const path = require('path');
 const resolve = path.resolve;
+const util = require('util');
 
 const modulesDir = [
   resolve(__dirname, '../../node_modules/'),
@@ -115,20 +115,17 @@ export default {
   build: {
     // You can extend webpack config here
     extend(config, ctx) {
-      const c = util.inspect(config, true, 8, true);
-      const ct = util.inspect(ctx, true, 8, true);
-      console.log('build config:', c);
-      console.log('build ctx:', ct);
-
-      // config.module.rules ts-loader tsconfigFile
+      // const c = util.inspect(config, true, 8, true);
+      // const ct = util.inspect(ctx, true, 8, true);
+      // console.log('build config:', c);
+      // console.log('build ctx:', ct);
     },
 
     babel: {
       presets({ isServer }, [ preset, options ]) {
-        console.log('babel isServer:', isServer);
-        console.log('babel pre:', preset);
-        console.log('babel opt:', options);
-
+        // console.log('babel isServer:', isServer);
+        // console.log('babel pre:', preset);
+        // console.log('babel opt:', options);
       }
     }
   }

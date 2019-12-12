@@ -3,13 +3,8 @@ import '~/plugins/composition-api';
 
 import { prettyPrint } from './pretty-print';
 
-import { Tween, Easing, update as updateTween } from 'es6-tween';
-// import { Tween, Easing, update as updateTween } from '@tweenjs/tween.js';
-
-// const TWEEN = require('@tweenjs/tween.js');
-// import * as TWEEN from '@tweenjs/tween.js';
-// const { Tween, Easing } = TWEEN;
-// const updateTween = update;
+// import anime from 'animejs/lib/anime.es.js';
+import anime from 'animejs';
 
 // prettyPrint({ m: 'tween.test',  TWEEN });
 
@@ -34,52 +29,28 @@ describe('Tweening support',  () => {
 
     let position = {x: 100};
     const waypoint1 = {x: 150};
-    const waypoint2 = {x: 125};
 
-    let done = false;
-    function init() {
-      // target = document.getElementById('target');
-      const tween = new Tween(position)
-        .to(waypoint1, 2000)
-        .easing(Easing.Linear.None)
-        .on('update', (st: any) => doUpdate(st, waypoint1));
+    const anim0 = anime({
+      targets: position,
+      x: 150,
+      easing: 'linear',
+      autoplay: false,
+      update: () => {
+        doUpdate(position, waypoint1)
+      }
+    });
 
-      const tweenBack = new Tween(position)
-        .to(waypoint2, 2000)
-        .easing(Easing.Linear.None)
-        .on('update', (st: any) => doUpdate(st, waypoint2))
-        .on('complete', () => {
-          done = true;
-          prettyPrint({ m: 'tweenBack complete'});
-        })
-      ;
-
-      tween.chain(tweenBack);
-      return tween.start();
-    }
-
+    const fini = anim0.finished;
+    anim0.play();
 
     function doUpdate(obj: any, target: object) {
       prettyPrint({ m: 'update', obj, target });
       return true;
     }
 
-    const p = new Promise((resolve) => {
-      init();
-      function animate(time: number) {
-        var id = requestAnimationFrame(animate);
-        updateTween();
-        prettyPrint({ m: 'animate', time });
-        if (done) {
-          cancelAnimationFrame(id);
-          prettyPrint({ m: 'Promise complete'});
-          resolve();
-        }
-      }
-      requestAnimationFrame(animate);
-    })
-
-    return p;
+    return fini.then(() => {
+      console.log('done');
+    });
   });
 
 });
