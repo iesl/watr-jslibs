@@ -1,4 +1,4 @@
-
+var util = require('util');
 import colors from 'vuetify/es5/util/colors';
 
 const path = require('path');
@@ -71,7 +71,6 @@ export default {
    ** Nuxt.js dev-modules
    */
   buildModules: [
-    // Doc: https://github.com/nuxt-community/eslint-module
     '@nuxtjs/eslint-module',
     '@nuxtjs/vuetify',
     '@nuxt/typescript-build'
@@ -116,8 +115,21 @@ export default {
   build: {
     // You can extend webpack config here
     extend(config, ctx) {
+      const c = util.inspect(config, true, 8, true);
+      const ct = util.inspect(ctx, true, 8, true);
+      console.log('build config:', c);
+      console.log('build ctx:', ct);
 
       // config.module.rules ts-loader tsconfigFile
+    },
+
+    babel: {
+      presets({ isServer }, [ preset, options ]) {
+        console.log('babel isServer:', isServer);
+        console.log('babel pre:', preset);
+        console.log('babel opt:', options);
+
+      }
     }
   }
 

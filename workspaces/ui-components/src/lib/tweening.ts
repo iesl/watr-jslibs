@@ -1,13 +1,21 @@
 
-import { Tween, Easing, update as updateTween } from '@tweenjs/tween.js';
+import { Tween, Easing, update as updateTween } from 'es6-tween';
+
 // import * as TWEEN from '@tweenjs/tween.js';
-// const { Tween, Easing, update } = TWEEN;
+// const TWEEN = require('@tweenjs/tween.js');
+// const { Tween, Easing } = TWEEN;
+// const updateTween = update;
+
+
+
 import { BBox, coords } from 'sharedLib';
-import { prettyPrint } from './pretty-print';
+// import { prettyPrint } from './pretty-print';
+
+// prettyPrint({ m: 'tween.ts',  TWEEN.default, Tween: TWEEN.Tween });
+
 
 export function tweenBBox(start: BBox, end: BBox, onUpdate: (bbox: BBox) => void): Promise<BBox> {
-
-  prettyPrint({ m: 'tweenBBox', Tween, Easing });
+  // prettyPrint({ m: 'tweenBBox', Tween, Easing });
   const p = new Promise<BBox>((resolve) => {
     const initial = {
       x: start.x,
@@ -28,11 +36,11 @@ export function tweenBBox(start: BBox, end: BBox, onUpdate: (bbox: BBox) => void
     const tween = new Tween(initial)
       .to(target, 2000)
       .easing(Easing.Linear.None)
-      .onUpdate((st: any) => {
+      .on('update', (st: any) => {
         const b = coords.mk.fromLtwh(st.x, st.y, st.width, st.height);
         onUpdate(b);
       })
-      .onComplete(() => {
+      .on('complete', () => {
         done = true;
       })
 

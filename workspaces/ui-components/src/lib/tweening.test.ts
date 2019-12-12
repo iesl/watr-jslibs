@@ -3,8 +3,15 @@ import '~/plugins/composition-api';
 
 import { prettyPrint } from './pretty-print';
 
-import { Tween, Easing, update as updateTween } from '@tweenjs/tween.js';
-// import TWEEN from '@tweenjs/tween.js';
+import { Tween, Easing, update as updateTween } from 'es6-tween';
+// import { Tween, Easing, update as updateTween } from '@tweenjs/tween.js';
+
+// const TWEEN = require('@tweenjs/tween.js');
+// import * as TWEEN from '@tweenjs/tween.js';
+// const { Tween, Easing } = TWEEN;
+// const updateTween = update;
+
+// prettyPrint({ m: 'tween.test',  TWEEN });
 
 import { tweenBBox } from './tweening';
 
@@ -35,13 +42,13 @@ describe('Tweening support',  () => {
       const tween = new Tween(position)
         .to(waypoint1, 2000)
         .easing(Easing.Linear.None)
-        .onUpdate((st) => doUpdate(st, waypoint1));
+        .on('update', (st: any) => doUpdate(st, waypoint1));
 
       const tweenBack = new Tween(position)
         .to(waypoint2, 2000)
         .easing(Easing.Linear.None)
-        .onUpdate((st) => doUpdate(st, waypoint2))
-        .onComplete(() => {
+        .on('update', (st: any) => doUpdate(st, waypoint2))
+        .on('complete', () => {
           done = true;
           prettyPrint({ m: 'tweenBack complete'});
         })
