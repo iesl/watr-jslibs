@@ -1,6 +1,5 @@
 /**
- * - Tracelog shape drawing
- * - Labeling regions with rectangular selection
+ * Tracelog shape drawing
  */
 
 import _ from 'lodash';
@@ -32,7 +31,7 @@ export function useSketchlibCore({ state, canvasDrawto, eventlibSelect }: Args) 
 
     const pixiJsApp = pixiJsAppRef.value!;
 
-    const { selectionRef }  = eventlibSelect;
+    const { selectionRef } = eventlibSelect;
 
     watch(selectionRef, (sel) => {
       if (sel) {
@@ -46,3 +45,4 @@ export function useSketchlibCore({ state, canvasDrawto, eventlibSelect }: Args) 
 
   }
 }
+

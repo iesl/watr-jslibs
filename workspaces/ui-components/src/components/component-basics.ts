@@ -62,6 +62,16 @@ export function watchAll(rs?: Ref<any>[]) {
   return state;
 }
 
+// TODO simplify the waitFor paradigm to something like the following:
+// export function useSketchlibCore({ state, canvasDrawto, eventlibSelect }: Args)  {
+//   waitFor(allInputArgs(), () => {
+//     const pixiJsApp = pixiJsAppRef.value!;
+//   });
+//   return {};
+// }
+
+// TODO make a simplified version of this that auto-detects the caller's name, and
+//   waits for completion of all function arguments
 export function waitFor(
   name: string,
   { state, dependsOn, ensureTruthy }: WaitForOptions,
