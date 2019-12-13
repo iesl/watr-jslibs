@@ -8,7 +8,7 @@ import {
 
 import * as PIXI from 'pixi.js';
 import { initPixiJs } from '~/lib/pixijs-utils';
-import { StateArgs, waitFor } from '~/components/component-basics'
+import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 
 // type SetImageSource = void;
 
@@ -23,7 +23,6 @@ type Args = StateArgs & {
   containerRef: Ref<HTMLDivElement|null>
 };
 
-// TODO: rename to usePixiJSDrawto
 export function useCanvasDrawto({
   state,
   canvasRef,

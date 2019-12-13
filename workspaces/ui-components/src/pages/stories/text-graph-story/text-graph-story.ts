@@ -1,5 +1,5 @@
 
-import TextGraphDev from '~/components/text-graph/text-graph.dev'
+import TextGraphDev from '~/components/widgets/text-graph/text-graph.dev'
 
 const cs = {
   TextGraphDev

@@ -10,8 +10,12 @@ type StoryEntry = {
 
 const stories: StoryEntry[] = [
   {
-    title: 'Pdf Page (new)',
+    title: 'Pdf Page Viewer',
     to: 'pdf-page-story'
+  },
+  {
+    title: 'Tracelog Viewer',
+    to: 'tracelog-viewer-story'
   },
   {
     title: 'TextGraph',

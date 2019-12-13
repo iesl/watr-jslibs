@@ -12,7 +12,7 @@ import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
 import { CanvasDrawto } from './drawto-canvas';
 import { BBox, Point } from 'sharedLib';
-import { StateArgs, waitFor } from '~/components/component-basics'
+import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 
 import * as PIXI from 'pixi.js';
 import chroma from 'chroma-js';

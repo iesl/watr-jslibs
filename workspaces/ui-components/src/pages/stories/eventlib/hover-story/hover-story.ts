@@ -13,24 +13,24 @@ import {
   TextDataPoint
 } from '~/lib/TextGlyphDataTypes'
 
-import { onMounted, ref, watch } from '@vue/composition-api';
-import { useEventlibHover } from '~/components/eventlib-hover'
+import { onMounted, watch } from '@vue/composition-api';
+import { useEventlibHover } from '~/components/compositions/eventlib-hover'
 import { coords, d3x, GridTypes, Point, toBox } from "sharedLib";
 
-import { useImgCanvasSvgOverlays  } from '~/components/elem-overlays'
-import { initState, waitFor } from '~/components/component-basics';
+import { useImgCanvasSvgOverlays  } from '~/components/compositions/elem-overlays'
+import { initState, waitFor } from '~/components/compositions/component-basics';
+import { divRef } from '~/lib/vue-composition-lib';
 
 function setup() {
   const state = initState();
 
-  const overlayRoot = ref(null);
-  const containerRef = overlayRoot;
+  const mountPoint = divRef();
 
-  const eventlibHover = useEventlibHover({ targetDivRef: overlayRoot, state });
+  const eventlibHover = useEventlibHover({ targetDivRef: mountPoint, state });
   const { hoveringRef, eventlibCore } = eventlibHover;
   const { loadShapes, mousePosRef } = eventlibCore;
 
-  const elemOverlay = useImgCanvasSvgOverlays({ containerRef, state });
+  const elemOverlay = useImgCanvasSvgOverlays({ mountPoint, state });
 
   waitFor('HoverStory', {
     state
@@ -123,7 +123,7 @@ function setup() {
   });
 
   return {
-    hoveringRef, mousePosRef, loadShapes, overlayRoot
+    hoveringRef, mousePosRef, loadShapes, mountPoint
   }
 }
 

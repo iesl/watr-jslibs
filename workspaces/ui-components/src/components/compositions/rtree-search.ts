@@ -9,9 +9,8 @@ import {
   ref,
 } from '@vue/composition-api';
 
-import { StateArgs } from '~/components/component-basics'
+import { StateArgs } from '~/components/compositions/component-basics'
 import { BBox, Point } from 'sharedLib';
-import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 
 type LoadData<T> = (data: T[]) => void;
 type Search<T> = (query: BBox) => T[];

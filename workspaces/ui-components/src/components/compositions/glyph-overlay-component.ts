@@ -11,11 +11,11 @@ import {
 import chroma from 'chroma-js';
 import * as PIXI from 'pixi.js';
 
-import { StateArgs, waitFor } from '~/components/component-basics'
-import { EventlibCore } from '~/components/eventlib-core';
-import { ImgCanvasOverlay } from '~/components/elem-overlays';
-import { CanvasDrawto } from '~/components/drawto-canvas';
-import { useRTreeSearch, RTreeSearch } from '~/components/rtree-search';
+import { StateArgs, waitFor } from '~/components/compositions/component-basics'
+import { EventlibCore } from '~/components/compositions/eventlib-core';
+import { ImgCanvasOverlay } from '~/components/compositions/elem-overlays';
+import { CanvasDrawto } from '~/components/compositions/drawto-canvas';
+import { useRTreeSearch, RTreeSearch } from '~/components/compositions/rtree-search';
 import { GridData, initGridData, gridDataToGlyphData, TextDataPoint } from '~/lib/TextGlyphDataTypes';
 import { GridTypes, Point, coords } from 'sharedLib';
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';

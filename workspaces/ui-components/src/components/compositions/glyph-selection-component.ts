@@ -10,15 +10,15 @@ import {
   watch,
 } from '@vue/composition-api';
 
-import { StateArgs, waitFor } from '~/components/component-basics'
-import { EventlibSelect } from '../eventlib-select';
-import { RTreeSearch } from '~/components/rtree-search';
+import { StateArgs, waitFor } from '~/components/compositions/component-basics'
+import { EventlibSelect } from '~/components/compositions/eventlib-select';
+import { RTreeSearch } from '~/components/compositions/rtree-search';
 import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 import { tweenBBox } from '~/lib/tweening';
 
 import chroma from 'chroma-js';
 import * as PIXI from 'pixi.js';
-import { CanvasDrawto } from '../drawto-canvas';
+import { CanvasDrawto } from '~/components/compositions/drawto-canvas';
 
 export interface GlyphSelection {
 }

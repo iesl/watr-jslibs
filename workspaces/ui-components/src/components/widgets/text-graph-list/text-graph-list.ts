@@ -4,7 +4,7 @@ import $ from 'jquery';
 import Vue from 'vue'
 import { Component } from "nuxt-property-decorator";
 
-import TextGraph from "./text-graph";
+import TextGraph from "~/components/widgets/text-graph/text-graph";
 
 import {
   GridTypes,

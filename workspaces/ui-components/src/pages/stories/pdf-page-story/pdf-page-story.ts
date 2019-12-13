@@ -8,8 +8,8 @@ import {
 // import onelineTextgrid from '~/../dev-data/textgrids/textgrid-oneline.json';
 import textgrid00 from '~/../dev-data/textgrids/textgrid-00.json';
 
-import { initState, waitFor } from '~/components/component-basics'
-import { usePdfPageViewer } from '~/components/pdf-page/pdf-page';
+import { initState, waitFor } from '~/components/compositions/component-basics'
+import { usePdfPageViewer } from '~/components/compositions/pdf-page';
 import { GridTypes } from 'sharedLib';
 
 export default {
@@ -19,9 +19,9 @@ export default {
 
     const state = initState();
 
-    const layerRoot: Ref<HTMLDivElement|null> = ref(null);
+    const mountPoint: Ref<HTMLDivElement|null> = ref(null);
 
-    const pdfPageViewer = usePdfPageViewer({ targetDivRef: layerRoot, state });
+    const pdfPageViewer = usePdfPageViewer({ targetDivRef: mountPoint, state });
 
     const { imgCanvasOverlay  } = pdfPageViewer;
 
@@ -40,7 +40,7 @@ export default {
 
 
     return {
-      layerRoot
+      mountPoint
     };
   }
 }

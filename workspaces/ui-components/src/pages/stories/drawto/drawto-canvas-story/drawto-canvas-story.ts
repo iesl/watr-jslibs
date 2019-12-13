@@ -6,19 +6,19 @@ import {
 import * as PIXI from 'pixi.js';
 
 
-import { useImgCanvasOverlays } from '~/components/elem-overlays'
-import { useCanvasDrawto } from '~/components/drawto-canvas';
-import { initState, waitFor } from '~/components/component-basics';
+import { useImgCanvasOverlays } from '~/components/compositions/elem-overlays'
+import { useCanvasDrawto } from '~/components/compositions/drawto-canvas';
+import { initState, waitFor } from '~/components/compositions/component-basics';
 
 export default {
   setup() {
 
     const state = initState();
 
-    const layerRoot: Ref<HTMLDivElement|null> = ref(null);
-    const containerRef = layerRoot;
+    const mountPoint: Ref<HTMLDivElement|null> = ref(null);
+    const containerRef = mountPoint;
 
-    const elemOverlay = useImgCanvasOverlays({ containerRef, state });
+    const elemOverlay = useImgCanvasOverlays({ mountPoint, state });
     const canvasRef = elemOverlay.elems.canvasElem
     const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
     const { pixiJsAppRef } = canvasDrawto;
@@ -50,7 +50,7 @@ export default {
     });
 
     return {
-      layerRoot
+      mountPoint
     };
   }
 }

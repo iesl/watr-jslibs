@@ -4,26 +4,26 @@
 import _ from 'lodash';
 
 import { onMounted, ref, watch } from '@vue/composition-api';
-import { useEventlibCore } from '~/components/eventlib-core'
-import { useEventlibSelect } from '~/components/eventlib-select'
-import { useCanvasDrawto } from '~/components/drawto-canvas';
+import { useEventlibCore } from '~/components/compositions/eventlib-core'
+import { useEventlibSelect } from '~/components/compositions/eventlib-select'
+import { useCanvasDrawto } from '~/components/compositions/drawto-canvas';
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";
-import { initState } from '~/components/component-basics'
+import { initState } from '~/components/compositions/component-basics'
 
-import { useImgCanvasOverlays } from '~/components/elem-overlays'
+import { useImgCanvasOverlays } from '~/components/compositions/elem-overlays'
 
 function setup() {
-  const overlayRoot = ref(null)
-  const containerRef = overlayRoot;
+  const mountPoint = ref(null)
+  const containerRef = mountPoint;
   const state = initState();
 
-  const eventlibCore = useEventlibCore({ targetDivRef: overlayRoot, state });
+  const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state });
   const { setMouseHandlers } = eventlibCore;
 
   const mouseActivity = ref('<none>');
   const mouseActivity2 = ref('<none>');
 
-  const elemOverlay = useImgCanvasOverlays({ containerRef, state });
+  const elemOverlay = useImgCanvasOverlays({ mountPoint, state });
   const canvasRef = elemOverlay.elems.canvasElem;
 
   const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
@@ -76,7 +76,7 @@ function setup() {
   });
 
   return {
-    overlayRoot, mouseActivity, mouseActivity2, selectionRef
+    mountPoint, mouseActivity, mouseActivity2, selectionRef
   }
 }
 

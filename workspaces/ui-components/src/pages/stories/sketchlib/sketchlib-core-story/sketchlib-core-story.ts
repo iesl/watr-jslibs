@@ -6,12 +6,12 @@ import {
 } from '@vue/composition-api';
 
 
-import { useImgCanvasOverlays } from '~/components/elem-overlays'
-import { useCanvasDrawto } from '~/components/drawto-canvas';
-import { useSketchlibCore } from '~/components/sketchlib-core';
-import { useEventlibCore } from '~/components/eventlib-core';
-import { useEventlibSelect } from '~/components/eventlib-select'
-import { initState, waitFor } from '~/components/component-basics'
+import { useImgCanvasOverlays } from '~/components/compositions/elem-overlays'
+import { useCanvasDrawto } from '~/components/compositions/drawto-canvas';
+import { useSketchlibCore } from '~/components/compositions/sketchlib-core';
+import { useEventlibCore } from '~/components/compositions/eventlib-core';
+import { useEventlibSelect } from '~/components/compositions/eventlib-select'
+import { initState, waitFor } from '~/components/compositions/component-basics'
 
 export default {
   setup() {
@@ -19,11 +19,11 @@ export default {
     const state = initState();
 
     // waitFor rationale:
-    const layerRoot: Ref<HTMLDivElement|null> = ref(null);
-    const containerRef = layerRoot;
-    const eventlibCore = useEventlibCore({ targetDivRef: layerRoot, state } );
+    const mountPoint: Ref<HTMLDivElement|null> = ref(null);
+    const containerRef = mountPoint;
+    const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
 
-    const elemOverlay = useImgCanvasOverlays({ containerRef, state });
+    const elemOverlay = useImgCanvasOverlays({ mountPoint, state });
 
     const canvasRef = elemOverlay.elems.canvasElem
 
@@ -44,7 +44,7 @@ export default {
 
 
     return {
-      layerRoot
+      mountPoint
     };
   }
 }

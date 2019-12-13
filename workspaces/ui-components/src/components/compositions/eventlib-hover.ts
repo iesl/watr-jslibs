@@ -9,8 +9,8 @@ import {
   Ref,
 } from '@vue/composition-api';
 
-import { useEventlibCore  } from '~/components/eventlib-core'
-import { StateArgs, waitFor } from '~/components/component-basics'
+import { useEventlibCore  } from '~/components/compositions/eventlib-core'
+import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 
 
 import {

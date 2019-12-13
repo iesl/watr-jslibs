@@ -4,7 +4,6 @@ import _ from 'lodash';
 
 import {
   reactive,
-  onMounted,
   onUnmounted,
   Ref,
   ref,
@@ -16,7 +15,7 @@ import {
 import RBush, {} from "rbush";
 
 import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
-import { StateArgs, waitFor } from '~/components/component-basics'
+import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 
 import {
   // MouseHandlers,

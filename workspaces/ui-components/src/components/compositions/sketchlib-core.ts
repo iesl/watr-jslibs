@@ -10,7 +10,7 @@ import {
 
 import { CanvasDrawto } from './drawto-canvas';
 import { EventlibCore } from './eventlib-core';
-import { StateArgs, waitFor } from '~/components/component-basics'
+import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 import { EventlibSelect } from './eventlib-select';
 import { drawRect } from '~/lib/pixijs-utils';
 

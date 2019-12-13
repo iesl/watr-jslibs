@@ -24,7 +24,7 @@ import {
 
 import {
   resizeCanvas
-} from '../../lib/CanvasUtils'
+} from '~/lib/CanvasUtils'
 
 
 import {

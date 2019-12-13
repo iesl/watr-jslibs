@@ -6,17 +6,16 @@ import {
 } from '@vue/composition-api';
 
 
-import { useImgCanvasSvgOverlays  } from '~/components/elem-overlays'
-import { initState } from '~/components/component-basics';
+import { useImgCanvasSvgOverlays  } from '~/components/compositions/elem-overlays'
+import { initState } from '~/components/compositions/component-basics';
 
 export default {
   setup() {
 
     const state = initState();
 
-    const layerRoot: Ref<HTMLDivElement|null> = ref(null);
-    const containerRef = layerRoot;
-    const elemOverlay = useImgCanvasSvgOverlays({ containerRef, state });
+    const mountPoint: Ref<HTMLDivElement|null> = ref(null);
+    const elemOverlay = useImgCanvasSvgOverlays({ mountPoint, state });
 
     elemOverlay.setDimensions(300, 350);
 
@@ -26,7 +25,7 @@ export default {
 
 
     return {
-      layerRoot
+      mountPoint
     };
   }
 }

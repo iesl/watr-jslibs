@@ -7,7 +7,7 @@ import {
   ref,
 } from '@vue/composition-api';
 
-import { StateArgs, waitFor } from '~/components/component-basics'
+import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 
 export interface OverlayElements {
   canvasElem: Ref<HTMLCanvasElement|null>;
@@ -22,11 +22,11 @@ export interface ImgCanvasOverlay {
 }
 
 type Args = StateArgs & {
-  containerRef: Ref<HTMLDivElement|null>
+  mountPoint: Ref<HTMLDivElement|null>
 };
 
 export function useImgCanvasOverlays({
-  containerRef, state
+  mountPoint, state
 }: Args): ImgCanvasOverlay {
 
   const dimensions: Ref<[number, number]> = ref([10, 10]);
@@ -41,11 +41,11 @@ export function useImgCanvasOverlays({
 
   waitFor('ImgCanvasOverlays', {
     state,
-    dependsOn: [containerRef],
+    dependsOn: [mountPoint],
     ensureTruthy: [imgElem, canvasElem]
   }, () => {
 
-    const overlayContainer = containerRef.value!;
+    const overlayContainer = mountPoint.value!;
 
     overlayContainer.classList.add('layers');
 
@@ -103,9 +103,9 @@ export function useImgCanvasOverlays({
 }
 
 export function useImgCanvasSvgOverlays({
-  containerRef, state
+  mountPoint, state
 }: Args) {
-  const imgCanvasOverlays = useImgCanvasOverlays({ containerRef, state });
+  const imgCanvasOverlays = useImgCanvasOverlays({ mountPoint, state });
   const { setImageSource, elems, setDimensions, dimensions } = imgCanvasOverlays;
   const { imgElem, canvasElem } = elems;
 
@@ -113,12 +113,12 @@ export function useImgCanvasSvgOverlays({
 
   waitFor('ImgCanvasSvgOverlays', {
     state,
-    dependsOn: [containerRef]
+    dependsOn: [mountPoint]
   }, () => {
-    watch(containerRef, (overlayContainer) => {
+    watch(mountPoint, (overlayContainer) => {
       if (overlayContainer === null) return;
 
-      // const overlayContainer = containerRef.value;
+      // const overlayContainer = mountPoint.value;
 
       const el = svgElem.value = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       el.classList.add('layer');

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import { Component } from "nuxt-property-decorator";
 
-import TextGraphList from "./text-graph-list";
+import TextGraphList from "~/components/widgets/text-graph-list/text-graph-list";
 
 @Component({
   components: {TextGraphList},
