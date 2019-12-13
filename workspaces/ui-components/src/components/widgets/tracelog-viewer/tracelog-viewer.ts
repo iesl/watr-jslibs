@@ -3,19 +3,12 @@
 import _ from 'lodash';
 
 import {
-  // reactive,
-  // onMounted,
-  // onUnmounted,
   Ref,
-  // ref,
-  // watch,
-  // onTrigger,
-  // onTrack,
 } from '@vue/composition-api';
 
-import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 import { usePdfPageViewer } from '~/components/compositions/pdf-page';
 import { divRef } from '~/lib/vue-composition-lib';
+import { StateArgs, initState, waitFor } from '~/components/compositions/component-basics';
 
 export interface TracelogViewer {
 }
@@ -43,4 +36,18 @@ export function useTracelogViewer({
     pageViewerMount,
     selectionFilterMount,
   }
+}
+
+function setup() {
+  const state = initState();
+
+  const mountPoint = divRef();
+
+  return {
+    mountPoint
+  }
+}
+
+export default {
+  setup
 }

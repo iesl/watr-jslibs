@@ -1,0 +1,14 @@
+<div>
+    <v-text-field
+        label="Query"
+        single-line
+        filled
+        v-model="queryTextRef"
+    ></v-text-field>
+    <ul class="selection">
+        <li v-for="(item, i) in currSelectionRef"
+            :key="i">
+            {{item}}
+        </li>
+    </ul>
+</div>

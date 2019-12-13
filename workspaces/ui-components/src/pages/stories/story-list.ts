@@ -8,39 +8,41 @@ type StoryEntry = {
   icon?: string;
 }
 
+
+
 const stories: StoryEntry[] = [
   {
     title: 'Pdf Page Viewer',
-    to: 'pdf-page-story'
+    to: 'widgets/pdf-page-story'
   },
   {
     title: 'Tracelog Viewer',
-    to: 'tracelog-viewer-story'
+    to: 'widgets/tracelog-viewer-story'
   },
   {
     title: 'TextGraph',
-    to: 'text-graph-story'
+    to: 'widgets/text-graph-story'
   },
   {
     title: 'EventLib Core',
-    to: 'eventlib/core-story'
+    to: 'compositions/eventlib/core-story'
   },
   {
     title: 'Hover EventLib',
-    to: 'eventlib/hover-story'
+    to: 'compositions/eventlib/hover-story'
   },
   {
     title: 'Layered image/svg/canvas',
-    to: 'elem-overlay-story'
+    to: 'compositions/elem-overlay-story'
   },
   { title: 'Canvas Drawto',
-    to: 'drawto/drawto-canvas-story'
+    to: 'compositions/drawto/drawto-canvas-story'
   },
   { title: 'SketchLib Core',
-    to: 'sketchlib/sketchlib-core-story'
+    to: 'compositions/sketchlib/sketchlib-core-story'
   },
-  { title: 'Filter Selection',
-    to: 'filter-select'
+  { title: 'Narrowing Filter Selection',
+    to: 'widgets/narrowing-filter-story'
   },
 ];
 

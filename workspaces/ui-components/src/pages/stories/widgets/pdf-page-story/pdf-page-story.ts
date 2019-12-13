@@ -21,7 +21,7 @@ export default {
 
     const mountPoint: Ref<HTMLDivElement|null> = ref(null);
 
-    const pdfPageViewer = usePdfPageViewer({ targetDivRef: mountPoint, state });
+    const pdfPageViewer = usePdfPageViewer({ mountPoint, state });
 
     const { imgCanvasOverlay  } = pdfPageViewer;
 
