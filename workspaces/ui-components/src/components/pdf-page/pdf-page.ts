@@ -25,10 +25,6 @@ export interface PdfPageViewer {
   setGrid: SetGrid;
 }
 
-// type SetGrid = (grid: GridTypes.Grid, page: number) => void;
-
-
-
 export function usePdfPageViewer({
   targetDivRef, state
 }: Args): PdfPageViewer {

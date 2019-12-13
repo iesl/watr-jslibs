@@ -39,8 +39,8 @@ export function useGlyphOverlays({
   canvasDrawto,
   imgCanvasOverlay,
 }: Args): GlyphOverlays {
-  // TODO: setHoveredText
-  // TODO: setClickedText
+  // TODO: setHoveredText (for highlighting sync-highlighting text on pdf-text widget)
+  // TODO: setClickedText (for synching pdf page text w/ image)
   const textgridRef: Ref<GridTypes.Grid|null> = ref(null)
   const pageNumRef: Ref<number|null> = ref(null);
   const rtreeSearch = useRTreeSearch<TextDataPoint>({ state });

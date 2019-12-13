@@ -53,7 +53,6 @@ export function useGlyphSelection({
       // search for glyphs in selection box...
       const selectedGlyphs = rtreeSearch.search(selection);
       const minBounds = queryHitsMBR(selectedGlyphs);
-      console.log(`got sel ${selection}, minBound=${minBounds}`)
       const selectionRect = new PIXI.Graphics();
       const lineColor = chroma('blue').num();
       const fillColor = chroma('green').num();
@@ -69,15 +68,9 @@ export function useGlyphSelection({
         });
 
         tweenPromise.then(() => {
-
-          pixiJsApp.stage.removeChild(selectionRect);
+          // pixiJsApp.stage.removeChild(selectionRect);
         });
       }
-
-
-
-      // let minBoundSelection = rtrees.queryHitsMBR(hits);
-      // tween bbox down to min-rect
     });
 
   });
