@@ -1,13 +1,11 @@
 //
 import _ from 'lodash';
-const storyRoot = '/stories'
 
 type StoryEntry = {
   title: string;
   to: string;
   icon?: string;
 }
-
 
 
 const stories: StoryEntry[] = [
@@ -41,16 +39,24 @@ const stories: StoryEntry[] = [
   { title: 'SketchLib Core',
     to: 'compositions/sketchlib/sketchlib-core-story'
   },
+];
+
+// TODO I'm trying to integrate the stories into the same tree as the component definitions
+const otherStories: StoryEntry[] = [
   { title: 'Narrowing Filter Selection',
-    to: 'widgets/narrowing-filter-story'
+    to: '/components/widgets/narrowing-filter/__stories__'
   },
 ];
 
 
-export const storyItems = _.map(stories, (s: StoryEntry) => {
+const pageStories = _.map(stories, (s: StoryEntry) => {
+  const storyRoot = '/pages/stories'
   return {
     icon: 'mdi-apps',
     title: s.title,
     to: `${storyRoot}/${s.to}`
   };
 });
+
+
+export const storyItems = _.concat(pageStories, otherStories);

@@ -1,5 +1,5 @@
 
-import { storyItems } from '~/pages/stories/story-list';
+import { storyItems } from '~/story-list';
 
 export default {
 
