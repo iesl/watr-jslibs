@@ -1,5 +1,6 @@
 //
 import _ from 'lodash';
+import { prettyPrint } from '~/lib/pretty-print';
 
 type StoryEntry = {
   title: string;
@@ -41,16 +42,19 @@ const stories: StoryEntry[] = [
   },
 ];
 
+const storyList = process.env.stories;
+
+
 // TODO I'm trying to integrate the stories into the same tree as the component definitions
 const otherStories: StoryEntry[] = [
   { title: 'Narrowing Filter Selection',
-    to: '/components/widgets/narrowing-filter/__stories__'
+    to: '/../components/widgets/narrowing-filter/__stories__'
   },
 ];
 
 
 const pageStories = _.map(stories, (s: StoryEntry) => {
-  const storyRoot = '/pages/stories'
+  const storyRoot = '/stories'
   return {
     icon: 'mdi-apps',
     title: s.title,
@@ -60,3 +64,5 @@ const pageStories = _.map(stories, (s: StoryEntry) => {
 
 
 export const storyItems = _.concat(pageStories, otherStories);
+
+// prettyPrint({ storyItems });

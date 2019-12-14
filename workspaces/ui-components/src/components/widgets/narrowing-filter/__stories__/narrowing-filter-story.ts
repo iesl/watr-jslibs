@@ -50,11 +50,8 @@ function setup() {
 
   // });
 
-  // return {
-  //   componentRoot,
-  //   currSelectionRef,
-  //   queryTextRef,
-  // }
+  return {
+  }
 }
 
 export default {

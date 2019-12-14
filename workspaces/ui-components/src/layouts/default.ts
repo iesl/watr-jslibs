@@ -1,7 +1,11 @@
 
-import { storyItems } from '~/story-list';
+import { storyItems } from '~/pages/stories/story-list';
+import collectedStories from '~/pages/stories/collected-stories/index.vue';
 
 export default {
+  components: {
+    collectedStories,
+  },
 
   data() {
     return {

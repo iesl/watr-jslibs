@@ -4,6 +4,7 @@ const path = require('path');
 const resolve = path.resolve;
 const util = require('util');
 
+
 const modulesDir = [
   resolve(__dirname, '../../node_modules/'),
   resolve(__dirname, './node_modules/')
@@ -15,12 +16,76 @@ const tsconfigFile = resolve( rootDir, 'tsconfig.json');
 console.log('nuxt config: srcDir', srcDir);
 console.log('nuxt config: modulesDir', modulesDir);
 
+const fs = require('fs');
+
+const storyList = [];
+function findStories(pathname) {
+  const dirs = fs.readdirSync(pathname, { withFileTypes: true });
+  for (const dirent of dirs) {
+    const entryName = path.join(pathname, dirent.name);
+    if (dirent.isDirectory()) {
+      findStories(entryName);
+    } else if (entryName.includes('__stories__') && entryName.endsWith('.vue')) {
+      storyList.push(entryName);
+    }
+  }
+}
+
+findStories('./src');
+
+
+
+// function globalRegisterStories() {
+//   // import requireContext from 'require-context.macro'; // <- add this
+//   const requireContext = require('require-context.macro'); // <- add this
+//   const Vue = require('vue');
+
+//   // https://webpack.js.org/guides/dependency-management/#require-context
+//   const requireComponent = requireContext(
+//     // Look for files in the current directory
+//     './src/components/',
+//     // look in subdirectories?
+//     true,
+//     // Match names
+//     /[\w-]+\.vue$/
+//   );
+
+//   // For each matching file name...
+//   requireComponent.keys().forEach((fileName) => {
+//     // Get the component config
+//     const componentConfig = requireComponent(fileName)
+//     // Get the PascalCase version of the component name
+//     const componentName = fileName
+//     // Remove the "./_" from the beginning
+//           .replace(/^\.\/_/, '')
+//     // Remove the file extension from the end
+//           .replace(/\.\w+$/, '')
+//     // Split up kebabs
+//           .split('-')
+//     // Upper case
+//           .map((kebab) => kebab.charAt(0).toUpperCase() + kebab.slice(1))
+//     // Concatenated
+//           .join('')
+
+//     // Globally register the component
+//     Vue.component(componentName, componentConfig.default || componentConfig)
+//   })
+
+// }
+
+
+
+
 
 
 export default {
   rootDir,
   srcDir,
   modulesDir,
+
+  env: {
+    storyList
+  },
 
   typescript: {
     loaders: {
@@ -53,7 +118,6 @@ export default {
    ** Customize the progress-bar color
    */
   loading: { color: '#fff' },
-
 
   /*
    ** Global CSS
@@ -123,9 +187,9 @@ export default {
 
     babel: {
       presets({ isServer }, [ preset, options ]) {
-        // console.log('babel isServer:', isServer);
-        // console.log('babel pre:', preset);
-        // console.log('babel opt:', options);
+        console.log('babel isServer:', isServer);
+        console.log('babel pre:', preset);
+        console.log('babel opt:', options);
       }
     }
   }
