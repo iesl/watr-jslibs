@@ -1,10 +1,7 @@
 
-import { storyItems } from '~/pages/stories/story-list';
-import collectedStories from '~/pages/stories/collected-stories/index.vue';
 
 export default {
   components: {
-    collectedStories,
   },
 
   data() {
@@ -14,7 +11,6 @@ export default {
       fixed: false,
       items: [
         { icon: 'mdi-apps', title: 'Welcome', to: '/' },
-        ...storyItems
       ],
       miniVariant: false,
       right: false,

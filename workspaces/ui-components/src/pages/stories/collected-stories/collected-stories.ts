@@ -1,61 +1,77 @@
 
+/** @ts-ignore */
+
 import _ from 'lodash';
-import { createComponent, ref, watch, Ref } from '@vue/composition-api';
-
-function findStories() {
-
-  const storyList = process.env.storyList;
-  const componentProps = _.map(storyList, (s: string) => {
-    const path0 = s.replace('src/', '~/');
-    const path = path0.replace('/index.vue', '');
-    const p0 = path.replace('/', '-');
-    const p1 = p0.replace('/index.vue', '');
-    const name = _.camelCase(p1);
-    return {
-      path,
-      name,
-    };
-  });
-
-  const entries = _.map(componentProps, p => {
-    return `${p.name}: () => import('${p.path}' /* webpackChunkName ${p.name} */),`;
-  });
-  const joined = _.join(entries, 'n');
-  console.log(`{\n ${joined}\n}`)
+import { createComponent, ref, watch, Ref, reactive, toRefs } from '@vue/composition-api';
 
 
-  return {
-    componentProps,
-  };
+// @ts-ignore
+import componentsCompositionsStoriesDrawtoDrawtoCanvasStory from '~/components/compositions/__stories__/drawto/drawto-canvas-story' ;
+// @ts-ignore
+import componentsCompositionsStoriesElemOverlayStory from '~/components/compositions/__stories__/elem-overlay-story' ;
+// @ts-ignore
+import componentsCompositionsStoriesEventlibCoreStory from '~/components/compositions/__stories__/eventlib/core-story' ;
+// @ts-ignore
+import componentsCompositionsStoriesEventlibHoverStory from '~/components/compositions/__stories__/eventlib/hover-story' ;
+// @ts-ignore
+import componentsCompositionsStoriesSketchlibSketchlibCoreStory from '~/components/compositions/__stories__/sketchlib/sketchlib-core-story' ;
+// @ts-ignore
+import componentsWidgetsNarrowingFilterStories from '~/components/widgets/narrowing-filter/__stories__' ;
+// @ts-ignore
+import componentsWidgetsPdfPageViewerStoriesPdfPageStory from '~/components/widgets/pdf-page-viewer/__stories__/pdf-page-story' ;
+// @ts-ignore
+import componentsWidgetsPdfTextViewerStoriesPdfTextViewerStory from '~/components/widgets/pdf-text-viewer/__stories__/pdf-text-viewer-story' ;
+// @ts-ignore
+import componentsWidgetsPdfTextViewerStoriesPdfTextViewerStoryTextGraphStory from '~/components/widgets/pdf-text-viewer/__stories__/pdf-text-viewer-story/text-graph-story' ;
+// @ts-ignore
+import componentsWidgetsTracelogViewerStoriesTracelogViewerStory from '~/components/widgets/tracelog-viewer/__stories__/tracelog-viewer-story' ;
+import { UnwrapRef } from '@vue/composition-api/dist/reactivity';
+
+const storyEntries = [
+  { title: 'componentsCompositionsStoriesDrawtoDrawtoCanvasStory', name: 'componentsCompositionsStoriesDrawtoDrawtoCanvasStory' },
+  { title: 'componentsCompositionsStoriesElemOverlayStory', name: 'componentsCompositionsStoriesElemOverlayStory' },
+  { title: 'componentsCompositionsStoriesEventlibCoreStory', name: 'componentsCompositionsStoriesEventlibCoreStory' },
+  { title: 'componentsCompositionsStoriesEventlibHoverStory', name: 'componentsCompositionsStoriesEventlibHoverStory' },
+  { title: 'componentsCompositionsStoriesSketchlibSketchlibCoreStory', name: 'componentsCompositionsStoriesSketchlibSketchlibCoreStory' },
+  { title: 'componentsWidgetsNarrowingFilterStories', name: 'componentsWidgetsNarrowingFilterStories' },
+  { title: 'componentsWidgetsPdfPageViewerStoriesPdfPageStory', name: 'componentsWidgetsPdfPageViewerStoriesPdfPageStory' },
+  { title: 'componentsWidgetsPdfTextViewerStoriesPdfTextViewerStory', name: 'componentsWidgetsPdfTextViewerStoriesPdfTextViewerStory' },
+  { title: 'componentsWidgetsPdfTextViewerStoriesPdfTextViewerStoryTextGraphStory', name: 'componentsWidgetsPdfTextViewerStoriesPdfTextViewerStoryTextGraphStory' },
+  { title: 'componentsWidgetsTracelogViewerStoriesTracelogViewerStory', name: 'componentsWidgetsTracelogViewerStoriesTracelogViewerStory' },
+];
+
+const components = {
+  componentsCompositionsStoriesDrawtoDrawtoCanvasStory: componentsCompositionsStoriesDrawtoDrawtoCanvasStory,
+  componentsCompositionsStoriesElemOverlayStory: componentsCompositionsStoriesElemOverlayStory,
+  componentsCompositionsStoriesEventlibCoreStory: componentsCompositionsStoriesEventlibCoreStory,
+  componentsCompositionsStoriesEventlibHoverStory: componentsCompositionsStoriesEventlibHoverStory,
+  componentsCompositionsStoriesSketchlibSketchlibCoreStory: componentsCompositionsStoriesSketchlibSketchlibCoreStory,
+  componentsWidgetsNarrowingFilterStories: componentsWidgetsNarrowingFilterStories,
+  componentsWidgetsPdfPageViewerStoriesPdfPageStory: componentsWidgetsPdfPageViewerStoriesPdfPageStory,
+  componentsWidgetsPdfTextViewerStoriesPdfTextViewerStory: componentsWidgetsPdfTextViewerStoriesPdfTextViewerStory,
+  componentsWidgetsPdfTextViewerStoriesPdfTextViewerStoryTextGraphStory: componentsWidgetsPdfTextViewerStoriesPdfTextViewerStoryTextGraphStory,
+  componentsWidgetsTracelogViewerStoriesTracelogViewerStory: componentsWidgetsTracelogViewerStoriesTracelogViewerStory,
+};
+
+interface Props {
+  storyid: string;
 }
 
 
-const storyDefs = findStories();
-const cprops = storyDefs.componentProps;
-
-// TODO I can't figure out how to do this dynamically, so I'm printing the component list to the console when starting, then
-//   pasting it here:
-const components = {
-  componentsWidgetsNarrowingFilterStories: () => import('~/components/widgets/narrowing-filter/__stories__/index.vue' /* webpackChunkName componentsWidgetsNarrowingFilterStories */)
-};
-
-const storyEntries = _.map(cprops, p => {
-
-  return {
-    component: p.name,
-    path: p.path,
-    title: p.name,
-  }
-});
-
-function setup() {
+function setup(props: Props) {
+  // const props  = toRefs(reactive({
+  //   storyid: ''
+  // }));
 
   const activeComponent: Ref<string|null> = ref(null);
   const selectedComponent = ref('');
-  findStories();
+
+  watch(() => {
+    console.log('props', props.storyid);
+  })
 
   watch(selectedComponent, (active) => {
-    const maybeProp = _.filter(cprops, p => p.name === active);
+    const maybeProp = _.filter(storyEntries, p => p.name === active);
     if (maybeProp.length > 0) {
       activeComponent.value = active;
     }
@@ -65,6 +81,7 @@ function setup() {
     activeComponent,
     selectedComponent,
     storyEntries,
+    props,
   };
 }
 
@@ -72,4 +89,21 @@ function setup() {
 export default createComponent({
   setup,
   components,
+  props: {
+    storyid: String
+  },
+  data() {
+    return {
+      clipped: false,
+      drawer: false,
+      fixed: false,
+      // items: [
+      //   { icon: 'mdi-apps', title: 'Welcome', to: '/' },
+      // ],
+      miniVariant: false,
+      right: false,
+      rightDrawer: false,
+      title: 'UI Component Development Stories'
+    }
+  }
 })

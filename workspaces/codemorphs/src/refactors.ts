@@ -1,4 +1,3 @@
-// Try out refactorings...
 import _ from 'lodash';
 import * as path from "path";
 
