@@ -1,10 +1,8 @@
 import colors from 'vuetify/es5/util/colors'
 
-// const path = import ('path');
 import path from 'path';
-const resolve = path.resolve;
 import util from 'util';
-import './scripts/findStories.js';
+const resolve = path.resolve;
 
 
 const modulesDir = [

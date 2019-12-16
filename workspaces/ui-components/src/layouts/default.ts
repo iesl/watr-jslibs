@@ -1,4 +1,5 @@
 
+import { storyItems }  from '~/pages/stories/autogen/story-list';
 
 export default {
   components: {
@@ -11,6 +12,7 @@ export default {
       fixed: false,
       items: [
         { icon: 'mdi-apps', title: 'Welcome', to: '/' },
+        ...storyItems
       ],
       miniVariant: false,
       right: false,

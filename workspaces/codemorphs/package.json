@@ -25,7 +25,8 @@
     "ver": "tsc --version && which tsc",
     "watch": "tsc --watch",
     "morph": "node dist/main.js",
-    "main": "npm-run-all --serial build \"morph -- {@}\" --",
+    "mainxx": "npm-run-all --serial build \"morph -- {@}\" --",
+    "main": "yarn build && yarn morph",
     "test": "jest"
   },
   "bugs": {

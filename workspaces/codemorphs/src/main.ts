@@ -33,10 +33,11 @@ program
   .alias('stories')
   .description('setup vue component')
   .option('-c, --tsconfig <path>', 'path to tsconfig.json for target project')
+  .option('-n, --dryrun', 'just print output')
   .action(function(options: any) {
     const tsconfig = options.tsconfig;
-    console.log(`storybook vue setup: tsconfig=${tsconfig}`);
-    setupStoryVues(tsconfig);
+    const dryrun = options.dryrun;
+    setupStoryVues(tsconfig, dryrun);
   });
 
 
