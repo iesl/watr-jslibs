@@ -1,4 +1,14 @@
-
+/**
+ * Given selection events and an rtree index, provide a way to
+ * select a set of indexed items, with various constraints
+ * - [x] Modify the selection rectangle to the min-bounding rectangle
+ *       that contains all indexed shapes within the original selection rectangle
+ *
+ * - [ ] Ignore the indexed shapes and simply select the same region
+ *       as specified in the original event
+ * - [ ] (possible future feature) Select based on chars/lines, as in selecting
+ *       a range of text
+ */
 import _ from 'lodash';
 
 import {

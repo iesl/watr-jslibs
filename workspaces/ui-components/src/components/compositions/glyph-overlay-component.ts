@@ -1,4 +1,7 @@
 
+/**
+
+ */
 import _ from 'lodash';
 
 import {
@@ -16,11 +19,11 @@ import { EventlibCore } from '~/components/compositions/eventlib-core';
 import { ImgCanvasOverlay } from '~/components/compositions/elem-overlays';
 import { CanvasDrawto } from '~/components/compositions/drawto-canvas';
 import { useRTreeSearch, RTreeSearch } from '~/components/compositions/rtree-search';
-import { GridData, initGridData, gridDataToGlyphData, TextDataPoint } from '~/lib/TextGlyphDataTypes';
-import { GridTypes, Point, coords } from 'sharedLib';
+import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
+import { coords, BBox } from 'sharedLib';
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 
-export type SetGrid = (grid: GridTypes.Grid, page: number) => void;
+export type SetGrid = (textData: TextDataPoint[], pageGeometry: BBox) => void;
 
 export interface GlyphOverlays {
   setGrid: SetGrid;
@@ -41,42 +44,30 @@ export function useGlyphOverlays({
 }: Args): GlyphOverlays {
   // TODO: setHoveredText (for highlighting sync-highlighting text on pdf-text widget)
   // TODO: setClickedText (for synching pdf page text w/ image)
-  const textgridRef: Ref<GridTypes.Grid|null> = ref(null)
-  const pageNumRef: Ref<number|null> = ref(null);
+
+  const textDataPointsRef: Ref<TextDataPoint[]|null> = ref(null)
+  let pageGeometry: BBox;
   const rtreeSearch = useRTreeSearch<TextDataPoint>({ state });
 
   const { pixiJsAppRef } = canvasDrawto;
-  const setGrid: SetGrid = (grid, page) => {
-    console.log('useGlyphOverlays: setGrid');
-    textgridRef.value = grid;
-    pageNumRef.value = page;
+  const setGrid: SetGrid = (textData, geom) => {
+    pageGeometry = geom;
+    textDataPointsRef.value = textData;
   }
 
   waitFor('GlyphOverlays', {
     state,
-    dependsOn: [textgridRef, pageNumRef, pixiJsAppRef],
+    dependsOn: [textDataPointsRef, pixiJsAppRef],
   }, () => {
 
     const pixiJsApp = pixiJsAppRef.value!;
+    const textData = textDataPointsRef.value!;
 
-    // TODO: don't make glyph data overlays depend on textgrid data loading
-    const pageNum = pageNumRef.value!;
-    const textgrid = textgridRef.value!;
-    const page = textgrid.pages[pageNum];
-    const [l, t, w, h] = page.pageGeometry;
-    const pageBounds = coords.mk.fromArray([l, t, w, h]);
-    const width = pageBounds.width;
-    const height = pageBounds.height;
+    const width = pageGeometry.width;
+    const height = pageGeometry.height;
     imgCanvasOverlay.setDimensions(width, height);
 
-    const pageGrid = page.textgrid;
-
-    // TODO: why is this margin here? hardcoded?
-    const tmpPageMargin = 10;
-    const origin = new Point(tmpPageMargin, tmpPageMargin, coords.CoordSys.GraphUnits);
-    const gridData: GridData = initGridData(pageGrid, pageNum, _ => 10, origin, 10);
-    const glyphData = gridDataToGlyphData(gridData.textDataPoints);
-    rtreeSearch.loadData(glyphData);
+    rtreeSearch.loadData(textData);
 
     // TODO recycle these graphics objects to avoid memory issues
     let glyphReticles: PIXI.Graphics[] = [];
@@ -107,18 +98,6 @@ export function useGlyphOverlays({
           glyphReticles.push(pgRect);
         }
       });
-      // glyphReticles = _.map(queryHits, (q) => {
-      //   const glyphData = q.glyphData;
-      //   if (glyphData) {
-      //     const box = glyphData.glyphBounds;
-      //     const pgRect = new PIXI.Graphics();
-      //     pgRect.lineStyle(1, selectLineColor);
-      //     pgRect.drawRect(box.x, box.y, box.width, box.height);
-      //     pixiJsApp.stage.addChild(pgRect)
-      //     return pgRect;
-      //   }
-      //   return undefined;
-      // });
 
     }
     const glyphHandlers: MouseHandlerInit = () =>  {

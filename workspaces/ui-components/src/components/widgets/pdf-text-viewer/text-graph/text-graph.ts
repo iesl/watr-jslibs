@@ -308,8 +308,7 @@ export default class TextGraph extends Vue {
 
     const context2d = this.canvasContext2D;
 
-    const textWidth = (s: string) => context2d.measureText(s).width;
-    const textHeight = this.lineHeight;
+    const textWidth = (s: string) => context2d.measureText(s).width; const textHeight = this.lineHeight;
     const origin = new Point(this.pageMargin, this.pageMargin, coords.CoordSys.GraphUnits);
     const textgrid: GridData = initGridData(this.textgrid, this.gridNum, textWidth, origin, textHeight);
     const gridWidth = textgrid.maxLineWidth + this.pageMargin;

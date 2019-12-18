@@ -12,7 +12,6 @@ import {
 type ComponentName = string;
 type ComponentInitRec = [ComponentName, boolean];
 
-
 export interface WaitForOptions {
   state: ComponentState;
   dependsOn?: Array<Ref<any>>;

@@ -5,7 +5,7 @@ import {
 } from '@vue/composition-api';
 
 
-import { StateArgs, waitFor } from '~/components/compositions/component-basics'
+import { StateArgs } from '~/components/compositions/component-basics'
 import { useEventlibCore, EventlibCore } from '~/components/compositions/eventlib-core';
 import { useImgCanvasOverlays, ImgCanvasOverlay } from '~/components/compositions/elem-overlays';
 import { useCanvasDrawto, CanvasDrawto } from '~/components/compositions/drawto-canvas';
@@ -43,12 +43,6 @@ export function usePdfPageViewer({
   useGlyphSelection({ canvasDrawto, rtreeSearch, eventlibSelect, state });
 
   const setGrid = glyphOverlays.setGrid;
-
-  waitFor('PdfPageViewer', {
-    state,
-  }, () => {
-
-  });
 
   return {
     eventlibCore,

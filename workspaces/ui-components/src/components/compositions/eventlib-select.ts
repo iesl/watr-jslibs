@@ -1,5 +1,5 @@
 /**
- * Draw selection rectangles and create selection events
+ * Provide the ability to draw selection rectangles and emit selection events
  */
 import _ from 'lodash';
 

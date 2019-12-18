@@ -44,7 +44,6 @@ export function useCanvasDrawto({
 
     pixiJsAppRef.value = app;
 
-
     app.view.onresize = function (ev: UIEvent) {
       const bgImage = bgImageRef.value;
       if (bgImage) {
