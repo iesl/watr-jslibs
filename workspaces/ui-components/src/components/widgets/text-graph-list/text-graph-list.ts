@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import $ from 'jquery';
 
 // import Vue from 'vue'
 // import { Component } from "nuxt-property-decorator";

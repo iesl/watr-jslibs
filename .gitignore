@@ -55,3 +55,5 @@ tmp*
 auth_config.json
 
 .nuxt
+
+.clinic
