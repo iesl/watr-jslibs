@@ -7,13 +7,14 @@ export type StoryEntry = {
 }
 
 export const storyItems: StoryEntry[] = [
-  { title: 'elemOverlayStory', to: '/stories/autogen/elemOverlayStory' },
-  { title: 'NarrowingFilter', to: '/stories/autogen/NarrowingFilter' },
-  { title: 'drawtoCanvasStory', to: '/stories/autogen/drawtoCanvasStory' },
-  { title: 'Eventlib Core', to: '/stories/autogen/coreStory' },
-  { title: 'hoverStory', to: '/stories/autogen/hoverStory' },
+  { title: 'Canvas/Svg/Div Overlays', to: '/stories/autogen/elemOverlays' },
+  { title: 'Text Overlay', to: '/stories/autogen/textOverlay' },
+  { title: 'Selection narrowing filter', to: '/stories/autogen/narrowingFilter' },
+  { title: 'Canvas/WebGL Drawing (pixi.js)', to: '/stories/autogen/drawtoCanvas' },
+  { title: 'Eventlib Core', to: '/stories/autogen/eventlibCore' },
+  { title: 'Hover Events', to: '/stories/autogen/hoverEvents' },
   { title: 'sketchlibCoreStory', to: '/stories/autogen/sketchlibCoreStory' },
-  { title: 'pdfPageStory', to: '/stories/autogen/pdfPageStory' },
+  { title: 'Pdf Page Viewer', to: '/stories/autogen/pdfPageViewer' },
   { title: 'pdfTextViewerStory', to: '/stories/autogen/pdfTextViewerStory' },
   { title: 'tracelogViewerStory', to: '/stories/autogen/tracelogViewerStory' },
   { title: 'textGraphStory', to: '/stories/autogen/textGraphStory' },

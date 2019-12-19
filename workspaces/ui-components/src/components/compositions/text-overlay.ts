@@ -11,7 +11,7 @@ export interface TextOverlay {
 
 
 type Args = StateArgs & {
-  containerRef: Ref<HTMLDivElement|null>
+  // containerRef: Ref<HTMLDivElement|null>
 };
 
 export function useTextOverlay({
