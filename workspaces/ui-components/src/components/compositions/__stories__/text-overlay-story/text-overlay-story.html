@@ -1,19 +1,16 @@
-<v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6>
-        <v-card>
-            <v-card-title class="headline">
-                Text Overlay
-            </v-card-title>
-            <v-card-text>
-                <p>
-                    Desc
-                </p>
-            </v-card-text>
-        </v-card>
+<layout>
 
-        <v-card>
-            <div class="mountPoint" ref="mountPoint"></div>
-        </v-card>
+    <template v-slot:title>
+        Text Overlay
+    </template>
 
-    </v-flex>
-</v-layout>
+    <template v-slot:description>
+    </template>
+
+    <template v-slot:notes>
+    </template>
+
+    <template v-slot:main>
+        <div class="mountPoint" ref="mountPoint"></div>
+    </template>
+</layout>

@@ -9,9 +9,11 @@ import {
 
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 
+
 export interface OverlayElements {
   canvasElem: Ref<HTMLCanvasElement|null>;
   imgElem: Ref<HTMLImageElement|null>;
+  textDivRef: Ref<HTMLDivElement|null>|false;
 }
 
 export interface ImgCanvasOverlay {
@@ -23,10 +25,11 @@ export interface ImgCanvasOverlay {
 
 type Args = StateArgs & {
   mountPoint: Ref<HTMLDivElement|null>
+  useTextOverlay?: boolean;
 };
 
 export function useImgCanvasOverlays({
-  mountPoint, state
+  mountPoint, useTextOverlay, state
 }: Args): ImgCanvasOverlay {
 
   const dimensions: Ref<[number, number]> = ref([10, 10]);
@@ -36,6 +39,8 @@ export function useImgCanvasOverlays({
   const placeholderImage = () => `http://via.placeholder.com/${width()}x${height()}`;
 
   const imgElem: Ref<HTMLImageElement|null> = ref(null);
+  const textDivRef: Ref<HTMLDivElement|null>|false = useTextOverlay? ref(null) : false;
+
   const canvasElem: Ref<HTMLCanvasElement|null> = ref(null);
   const imgElemSource: Ref<string|null> = ref(null);
 
@@ -56,6 +61,16 @@ export function useImgCanvasOverlays({
     const canvasEl = canvasElem.value = document.createElement('canvas');
     canvasEl.classList.add('layer');
     overlayContainer.append(canvasEl);
+    let textDiv: HTMLDivElement|null = null;
+
+
+    if (textDivRef) {
+      console.log('adding text div');
+      textDiv = document.createElement('div');
+      textDivRef.value = textDiv;
+      textDiv.classList.add('layer');
+      overlayContainer.append(textDiv);
+    }
 
 
     watch([imgElem, imgElemSource], () => {
@@ -73,6 +88,11 @@ export function useImgCanvasOverlays({
 
       overlayContainer.style.width = w;
       overlayContainer.style.height = h;
+
+      if (textDiv) {
+        textDiv.style.width = w;
+        textDiv.style.height = h;
+      }
 
       canvasEl.setAttribute('width', w);
       canvasEl.setAttribute('height', h);
@@ -95,7 +115,11 @@ export function useImgCanvasOverlays({
   }
 
   return {
-    elems: { imgElem, canvasElem },
+    elems: {
+      textDivRef,
+      imgElem,
+      canvasElem
+    },
     setDimensions,
     dimensions,
     setImageSource,

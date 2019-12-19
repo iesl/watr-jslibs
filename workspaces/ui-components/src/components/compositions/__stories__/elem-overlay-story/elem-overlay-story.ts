@@ -6,10 +6,12 @@ import {
 } from '@vue/composition-api';
 
 
+import Layout from '~/components/story-default-layout/index.vue';
 import { useImgCanvasSvgOverlays  } from '~/components/compositions/elem-overlays'
 import { initState } from '~/components/compositions/component-basics';
 
 export default {
+  components: { Layout },
   setup() {
 
     const state = initState();

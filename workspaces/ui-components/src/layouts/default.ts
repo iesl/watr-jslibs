@@ -11,7 +11,7 @@ export default {
       drawer: false,
       fixed: false,
       items: [
-        { icon: 'mdi-apps', title: 'Welcome', to: '/' },
+        { icon: 'mdi-apps', title: 'Home', to: '/' },
         ...storyItems
       ],
       miniVariant: false,
