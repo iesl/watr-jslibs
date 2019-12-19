@@ -85,9 +85,6 @@ export default createComponent({
           // wordWrapWidth: 440,
         });
 
-        const richText = new PIXI.Text('Rich text with a lot of options and across multiple lines', style);
-        richText.x = 50;
-        richText.y = 250;
         const textDataPoints = textgrid.textgrid.textDataPoints;
         console.log('starting text init');
 

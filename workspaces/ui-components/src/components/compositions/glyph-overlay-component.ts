@@ -1,13 +1,12 @@
-
 /**
-
+ * Provides rtree-based hovering and search over given input shapes
  */
+
 import _ from 'lodash';
 
 import {
   Ref,
   ref,
-  // watch,
 } from '@vue/composition-api';
 
 

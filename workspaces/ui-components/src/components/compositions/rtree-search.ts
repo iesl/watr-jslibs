@@ -1,4 +1,6 @@
-//
+/**
+ * Initialize and return an rtree interface
+ */
 
 import _ from 'lodash';
 import RBush from "rbush";
