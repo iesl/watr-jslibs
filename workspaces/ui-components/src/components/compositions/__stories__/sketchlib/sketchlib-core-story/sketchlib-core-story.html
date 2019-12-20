@@ -1,16 +1,17 @@
-<v-layout column>
-    <v-flex xs12 sm8 md6>
-        <v-card>
-            <v-card-title class="headline">
-                Sketchlib Core functionality
-            </v-card-title>
-            <v-card-text>
-                <p></p>
-            </v-card-text>
-        </v-card>
-        <v-card>
-            <div class="mountPoint" ref="mountPoint"></div>
-        </v-card>
+<layout>
 
-    </v-flex>
-</v-layout>
+    <template v-slot:title>
+        Sketchlib Core/Trace functionality
+    </template>
+
+    <template v-slot:description>
+        Basic Shape Drawing and animation for Tracelog viewing
+    </template>
+
+    <template v-slot:notes>
+    </template>
+
+    <template v-slot:main>
+        <div class="mountPoint" ref="mountPoint"></div>
+    </template>
+</layout>

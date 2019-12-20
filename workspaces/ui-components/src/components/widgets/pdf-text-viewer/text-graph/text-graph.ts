@@ -13,7 +13,6 @@ import {
 
 import {namespace} from "vuex-class";
 
-// import rtree from "rbush";
 import RBush from "rbush";
 
 import {

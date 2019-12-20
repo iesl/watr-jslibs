@@ -12,7 +12,7 @@ export const storyItems: StoryEntry[] = [
   { title: 'Selection narrowing filter', to: '/stories/autogen/narrowingFilter' },
   { title: 'Canvas/WebGL Drawing (pixi.js)', to: '/stories/autogen/drawtoCanvas' },
   { title: 'Eventlib Core', to: '/stories/autogen/eventlibCore' },
-  { title: 'sketchlibCoreStory', to: '/stories/autogen/sketchlibCoreStory' },
+  { title: 'Tracelog/Core Sketching', to: '/stories/autogen/sketchlibCore' },
   { title: 'Pdf Page Viewer', to: '/stories/autogen/pdfPageViewer' },
   { title: 'Pdf Text Viewer', to: '/stories/autogen/pdfTextViewer' },
   { title: 'tracelogViewerStory', to: '/stories/autogen/tracelogViewerStory' },

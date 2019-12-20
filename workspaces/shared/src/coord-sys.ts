@@ -114,9 +114,7 @@ class Trapezoid {
     const p4 = this.bottomLine.p1;
     return {
       type: "path",
-      d: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} L ${p4.x} ${
-        p4.y
-      } Z`,
+      d: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} L ${p4.x} ${p4.y} Z`,
     };
   }
 }
