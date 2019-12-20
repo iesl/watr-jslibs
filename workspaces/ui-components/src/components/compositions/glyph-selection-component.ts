@@ -37,7 +37,7 @@ type Args = StateArgs & {
   eventlibSelect: EventlibSelect;
   rtreeSearch: RTreeSearch<TextDataPoint>;
   canvasDrawto: CanvasDrawto;
-  // imgCanvasOverlay: ImgCanvasOverlay;
+  // imgCanvasOverlay: SuperimposedElements;
 };
 
 

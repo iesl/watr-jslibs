@@ -3,14 +3,14 @@
  */
 import _ from 'lodash';
 
-import { onMounted, ref, watch } from '@vue/composition-api';
+import { onMounted, ref } from '@vue/composition-api';
 import { useEventlibCore } from '~/components/compositions/eventlib-core'
 import { useEventlibSelect } from '~/components/compositions/eventlib-select'
 import { useCanvasDrawto } from '~/components/compositions/drawto-canvas';
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";
 import { initState } from '~/components/compositions/component-basics'
 
-import { useImgCanvasOverlays } from '~/components/compositions/elem-overlays'
+import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements'
 
 function setup() {
   const mountPoint = ref(null)
@@ -23,17 +23,13 @@ function setup() {
   const mouseActivity = ref('<none>');
   const mouseActivity2 = ref('<none>');
 
-  const elemOverlay = useImgCanvasOverlays({ mountPoint, state });
-  const canvasRef = elemOverlay.elems.canvasElem;
+  const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Img, ElementTypes.Canvas], mountPoint, state });
+  const canvas = superimposedElements.overlayElements.canvas!;
 
-  const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
+  const canvasDrawto = useCanvasDrawto({ canvas, containerRef, state });
   const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
 
   const { selectionRef }  = eventlibSelect;
-
-  watch(canvasRef, (el) => {
-    if (el === null) return;
-  });
 
 
   function shEvent(e: EMouseEvent) {
@@ -70,7 +66,7 @@ function setup() {
 
   onMounted(() => {
 
-    elemOverlay.setDimensions(600, 500);
+    superimposedElements.setDimensions(600, 500);
     setMouseHandlers([myHandlers1]);
 
   });

@@ -10,13 +10,13 @@ import {
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 
 
-export interface OverlayElements {
+ interface OverlayElements {
   canvasElem: Ref<HTMLCanvasElement|null>;
   imgElem: Ref<HTMLImageElement|null>;
   textDivRef: Ref<HTMLDivElement|null>|false;
 }
 
-export interface ImgCanvasOverlay {
+ interface ImgCanvasOverlay {
   elems: OverlayElements
   setDimensions: (width: number, height: number) => void;
   dimensions: Readonly<Ref<[number, number]>>;
@@ -28,7 +28,7 @@ type Args = StateArgs & {
   useTextOverlay?: boolean;
 };
 
-export function useImgCanvasOverlays({
+function useImgCanvasOverlays({
   mountPoint, useTextOverlay, state
 }: Args): ImgCanvasOverlay {
 
@@ -126,7 +126,7 @@ export function useImgCanvasOverlays({
   };
 }
 
-export function useImgCanvasSvgOverlays({
+ function useImgCanvasSvgOverlays({
   mountPoint, state
 }: Args) {
   const imgCanvasOverlays = useImgCanvasOverlays({ mountPoint, state });

@@ -41,13 +41,17 @@ export function useSuperimposedElements({
 
   const eventDiv = document.createElement('div');
   eventDiv.classList.add('layer');
-  eventDiv.classList.add('events');
+  eventDiv.classList.add('event-layer');
 
 
   const overlayElements: OverlayElements = {
     eventDiv
   };
 
+  if (useElem(ElementTypes.Img)) {
+    const el = overlayElements.img = document.createElement('img');
+    el.classList.add('layer');
+  }
   if (useElem(ElementTypes.Canvas)) {
     const el = overlayElements.canvas = document.createElement('canvas');
     el.classList.add('layer');
@@ -60,11 +64,7 @@ export function useSuperimposedElements({
   }
   if (useElem(ElementTypes.Text)) {
     const el = overlayElements.textDiv = document.createElement('div');
-    el.classList.add('layer');
-  }
-  if (useElem(ElementTypes.Img)) {
-    const el = overlayElements.img = document.createElement('img');
-    el.classList.add('layer');
+    el.classList.add('layer', 'text-layer');
   }
 
   const dimensions: Ref<[number, number]> = ref([10, 10]);
@@ -126,11 +126,16 @@ export function useSuperimposedElements({
         canvas.setAttribute('height', h);
       }
       if (svg) {
+        svg.setAttribute('width', w);
+        svg.setAttribute('height', h);
       }
       if (textDiv) {
         textDiv.style.width = w;
         textDiv.style.height = h;
       }
+
+      eventDiv.style.width = w;
+      eventDiv.style.height = h;
 
     });
   });

@@ -19,13 +19,13 @@ export interface CanvasDrawto {
 
 
 type Args = StateArgs & {
-  canvasRef: Ref<HTMLCanvasElement|null>,
+  canvas: HTMLCanvasElement,
   containerRef: Ref<HTMLDivElement|null>
 };
 
 export function useCanvasDrawto({
   state,
-  canvasRef,
+  canvas,
   containerRef
 }: Args): CanvasDrawto {
   const pixiJsAppRef: Ref<PIXI.Application|null> = ref(null);
@@ -34,12 +34,11 @@ export function useCanvasDrawto({
 
   waitFor('CanvasDrawto', {
     state,
-    dependsOn: [canvasRef, containerRef],
+    dependsOn: [containerRef],
   }, () => {
-    const canvasElem = canvasRef.value!;
     const divElem = containerRef.value!;
 
-    const app = initPixiJs(canvasElem, divElem);
+    const app = initPixiJs(canvas, divElem);
     app.resize();
 
     pixiJsAppRef.value = app;

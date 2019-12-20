@@ -69,7 +69,8 @@ export interface Row {
 */
 export type NumArray4 = [number, number, number, number];
 export type BBoxArray = NumArray4;
-export type CharLocus = [string, number, BBoxArray];
+type PageNum = number;
+export type CharLocus = [string, PageNum, BBoxArray];
 
 export interface Locus {
   g?: [ CharLocus ];

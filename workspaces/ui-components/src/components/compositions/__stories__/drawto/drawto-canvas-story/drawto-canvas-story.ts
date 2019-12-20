@@ -6,7 +6,7 @@ import {
 import * as PIXI from 'pixi.js';
 
 
-import { useImgCanvasOverlays } from '~/components/compositions/elem-overlays'
+import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements'
 import { useCanvasDrawto } from '~/components/compositions/drawto-canvas';
 import { initState, waitFor } from '~/components/compositions/component-basics';
 
@@ -18,9 +18,9 @@ export default {
     const mountPoint: Ref<HTMLDivElement|null> = ref(null);
     const containerRef = mountPoint;
 
-    const elemOverlay = useImgCanvasOverlays({ mountPoint, state });
-    const canvasRef = elemOverlay.elems.canvasElem
-    const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
+    const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas], mountPoint, state });
+    const canvas = superimposedElements.overlayElements.canvas!;
+    const canvasDrawto = useCanvasDrawto({ canvas, containerRef, state });
     const { pixiJsAppRef } = canvasDrawto;
 
     waitFor('CanvasDrawtoStory', {
@@ -29,7 +29,7 @@ export default {
     }, () => {
 
       const pixiJsApp = pixiJsAppRef.value!;
-      elemOverlay.setDimensions(600, 800);
+      superimposedElements.setDimensions(600, 800);
 
       const pg = new PIXI.Graphics();
 

@@ -26,13 +26,13 @@ export default createComponent({
           const [l, t, w, h] = page0.pageGeometry;
           const pageBounds = coords.mk.fromArray([l, t, w, h]);
 
-          const textWidth = () => 10; // (s: string) => context2d.measureText(s).width;
-          const textHeight = 12; // this.lineHeight;
-          const tmpPageMargin = 10;
-          const origin = new Point(tmpPageMargin, tmpPageMargin, coords.CoordSys.GraphUnits);
-          const gridData: GridData = initGridData(textgrid, 0, textWidth, origin, textHeight);
+          // const textWidth = () => 10; // (s: string) => context2d.measureText(s).width;
+          // const textHeight = 12; // this.lineHeight;
+          // const tmpPageMargin = 10;
+          // const origin = new Point(tmpPageMargin, tmpPageMargin, coords.CoordSys.GraphUnits);
+          // const gridData: GridData = initGridData(textgrid, 0, textWidth, origin, textHeight);
           providedTextgridRef.value = {
-            textgrid: gridData,
+            textgrid,
             pageBounds
           };
         });

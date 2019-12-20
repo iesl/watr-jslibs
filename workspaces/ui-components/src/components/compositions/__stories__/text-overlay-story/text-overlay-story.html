@@ -8,6 +8,35 @@
     </template>
 
     <template v-slot:notes>
+        <div class="mt-1 mb-3 d-flex align-center">
+            in:
+            <v-textarea outlined hide-details dense class="mx-3"
+                          label="Input Text"
+                          v-model="inputText"
+            />
+            size:
+            <v-text-field single-line outlined hide-details dense class="mx-3"
+                          label="size"
+                          v-model="textSize"
+            />
+            top:
+            <v-text-field single-line outlined hide-details dense class="mx-3"
+                          label="top"
+                          v-model="textTop"
+            />
+            left:
+            <v-text-field single-line outlined hide-details dense class="mx-3"
+                          label="left"
+                          v-model="textLeft"
+            />
+            family:
+            <v-text-field single-line outlined hide-details dense class="mx-3"
+                          label="family"
+                          v-model="textFamily"
+            />
+
+        </div>
+        <pre>{{ textDimensions }}</pre>
     </template>
 
     <template v-slot:main>

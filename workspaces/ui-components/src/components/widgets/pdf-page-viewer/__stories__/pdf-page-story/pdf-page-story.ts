@@ -24,11 +24,11 @@ export default {
 
     const pdfPageViewer = usePdfPageViewer({ mountPoint, state });
 
-    const { imgCanvasOverlay  } = pdfPageViewer;
+    const { superimposedElements  } = pdfPageViewer;
 
 
     onMounted(() => {
-      imgCanvasOverlay.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
+      superimposedElements.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
       const grid: GridTypes.Grid = textgrid00 as any as GridTypes.Grid;
       const page0 = grid.pages[0]
       // // TODO: why is this margin here? hardcoded?
@@ -41,7 +41,7 @@ export default {
 
       waitFor('PdfPageStory', { state }, () => {
         // TODO figure out how to set the correct dimensions for the img/canvas elems
-        imgCanvasOverlay.setDimensions(910, 1213);
+        superimposedElements.setDimensions(910, 1213);
         pdfPageViewer.setGrid(glyphData, pageBounds);
       });
 

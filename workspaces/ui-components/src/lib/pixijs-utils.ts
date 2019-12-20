@@ -33,12 +33,13 @@ export function drawRect(bbox: BBox) {
   const pg = new PIXI.Graphics();
 
   const { x, y, width, height } = bbox;
-  const fillcolor = chroma('red').num();
+  // const fillcolor = chroma('red').num();
+  const linecolor = chroma('yellow').num();
 
-  pg.lineStyle(2, 0xFEEB77, 1);
-  pg.beginFill(fillcolor);
+  pg.lineStyle(1, linecolor, 0.3);
+  // pg.beginFill(fillcolor);
   pg.drawRect(x, y, width, height);
-  pg.endFill();
+  // pg.endFill();
 
   return pg;
 }

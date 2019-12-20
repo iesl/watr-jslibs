@@ -10,8 +10,7 @@ div.layers {
         position: absolute;
         top: 0;
         left: 0;
-        opacity: 1;
-        z-index: 1;
+        z-index: -1;
     }
 
     canvas.layer {
@@ -29,14 +28,23 @@ div.layers {
         z-index: 3;
     }
 
-    div.layer.text {
+    div.layer.text-layer {
         position: absolute;
         top: 0;
         left: 0;
         z-index: 4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        .textoverlay {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     }
 
-    div.layer.events {
+    div.layer.event-layer {
         position: absolute;
         top: 0;
         left: 0;

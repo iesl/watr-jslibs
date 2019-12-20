@@ -7,7 +7,8 @@ import {
 
 import { StateArgs } from '~/components/compositions/component-basics'
 import { useEventlibCore, EventlibCore } from '~/components/compositions/eventlib-core';
-import { useImgCanvasOverlays, ImgCanvasOverlay } from '~/components/compositions/elem-overlays';
+// import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
+import { useSuperimposedElements, SuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
 import { useCanvasDrawto, CanvasDrawto } from '~/components/compositions/drawto-canvas';
 
 import { useGlyphOverlays, SetGrid } from '~/components/compositions/glyph-overlay-component';
@@ -21,7 +22,7 @@ type Args = StateArgs & {
 
 export interface PdfPageViewer {
   eventlibCore: EventlibCore;
-  imgCanvasOverlay: ImgCanvasOverlay;
+  superimposedElements: SuperimposedElements;
   canvasDrawto: CanvasDrawto;
   setGrid: SetGrid;
 }
@@ -34,10 +35,14 @@ export function usePdfPageViewer({
 
   const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
 
-  const imgCanvasOverlay = useImgCanvasOverlays({ mountPoint, state });
-  const canvasRef = imgCanvasOverlay.elems.canvasElem;
-  const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef: mountPoint, state });
-  const glyphOverlays = useGlyphOverlays({ state, eventlibCore, canvasDrawto, imgCanvasOverlay });
+  const superimposedElements = useSuperimposedElements({
+    includeElems: [ElementTypes.Img, ElementTypes.Canvas],
+    mountPoint, state
+  });
+
+  const canvas = superimposedElements.overlayElements.canvas!;
+  const canvasDrawto = useCanvasDrawto({ canvas, containerRef: mountPoint, state });
+  const glyphOverlays = useGlyphOverlays({ state, eventlibCore, canvasDrawto, superimposedElements });
   const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
   const { rtreeSearch } = glyphOverlays;
   useGlyphSelection({ canvasDrawto, rtreeSearch, eventlibSelect, state });
@@ -46,7 +51,7 @@ export function usePdfPageViewer({
 
   return {
     eventlibCore,
-    imgCanvasOverlay,
+    superimposedElements,
     canvasDrawto,
     setGrid
   }

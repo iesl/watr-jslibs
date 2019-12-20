@@ -6,7 +6,7 @@ import {
 } from '@vue/composition-api';
 
 
-import { useImgCanvasOverlays } from '~/components/compositions/elem-overlays'
+import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements'
 import { useCanvasDrawto } from '~/components/compositions/drawto-canvas';
 import { useSketchlibCore } from '~/components/compositions/sketchlib-core';
 import { useEventlibCore } from '~/components/compositions/eventlib-core';
@@ -23,11 +23,11 @@ export default {
     const containerRef = mountPoint;
     const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
 
-    const elemOverlay = useImgCanvasOverlays({ mountPoint, state });
+    const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas], mountPoint, state });
 
-    const canvasRef = elemOverlay.elems.canvasElem
+    const canvas = superimposedElements.overlayElements.canvas!;
 
-    const canvasDrawto = useCanvasDrawto({ canvasRef, containerRef, state });
+    const canvasDrawto = useCanvasDrawto({ canvas, containerRef, state });
     const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
 
     useSketchlibCore({ state, canvasDrawto, eventlibCore, eventlibSelect });
@@ -36,7 +36,7 @@ export default {
     onMounted(() => {
 
       waitFor('SketchlibCoreStory', { state }, () => {
-        elemOverlay.setDimensions(400, 600);
+        superimposedElements.setDimensions(400, 600);
       });
 
     });

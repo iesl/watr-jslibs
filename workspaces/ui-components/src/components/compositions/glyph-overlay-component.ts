@@ -15,7 +15,7 @@ import * as PIXI from 'pixi.js';
 
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 import { EventlibCore } from '~/components/compositions/eventlib-core';
-import { ImgCanvasOverlay } from '~/components/compositions/elem-overlays';
+import { SuperimposedElements } from '~/components/compositions/superimposed-elements';
 import { CanvasDrawto } from '~/components/compositions/drawto-canvas';
 import { useRTreeSearch, RTreeSearch } from '~/components/compositions/rtree-search';
 import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
@@ -32,14 +32,14 @@ export interface GlyphOverlays {
 type Args = StateArgs & {
   eventlibCore: EventlibCore;
   canvasDrawto: CanvasDrawto;
-  imgCanvasOverlay: ImgCanvasOverlay;
+  superimposedElements: SuperimposedElements;
 };
 
 export function useGlyphOverlays({
   state,
   eventlibCore,
   canvasDrawto,
-  imgCanvasOverlay,
+  superimposedElements,
 }: Args): GlyphOverlays {
   // TODO: setHoveredText (for highlighting sync-highlighting text on pdf-text widget)
   // TODO: setClickedText (for synching pdf page text w/ image)
@@ -64,7 +64,7 @@ export function useGlyphOverlays({
 
     const width = pageGeometry.width;
     const height = pageGeometry.height;
-    imgCanvasOverlay.setDimensions(width, height);
+    superimposedElements.setDimensions(width, height);
 
     rtreeSearch.loadData(textData);
 
