@@ -27,14 +27,15 @@
       - Tracelog shape drawing
       - Labeling regions with rectangular selection
 
-***** Elem Overlays (layering)
-      (div elem) => [...]
+***** Superimposed Element Overlays (svg/canvas/html overlays)
 
       The image/canvas/svg overlay structure
       - Make sure overlays are aligned and z-stacked correctly
       - Draw shapes to svg and canvas
-        - Try to take out any helper libraries (d3 and fabric)
+        - Try to take out any overly large helper libraries (d3 and fabric)
       - Zoom in/out, properly modifying geometry of the layers (new feature)
+     - [ ] Visual represent overlay system
+           Create a visual representation of the overlay system as overlapping sheets, with an output display of the functionality at each level
 
 ***** Eventlib system
       The hover/knn event system
@@ -43,10 +44,8 @@
       Use for glyph highlighting/selection
       Will be used for graph paper variants (regular grid vs. free-form glyph placement)
 
-***** Selection system
-      Rectangular selection events.
-
-      TODO Started; still a bit flakey
+****** Selection system
+       Rectangular selection events.
 
 ***** Run Trace
       Given a tracelog, display the shapes as pdf image overlays
@@ -60,6 +59,9 @@
      Simple cell-based informational display
      (optional, review this before implementing)
 
+
+
+** Subsystems
 
 ** Upcoming Goals
 *** Text Viewer for TextWorks
@@ -81,11 +83,33 @@
 
 ** Possible RBush replacement, a bit faster:
    https://github.com/mourner/flatbush
+
    
 
-** build structure 
-   Trying to figure out why tween.js is not working under nuxt, but works under tsc in shared
-   Nuxt uses babel (I think)
-   
+** Eventlib Handler set examples:
 
+const defaultGlobalHandlers = {
+  keypress: {
+    'x': () => closeCurrWindow 
+  }
+}
 
+const defaultLocalHandlers = {
+  mouseover: (e) => {...}
+  mousemove: (e) => {...}
+  keys: {
+    'ctrl': () => install(rectSelectHandlers) 
+  }
+}
+
+(localState: S) => { 
+  const rectSelectHandlers = {
+    init: () => { turnOff(Hover/ClickSelect/tooltips)  }
+    dispose: () => { turnBackOn(Hover/ClickSelect/tooltips)  }
+    mouseover: (e) => {...}
+    mousemove: (e) => {...}
+    keydown: {
+      'ctrl': () => endSelect, uninstall()
+    }
+  }
+}

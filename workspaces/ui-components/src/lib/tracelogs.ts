@@ -2,6 +2,14 @@
 import _ from "lodash";
 
 
+interface ShapeMetaInfo {
+  id: number;
+  labels: string;
+}
+
+type ShapeAndMeta = Shape&ShapeMetaInfo;
+
+
 export interface ILogHeaders {
   tags: string;
   name: string;
@@ -11,35 +19,31 @@ export interface ILogHeaders {
 
 export interface ILogEntry {
   headers: ILogHeaders;
-  body: Shape[];
+  body: ShapeAndMeta[];
   logType: string;
   page: number;
 }
 
-interface BaseShape {
-  id: number;
-  labels: string;
-}
 
-export interface Point extends BaseShape {
+export interface Point {
   kind: 'point';
 
   x: number;
   y: number;
 }
-export interface Line extends BaseShape {
+export interface Line  {
   kind: 'line';
 
   p1: Point;
   p2: Point;
 }
 
-export interface Rect extends BaseShape {
+export interface Rect {
   kind: 'rect';
   bounds: [number, number, number, number];
 }
 
-export interface Trapezoid extends BaseShape {
+export interface Trapezoid {
   kind: 'trapezoid';
 
   topLeft: Point;
@@ -48,19 +52,32 @@ export interface Trapezoid extends BaseShape {
   bottomWidth: number;
 }
 
+
 export type Shape = Line | Rect | Point | Trapezoid;
 
+export type ShapeKind = Shape['kind'];
+
+
 type LineFold<T>      = (l: Line) => T
-type LTBoundsFold<T>  = (l: Rect) => T
+type RectFold<T>  = (l: Rect) => T
 type PointFold<T>     = (l: Point) => T
 type TrapezoidFold<T> = (l: Trapezoid) => T
 
-export interface Folds<T> {
- line?: LineFold<T>;
- rect?: LTBoundsFold<T>;
- point?: PointFold<T>;
- trapezoid? :TrapezoidFold<T>;
+export interface FoldF<T> {
+  line: LineFold<T>;
+  rect: RectFold<T>;
+  point: PointFold<T>;
+  trapezoid: TrapezoidFold<T>;
 }
+
+export interface FoldX<T, U, V, W> {
+  line: LineFold<T>;
+  rect: RectFold<U>;
+  point: PointFold<V>;
+  trapezoid: TrapezoidFold<W>;
+}
+
+export type Folds<T> = Partial<FoldF<T>>;
 
 export function foldShape<T>(shape: Shape, fs:Folds<T>): T|undefined {
   switch(shape.kind) {
@@ -71,25 +88,34 @@ export function foldShape<T>(shape: Shape, fs:Folds<T>): T|undefined {
   }
 }
 
+export function foldShapeTotal<S, T, U, V>(shape: Shape, fs:FoldX<S, T, U, V>): S|T|U|V {
+  switch(shape.kind) {
+    case 'line'      : return fs.line(shape);
+    case 'rect'      : return fs.rect(shape);
+    case 'point'     : return fs.point(shape);
+    case 'trapezoid' : return fs.trapezoid(shape);
+  }
+}
+
 
 function adjustUnitsPoint(p: Point): Point  {
   const x = p.x / 100.0;
   const y = p.y / 100.0;
-  const { kind, id, labels } = p;
+  const { kind } = p;
   return {
     x, y,
-    kind, id, labels
+    kind
   };
 }
 
-export const ShapeAdjustUnitsFold: Folds<Shape> = {
+export const ShapeIntRepsToFloats: Folds<Shape> = {
   line: (sh: Line) => {
     const p1 = adjustUnitsPoint(sh.p1);
     const p2 = adjustUnitsPoint(sh.p2);
-    const { kind, id, labels } = sh;
+    const { kind } = sh;
     return {
       p1, p2,
-      kind, id, labels
+      kind
     };
   },
 
@@ -101,10 +127,10 @@ export const ShapeAdjustUnitsFold: Folds<Shape> = {
     const y      = t / 100.0;
     const width  = w / 100.0;
     const height = h / 100.0;
-    const { kind, id, labels } = sh;
+    const { kind } = sh;
     return {
       bounds: [x, y, width, height],
-      kind, id, labels
+      kind
     };
   },
 
@@ -113,11 +139,11 @@ export const ShapeAdjustUnitsFold: Folds<Shape> = {
     const bottomLeft = adjustUnitsPoint(sh.bottomLeft);
     const topWidth = sh.topWidth / 100.0;
     const bottomWidth = sh.bottomWidth / 100.0;
-    const { kind, id, labels } = sh;
+    const { kind } = sh;
     return {
       topLeft, topWidth,
       bottomLeft, bottomWidth,
-      kind, id, labels
+      kind
     };
   }
 };
@@ -227,3 +253,169 @@ export const ShapeToSvgElement: Folds<SVGGraphicsElement> = {
   }
 };
 
+type ShapeForKind<T extends ShapeKind> =
+  T extends Point['kind'] ? Point :
+  T extends Rect['kind'] ? Rect :
+  T extends Line['kind'] ? Line :
+  T extends Trapezoid['kind'] ? Trapezoid :
+  never;
+
+// export type InitFn<K extends ShapeKind, S extends ShapeForKind<K>> = (s: S) => void;
+// export type InitFn<K extends ShapeKind> =
+//   <S extends ShapeForKind<K>>(s: S) => S
+export type InitFn<S extends Shape> = (s: S) => S
+
+type Ret<T extends ShapeKind> =
+  T extends Point['kind'] ? Point :
+  T extends Rect['kind'] ? Rect :
+  T extends Line['kind'] ? Line :
+  T extends Trapezoid['kind'] ? Trapezoid :
+  never;
+
+type PointInits = [number, number];
+
+type InitT<T extends ShapeKind> =
+  T extends Point['kind'] ? PointInits :
+  T extends Rect['kind'] ? [number, number, number, number] :
+  T extends Line['kind'] ? [PointInits, PointInits] :
+  T extends Trapezoid['kind'] ? [PointInits, PointInits, number, number] :
+  never
+;
+
+
+export function initShape<S extends ShapeKind, V extends Ret<S>>(kind: S, initVals: InitT<S>): V {
+  switch(kind) {
+    case 'point': {
+      const [x, y] = initVals as InitT<'point'>;
+      const point: Point = {
+        kind: 'point', x, y,
+      };
+      return point as V;
+    }
+    case "line": {
+      const [i1, i2] = initVals as InitT<'line'>;
+      const p1 = initShape('point', i1);
+      const p2 = initShape('point', i2);
+      const line: Line = {
+        kind: 'line', p1, p2,
+      };
+
+      return line as V;
+    }
+    case "rect": {
+      const bounds = initVals as InitT<'rect'>;
+      const rect: Rect = {
+        kind: 'rect', bounds
+      };
+      return rect as V;
+    }
+    case "trapezoid":
+      const [tl, bl, topWidth, bottomWidth] = initVals as InitT<'trapezoid'>;
+      const topLeft: Point = initShape('point', tl) ;
+      const bottomLeft: Point = initShape('point', bl) ;
+
+      const trap: Trapezoid = {
+        kind: 'trapezoid', topLeft, bottomLeft, topWidth, bottomWidth
+      };
+
+      return trap as V;
+
+  };
+
+  return undefined as any as V;
+}
+
+export function zeroShape0
+  <K extends ShapeKind, S extends ShapeForKind<K>>
+  (kind: K, f: (s: S) => S = s => s) : S {
+    const x = 0;
+    const y = 0;
+    const p: Point = zeroShape0('point') ;
+    switch(kind) {
+      case 'point': {
+        const point: Point = {
+          kind: 'point', x, y
+        };
+
+        return f(point as S);
+      }
+      case "line": {
+        const line: Line = {
+          kind: 'line', p1: p, p2: p,
+        };
+
+        return f(line as S);
+      }
+      case "rect": {
+        const rect: Rect = {
+          kind: 'rect', bounds: [0, 0, 0, 0]
+        };
+
+        return f(rect as S);
+      }
+      case "trapezoid":
+        const trap: Trapezoid = {
+          kind: 'trapezoid', topLeft: p, bottomLeft: p, topWidth: 0, bottomWidth: 0
+        };
+
+        return f(trap as S);
+    };
+
+    return undefined as any as S;
+  }
+
+export function zeroShape1
+  <K extends ShapeKind,
+S extends ShapeForKind<K>,
+T extends ShapeForKind<K>,
+U extends ShapeForKind<K>,
+V extends ShapeForKind<K>
+  >
+  (kind: K, fold: FoldX<S, T, U, V>|undefined = undefined) : S|T|U|V {
+    const x = 0;
+    const y = 0;
+    const p: Point = zeroShape1('point') ;
+    switch(kind) {
+      case 'point': {
+        const point: Point = {
+          kind: 'point', x, y
+        };
+
+        if (fold) {
+          return foldShapeTotal(point, fold);
+        }
+        return point as S;
+      }
+      case "line": {
+        const line: Line = {
+          kind: 'line', p1: p, p2: p,
+        };
+        if (fold) {
+          return foldShapeTotal(line, fold);
+        }
+
+        return line as S;
+      }
+      case "rect": {
+        const rect: Rect = {
+          kind: 'rect', bounds: [0, 0, 0, 0]
+        };
+
+        if (fold) {
+          return foldShapeTotal(rect, fold);
+        }
+        return rect as S;
+      }
+      case "trapezoid":
+        const trap: Trapezoid = {
+          kind: 'trapezoid', topLeft: p, bottomLeft: p, topWidth: 0, bottomWidth: 0
+        };
+
+        if (fold) {
+          return foldShapeTotal(trap, fold);
+        }
+        return trap as S;
+    };
+
+    return undefined as any as S;
+  }

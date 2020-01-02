@@ -6,6 +6,7 @@ import { ref, onMounted, createComponent, provide, Ref } from '@vue/composition-
 import { configAxios } from '~/lib/axios';
 import { CandidateGroup as CandidateGroupT } from '~/lib/FilterEngine';
 import { ILogEntry } from '~/lib/tracelogs';
+import Layout from '~/components/story-default-layout/index.vue';
 
 
 type CandidateGroup = CandidateGroupT<ILogEntry>;
@@ -38,6 +39,7 @@ export default createComponent({
   },
   components: {
     NarrowingFilter,
+    Layout
   },
 });
 

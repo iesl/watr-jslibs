@@ -1,4 +1,4 @@
-<layout>
+<titled-layout>
 
     <template v-slot:title>
         Sketchlib Core/Trace functionality
@@ -8,10 +8,39 @@
         Basic Shape Drawing and animation for Tracelog viewing
     </template>
 
-    <template v-slot:notes>
-    </template>
 
-    <template v-slot:main>
-        <div class="mountPoint" ref="mountPoint"></div>
-    </template>
-</layout>
+    <left-right-layout>
+
+        <template v-slot:left-content>
+            <v-card>
+                <div class="mountPoint" ref="mountPoint"></div>
+            </v-card>
+        </template>
+        <template v-slot:right-content>
+            <v-card>
+
+                <v-btn-toggle v-model="inkwellToggle">
+                    <v-btn>
+                        <v-icon>mdi-format-align-left</v-icon>
+                    </v-btn>
+
+                    <v-btn>
+                        <v-icon>mdi-format-align-center</v-icon>
+                    </v-btn>
+
+                    <v-btn>
+                        <v-icon>mdi-format-align-right</v-icon>
+                    </v-btn>
+
+                    <v-btn>
+                        <v-icon>mdi-format-align-justify</v-icon>
+                    </v-btn>
+                </v-btn-toggle>
+                <span>{{ inkwellSelection }}</span>
+
+            </v-card>
+        </template>
+
+    </left-right-layout>
+
+</titled-layout>

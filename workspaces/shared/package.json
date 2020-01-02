@@ -13,8 +13,6 @@
   "scripts": {
     "clean": "rimraf dist",
     "test": "jest",
-
-
     "babel:type-check": "tsc --noEmit",
     "babel:type-check:watch": "npm run type-check -- --watch",
     "babel:build:types": "tsc --emitDeclarationOnly --declaration",
@@ -23,12 +21,9 @@
     "babel:build:js:watch": "npm run build:js -- --watch",
     "babel:build": "npm-run-all clean build:types build:js",
     "babel:build:watch": "npm-run-all build:types:watch build:js:watch",
-
     "tsc:build": "tsc --declaration",
     "tsc:rebuild": "npm-run-all clean tsc:build",
-
     "build": "npm-run-all tsc:rebuild"
-
   },
   "main": "src/index.ts",
   "jest": {
@@ -59,6 +54,5 @@
       "node"
     ]
   },
-  "peerDependencies": {
-  }
+  "peerDependencies": {}
 }

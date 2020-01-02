@@ -6,6 +6,8 @@ import _ from 'lodash';
 import {
   ref,
   Ref,
+  reactive,
+  toRefs,
 } from '@vue/composition-api';
 
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
@@ -25,11 +27,11 @@ function pointsToRect(p1: Point, p2: Point): BBox {
   let nheight = Math.abs(p1.y - p2.y);
 
   return new BBox(nx, ny, nwidth, nheight);
-  // return {left: nx, top: ny, width: nwidth, height: nheight};
 }
 
 export interface EventlibSelect {
   selectionRef: Ref<BBox|null>;
+  clickedPointRef: Ref<Point|null>;
 }
 
 type Args = StateArgs & {
@@ -43,7 +45,9 @@ export function useEventlibSelect({
   canvasDrawto
 }: Args) {
 
-  const selectionRef = ref(new BBox(0, 0, 0, 0));
+  // const selectionRef = ref(new BBox(0, 0, 0, 0));
+  const selectionRef: Ref<BBox|null> = ref(null);
+  const clickedPointRef: Ref<Point|null> = ref(null);
   const { pixiJsAppRef } = canvasDrawto;
 
   waitFor('EventlibSelect', {
@@ -182,6 +186,79 @@ export function useEventlibSelect({
   });
 
   return {
-    selectionRef
+    selectionRef,
+    clickedPointRef
   }
+}
+
+export interface ExtentHandlerRefs {
+  origin: Ref<[ number, number ]>;
+  current: Ref<[ number, number ]>;
+  done: Ref<boolean>;
+  cancelled: Ref<boolean>;
+}
+
+export interface ExtentHandlers {
+  refs: ExtentHandlerRefs;
+  handlers: MouseHandlerInit;
+}
+
+export function selectExtentHandlers(): ExtentHandlers {
+
+  let selecting = false;
+
+  const refs: ExtentHandlerRefs = toRefs(reactive({
+    origin: [0, 0] as [number, number],
+    current: [0, 0] as [number, number],
+    done: false, cancelled: false
+  }));
+
+  const mousedown = (e: EMouseEvent) => {
+    const {x, y} = e.pos;
+    refs.current.value = refs.origin.value = [x, y];
+    selecting = true;
+  };
+
+  const mousemove = (e: EMouseEvent) => {
+    if (selecting) {
+      const {x, y} = e.pos;
+      refs.current.value = [x, y];
+    }
+  }
+
+  const mouseup = (e: EMouseEvent) => {
+    if (selecting) {
+      const {x, y} = e.pos;
+      refs.current.value = [x, y];
+      refs.done.value = true;
+    }
+  }
+
+  const mouseout = (e: EMouseEvent) => {
+    if (selecting) {
+      const {x, y} = e.pos;
+      refs.current.value = [x, y];
+    }
+  }
+
+  const mouseover = (e: EMouseEvent) => {
+    if (selecting) {
+      const {x, y} = e.pos;
+      refs.current.value = [x, y];
+    }
+  }
+
+  const handlers: MouseHandlerInit = () =>  {
+    return {
+      mousedown,
+      mousemove,
+      mouseup,
+      mouseout,
+      mouseover,
+    }
+  }
+  return {
+    refs, handlers
+  };
+
 }

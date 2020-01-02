@@ -1,13 +1,23 @@
-<v-layout column >
-    <v-flex xs12 sm8 md6>
-        <v-card>
-            <v-card-title class="headline">
-                Filter Selection/Narrowing
-            </v-card-title>
 
-            <narrowingFilter ref="mountPoint" />
+<layout>
 
-        </v-card>
+    <template v-slot:title>
+        Filter Selection/Narrowing
+    </template>
 
-    </v-flex>
-</v-layout>
+    <template v-slot:description>
+        TODO: allow geometry based filtering along with text based
+    </template>
+
+    <template v-slot:notes>
+        <span>TODO:</span>
+        <ul>
+        </ul>
+    </template>
+
+    <template v-slot:main>
+        <narrowingFilter ref="mountPoint" />
+    </template>
+
+</layout>
+

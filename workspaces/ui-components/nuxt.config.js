@@ -72,7 +72,12 @@ export default {
    ** Nuxt.js dev-modules
    */
   buildModules: [
-    '@nuxtjs/eslint-module',
+    ['@nuxtjs/eslint-module', {
+      useEslintrc: true,
+      ignorePattern: [
+        '**/autogen/*.vue'
+      ]
+    }],
     '@nuxtjs/vuetify',
     '@nuxt/typescript-build'
   ],

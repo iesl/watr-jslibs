@@ -43,8 +43,15 @@
     "ts-jest": "^24.2.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.7.4",
+    "@babel/core": "^7.6.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-typescript": "^7.7.4",
     "@nuxtjs/eslint-config": "^2.0.0",
-    "@nuxtjs/eslint-module": "^1.1.0"
+    "@nuxtjs/eslint-module": "^1.1.0",
+    "eslint": "^6.7.2",
+    "lerna": "^3.18.3"
   },
   "peerDependencies": {
     "vue": "^2.6.11",

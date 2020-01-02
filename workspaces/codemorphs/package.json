@@ -59,5 +59,8 @@
       "json",
       "node"
     ]
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.23"
   }
 }
