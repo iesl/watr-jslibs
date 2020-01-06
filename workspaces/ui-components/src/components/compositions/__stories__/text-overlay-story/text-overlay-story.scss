@@ -1,1 +1,17 @@
-.todo {}
+#Test {
+    position: absolute;
+    // visibility: hidden;
+    background: blue;
+    height: auto;
+    width: auto;
+    white-space: nowrap; /* Thanks to Herb Caudill comment */
+}
+
+.measured {
+    position: absolute;
+    // visibility: hidden;
+    background: blue;
+    height: auto;
+    width: auto;
+    white-space: nowrap; /* Thanks to Herb Caudill comment */
+}

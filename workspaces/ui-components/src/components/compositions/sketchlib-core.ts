@@ -8,7 +8,7 @@ import {
   watch,
 } from '@vue/composition-api';
 
-import { SvgDrawTo } from './drawto-canvas';
+import { SvgDrawTo } from './svg-drawto';
 import { EventlibCore } from './eventlib-core';
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 import { EventlibSelect } from './eventlib-select';

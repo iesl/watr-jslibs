@@ -12,7 +12,7 @@ import {
 // import { MouseHandlerInit, EMouseEvent } from '~/lib/EventlibHandlers';
 
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements'
-import { useSvgDrawTo } from '~/components/compositions/drawto-canvas';
+import { useSvgDrawTo } from '~/components/compositions/svg-drawto';
 import { useSketchlibCore } from '~/components/compositions/sketchlib-core';
 import { useEventlibCore } from '~/components/compositions/eventlib-core';
 import { useEventlibSelect, selectExtentHandlers } from '~/components/compositions/eventlib-select'

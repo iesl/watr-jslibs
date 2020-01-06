@@ -27,7 +27,7 @@ import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 import { tweenBBox } from '~/lib/tweening';
 
 import chroma from 'chroma-js';
-import { SvgDrawTo } from '~/components/compositions/drawto-canvas';
+import { SvgDrawTo } from '~/components/compositions/svg-drawto';
 
 export interface GlyphSelection {
 }

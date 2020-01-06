@@ -1,5 +1,6 @@
 
 import _ from 'lodash';
+import * as d3 from 'd3';
 
 import {
   ref,
@@ -8,11 +9,12 @@ import {
 } from '@vue/composition-api';
 
 
-import Layout from '~/components/story-default-layout/index.vue';
+// import Layout from '~/components/story-default-layout/index.vue';
+import Layout from '~/components/story-templates/titled-frame-template/index.vue';
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
 import { useTextOverlay } from '~/components/compositions/text-overlay';
 import { initState, waitFor } from '~/components/compositions/component-basics';
-import { useSvgDrawTo } from '../../drawto-canvas';
+import { useSvgDrawTo } from '../../svg-drawto';
 import { BBox } from 'sharedLib';
 import chroma from 'chroma-js';
 import { TextStyle } from '~/lib/html-text-metrics';
@@ -44,8 +46,8 @@ export default {
       mountPoint, state
     });
 
-    const canvas = superimposedElements.overlayElements.canvas!;
-    const svgDrawTo = useSvgDrawTo({ canvas, containerRef: mountPoint, state });
+    // const canvas = superimposedElements.overlayElements.canvas!;
+    // const svgDrawTo = useSvgDrawTo({ containerRef: mountPoint, state });
     // const { pixiJsAppRef } = svgDrawTo;
 
     // Set text size, print text, overlay canvas or svg rect, print dimensions
@@ -53,7 +55,7 @@ export default {
 
     const textDimensions = ref('init');
     const textSize = ref(45);
-    const inputText = ref('My Big Text');
+    const inputText = ref('Hover This Text');
     const textTop = ref(20);
     const textLeft = ref(20);
     const textFamily = ref('arial');
@@ -73,7 +75,10 @@ export default {
 
     }, () => {
       // const pixiJsApp = pixiJsAppRef.value!;
-      superimposedElements.setDimensions(300, 350);
+      const svgLayer = superimposedElements.overlayElements.svg!;
+      superimposedElements.setDimensions(500, 350);
+
+
       watch([inputText, textSize, textTop, textLeft, textFamily], () => {
         const input = inputText.value;
         const inputLines = input.split('\n');
@@ -88,25 +93,42 @@ export default {
           weight: 'normal'
         };
 
-        // pixiJsApp.stage.removeChildren();
         textOverlay.clearText();
+
+        const svgSelect = d3.select(svgLayer);
+
+        /*
+          var fontSize = 12;
+          var test = document.getElementById("Test");
+          test.style.fontSize = fontSize;
+          var height = (test.clientHeight + 1) + "px";
+          var width = (test.clientWidth + 1) + "px"
+        */
 
         _.each(inputLines, (line, linenum) => {
           const lineDimensions = textOverlay.putTextLn(style, left, top+(linenum*size), line)
           const dims = lineDimensions.elementDimensions;
+          svgSelect
+            .selectAll('.chars')
+            .data(dims, (d: any) => `${d.x}x${d.y}`)
+            .join('rect')
+            .classed('chars', true)
+            .attr("x", (d: any) => d.x)
+            .attr("y", (d: any) => d.y)
+            .attr("width", (d: any) => d.width)
+            .attr("height", (d: any) => d.height)
+            .attr("stroke", 'blue')
+            .attr("stroke-width", 1)
+            .attr("stroke-opacity", 0.8)
+            .attr("fill", 'yellow')
+            .attr("fill-opacity", 0.3)
+          ;
+
           const dimStrs = _.map(dims, d => {
             return `[${d.x}, ${d.y}, ${d.width}, ${d.height}]`;
           });
           const dimFmt = _.join(dimStrs, '\n');
           textDimensions.value = dimFmt;
-
-          const boundingRects = _.map(dims, d => {
-            const bbox = new BBox(d.x, d.y, d.width, d.height);
-            return drawRect(bbox);
-          });
-          if (boundingRects.length > 0) {
-            // pixiJsApp.stage.addChild(...boundingRects)
-          }
 
         });
 

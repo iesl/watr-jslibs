@@ -6,7 +6,7 @@ import _ from 'lodash';
 import { onMounted, ref } from '@vue/composition-api';
 import { useEventlibCore } from '~/components/compositions/eventlib-core'
 import { useEventlibSelect } from '~/components/compositions/eventlib-select'
-import { useSvgDrawTo } from '~/components/compositions/drawto-canvas';
+import { useSvgDrawTo } from '~/components/compositions/svg-drawto';
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";
 import { initState } from '~/components/compositions/component-basics'
 

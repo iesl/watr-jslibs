@@ -5,7 +5,7 @@ import {
 
 
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements'
-import { useSvgDrawTo } from '~/components/compositions/drawto-canvas';
+import { useSvgDrawTo } from '~/components/compositions/svg-drawto';
 import { initState, waitFor } from '~/components/compositions/component-basics';
 
 export default {

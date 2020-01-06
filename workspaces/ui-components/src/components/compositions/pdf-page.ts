@@ -9,7 +9,7 @@ import { StateArgs } from '~/components/compositions/component-basics'
 import { useEventlibCore, EventlibCore } from '~/components/compositions/eventlib-core';
 // import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
 import { useSuperimposedElements, SuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
-import { useSvgDrawTo, SvgDrawTo } from '~/components/compositions/drawto-canvas';
+import { useSvgDrawTo, SvgDrawTo } from '~/components/compositions/svg-drawto';
 
 import { useGlyphOverlays, SetGrid } from '~/components/compositions/glyph-overlay-component';
 import { useGlyphSelection } from '~/components/compositions/glyph-selection-component';

@@ -15,7 +15,7 @@ import chroma from 'chroma-js';
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 import { EventlibCore } from '~/components/compositions/eventlib-core';
 import { SuperimposedElements } from '~/components/compositions/superimposed-elements';
-import { SvgDrawTo } from '~/components/compositions/drawto-canvas';
+import { SvgDrawTo } from '~/components/compositions/svg-drawto';
 import { useRTreeSearch, RTreeSearch } from '~/components/compositions/rtree-search';
 import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 import { coords, BBox } from 'sharedLib';

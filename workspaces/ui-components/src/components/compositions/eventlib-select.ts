@@ -12,7 +12,7 @@ import {
 
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
-import { SvgDrawTo } from './drawto-canvas';
+import { SvgDrawTo } from './svg-drawto';
 import { BBox, Point } from 'sharedLib';
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 

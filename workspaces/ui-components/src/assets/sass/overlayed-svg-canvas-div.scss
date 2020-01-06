@@ -37,10 +37,13 @@ div.layers {
         text-overflow: ellipsis;
         white-space: nowrap;
 
-        .textoverlay {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .measured {
+            position: absolute;
+            // visibility: hidden;
+            // background: blue;
+            height: auto;
+            width: auto;
+            white-space: nowrap; /* Thanks to Herb Caudill comment */
         }
     }
 

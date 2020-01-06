@@ -37,23 +37,50 @@ export function getTextWidth(ctx: CanvasRenderingContext2D, text: string, font: 
   return metrics.width;
 }
 
-// export function getTextDimensions(text: string) {
-//   // Credit to http://jsfiddle.net/r491oe7z/2/
+import $ from 'jquery';
+import _ from 'lodash';
 
-//   const div = document.createElement('div');
-//   div.classList.add('textDimensionCalculation');
-//   const node = document.createTextNode(text);
-//   div.append(node);
-
-//   document.body.appendChild(div);
-
-//   const dimensions = {
-//     width : jQuery(div).outerWidth(),
-//     height : jQuery(div).outerHeight()
-//   };
-
-//   div.parentNode.removeChild(div);
+// export function getTextDimensionsJQuery(text: string) {
 // }
+
+export function showText(text: string, div: HTMLDivElement, atX: number, atY: number): LineDimensions {
+
+  const w = $(div).outerWidth();
+  const lineWidth = w!==undefined? w : 0;
+  const h = $(div).outerHeight();
+  const lineHeight = h!==undefined? h : 0;
+
+  let currX = atX;
+  const sizes = _.map(_.range(1, text.length+1), (i: number) => {
+    const inits = text.slice(0, i);
+    // div.innerText= inits;
+    $(div).text(inits)
+    const cw = $(div).outerWidth();
+    const currWidth = cw!==undefined? cw : 0;
+    const ch = $(div).outerHeight();
+    const currHeight = ch!==undefined? ch : 0;
+    // const textWidth = getTextWidth(inits, fontstring);
+    const charWidth = currWidth - currX + atX;
+    // const floorWidth = Math.floor(charWidth);
+    // const floorX = Math.floor(currX);
+    const size = { x: currX, y: atY, width: charWidth, height: currHeight};
+    const dbg = `${i}> '${inits}' = currW:${cw} charW:${charWidth}`;
+    console.log(dbg);
+    currX = currWidth + atX;
+
+    return size;
+  });
+
+  const lineDimensions: LineDimensions = {
+    x: 0, y: 0,
+    width: lineWidth,
+    height: lineHeight,
+    elementDimensions: sizes
+  };
+
+  return lineDimensions;
+
+}
 
 /*
   // <span class="my_class">Hello World</span>

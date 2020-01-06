@@ -5,7 +5,7 @@ import { ref, watch, Ref, createComponent, inject, onMounted, provide  } from '@
 import { initState } from '~/components/compositions/component-basics'
 import { useEventlibCore } from '~/components/compositions/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
-import { useSvgDrawTo } from '~/components/compositions/drawto-canvas';
+import { useSvgDrawTo } from '~/components/compositions/svg-drawto';
 import { useGlyphOverlays } from '~/components/compositions/glyph-overlay-component';
 import { useGlyphSelection } from '~/components/compositions/glyph-selection-component';
 import { useEventlibSelect } from '~/components/compositions/eventlib-select';
