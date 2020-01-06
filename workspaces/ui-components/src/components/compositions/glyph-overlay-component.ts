@@ -11,12 +11,11 @@ import {
 
 
 import chroma from 'chroma-js';
-import * as PIXI from 'pixi.js';
 
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 import { EventlibCore } from '~/components/compositions/eventlib-core';
 import { SuperimposedElements } from '~/components/compositions/superimposed-elements';
-import { CanvasDrawto } from '~/components/compositions/drawto-canvas';
+import { SvgDrawTo } from '~/components/compositions/drawto-canvas';
 import { useRTreeSearch, RTreeSearch } from '~/components/compositions/rtree-search';
 import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 import { coords, BBox } from 'sharedLib';
@@ -31,14 +30,14 @@ export interface GlyphOverlays {
 
 type Args = StateArgs & {
   eventlibCore: EventlibCore;
-  canvasDrawto: CanvasDrawto;
+  svgDrawTo: SvgDrawTo;
   superimposedElements: SuperimposedElements;
 };
 
 export function useGlyphOverlays({
   state,
   eventlibCore,
-  canvasDrawto,
+  svgDrawTo,
   superimposedElements,
 }: Args): GlyphOverlays {
   // TODO: setHoveredText (for highlighting sync-highlighting text on pdf-text widget)
@@ -48,7 +47,7 @@ export function useGlyphOverlays({
   let pageGeometry: BBox;
   const rtreeSearch = useRTreeSearch<TextDataPoint>({ state });
 
-  const { pixiJsAppRef } = canvasDrawto;
+  // const { pixiJsAppRef } = svgDrawTo;
   const setGrid: SetGrid = (textData, geom) => {
     pageGeometry = geom;
     textDataPointsRef.value = textData;
@@ -56,10 +55,10 @@ export function useGlyphOverlays({
 
   waitFor('GlyphOverlays', {
     state,
-    dependsOn: [textDataPointsRef, pixiJsAppRef],
+    dependsOn: [textDataPointsRef],
   }, () => {
 
-    const pixiJsApp = pixiJsAppRef.value!;
+    // const pixiJsApp = pixiJsAppRef.value!;
     const textData = textDataPointsRef.value!;
 
     const width = pageGeometry.width;
@@ -69,7 +68,7 @@ export function useGlyphOverlays({
     rtreeSearch.loadData(textData);
 
     // TODO recycle these graphics objects to avoid memory issues
-    let glyphReticles: PIXI.Graphics[] = [];
+    // let glyphReticles: PIXI.Graphics[] = [];
 
     const onMouseMove = (e: EMouseEvent) => {
       const pos = e.pos;
@@ -83,18 +82,18 @@ export function useGlyphOverlays({
 
       // Show hit reticles:
       const selectLineColor = chroma('gray').num();
-      pixiJsApp.stage.removeChild(...glyphReticles);
-      glyphReticles = [];
+      // pixiJsApp.stage.removeChild(...glyphReticles);
+      // glyphReticles = [];
 
       _.each(queryHits, (q) => {
         const glyphData = q.glyphData;
         if (glyphData) {
           const box = glyphData.glyphBounds;
-          const pgRect = new PIXI.Graphics();
-          pgRect.lineStyle(1, selectLineColor);
-          pgRect.drawRect(box.x, box.y, box.width, box.height);
-          pixiJsApp.stage.addChild(pgRect)
-          glyphReticles.push(pgRect);
+          // const pgRect = new PIXI.Graphics();
+          // pgRect.lineStyle(1, selectLineColor);
+          // pgRect.drawRect(box.x, box.y, box.width, box.height);
+          // pixiJsApp.stage.addChild(pgRect)
+          // glyphReticles.push(pgRect);
         }
       });
 

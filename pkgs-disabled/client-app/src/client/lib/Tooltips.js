@@ -3,7 +3,7 @@
  * tooltip engine won't suffice.
  */
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { $id } from "./tstags";
 

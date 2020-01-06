@@ -6,7 +6,7 @@ import _ from 'lodash';
 import { onMounted, ref } from '@vue/composition-api';
 import { useEventlibCore } from '~/components/compositions/eventlib-core'
 import { useEventlibSelect } from '~/components/compositions/eventlib-select'
-import { useCanvasDrawto } from '~/components/compositions/drawto-canvas';
+import { useSvgDrawTo } from '~/components/compositions/drawto-canvas';
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";
 import { initState } from '~/components/compositions/component-basics'
 
@@ -26,8 +26,8 @@ function setup() {
   const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Img, ElementTypes.Canvas], mountPoint, state });
   const canvas = superimposedElements.overlayElements.canvas!;
 
-  const canvasDrawto = useCanvasDrawto({ canvas, containerRef, state });
-  const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
+  const svgDrawTo = useSvgDrawTo({ canvas, containerRef, state });
+  const eventlibSelect = useEventlibSelect({ eventlibCore, svgDrawTo, state });
 
   const { selectionRef }  = eventlibSelect;
 

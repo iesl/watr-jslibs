@@ -2,7 +2,7 @@
 
 import * as spu  from '../client/lib/SplitWin';
 import * as util  from '../client/lib/utils';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { $id, t, htm } from '../client/lib/tstags';
 
 export function runSplitPane() {

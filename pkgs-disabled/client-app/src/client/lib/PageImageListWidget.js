@@ -5,7 +5,7 @@
 
 
 import * as $ from 'jquery';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import {t, $id, icon} from "./tstags";
 import * as reflowWidgetInit from  './ReflowWidgetInit';

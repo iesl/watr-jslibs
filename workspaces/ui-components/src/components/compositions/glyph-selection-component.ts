@@ -27,8 +27,7 @@ import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 import { tweenBBox } from '~/lib/tweening';
 
 import chroma from 'chroma-js';
-import * as PIXI from 'pixi.js';
-import { CanvasDrawto } from '~/components/compositions/drawto-canvas';
+import { SvgDrawTo } from '~/components/compositions/drawto-canvas';
 
 export interface GlyphSelection {
 }
@@ -36,7 +35,7 @@ export interface GlyphSelection {
 type Args = StateArgs & {
   eventlibSelect: EventlibSelect;
   rtreeSearch: RTreeSearch<TextDataPoint>;
-  canvasDrawto: CanvasDrawto;
+  svgDrawTo: SvgDrawTo;
   // imgCanvasOverlay: SuperimposedElements;
 };
 
@@ -45,36 +44,36 @@ export function useGlyphSelection({
   state,
   eventlibSelect,
   rtreeSearch,
-  canvasDrawto,
+  svgDrawTo,
 }: Args): GlyphSelection {
   const { selectionRef } = eventlibSelect;
 
-  const { pixiJsAppRef } = canvasDrawto;
+  // const { pixiJsAppRef } = svgDrawTo;
 
   waitFor('GlyphSelection', {
     state,
-    dependsOn: [pixiJsAppRef],
+    dependsOn: [],
   }, () => {
 
-    const pixiJsApp = pixiJsAppRef.value!;
+    // const pixiJsApp = pixiJsAppRef.value!;
 
     watch(selectionRef, () => {
       const selection = selectionRef.value!;
       // search for glyphs in selection box...
       const selectedGlyphs = rtreeSearch.search(selection);
       const minBounds = queryHitsMBR(selectedGlyphs);
-      const selectionRect = new PIXI.Graphics();
+      // const selectionRect = new PIXI.Graphics();
       const lineColor = chroma('blue').num();
       const fillColor = chroma('green').num();
 
       if (minBounds) {
-        pixiJsApp.stage.addChild(selectionRect);
+        // pixiJsApp.stage.addChild(selectionRect);
         const tweenPromise = tweenBBox(selection, minBounds, (currBBox) => {
-          selectionRect.clear();
-          selectionRect.lineStyle(1, lineColor);
-          selectionRect.beginFill(fillColor, 0.4);
-          selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
-          selectionRect.endFill();
+          // selectionRect.clear();
+          // selectionRect.lineStyle(1, lineColor);
+          // selectionRect.beginFill(fillColor, 0.4);
+          // selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
+          // selectionRect.endFill();
         });
 
         tweenPromise.then(() => {

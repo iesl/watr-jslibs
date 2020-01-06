@@ -3,7 +3,7 @@
  **/
 
 /* global require _ watr  */
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import { shared } from './shared-state';
 import * as ReflowWidget from  './ReflowWidget';

@@ -3,7 +3,7 @@
  **/
 
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 import * as d3 from 'd3';
 import $ from 'jquery';
 

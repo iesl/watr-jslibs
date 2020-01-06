@@ -1,6 +1,6 @@
 /* global  */
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 import * as $ from 'jquery';
 // import * as Rx from 'rxjs';
 import * as rx from "rxjs";

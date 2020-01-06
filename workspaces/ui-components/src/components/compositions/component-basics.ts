@@ -62,7 +62,7 @@ export function watchAll(rs?: Ref<any>[]) {
 }
 
 // TODO simplify the waitFor paradigm to something like the following:
-// export function useSketchlibCore({ state, canvasDrawto, eventlibSelect }: Args)  {
+// export function useSketchlibCore({ state, svgDrawTo, eventlibSelect }: Args)  {
 //   waitFor(allInputArgs(), () => {
 //     const pixiJsApp = pixiJsAppRef.value!;
 //   });

@@ -1,4 +1,4 @@
-import * as _ from 'lodash';
+import _ from 'lodash';
 import path from "path";
 
 import { readCorpusEntries } from "./corpusRoutes";

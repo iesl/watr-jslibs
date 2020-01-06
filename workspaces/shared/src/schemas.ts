@@ -5,7 +5,7 @@
 
 /* global require */
 
-// import * as _ from 'lodash';
+// import _ from 'lodash';
 // let Ajv = require('ajv');
 
 // function schemaName(n) {

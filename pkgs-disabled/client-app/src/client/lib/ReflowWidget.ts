@@ -5,7 +5,7 @@
 /* global require fabric */
 
 import * as $ from 'jquery';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import * as fabric from 'fabric';
 import * as d3 from 'd3';
 

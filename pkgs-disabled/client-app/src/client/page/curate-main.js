@@ -5,7 +5,7 @@
 /* global */
 import * as $ from 'jquery';
 import 'jquery-serializejson';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import * as frame from '../lib/frame';
 import { t, htm } from "../lib/tstags";

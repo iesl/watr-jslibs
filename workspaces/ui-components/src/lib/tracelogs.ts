@@ -374,7 +374,6 @@ V extends ShapeForKind<K>
   (kind: K, fold: FoldX<S, T, U, V>|undefined = undefined) : S|T|U|V {
     const x = 0;
     const y = 0;
-    const p: Point = zeroShape1('point') ;
     switch(kind) {
       case 'point': {
         const point: Point = {
@@ -387,6 +386,7 @@ V extends ShapeForKind<K>
         return point as S;
       }
       case "line": {
+        const p: Point = zeroShape1('point') ;
         const line: Line = {
           kind: 'line', p1: p, p2: p,
         };
@@ -407,6 +407,7 @@ V extends ShapeForKind<K>
         return rect as S;
       }
       case "trapezoid":
+        const p: Point = zeroShape1('point') ;
         const trap: Trapezoid = {
           kind: 'trapezoid', topLeft: p, bottomLeft: p, topWidth: 0, bottomWidth: 0
         };

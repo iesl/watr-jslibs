@@ -4,7 +4,7 @@
  */
 
 import * as $ from 'jquery';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import 'jquery-serializejson';
 
 import {t, htm, $id} from "./tstags";

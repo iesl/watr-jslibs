@@ -12,13 +12,11 @@ import {
 
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
-import { CanvasDrawto } from './drawto-canvas';
+import { SvgDrawTo } from './drawto-canvas';
 import { BBox, Point } from 'sharedLib';
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 
-import * as PIXI from 'pixi.js';
 import chroma from 'chroma-js';
-
 
 function pointsToRect(p1: Point, p2: Point): BBox {
   let ny = Math.min(p1.y, p2.y);
@@ -35,43 +33,43 @@ export interface EventlibSelect {
 }
 
 type Args = StateArgs & {
-  canvasDrawto: CanvasDrawto,
+  svgDrawTo: SvgDrawTo,
   eventlibCore: EventlibCore,
 };
 
 export function useEventlibSelect({
   state,
   eventlibCore,
-  canvasDrawto
+  svgDrawTo
 }: Args) {
 
   // const selectionRef = ref(new BBox(0, 0, 0, 0));
   const selectionRef: Ref<BBox|null> = ref(null);
   const clickedPointRef: Ref<Point|null> = ref(null);
-  const { pixiJsAppRef } = canvasDrawto;
+  // const { pixiJsAppRef } = svgDrawTo;
 
   waitFor('EventlibSelect', {
     state,
-    dependsOn: [canvasDrawto.pixiJsAppRef],
+    dependsOn: [],
   }, () => {
 
     const { setMouseHandlers } = eventlibCore;
 
-    const pixiJsApp = pixiJsAppRef.value!;
+    // const pixiJsApp = pixiJsAppRef.value!;
 
     let selecting = false;
     let originPt: Point = new Point(0, 0);
     let currentPt: Point = new Point(0, 0);
 
 
-    const selectionRect = new PIXI.Graphics();
+    // const selectionRect = new PIXI.Graphics();
     const selectLineColor = chroma('blue').darken().num();
 
     function drawCurrentRect() {
       const currBBox = pointsToRect(originPt, currentPt);
-      selectionRect.clear();
-      selectionRect.lineStyle(2, selectLineColor);
-      selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
+      // selectionRect.clear();
+      // selectionRect.lineStyle(2, selectLineColor);
+      // selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
     }
 
 
@@ -85,25 +83,25 @@ export function useEventlibSelect({
           const currBBox = pointsToRect(originPt, currentPt);
 
           flashFill = flashFill.brighten(0.4);
-          selectionRect.clear();
-          selectionRect.beginFill(flashFill.num(), 0.4);
-          selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
-          selectionRect.endFill();
+          // selectionRect.clear();
+          // selectionRect.beginFill(flashFill.num(), 0.4);
+          // selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
+          // selectionRect.endFill();
         } else {
-          pixiJsApp.ticker.remove(_go);
+          // pixiJsApp.ticker.remove(_go);
           endSelection();
         }
       }
 
-      pixiJsApp.ticker.add(_go);
+      // pixiJsApp.ticker.add(_go);
 
       // selectionRect.lineStyle(2, selectLineColor);
     }
 
     function endSelection() {
       selecting = false;
-      selectionRect.clear();
-      pixiJsApp.stage.removeChild(selectionRect);
+      // selectionRect.clear();
+      // pixiJsApp.stage.removeChild(selectionRect);
     }
 
     const onMouseDown = (e: EMouseEvent) => {
@@ -112,7 +110,7 @@ export function useEventlibSelect({
       const { ctrlKey } = e.origMouseEvent;
       if (ctrlKey) {
         originPt = currentPt = new Point(x, y);
-        pixiJsApp.stage.addChild(selectionRect)
+        // pixiJsApp.stage.addChild(selectionRect)
         drawCurrentRect();
 
         selecting = true;

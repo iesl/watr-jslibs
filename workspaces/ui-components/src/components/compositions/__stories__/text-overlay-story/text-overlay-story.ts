@@ -12,25 +12,24 @@ import Layout from '~/components/story-default-layout/index.vue';
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
 import { useTextOverlay } from '~/components/compositions/text-overlay';
 import { initState, waitFor } from '~/components/compositions/component-basics';
-import { useCanvasDrawto } from '../../drawto-canvas';
+import { useSvgDrawTo } from '../../drawto-canvas';
 import { BBox } from 'sharedLib';
-import * as PIXI from 'pixi.js';
 import chroma from 'chroma-js';
 import { TextStyle } from '~/lib/html-text-metrics';
 
 export function drawRect(bbox: BBox) {
-  const pg = new PIXI.Graphics();
+  // const pg = new PIXI.Graphics();
 
   const { x, y, width, height } = bbox;
   // const fillcolor = chroma('red').num();
   const linecolor = chroma('yellow').num();
 
-  pg.lineStyle(1, linecolor, 0.3);
-  // pg.beginFill(fillcolor);
-  pg.drawRect(x, y, width, height);
-  // pg.endFill();
+  // pg.lineStyle(1, linecolor, 0.3);
+  // // pg.beginFill(fillcolor);
+  // pg.drawRect(x, y, width, height);
+  // // pg.endFill();
 
-  return pg;
+  // return pg;
 }
 
 export default {
@@ -46,8 +45,8 @@ export default {
     });
 
     const canvas = superimposedElements.overlayElements.canvas!;
-    const canvasDrawto = useCanvasDrawto({ canvas, containerRef: mountPoint, state });
-    const { pixiJsAppRef } = canvasDrawto;
+    const svgDrawTo = useSvgDrawTo({ canvas, containerRef: mountPoint, state });
+    // const { pixiJsAppRef } = svgDrawTo;
 
     // Set text size, print text, overlay canvas or svg rect, print dimensions
     // Set text color, styles, ...
@@ -70,10 +69,10 @@ export default {
 
     waitFor('', {
       state,
-      dependsOn: [pixiJsAppRef, mountPoint],
+      dependsOn: [mountPoint],
 
     }, () => {
-      const pixiJsApp = pixiJsAppRef.value!;
+      // const pixiJsApp = pixiJsAppRef.value!;
       superimposedElements.setDimensions(300, 350);
       watch([inputText, textSize, textTop, textLeft, textFamily], () => {
         const input = inputText.value;
@@ -89,7 +88,7 @@ export default {
           weight: 'normal'
         };
 
-        pixiJsApp.stage.removeChildren();
+        // pixiJsApp.stage.removeChildren();
         textOverlay.clearText();
 
         _.each(inputLines, (line, linenum) => {
@@ -106,7 +105,7 @@ export default {
             return drawRect(bbox);
           });
           if (boundingRects.length > 0) {
-            pixiJsApp.stage.addChild(...boundingRects)
+            // pixiJsApp.stage.addChild(...boundingRects)
           }
 
         });

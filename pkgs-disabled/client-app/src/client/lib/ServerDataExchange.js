@@ -3,7 +3,7 @@
  */
 
 
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import * as Rx from 'rxjs';
 import * as server from './serverApi';

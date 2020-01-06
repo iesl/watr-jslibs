@@ -9,7 +9,7 @@ import { StateArgs } from '~/components/compositions/component-basics'
 import { useEventlibCore, EventlibCore } from '~/components/compositions/eventlib-core';
 // import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
 import { useSuperimposedElements, SuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
-import { useCanvasDrawto, CanvasDrawto } from '~/components/compositions/drawto-canvas';
+import { useSvgDrawTo, SvgDrawTo } from '~/components/compositions/drawto-canvas';
 
 import { useGlyphOverlays, SetGrid } from '~/components/compositions/glyph-overlay-component';
 import { useGlyphSelection } from '~/components/compositions/glyph-selection-component';
@@ -23,7 +23,7 @@ type Args = StateArgs & {
 export interface PdfPageViewer {
   eventlibCore: EventlibCore;
   superimposedElements: SuperimposedElements;
-  canvasDrawto: CanvasDrawto;
+  svgDrawTo: SvgDrawTo;
   setGrid: SetGrid;
 }
 
@@ -41,18 +41,18 @@ export function usePdfPageViewer({
   });
 
   const canvas = superimposedElements.overlayElements.canvas!;
-  const canvasDrawto = useCanvasDrawto({ canvas, containerRef: mountPoint, state });
-  const glyphOverlays = useGlyphOverlays({ state, eventlibCore, canvasDrawto, superimposedElements });
-  const eventlibSelect = useEventlibSelect({ eventlibCore, canvasDrawto, state });
+  const svgDrawTo = useSvgDrawTo({ canvas, containerRef: mountPoint, state });
+  const glyphOverlays = useGlyphOverlays({ state, eventlibCore, svgDrawTo, superimposedElements });
+  const eventlibSelect = useEventlibSelect({ eventlibCore, svgDrawTo, state });
   const { rtreeSearch } = glyphOverlays;
-  useGlyphSelection({ canvasDrawto, rtreeSearch, eventlibSelect, state });
+  useGlyphSelection({ svgDrawTo, rtreeSearch, eventlibSelect, state });
 
   const setGrid = glyphOverlays.setGrid;
 
   return {
     eventlibCore,
     superimposedElements,
-    canvasDrawto,
+    svgDrawTo,
     setGrid
   }
 

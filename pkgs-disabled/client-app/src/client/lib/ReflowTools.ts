@@ -3,7 +3,7 @@
  **/
 
 /* global require watr */
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 import * as coords from './coord-sys';
 const GraphPaper = watr.utils.GraphPaper;
