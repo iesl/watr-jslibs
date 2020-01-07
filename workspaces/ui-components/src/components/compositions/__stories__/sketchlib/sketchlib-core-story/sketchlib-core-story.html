@@ -1,4 +1,5 @@
-<titled-layout>
+
+<layout>
 
     <template v-slot:title>
         Sketchlib Core/Trace functionality
@@ -8,39 +9,43 @@
         Basic Shape Drawing and animation for Tracelog viewing
     </template>
 
+    <template v-slot:controls>
+        <v-container>
+            <v-row>
+                <v-col justify="space-between" cols="4">
+                    <v-card>
 
-    <left-right-layout>
+                        <v-btn-toggle v-model="inkwellToggle">
+                            <v-btn>
+                                <v-icon>mdi-format-align-left</v-icon>
+                            </v-btn>
 
-        <template v-slot:left-content>
-            <v-card>
-                <div class="mountPoint" ref="mountPoint"></div>
-            </v-card>
-        </template>
-        <template v-slot:right-content>
-            <v-card>
+                            <v-btn>
+                                <v-icon>mdi-format-align-center</v-icon>
+                            </v-btn>
 
-                <v-btn-toggle v-model="inkwellToggle">
-                    <v-btn>
-                        <v-icon>mdi-format-align-left</v-icon>
-                    </v-btn>
+                            <v-btn>
+                                <v-icon>mdi-format-align-right</v-icon>
+                            </v-btn>
 
-                    <v-btn>
-                        <v-icon>mdi-format-align-center</v-icon>
-                    </v-btn>
+                            <v-btn>
+                                <v-icon>mdi-format-align-justify</v-icon>
+                            </v-btn>
+                        </v-btn-toggle>
+                        <span>{{ inkwellSelection }}</span>
 
-                    <v-btn>
-                        <v-icon>mdi-format-align-right</v-icon>
-                    </v-btn>
+                    </v-card>
+                </v-col>
+            </v-row>
+        </v-container>
+    </template>
 
-                    <v-btn>
-                        <v-icon>mdi-format-align-justify</v-icon>
-                    </v-btn>
-                </v-btn-toggle>
-                <span>{{ inkwellSelection }}</span>
+    <template v-slot:notes>
+        Notes...
+    </template>
 
-            </v-card>
-        </template>
+    <template v-slot:main>
+        <div class="mountPoint" ref="mountPoint"></div>
+    </template>
 
-    </left-right-layout>
-
-</titled-layout>
+</layout>

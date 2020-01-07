@@ -9,7 +9,6 @@ import {
 } from '@vue/composition-api';
 
 
-// import Layout from '~/components/story-default-layout/index.vue';
 import Layout from '~/components/story-templates/titled-frame-template/index.vue';
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
 import { useTextOverlay } from '~/components/compositions/text-overlay';

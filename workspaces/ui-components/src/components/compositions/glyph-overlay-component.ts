@@ -37,7 +37,7 @@ type Args = StateArgs & {
 export function useGlyphOverlays({
   state,
   eventlibCore,
-  svgDrawTo,
+  // svgDrawTo,
   superimposedElements,
 }: Args): GlyphOverlays {
   // TODO: setHoveredText (for highlighting sync-highlighting text on pdf-text widget)

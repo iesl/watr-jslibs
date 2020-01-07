@@ -26,7 +26,7 @@ function setup() {
   const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Img, ElementTypes.Canvas], mountPoint, state });
   const canvas = superimposedElements.overlayElements.canvas!;
 
-  const svgDrawTo = useSvgDrawTo({ canvas, containerRef, state });
+  const svgDrawTo = useSvgDrawTo({ containerRef, state });
   const eventlibSelect = useEventlibSelect({ eventlibCore, svgDrawTo, state });
 
   const { selectionRef }  = eventlibSelect;

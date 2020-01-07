@@ -1,7 +1,5 @@
 
-// import Layout from '~/components/story-default-layout/index.vue';
-import TitledLayout from '~/components/story-templates/titled-frame-template/index.vue';
-import LeftRightLayout from '~/components/story-templates/left-right-template/index.vue';
+import Layout from '~/components/story-templates/titled-frame-template/index.vue';
 
 import {
   ref,
@@ -105,7 +103,7 @@ export function clickToDrawHandlers(shapeKindRef: Ref<string>) {
 // }
 
 export default {
-  components: { TitledLayout, LeftRightLayout },
+  components: { Layout },
   setup() {
 
     const state = initState();
@@ -118,9 +116,7 @@ export default {
 
     const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Svg], mountPoint, state });
 
-    const canvas = superimposedElements.overlayElements.canvas!;
-
-    const svgDrawTo = useSvgDrawTo({ canvas, containerRef, state });
+    const svgDrawTo = useSvgDrawTo({ containerRef, state });
     const eventlibSelect = useEventlibSelect({ eventlibCore, svgDrawTo, state });
     const { selectionRef } = eventlibSelect;
 
