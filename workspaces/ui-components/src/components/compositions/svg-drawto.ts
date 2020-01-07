@@ -15,7 +15,6 @@ export interface SvgDrawTo {
 
 
 type Args = StateArgs & {
-  canvas: HTMLCanvasElement,
   containerRef: Ref<HTMLDivElement|null>
 };
 

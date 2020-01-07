@@ -45,22 +45,23 @@ export default createComponent({
 
     const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
     const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Text], mountPoint, state });
-    const canvas = superimposedElements.overlayElements.canvas!;
-    const svgDrawTo = useSvgDrawTo({ canvas, containerRef: mountPoint, state });
+    const svgDrawTo = useSvgDrawTo({ containerRef: mountPoint, state });
     const eventlibSelect = useEventlibSelect({ eventlibCore, svgDrawTo, state });
     const glyphOverlays = useGlyphOverlays({ state, eventlibCore, svgDrawTo, superimposedElements });
     const textOverlay = useTextOverlay({ superimposedElements, state });
 
     const { putTextLn } = textOverlay;
 
+
     onMounted(() => {
       superimposedElements.setDimensions(600, 800);
 
       watch(providedTextgridRef, (providedTextgrid) => {
+
         if (providedTextgrid===null) return;
         const textgrid = providedTextgrid.textgrid;
 
-        const size = 14;
+        const size = 18;
         const style: TextStyle = {
           size,
           style: 'normal',
@@ -68,6 +69,9 @@ export default createComponent({
           weight: 'normal'
         };
 
+        const textDiv = superimposedElements.overlayElements.textDiv!;
+
+        textDiv.style.visibility = 'hidden';
         let currY = 0;
         let maxWidth = 0;
         _.each(textgrid.rows, (row, rownum) => {
@@ -80,6 +84,7 @@ export default createComponent({
         });
 
         const widthSlopFactor = 20;
+        textDiv.style.visibility = 'visible';
         superimposedElements.setDimensions(maxWidth+widthSlopFactor, currY+size);
 
       });

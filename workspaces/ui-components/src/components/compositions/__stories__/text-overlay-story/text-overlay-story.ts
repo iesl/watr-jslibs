@@ -97,14 +97,6 @@ export default {
 
         const svgSelect = d3.select(svgLayer);
 
-        /*
-          var fontSize = 12;
-          var test = document.getElementById("Test");
-          test.style.fontSize = fontSize;
-          var height = (test.clientHeight + 1) + "px";
-          var width = (test.clientWidth + 1) + "px"
-        */
-
         _.each(inputLines, (line, linenum) => {
           const lineDimensions = textOverlay.putTextLn(style, left, top+(linenum*size), line)
           const dims = lineDimensions.elementDimensions;

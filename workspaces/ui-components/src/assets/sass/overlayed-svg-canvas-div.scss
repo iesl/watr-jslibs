@@ -38,12 +38,11 @@ div.layers {
         white-space: nowrap;
 
         .measured {
+            visibility: hidden;
             position: absolute;
-            // visibility: hidden;
-            // background: blue;
             height: auto;
             width: auto;
-            white-space: nowrap; /* Thanks to Herb Caudill comment */
+            white-space: pre;
         }
     }
 

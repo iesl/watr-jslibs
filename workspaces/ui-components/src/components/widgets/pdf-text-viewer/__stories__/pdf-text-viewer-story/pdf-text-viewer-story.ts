@@ -3,16 +3,15 @@
 import PdfTextViewer from '../../index.vue';
 import { provideTextGrid, TextgridRef } from '../../pdf-text-viewer';
 import { createComponent, ref, onMounted } from '@vue/composition-api';
-import { GridTypes, coords, Point } from 'sharedLib';
+import { GridTypes, coords } from 'sharedLib';
 import { configAxios } from '~/lib/axios';
-import { initGridData, GridData } from '~/lib/TextGlyphDataTypes';
+import Layout from '~/components/story-templates/titled-frame-template/index.vue';
 
 export default createComponent({
-  components: { PdfTextViewer },
+  components: { PdfTextViewer, Layout },
   setup() {
 
 
-    // const providedTextgridRef: Ref<GridTypes.Textgrid|null> = ref(null);
     const providedTextgridRef: TextgridRef = ref(null);
     provideTextGrid(providedTextgridRef);
 
@@ -26,11 +25,6 @@ export default createComponent({
           const [l, t, w, h] = page0.pageGeometry;
           const pageBounds = coords.mk.fromArray([l, t, w, h]);
 
-          // const textWidth = () => 10; // (s: string) => context2d.measureText(s).width;
-          // const textHeight = 12; // this.lineHeight;
-          // const tmpPageMargin = 10;
-          // const origin = new Point(tmpPageMargin, tmpPageMargin, coords.CoordSys.GraphUnits);
-          // const gridData: GridData = initGridData(textgrid, 0, textWidth, origin, textHeight);
           providedTextgridRef.value = {
             textgrid,
             pageBounds

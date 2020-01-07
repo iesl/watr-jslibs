@@ -1,15 +1,29 @@
-<v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6>
-        <v-card>
-            <v-card-title class="headline">
-                Pdf Text Viewer
-            </v-card-title>
-        </v-card>
-        <v-card>
-            <div>
-                <PdfTextViewer />
-            </div>
-        </v-card>
+<layout>
 
-    </v-flex>
-</v-layout>
+    <template v-slot:title>
+        Pdf Text Viewer
+    </template>
+
+    <template v-slot:description>
+        Viewer for TextWorks extracted text
+    </template>
+
+    <template v-slot:controls>
+        <v-container>
+            <v-row>
+                <v-col justify="space-between" cols="4">
+                </v-col>
+
+            </v-row>
+        </v-container>
+    </template>
+
+    <template v-slot:notes>
+        A few notes go here
+    </template>
+
+    <template v-slot:main>
+        <PdfTextViewer />
+    </template>
+</layout>
+
