@@ -1,7 +1,0 @@
-<template lang="html" src="./story-default-layout.html">
-</template>
-<script lang="ts">
-  export default {}
-</script>
-<style lang="scss" scoped>
-</style>

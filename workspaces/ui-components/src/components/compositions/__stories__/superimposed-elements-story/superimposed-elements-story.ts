@@ -4,12 +4,10 @@ import {
 } from '@vue/composition-api';
 
 
-import Layout from '~/components/story-templates/titled-frame-template/index.vue';
 import { useSuperimposedElements, ElementTypes  } from '~/components/compositions/superimposed-elements'
 import { initState } from '~/components/compositions/component-basics';
 
 export default {
-  components: { Layout },
   setup() {
 
     const state = initState();

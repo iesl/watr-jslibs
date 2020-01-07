@@ -26,7 +26,6 @@ type Args = StateArgs & {
 
 
 export function useTextOverlay({
-  state,
   superimposedElements,
 }: Args): TextOverlay {
 

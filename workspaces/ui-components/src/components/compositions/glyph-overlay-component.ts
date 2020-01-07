@@ -15,7 +15,6 @@ import chroma from 'chroma-js';
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 import { EventlibCore } from '~/components/compositions/eventlib-core';
 import { SuperimposedElements } from '~/components/compositions/superimposed-elements';
-import { SvgDrawTo } from '~/components/compositions/svg-drawto';
 import { useRTreeSearch, RTreeSearch } from '~/components/compositions/rtree-search';
 import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 import { coords, BBox } from 'sharedLib';
@@ -30,14 +29,12 @@ export interface GlyphOverlays {
 
 type Args = StateArgs & {
   eventlibCore: EventlibCore;
-  svgDrawTo: SvgDrawTo;
   superimposedElements: SuperimposedElements;
 };
 
 export function useGlyphOverlays({
   state,
   eventlibCore,
-  // svgDrawTo,
   superimposedElements,
 }: Args): GlyphOverlays {
   // TODO: setHoveredText (for highlighting sync-highlighting text on pdf-text widget)
@@ -47,7 +44,6 @@ export function useGlyphOverlays({
   let pageGeometry: BBox;
   const rtreeSearch = useRTreeSearch<TextDataPoint>({ state });
 
-  // const { pixiJsAppRef } = svgDrawTo;
   const setGrid: SetGrid = (textData, geom) => {
     pageGeometry = geom;
     textDataPointsRef.value = textData;

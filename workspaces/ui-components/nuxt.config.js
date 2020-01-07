@@ -4,17 +4,14 @@ import path from 'path';
 import util from 'util';
 const resolve = path.resolve;
 
-
 const modulesDir = [
   resolve(__dirname, '../../node_modules/'),
   resolve(__dirname, './node_modules/')
-];
+]
 
 const rootDir = __dirname;
 const srcDir = resolve( rootDir, 'src');
 const tsconfigFile = resolve( rootDir, 'tsconfig.json');
-
-
 
 export default {
   rootDir,
@@ -66,7 +63,8 @@ export default {
    ** Plugins to load before mounting the App
    */
   plugins: [
-    '~/plugins/composition-api'
+    '~/plugins/composition-api',
+    '~/plugins/global-components'
   ],
   /*
    ** Nuxt.js dev-modules

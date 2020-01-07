@@ -1,5 +1,4 @@
 
-import Layout from '~/components/story-templates/titled-frame-template/index.vue';
 
 import {
   ref,
@@ -10,7 +9,6 @@ import {
 // import { MouseHandlerInit, EMouseEvent } from '~/lib/EventlibHandlers';
 
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements'
-import { useSvgDrawTo } from '~/components/compositions/svg-drawto';
 import { useSketchlibCore } from '~/components/compositions/sketchlib-core';
 import { useEventlibCore } from '~/components/compositions/eventlib-core';
 import { useEventlibSelect, selectExtentHandlers } from '~/components/compositions/eventlib-select'
@@ -103,7 +101,6 @@ export function clickToDrawHandlers(shapeKindRef: Ref<string>) {
 // }
 
 export default {
-  components: { Layout },
   setup() {
 
     const state = initState();
@@ -116,11 +113,10 @@ export default {
 
     const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Svg], mountPoint, state });
 
-    const svgDrawTo = useSvgDrawTo({ containerRef, state });
-    const eventlibSelect = useEventlibSelect({ eventlibCore, svgDrawTo, state });
+    const eventlibSelect = useEventlibSelect({ eventlibCore, state });
     const { selectionRef } = eventlibSelect;
 
-    useSketchlibCore({ state, svgDrawTo, eventlibCore, eventlibSelect });
+    useSketchlibCore({ state, eventlibCore, eventlibSelect });
 
     const myHandlers1  = () =>  {
       return {

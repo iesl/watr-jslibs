@@ -27,7 +27,6 @@ export interface RTreeSearch<T> {
 type Args = StateArgs & {}
 
 export function useRTreeSearch<T>({
-  state,
 }: Args): RTreeSearch<T> {
   const rtree: RBush<T> = new RBush<T>();
   const dataRef: Ref<T[] | null> = ref(null);

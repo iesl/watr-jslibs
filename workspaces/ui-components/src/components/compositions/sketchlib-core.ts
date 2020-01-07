@@ -8,7 +8,6 @@ import {
   watch,
 } from '@vue/composition-api';
 
-import { SvgDrawTo } from './svg-drawto';
 import { EventlibCore } from './eventlib-core';
 import { StateArgs, waitFor } from '~/components/compositions/component-basics'
 import { EventlibSelect } from './eventlib-select';
@@ -16,13 +15,11 @@ import { EventlibSelect } from './eventlib-select';
 
 
 type Args = StateArgs & {
-  svgDrawTo: SvgDrawTo,
   eventlibCore: EventlibCore,
   eventlibSelect: EventlibSelect,
 };
 
-export function useSketchlibCore({ state, svgDrawTo, eventlibSelect }: Args)  {
-  // const { pixiJsAppRef } = svgDrawTo;
+export function useSketchlibCore({ state, eventlibSelect }: Args)  {
 
   waitFor('SketchlibCore', {
     state,

@@ -2,21 +2,24 @@
  * Provide the ability to draw selection rectangles and emit selection events
  */
 import _ from 'lodash';
+import * as d3 from 'd3';
 
 import {
   ref,
   Ref,
   reactive,
   toRefs,
+  watch,
 } from '@vue/composition-api';
 
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
-import { SvgDrawTo } from './svg-drawto';
-import { BBox, Point } from 'sharedLib';
-import { StateArgs, waitFor } from '~/components/compositions/component-basics'
+import { BBox, Point, d3x } from 'sharedLib';
+import { StateArgs } from '~/components/compositions/component-basics'
+const { initStroke, initFill, initRect } = d3x;
 
-import chroma from 'chroma-js';
+// import chroma from 'chroma-js';
+import { SuperimposedElements } from './superimposed-elements';
 
 function pointsToRect(p1: Point, p2: Point): BBox {
   let ny = Math.min(p1.y, p2.y);
@@ -33,155 +36,77 @@ export interface EventlibSelect {
 }
 
 type Args = StateArgs & {
-  svgDrawTo: SvgDrawTo,
+  superimposedElements: SuperimposedElements,
   eventlibCore: EventlibCore,
 };
 
 export function useEventlibSelect({
-  state,
+  superimposedElements,
   eventlibCore,
-  svgDrawTo
 }: Args) {
 
-  // const selectionRef = ref(new BBox(0, 0, 0, 0));
   const selectionRef: Ref<BBox|null> = ref(null);
   const clickedPointRef: Ref<Point|null> = ref(null);
-  // const { pixiJsAppRef } = svgDrawTo;
 
-  waitFor('EventlibSelect', {
-    state,
-    dependsOn: [],
-  }, () => {
+  const svgLayer = superimposedElements.overlayElements.svg!;
+  const svgSelect = d3.select(svgLayer);
 
-    const { setMouseHandlers } = eventlibCore;
+  let currSvgRect: d3.Selection<SVGRectElement, BBox, SVGElement, unknown>;
 
-    // const pixiJsApp = pixiJsAppRef.value!;
+  const { setMouseHandlers } = eventlibCore;
 
-    let selecting = false;
-    let originPt: Point = new Point(0, 0);
-    let currentPt: Point = new Point(0, 0);
+  const { refs, handlers } = selectExtentHandlers();
 
+  let originPt: Point = new Point(0, 0);
+  let currentPt: Point = new Point(0, 0);
+  let currBBox: BBox;
 
-    // const selectionRect = new PIXI.Graphics();
-    const selectLineColor = chroma('blue').darken().num();
+  function initSvgRect() {
+    currBBox = pointsToRect(originPt, currentPt);
 
-    function drawCurrentRect() {
-      const currBBox = pointsToRect(originPt, currentPt);
-      // selectionRect.clear();
-      // selectionRect.lineStyle(2, selectLineColor);
-      // selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
-    }
+    currSvgRect = svgSelect
+      .selectAll('rect#selection')
+      .data([currBBox])
+      .enter()
+      .append('rect').attr('id', 'selection')
+      .call(initStroke, 'blue', 1, 0.8)
+      .call(initFill, 'yellow', 0.8)
+    ;
+    updateCurrentRect();
+  }
 
+  function updateCurrentRect() {
+    currBBox = pointsToRect(originPt, currentPt);
+    currSvgRect
+      .call(initRect, () => currBBox)
+    ;
+  }
 
-    function flashCurrentRect(color: string) {
-      let elapsed = 0;
-      let flashFill = chroma(color);
-
-      function _go() {
-        elapsed += 1;
-        if (elapsed < 10) {
-          const currBBox = pointsToRect(originPt, currentPt);
-
-          flashFill = flashFill.brighten(0.4);
-          // selectionRect.clear();
-          // selectionRect.beginFill(flashFill.num(), 0.4);
-          // selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
-          // selectionRect.endFill();
-        } else {
-          // pixiJsApp.ticker.remove(_go);
-          endSelection();
-        }
-      }
-
-      // pixiJsApp.ticker.add(_go);
-
-      // selectionRect.lineStyle(2, selectLineColor);
-    }
-
-    function endSelection() {
-      selecting = false;
-      // selectionRect.clear();
-      // pixiJsApp.stage.removeChild(selectionRect);
-    }
-
-    const onMouseDown = (e: EMouseEvent) => {
-      const {x, y} = e.pos;
-
-      const { ctrlKey } = e.origMouseEvent;
-      if (ctrlKey) {
-        originPt = currentPt = new Point(x, y);
-        // pixiJsApp.stage.addChild(selectionRect)
-        drawCurrentRect();
-
-        selecting = true;
-      }
-    };
-
-    const onMouseMove = (e: EMouseEvent) => {
-      const { ctrlKey } = e.origMouseEvent;
-
-      if (selecting) {
-        if (ctrlKey) {
-          const {x, y} = e.pos;
-          currentPt = new Point(x, y);
-          drawCurrentRect();
-        } else {
-          endSelection();
-        }
-      }
-    }
-
-    const onMouseUp = (e: EMouseEvent) => {
-      const { ctrlKey } = e.origMouseEvent;
-
-      if (selecting && ctrlKey) {
-        if (currentPt !== originPt) {
-          const currBBox = pointsToRect(originPt, currentPt);
-          // Flash selection okay signal
-          flashCurrentRect('green');
-
-          selectionRef.value = currBBox;
-        }
-      }
-      // endSelection();
-    }
-
-    const onMouseOut = (e: EMouseEvent) => {
-      if (selecting) {
-        const {x, y} = e.pos;
-        currentPt = new Point(x, y);
-        drawCurrentRect();
-      }
-    }
-
-    const onMouseOver = (e: EMouseEvent) => {
-      const { ctrlKey } = e.origMouseEvent;
-      if (selecting) {
-        if (ctrlKey) {
-          const {x, y} = e.pos;
-          currentPt = new Point(x, y);
-          drawCurrentRect();
-        } else {
-          flashCurrentRect('red');
-        }
-      }
-    }
-
-    const myHandlers1: MouseHandlerInit = () =>  {
-      return {
-        mousedown   : onMouseDown,
-        mousemove   : onMouseMove,
-        // mouseenter  : e => shEvent2(e),
-        // mouseleave  : e => shEvent2(e),
-        mouseup     : onMouseUp,
-        mouseout    : onMouseOut,
-        mouseover   : onMouseOver,
-      }
-    }
-
-    setMouseHandlers([myHandlers1]);
-
+  watch(refs.origin, ([x, y]) => {
+    originPt = currentPt = new Point(x, y);
+    initSvgRect();
   });
+
+  watch(refs.current, ([x, y]) => {
+    currentPt = new Point(x, y);
+    updateCurrentRect();
+  });
+
+  watch(refs.final, ([[], [x2, y2]]) => {
+    currentPt = new Point(x2, y2);
+    updateCurrentRect();
+
+    currSvgRect
+      .transition()
+      .duration(200)
+      .call(initFill, 'green', 0.2)
+      .remove()
+    ;
+
+    selectionRef.value = currBBox;
+  });
+
+  setMouseHandlers([handlers]);
 
   return {
     selectionRef,
@@ -192,7 +117,7 @@ export function useEventlibSelect({
 export interface ExtentHandlerRefs {
   origin: Ref<[ number, number ]>;
   current: Ref<[ number, number ]>;
-  done: Ref<boolean>;
+  final: Ref<[ [number, number], [number, number] ]>;
   cancelled: Ref<boolean>;
 }
 
@@ -208,7 +133,8 @@ export function selectExtentHandlers(): ExtentHandlers {
   const refs: ExtentHandlerRefs = toRefs(reactive({
     origin: [0, 0] as [number, number],
     current: [0, 0] as [number, number],
-    done: false, cancelled: false
+    final: [[0, 0], [0, 0]] as [[number, number], [number, number]],
+    cancelled: false
   }));
 
   const mousedown = (e: EMouseEvent) => {
@@ -227,8 +153,7 @@ export function selectExtentHandlers(): ExtentHandlers {
   const mouseup = (e: EMouseEvent) => {
     if (selecting) {
       const {x, y} = e.pos;
-      refs.current.value = [x, y];
-      refs.done.value = true;
+      refs.final.value = [refs.origin.value, [x, y]];
     }
   }
 
@@ -260,3 +185,4 @@ export function selectExtentHandlers(): ExtentHandlers {
   };
 
 }
+

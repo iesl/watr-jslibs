@@ -27,7 +27,6 @@ import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 import { tweenBBox } from '~/lib/tweening';
 
 import chroma from 'chroma-js';
-import { SvgDrawTo } from '~/components/compositions/svg-drawto';
 
 export interface GlyphSelection {
 }
@@ -35,8 +34,6 @@ export interface GlyphSelection {
 type Args = StateArgs & {
   eventlibSelect: EventlibSelect;
   rtreeSearch: RTreeSearch<TextDataPoint>;
-  svgDrawTo: SvgDrawTo;
-  // imgCanvasOverlay: SuperimposedElements;
 };
 
 
@@ -44,11 +41,8 @@ export function useGlyphSelection({
   state,
   eventlibSelect,
   rtreeSearch,
-  svgDrawTo,
 }: Args): GlyphSelection {
   const { selectionRef } = eventlibSelect;
-
-  // const { pixiJsAppRef } = svgDrawTo;
 
   waitFor('GlyphSelection', {
     state,

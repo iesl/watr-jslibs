@@ -3,10 +3,9 @@
  */
 import _ from 'lodash';
 
-import { onMounted, ref } from '@vue/composition-api';
+import { onMounted, ref, Ref } from '@vue/composition-api';
 import { useEventlibCore } from '~/components/compositions/eventlib-core'
 import { useEventlibSelect } from '~/components/compositions/eventlib-select'
-import { useSvgDrawTo } from '~/components/compositions/svg-drawto';
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";
 import { initState } from '~/components/compositions/component-basics'
 
@@ -14,53 +13,49 @@ import { useSuperimposedElements, ElementTypes } from '~/components/compositions
 
 function setup() {
   const mountPoint = ref(null)
-  const containerRef = mountPoint;
   const state = initState();
 
   const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state });
   const { setMouseHandlers } = eventlibCore;
 
   const mouseActivity = ref('<none>');
-  const mouseActivity2 = ref('<none>');
+  const mouseActivityLog = ref(['<none>']);
 
-  const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Img, ElementTypes.Canvas], mountPoint, state });
-  const canvas = superimposedElements.overlayElements.canvas!;
+  const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Img, ElementTypes.Svg], mountPoint, state });
 
-  const svgDrawTo = useSvgDrawTo({ containerRef, state });
-  const eventlibSelect = useEventlibSelect({ eventlibCore, svgDrawTo, state });
+  const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
 
   const { selectionRef }  = eventlibSelect;
 
 
-  function shEvent(e: EMouseEvent) {
+  function showMouseEvent(e: EMouseEvent) {
     const etype = e.origMouseEvent.type;
     const {x, y} = e.pos;
-    const xi = Math.floor(x);
-    const yi = Math.floor(y);
-    mouseActivity.value = `mouse ${etype} @${xi},${yi}`;
-  }
-
-  function shEvent2(e: EMouseEvent) {
-    const etype = e.origMouseEvent.type;
-    const {x, y} = e.pos;
-    const xi = Math.floor(x);
-    const yi = Math.floor(y);
-    mouseActivity2.value = `mouse ${etype} @${xi}, ${yi}`;
-
+    const xi = x.toFixed(2);
+    const yi = y.toFixed(2);
+    const log = `Mouse: ${etype} @${xi},  ${yi}`;
+    if (etype === 'mousemove') {
+      mouseActivity.value = `Mouse move: @${xi},  ${yi}`;
+    } else {
+      const logs = mouseActivityLog.value;
+      const newLogs = logs.slice(0, 5);
+      newLogs.unshift(log);
+      mouseActivityLog.value = newLogs;
+    }
   }
 
   const myHandlers1: MouseHandlerInit = () =>  {
     return {
-      mousemove   : e => shEvent(e),
-      mousedown   : e => shEvent2(e),
-      mouseenter  : e => shEvent2(e),
-      mouseleave  : e => shEvent2(e),
-      mouseout    : e => shEvent2(e),
-      mouseover   : e => shEvent2(e),
-      mouseup     : e => shEvent2(e),
-      click       : e => shEvent2(e),
-      dblclick    : e => shEvent2(e),
-      contextmenu : e => shEvent2(e),
+      mousemove   : e => showMouseEvent(e),
+      mousedown   : e => showMouseEvent(e),
+      mouseenter  : e => showMouseEvent(e),
+      mouseleave  : e => showMouseEvent(e),
+      mouseout    : e => showMouseEvent(e),
+      mouseover   : e => showMouseEvent(e),
+      mouseup     : e => showMouseEvent(e),
+      click       : e => showMouseEvent(e),
+      dblclick    : e => showMouseEvent(e),
+      contextmenu : e => showMouseEvent(e),
     }
   }
 
@@ -72,7 +67,7 @@ function setup() {
   });
 
   return {
-    mountPoint, mouseActivity, mouseActivity2, selectionRef
+    mountPoint, mouseActivity, selectionRef, mouseActivityLog
   }
 }
 

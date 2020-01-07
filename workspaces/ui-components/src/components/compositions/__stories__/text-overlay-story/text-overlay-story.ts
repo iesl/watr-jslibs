@@ -9,11 +9,9 @@ import {
 } from '@vue/composition-api';
 
 
-import Layout from '~/components/story-templates/titled-frame-template/index.vue';
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
 import { useTextOverlay } from '~/components/compositions/text-overlay';
 import { initState, waitFor } from '~/components/compositions/component-basics';
-import { useSvgDrawTo } from '../../svg-drawto';
 import { BBox } from 'sharedLib';
 import chroma from 'chroma-js';
 import { TextStyle } from '~/lib/html-text-metrics';
@@ -34,7 +32,6 @@ export function drawRect(bbox: BBox) {
 }
 
 export default {
-  components: { Layout },
   setup() {
 
     const state = initState();
@@ -47,7 +44,6 @@ export default {
 
     // const canvas = superimposedElements.overlayElements.canvas!;
     // const svgDrawTo = useSvgDrawTo({ containerRef: mountPoint, state });
-    // const { pixiJsAppRef } = svgDrawTo;
 
     // Set text size, print text, overlay canvas or svg rect, print dimensions
     // Set text color, styles, ...

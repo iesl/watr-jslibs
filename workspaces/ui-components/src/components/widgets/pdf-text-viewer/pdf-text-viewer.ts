@@ -5,9 +5,7 @@ import { ref, watch, Ref, createComponent, inject, onMounted, provide  } from '@
 import { initState } from '~/components/compositions/component-basics'
 import { useEventlibCore } from '~/components/compositions/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
-import { useSvgDrawTo } from '~/components/compositions/svg-drawto';
 import { useGlyphOverlays } from '~/components/compositions/glyph-overlay-component';
-import { useGlyphSelection } from '~/components/compositions/glyph-selection-component';
 import { useEventlibSelect } from '~/components/compositions/eventlib-select';
 
 import {
@@ -45,9 +43,8 @@ export default createComponent({
 
     const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
     const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Text], mountPoint, state });
-    const svgDrawTo = useSvgDrawTo({ containerRef: mountPoint, state });
-    const eventlibSelect = useEventlibSelect({ eventlibCore, svgDrawTo, state });
-    const glyphOverlays = useGlyphOverlays({ state, eventlibCore, svgDrawTo, superimposedElements });
+    const eventlibSelect = useEventlibSelect({ eventlibCore, state });
+    const glyphOverlays = useGlyphOverlays({ state, eventlibCore, superimposedElements });
     const textOverlay = useTextOverlay({ superimposedElements, state });
 
     const { putTextLn } = textOverlay;
@@ -78,7 +75,6 @@ export default createComponent({
           const text = row.text;
           const lineDimensions = putTextLn(style, 0, currY, text);
           maxWidth = Math.max(maxWidth, lineDimensions.width);
-          prettyPrint({ text, rownum, currY }, { colors: false });
 
           currY += size+2;
         });
