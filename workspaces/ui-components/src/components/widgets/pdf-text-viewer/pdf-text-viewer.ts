@@ -7,13 +7,8 @@ import { useEventlibCore } from '~/components/compositions/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
 import { useGlyphOverlays } from '~/components/compositions/glyph-overlay-component';
 import { useEventlibSelect } from '~/components/compositions/eventlib-select';
-
-import {
-  BBox,
-} from "sharedLib";
+import { BBox, GridTypes } from "sharedLib";
 import { useTextOverlay  } from '~/components/compositions/text-overlay';
-import { prettyPrint } from '~/lib/pretty-print';
-import { GridTypes } from 'sharedLib/dist';
 import { TextStyle } from '~/lib/html-text-metrics';
 
 
@@ -43,8 +38,8 @@ export default createComponent({
 
     const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
     const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Text], mountPoint, state });
-    const eventlibSelect = useEventlibSelect({ eventlibCore, state });
-    const glyphOverlays = useGlyphOverlays({ state, eventlibCore, superimposedElements });
+    useEventlibSelect({ superimposedElements, eventlibCore, state });
+    useGlyphOverlays({ state, eventlibCore, superimposedElements });
     const textOverlay = useTextOverlay({ superimposedElements, state });
 
     const { putTextLn } = textOverlay;
@@ -71,7 +66,7 @@ export default createComponent({
         textDiv.style.visibility = 'hidden';
         let currY = 0;
         let maxWidth = 0;
-        _.each(textgrid.rows, (row, rownum) => {
+        _.each(textgrid.rows, (row) => {
           const text = row.text;
           const lineDimensions = putTextLn(style, 0, currY, text);
           maxWidth = Math.max(maxWidth, lineDimensions.width);

@@ -39,7 +39,7 @@ export function usePdfPageViewer({
   });
 
   const glyphOverlays = useGlyphOverlays({ state, eventlibCore, superimposedElements });
-  const eventlibSelect = useEventlibSelect({ eventlibCore, state });
+  const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
   const { rtreeSearch } = glyphOverlays;
   useGlyphSelection({ rtreeSearch, eventlibSelect, state });
 

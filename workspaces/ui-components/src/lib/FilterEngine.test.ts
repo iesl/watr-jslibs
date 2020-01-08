@@ -7,9 +7,10 @@ import { SelectionFilteringEngine, CandidateGroup, GroupKey } from './FilterEngi
 // import { prettyPrint } from './pretty-print';
 import { ILogEntry } from './tracelogs';
 
-console.log('starting import');
-import tracelog from '~/../dev-data/tracelogs/tracelog.json';
-console.log('ending import');
+
+// console.log('starting import');
+// import tracelog from '~/../dev-data/tracelogs/tracelog.json';
+// console.log('ending import');
 
 function createFilter(cgs: CandidateGroup<ILogEntry>[]) {
   return new SelectionFilteringEngine(cgs);
@@ -101,29 +102,29 @@ describe('Selection Narrowing/Filtering',  () => {
     groupNames.should.eql(['bar 22.', 'baz 32.']);
   });
 
-  it.only('should test very large filter inputs (for profiling)', () => {
-    // const grps = numberedCandidateGroup(
-    //   'foo',
-    //   'fooGrpName',
-    //   g => ({ multikey: ['foo', g.page.toString()+'.'] }),
-    //   100000
-    // );
+  // it.only('should test very large filter inputs (for profiling)', () => {
+  //   // const grps = numberedCandidateGroup(
+  //   //   'foo',
+  //   //   'fooGrpName',
+  //   //   g => ({ multikey: ['foo', g.page.toString()+'.'] }),
+  //   //   100000
+  //   // );
 
-    console.log('starting test');
-    const groups: CandidateGroup<ILogEntry> = {
-      candidates: tracelog as ILogEntry[],
-      groupKeyFunc: (l: ILogEntry) => ({
-        multikey: ["trace", `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`]
-      })
-    };
-    console.log('finished creating candidates');
+  //   console.log('starting test');
+  //   const groups: CandidateGroup<ILogEntry> = {
+  //     candidates: tracelog as ILogEntry[],
+  //     groupKeyFunc: (l: ILogEntry) => ({
+  //       multikey: ["trace", `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`]
+  //     })
+  //   };
+  //   console.log('finished creating candidates');
 
-    _.each(_.range(100), (i) => {
-      console.log('iter', i);
-      new SelectionFilteringEngine([groups]);
-    });
+  //   _.each(_.range(100), (i) => {
+  //     console.log('iter', i);
+  //     new SelectionFilteringEngine([groups]);
+  //   });
 
-    console.log('done');
-  });
+  //   console.log('done');
+  // });
 
 });

@@ -5,13 +5,16 @@
     </template>
 
     <template v-slot:description>
-        Compositional component to create overlay of Img, HtmlCanvas, Text div, and SVG elements,
-        superimposed and aligned such that Canvas and Svg elements may be used to draw on
-        the underlying image.
+        Any combination of Img, Canvas, Svg, Div
     </template>
 
     <template v-slot:notes>
-        <span>TODO:</span>
+        <p>
+            Compositional component to create overlays of Img, HtmlCanvas, HtmlDiv, and SVG elements,
+            superimposed and aligned such that Canvas and Svg elements may be used to draw on
+            the underlying image, and HtmlDiv can provide positioned text overlays.
+        </p>
+
         <ul>
             <li>Show that elements are perfectly aligned</li>
             <li>Show that drawing on Svg and Canvas produces perfectly aligned shapes</li>

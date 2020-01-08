@@ -3,7 +3,7 @@
  */
 import _ from 'lodash';
 
-import { onMounted, ref, Ref } from '@vue/composition-api';
+import { onMounted, ref } from '@vue/composition-api';
 import { useEventlibCore } from '~/components/compositions/eventlib-core'
 import { useEventlibSelect } from '~/components/compositions/eventlib-select'
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";

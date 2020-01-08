@@ -56,11 +56,43 @@ export class SelectionFilteringEngine<T> {
   }
 
   public setCandidateGroups(candidateGroups: CandidateGroup<T>[]) {
+    let t0 = 0;
+    let t1 = 0;
+    let t2 = 0;
+    let t3 = 0;
+
+    const t0a = performance.now();
+    const t1a = performance.now();
     this.keyedRecords = this.regroupCandidates(candidateGroups);
+    const t1z = performance.now();
+
+    const t2a = performance.now();
     this.keyedRecordGroups = this.groupRecordsByKey(this.keyedRecords);
+    const t2z = performance.now();
+
+    const t3a = performance.now();
     this.lunrIndex = this.initIndex(this.keyedRecords);
+    const t3z = performance.now();
+
     const tokenSet = (<any>this.lunrIndex).tokenSet;
+
     this.indexTokens = tokenSet.toArray();
+
+    const t0z = performance.now();
+
+    t0 += t0z - t0a;
+    t1 += t1z - t1a;
+    t2 += t2z - t2a;
+    t3 += t3z - t3a;
+
+      const result = `
+  setCandidateGroups: ${t0.toFixed(2)}
+     regroupCandidates: ${t1.toFixed(2)}
+     groupRecordsByKey: ${t2.toFixed(2)}
+     initIndex: ${t3.toFixed(2)}
+    `;
+
+    console.log(result);
   }
 
   public groupRecordsByKey(records: KeyedRecord<T>[]): KeyedRecordGroup<T>[] {
