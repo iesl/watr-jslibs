@@ -8,11 +8,11 @@ import {
 
 // import { MouseHandlerInit, EMouseEvent } from '~/lib/EventlibHandlers';
 
-import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements'
-import { useSketchlibCore } from '~/components/compositions/sketchlib-core';
-import { useEventlibCore } from '~/components/compositions/eventlib-core';
-import { useEventlibSelect, selectExtentHandlers } from '~/components/compositions/eventlib-select'
-import { initState, waitFor } from '~/components/compositions/component-basics'
+import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements'
+// import { useSketchlibCore } from '~/components/basics/sketchlib-core';
+import { useEventlibCore } from '~/components/basics/eventlib-core';
+import { useEventlibSelect, selectExtentHandlers } from '~/components/basics/eventlib-select'
+import { initState, waitFor } from '~/components/basics/component-basics'
 
 
 import { Line, Point, Rect, Trapezoid,  ShapeKind, zeroShape1, Shape } from '~/lib/tracelogs';
@@ -65,7 +65,7 @@ export function initShapeForSelection(shapeKind: ShapeKind, selectedRect: BBox):
 
 export function clickToDrawHandlers(shapeKindRef: Ref<string>) {
   const extentHandlers = selectExtentHandlers();
-  const { origin, current, done, cancelled } = extentHandlers.refs;
+  const { origin, current, cancelled } = extentHandlers.refs;
   const handlers = extentHandlers.handlers;
 
   watch(origin, (o) => {
@@ -74,9 +74,6 @@ export function clickToDrawHandlers(shapeKindRef: Ref<string>) {
 
   });
   watch(current, (c) => {
-
-  });
-  watch(done, (d) => {
 
   });
   // const install = () => {};
@@ -113,10 +110,9 @@ export default {
 
     const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Svg], mountPoint, state });
 
-    const eventlibSelect = useEventlibSelect({ eventlibCore, state });
+    const eventlibSelect = useEventlibSelect({ superimposedElements, eventlibCore, state });
     const { selectionRef } = eventlibSelect;
 
-    useSketchlibCore({ state, eventlibCore, eventlibSelect });
 
     const myHandlers1  = () =>  {
       return {
@@ -148,9 +144,9 @@ export default {
 
       watch(selectionRef, (selectedRect) => {
         if (!selectedRect) return;
-        const shapeKind = inkwellSelection.value;
-        const newShape = initShapeForSelection(shapeKind, selectedRect);
-        svg.append(newShape);
+        // const shapeKind = inkwellSelection.value;
+        // const newShape = initShapeForSelection(shapeKind, selectedRect);
+        // svg.append(newShape);
       });
 
     });

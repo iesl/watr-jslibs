@@ -3,4 +3,3 @@
 // story-name=pdfTextViewer
 // story-title=Pdf Text Viewer
 </script>
-<style lang="scss" src="./pdf-text-viewer-story.scss" scoped></style>

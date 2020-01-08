@@ -6,9 +6,10 @@ import {
   Ref,
 } from '@vue/composition-api';
 
-import { usePdfPageViewer } from '~/components/compositions/pdf-page';
+
+import { usePdfPageViewer } from '~/components/subsystems/pdf-page-viewer';
 import { divRef } from '~/lib/vue-composition-lib';
-import { StateArgs, initState, waitFor } from '~/components/compositions/component-basics';
+import { StateArgs, initState, waitFor } from '~/components/basics/component-basics';
 
 export interface TracelogViewer {
 }

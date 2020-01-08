@@ -6,7 +6,7 @@ import {
   ref,
 } from '@vue/composition-api';
 
-import { StateArgs, waitFor } from '~/components/compositions/component-basics'
+import { StateArgs, waitFor } from '~/components/basics/component-basics'
 
 export const enum ElementTypes {
   Canvas, Svg, Text, Img

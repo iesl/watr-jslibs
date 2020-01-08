@@ -15,7 +15,7 @@ import {
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
 import { BBox, Point, d3x } from 'sharedLib';
-import { StateArgs } from '~/components/compositions/component-basics'
+import { StateArgs } from '~/components/basics/component-basics'
 const { initStroke, initFill, initRect } = d3x;
 
 // import chroma from 'chroma-js';

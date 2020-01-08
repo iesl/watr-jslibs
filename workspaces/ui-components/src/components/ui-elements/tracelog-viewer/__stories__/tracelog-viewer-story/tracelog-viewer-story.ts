@@ -4,8 +4,8 @@
 //   Ref,
 // } from '@vue/composition-api';
 
-import { initState, waitFor } from '~/components/compositions/component-basics';
-import { useTracelogViewer } from '~/components/widgets/tracelog-viewer/tracelog-viewer';
+import { initState, waitFor } from '~/components/basics/component-basics';
+import { useTracelogViewer } from '~/components/ui-elements/tracelog-viewer/tracelog-viewer';
 import { divRef } from '~/lib/vue-composition-lib';
 
 

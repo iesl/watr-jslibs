@@ -15,7 +15,7 @@ import {
 import RBush, {} from "rbush";
 
 import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
-import { StateArgs, waitFor } from '~/components/compositions/component-basics'
+import { StateArgs, waitFor } from '~/components/basics/component-basics'
 
 import {
   // MouseHandlers,

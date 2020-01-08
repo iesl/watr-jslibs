@@ -4,8 +4,8 @@ import {
 } from '@vue/composition-api';
 
 
-import { useSuperimposedElements, ElementTypes  } from '~/components/compositions/superimposed-elements'
-import { initState } from '~/components/compositions/component-basics';
+import { useSuperimposedElements, ElementTypes  } from '~/components/basics/superimposed-elements'
+import { initState } from '~/components/basics/component-basics';
 
 export default {
   setup() {

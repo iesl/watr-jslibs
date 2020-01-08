@@ -5,7 +5,7 @@ import {
   CandidateGroup as CandidateGroupT,
   KeyedRecordGroup as KeyedRecordGroupT,
 } from "~/lib/FilterEngine";
-import { ref, watch, Ref, createComponent, inject, onMounted  } from '@vue/composition-api';
+import { ref, watch, Ref, createComponent, inject  } from '@vue/composition-api';
 import { ILogEntry } from '~/lib/tracelogs';
 import { configAxios } from '~/lib/axios';
 

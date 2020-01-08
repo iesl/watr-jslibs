@@ -1,18 +1,22 @@
 
 
-import PdfTextViewer from '../../index.vue';
-import { provideTextGrid, TextgridRef } from '../../pdf-text-viewer';
+// import PdfTextViewer from '../index.vue';
+import { usePdfTextViewer } from '../../pdf-text-viewer';
 import { createComponent, ref, onMounted } from '@vue/composition-api';
 import { GridTypes, coords } from 'sharedLib';
 import { configAxios } from '~/lib/axios';
+import { initState } from '~/components/basics/component-basics';
+import { divRef } from '~/lib/vue-composition-lib';
 
 export default createComponent({
-  components: { PdfTextViewer },
+  components: {},
   setup() {
 
+    const state = initState();
+    const mountPoint = divRef();
 
-    const providedTextgridRef: TextgridRef = ref(null);
-    provideTextGrid(providedTextgridRef);
+    const pdfTextViewer = usePdfTextViewer({ mountPoint, state });
+    const { setText } = pdfTextViewer;
 
     onMounted(() => {
 
@@ -23,17 +27,15 @@ export default createComponent({
           const textgrid = page0.textgrid;
           const [l, t, w, h] = page0.pageGeometry;
           const pageBounds = coords.mk.fromArray([l, t, w, h]);
+          setText({ textgrid, pageBounds });
 
-          providedTextgridRef.value = {
-            textgrid,
-            pageBounds
-          };
         });
 
     })
 
 
     return {
+      mountPoint
     };
   }
 });

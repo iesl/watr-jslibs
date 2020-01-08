@@ -20,9 +20,9 @@ import {
   watch,
 } from '@vue/composition-api';
 
-import { StateArgs, waitFor } from '~/components/compositions/component-basics'
-import { EventlibSelect } from '~/components/compositions/eventlib-select';
-import { RTreeSearch } from '~/components/compositions/rtree-search';
+import { StateArgs, waitFor } from '~/components/basics/component-basics'
+import { EventlibSelect } from '~/components/basics/eventlib-select';
+import { RTreeSearch } from '~/components/basics/rtree-search';
 import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
 import { tweenBBox } from '~/lib/tweening';
 

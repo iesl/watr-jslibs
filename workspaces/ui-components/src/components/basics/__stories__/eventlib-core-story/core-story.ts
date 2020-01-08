@@ -4,12 +4,12 @@
 import _ from 'lodash';
 
 import { onMounted, ref } from '@vue/composition-api';
-import { useEventlibCore } from '~/components/compositions/eventlib-core'
-import { useEventlibSelect } from '~/components/compositions/eventlib-select'
+import { useEventlibCore } from '~/components/basics/eventlib-core'
+import { useEventlibSelect } from '~/components/basics/eventlib-select'
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";
-import { initState } from '~/components/compositions/component-basics'
+import { initState } from '~/components/basics/component-basics'
 
-import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements'
+import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements'
 
 function setup() {
   const mountPoint = ref(null)

@@ -5,14 +5,14 @@ import {
 } from '@vue/composition-api';
 
 
-import { StateArgs } from '~/components/compositions/component-basics'
-import { useEventlibCore, EventlibCore } from '~/components/compositions/eventlib-core';
-// import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
-import { useSuperimposedElements, SuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
+import { StateArgs } from '~/components/basics/component-basics'
+import { useEventlibCore, EventlibCore } from '~/components/basics/eventlib-core';
+// import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
+import { useSuperimposedElements, SuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
 
-import { useGlyphOverlays, SetGrid } from '~/components/compositions/glyph-overlay-component';
-import { useGlyphSelection } from '~/components/compositions/glyph-selection-component';
-import { useEventlibSelect } from '~/components/compositions/eventlib-select';
+import { useGlyphOverlays, SetGrid } from '~/components/basics/glyph-overlay-component';
+import { useGlyphSelection } from '~/components/basics/glyph-selection-component';
+import { useEventlibSelect } from '~/components/basics/eventlib-select';
 
 
 type Args = StateArgs & {
@@ -29,12 +29,11 @@ export interface PdfPageViewer {
 export function usePdfPageViewer({
   mountPoint, state
 }: Args): PdfPageViewer {
-  // const containerRef = targetDivRef;
 
   const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
 
   const superimposedElements = useSuperimposedElements({
-    includeElems: [ElementTypes.Img, ElementTypes.Canvas],
+    includeElems: [ElementTypes.Img, ElementTypes.Svg],
     mountPoint, state
   });
 

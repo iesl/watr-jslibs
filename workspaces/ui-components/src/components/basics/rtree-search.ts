@@ -11,17 +11,25 @@ import {
   ref,
 } from '@vue/composition-api';
 
-import { StateArgs } from '~/components/compositions/component-basics'
-import { BBox, Point } from 'sharedLib';
+import { StateArgs } from '~/components/basics/component-basics'
+import { BBox, coords } from 'sharedLib';
+import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
+import { EventlibCore } from './eventlib-core';
 
 type LoadData<T> = (data: T[]) => void;
 type Search<T> = (query: BBox) => T[];
-type NearTo<T> = (p: Point, range: number) => T[];
+
+interface Flashlight<T> {
+  off(): void;
+  litItemsRef: Ref<T[]>;
+}
+
+type FlashlightToggle<T> = (eventlibCore: EventlibCore) => Flashlight<T>;
 
 export interface RTreeSearch<T> {
   loadData: LoadData<T>;
   search: Search<T>;
-  nearTo: NearTo<T>;
+  flashlight: FlashlightToggle<T>;
 }
 
 type Args = StateArgs & {}
@@ -48,14 +56,38 @@ export function useRTreeSearch<T>({
     return rtree.search(query);
   }
 
-  const nearTo: NearTo<T> = (p, r) => {
-    return [];
+  const flashlight: FlashlightToggle<T> = (eventlibCore) => {
+    const litItemsRef: Ref<T[]> = ref([]);
+
+    const mousemove = (e: EMouseEvent) => {
+      const pos = e.pos;
+      const mousePt = coords.mkPoint.fromXy(pos.x, pos.y);
+      const queryBox = coords.boxCenteredAt(mousePt, 8, 8);
+      const hits = rtree.search(queryBox);
+      litItemsRef.value = hits;
+    }
+
+    const handlers: MouseHandlerInit = () =>  {
+      return {
+        mousemove,
+      }
+    }
+
+    eventlibCore.setMouseHandlers([handlers]);
+
+    const off = () => {
+      // TODO unwatch(litItemsRef)
+    };
+
+    return {
+      litItemsRef, off
+    };
   }
 
   return {
     loadData,
     search,
-    nearTo,
+    flashlight
   };
 
 }

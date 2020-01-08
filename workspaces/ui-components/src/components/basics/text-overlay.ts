@@ -6,7 +6,7 @@
 import _ from 'lodash';
 
 
-import { StateArgs } from '~/components/compositions/component-basics'
+import { StateArgs } from '~/components/basics/component-basics'
 import { SuperimposedElements  } from './superimposed-elements';
 import { TextStyle, makeStyleString, LineDimensions, showText } from '~/lib/html-text-metrics';
 

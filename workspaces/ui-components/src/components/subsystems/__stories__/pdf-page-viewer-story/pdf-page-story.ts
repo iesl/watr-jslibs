@@ -5,11 +5,10 @@ import {
 } from '@vue/composition-api';
 
 
-// import onelineTextgrid from '~/../dev-data/textgrids/textgrid-oneline.json';
 import textgrid00 from '~/../dev-data/textgrids/textgrid-00.json';
 
-import { initState, waitFor } from '~/components/compositions/component-basics'
-import { usePdfPageViewer } from '~/components/compositions/pdf-page';
+import { initState, waitFor } from '~/components/basics/component-basics'
+import { usePdfPageViewer } from '~/components/subsystems/pdf-page-viewer';
 import { GridTypes, Point, coords } from 'sharedLib';
 import { initGridData, gridDataToGlyphData } from '~/lib/TextGlyphDataTypes';
 
@@ -46,8 +45,6 @@ export default {
       });
 
     });
-
-
 
     return {
       mountPoint

@@ -9,9 +9,9 @@ import {
 } from '@vue/composition-api';
 
 
-import { useSuperimposedElements, ElementTypes } from '~/components/compositions/superimposed-elements';
-import { useTextOverlay } from '~/components/compositions/text-overlay';
-import { initState, waitFor } from '~/components/compositions/component-basics';
+import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
+import { useTextOverlay } from '~/components/basics/text-overlay';
+import { initState, waitFor } from '~/components/basics/component-basics';
 import { BBox } from 'sharedLib';
 import chroma from 'chroma-js';
 import { TextStyle } from '~/lib/html-text-metrics';

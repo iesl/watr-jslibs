@@ -11,7 +11,7 @@ import {
 import 'd3-transition';
 
 import { BBox } from './coord-sys';
-import { Transition, SelectionOrTransition } from "d3-transition";
+import { SelectionOrTransition } from "d3-transition";
 
 export function initRect<GElement extends BaseType, Datum, PElement extends BaseType, PDatum > (
   sel: Selection<GElement, Datum, PElement, PDatum>,
