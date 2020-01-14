@@ -1,18 +1,17 @@
 
 import _ from 'lodash';
 
-import {
-  coords,
-  utils,
-  GridTypes,
-} from "sharedLib";
+import * as coords from '~/lib/coord-sys';
 
 import {
-  mk,
-  Point,
-  BBox,
-  MinMaxBox
-} from "sharedLib";
+    mk,
+    Point,
+    BBox,
+    MinMaxBox
+} from '~/lib/coord-sys';
+
+import * as GridTypes from '~/lib/TextGridTypes';
+import * as utils from '~/lib/utils';
 
 export type Width = number;
 export type MeasureTextWidth = (ch: string) => Width;

@@ -1,4 +1,3 @@
-
 import _ from 'lodash';
 import * as d3 from 'd3';
 
@@ -12,9 +11,9 @@ import {
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
 import { useTextOverlay } from '~/components/basics/text-overlay';
 import { initState, waitFor } from '~/components/basics/component-basics';
-import { BBox } from 'sharedLib';
 import chroma from 'chroma-js';
 import { TextStyle } from '~/lib/html-text-metrics';
+import { BBox } from '~/lib/coord-sys';
 
 export function drawRect(bbox: BBox) {
   // const pg = new PIXI.Graphics();

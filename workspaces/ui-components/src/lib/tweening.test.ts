@@ -10,7 +10,7 @@ import anime from 'animejs';
 
 import { tweenBBox } from './tweening';
 
-import { coords } from 'sharedLib';
+import * as coords from '~/lib/coord-sys';
 
 describe('Tweening support',  () => {
   it.only('tweens bbox', async () => {

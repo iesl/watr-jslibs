@@ -8,8 +8,8 @@
  *
  **/
 
-import { coords } from "sharedLib";
 import _ from "lodash";
+import * as coords from '~/lib/coord-sys';
 
 
 /**
@@ -99,4 +99,3 @@ export class FontProps {
   weight: Weight = "normal";
   size: number = 20;
 }
-

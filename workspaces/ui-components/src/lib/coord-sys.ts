@@ -98,6 +98,7 @@ class Line {
     };
   }
 }
+
 class Trapezoid {
   public topLine: Line;
   public bottomLine: Line;

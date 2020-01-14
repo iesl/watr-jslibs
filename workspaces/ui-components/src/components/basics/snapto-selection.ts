@@ -14,7 +14,7 @@ import _ from 'lodash';
 import {
   mk,
   BBox,
-} from "sharedLib";
+} from '~/lib/coord-sys';
 
 import {
   watch,

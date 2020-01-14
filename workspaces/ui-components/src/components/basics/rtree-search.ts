@@ -12,7 +12,8 @@ import {
 } from '@vue/composition-api';
 
 import { StateArgs } from '~/components/basics/component-basics'
-import { BBox, coords } from 'sharedLib';
+import * as coords from '~/lib/coord-sys';
+import { BBox } from '~/lib/coord-sys';
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
 

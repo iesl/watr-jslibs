@@ -1,5 +1,6 @@
 
-import { BBox, coords } from 'sharedLib';
+import * as coords from '~/lib/coord-sys';
+import { BBox } from '~/lib/coord-sys';
 
 import anime from 'animejs';
 

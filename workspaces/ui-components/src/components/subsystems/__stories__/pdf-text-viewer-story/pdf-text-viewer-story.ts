@@ -3,7 +3,8 @@
 // import PdfTextViewer from '../index.vue';
 import { usePdfTextViewer } from '../../pdf-text-viewer';
 import { createComponent, ref, onMounted } from '@vue/composition-api';
-import { GridTypes, coords } from 'sharedLib';
+import * as GridTypes from '~/lib/TextGridTypes';
+import * as coords from '~/lib/coord-sys';
 import { configAxios } from '~/lib/axios';
 import { initState } from '~/components/basics/component-basics';
 import { divRef } from '~/lib/vue-composition-lib';

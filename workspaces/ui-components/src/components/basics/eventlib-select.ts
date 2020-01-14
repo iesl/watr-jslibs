@@ -14,11 +14,11 @@ import {
 
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
 import { EventlibCore } from './eventlib-core';
-import { BBox, Point, d3x } from 'sharedLib';
+import { BBox, Point } from '~/lib/coord-sys';
+import * as d3x from '~/lib/d3-extras';
 import { StateArgs } from '~/components/basics/component-basics'
 const { initStroke, initFill, initRect } = d3x;
 
-// import chroma from 'chroma-js';
 import { SuperimposedElements } from './superimposed-elements';
 
 function pointsToRect(p1: Point, p2: Point): BBox {
@@ -185,4 +185,3 @@ export function selectExtentHandlers(): ExtentHandlers {
   };
 
 }
-

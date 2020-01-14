@@ -27,7 +27,7 @@ import {
 } from '~/lib/EventlibHandlers';
 
 import { UnwrapRef } from '@vue/composition-api/dist/reactivity';
-import { coords } from 'sharedLib';
+import * as coords from '~/lib/coord-sys';
 
 
 

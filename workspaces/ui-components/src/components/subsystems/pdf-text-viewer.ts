@@ -8,7 +8,8 @@ import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
 import { useGlyphOverlays } from '~/components/basics/glyph-overlays';
 import { useEventlibSelect } from '~/components/basics/eventlib-select';
-import { BBox, GridTypes } from "sharedLib";
+import { BBox } from '~/lib/coord-sys';
+import * as GridTypes from '~/lib/TextGridTypes';
 import { useTextOverlay  } from '~/components/basics/text-overlay';
 import { TextStyle } from '~/lib/html-text-metrics';
 

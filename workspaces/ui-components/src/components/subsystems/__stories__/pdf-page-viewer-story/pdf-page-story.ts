@@ -9,8 +9,10 @@ import textgrid00 from '~/../dev-data/textgrids/textgrid-00.json';
 
 import { initState, waitFor } from '~/components/basics/component-basics'
 import { usePdfPageViewer } from '~/components/subsystems/pdf-page-viewer';
-import { GridTypes, Point, coords } from 'sharedLib';
+import * as coords from '~/lib/coord-sys';
+import * as GridTypes from '~/lib/TextGridTypes';
 import { initGridData, gridDataToGlyphData } from '~/lib/TextGlyphDataTypes';
+import { Point } from '~/lib/coord-sys';
 
 export default {
   setup() {

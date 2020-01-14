@@ -14,9 +14,8 @@ import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useEventlibSelect, selectExtentHandlers } from '~/components/basics/eventlib-select'
 import { initState, waitFor } from '~/components/basics/component-basics'
 
-
-import { Line, Point, Rect, Trapezoid,  ShapeKind, zeroShape1, Shape } from '~/lib/tracelogs';
-import { BBox } from 'sharedLib';
+import { Line, Point, Rect, Trapezoid, ShapeKind, zeroShape1, Shape } from '~/lib/tracelogs';
+import { useSketchpad } from '../../sketchpad';
 
 type InkwellItem = {
   title: ShapeKind
@@ -27,41 +26,6 @@ const inkwellOptions: InkwellItem[]  = [
   { title: 'rect' },
   { title: 'trapezoid' },
 ];
-
-export function initShapeForSelection(shapeKind: ShapeKind, selectedRect: BBox): Shape {
-  const {top, left, width, height, right, bottom } = selectedRect;
-
-  const newShape = zeroShape1(shapeKind, {
-    point: (p: Point) => {
-      p.x = left;
-      p.y = top;
-      return p;
-    },
-    rect: (r: Rect) => {
-      r.bounds = [left, top, width, height];
-      return r;
-    },
-    line: (l: Line) => {
-      l.p1.x = left;
-      l.p1.y = top;
-      l.p2.x = right;
-      l.p2.y = bottom;
-      return l;
-    },
-    trapezoid: (t: Trapezoid) => {
-      const topWidth = width / 2;
-      const bottomWidth = height * 2;
-      t.topWidth = topWidth;
-      t.bottomWidth = bottomWidth;
-      t.topLeft.x = left;
-      t.topLeft.y = top;
-      t.bottomLeft.x = left-height/2;
-      t.bottomLeft.y = bottom;
-      return t;
-    },
-  });
-  return newShape;
-}
 
 export function clickToDrawHandlers(shapeKindRef: Ref<string>) {
   const extentHandlers = selectExtentHandlers();
@@ -85,31 +49,19 @@ export function clickToDrawHandlers(shapeKindRef: Ref<string>) {
   };
 }
 
-// (localState: S) => {
-//   const rectSelectHandlers = {
-//     init: () => { turnOff(Hover/ClickSelect/tooltips)  }
-//     dispose: () => { turnBackOn(Hover/ClickSelect/tooltips)  }
-//     mouseover: (e) => {...}
-//     mousemove: (e) => {...}
-//     keydown: {
-//       'ctrl': () => endSelect, uninstall()
-//     }
-//   }
-// }
-
 export default {
   setup() {
 
     const state = initState();
 
     const mountPoint: Ref<HTMLDivElement|null> = ref(null);
-    const containerRef = mountPoint;
     const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
     const inkwellToggle = ref(0);
     const inkwellSelection: Ref<ShapeKind> = ref('point');
 
     const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Svg], mountPoint, state });
 
+    const sketchpad = useSketchpad({ superimposedElements, state });
     const eventlibSelect = useEventlibSelect({ superimposedElements, eventlibCore, state });
     const { selectionRef } = eventlibSelect;
 
@@ -158,3 +110,53 @@ export default {
     };
   }
 }
+
+
+
+
+// (localState: S) => {
+//   const rectSelectHandlers = {
+//     init: () => { turnOff(Hover/ClickSelect/tooltips)  }
+//     dispose: () => { turnBackOn(Hover/ClickSelect/tooltips)  }
+//     mouseover: (e) => {...}
+//     mousemove: (e) => {...}
+//     keydown: {
+//       'ctrl': () => endSelect, uninstall()
+//     }
+//   }
+// }
+
+// export function initShapeForSelection(shapeKind: ShapeKind, selectedRect: BBox): Shape {
+//   const {top, left, width, height, right, bottom } = selectedRect;
+
+//   const newShape = zeroShape1(shapeKind, {
+//     point: (p: Point) => {
+//       p.x = left;
+//       p.y = top;
+//       return p;
+//     },
+//     rect: (r: Rect) => {
+//       r.bounds = [left, top, width, height];
+//       return r;
+//     },
+//     line: (l: Line) => {
+//       l.p1.x = left;
+//       l.p1.y = top;
+//       l.p2.x = right;
+//       l.p2.y = bottom;
+//       return l;
+//     },
+//     trapezoid: (t: Trapezoid) => {
+//       const topWidth = width / 2;
+//       const bottomWidth = height * 2;
+//       t.topWidth = topWidth;
+//       t.bottomWidth = bottomWidth;
+//       t.topLeft.x = left;
+//       t.topLeft.y = top;
+//       t.bottomLeft.x = left-height/2;
+//       t.bottomLeft.y = bottom;
+//       return t;
+//     },
+//   });
+//   return newShape;
+// }

@@ -4,7 +4,7 @@ import _ from "lodash";
 
 import {
   getOrDie
-} from "sharedLib";
+} from "~/lib/utils";
 
 
 export function resizeCanvas(htmlCanvas: HTMLCanvasElement, width: number, height: number): void {
@@ -29,4 +29,3 @@ export function resizeCanvas(htmlCanvas: HTMLCanvasElement, width: number, heigh
   context.textBaseline = textBaseline;
 
 }
-

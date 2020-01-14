@@ -56,7 +56,6 @@ export function usePdfPageViewer({
 
 interface PdfPageViewerState {
   drawables: object[];
-
 }
 
 export interface StateModule<S> {

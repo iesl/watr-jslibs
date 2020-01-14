@@ -27,13 +27,12 @@ export interface ILogEntry {
 
 export interface Point {
   kind: 'point';
-
   x: number;
   y: number;
 }
+
 export interface Line  {
   kind: 'line';
-
   p1: Point;
   p2: Point;
 }
@@ -88,7 +87,21 @@ export function foldShape<T>(shape: Shape, fs:Folds<T>): T|undefined {
   }
 }
 
+export function mapShape(shape: Shape, fs:FoldF<Shape>): Shape {
+  const f = foldShape(shape, fs);
+  return f!;
+}
+
 export function foldShapeTotal<S, T, U, V>(shape: Shape, fs:FoldX<S, T, U, V>): S|T|U|V {
+  switch(shape.kind) {
+    case 'line'      : return fs.line(shape);
+    case 'rect'      : return fs.rect(shape);
+    case 'point'     : return fs.point(shape);
+    case 'trapezoid' : return fs.trapezoid(shape);
+  }
+}
+
+export function transformShape<S, T, U, V>(shape: Shape, fs:FoldX<S, T, U, V>): S|T|U|V {
   switch(shape.kind) {
     case 'line'      : return fs.line(shape);
     case 'rect'      : return fs.rect(shape);
@@ -108,7 +121,7 @@ function adjustUnitsPoint(p: Point): Point  {
   };
 }
 
-export const ShapeIntRepsToFloats: Folds<Shape> = {
+export const ShapeIntRepsToFloats: FoldF<Shape> = {
   line: (sh: Line) => {
     const p1 = adjustUnitsPoint(sh.p1);
     const p2 = adjustUnitsPoint(sh.p2);

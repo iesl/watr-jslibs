@@ -17,7 +17,8 @@ import { EventlibCore } from '~/components/basics/eventlib-core';
 import { SuperimposedElements } from '~/components/basics/superimposed-elements';
 import { useRTreeIndex, RTreeIndex } from '~/components/basics/rtree-search';
 import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
-import { BBox, d3x } from 'sharedLib';
+import * as d3x from '~/lib/d3-extras';
+import { BBox } from '~/lib/coord-sys';
 
 const { initStroke, initFill, initRect } = d3x;
 

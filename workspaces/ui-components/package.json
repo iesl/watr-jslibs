@@ -36,7 +36,6 @@
     "lunr": "^2.3.8",
     "nuxt": "^2.10.2",
     "rbush": "^3.0.1",
-    "sharedLib": "=0.1.0",
     "ts-jest": "^24.2.0"
   },
   "devDependencies": {
