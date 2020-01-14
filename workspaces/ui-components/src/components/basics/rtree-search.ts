@@ -26,7 +26,7 @@ interface Flashlight<T> {
 
 type FlashlightToggle<T> = (eventlibCore: EventlibCore) => Flashlight<T>;
 
-export interface RTreeSearch<T> {
+export interface RTreeIndex<T> {
   loadData: LoadData<T>;
   search: Search<T>;
   flashlight: FlashlightToggle<T>;
@@ -34,8 +34,8 @@ export interface RTreeSearch<T> {
 
 type Args = StateArgs & {}
 
-export function useRTreeSearch<T>({
-}: Args): RTreeSearch<T> {
+export function useRTreeIndex<T>({
+}: Args): RTreeIndex<T> {
   const rtree: RBush<T> = new RBush<T>();
   const dataRef: Ref<T[] | null> = ref(null);
 

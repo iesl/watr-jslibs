@@ -1,5 +1,7 @@
 /**
-  */
+ *
+ */
+
 import _ from 'lodash';
 
 import {
@@ -9,38 +11,38 @@ import {
 
 import { usePdfPageViewer } from '~/components/subsystems/pdf-page-viewer';
 import { divRef } from '~/lib/vue-composition-lib';
-import { StateArgs, initState, waitFor } from '~/components/basics/component-basics';
+import { StateArgs, waitFor } from '~/components/basics/component-basics';
+import NarrowingFilter from '~/components/ui-elements/narrowing-filter/index.vue';
 
 export interface TracelogViewer {
+  pageViewerMount: Ref<HTMLDivElement|null>;
 }
 
 type Args = StateArgs & {
   mountPoint: Ref<HTMLDivElement|null>;
 };
 
+// TODO this should be an assembly perhaps? should it be a .vue? you decide...
 export function useTracelogViewer({
   state,
   mountPoint,
 }: Args): TracelogViewer {
 
   const pageViewerMount = divRef();
-  const selectionFilterMount = divRef();
+  // const selectionFilterMount = divRef();
 
+  // One per pdf page: 
   const pdfPageViewer = usePdfPageViewer({ mountPoint: pageViewerMount, state });
+  // + tracelog shape viewer
+  // + selection filter
 
-  waitFor('TracelogViewer', {
-    state,
-  }, () => {
-
-  });
   return {
-    pageViewerMount,
-    selectionFilterMount,
+    pageViewerMount
   }
 }
 
 function setup() {
-  const state = initState();
+  // const state = initState();
 
   const mountPoint = divRef();
 
@@ -50,5 +52,7 @@ function setup() {
 }
 
 export default {
-  setup
+  components: { NarrowingFilter },
+  setup,
+  useTracelogViewer,
 }

@@ -9,7 +9,6 @@ import { ref, watch, Ref, createComponent, inject  } from '@vue/composition-api'
 import { ILogEntry } from '~/lib/tracelogs';
 import { configAxios } from '~/lib/axios';
 
-// export const ProvidedCandidates = 'ProvidedCandidates';
 export const ProvidedCandidatesUrl = 'ProvidedCandidatesUrl';
 
 type CandidateGroup = CandidateGroupT<ILogEntry>;

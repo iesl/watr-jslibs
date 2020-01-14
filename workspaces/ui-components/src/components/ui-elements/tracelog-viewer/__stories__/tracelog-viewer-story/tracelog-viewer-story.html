@@ -1,13 +1,26 @@
-<v-layout column>
-    <v-flex xs12 sm8 md6>
-        <v-card>
-            <v-card-title class="headline">
-                Tracelog Viewer
-            </v-card-title>
-        </v-card>
-        <v-card>
-            <div class="mountPoint" ref="mountPoint"></div>
-        </v-card>
+<layout>
 
-    </v-flex>
-</v-layout>
+    <template v-slot:title>
+        Visual Tracelog Viewer
+    </template>
+
+    <template v-slot:description>
+    </template>
+
+    <template v-slot:controls>
+        <v-container>
+            <v-row>
+                <v-col> Control Panel </v-col>
+            </v-row>
+        </v-container>
+    </template>
+
+    <template v-slot:notes>
+        Todo: Notes...
+    </template>
+
+    <template v-slot:main>
+        <tracelogViewer />
+    </template>
+
+</layout>

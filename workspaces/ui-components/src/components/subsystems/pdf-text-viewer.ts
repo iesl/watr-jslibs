@@ -6,7 +6,7 @@ import { StateArgs } from '~/components/basics/component-basics'
 import { initState } from '~/components/basics/component-basics'
 import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
-import { useGlyphOverlays } from '~/components/basics/glyph-overlay-component';
+import { useGlyphOverlays } from '~/components/basics/glyph-overlays';
 import { useEventlibSelect } from '~/components/basics/eventlib-select';
 import { BBox, GridTypes } from "sharedLib";
 import { useTextOverlay  } from '~/components/basics/text-overlay';

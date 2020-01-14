@@ -8,7 +8,7 @@ export type StoryEntry = {
 
 export const storyItems: StoryEntry[] = [
   { title: 'Eventlib Core', to: '/stories/autogen/eventlibCore' },
-  { title: 'Sketchlib Core: Tracelog primitives', to: '/stories/autogen/sketchlibCore' },
+  { title: 'Sketchpad shape drawing primitives', to: '/stories/autogen/sketchpad' },
   { title: 'Superimposed Elements Story', to: '/stories/autogen/superimposedElementsStory' },
   { title: 'Text Overlay', to: '/stories/autogen/textOverlay' },
   { title: 'Pdf Page Viewer', to: '/stories/autogen/pdfPageViewer' },

@@ -5,8 +5,6 @@
 import _ from 'lodash';
 
 import {
-  Ref,
-  ref,
   watch,
 } from '@vue/composition-api';
 
@@ -14,13 +12,12 @@ import {
 
 import * as d3 from 'd3';
 
-import { StateArgs, waitFor } from '~/components/basics/component-basics'
+import { StateArgs } from '~/components/basics/component-basics'
 import { EventlibCore } from '~/components/basics/eventlib-core';
 import { SuperimposedElements } from '~/components/basics/superimposed-elements';
-import { useRTreeSearch, RTreeSearch } from '~/components/basics/rtree-search';
+import { useRTreeIndex, RTreeIndex } from '~/components/basics/rtree-search';
 import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
-import { coords, BBox, d3x } from 'sharedLib';
-import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
+import { BBox, d3x } from 'sharedLib';
 
 const { initStroke, initFill, initRect } = d3x;
 
@@ -28,7 +25,7 @@ export type SetGrid = (textData: TextDataPoint[], pageGeometry: BBox) => void;
 
 export interface GlyphOverlays {
   setGrid: SetGrid;
-  rtreeSearch: RTreeSearch<TextDataPoint>;
+  rtreeIndex: RTreeIndex<TextDataPoint>;
 }
 
 type Args = StateArgs & {
@@ -44,28 +41,16 @@ export function useGlyphOverlays({
   // TODO: setHoveredText (for highlighting sync-highlighting text on pdf-text widget)
   // TODO: setClickedText (for synching pdf page text w/ image)
 
-  const textDataPointsRef: Ref<TextDataPoint[]|null> = ref(null)
-  let pageGeometry: BBox;
-  const rtreeSearch = useRTreeSearch<TextDataPoint>({ state });
+  const rtreeIndex = useRTreeIndex<TextDataPoint>({ state });
 
   const setGrid: SetGrid = (textData, geom) => {
-    pageGeometry = geom;
-    textDataPointsRef.value = textData;
-  }
+    const pageGeometry = geom;
+    const { width, height } = pageGeometry;
 
-  waitFor('GlyphOverlays', {
-    state,
-    dependsOn: [textDataPointsRef],
-  }, () => {
-
-    const textData = textDataPointsRef.value!;
-
-    const width = pageGeometry.width;
-    const height = pageGeometry.height;
     superimposedElements.setDimensions(width, height);
 
-    rtreeSearch.loadData(textData);
-    const flashlight = rtreeSearch.flashlight(eventlibCore);
+    rtreeIndex.loadData(textData);
+    const flashlight = rtreeIndex.flashlight(eventlibCore);
 
     const svgLayer = superimposedElements.overlayElements.svg!;
     const svgSelect = d3.select(svgLayer);
@@ -85,12 +70,11 @@ export function useGlyphOverlays({
         .call(initFill, 'yellow', 0.8)
 
     });
-
-  });
+  }
 
   return {
     setGrid,
-    rtreeSearch
+    rtreeIndex
   };
 
 }
