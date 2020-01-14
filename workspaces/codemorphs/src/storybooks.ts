@@ -31,8 +31,8 @@ export function setupStoryVues(tsconfigPath: string, dryrun: boolean) {
   fs.mkdir(storyOutputDir);
 
   const storyList = findStories(project);
-  _.each(storyList, (storyPath: StoryPaths) => {
 
+  _.each(storyList, (storyPath: StoryPaths) => {
     const storyBaseName = storyPath.storyBaseName;
     const vueContent = `
 <script lang="ts">
@@ -94,8 +94,6 @@ function getStoryProp(fileContent: string, propname: string): string | undefined
   return propValue;
 }
 
-// story-name=myStory
-// story-category=widget
 
 function findStories(project: Project): StoryPaths[] {
   // const srcFiles = project.getSourceFiles()

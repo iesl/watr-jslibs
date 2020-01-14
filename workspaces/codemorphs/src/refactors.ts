@@ -14,7 +14,7 @@ export function listSrcFiles() {
 }
 
 
-export function organizeImports(tsconfigPath: string, componentName: string, rootPath: string) {
+export function organizeImports(tsconfigPath: string, componentName: string, _rootPath: string) {
   const project = new Project({
     tsConfigFilePath: tsconfigPath
   });
@@ -47,22 +47,23 @@ export function setupVueComponent(tsconfigPath: string, componentName: string, r
   }
 
   const vueFile = at('index.vue');
-  _.capitalize()
   const nameParts = componentName.split('-');
   const capParts = _.map(nameParts, _.capitalize);
   const title = _.join(capParts, ' ');
 
-  const vueContent = `<template lang="html" src="./${componentName}.html"></template>
-<script lang="ts" src="./${componentName}.ts">
+  const vueContent = `<template lang="html" src="./_inc.html"></template>
+<script lang="ts" src="./index.ts">
 // story-name=${_.camelCase(componentName)}
 // story-title=${title}
 </script>
-<style lang="scss" src="./${componentName}.scss" scoped></style>
+<style lang="scss" src="./_inc.scss" scoped></style>
 `;
 
-  const vueSourceFile = project.createSourceFile(vueFile, vueContent).saveSync();
-  const tsSource = project.createSourceFile(at(`${componentName}.ts`), '// TODO \n').saveSync();
-  const htmlSource = project.createSourceFile(at(`${componentName}.html`), '<div> TODO </div>\n').saveSync();
-  const styleSource = project.createSourceFile(at(`${componentName}.scss`), '.todo {}\n').saveSync();
+  // const tsSource = project.createSourceFile(at(`${componentName}.ts`), '// TODO \n').saveSync();
+
+  project.createSourceFile(vueFile, vueContent).saveSync();
+  project.createSourceFile(at(`index.ts`), '// TODO \n').saveSync();
+  project.createSourceFile(at(`_inc.html`), '<div> TODO </div>\n').saveSync();
+  project.createSourceFile(at(`_inc.scss`), '.todo {}\n').saveSync();
 
 }
