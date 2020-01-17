@@ -7,9 +7,7 @@
   "author": "Adam Saunders <saunders@cs.umass.edu>",
   "dependencies": {
     "@types/fs-extra": "^8.0.1",
-    "caporal": "^1.3.0",
     "commander": "^4.0.1",
-    "fast-csv": "^4.0.2",
     "fs-extra": "^8.1.0"
   },
   "license": "ISC",
@@ -20,7 +18,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "main": "npm-run-all --serial build \"morph -- {@}\" --",
+    "cli": "node dist/main.js",
+    "main": "npm-run-all --serial build \"cli -- {@}\" --",
     "test": "jest"
   }
 }

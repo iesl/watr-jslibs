@@ -3,15 +3,9 @@
     "baseUrl": ".",
     "allowJs": true,
 
-    "target": "esnext",
-    "module": "esnext",
+    "target": "es6",
+    "module": "commonjs",
     "moduleResolution": "node",
-
-    "lib": [
-      "esnext",
-      "esnext.asynciterable",
-      "dom"
-    ],
 
     "esModuleInterop": true,
     "importHelpers": true,
@@ -19,9 +13,8 @@
 
     "experimentalDecorators": true,
     "strict": true,
-    "noEmit": true,
-
-    "resolveJsonModule": true,
+    "noEmit": false,
+    "outDir": "./dist",
 
     "noImplicitReturns": true,
     "noUnusedParameters": false,
