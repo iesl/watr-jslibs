@@ -1,0 +1,55 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "allowJs": true,
+
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+
+    "lib": [
+      "esnext",
+      "esnext.asynciterable",
+      "dom"
+    ],
+
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
+
+    "experimentalDecorators": true,
+    "strict": true,
+    "noEmit": true,
+
+    "resolveJsonModule": true,
+
+    "noImplicitReturns": true,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false,
+
+    "inlineSourceMap": true,
+    "preserveConstEnums": true,
+
+    "types": [
+      "jest",
+      "chai",
+      "vuetify",
+      "@types/node",
+      "@nuxt/types"
+    ],
+
+    "paths": {
+      "~/*":  ["./src/*"],
+      "@/*":  ["./src/*"],
+      "~~/*": ["./src/*"],
+      "@@/*": ["./src/*"]
+    }
+
+  },
+
+  "exclude": ["node_modules", "../../node_modules", ".nuxt", "dist"],
+
+  "include": [
+    "src/**/*"
+  ],
+}
