@@ -8,6 +8,7 @@
 
 
 
+
 ** Current Goal(s)
 *** Tracelog visualizer
 **** Pdf Image viewer
@@ -113,3 +114,5 @@ const defaultLocalHandlers = {
     }
   }
 }
+
+TODO maybe use suffix tree for filter search?

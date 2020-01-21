@@ -3,6 +3,8 @@ import fs from 'fs-extra';
 import * as csv from 'fast-csv';
 import path from 'path';
 
+import { traverseObject } from './radix-tree';
+
 export async function csvToPathTree(csvfile: string): Promise<any> {
 
   return new Promise((resolve, reject) => {
@@ -12,6 +14,7 @@ export async function csvToPathTree(csvfile: string): Promise<any> {
     if (!fileExists) {
       return reject(`File not found: ${csvabs} `);
     }
+
     let accum: any = {};
 
     function parseCsvRow(row: string[]) {
@@ -23,6 +26,7 @@ export async function csvToPathTree(csvfile: string): Promise<any> {
         }
         return p;
       });
+
       const urlList = _.get(accum, parts, []);
       _.set(accum, parts, _.concat(urlList, [[url, hashId]]));
     }
@@ -39,24 +43,7 @@ export async function csvToPathTree(csvfile: string): Promise<any> {
   });
 }
 
-export function traverseObject(fn: (o: any, p: string[]) => void, initObj: any) {
-  function _loop(lobj: any, lpath: string[]) {
-    fn(lobj, lpath);
-    if (!_.isArray(lobj)) {
-      _.each(_.keys(lobj), k => {
-        const newpath = _.concat(lpath, k)
-        _loop(lobj[k], newpath);
-      });
-    }
-  }
-  _loop(initObj, []);
-}
 
-export const printSummary = (accObj: any) => traverseObject((currObj, currPath) => {
-  if (_.isArray(currObj)) {
-    console.log(`${_.join(currPath, ' / ')}: ${currObj.length}`);
-  }
-}, accObj);
 
 
 const addUrlPaths = (initObj: any) => traverseObject((currObj, currPath) => {
@@ -64,8 +51,6 @@ const addUrlPaths = (initObj: any) => traverseObject((currObj, currPath) => {
   if (_.isArray(currObj)) {
     const urls = currObj;
     const daccum: any = {};
-
-    let iter = 0;
 
     _.each(urls, ([url, hashId]) => {
       if (url.includes('//')) {
