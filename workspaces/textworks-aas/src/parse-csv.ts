@@ -3,8 +3,6 @@ import fs from 'fs-extra';
 import * as csv from 'fast-csv';
 import path from 'path';
 
-import {prettyPrint} from  './pretty-print';
-
 export async function csvToPathTree(csvfile: string): Promise<any> {
 
   return new Promise((resolve, reject) => {
@@ -35,10 +33,7 @@ export async function csvToPathTree(csvfile: string): Promise<any> {
         parseCsvRow(row);
       })
       .on('end', () => {
-        console.log(`done...`);
-        // prettyPrint({ msg: 'pre', accum });
         addUrlPaths(accum);
-        // prettyPrint({ msg: 'post', accum });
         resolve(accum);
       });
   });
@@ -73,8 +68,6 @@ const addUrlPaths = (initObj: any) => traverseObject((currObj, currPath) => {
     let iter = 0;
 
     _.each(urls, ([url, hashId]) => {
-      // console.log(`addUrlPaths url: ${url} `);
-      // console.log(`            hid: ${hashId} `);
       if (url.includes('//')) {
         const urlDomainAndPath = url.split('//')[1];
         const urlDomain = urlDomainAndPath.split('/')[0];
@@ -86,11 +79,7 @@ const addUrlPaths = (initObj: any) => traverseObject((currObj, currPath) => {
         const nonUrls = _.get(daccum, [url], []);
         _.set(daccum, [url], _.concat(nonUrls, [[url, hashId]]));
       }
-
-      prettyPrint({ msg: `iter ${iter}`, url, hashId, daccum });
     });
-
-    prettyPrint({ msg: 'done', daccum });
 
     const parentPath = currPath.slice(0, currPath.length-1);
     const lastPathPart = currPath[currPath.length-1];
