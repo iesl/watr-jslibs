@@ -16,6 +16,18 @@ const program = cmds;
  * Roadmap:
  *   - Download initial *.html from given urls, putting them in appropriate directory structure
  *   - Examine outgoing href/links per html, trying to identify likely pdf file link
+ *      - in html:
+ *        -urls
+ *          - head/meta[name] startwith 'citation_'
+ *          - head/meta[name] === 'citation_url' => url => proceedings pdf?
+ *          - head/meta[name] === 'citation_pdf_url' => url => proceedings pdf?
+ *          - head/meta[name] === 'citation_abstract_url' => abstract
+ *          - *[href] ~= /https?/ && /.pdf$/
+ *        - Abs/Auth/Title
+ *          - div[:class=row]/div[:class=col-md-12](0) === abstract
+ *          - div[:id|:class=abstract] === abstract
+ *          - div[:class=row]/div[:class=col-md-12](1) === keywords
+ *
  *   - Examine htmls for embedded abstract/title/author
  *   - For htmls w/o embedded a/t/a:
  *      - Look for pdf and/or redirects to other htmls
