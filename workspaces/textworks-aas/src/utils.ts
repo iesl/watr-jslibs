@@ -1,4 +1,5 @@
 
+import _ from "lodash";
 import path from 'path';
 import fs from 'fs-extra';
 
@@ -39,4 +40,16 @@ export function fileOrDie(file: string|undefined, ...ps: string[]): string {
   process.exit();
   // just to quiet the return errors:
   throw new Error();
+}
+
+export async function runMapThenables<V>(vs: ArrayLike<V>, f: (v: V) => Promise<any>): Promise<void> {
+  if (vs.length > 0) {
+    const v0 = vs[0];
+    return f(v0).then(() => {
+      return runMapThenables(_.tail(vs), f);
+    }).catch(err => {
+      console.log("runMapThenables: error: ", err);
+    });
+  }
+  return;
 }

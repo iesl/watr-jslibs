@@ -8,6 +8,7 @@ import path from 'path';
 import { csvToPathTree } from './parse-csv';
 import { traverseUrls } from './radix-tree';
 import { getHtml } from './get-urls';
+import { prettyPrint } from './pretty-print';
 
 
 type CBFunc = () => Promise<void>;
@@ -155,12 +156,9 @@ export function runGetHtml(url: string, output: string) {
 }
 
 
-import { prettyPrint } from './pretty-print';
 
 
 interface Field {
-  // url: string;
-  // path: string;
   name: string;
   evidence: string;
   value?: string;
@@ -169,15 +167,56 @@ interface Field {
 interface DocumentMeta {
   fields: Field[];
   url: string;
+  id: string;
   path: string;
   error?: string;
 }
 
+function makePath(rootDir: string, hashId: string, treePath: string[]): string|undefined {
+  const basepathArr = _.concat(treePath, [hashId]);
+  const basepath = path.join(rootDir, ...basepathArr);
+  // const filepath = path.join(basepath, 'download.html');
+  const exists = fs.existsSync(basepath);
+  return exists? basepath : undefined;
+}
 
+function readFile(rootDir: string, filename: string): string|undefined {
+  const filepath = path.join(rootDir, filename);
+  const exists = fs.existsSync(filepath);
+  if (exists) {
+    const buf = fs.readFileSync(filepath);
+    const fileContent = buf.toString().trim();
+    return fileContent;
+  }
+  return undefined;
+}
+
+
+const suspiciousAbstractRegexes = [
+  '^</div>',
+  '^<div class="item abstract">',
+  '^<p><i>',
+  '^limited training samples and prevent',
+  '^each argume',
+  '^However, m',
+  '^Frontmatter for Workshop Proceedings.',
+  '^This is the preface',
+  '^Preface to the 2018 KDD Workshop on Cau',
+  '^Presents the welcome message from the conference proceedings.',
+  '^The conference offers a note of thanks and lists its reviewers.',
+  '^Provides a listing of current committee members and society officers.',
+  '^This correspondence calls attenti',
+  '^Prospective authors are requested to submit new, unpublished manuscripts',
+  '^The seven papers in this special section',
+].map(s => new RegExp(s));
+
+/**
+ *  Traverse the spidered html files and try to extract fields (abstract)
+ *  Write the extracted fields to a json file
+ */
 export function examineHtml(csvfile: string, outdir: string) {
-  const workingDir = path.resolve(outdir);
+  const workingDir = outdir;
 
-  // const allFields: Field[] = [];
   const documentMetas: DocumentMeta[] = [];
   let docsFound = 0;
 
@@ -186,41 +225,42 @@ export function examineHtml(csvfile: string, outdir: string) {
 
       const meta: DocumentMeta = {
         fields: [],
+        id: hashId,
         url,
         path: '',
         error: undefined
       };
 
-      const basepathArr = _.concat(treePath, [hashId]);
-      const basepath = path.join(workingDir, ...basepathArr);
-      const filepath = path.join(basepath, 'download.html');
-      const exists = fs.existsSync(filepath);
-      if (exists) {
-        docsFound += 1;
-        meta.path = filepath;
+      const basepath = makePath(workingDir, hashId, treePath);
 
-        const buf = fs.readFileSync(filepath);
-        const fileContent = buf.toString().trim();
+      if (basepath) {
+        const fileContent = readFile(basepath, 'download.html');
 
-        if (fileContent.length === 0) {
-          meta.error = 'file is empty';
+        if (fileContent) {
+          docsFound += 1;
+          const filepath = path.join(basepath, 'download.html');
+          meta.path = filepath;
+
+          if (fileContent.length === 0) {
+            meta.error = 'file is empty';
+          }
+
+          const ls = fileContent.split('\n');
+          const fileLines = _(ls)
+            .map(l => l.trim())
+            .filter(l => l.length>0)
+            .value();
+
+          const fields = [
+            findAbstractV1(fileLines),
+            findAbstractV2(fileLines),
+            findAbstractV3(fileLines),
+            findAbstractV4(fileLines),
+          ];
+
+          meta.fields = fields;
+          documentMetas.push(meta);
         }
-
-        const ls = fileContent.split('\n');
-        const fileLines = _(ls)
-          .map(l => l.trim())
-          .filter(l => l.length>0)
-          .value();
-
-        const fields = [
-          findAbstractV1(fileLines),
-          findAbstractV2(fileLines),
-          findAbstractV3(fileLines),
-          findAbstractV4(fileLines),
-        ];
-
-        meta.fields = fields;
-        documentMetas.push(meta);
       }
     });
   }).then(() => {
@@ -229,6 +269,41 @@ export function examineHtml(csvfile: string, outdir: string) {
       const withAbstracts = dm.fields.filter(f => f.value !== undefined);
       return withAbstracts.length===0;
     });
+
+    const withAbstracts = documentMetas.filter(dm => {
+      return _.some(dm.fields, f => f.value!==undefined);
+    });
+
+    const nonSuspiciousAbstracts = withAbstracts.filter(dm => {
+      const nonSuspiciousFields = dm.fields.filter(f => {
+        const v = f.value;
+        if (v) {
+          return !_.some(suspiciousAbstractRegexes, re => {
+            const result = re.test(v);
+            const tooShort = v.length <= 80;
+            return result || tooShort;
+          });
+        }
+        return false;
+
+      });
+      return nonSuspiciousFields.length > 0;
+    });
+
+    const pruned = _.map(nonSuspiciousAbstracts, dm => {
+      const definedFields = dm.fields.filter(f => f.value!==undefined);
+      const justAbstract = definedFields.map(f => f.value);
+      return {
+        id: dm.id,
+        url: dm.url,
+        fields: [{ kind: 'abstract', value: justAbstract}]
+      }
+    });
+
+    console.log(`# of nonSuspiciousAbstracts: ${nonSuspiciousAbstracts.length}`);
+
+    const withAbstractsAsJson = JSON.stringify(pruned);
+    fs.writeFileSync('withAbstracts.json', withAbstractsAsJson);
 
     const noAbstractsNoErrors = noAbstracts.filter(dm => dm.error===undefined)
     const withErrors = noAbstracts.filter(dm => dm.error!==undefined)
@@ -250,6 +325,7 @@ export function examineHtml(csvfile: string, outdir: string) {
     });
 
     const uniqDomains = _.uniq(domainsWoAbs);
+
 
     const examples = _.map(uniqDomains, (domain) => {
       const domainFields = noAbstractsNoErrors
@@ -275,13 +351,13 @@ export function examineHtml(csvfile: string, outdir: string) {
       errorCounts
     });
 
-    _.each(noAbstractsNoErrors, dm => {
-      const p = dm.path;
-      const i = p.indexOf('dld.d');
-      const subp = p.slice(i, p.length);
-      console.log(subp);
-      console.log(`url> ${dm.url}`);
-    });
+    // _.each(noAbstractsNoErrors, dm => {
+    //   const p = dm.path;
+    //   const i = p.indexOf('dld.d');
+    //   const subp = p.slice(i, p.length);
+    //   console.log(subp);
+    //   console.log(`url> ${dm.url}`);
+    // });
 
   });
 
@@ -371,7 +447,8 @@ function findAbstractV4(fileLines: string[]): Field {
   return field;
 }
 
-import { Builder, By, WebDriver } from 'selenium-webdriver';
+import { Builder, WebDriver } from 'selenium-webdriver';
+import { runMapThenables } from './utils';
 
 
 export async function initBrowser() {
@@ -398,6 +475,7 @@ async function promptToFetch(url: string, driver: WebDriver): Promise<string|und
   })
   switch (response.value) {
     case 'download':
+      // const htmlTag = await driver.findElement(By.tagName('html'))
       return getPageHtml(driver, url);
     case 'skip':
       break;
@@ -408,8 +486,6 @@ async function promptToFetch(url: string, driver: WebDriver): Promise<string|und
 }
 
 export async function fetchViaFirefox(urlFile: string, _outdir: string) {
-  // const workingDir = path.resolve(outdir);
-  // const urlList = path.join(workingDir, urlFile);
   const exists = fs.existsSync(urlFile);
   if (! exists) {
     console.log(`Exiting: file ${urlFile} doesn't exist.`)
@@ -422,28 +498,8 @@ export async function fetchViaFirefox(urlFile: string, _outdir: string) {
 
   const driver = await initBrowser();
 
-  const chain = _.chain(urls).reduce(async (pacc, url) => {
-    return pacc.then(async () => {
-      const html = await promptToFetch(url, driver)
-      console.log(html);
-    }).catch(err => {
-      console.log("error: ", err);
-    }) ;
-  }, Promise.resolve());
-
-  await chain.value();
-}
-
-export async function controlFirefox() {
-
-  const driver = await new Builder().forBrowser('firefox').build();
-  //your code inside this block
-  await driver.get('https://selenium.dev')
-  const htmlTag = await driver.findElement(By.tagName('html'))
-  const htmlText = await htmlTag.getText();
-  const htmlInner = await htmlTag.getAttribute('innerHTML');
-  const pageSource = await driver.getPageSource();
-
-  prettyPrint({ htmlText, htmlInner, pageSource });
-
+  runMapThenables(urls, async (url: string) => {
+    const html = await promptToFetch(url, driver)
+    console.log(html);
+  });
 }

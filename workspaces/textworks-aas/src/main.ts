@@ -9,7 +9,7 @@ import { csvToPathTree  } from './parse-csv';
 import { printSummary } from './radix-tree';
 
 import cmds from 'caporal';
-import { initPaths, runGetHtml, examineHtml, downloadAll, controlFirefox, fetchViaFirefox } from './spidering';
+import { initPaths, runGetHtml, examineHtml, downloadAll, fetchViaFirefox } from './spidering';
 const program = cmds;
 
 /**
@@ -82,12 +82,6 @@ program
   .argument('<output>', 'output file')
   .action((args: any, _opts: any, _logger: any) => {
     runGetHtml(args.url, args.output);
-  });
-
-program
-  .command('firefox', 'control firefox')
-  .action((args: any, opts: any, _logger: any) => {
-    controlFirefox();
   });
 
 program
