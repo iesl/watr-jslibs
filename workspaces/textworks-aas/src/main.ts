@@ -9,7 +9,7 @@ import { csvToPathTree  } from './parse-csv';
 import { printSummary } from './radix-tree';
 
 import cmds from 'caporal';
-import { initPaths, runGetHtml, examineHtml, downloadAll } from './spidering';
+import { initPaths, runGetHtml, examineHtml, downloadAll, controlFirefox, fetchViaFirefox } from './spidering';
 const program = cmds;
 
 /**
@@ -53,6 +53,7 @@ program
     const d = dirOrDie(args.outputdir, opts.rootdir);
     initPaths(f, d);
   });
+
 program
   .command('spider', 'fetch all htmls')
   .argument('<file>', 'csv file name')
@@ -81,6 +82,21 @@ program
   .argument('<output>', 'output file')
   .action((args: any, _opts: any, _logger: any) => {
     runGetHtml(args.url, args.output);
+  });
+
+program
+  .command('firefox', 'control firefox')
+  .action((args: any, opts: any, _logger: any) => {
+    controlFirefox();
+  });
+
+program
+  .command('fetch-ff', 'control firefox')
+  .argument('<urls>', 'url to fetch')
+  .option('--rootdir', 'root path')
+  .action((args: any, opts: any, _logger: any) => {
+    const urlList = fileOrDie(args.urls, opts.rootdir);
+    fetchViaFirefox(urlList, opts.rootdir);
   });
 
 

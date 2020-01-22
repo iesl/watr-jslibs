@@ -2,7 +2,7 @@
 ** Subprobjects
 
 *** ClientApp
-    The first production version of WatrColors. 
+    The first production version of WatrColors.
 
 *** shared
     library of assorted utilities
@@ -14,7 +14,7 @@
 *** WatrmarksJs
     Scala code cross-compiled to javascript and used as a helper library
 
-    
+
 ** Applications and Subsystems
 
 *** Visual Tracelog Viewer
@@ -25,34 +25,31 @@
     Easier hierarchical annotation system
 
 *** Extracted Text Viewer
-    
+
 *** Annotation Explorer
     Read-only version of the labeler for viewing:
     - labelled datasets
     - issues and/or errors with current extractors
-      
+
 *** Workload distribution
-    Allow multiple annotators to be assigned portions of 
+    Allow multiple annotators to be assigned portions of
     labeling work and track progress
-    
+
 *** Reconcilation UI
     Show differences between two annotations of the same region or text,
     allow reconcilation editor to resolve differences.
-    
+
 *** Hosted text extraction interface
     Online trial version of TextWorks and visualizers
-    
+
 *** MIT Material Science Annotator
 **** Relation and graph editor
 
 *** Login/Authentication and Permission system
-    
+
 *** Commentary overlay (OpenReview feature)
-    
+
 *** Pdf Page thumbnail viewer/browser
-    
+
 *** Pdf extraction artifact overview/viewer
     Planned. Show all artifacts and information related to a particular pdf
-
-
-

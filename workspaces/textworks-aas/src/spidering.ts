@@ -280,6 +280,7 @@ export function examineHtml(csvfile: string, outdir: string) {
       const i = p.indexOf('dld.d');
       const subp = p.slice(i, p.length);
       console.log(subp);
+      console.log(`url> ${dm.url}`);
     });
 
   });
@@ -370,47 +371,79 @@ function findAbstractV4(fileLines: string[]): Field {
   return field;
 }
 
-
-// <p class="left"><a href="https://aaai.org/ojs/index.php/AAAI/article/view/5162">
-// Binary Classifier Inspired by Quantum Theory</a><br />
-// <i>Prayag Tiwari, Massimo Melucci</i><br />
-// Pages 10051-10052&nbsp;|&nbsp;
-// <a href="https://aaai.org/ojs/index.php/AAAI/article/view/5162/5035">PDF</a></p>
+import { Builder, By, WebDriver } from 'selenium-webdriver';
 
 
+export async function initBrowser() {
+  return new Builder().forBrowser('firefox').build();
+}
+
+export async function getPageHtml(driver: WebDriver, url: string) {
+  await driver.get(url)
+  return await driver.getPageSource();
+}
+
+// function promptToFetch(url: string, hashId: string, treePath: string[], outdir: string) {
+async function promptToFetch(url: string, driver: WebDriver): Promise<string|undefined> {
+  const response = await prompts({
+    type: 'select',
+    name: 'value',
+    message: `view: ${url}`,
+    choices: [
+      { title: 'Download', value: 'download' },
+      { title: 'Skip', value: 'skip' },
+      { title: 'Quit', value: 'quit' }
+    ],
+    initial: 0
+  })
+  switch (response.value) {
+    case 'download':
+      return getPageHtml(driver, url);
+    case 'skip':
+      break;
+    case 'quit':
+      process.exit();
+  }
+  return;
+}
+
+export async function fetchViaFirefox(urlFile: string, _outdir: string) {
+  // const workingDir = path.resolve(outdir);
+  // const urlList = path.join(workingDir, urlFile);
+  const exists = fs.existsSync(urlFile);
+  if (! exists) {
+    console.log(`Exiting: file ${urlFile} doesn't exist.`)
+    return Promise.resolve();
+  }
+
+  const urlBuf = fs.readFileSync(urlFile);
+  const urls = urlBuf.toString().split('\n').map(l => l.trim()).filter(l => l.length>0);
 
 
-// // import parse5 from 'parse5';
-// import { Document, TreeAdapter, Node } from 'parse5';
+  const driver = await initBrowser();
 
-// //@ts-ignore
-// // import * as treeAdapter from 'parse5/lib/tree-adapters/default';
+  const chain = _.chain(urls).reduce(async (pacc, url) => {
+    return pacc.then(async () => {
+      const html = await promptToFetch(url, driver)
+      console.log(html);
+    }).catch(err => {
+      console.log("error: ", err);
+    }) ;
+  }, Promise.resolve());
 
-// type WalkerNode = Node | object;
+  await chain.value();
+}
 
-// function walkTree(document: Document, treeAdapter: TreeAdapter, handler: (node: WalkerNode) => void) {
-//   for (let stack = treeAdapter.getChildNodes(document).slice(); stack.length; ) {
-//     const node = stack.shift();
-//     if (node !== undefined) {
-//       const children = treeAdapter.getChildNodes(node);
+export async function controlFirefox() {
 
-//       handler(node);
+  const driver = await new Builder().forBrowser('firefox').build();
+  //your code inside this block
+  await driver.get('https://selenium.dev')
+  const htmlTag = await driver.findElement(By.tagName('html'))
+  const htmlText = await htmlTag.getText();
+  const htmlInner = await htmlTag.getAttribute('innerHTML');
+  const pageSource = await driver.getPageSource();
 
-//       if (children && children.length) {
-//         stack = children.concat(stack);
-//       }
-//     }
-//   }
-// }
-// function findAbstractV2(fileLines: string[]): Partial<Field> {
-//   // const document = parse5.parse(fileContent);
-//   // walkTree(document, treeAdapter, (node: WalkerNode) => {
-//   //   const elem: any = node as any;
+  prettyPrint({ htmlText, htmlInner, pageSource });
 
-//   //   const nname = elem.nodeName;
-//   //   const tag = elem.tagName;
-//   //   prettyPrint({ nname, tag });
-
-//   // });
-//   // prettyPrint({ document });
-// }
+}
