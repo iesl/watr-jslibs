@@ -49,7 +49,7 @@ export function initPaths(csvfile: string, outdir: string) {
 
 export async function downloadAll(csvfile: string, outdir: string) {
   const workingDir = path.resolve(outdir);
-  const pauseLength = 4 * 1000;
+  const pauseLength = 2 * 1000;
 
   let fns: CBFunc[] = []
 
@@ -83,7 +83,7 @@ export async function downloadAll(csvfile: string, outdir: string) {
     });
     return Promise.resolve();
   }).then(async () => {
-    const torun = fns.slice(0, 1000);
+    const torun = fns; // .slice(0, 1000);
     console.log(`running ${fns.length} callbacks`);
 
     const chain = _.chain(torun).reduce(async (acc, action) => {
