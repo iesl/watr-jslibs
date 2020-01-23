@@ -4,8 +4,9 @@ import * as csv from 'fast-csv';
 import path from 'path';
 
 import { traverseObject } from './radix-tree';
+import { prettyPrint } from './pretty-print';
 
-export async function csvToPathTree(csvfile: string): Promise<any> {
+export async function parseCsv(csvfile: string): Promise<string[][]> {
 
   return new Promise((resolve, reject) => {
     const csvabs = path.resolve(csvfile);
@@ -15,32 +16,45 @@ export async function csvToPathTree(csvfile: string): Promise<any> {
       return reject(`File not found: ${csvabs} `);
     }
 
-    let accum: any = {};
-
-    function parseCsvRow(row: string[]) {
-      const [hashId, dblpId, url] = row;
-      const parts0 = dblpId.split('/');
-      const parts = _.map(parts0, (p: string) => {
-        if (p.match(/\d+/)) {
-          return `_${p}`;
-        }
-        return p;
-      });
-
-      const urlList = _.get(accum, parts, []);
-      _.set(accum, parts, _.concat(urlList, [[url, hashId]]));
-    }
+    let accum: any = [];
 
     fs.createReadStream(csvabs)
       .pipe(csv.parse({ headers: false }))
       .on('data', (row: string[]) => {
-        parseCsvRow(row);
+        accum.push(row);
       })
       .on('end', () => {
-        addUrlPaths(accum);
         resolve(accum);
       });
   });
+}
+
+export async function csvToPathTree(csvfile: string): Promise<any> {
+  return parseCsv(csvfile)
+    .then((rows: string[][]) => {
+      // prettyPrint({ rows: rows.slice(0, 10) });
+
+      let accum: any = {};
+
+      function parseCsvRow(row: string[]) {
+        const [hashId, dblpId, url] = row;
+        const parts0 = dblpId.split('/');
+        const parts = _.map(parts0, (p: string) => {
+          if (p.match(/\d+/)) {
+            return `_${p}`;
+          }
+          return p;
+        });
+
+        const urlList = _.get(accum, parts, []);
+        _.set(accum, parts, _.concat(urlList, [[url, hashId]]));
+      }
+
+      _.each(rows, parseCsvRow);
+
+      addUrlPaths(accum);
+      return accum;
+    });
 }
 
 

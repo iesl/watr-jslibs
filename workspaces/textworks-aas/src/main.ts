@@ -1,16 +1,14 @@
 //
 import _ from 'lodash';
-import fs from 'fs-extra';
-import path from 'path';
 
-import { getHtml } from './get-urls';
 import { fileOrDie, dirOrDie } from './utils';
 import { csvToPathTree  } from './parse-csv';
 import { printSummary } from './radix-tree';
 
 import cmds from 'caporal';
-import { initPaths, runGetHtml, examineHtml, downloadAll, fetchViaFirefox } from './spidering';
+import { runGetHtml, spiderAll, fetchViaFirefox, interactiveSpider, interactiveSpiderViaFF } from './spidering';
 import { runInkDemo } from './ink-sample';
+import { extractAbstractFromHtml } from './field-extract';
 const program = cmds;
 
 /**
@@ -37,22 +35,25 @@ const program = cmds;
  */
 
 program
-  .command('load', 'load csv and report some info')
-  .argument('<file>', 'csv file name')
-  .action((args: any, _opts: any, _logger: any) => {
-    loadcsv(args.file)
-  });
-
-
-program
-  .command('init-paths', 'create dir structure for html/pdf downloads')
+  .command('spider-interactive', 'user-driven file download')
   .argument('<file>', 'csv file name')
   .argument('<outputdir>', 'basepath to write output files/directories')
   .option('--rootdir', 'root path')
   .action((args: any, opts: any, _logger: any) => {
     const f = fileOrDie(args.file, opts.rootdir);
     const d = dirOrDie(args.outputdir, opts.rootdir);
-    initPaths(f, d);
+    interactiveSpider(f, d);
+  });
+
+program
+  .command('spider-ff', 'user-driven file download')
+  .argument('<file>', 'json')
+  .argument('<outputdir>', 'basepath to write output files/directories')
+  .option('--rootdir', 'root path')
+  .action((args: any, opts: any, _logger: any) => {
+    const f = fileOrDie(args.file, opts.rootdir);
+    const d = dirOrDie(args.outputdir, opts.rootdir);
+    interactiveSpiderViaFF(f, d);
   });
 
 program
@@ -63,18 +64,18 @@ program
   .action((args: any, opts: any, _logger: any) => {
     const f = fileOrDie(args.file, opts.rootdir);
     const d = dirOrDie(args.outputdir, opts.rootdir);
-    downloadAll(f, d);
+    spiderAll(f, d);
   });
 
 program
-  .command('examine-htmls', 'look at html')
+  .command('extract-html-abstract', 'find abstracts in html')
   .argument('<file>', 'csv file name')
   .argument('<outputdir>', 'html download basepath')
   .option('--rootdir', 'root path')
   .action((args: any, opts: any, _logger: any) => {
     const f = fileOrDie(args.file, opts.rootdir);
     const d = dirOrDie(args.outputdir, opts.rootdir);
-    examineHtml(f, d);
+    extractAbstractFromHtml(f, d);
   });
 
 program
@@ -100,12 +101,6 @@ program
     runInkDemo();
   });
 
-
-function loadcsv(csvfile: string) {
-  csvToPathTree(csvfile).then((treeObj: any) => {
-    printSummary(treeObj);
-  });
-}
 
 
 program.parse(process.argv);

@@ -35,7 +35,6 @@ export class RadixTree {
 }
 
 export const traverseUrls = (accObj: any, fn: (url: string, hid: string, treePath: string[]) => void) => {
-  console.log('traverseUrls; ');
 
   traverseObject((currObj, currPath) => {
 
