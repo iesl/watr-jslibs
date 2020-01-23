@@ -10,6 +10,7 @@ import { printSummary } from './radix-tree';
 
 import cmds from 'caporal';
 import { initPaths, runGetHtml, examineHtml, downloadAll, fetchViaFirefox } from './spidering';
+import { runInkDemo } from './ink-sample';
 const program = cmds;
 
 /**
@@ -91,6 +92,12 @@ program
   .action((args: any, opts: any, _logger: any) => {
     const urlList = fileOrDie(args.urls, opts.rootdir);
     fetchViaFirefox(urlList, opts.rootdir);
+  });
+
+program
+  .command('ink', 'testing ink ui builder')
+  .action((_args: any, _opts: any, _logger: any) => {
+    runInkDemo();
   });
 
 

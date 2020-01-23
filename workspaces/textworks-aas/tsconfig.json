@@ -23,6 +23,8 @@
     "inlineSourceMap": true,
     "preserveConstEnums": true,
 
+    "jsx": "react",
+
     "types": [
       "jest",
       "chai",
