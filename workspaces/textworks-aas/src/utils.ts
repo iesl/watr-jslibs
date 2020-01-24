@@ -15,6 +15,7 @@ export function dirOrDie(file: string|undefined, ...ps: string[]): string {
   if (file) {
     pres = path.resolve(...ps, file)
     const exists = fs.existsSync(pres);
+    // fs.statSync(pres).is
     const valid = exists? fs.statSync(pres).isDirectory() : false;
     if (valid) {
       return pres;
@@ -22,8 +23,19 @@ export function dirOrDie(file: string|undefined, ...ps: string[]): string {
   }
   console.log(`Dir Error: ${pres} doesn't exist`);
   process.exit();
-  // just to quiet the return errors:
-  throw new Error();
+}
+
+export function fileOrUndef(file: string|undefined, ...ps: string[]): string|undefined {
+  let pres = file;
+  if (file) {
+    pres = path.resolve(...ps, file)
+    const exists = fs.existsSync(pres);
+    const valid = exists? fs.statSync(pres).isFile() : false;
+    if (valid) {
+      return pres;
+    }
+  }
+  return undefined;
 }
 
 export function fileOrDie(file: string|undefined, ...ps: string[]): string {
@@ -38,8 +50,6 @@ export function fileOrDie(file: string|undefined, ...ps: string[]): string {
   }
   console.log(`File Error: ${pres} doesn't exist`);
   process.exit();
-  // just to quiet the return errors:
-  throw new Error();
 }
 
 export async function runMapThenables<V>(vs: ArrayLike<V>, f: (v: V) => Promise<any>): Promise<void> {

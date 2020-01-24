@@ -68,7 +68,15 @@ const Run: React.FC = () => {
 
 
 
-export async function runInkDemo() {
+import { progressLogger } from './logging';
 
-    const app = render(<Run />);
+export async function runInkDemo() {
+    const spiderLog = progressLogger('spider.log');
+
+    spiderLog('my first log');
+    spiderLog('my second log');
+    spiderLog('my third log');
+    spiderLog({ foo: 'msg1', bar: 'msg2'});
+
+    /* const app = render(<Run />); */
 }
