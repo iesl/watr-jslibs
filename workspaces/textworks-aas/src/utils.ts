@@ -61,5 +61,5 @@ export async function runMapThenables<V>(vs: ArrayLike<V>, f: (v: V) => Promise<
       console.log("runMapThenables: error: ", err);
     });
   }
-  return;
+  return Promise.resolve();
 }

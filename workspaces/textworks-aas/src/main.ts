@@ -4,7 +4,7 @@ import path from 'path';
 import { fileOrDie, dirOrDie, fileOrUndef } from './utils';
 
 import cmds from 'caporal';
-import { defaultSpideringOptions, createSpider } from './spidering';
+import { defaultSpideringOptions, createSpider, csvToSpiderRecs } from './spidering';
 import { runInkDemo } from './ink-sample';
 import { extractAbstractFromHtml } from './field-extract';
 import { prettyPrint } from './pretty-print';
@@ -43,13 +43,12 @@ program
   .option('--useBrowser', 'run a selenium-controlled browser to fetch urls')
   .action((_args: any, opts: any, _logger: any) => {
 
-
     const spiderOpts = defaultSpideringOptions;
-    prettyPrint({ _args, opts, spiderOpts });
     const cwd = dirOrDie(opts.cwd);
 
-    const configFile = fileOrUndef(opts.config, cwd);
+    // const configFile = fileOrUndef(opts.config, cwd);
     // if (configFile) {}
+
     const log = opts.logpath || 'spidering-log.json';
     const loggingPath = path.join(cwd, log);
 
@@ -59,7 +58,6 @@ program
     spiderOpts.useBrowser = opts.useBrowser;
     spiderOpts.rootDir = cwd;
     spiderOpts.downloadDir = opts.downloads? dirOrDie(opts.downloads, cwd) : cwd;
-    prettyPrint({ spiderOpts });
     createSpider(spiderOpts);
   });
 
@@ -72,6 +70,19 @@ program
     const f = fileOrDie(args.file, opts.rootdir);
     const d = dirOrDie(args.outputdir, opts.rootdir);
     extractAbstractFromHtml(f, d);
+  });
+
+program
+  .command('csv-to-srecs', 'convert csv to spidering input file format')
+  .option('--cwd <path>', 'base path to resolve other paths/files (if they are not absolute)')
+  .option('--csv <file>', 'input csf file ', program.STRING)
+  .option('--outfile <file>', 'output json file', program.STRING)
+  .action((_args: any, opts: any, _logger: any) => {
+    const cwd = dirOrDie(opts.cwd);
+    const csvfile = path.join(cwd, opts.csv);
+    const outfile = path.join(cwd, opts.outfile);
+
+    csvToSpiderRecs(csvfile, outfile);
   });
 
 program

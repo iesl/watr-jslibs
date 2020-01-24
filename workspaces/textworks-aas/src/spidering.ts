@@ -9,6 +9,8 @@ import { fetchUrl } from './get-urls';
 import { Builder, WebDriver, By, until } from 'selenium-webdriver';
 import { runMapThenables } from './utils';
 import { createLogger, format, transports } from 'winston';
+import { csvToPathTree } from './parse-csv';
+import { traverseUrls } from './radix-tree';
 const { combine, timestamp, prettyPrint } = format;
 
 export interface SpideringEnv {
@@ -64,7 +66,7 @@ function initLogger(logname: string): Logger {
 }
 
 export async function createSpider(opts: SpideringOptions) {
-  const logger = initLogger(path.join(opts.rootDir, opts.loggingPath));
+  const logger = initLogger(opts.loggingPath);
   logger.info({ event: 'initializing spider', config: opts });
 
   const input = opts.spiderInputFile;
@@ -98,7 +100,7 @@ export async function createSpider(opts: SpideringOptions) {
 
   logger.info({ event: 'starting spider' });
 
-  runMapThenables(spideringRecs.recs, async (rec: SpideringRec) => {
+  await runMapThenables(spideringRecs.recs, async (rec: SpideringRec) => {
     const url = rec.url;
     let fetched: string | undefined;
     const nextAction = await prompt();
@@ -143,18 +145,22 @@ async function fetchViaAxios(): Promise<[FetchUrlFn, ShutdownFn]> {
     return fetchUrl(env, url);
   };
   const shutdown: ShutdownFn = async () => {
-
   };
   return [fetch, shutdown];
 }
 
 async function fetchViaFirefox(): Promise<[FetchUrlFn, ShutdownFn]> {
-  const driver = await initBrowser();
+  const driver0 = await initBrowser();
 
   const fetch: FetchUrlFn = async (env, url) => {
+    const driver = driver0;
     return getPageHtml(env, driver, url);
   };
-  const shutdown: ShutdownFn = driver.quit;
+
+  const shutdown: ShutdownFn = async () => {
+    const driver = driver0;
+    return driver.quit();
+  }
   return [fetch, shutdown];
 }
 
@@ -319,6 +325,21 @@ async function promptForAction(): Promise<string> {
   }).then(r => r.value);
 }
 
+
+export async function csvToSpiderRecs(csvfile: string, outfile: string): Promise<void> {
+  csvToPathTree(csvfile)
+    .then((treeObj: any) => {
+      const recs: SpideringRec[] = [];
+
+      traverseUrls(treeObj, (url: string, hashId: string, treePath: string[]) => {
+        const outpath = path.join(...treePath, hashId);
+        recs.push({ url, outpath });
+      });
+
+      const recsAsJson = JSON.stringify(recs);
+      fs.writeFileSync(outfile, recsAsJson);
+    });
+}
 
 // async function waitFor(ms: number): Promise<void> {
 //   return new Promise<void>((resolve) => {
