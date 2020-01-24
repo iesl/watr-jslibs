@@ -127,11 +127,11 @@ export function extractAbstractFromHtml(csvfile: string, outdir: string) {
 
     console.log(`# of nonSuspiciousAbstracts: ${nonSuspiciousAbstracts.length}`);
 
-    const withAbstractsAsJson = JSON.stringify(pruned);
-    fs.writeFileSync('withAbstracts.json', withAbstractsAsJson);
+    // const withAbstractsAsJson = JSON.stringify(pruned);
+    // fs.writeFileSync('withAbstracts.json', withAbstractsAsJson);
 
-    const noAbstractsJson = JSON.stringify(noAbstracts);
-    fs.writeFileSync('withoutAbstracts.json', noAbstractsJson);
+    // const noAbstractsJson = JSON.stringify(noAbstracts);
+    // fs.writeFileSync('withoutAbstracts.json', noAbstractsJson);
 
     const noAbstractsNoErrors = noAbstracts.filter(dm => dm.error===undefined)
     const withErrors = noAbstracts.filter(dm => dm.error!==undefined)
@@ -163,11 +163,16 @@ export function extractAbstractFromHtml(csvfile: string, outdir: string) {
 
       const len = domainFields.length;
       const urls = domainFields
-        .slice(0, 2)
-        .map(f => f.path);
+        .map(f => {
+          const i = f.path.indexOf('dblp.org/');
+          return {
+            path: f.path.slice(i, f.path.length),
+            url: f.url
+          }
+        });
 
       return {
-        len, urls
+        domain, len, urls
       };
     })
 
@@ -176,9 +181,20 @@ export function extractAbstractFromHtml(csvfile: string, outdir: string) {
       noAbstractCount: noAbstracts.length,
       noAbstractNoErrorCount,
       uniqDomains,
-      examples,
+      // examples,
       errorCounts
     });
+
+    const doiUrls = examples.filter(e => e.domain.includes('doi.org'));
+
+    _.each(doiUrls, d => {
+      console.log(`domain> ${d.domain} len = ${d.len}`);
+      _.each(d.urls, u => {
+        console.log(`url> ${u.url}`);
+        console.log(`pth> ${u.path}`);
+      });
+    });
+
 
     // _.each(noAbstractsNoErrors, dm => {
     //   const p = dm.path;

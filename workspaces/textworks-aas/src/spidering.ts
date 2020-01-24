@@ -21,18 +21,28 @@ type CBFunc = () => Promise<void>;
  */
 
 
-export async function interactiveSpiderViaFF(recJson: string, _outdir: string) {
+export async function interactiveSpiderViaFF(recJson: string, _outdir: string, urlfilter: string) {
+  console.log(`using url filter ${urlfilter}`);
+
   const tmp = fs.readFileSync(recJson);
   const asJson: any[] = JSON.parse(tmp.toString());
+
+  const filterRE = new RegExp(urlfilter);
 
   const driver = await initBrowser();
   runMapThenables(asJson, async (rec: any) => {
     const url: string = rec.url;
 
+    if (!filterRE.test(url)) {
+      console.log(`skipping filtered url: ${url}`)
+      return
+    }
     if (url.includes('ieeexplore') || url.includes('no_url')) {
-      console.log(`skipping ieeexplore: ${url}`)
+      console.log(`skipping ieeexplore/no_url: ${url}`)
       return;
     }
+
+
     const basepath = rec.path;
     const filepath = path.join(basepath, 'download.html');
 
@@ -183,23 +193,130 @@ export function runGetHtml(url: string, output: string) {
   })
 }
 
-import { Builder, WebDriver } from 'selenium-webdriver';
+import { Builder, WebDriver, By, until } from 'selenium-webdriver';
 import { runMapThenables } from './utils';
 
 
-export async function initBrowser() {
-  return new Builder().forBrowser('firefox').build();
+export async function initBrowser(): Promise<WebDriver> {
+  const bldr = new Builder();
+  bldr.forBrowser('firefox');
+  bldr.getCapabilities().setAcceptInsecureCerts(true);
+  return bldr.build();
 }
 
-export async function getPageHtml(driver: WebDriver, url: string): Promise<string|undefined> {
-  /// need special rule handling for various page types...
+
+interface SpideringRule {
+  urlre: RegExp;
+  rule: (wd: WebDriver, url: string) => Promise<string|undefined>;
+}
+
+// Rules:
+const SpideringRules: SpideringRule[] = [
+  { urlre: new RegExp('aaai\.org.+/paper/view/.*'), rule: async (wd: WebDriver, url: string) => {
+    try {
+      // re-write the url
+      const newUrl = url.replace('/view/', '/viewPaper/');
+      await wd.get(newUrl);
+      await wd.wait(until.elementLocated(By.id('abstract')), 5000);
+      const pageSource = await wd.getPageSource();
+      const i = pageSource.indexOf('<h4>Abstract');
+      if (i < 0) {
+        console.log('warning: rule did not succeed');
+      }
+      return pageSource;
+    } catch (err) {
+      console.log(`error in getPageHtml: ${err}`);
+      return undefined;
+
+    }
+  }},
+  { urlre: new RegExp('doi\.org/10\.1609/.*'), rule: async (wd: WebDriver, url: string) => {
+    try {
+
+      // until.urlMatches('')
+      await wd.get(url);
+      await wd.wait(until.elementLocated(By.className('abstract')), 5000);
+      const pageSource = await wd.getPageSource();
+      const i = pageSource.indexOf('Abstract</h3>');
+      if (i < 0) {
+        console.log('warning: rule possible did not succeed');
+      }
+      return pageSource;
+    } catch (err) {
+      console.log(`error in getPageHtml: ${err}`);
+      return undefined;
+
+    }
+  }},
+  { urlre: new RegExp('//doi\.org/.*'), rule: async (wd: WebDriver, url: string) => {
+    // General doi.org rules
+    try {
+
+      await wd.get(url);
+      // wait for a forward/redirect
+      await wd.wait(until.urlMatches(/!(doi\.org)/));
+      const currUrl = await wd.getCurrentUrl();
+
+
+      await wd.wait(until.elementLocated(By.className('abstract')), 5000);
+      const pageSource = await wd.getPageSource();
+      const i = pageSource.indexOf('Abstract</h3>');
+      if (i < 0) {
+        console.log('warning: rule possible did not succeed');
+      }
+      return pageSource;
+    } catch (err) {
+      console.log(`error in getPageHtml: ${err}`);
+      return undefined;
+
+    }
+  }}
   // e.g., ieeexplore.ieee.org
   //    class='row result-item'
 
 
-  // await driver.get(url).then(() => driver.sleep(3*1000))
-  return driver.get(url)
-    .then(() => driver.getPageSource())
+
+];
+
+
+
+export async function getPageHtml(driver: WebDriver, url: string): Promise<string|undefined> {
+  async function defaultRule(driver: WebDriver, url: string) {
+    try {
+      await driver.get(url)
+      await driver.sleep(2000)
+      return driver.getPageSource()
+        .catch(err => {
+          console.log(`error in getPageHtml: ${err}`);
+          return undefined;
+        });
+    } catch (err) {
+      console.log(`error in getPageHtml: ${err}`);
+      return;
+    }
+  }
+
+  const applicableRules = SpideringRules.filter(r => r.urlre.test(url));
+  const len = applicableRules.length;
+  let rule: (wd: WebDriver, url: string) => Promise<string|undefined> = defaultRule;
+  switch (len) {
+    case 0:
+      console.log('using default spidering rules');
+      break;
+    case 1:
+      const srule = applicableRules[0];
+      rule = srule.rule;
+      console.log(`using spidering rule ${srule.urlre.source}`);
+      break;
+    default:
+      const drule = applicableRules[0];
+      const allRules = applicableRules.map(r => r.urlre.source)
+      rule = drule.rule;
+      console.log(`Warning: multiple rules found for url ${url}: ${allRules} `);
+      console.log(`using spidering rule ${drule.urlre.source}`);
+      break;
+  }
+  return rule(driver, url)
     .catch(err => {
       console.log(`error in getPageHtml: ${err}`);
       return undefined;

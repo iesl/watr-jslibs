@@ -49,11 +49,11 @@ program
   .command('spider-ff', 'user-driven file download')
   .argument('<file>', 'json')
   .argument('<outputdir>', 'basepath to write output files/directories')
-  .option('--rootdir', 'root path')
+  .option('--urlfilter', 'optional regex to filter urls', (s) => s, '.*') .option('--rootdir', 'root path')
   .action((args: any, opts: any, _logger: any) => {
     const f = fileOrDie(args.file, opts.rootdir);
     const d = dirOrDie(args.outputdir, opts.rootdir);
-    interactiveSpiderViaFF(f, d);
+    interactiveSpiderViaFF(f, d, opts.urlfilter);
   });
 
 program
