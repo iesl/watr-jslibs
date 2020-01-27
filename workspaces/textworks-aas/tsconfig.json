@@ -25,6 +25,8 @@
 
     "jsx": "react",
 
+    "incremental": true,
+
     "types": [
       "jest",
       "chai",
