@@ -3,8 +3,8 @@ import fs from 'fs-extra';
 import * as csv from 'fast-csv';
 import path from 'path';
 
-import { traverseObject } from './radix-tree';
-import { prettyPrint } from './pretty-print';
+import { traverseObject } from '~/util/radix-tree';
+import { prettyPrint } from '~/util/pretty-print';
 
 export async function parseCsv(csvfile: string): Promise<string[][]> {
 

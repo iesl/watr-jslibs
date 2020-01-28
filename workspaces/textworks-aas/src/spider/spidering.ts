@@ -4,13 +4,13 @@ import fs from 'fs-extra';
 import path from 'path';
 
 
-import { fetchUrl } from './get-urls';
+import { fetchUrl } from '~/spider/get-urls';
 
 import { Builder, WebDriver, By, until } from 'selenium-webdriver';
-import { runMapThenables } from './utils';
+import { runMapThenables } from '~/util/utils';
 import { createLogger, format, transports } from 'winston';
-import { csvToPathTree } from './parse-csv';
-import { traverseUrls } from './radix-tree';
+import { csvToPathTree } from '~/util/parse-csv';
+import { traverseUrls } from '~/util/radix-tree';
 const { combine, timestamp, prettyPrint } = format;
 
 export interface SpideringEnv {

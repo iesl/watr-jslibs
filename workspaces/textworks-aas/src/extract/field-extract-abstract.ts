@@ -3,11 +3,11 @@ import _ from 'lodash';
 import fs from 'fs-extra';
 import path from 'path';
 import * as cheerio from 'cheerio';
-import { Field, ExtractError } from './field-extract';
-import { prettyPrint } from './pretty-print';
-import { walkFileCorpus, CorpusEntry } from './corpora/file-corpus';
+import { Field, ExtractError } from '~/extract/field-extract';
+import { prettyPrint } from '~/util/pretty-print';
+import { walkFileCorpus, CorpusEntry } from '~/corpora/file-corpus';
 import { makeCssTreeNormalForm, makeCssTreeNormalFormFromNode } from './reshape-html';
-import { readFile, indentLevel, findIndexForLines, findSubContentAtIndex, filterText, stripMargin } from './field-extract-utils';
+import { readFile, indentLevel, findIndexForLines, findSubContentAtIndex, filterText, stripMargin } from '~/extract/field-extract-utils';
 
 
 export async function extractAbstractFromHtmls(corpusRoot: string) {

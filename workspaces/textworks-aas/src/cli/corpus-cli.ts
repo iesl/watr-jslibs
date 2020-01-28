@@ -1,11 +1,11 @@
 import _ from 'lodash';
 
 import path from 'path';
-import { fileOrDie, dirOrDie, fileOrUndef } from './utils';
+import { fileOrDie, dirOrDie, fileOrUndef } from '~/util/utils';
 
 import cmds from 'caporal';
-import { initCorpus } from './field-extract';
-import { prettyPrint } from './pretty-print';
+import { initCorpus } from '~/extract/field-extract';
+import { prettyPrint } from '~/util/pretty-print';
 const program = cmds;
 
 program

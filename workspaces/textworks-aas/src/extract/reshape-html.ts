@@ -10,9 +10,9 @@ import * as cheerio from 'cheerio';
 // TODO use npm lib surgeon to extract fields
 // TODO peruse: https://github.com/lorien/awesome-web-scraping/blob/master/javascript.md
 
-// import { prettyPrint } from './pretty-print';
-import { walkFileCorpus, CorpusEntry } from './corpora/file-corpus';
-import { prettyPrint } from './pretty-print';
+// import { prettyPrint } from '~/util/pretty-print';
+import { walkFileCorpus, CorpusEntry } from '~/corpora/file-corpus';
+import { prettyPrint } from '~/util/pretty-print';
 
 type Attrs = { [k: string]: string };
 

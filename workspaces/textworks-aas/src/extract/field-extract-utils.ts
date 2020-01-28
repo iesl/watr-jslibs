@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import fs from 'fs-extra';
 import path from 'path';
-import { prettyPrint } from './pretty-print';
+import { prettyPrint } from '~/util/pretty-print';
 
 export function readFile(leading: string, ...more: string[]): string|undefined {
   const filepath = path.join(leading, ...more);

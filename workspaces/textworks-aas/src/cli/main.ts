@@ -1,15 +1,15 @@
 import _ from 'lodash';
 
 import path from 'path';
-import { fileOrDie, dirOrDie, fileOrUndef } from './utils';
+import { fileOrDie, dirOrDie, fileOrUndef } from '~/util/utils';
 
 import cmds from 'caporal';
-import { defaultSpideringOptions, createSpider, csvToSpiderRecs } from './spidering';
-import { runInkDemo } from './ink-sample';
-import { extractAbstractFromHtml } from './field-extract';
-import { prettyPrint } from './pretty-print';
-import { extractAbstractFromHtmls } from './field-extract-abstract';
-import { viewNormalizedHtmls } from './reshape-html';
+import { defaultSpideringOptions, createSpider, csvToSpiderRecs } from '~/spider/spidering';
+import { runInkDemo } from '~/misc/ink-sample';
+// import { extractAbstractFromHtml } from '~/extract/field-extract';
+import { prettyPrint } from '~/util/pretty-print';
+import { extractAbstractFromHtmls } from '~/extract/field-extract-abstract';
+import { viewNormalizedHtmls } from '~/extract/reshape-html';
 const program = cmds;
 
 /**

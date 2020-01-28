@@ -68,7 +68,7 @@ const Run: React.FC = () => {
 
 
 
-import { progressLogger } from './logging';
+import { progressLogger } from '~/util/logging';
 
 export async function runInkDemo() {
     const spiderLog = progressLogger('spider.log');

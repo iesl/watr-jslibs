@@ -3,12 +3,12 @@ import fs from 'fs-extra';
 import path from 'path';
 
 
-import { csvToPathTree } from './parse-csv';
-import { traverseUrls } from './radix-tree';
-import { prettyPrint } from './pretty-print';
-import { extractAbstract } from './field-extract-abstract';
-import { walkFileCorpus, CorpusEntry } from './corpora/file-corpus';
-import { suspiciousAbstractRegexes } from './field-extract-utils';
+import { csvToPathTree } from '~/util/parse-csv';
+import { traverseUrls } from '~/util/radix-tree';
+import { prettyPrint } from '~/util/pretty-print';
+import { extractAbstract } from '~/extract/field-extract-abstract';
+import { walkFileCorpus, CorpusEntry } from '~/corpora/file-corpus';
+import { suspiciousAbstractRegexes } from '~/extract/field-extract-utils';
 
 export type Verified = 'correct' | 'incorrect' ;
 

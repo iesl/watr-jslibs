@@ -25,7 +25,7 @@ export async function getHtml(url: string, output: string): Promise<void> {
 }
 
 import stream from 'stream';
-import { SpideringEnv } from './spidering';
+import { SpideringEnv } from '~/spider/spidering';
 
 export async function fetchUrl(env: SpideringEnv, url: string): Promise<string> {
   const userAgents = [

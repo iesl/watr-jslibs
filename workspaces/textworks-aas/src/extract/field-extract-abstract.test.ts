@@ -1,10 +1,10 @@
 import 'chai/register-should';
 
 import _ from 'lodash';
-import * as fex from './field-extract-abstract';
-import { prettyPrint } from './pretty-print';
+import * as fex from '~/extract/field-extract-abstract';
+import { prettyPrint } from '~/util/pretty-print';
 import { makeCssTreeNormalForm } from './reshape-html';
-import { stripMargin } from './field-extract-utils';
+import { stripMargin } from '~/extract/field-extract-utils';
 
 describe('Abstract Field Extraction',  () => {
   it("should pick out .hlFld coded abstracts", () => {
