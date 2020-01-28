@@ -241,3 +241,6 @@ function makePath(rootDir: string, hashId: string, treePath: string[]): string|u
   const exists = fs.existsSync(basepath);
   return exists? basepath : undefined;
 }
+
+
+
