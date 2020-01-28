@@ -6,17 +6,25 @@ import path from 'path';
 import { csvToPathTree } from './parse-csv';
 import { traverseUrls } from './radix-tree';
 import { prettyPrint } from './pretty-print';
+import { extractAbstract } from './field-extract-abstract';
+import { walkFileCorpus, CorpusEntry } from './corpora/file-corpus';
+import { suspiciousAbstractRegexes } from './field-extract-utils';
 
-interface Field {
-  name: string;
-  evidence: string;
-  value?: string;
-}
-interface ExtractError {
+export type Verified = 'correct' | 'incorrect' ;
+
+export interface ExtractError {
   msg: string;
 }
 
-interface DocumentMeta {
+export interface Field {
+  name: string;
+  evidence: string;
+  verified?: Verified;
+  value?: string;
+}
+
+
+export interface DocumentMeta {
   fields: Field[];
   url: string;
   id: string;
@@ -24,32 +32,46 @@ interface DocumentMeta {
   error?: ExtractError;
 }
 
-export function extractAbstract(entryRootDir: string): Field[] | ExtractError {
-  const htmlFile = path.join(entryRootDir, 'download.html');
+export async function initCorpus(csvfile: string, corpusRoot: string) {
+  prettyPrint({ corpusRoot });
 
-  const fileContent = readFile(htmlFile);
-  if (!fileContent) {
-    return { msg: 'file could not be read' };
-  }
+  await csvToPathTree(csvfile).then((treeObj: any) => {
+    traverseUrls(treeObj, (url: string, hashId: string, treePath: string[]) => {
+      const entryPath = path.join(...treePath, hashId);
+      const entryPathResolved = path.resolve(corpusRoot, entryPath);
+      console.log(`==  ${url} == ${entryPathResolved}`)
+      const entryPathExists = fs.existsSync(entryPathResolved);
+      if (!entryPathExists) {
+        console.log(`Error: no corpus entry path for ${url}:  ${treePath}, ${hashId}`)
+        return;
+      }
 
-  if (fileContent.length === 0) {
-    return {msg: 'file is empty' };
-  }
 
-  const ls = fileContent.split('\n');
-  const fileLines = _(ls)
-    .map(l => l.trim())
-    .filter(l => l.length>0)
-    .value();
+      const htmlFile = path.join(entryPathResolved, 'download.html');
+      const htmlExists = fs.existsSync(htmlFile);
+      if (!htmlExists) {
+        console.log(`Warning: no html entry for ${url}: ${treePath}, ${hashId}`)
+      }
 
-  const fields = [
-    findAbstractV1(fileLines),
-    findAbstractV2(fileLines),
-    findAbstractV3(fileLines),
-    findAbstractV4(fileLines),
-  ];
+      const metaFile = path.join(entryPathResolved, 'entry-meta.json');
+      const metaFileExists = fs.existsSync(metaFile);
+      if (metaFileExists) {
+        console.log(`Warning: entry-meta.json exists for  ${url}; skipping...`)
+        return;
+      }
 
-  return fields.filter(f => f.value);
+      const initMeta: DocumentMeta = {
+        fields: [],
+        id: hashId,
+        url,
+        path: ''
+      };
+      const metaJson = JSON.stringify(initMeta);
+      console.log(`writing meta.json...`)
+      fs.writeFileSync(metaFile, metaJson);
+    });
+  });
+
 }
 
 /**
@@ -211,86 +233,6 @@ export function extractAbstractFromHtml(csvfile: string, outdir: string) {
 
 
 
-function findAbstractV1(fileLines: string[]): Field {
-  let field: Field = {
-    name: 'abstract',
-    evidence: 'line.match(id="abstract")',
-  };
-  fileLines.findIndex((line, lineNum) => {
-    if (line.match('id="abstract"')) {
-      const abst = fileLines[lineNum+1];
-      field.value = abst;
-    }
-  });
-  // console.log('f>', field);
-
-  return field;
-}
-
-function findAbstractV2(fileLines: string[]): Field {
-  let field: Field = {
-    name: 'abstract',
-    evidence: 'line.match(global.document.metadata)',
-  };
-  fileLines.findIndex((line) => {
-    if (line.match('global.document.metadata')) {
-      const jsonStart = line.indexOf('{');
-      const jsonEnd = line.lastIndexOf('}');
-      const lineJson = line.slice(jsonStart, jsonEnd+1);
-      try {
-        const metadataObj = JSON.parse(lineJson);
-        const abst = metadataObj['abstract'];
-        field.value = abst;
-        // prettyPrint({ abst, metadataObj });
-      } catch (e) {
-        prettyPrint({ e, lineJson });
-      }
-    }
-  });
-  return field;
-}
-
-function findAbstractV3(fileLines: string[]): Field {
-  let field: Field = {
-    name: 'abstract',
-    evidence: 'line.match(global.document.metadata)',
-  };
-  fileLines.findIndex((line, lineNum) => {
-    if (line.includes('col-md-12') && !line.includes('signin')) {
-      const l1 = fileLines[lineNum+1];
-      const l2 = fileLines[lineNum+2];
-      const maybeAbstract = !l1.includes('class="keywords"');
-
-      if (maybeAbstract) {
-        field.value = l2;
-      }
-    }
-  });
-  return field;
-}
-
-// TODO detect empty and badly-formed files
-function findAbstractV4(fileLines: string[]): Field {
-  let field: Field = {
-    name: 'abstract',
-    evidence: '//doi.org: div[:class="abstract"]/h3+p',
-  };
-  fileLines.findIndex((line, lineNum) => {
-    const l1 = fileLines[lineNum+1];
-    const l2 = fileLines[lineNum+2];
-    if (line.match('"item abstract"') && l1.match('Abstract') && l2.match('<p>')) {
-      const begin = l2.indexOf('<p>')
-      const end = l2.lastIndexOf('</p>')
-      const abst = line.slice(begin, end);
-      field.value = abst;
-    }
-  });
-  //<div class="item abstract">
-  //  <h3 class="label">Abstract</h3>
-  //  <p>This paper proposes a no... </p>
-  //</div>
-  return field;
-}
 
 function makePath(rootDir: string, hashId: string, treePath: string[]): string|undefined {
   const basepathArr = _.concat(treePath, [hashId]);
@@ -299,33 +241,3 @@ function makePath(rootDir: string, hashId: string, treePath: string[]): string|u
   const exists = fs.existsSync(basepath);
   return exists? basepath : undefined;
 }
-
-function readFile(leading: string, ...more: string[]): string|undefined {
-  const filepath = path.join(leading, ...more);
-  const exists = fs.existsSync(filepath);
-  if (exists) {
-    const buf = fs.readFileSync(filepath);
-    const fileContent = buf.toString().trim();
-    return fileContent;
-  }
-  return undefined;
-}
-
-
-const suspiciousAbstractRegexes = [
-  '^</div>',
-  '^<div class="item abstract">',
-  '^<p><i>',
-  '^limited training samples and prevent',
-  '^each argume',
-  '^However, m',
-  '^Frontmatter for Workshop Proceedings.',
-  '^This is the preface',
-  '^Preface to the 2018 KDD Workshop on Cau',
-  '^Presents the welcome message from the conference proceedings.',
-  '^The conference offers a note of thanks and lists its reviewers.',
-  '^Provides a listing of current committee members and society officers.',
-  '^This correspondence calls attenti',
-  '^Prospective authors are requested to submit new, unpublished manuscripts',
-  '^The seven papers in this special section',
-].map(s => new RegExp(s));

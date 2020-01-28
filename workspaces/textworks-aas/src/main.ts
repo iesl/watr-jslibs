@@ -8,6 +8,8 @@ import { defaultSpideringOptions, createSpider, csvToSpiderRecs } from './spider
 import { runInkDemo } from './ink-sample';
 import { extractAbstractFromHtml } from './field-extract';
 import { prettyPrint } from './pretty-print';
+import { extractAbstractFromHtmls } from './field-extract-abstract';
+import { viewNormalizedHtmls } from './reshape-html';
 const program = cmds;
 
 /**
@@ -62,14 +64,25 @@ program
   });
 
 program
-  .command('extract-html-abstract', 'find abstracts in html')
-  .argument('<file>', 'csv file name')
-  .argument('<outputdir>', 'html download basepath')
-  .option('--rootdir', 'root path')
+  .command('find-abstracts', 'find abstracts in html')
+  .option('--cwd <path>', 'base path to resolve other paths/files (if they are not absolute)')
+  .option('--corpus-root <path>', 'root download path')
   .action((args: any, opts: any, _logger: any) => {
-    const f = fileOrDie(args.file, opts.rootdir);
-    const d = dirOrDie(args.outputdir, opts.rootdir);
-    extractAbstractFromHtml(f, d);
+    prettyPrint({ opts, args });
+    const cwd = dirOrDie(opts.cwd);
+    const corpusRoot = dirOrDie(path.join(cwd, opts.corpusRoot));
+    extractAbstractFromHtmls(corpusRoot);
+  });
+
+program
+  .command('view-norms', 'view normalized htmls')
+  .option('--cwd <path>', 'base path to resolve other paths/files (if they are not absolute)')
+  .option('--corpus-root <path>', 'root download path')
+  .action((args: any, opts: any, _logger: any) => {
+    prettyPrint({ opts, args });
+    const cwd = dirOrDie(opts.cwd);
+    const corpusRoot = dirOrDie(path.join(cwd, opts.corpusRoot));
+    viewNormalizedHtmls(corpusRoot);
   });
 
 program
@@ -84,6 +97,7 @@ program
 
     csvToSpiderRecs(csvfile, outfile);
   });
+
 
 program
   .command('ink', 'testing ink ui builder')

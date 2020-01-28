@@ -1,10 +1,22 @@
 {
   "presets": [
-		"@babel/preset-react",
     [ "@babel/env", {
       "targets": {
         "node": true
       }
-    }]
-  ]
+    }],
+    "@babel/typescript"
+  ],
+
+  "env": {
+    "test": {
+      "presets": [
+        [
+          "@babel/env",
+          {}
+        ],
+        "@babel/preset-typescript"
+      ]
+    }
+  }
 }

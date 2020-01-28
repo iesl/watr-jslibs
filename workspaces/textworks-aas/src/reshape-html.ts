@@ -1,5 +1,7 @@
 //
 import fs from 'fs-extra';
+import path from 'path';
+// import prompts from 'prompts';
 
 
 import _ from 'lodash';
@@ -8,6 +10,8 @@ import * as cheerio from 'cheerio';
 // TODO use npm lib surgeon to extract fields
 // TODO peruse: https://github.com/lorien/awesome-web-scraping/blob/master/javascript.md
 
+// import { prettyPrint } from './pretty-print';
+import { walkFileCorpus, CorpusEntry } from './corpora/file-corpus';
 import { prettyPrint } from './pretty-print';
 
 type Attrs = { [k: string]: string };
@@ -45,65 +49,92 @@ function parseAttrs(attrs: Attrs): string[][] {
   return kvs;
 }
 
-export function getCSSTree() {
-  const testHtml = fs.readFileSync('../../test.html').toString();
-  const $ = cheerio.load(testHtml);
 
-  const root: Cheerio = $(':root');
+function indentStrings(strs: string[], lpad: string|number): string[] {
+  let p = lpad;
+  if (typeof lpad === 'number') {
+    p = ''.padStart(lpad)
+  }
+  return _.map(strs, str => p+str);
+}
 
-  mapHtmlTree(root[0], (node: CheerioElement, depth, index, sibcount) => {
-    const tn = node.tagName
-    const tp = node['type'];
+export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
 
-    let fmt = ''.padStart(depth*2);
-    const attrs = node.attribs;
-    let attrsStr = '';
-    if (attrs) {
-      const attrPairs = parseAttrs(attrs);
-      const attrstr0 = _.map(attrPairs, ([k, v, abbr]) => {
-        if (abbr.length===1) {
-          return `${abbr}${v}`;
-        }
-        return `${abbr}='${v}'`;
-      });
-      attrsStr = _.join(attrstr0, ' ');
-    }
+  const finalTree: string[] = [];
 
-    switch (tp) {
-      case 'tag':
-        fmt = `${fmt}${tn} ${attrsStr}`;
-        break;
+  _.each(_.range(root.length), (rootIndex) => {
+    const elem = root[rootIndex]
 
-      case 'text': {
-        const d = node.data?.trim();
-        if (d && d.length > 0) {
-          const oneLine = d.replace('\n', '\\n');
-          const len = oneLine.length;
-          const abbrev = oneLine.slice(0, 50);
-          fmt = `${fmt}(l=${len})> ${abbrev} ...`;
-        }
-        break;
+    mapHtmlTree(elem, (node: CheerioElement, depth, _index, _sibcount) => {
+      const tn = node.tagName
+      const tp = node['type'];
+
+      let lpad = ''.padStart(depth*2);
+      const attrs = node.attribs;
+      let attrsStr = '';
+      if (attrs) {
+        const attrPairs = parseAttrs(attrs);
+        const attrstr0 = _.map(attrPairs, ([_k, v, abbr]) => {
+          if (abbr.length===1) {
+            return `${abbr}${v}`;
+          }
+          return `${abbr}='${v}'`;
+        });
+        attrsStr = _.join(attrstr0, ' ');
       }
 
-      case 'comment': {
-        const d = node.data?.trim();
-        if (d && d.length > 0) {
-          const oneLine = d.replace('\n', '\\n');
-          const len = oneLine.length;
-          const abbrev = oneLine.slice(0, 50);
-          fmt = `${fmt}comment(l=${len})> ${abbrev} ...`;
+      switch (tp) {
+        case 'tag': {
+          const line = `${lpad}${tn} ${attrsStr}`;
+          finalTree.push(line)
+          break;
         }
-        break;
+
+        case 'text': {
+          const d = node.data?.trim();
+          if (d && d.length > 0) {
+            const lines = d.split('\n');
+            const indentedLines =
+              indentStrings(
+                indentStrings(lines, '| ' ),
+                depth*2
+              );
+            _.each(indentedLines, l => finalTree.push(l));
+          }
+          break;
+        }
+
+        case 'comment': {
+          const line = `${lpad}comment`;
+          finalTree.push(line)
+          const d = node.data?.trim();
+          if (d && d.length > 0) {
+            const lines = d.split('\n');
+            const indentedLines =
+              indentStrings(
+                indentStrings(lines, '## ' ),
+                (depth+1)*2
+              );
+            _.each(indentedLines, l => finalTree.push(l));
+          }
+          break;
+        }
+
+        default:
+          const line = `${lpad}${tn}[${tp}] ${attrsStr}`;
+          finalTree.push(line)
       }
 
-      default:
-        fmt = `${fmt}${tn}[${tp}] ${attrsStr}`;
-    }
-    if (fmt.trim().length > 0) {
-      console.log(fmt);
-    }
+    });
   });
 
+  return finalTree;
+}
+
+export function makeCssTreeNormalForm(htmlFile: string): string[] {
+  const $ = cheerio.load(htmlFile);
+  const root: Cheerio = $(':root');
+  return makeCssTreeNormalFormFromNode(root);
 }
 
 function mapHtmlTree(
@@ -125,10 +156,52 @@ function mapHtmlTree(
   _inner(rootElem, 0, 0, 1);
 }
 
-getCSSTree();
+
+export async function viewNormalizedHtmls(corpusRoot: string) {
+  return walkFileCorpus(corpusRoot,  (entry: CorpusEntry) => {
+    const htmlFile = path.join(entry.path, 'download.html');
+    const metaFile = path.join(entry.path, 'entry-meta.json');
+    const fileContent = readFile(htmlFile);
+    const metaFileContent = readFile(metaFile);
+
+    if (!metaFileContent) {
+      prettyPrint({ msg: 'file could not be read' });
+      return;
+    }
+
+    const meta = JSON.parse(metaFileContent);
 
 
+    if (!fileContent) {
+      prettyPrint({ msg: 'file could not be read' });
+      return;
+    }
 
+    if (fileContent.length === 0) {
+      prettyPrint({ msg: 'file is empty' });
+      return;
+    }
+
+    const cssNormalForm = makeCssTreeNormalForm(fileContent);
+    const cssNormal = _.join(cssNormalForm, '\n');
+    console.log(meta);
+    console.log(cssNormal);
+
+  }).then(() => {
+    console.log('done walking');
+  });
+}
+
+function readFile(leading: string, ...more: string[]): string|undefined {
+  const filepath = path.join(leading, ...more);
+  const exists = fs.existsSync(filepath);
+  if (exists) {
+    const buf = fs.readFileSync(filepath);
+    const fileContent = buf.toString().trim();
+    return fileContent;
+  }
+  return undefined;
+}
 // get-css
 // $.prototype.getUniqueSelector = function () {
 //     var el = this;

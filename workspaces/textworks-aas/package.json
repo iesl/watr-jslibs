@@ -14,6 +14,7 @@
     "@types/cheerio": "^0.22.15",
     "@types/fs-extra": "^8.0.1",
     "@types/ink": "^2.0.3",
+    "@types/klaw": "^3.0.0",
     "@types/parse5": "^5.0.2",
     "@types/prompts": "^2.0.3",
     "@types/react": "^16.9.19",
@@ -26,10 +27,13 @@
     "fast-csv": "^4.0.2",
     "fs-extra": "^8.1.0",
     "ink": "^2.6.0",
+    "jest": "^25.1.0",
+    "klaw": "^3.0.0",
     "parse5": "^5.1.1",
     "prompts": "^2.3.0",
     "react": "^16.12.0",
     "selenium-webdriver": "^4.0.0-alpha.5",
+    "ts-jest": "^25.0.0",
     "typescript": "^3.7.5",
     "winston": "^3.2.1"
   },
@@ -40,10 +44,15 @@
   },
   "scripts": {
     "build": "tsc",
-    "watch": "tsc --watch",
-    "cli": "node dist/main.js",
-    "tmp": "tsc && node dist/reshape-html.js",
-    "main": "npm-run-all --serial build \"cli -- {@}\" --",
+    "main": "node dist/main.js",
+    "main-dev": "yarn build && node dist/main.js",
+    "corpus": "node dist/corpus-cli.js",
+    "corpus-dev": "yarn build && node dist/corpus-cli.js",
     "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "babel-jest": "^25.1.0"
   }
 }
