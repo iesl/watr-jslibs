@@ -6,7 +6,7 @@ import { fileOrDie, dirOrDie, fileOrUndef } from '~/util/utils';
 import cmds from 'caporal';
 import { initCorpus } from '~/extract/field-extract';
 import { prettyPrint } from '~/util/pretty-print';
-import { packageData } from '~/corpora/file-corpus';
+import { packageData } from '~/corpora/bundler';
 const program = cmds;
 
 program

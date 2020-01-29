@@ -1,13 +1,5 @@
 
-// import fs from 'fs-extra';
-
 export interface Readable<T> extends ReadStream<T> {}
-// export class Readable<T> {
-//   constructor(opts?: ReadableOptions<Readable<T>>);
-
-//   _read?(size: number): void;
-//   _destroy?(error: Error | null, callback: BasicCallback): void;
-// }
 
 export interface ReadStream<T> {
   readable: boolean;
@@ -75,15 +67,3 @@ export interface ReadStream<T> {
 
   [Symbol.asyncIterator](): AsyncIterableIterator<T>;
 }
-
-// export interface ReadableOptions<This> {
-//   highWaterMark?: number;
-//   encoding?: string;
-//   objectMode?: boolean;
-//   read?(this: This, size: number): void;
-//   destroy?(
-//       this: This,
-//       error: Error | null,
-//       callback: BasicCallback,
-//       ): void;
-// }

@@ -1,17 +1,7 @@
-
 import _ from 'lodash';
 
 import path from "path";
-import fs from "fs-extra";
 import klaw, { Item } from "klaw";
-import split from 'split2';
-import pump from 'pump';
-import through from 'through2';
-import { Readable  } from 'stream';
-import * as csv from 'fast-csv';
-
-// import streamFrom from 'from2';
-// import { prettyPrint } from '~/util/pretty-print';
 
 type ArtifactType = string;
 
@@ -59,163 +49,68 @@ export function walkFileCorpus(corpusRoot: string, fn: WalkFunction): Promise<vo
   });
 }
 
+import fs, {} from 'fs-extra';
+import stream, { Readable, Transform }  from 'stream';
+import through from 'through2';
 
-function createReadStream(filename: string): Readable {
-  const str = fs.createReadStream(filename);
-  str.on('end', () => {
-    str.destroy();
-  });
-  return str;
+
+interface DirStackEntry {
+  fullpath: string;
+  expanded: boolean;
 }
 
+export function directoryStreamDepthFirst(root: string): Readable {
+  const stack: DirStackEntry[] = [{ fullpath: root, expanded: false }];
 
-function makeNoteIdMapper() {
-  const idMap: any = {};
-  const chunker = through.obj(
-    function (rec: string[], _enc: string, cb) {
-      const [noteId,, url] = rec;
-      idMap[noteId] = url ;
-      return cb(null, null);
-    },
-    function flush(cb) {
-      this.push(idMap);
-      cb();
+  function expand(): DirStackEntry | undefined {
+    let top = _.last(stack)
+    while ( top && !top.expanded ) {
+      const topPath = top.fullpath;
+      const dirEntries = fs.readdirSync(top.fullpath, {withFileTypes: true});
+      const dirNames = _(dirEntries)
+        .filter(e => e.isDirectory())
+        .map(e => e.name)
+        .sort()
+        .reverse()
+        .map(e => {
+          const fullpath = path.join(topPath, e);
+          return {
+            fullpath,
+            expanded: false
+          }
+        })
+        .value();
+
+      top.expanded = true;
+      stack.push(...dirNames);
+      top = _.last(stack)
     }
-  );
-  return chunker;
-}
-function makeLogChunker() {
-  let noteId: string | undefined;
-  let abs: string | undefined;
-  let nextRec: any;
-
-  const chunker = through.obj(
-    function (blineChunk: Buffer, _enc: string, cb) {
-      const lineChunk = blineChunk.toString();
-      const isStart =  /^extracting/.test(lineChunk);
-      const isAbstract =  /^  >/.test(lineChunk);
-
-      if (isStart) {
-        if (noteId && abs) {
-          nextRec = {
-            noteId,
-            fields: [{ name: 'abstract', value: abs }]
-          };
-        }
-        noteId = abs = undefined;
-
-        const matchHashId = /\/([^\/]+)\/download.html$/.exec(lineChunk);
-        if (!matchHashId) {
-          throw Error(`matchHashId should have succeeded on ${lineChunk}`);
-        }
-        noteId = matchHashId[1];
-
-        if (nextRec) {
-          const z = nextRec;
-          nextRec = undefined;
-          return cb(null, z);
-        }
-      } else if (isAbstract) {
-        const a = lineChunk.split('>')[1].trim();
-        abs = a;
-      }
-
-      return cb(null, null);
-    },
-    function flush(cb) {
-      if (noteId && abs) {
-        this.push({ noteId, fields: [
-          { name: 'abstract', value: abs }
-        ]});
-        noteId = abs = undefined;
-      }
-      cb();
-    }
-  );
-  return chunker;
-}
-
-function makeIdUrlAugmenter(idToUrlMap: any) {
-  return through.obj(
-    function (rec: any, _enc: string, cb) {
-      const noteId = rec['noteId'];
-      const url = idToUrlMap[noteId];
-      if (!noteId || !url) {
-        throw new Error(`no noteId or url found: ${rec}` );
-      }
-      rec['url'] = url;
-      return cb(null, rec);
-    },
-  );
-}
-
-const printer = through.obj(
-  function (chunk: any, _enc: string, cb) {
-    console.log('chunk', chunk);
-    cb(null, chunk);
+    const next = stack.pop();
+    return next;
   }
-);
 
-function readCsvFile(csvfile: string) {
-  const csvStream = createReadStream(csvfile);
-  const csvParser = csv.parse({ headers: false });
-  const mapMaker = makeNoteIdMapper();
-  const pipe = pump(csvStream, csvParser, mapMaker, (err: Error) => {
-    console.log(`done; err=${err}`, err);
+  const streamOut = new stream.Readable({
+    objectMode: true,
+    read() {
+      const data = expand();
+      if (data) {
+        this.push(data);
+        return;
+      }
+      this.push(null)
+    }
   });
 
-  return pipe;
+  return streamOut;
 }
 
-export function readLogFile(logfile: string, idToUrlMap: any) {
-
-  const logStream = createReadStream(logfile);
-
-  const logChunker = makeLogChunker();
-  const idToUrl = makeIdUrlAugmenter(idToUrlMap);
-
-  const pipe = pump(logStream, split(), logChunker, idToUrl, (err: Error) => {
-    console.log(`done; err=${err}`, err);
-  });
-  return pipe;
-}
-
-
-function jsonCollector() {
-  let objs: any[] = [];
+export function stringStreamFilter(test: (p: string) => boolean): Transform {
   return through.obj(
-    function (rec: any, _enc: string, cb) {
-      objs.push(rec);
-      return cb(null, null);
-    },
-    function (cb) {
-      this.push(objs);
-      return cb();
+    (chunk: string, _enc: string, next: (err: any, v: string) => void) => {
+      if (test(chunk)) {
+        next(null, chunk);
+        return;
+      }
     }
   );
-}
-function jsonStringify() {
-  return through.obj(
-    function (jsons: any, _enc: string, cb) {
-      return cb(null, JSON.stringify(jsons));
-    }
-  );
-}
-
-export function packageData(csvfile: string, logfile: string) {
-
-  const csvReader = readCsvFile(csvfile);
-
-  csvReader.on('data', (data: any) => {
-
-    const logEntryStream = readLogFile(logfile, data);
-    const output = fs.createWriteStream('../../tmp.out.json');
-    const stringify = jsonStringify();
-    const collector = jsonCollector();
-
-    pump(logEntryStream, collector, stringify, output, (err: Error) => {
-      console.log(`done; err=${err}`, err);
-    });
-
-  });
 }
