@@ -6,7 +6,7 @@ import { fileOrDie, dirOrDie, fileOrUndef } from '~/util/utils';
 import cmds from 'caporal';
 import { initCorpus } from '~/extract/field-extract';
 import { prettyPrint } from '~/util/pretty-print';
-import { packageData } from '~/corpora/bundler';
+import { writeExtractedFieldsToCorpus } from '~/corpora/bundler';
 const program = cmds;
 
 program
@@ -26,7 +26,7 @@ program
 
 
 program
-  .command('package-data', 'create a single json file with all of extracted data')
+  .command('write-data', 'tmp cmd')
   .option('--cwd <path>', 'base path to resolve other paths/files (if they are not absolute)')
   .option('--corpus-root <path>', 'root download path')
   .option('--logfile <file>', 'input log file ', program.STRING)
@@ -38,7 +38,10 @@ program
     const corpusRoot = dirOrDie(opts.corpusRoot, cwd);
     prettyPrint({ cwd, logfile, csvfile, corpusRoot });
 
-    packageData(csvfile, logfile);
+    // packageData(csvfile, logfile);
+    writeExtractedFieldsToCorpus(csvfile, logfile).then(() => {
+      console.log('program: done');
+    });
 
 
   });
