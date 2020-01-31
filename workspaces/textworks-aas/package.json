@@ -12,8 +12,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "arg": "ts-node -r tsconfig-paths/register src/cli/index.ts",
-    "spider": "ts-node -r tsconfig-paths/register src/cli/main.ts",
+    "cli": "ts-node -r tsconfig-paths/register src/cli/index.ts",
+    "main": "ts-node -r tsconfig-paths/register src/cli/main.ts",
     "corpus": "ts-node -r tsconfig-paths/register src/cli/corpus-cli.ts",
     "test": "jest"
   },

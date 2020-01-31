@@ -1,38 +1,28 @@
 import _ from 'lodash';
 import path from 'path';
 import fs, {} from 'fs-extra';
-import { Transform }  from 'stream';
+import { Readable, Transform }  from 'stream';
 import through from 'through2';
 
 import pump from 'pump';
 
-import { directoryStreamDepthFirst, stringStreamFilter } from './file-corpus';
+import urlParse from 'url-parse';
+import { prettyPrint } from '~/util/pretty-print';
+import { dirsteam, stringStreamFilter } from './dirstream';
 
-
-export function corpusBrowser(corpusRoot: string) {
-  const corpusDirStream = directoryStreamDepthFirst(corpusRoot);
+export function corpusEntryStream(corpusRoot: string): Readable {
+  const corpusDirStream = dirsteam(corpusRoot);
 
   const entryDirFilter = stringStreamFilter((dir: string) => {
     return /_urls_\/.+$/.test(dir);
   });
 
-  const pipeline = pump(
-    corpusDirStream,
-    entryDirFilter,
-    expandDir(),
-    // 
-    (err: Error) => {
-      console.log(`Error:`, err);
-    });
-
-    pipeline.on('data', (data) =>{
-      prettyPrint({ data });
-    });
-
+  return corpusDirStream
+    .pipe(entryDirFilter);
 }
 
 export function corpusStats(corpusRoot: string) {
-  const corpusDirStream = directoryStreamDepthFirst(corpusRoot);
+  const corpusDirStream = dirsteam(corpusRoot);
 
   const entryDirFilter = stringStreamFilter((dir: string) => {
     return /_urls_\/.+$/.test(dir);
@@ -53,14 +43,24 @@ export function corpusStats(corpusRoot: string) {
 
 }
 
-interface ExpandedDir {
+export interface ExpandedDir {
   dir: string;
   files: string[];
 }
 
-function expandDir(): Transform {
+export function tapStream(msg: string): Transform {
+  return through.obj(
+    (data: any, _enc: string, next: (err: any, v: any) => void) => {
+      prettyPrint({ msg, data });
+      return next(null, data);
+    }
+  );
+}
+
+export function expandDir(): Transform {
   return through.obj(
     (dir: string, _enc: string, next: (err: any, v: any) => void) => {
+      prettyPrint({ msg: 'expandDir', dir });
       const dirEntries = fs.readdirSync(dir, { withFileTypes: true });
       const files = dirEntries
         .filter(dirent => dirent.isFile())
@@ -74,8 +74,6 @@ function expandDir(): Transform {
   );
 }
 
-import urlParse from 'url-parse';
-import { prettyPrint } from '~/util/pretty-print';
 
 function collectStats(): Transform {
   const stats: any = {};

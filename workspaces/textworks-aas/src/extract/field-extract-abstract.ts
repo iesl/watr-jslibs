@@ -1,23 +1,42 @@
 
 import _ from 'lodash';
-import fs from 'fs-extra';
 import path from 'path';
+import pump from 'pump';
+import { Transform }  from 'stream';
+import through from 'through2';
+
 import * as cheerio from 'cheerio';
 import { Field, ExtractError } from '~/extract/field-extract';
 import { prettyPrint } from '~/util/pretty-print';
-import { walkFileCorpus, CorpusEntry } from '~/corpora/file-corpus';
-import { makeCssTreeNormalForm, makeCssTreeNormalFormFromNode } from './reshape-html';
+import { makeCssTreeNormalFormFromNode, htmlToCssNormTransform } from './reshape-html';
 import { readFile, indentLevel, findIndexForLines, findSubContentAtIndex, filterText, stripMargin } from '~/extract/field-extract-utils';
+import { corpusEntryStream, expandDir, ExpandedDir } from '~/corpora/corpus-browser';
 
 
+export function extractAbstractTransform(): Transform {
+  return through.obj(
+    (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
+      extractAbstract(exDir);
+      next(null, exDir);
+    });
+}
 export async function extractAbstractFromHtmls(corpusRoot: string) {
-  return walkFileCorpus(corpusRoot, (entry: CorpusEntry) => {
-    const htmlFile = path.join(entry.path, 'download.html');
-    const metaFile = path.join(entry.path, 'entry-meta.json');
-    extractAbstract(htmlFile);
-  }).then(() => {
-    console.log('done walking');
-  });
+  const entryStream = corpusEntryStream(corpusRoot);
+  const pipe = pump(
+    entryStream,
+    expandDir(),
+    htmlToCssNormTransform(),
+    extractAbstractTransform(),
+    (err?: Error) => {
+      if (err) {
+        console.log(`Error:`, err);
+      } else {
+        console.log(`Done.`);
+      }
+    });
+
+  pipe.on('data', () => {});
+
 }
 
 type PipelineFunction = (lines: string[], content: string) => Field;
@@ -30,34 +49,30 @@ export const AbstractPipeline: PipelineFunction[] = [
   findAbstractV6,
   findAbstractV7,
   findAbstractV8,
+  findAbstractV9,
 ];
 
-export function extractAbstract(htmlFile: string): Field[] | ExtractError {
-  console.log(`extracting ${htmlFile}`);
+export function extractAbstract(exDir: ExpandedDir): Field[] | ExtractError {
 
-  const fileContent = readFile(htmlFile);
+  const htmlFile = exDir.files
+    .filter(f => f.endsWith('.html'))
+    .map(f => path.join(exDir.dir, f))[0];
+  const cssNormFile = exDir.files
+    .filter(f => f.endsWith('.norm.txt'))
+    .map(f => path.join(exDir.dir, f))[0];
 
-  if (!fileContent) {
-    return { msg: 'file could not be read' };
+  const htmlContent = readFile(htmlFile);
+  const normFileContent = readFile(cssNormFile);
+
+  if (!(htmlContent && normFileContent)) {
+    return { msg: `.html and .norm.txt did not exist in ${exDir}` };
   }
 
-  if (fileContent.length === 0) {
-    return {msg: 'file is empty' };
-  }
-
-  const cssNormalForm = makeCssTreeNormalForm(fileContent);
+  const cssNormalForm = normFileContent.split('\n');
   const fields = _.map(AbstractPipeline, pf => {
-    return pf(cssNormalForm, fileContent);
+    return pf(cssNormalForm, htmlContent);
   });
   const abstractFields = fields.filter(f => f.value);
-
-  const dir = path.dirname(htmlFile);
-  const cssNormFile = path.join(dir, 'css-norm.txt');
-  if (fs.existsSync(cssNormFile)) {
-    fs.removeSync(cssNormFile);
-  }
-  const cssNormContent = _.join(cssNormalForm, '\n');
-  fs.writeFileSync(cssNormFile, cssNormContent);
 
   if (abstractFields.length>0) {
     console.log(`found abstracts: ${htmlFile}`)
@@ -202,7 +217,7 @@ export function findAbstractV6(cssNormLines: string[]): Field {
   return field;
 }
 
-export function findAbstractV7(cssNormLines: string[], fileContent: string): Field {
+export function findAbstractV7(_cssNormLines: string[], fileContent: string): Field {
   let field: Field = {
     name: 'abstract',
     evidence: '??',
@@ -241,26 +256,22 @@ export function findAbstractV8(_normLines: string[], fileContent: string): Field
   return field;
 }
 
+export function findAbstractV9(_normLines: string[], fileContent: string): Field {
+  let field: Field = {
+    name: 'abstract',
+    evidence: 'div#body > div#main > div#content > div#abstract',
+  };
 
-// // TODO detect empty and badly-formed files
-// function findAbstractV4(cssNormLines: string[]): Field {
-//   let field: Field = {
-//     name: 'abstract',
-//     evidence: '//doi.org: div[:class="abstract"]/h3+p',
-//   };
-//   cssNormLines.findIndex((line, lineNum) => {
-//     const l1 = cssNormLines[lineNum+1];
-//     const l2 = cssNormLines[lineNum+2];
-//     if (line.match('"item abstract"') && l1.match('Abstract') && l2.match('<p>')) {
-//       const begin = l2.indexOf('<p>')
-//       const end = l2.lastIndexOf('</p>')
-//       const abst = line.slice(begin, end);
-//       field.value = abst;
-//     }
-//   });
-//   //<div class="item abstract">
-//   //  <h3 class="label">Abstract</h3>
-//   //  <p>This paper proposes a no... </p>
-//   //</div>
-//   return field;
-// }
+  const $ = cheerio.load(fileContent);
+
+  const maybeAbstract = $('div#body > div#main > div#content > div#abstract');
+  const cssNormal = makeCssTreeNormalFormFromNode(maybeAbstract);
+  const justText = filterText(cssNormal);
+  const abs = _.join(justText, ' ').trim();
+
+  if (abs.length > 0) {
+    field.value = abs;
+  }
+
+  return field;
+}

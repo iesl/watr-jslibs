@@ -1,8 +1,10 @@
 //
 import fs from 'fs-extra';
 import path from 'path';
-// import prompts from 'prompts';
+import pump from 'pump';
+import through from 'through2';
 
+import { Transform }  from 'stream';
 
 import _ from 'lodash';
 import * as cheerio from 'cheerio';
@@ -10,8 +12,8 @@ import * as cheerio from 'cheerio';
 // TODO use npm lib surgeon to extract fields
 // TODO peruse: https://github.com/lorien/awesome-web-scraping/blob/master/javascript.md
 
-import { walkFileCorpus, CorpusEntry } from '~/corpora/file-corpus';
 import { prettyPrint } from '~/util/pretty-print';
+import { corpusEntryStream, expandDir, ExpandedDir, tapStream } from '~/corpora/corpus-browser';
 
 type Attrs = { [k: string]: string };
 
@@ -173,38 +175,53 @@ export async function writeNormalizedHtml(htmlFile: string) {
   fs.writeFileSync(`${htmlFile}.norm.txt`, cssNormal);
 }
 
-export async function viewNormalizedHtmls(corpusRoot: string) {
-  return walkFileCorpus(corpusRoot,  (entry: CorpusEntry) => {
-    const htmlFile = path.join(entry.path, 'download.html');
-    const metaFile = path.join(entry.path, 'entry-meta.json');
-    const fileContent = readFile(htmlFile);
-    const metaFileContent = readFile(metaFile);
+export function htmlToCssNormTransform(): Transform {
+  return through.obj(
+    (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
+      _(exDir.files)
+        .filter(f => f.endsWith('.html'))
+        .map(f => path.join(exDir.dir, f))
+        .each(htmlFile => {
+          const fileContent = readFile(htmlFile);
+          if (!fileContent) {
+            prettyPrint({ msg: 'file could not be read' });
+            return;
+          }
 
-    if (!metaFileContent) {
-      prettyPrint({ msg: 'file could not be read' });
-      return;
-    }
+          if (fileContent.length === 0) {
+            prettyPrint({ msg: 'file is empty' });
+            return;
+          }
 
-    const meta = JSON.parse(metaFileContent);
+          const cssNormalForm = makeCssTreeNormalForm(fileContent);
+          const cssNormal = _.join(cssNormalForm, '\n');
+          const normFile = `${htmlFile}.norm.txt`;
+          fs.writeFileSync(normFile, cssNormal);
+        });
 
+      next(null, exDir);
+    });
+}
 
-    if (!fileContent) {
-      prettyPrint({ msg: 'file could not be read' });
-      return;
-    }
+export async function normalizeHtmls(corpusRoot: string) {
+  const entryStream = corpusEntryStream(corpusRoot);
 
-    if (fileContent.length === 0) {
-      prettyPrint({ msg: 'file is empty' });
-      return;
-    }
+  const pipe = pump(
+    entryStream,
+    tapStream('pre-expand'),
+    expandDir(),
+    tapStream('post-expand'),
+    htmlToCssNormTransform(),
+    tapStream('css-done'),
+    (err?: Error) => {
+      if (err) {
+        console.log(`Error:`, err);
+      } else {
+        console.log(`Done.`);
+      }
+    });
 
-    const cssNormalForm = makeCssTreeNormalForm(fileContent);
-    const cssNormal = _.join(cssNormalForm, '\n');
-    console.log(meta);
-    console.log(cssNormal);
-
-  }).then(() => {
-    console.log('done walking');
+  pipe.on('data', () => {
   });
 }
 

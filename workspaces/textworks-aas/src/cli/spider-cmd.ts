@@ -2,12 +2,13 @@ import _ from 'lodash';
 import { Argv } from 'yargs';
 import { yall, opt } from './arglib';
 import { prettyPrint } from '~/util/pretty-print';
+import { createSpider } from '~/spider/spidering';
 
 export const command = 'spider';
 
 export const aliases = ['crawl'];
 
-export const describe = 'start the spider'
+export const describe = 'Start the spider'
 
 export function builder(yargs: Argv) {
   yall(yargs, [
@@ -26,10 +27,8 @@ export function builder(yargs: Argv) {
 }
 
 export function handler(argv: any) {
-  const props = _.pickBy(argv, !_.isFunction);
-  const {
-    downloads, input, logpath
-  } = argv;
+  prettyPrint({ msg: 'Spidering', argv });
 
-  prettyPrint({ msg: 'Spidering', argv, downloads, input, logpath, props });
+  const spiderOpts = argv;
+  createSpider(spiderOpts);
 }

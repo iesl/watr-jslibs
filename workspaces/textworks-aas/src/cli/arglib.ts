@@ -27,8 +27,11 @@ function resolveArgPath(argv: Arguments, pathkey: string): string | undefined {
     const wd  = argv.cwd;
     if (typeof wd === 'string') {
       pathvalue = path.resolve(wd, pathvalue);
+    } else {
+      pathvalue = path.resolve(pathvalue);
     }
   }
+  pathvalue = path.normalize(pathvalue);
   argv[pathkey] = pathvalue;
   return pathvalue;
 }
@@ -56,8 +59,14 @@ const existingPath = (pathAndDesc: string) => (ya: Argv) => {
   })
 
   ya.middleware((argv: Arguments) => {
-    resolveArgPath(argv, pathname);
-    return argv;
+    const p = resolveArgPath(argv, pathname);
+    if (p && fs.existsSync(p)) {
+      return argv;
+    }
+    console.log(`option ${pathname} specified non-existent file ${p}`);
+    return ya.check(() => {
+      return false;
+    });
   }, true);
 
   return ya;
@@ -82,13 +91,18 @@ export const config = (ya: Argv) => {
     console.log('running middleware config');
     if (typeof argv.config === 'string') {
       const configFile = resolveArgPath(argv, 'config');
+      console.log(`resolved config to ${configFile}`);
       if (!configFile) {
         throw new Error(`Non-existent config file specified`)
+      }
+      // Set working directory to config file dir if not already set
+      if (!argv['cwd']) {
+        argv['cwd'] = path.dirname(configFile);
+        console.log(`resolved cwd in config to ${argv.cwd}`);
       }
       const buf = fs.readFileSync(configFile);
       const conf = JSON.parse(buf.toString())
       prettyPrint({ msg: 'config file', conf });
-      // return argv;
       const confKVs = _.toPairs(conf);
       _.each(confKVs, ([k, v]) => {
         argv[k] = v;
@@ -100,12 +114,6 @@ export const config = (ya: Argv) => {
 
   return ya;
 }
-
-// option<
-//    O extends { [key: string]: Options }
-//    >(options: O)
-// : Argv<Omit<T, keyof O> & InferredOptionTypes<O>>;
-type Opt = { [key: string]: Options };
 
 export const setOpt = (ya: Argv) => {
   ya.option

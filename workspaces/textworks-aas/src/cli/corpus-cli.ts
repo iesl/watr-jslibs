@@ -6,7 +6,7 @@ import cmds from 'caporal';
 const program = cmds;
 
 import { prettyPrint } from '~/util/pretty-print';
-import { corpusBrowser, corpusStats } from '~/corpora/corpus-browser';
+import { corpusStats } from '~/corpora/corpus-browser';
 
 program
   .command('stats', 'collect some coverage stats')
@@ -17,17 +17,6 @@ program
     const corpusRoot = dirOrDie(opts.corpusRoot, cwd);
     prettyPrint({ corpusRoot });
     corpusStats(corpusRoot);
-  });
-
-program
-  .command('browse', 'interactively go through the corpus')
-  .option('--cwd <path>', 'base path to resolve other paths/files (if they are not absolute)')
-  .option('--corpus-root <path>', 'root download path')
-  .action((_args: any, opts: any, _logger: any) => {
-    const cwd = dirOrDie(opts.cwd);
-    const corpusRoot = dirOrDie(opts.corpusRoot, cwd);
-    prettyPrint({ corpusRoot });
-    corpusBrowser(corpusRoot);
   });
 
 

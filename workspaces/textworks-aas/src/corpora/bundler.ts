@@ -6,7 +6,6 @@ import pump from 'pump';
 import through from 'through2';
 import { Readable  } from 'stream';
 import * as csv from 'fast-csv';
-import { prettyPrint } from '~/util/pretty-print';
 
 function createReadStream(filename: string): Readable {
   const str = fs.createReadStream(filename);
@@ -157,10 +156,10 @@ export async function writeExtractedFieldsToCorpus(csvfile: string, logfile: str
       }
     );
 
-    endstr.on('data', (d) => {
+    endstr.on('data', () => {
       console.log('processing...')
     });
-    endstr.on('done', (d) => {
+    endstr.on('done', () => {
       console.log('done...')
     });
   });
