@@ -2,6 +2,9 @@ import _ from 'lodash';
 
 import path from "path";
 import klaw, { Item } from "klaw";
+import fs, {} from 'fs-extra';
+import stream, { Readable, Transform }  from 'stream';
+import through from 'through2';
 
 type ArtifactType = string;
 
@@ -25,7 +28,6 @@ export interface CorpusEntry {
 }
 
 
-// export async function walkFileCorpus(corpusRoot: string): Promise<void> {
 type WalkFunction = ((e: CorpusEntry) => void) |
   ((e: CorpusEntry) => Promise<void>);
 
@@ -49,9 +51,6 @@ export function walkFileCorpus(corpusRoot: string, fn: WalkFunction): Promise<vo
   });
 }
 
-import fs, {} from 'fs-extra';
-import stream, { Readable, Transform }  from 'stream';
-import through from 'through2';
 
 
 interface DirStackEntry {
@@ -94,7 +93,7 @@ export function directoryStreamDepthFirst(root: string): Readable {
     read() {
       const data = expand();
       if (data) {
-        this.push(data);
+        this.push(data.fullpath);
         return;
       }
       this.push(null)
@@ -106,11 +105,11 @@ export function directoryStreamDepthFirst(root: string): Readable {
 
 export function stringStreamFilter(test: (p: string) => boolean): Transform {
   return through.obj(
-    (chunk: string, _enc: string, next: (err: any, v: string) => void) => {
+    (chunk: string, _enc: string, next: (err: any, v: string|null) => void) => {
       if (test(chunk)) {
-        next(null, chunk);
-        return;
+        return next(null, chunk);
       }
+      return next(null, null);
     }
   );
 }

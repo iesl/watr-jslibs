@@ -3,14 +3,13 @@ import _ from 'lodash';
 import path from 'path';
 import { fileOrDie, dirOrDie, fileOrUndef } from '~/util/utils';
 
-import cmds from 'caporal';
+import program from 'caporal';
 import { defaultSpideringOptions, createSpider, csvToSpiderRecs } from '~/spider/spidering';
 import { runInkDemo } from '~/misc/ink-sample';
 // import { extractAbstractFromHtml } from '~/extract/field-extract';
 import { prettyPrint } from '~/util/pretty-print';
 import { extractAbstractFromHtmls } from '~/extract/field-extract-abstract';
-import { viewNormalizedHtmls } from '~/extract/reshape-html';
-const program = cmds;
+import { viewNormalizedHtmls, writeNormalizedHtml } from '~/extract/reshape-html';
 
 /**
  * Roadmap:
@@ -86,9 +85,20 @@ program
   });
 
 program
+  .command('write-norms', 're-write an html file into a normalized form')
+  .option('--cwd <path>', 'base path to resolve other paths/files (if they are not absolute)')
+  .option('--html <file>', 'input html file ')
+  .action((args: any, opts: any, _logger: any) => {
+    prettyPrint({ opts, args });
+    const cwd = dirOrDie(opts.cwd);
+    const htmlFile = path.join(cwd, opts.html);
+    writeNormalizedHtml(htmlFile);
+  });
+
+program
   .command('csv-to-srecs', 'convert csv to spidering input file format')
   .option('--cwd <path>', 'base path to resolve other paths/files (if they are not absolute)')
-  .option('--csv <file>', 'input csf file ', program.STRING)
+  .option('--csv <file>', 'input csv file ', program.STRING)
   .option('--outfile <file>', 'output json file', program.STRING)
   .action((_args: any, opts: any, _logger: any) => {
     const cwd = dirOrDie(opts.cwd);

@@ -11,7 +11,9 @@ import { runMapThenables } from '~/util/utils';
 import { createLogger, format, transports } from 'winston';
 import { csvToPathTree } from '~/util/parse-csv';
 import { traverseUrls } from '~/util/radix-tree';
-const { combine, timestamp, prettyPrint } = format;
+const { combine, timestamp } = format;
+
+import { prettyPrint } from '~/util/pretty-print';
 
 export interface SpideringEnv {
   logger: Logger;
@@ -54,7 +56,7 @@ function initLogger(logname: string): Logger {
     level: 'info',
     format: combine(
       timestamp(),
-      prettyPrint()
+      format.prettyPrint()
     ),
     transports: [
       new transports.File({ filename: logname }),
@@ -204,24 +206,24 @@ const SpideringRules: SpideringRule[] = [
 
       }
     }},
-  { urlre: new RegExp('doi\.org/10\.1609/.*'),
-    rule: async (_env, wd: WebDriver, url: string) => {
-      try {
+  // { urlre: new RegExp('doi\.org/10\.1609/.*'),
+  //   rule: async (_env, wd: WebDriver, url: string) => {
+  //     try {
 
-        await wd.get(url);
-        await wd.wait(until.elementLocated(By.className('abstract')), 5000);
-        const pageSource = await wd.getPageSource();
-        const i = pageSource.indexOf('Abstract</h3>');
-        if (i < 0) {
-          console.log('warning: rule possible did not succeed');
-        }
-        return pageSource;
-      } catch (err) {
-        console.log(`error in getPageHtml: ${err}`);
-        return undefined;
+  //       await wd.get(url);
+  //       await wd.wait(until.elementLocated(By.className('abstract')), 5000);
+  //       const pageSource = await wd.getPageSource();
+  //       const i = pageSource.indexOf('Abstract</h3>');
+  //       if (i < 0) {
+  //         console.log('warning: rule possible did not succeed');
+  //       }
+  //       return pageSource;
+  //     } catch (err) {
+  //       console.log(`error in getPageHtml: ${err}`);
+  //       return undefined;
 
-      }
-    }},
+  //     }
+  //   }},
   { urlre: new RegExp('//doi\.org/.*'),
     rule: async (_env, wd: WebDriver, url: string) => {
       try {
@@ -229,17 +231,13 @@ const SpideringRules: SpideringRule[] = [
 
         await wd.get(url);
         // wait for a forward/redirect
-        await wd.wait(until.urlMatches(/!(doi\.org)/));
 
-        // const currUrl = await wd.getCurrentUrl();
+        const currUrl = await wd.getCurrentUrl();
+        const readyState: string = await wd.executeScript('return document.readyState');
+        prettyPrint({ readyState, currUrl });
 
-
-        await wd.wait(until.elementLocated(By.className('abstract')), 5000);
         const pageSource = await wd.getPageSource();
-        const i = pageSource.indexOf('Abstract</h3>');
-        if (i < 0) {
-          console.log('warning: rule possible did not succeed');
-        }
+
         return pageSource;
       } catch (err) {
         console.log(`error in getPageHtml: ${err}`);

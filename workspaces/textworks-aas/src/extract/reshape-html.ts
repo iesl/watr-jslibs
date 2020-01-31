@@ -156,6 +156,23 @@ function mapHtmlTree(
 }
 
 
+export async function writeNormalizedHtml(htmlFile: string) {
+  const fileContent = readFile(htmlFile);
+  if (!fileContent) {
+    prettyPrint({ msg: 'file could not be read' });
+    return;
+  }
+
+  if (fileContent.length === 0) {
+    prettyPrint({ msg: 'file is empty' });
+    return;
+  }
+
+  const cssNormalForm = makeCssTreeNormalForm(fileContent);
+  const cssNormal = _.join(cssNormalForm, '\n');
+  fs.writeFileSync(`${htmlFile}.norm.txt`, cssNormal);
+}
+
 export async function viewNormalizedHtmls(corpusRoot: string) {
   return walkFileCorpus(corpusRoot,  (entry: CorpusEntry) => {
     const htmlFile = path.join(entry.path, 'download.html');
