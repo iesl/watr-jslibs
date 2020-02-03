@@ -56,7 +56,6 @@ function spiderRec(url: string, path: string): SpideringRec {
 }
 
 
-
 function initLogger(logpath: string): Logger {
   const logname = path.resolve(logpath, 'spider-log.json');
   const logger = createLogger({
@@ -189,9 +188,6 @@ async function fetchViaAxios(): Promise<[FetchUrlFn, ShutdownFn]> {
   };
   return [fetch, shutdown];
 }
-
-
-
 
 
 async function alwaysDownload(): Promise<UserAction[]> {

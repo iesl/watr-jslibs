@@ -1,4 +1,5 @@
 
+import _ from 'lodash';
 import path from 'path';
 import fs from "fs-extra";
 import split from 'split2';
@@ -6,6 +7,9 @@ import pump from 'pump';
 import through from 'through2';
 import { Readable  } from 'stream';
 import * as csv from 'fast-csv';
+import { csvStream, makeCorpusPathFromUrlDplpNoteId } from '~/util/parse-csv';
+import { Transform }  from 'stream';
+import { throughFunc, sliceStream } from '~/util/stream-utils';
 
 function createReadStream(filename: string): Readable {
   const str = fs.createReadStream(filename);
@@ -105,6 +109,7 @@ function readCsvFile(csvfile: string) {
   const csvStream = createReadStream(csvfile);
   const csvParser = csv.parse({ headers: false });
   const mapMaker = makeNoteIdMapper();
+  csvStream
   const pipe = pump(csvStream, csvParser, mapMaker, (err: Error) => {
     console.log(`csv:done; err=${err}`, err);
   });
@@ -163,5 +168,102 @@ export async function writeExtractedFieldsToCorpus(csvfile: string, logfile: str
       console.log('done...')
     });
   });
+
+}
+
+interface Accum {
+  noteId: string;
+  dblpConfId: string;
+  url: string;
+  corpusPath: string;
+}
+
+type AccumKey = keyof Accum;
+
+export function jsonifyCSV(fields: AccumKey[], row: string[]): Partial<Accum> {
+  const acc: Partial<Accum> = {};
+  _.each(row, (rf, ri) => {
+    acc[fields[ri]] = rf;
+  });
+  return acc;
+}
+
+
+import hash from 'object-hash';
+import { prettyPrint } from '~/util/pretty-print';
+
+export function normalizeUrlCorpus(urlCsv: string, fromCorpus: string, toCorpus: string) {
+  console.log(`normalizeUrlCorpus`);
+
+  const jsonify = _.curry(jsonifyCSV)(['noteId', 'dblpConfId', 'url']);
+  const jsonifyTrans = throughFunc(jsonify);
+
+  const csvstr = csvStream(urlCsv);
+
+  const rewrite = throughFunc((acc: Partial<Accum>) => {
+    const url = acc.url!;
+
+    const urlHash = hash(url, { algorithm: 'sha1', encoding: 'hex' });
+    const leadingPath = urlHash.slice(0, 2).split('').join('/');
+
+    const leafPath = `${acc.noteId}.d`;
+    const corpusPath = path.join(leadingPath, leafPath);
+
+    acc.corpusPath = corpusPath;
+
+
+    path.join(fromCorpus, corpusPath);
+    const newCorpusPath = path.join(toCorpus, corpusPath);
+    const oldCorpusPath = makeCorpusPathFromUrlDplpNoteId(url, acc.dblpConfId!, acc.noteId!);
+
+    const now = new Date();
+    const timeOpts =  { timeStyle: 'medium', hour: '2-digit', minute: '2-digit', seconds: '2-digit', hour12: false };
+    const nowTime = now.toLocaleTimeString('en-US', timeOpts)
+
+    const timestamp = nowTime
+      .replace(/:/g, '.');
+
+
+    const oldCorpusFullpath = path.join(fromCorpus, oldCorpusPath);
+
+
+    const oldPathExists = fs.existsSync(oldCorpusFullpath);
+    if (oldPathExists) {
+      const dirEntries = fs.readdirSync(oldCorpusFullpath, { withFileTypes: true });
+      const files = dirEntries
+        .filter(dirent => dirent.isFile())
+        .map(dirent => dirent.name);
+
+      prettyPrint({ files });
+
+      _.each(files, filename => {
+        const ext = path.extname(filename);
+        const bn = filename.slice(0, filename.length-ext.length);
+        const newFilename = `${bn}-${timestamp}${ext}`;
+        const toFile = path.resolve(newCorpusPath, newFilename);
+        const fromFile = path.resolve(oldCorpusFullpath, filename);
+        prettyPrint({ fromFile, toFile });
+        const toExists = fs.existsSync(toFile);
+        if (toExists) {
+          console.log(`Warning: ${toFile} already exists`);
+        }
+        fs.mkdirpSync(newCorpusPath);
+        fs.copyFileSync(fromFile, toFile);
+      });
+
+    } else {
+      prettyPrint({ msg: 'no entry for this record in "from" corpus'});
+    }
+    return acc;
+  });
+
+  const pipeline = pump(
+    csvstr,
+    // sliceStream(0, 10),
+    jsonifyTrans,
+    rewrite,
+  );
+
+  pipeline.on('data', () => {});
 
 }

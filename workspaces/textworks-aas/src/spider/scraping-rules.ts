@@ -8,6 +8,7 @@ export interface SpideringRule {
   urlre: RegExp;
   rule: (env: SpideringEnv, wd: WebDriver, url: string) => Promise<string|undefined>;
 }
+
 // Rules:
 export const SpideringRules: SpideringRule[] = [
   { urlre: new RegExp('aaai\.org.+/paper/view/.*'),

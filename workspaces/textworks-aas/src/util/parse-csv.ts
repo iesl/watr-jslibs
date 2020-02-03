@@ -4,7 +4,18 @@ import * as csv from 'fast-csv';
 import path from 'path';
 
 import { traverseObject } from '~/util/radix-tree';
-import { prettyPrint } from '~/util/pretty-print';
+import { Readable } from 'stream';
+
+export function csvStream(csvfile: string): Readable {
+  const csvabs = path.resolve(csvfile);
+  const str = fs.createReadStream(csvabs);
+
+  return str
+    .pipe(csv.parse({ headers: false }))
+    .on('end', () => {
+      str.destroy();
+    });
+}
 
 export async function parseCsv(csvfile: string): Promise<string[][]> {
 
@@ -27,6 +38,26 @@ export async function parseCsv(csvfile: string): Promise<string[][]> {
         resolve(accum);
       });
   });
+}
+
+export function makeCorpusPathFromUrlDplpNoteId(url: string, dblpId: string, noteId: string): string {
+  let corpusPath: string = '';
+  const parts0 = dblpId.split('/');
+  const parts = _.map(parts0, (p: string) => {
+    if (p.match(/\d+/)) {
+      return `_${p}`;
+    }
+    return p;
+  });
+  if (url.includes('//')) {
+    const urlDomainAndPath = url.split('//')[1];
+    const urlDomain = urlDomainAndPath.split('/')[0];
+    const domainParts = urlDomain.split('.').reverse();
+    corpusPath = path.join(...parts, ...domainParts, '_urls_', noteId);
+  } else {
+    corpusPath = url;
+  }
+  return corpusPath;
 }
 
 export async function csvToPathTree(csvfile: string): Promise<any> {

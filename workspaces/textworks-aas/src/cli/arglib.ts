@@ -1,11 +1,9 @@
 import _ from 'lodash';
 
-// import { prettyPrint } from '~/util/pretty-print';
-// import findUp from 'find-up';
 import fs from 'fs-extra';
 import path from 'path';
 
-import { Argv, Arguments, Options } from 'yargs';
+import { Argv, Arguments } from 'yargs';
 import { prettyPrint } from '~/util/pretty-print';
 
 

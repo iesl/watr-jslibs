@@ -1,23 +1,54 @@
 import _ from 'lodash';
 
-import { dirOrDie } from '~/util/utils';
-
-import cmds from 'caporal';
-const program = cmds;
-
-import { prettyPrint } from '~/util/pretty-print';
+import path from 'path';
+import yargs, { Argv } from 'yargs';
+import { yall, opt } from './arglib';
 import { corpusStats } from '~/corpora/corpus-browser';
+import { normalizeUrlCorpus } from '~/corpora/bundler';
+import { prettyPrint } from '~/util/pretty-print';
 
-program
-  .command('stats', 'collect some coverage stats')
-  .option('--cwd <path>', 'base path to resolve other paths/files (if they are not absolute)')
-  .option('--corpus-root <path>', 'root download path')
-  .action((_args: any, opts: any, _logger: any) => {
-    const cwd = dirOrDie(opts.cwd);
-    const corpusRoot = dirOrDie(opts.corpusRoot, cwd);
-    prettyPrint({ corpusRoot });
-    corpusStats(corpusRoot);
-  });
+yargs.command(
+  'stats',
+  'collect some coverage stats',
+  function config(ya: Argv) {
+    yall(ya, [
+      opt.config,
+      opt.setCwd,
+      opt.existingDir('corpus-root: root directory for corpus files'),
+    ]);
+  },
+  function exec(args: any) {
+    corpusStats(args.corpusRoot);
+  }
+);
 
+yargs.command(
+  'normalize',
+  '',
+  function config(ya: Argv) {
+    yall(ya, [
+      opt.setCwd,
+      opt.existingFile('csv: csv with noteId, dblpIds, urls'),
+      opt.existingDir('from-corpus: copy from'),
+      opt.existingDir('to-corpus: output dir for normalized corpus'),
+    ]);
+  },
 
-program.parse(process.argv);
+  function exec(args: any) {
+    const fromc = path.resolve(args.cwd, args.fromCorpus);
+    const toc = path.resolve(args.cwd, args.toCorpus);
+    normalizeUrlCorpus(args.csv, fromc, toc);
+  }
+);
+
+yargs
+  .demandCommand(1, 'You need at least one command before moving on')
+  .strict()
+  .help()
+  .fail(function (msg, err, _yargs) {
+    const errmsg = err? `${err.name}: ${err.message}` : '';
+    prettyPrint({ msg, errmsg });
+    process.exit(1)
+  })
+  .argv
+;
