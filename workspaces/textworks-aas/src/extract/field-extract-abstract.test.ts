@@ -110,9 +110,9 @@ describe('Abstract Field Extraction',  () => {
     // prettyPrint({ fields });
   });
 
-  it("should not crash on err html", () => {
-    fex.extractAbstract('../../abs-example-v8.html')
-    // fex.extractAbstract('../../var1.html')
-  });
+  // it("should not crash on err html", () => {
+  //   fex.extractAbstract('../../abs-example-v8.html')
+  //   // fex.extractAbstract('../../var1.html')
+  // });
 
 });

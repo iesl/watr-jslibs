@@ -10,7 +10,7 @@ import urlParse from 'url-parse';
 import { prettyPrint } from '~/util/pretty-print';
 import { dirsteam, stringStreamFilter } from './dirstream';
 
-export function corpusEntryStream(corpusRoot: string): Readable {
+export function oldCorpusEntryStream(corpusRoot: string): Readable {
   const corpusDirStream = dirsteam(corpusRoot);
 
   const entryDirFilter = stringStreamFilter((dir: string) => {
@@ -20,6 +20,17 @@ export function corpusEntryStream(corpusRoot: string): Readable {
   return corpusDirStream
     .pipe(entryDirFilter);
 }
+export function newCorpusEntryStream(corpusRoot: string): Readable {
+  const corpusDirStream = dirsteam(corpusRoot);
+
+  const entryDirFilter = stringStreamFilter((dir: string) => {
+    return /[\/][^\/]+\.d$/.test(dir);
+  });
+
+  return corpusDirStream
+    .pipe(entryDirFilter);
+}
+
 
 export function corpusStats(corpusRoot: string) {
   const corpusDirStream = dirsteam(corpusRoot);
@@ -48,19 +59,10 @@ export interface ExpandedDir {
   files: string[];
 }
 
-export function tapStream(msg: string): Transform {
-  return through.obj(
-    (data: any, _enc: string, next: (err: any, v: any) => void) => {
-      prettyPrint({ msg, data });
-      return next(null, data);
-    }
-  );
-}
 
 export function expandDir(): Transform {
   return through.obj(
     (dir: string, _enc: string, next: (err: any, v: any) => void) => {
-      prettyPrint({ msg: 'expandDir', dir });
       const dirEntries = fs.readdirSync(dir, { withFileTypes: true });
       const files = dirEntries
         .filter(dirent => dirent.isFile())

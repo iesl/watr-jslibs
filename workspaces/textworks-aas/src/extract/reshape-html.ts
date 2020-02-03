@@ -13,7 +13,9 @@ import * as cheerio from 'cheerio';
 // TODO peruse: https://github.com/lorien/awesome-web-scraping/blob/master/javascript.md
 
 import { prettyPrint } from '~/util/pretty-print';
-import { corpusEntryStream, expandDir, ExpandedDir, tapStream } from '~/corpora/corpus-browser';
+import { newCorpusEntryStream, expandDir, ExpandedDir } from '~/corpora/corpus-browser';
+import { tapStream } from '~/util/stream-utils';
+// import { sliceStream } from '~/util/stream-utils';
 
 type Attrs = { [k: string]: string };
 
@@ -158,7 +160,13 @@ function mapHtmlTree(
 }
 
 
-export async function writeNormalizedHtml(htmlFile: string) {
+async function writeNormalizedHtml(htmlFile: string) {
+  const cssNormFilename = `${htmlFile}.norm.txt`;
+  if (fs.existsSync(cssNormFilename)) {
+    console.log(`css.norm.txt already exists`)
+    return;
+  }
+
   const fileContent = readFile(htmlFile);
   if (!fileContent) {
     prettyPrint({ msg: 'file could not be read' });
@@ -182,21 +190,7 @@ export function htmlToCssNormTransform(): Transform {
         .filter(f => f.endsWith('.html'))
         .map(f => path.join(exDir.dir, f))
         .each(htmlFile => {
-          const fileContent = readFile(htmlFile);
-          if (!fileContent) {
-            prettyPrint({ msg: 'file could not be read' });
-            return;
-          }
-
-          if (fileContent.length === 0) {
-            prettyPrint({ msg: 'file is empty' });
-            return;
-          }
-
-          const cssNormalForm = makeCssTreeNormalForm(fileContent);
-          const cssNormal = _.join(cssNormalForm, '\n');
-          const normFile = `${htmlFile}.norm.txt`;
-          fs.writeFileSync(normFile, cssNormal);
+          writeNormalizedHtml(htmlFile);
         });
 
       next(null, exDir);
@@ -204,15 +198,13 @@ export function htmlToCssNormTransform(): Transform {
 }
 
 export async function normalizeHtmls(corpusRoot: string) {
-  const entryStream = corpusEntryStream(corpusRoot);
+  const entryStream = newCorpusEntryStream(corpusRoot);
 
   const pipe = pump(
     entryStream,
-    tapStream('pre-expand'),
+    tapStream('normalize'),
     expandDir(),
-    tapStream('post-expand'),
     htmlToCssNormTransform(),
-    tapStream('css-done'),
     (err?: Error) => {
       if (err) {
         console.log(`Error:`, err);

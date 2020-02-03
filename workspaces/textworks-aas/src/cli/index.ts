@@ -4,7 +4,6 @@ import { prettyPrint } from '~/util/pretty-print';
 import { yall, opt } from './arglib';
 import { normalizeHtmls } from '~/extract/reshape-html';
 import { extractAbstractFromHtmls } from '~/extract/field-extract-abstract';
-import { normalizeCmd } from './corpus-cli';
 
 yargs.commandDir('.', {
   recurse: false,

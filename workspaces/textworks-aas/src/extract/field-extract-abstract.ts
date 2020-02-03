@@ -5,27 +5,43 @@ import pump from 'pump';
 import { Transform }  from 'stream';
 import through from 'through2';
 
+import fs from 'fs-extra';
 import * as cheerio from 'cheerio';
-import { Field, ExtractError } from '~/extract/field-extract';
+import { Field } from '~/extract/field-extract';
 import { prettyPrint } from '~/util/pretty-print';
 import { makeCssTreeNormalFormFromNode, htmlToCssNormTransform } from './reshape-html';
 import { readFile, indentLevel, findIndexForLines, findSubContentAtIndex, filterText, stripMargin } from '~/extract/field-extract-utils';
-import { corpusEntryStream, expandDir, ExpandedDir } from '~/corpora/corpus-browser';
+import { newCorpusEntryStream, expandDir, ExpandedDir } from '~/corpora/corpus-browser';
+import { sliceStream, tapFunc } from '~/util/stream-utils';
 
 
 export function extractAbstractTransform(): Transform {
   return through.obj(
     (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
-      extractAbstract(exDir);
+      try {
+        extractAbstract(exDir);
+      } catch (err) {
+        console.log(`err ${err}`);
+      }
       next(null, exDir);
     });
 }
+
+// import parallel from 'parallel-transform';
+// var stream = transform(10, {objectMode:false}, function(data, callback) {
+// 	// data is now a buffer
+// 	callback(null, data);
+// });
+
+// fs.createReadStream('filename').pipe(stream).pipe(process.stdout);
+
+
 export async function extractAbstractFromHtmls(corpusRoot: string) {
-  const entryStream = corpusEntryStream(corpusRoot);
+  const entryStream = newCorpusEntryStream(corpusRoot);
   const pipe = pump(
     entryStream,
+    tapFunc((d, i) => { console.log(`${i}: ${d}`); }),
     expandDir(),
-    htmlToCssNormTransform(),
     extractAbstractTransform(),
     (err?: Error) => {
       if (err) {
@@ -52,41 +68,51 @@ export const AbstractPipeline: PipelineFunction[] = [
   findAbstractV9,
 ];
 
-export function extractAbstract(exDir: ExpandedDir): Field[] | ExtractError {
+export function extractAbstract(exDir: ExpandedDir): void {
 
-  const htmlFile = exDir.files
+  const htmlFiles = exDir.files
     .filter(f => f.endsWith('.html'))
-    .map(f => path.join(exDir.dir, f))[0];
-  const cssNormFile = exDir.files
-    .filter(f => f.endsWith('.norm.txt'))
-    .map(f => path.join(exDir.dir, f))[0];
+    .map(f => path.resolve(exDir.dir, f));
 
-  const htmlContent = readFile(htmlFile);
-  const normFileContent = readFile(cssNormFile);
 
-  if (!(htmlContent && normFileContent)) {
-    return { msg: `.html and .norm.txt did not exist in ${exDir}` };
-  }
+  _.each(htmlFiles, (htmlFile) => {
+    const extrAbsFilename = `${htmlFile}.ex.abs.json`;
 
-  const cssNormalForm = normFileContent.split('\n');
-  const fields = _.map(AbstractPipeline, pf => {
-    return pf(cssNormalForm, htmlContent);
-  });
-  const abstractFields = fields.filter(f => f.value);
+    if (fs.existsSync(extrAbsFilename)) {
+      console.log(`skipping: abstracts file already exists: ${extrAbsFilename}`)
+      return;
+    }
+    console.log(`extracting abstract from ${htmlFile}`);
 
-  if (abstractFields.length>0) {
-    console.log(`found abstracts: ${htmlFile}`)
-    _.each(abstractFields, field => {
-      const ev = field.evidence;
-      const vl = field.value!;
-      console.log(`  > ${vl}`)
-      console.log(`  using: ${ev}`)
+    const cssNormFile = `${htmlFile}.norm.txt`;
+
+    const htmlContent = readFile(htmlFile);
+    const normFileContent = readFile(cssNormFile);
+
+    if (!(htmlContent && normFileContent)) {
+      console.log(`.html and .norm.txt did not exist in ${exDir}`)
+      return;
+    }
+
+    const cssNormalForm = normFileContent.split('\n');
+    const fields = _.map(AbstractPipeline, pf => {
+      return pf(cssNormalForm, htmlContent);
     });
-  } else {
-    console.log(`no abstract: ${htmlFile}`)
-  }
 
-  return abstractFields;
+    const abstractFields: Field[] = fields.filter(f => f.value);
+
+    const writeAbstracts = true;
+
+    if (writeAbstracts) {
+      if (abstractFields.length>0) {
+        console.log(`writing ${abstractFields.length} abstracts to ${extrAbsFilename}`);
+        fs.writeJsonSync(extrAbsFilename, abstractFields);
+      } else {
+        console.log(`no abstracts: ${htmlFile}`)
+      }
+    }
+    return;
+  });
 }
 
 
@@ -229,7 +255,7 @@ export function findAbstractV7(_cssNormLines: string[], fileContent: string): Fi
   const abstrParent = maybeAbstract.parents()[0];
 
   const cssNormalParent = makeCssTreeNormalFormFromNode($(abstrParent));
-  prettyPrint({ cssNormalParent } );
+  // prettyPrint({ cssNormalParent } );
   const justText = filterText(cssNormalParent);
   field.value = _.join(justText, ' ');
 
@@ -249,7 +275,7 @@ export function findAbstractV8(_normLines: string[], fileContent: string): Field
   let maybeAbstr = _.takeWhile(cssNormal.slice(1), l => !l.includes('col-md-12'));
   maybeAbstr = stripMargin(maybeAbstr);
   if (maybeAbstr.length > 0) {
-    prettyPrint({ maybeAbstr } );
+    // prettyPrint({ maybeAbstr } );
     field.value = _.join(maybeAbstr, ' ');
   }
 
