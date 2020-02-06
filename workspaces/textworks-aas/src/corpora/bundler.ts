@@ -1,20 +1,15 @@
 import _ from "lodash";
 import path from "path";
 import fs from "fs-extra";
-import split from "split2";
 import pump from "pump";
-import through from "through2";
-import * as csv from "fast-csv";
 import {csvStream} from "~/util/parse-csv";
-import {
-  throughFunc,
-  createReadStream,
-  sliceStream,
-  progressCount,
-} from "~/util/stream-utils";
-import {prettyPrint} from "~/util/pretty-print";
+import {throughFunc, sliceStream, progressCount} from "~/util/stream-utils";
+
+// import {prettyPrint} from "~/util/pretty-print";
+
 import hash from "object-hash";
-import {expandDir, expandedDir} from "./corpus-browser";
+import {expandedDir} from "./corpus-browser";
+import { prettyPrint } from '~/util/pretty-print';
 
 interface Accum {
   noteId: string;
@@ -77,19 +72,39 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
           url: meta.url,
         };
       });
+
+      // prettyPrint({ entryMeta });
+
+      const hasEntryMeta = entryMeta.length > 0;
       const idAndUrlMatch = entryMeta.every(({id, url}) => {
         return noteId === id && url === acc.url;
       });
+      if (!hasEntryMeta) {
+        console.log(`Error: no entry-meta*.json for ${noteId} ${url}`);
+        return;
+      }
       if (!idAndUrlMatch) {
         console.log(`Error: id/url do not match for ${noteId} ${url}`);
+        return;
       }
-      // prettyPrint({acc, entryPathExists, entryPath});
+
+      const entryProps = path.join(entryPath, "entry-props.json");
+      const props = {
+        noteId,
+        dblpConfId,
+        url,
+      };
+
+      // write the manifest..
+      fs.writeJsonSync(entryProps, props);
+
+      // prettyPrint({props, entryPath});
     } else {
       console.log(`Error: no corpus path for ${noteId} ${url}`);
     }
 
     // resolve corpus entry path
-    return "ok";
+    return;
   });
 
   const pipeline = pump(
@@ -103,5 +118,5 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
     },
   );
 
-  pipeline.on("data", err => {});
+  pipeline.on("data", () => {});
 }
