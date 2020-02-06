@@ -53,9 +53,6 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
     if (url === "no_url") return;
 
     const noteId: string = acc.noteId!;
-    const dblpConfId: string = acc.dblpConfId!;
-    // console.log(`Checking ${noteId}/${url}`);
-    // console.log(`.`);
 
     const leadingPath = makeCorpusEntryLeadingPath(url);
     const leafPath = `${acc.noteId}.d`;
@@ -64,52 +61,20 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
     const entryPathExists = fs.existsSync(entryPath);
     if (entryPathExists) {
       const expDir = expandedDir(entryPath);
-      const metaFiles = matchingFiles(/entry-meta/)(expDir.files);
-      const entryMeta = metaFiles.map(f => {
-        const meta = fs.readJsonSync(path.join(expDir.dir, f));
-        return {
-          id: meta.id,
-          url: meta.url,
-        };
-      });
+      const entryProps = fs.readJsonSync(path.join(expDir.dir, 'entry-props.json'));
 
-      // prettyPrint({ entryMeta });
+      prettyPrint({ entryProps });
 
-      const hasEntryMeta = entryMeta.length > 0;
-      const idAndUrlMatch = entryMeta.every(({id, url}) => {
-        return noteId === id && url === acc.url;
-      });
-      if (!hasEntryMeta) {
-        console.log(`Error: no entry-meta*.json for ${noteId} ${url}`);
-        return;
-      }
-      if (!idAndUrlMatch) {
-        console.log(`Error: id/url do not match for ${noteId} ${url}`);
-        return;
-      }
-
-      const entryProps = path.join(entryPath, "entry-props.json");
-      const props = {
-        noteId,
-        dblpConfId,
-        url,
-      };
-
-      // write the manifest..
-      fs.writeJsonSync(entryProps, props);
-
-      // prettyPrint({props, entryPath});
-    } else {
-      console.log(`Error: no corpus path for ${noteId} ${url}`);
+      return;
     }
 
-    // resolve corpus entry path
+    console.log(`Error: problem processing ${noteId} ${url}`);
     return;
   });
 
   const pipeline = pump(
     csvstr,
-    // sliceStream(0, 10),
+    sliceStream(0, 10),
     progressCount(1000),
     csvToObj,
     rewrite,
