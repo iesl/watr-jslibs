@@ -1,11 +1,10 @@
-import _ from 'lodash';
+import _ from "lodash";
 
-import fs from 'fs-extra';
-import path from 'path';
+import fs from "fs-extra";
+import path from "path";
 
-import { Argv, Arguments } from 'yargs';
-import { prettyPrint } from '~/util/pretty-print';
-
+import {Argv, Arguments} from "yargs";
+import {prettyPrint} from "~/util/pretty-print";
 
 type ArgvApp = (ya: Argv) => Argv;
 
@@ -14,16 +13,15 @@ export function yall(ya: Argv, fs: ArgvApp[]): Argv {
 }
 
 function resolveArgPath(argv: Arguments, pathkey: string): string | undefined {
-
-  if (typeof argv[pathkey] !== 'string') {
+  if (typeof argv[pathkey] !== "string") {
     return;
   }
 
   let pathvalue = argv[pathkey] as string;
 
   if (!path.isAbsolute(pathvalue)) {
-    const wd  = argv.cwd;
-    if (typeof wd === 'string') {
+    const wd = argv.cwd;
+    if (typeof wd === "string") {
       pathvalue = path.resolve(wd, pathvalue);
     } else {
       pathvalue = path.resolve(pathvalue);
@@ -34,27 +32,26 @@ function resolveArgPath(argv: Arguments, pathkey: string): string | undefined {
   return pathvalue;
 }
 
-export const setCwd = (ya: Argv) => ya.option(
-  'cwd', {
-    describe: 'set working directory',
+export const setCwd = (ya: Argv) =>
+  ya.option("cwd", {
+    describe: "set working directory",
     normalize: true,
-    type: 'string',
+    type: "string",
     requiresArg: true,
   });
 
-
 const existingPath = (pathAndDesc: string) => (ya: Argv) => {
-  let [ pathname, desc ] = pathAndDesc.includes(':')?
-    pathAndDesc.split(':') :
-    [pathAndDesc, `directory ${pathAndDesc}`];
+  let [pathname, desc] = pathAndDesc.includes(":")
+    ? pathAndDesc.split(":")
+    : [pathAndDesc, `directory ${pathAndDesc}`];
 
   pathname = pathname.trim();
   desc = desc.trim();
   ya.option(pathname, {
     describe: desc,
-    type: 'string',
+    type: "string",
     requiresArg: true,
-  })
+  });
 
   ya.middleware((argv: Arguments) => {
     const p = resolveArgPath(argv, pathname);
@@ -68,39 +65,39 @@ const existingPath = (pathAndDesc: string) => (ya: Argv) => {
   }, true);
 
   return ya;
-}
+};
 
 export const existingDir = (dirAndDesc: string) => {
   return existingPath(dirAndDesc);
-}
+};
 
 export const existingFile = (fileAndDesc: string) => {
   return existingPath(fileAndDesc);
-}
+};
 
 export const config = (ya: Argv) => {
-  ya.option('config', {
-    describe: 'optional path to configuration file',
-    type: 'string',
+  ya.option("config", {
+    describe: "optional path to configuration file",
+    type: "string",
     requiresArg: true,
   });
 
   ya.middleware((argv: Arguments) => {
-    console.log('running middleware config');
-    if (typeof argv.config === 'string') {
-      const configFile = resolveArgPath(argv, 'config');
+    console.log("running middleware config");
+    if (typeof argv.config === "string") {
+      const configFile = resolveArgPath(argv, "config");
       console.log(`resolved config to ${configFile}`);
       if (!configFile) {
-        throw new Error(`Non-existent config file specified`)
+        throw new Error(`Non-existent config file specified`);
       }
       // Set working directory to config file dir if not already set
-      if (!argv['cwd']) {
-        argv['cwd'] = path.dirname(configFile);
+      if (!argv["cwd"]) {
+        argv["cwd"] = path.dirname(configFile);
         console.log(`resolved cwd in config to ${argv.cwd}`);
       }
       const buf = fs.readFileSync(configFile);
-      const conf = JSON.parse(buf.toString())
-      prettyPrint({ msg: 'config file', conf });
+      const conf = JSON.parse(buf.toString());
+      prettyPrint({msg: "config file", conf});
       const confKVs = _.toPairs(conf);
       _.each(confKVs, ([k, v]) => {
         argv[k] = v;
@@ -111,11 +108,11 @@ export const config = (ya: Argv) => {
   }, true);
 
   return ya;
-}
+};
 
 export const setOpt = (ya: Argv) => {
-  ya.option
-}
+  ya.option;
+};
 
 export const opt = {
   setCwd,
@@ -125,14 +122,11 @@ export const opt = {
   obj: setOpt,
 };
 
-
-
 // const configPath = findUp.sync(configFile, {
 //   cwd: process.cwd(),
 //   type: 'file',
 //   allowSymlinks: true
 // });
-
 
 /**
    Options:

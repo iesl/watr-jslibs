@@ -63,3 +63,19 @@ export async function runMapThenables<V>(vs: ArrayLike<V>, f: (v: V) => Promise<
   }
   return Promise.resolve();
 }
+
+
+export function makeNowTimeString(): string {
+  const now = new Date();
+  const timeOpts = {
+    timeStyle: "medium",
+    hour: "2-digit",
+    minute: "2-digit",
+    seconds: "2-digit",
+    hour12: false,
+  };
+  const nowTime = now.toLocaleTimeString("en-US", timeOpts);
+
+  const timestamp = nowTime.replace(/:/g, ".");
+  return timestamp;
+}
