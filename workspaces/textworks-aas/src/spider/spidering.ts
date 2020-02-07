@@ -7,8 +7,6 @@ import { fetchUrl } from '~/spider/axios-scraper';
 
 import { runMapThenables } from '~/util/utils';
 import { createLogger, format, transports, Logger } from 'winston';
-import { csvToPathTree } from '~/util/parse-csv';
-import { traverseUrls } from '~/util/radix-tree';
 import { fetchViaFirefox, FetchUrlFn, ShutdownFn } from './browser-scraper';
 const { combine, timestamp } = format;
 
@@ -47,14 +45,6 @@ interface SpideringRec {
   path?: string;
   dlpath: () => string;
 }
-
-function spiderRec(url: string, path: string): SpideringRec {
-  return {
-    url, path,
-    dlpath: () => path
-  };
-}
-
 
 function initLogger(logpath: string): Logger {
   const logname = path.resolve(logpath, 'spider-log.json');
@@ -247,24 +237,3 @@ async function promptForFilter(): Promise<string> {
     message: `Enter url filter regex`
   }).then(r => r.value);
 }
-
-
-export async function csvToSpiderRecs(csvfile: string, outfile: string): Promise<void> {
-  csvToPathTree(csvfile)
-    .then((treeObj: any) => {
-      const recs: SpideringRec[] = [];
-
-      traverseUrls(treeObj, (url: string, hashId: string, treePath: string[]) => {
-        const outpath = path.join(...treePath, hashId);
-        recs.push(spiderRec(url, outpath));
-      });
-
-      const recsAsJson = JSON.stringify(recs);
-      fs.writeFileSync(outfile, recsAsJson);
-    });
-}
-
-// TODO URL https://ieeexplore.ieee.org/document/698720
-// <a _ngcontent-c19="" class="doc-actions-link stats-document-lh-action-downloadPdf_2 pdf" href="/stamp/stamp.jsp?tp=&amp;arnumber=698720">
-// <i _ngcontent-c19="" class="icon doc-act-icon-pdf"></i>
-// </a>

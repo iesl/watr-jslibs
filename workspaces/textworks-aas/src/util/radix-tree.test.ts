@@ -4,9 +4,9 @@ import _ from "lodash";
 import {prettyPrint} from "~/util/pretty-print";
 import {
   createRadix,
-  upsertRadix,
-  insertRadix,
-  traverseRadixValues,
+  radUpsert,
+  radInsert,
+  radTraverseValues,
 } from "./radix-tree";
 
 describe("Radix Tree Tests", () => {
@@ -20,13 +20,13 @@ describe("Radix Tree Tests", () => {
 
     expect(radTree).toMatchObject({});
 
-    insertRadix(radTree, "a.$.12._$.b", {s: "hey", i: 25});
+    radInsert(radTree, "a.$.12._$.b", {s: "hey", i: 25});
 
     expect(radTree).toMatchObject({
       a: {$: {_12: {__$: {b: {_$: {i: 25, s: "hey"}}}}}},
     });
 
-    upsertRadix(radTree, "a.$.12._$.b", prev => {
+    radUpsert(radTree, "a.$.12._$.b", prev => {
       return prev ? {...prev, s: "hey yourself"} : {i: 42, s: "hey yourself"};
     });
 
@@ -36,7 +36,7 @@ describe("Radix Tree Tests", () => {
       },
     });
 
-    upsertRadix(radTree, "a.blah.b", prev => {
+    radUpsert(radTree, "a.blah.b", prev => {
       return prev ? {...prev, s: "child data"} : {i: 103, s: "new blah data"};
     });
 
@@ -59,11 +59,11 @@ describe("Radix Tree Tests", () => {
     ];
     const o = {};
 
-    _.each(nodes, ([p, d]) => insertRadix(o, p, d));
+    _.each(nodes, ([p, d]) => radInsert(o, p, d));
 
     prettyPrint({o});
 
-    traverseRadixValues(o, (path, tval) => {
+    radTraverseValues(o, (path, tval) => {
       prettyPrint({path, tval});
     });
   });

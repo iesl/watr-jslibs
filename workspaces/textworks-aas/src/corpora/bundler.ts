@@ -10,9 +10,9 @@ import {expandedDir, ExpandedDir} from "./corpus-browser";
 import {prettyPrint} from "~/util/pretty-print";
 import {
   createRadix,
-  insertRadix,
-  traverseRadixValues,
-  upsertRadix,
+  radInsert,
+  radTraverseValues,
+  radUpsert,
 } from "~/util/radix-tree";
 
 interface Accum {
@@ -54,7 +54,6 @@ function gatherAbstracts(expDir: ExpandedDir): string[] {
   const afs = matchingFiles(/ex.abs.json$/)(expDir.files);
   return afs.map(af => {
     const exAbs = fs.readJsonSync(path.join(expDir.dir, af));
-    // prettyPrint({ exAbs });
     return exAbs.value;
   });
 }
@@ -80,7 +79,6 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
         path.join(expDir.dir, "entry-props.json"),
       );
 
-      // prettyPrint({expDir});
       const urlAbstracts = gatherAbstracts(expDir);
       const absCount = urlAbstracts.length === 0 ? 0 : 1;
       const missingAbs = urlAbstracts.length === 0 ? 1 : 0;
@@ -89,13 +87,7 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
       const dblpParts = _.tail(dblpId.split("/"));
       dblpParts.push(noteId);
 
-
-      insertRadix(radStats, dblpParts, {urlCount: 1, absCount, missingAbs});
-      // insertRadix(radStats, dblpParts, {
-      //   urlCount: 1,
-      //   // absCount: 0,
-      //   // missingAbs: 0,
-      // });
+      radInsert(radStats, dblpParts, {urlCount: 1, absCount, missingAbs});
 
       return;
     }
@@ -117,16 +109,15 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
     },
   );
 
-
   pipeline.on("end", () => {
     console.log("accumulating stats");
 
     const accumStats = createRadix<CorpusStats>();
 
-    traverseRadixValues(radStats, (path, stats) => {
+    radTraverseValues(radStats, (path, stats) => {
       path.pop();
       while (path.length > 0) {
-        upsertRadix(accumStats, path, accStats => {
+        radUpsert(accumStats, path, accStats => {
           if (accStats) {
             return {
               urlCount: stats.urlCount + accStats.urlCount,
@@ -141,7 +132,7 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
     });
 
     const allStats: string[] = [];
-    traverseRadixValues(accumStats, (path, stats) => {
+    radTraverseValues(accumStats, (path, stats) => {
       const {urlCount, absCount, missingAbs} = stats;
       const venue = _.join(path, " / ").padEnd(24);
       allStats.push(

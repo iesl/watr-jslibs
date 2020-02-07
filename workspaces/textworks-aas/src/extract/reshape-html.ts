@@ -203,7 +203,7 @@ export async function normalizeHtmls(corpusRoot: string) {
   const pipe = pump(
     entryStream,
     tapStream('normalize'),
-    expandDir(),
+    expandDir,
     htmlToCssNormTransform(),
     (err?: Error) => {
       if (err) {

@@ -1,14 +1,6 @@
-import _ from 'lodash';
-// import fs from 'fs-extra';
-// import path from 'path';
+import _ from "lodash";
 
-
-// import { csvToPathTree } from '~/util/parse-csv';
-// import { traverseUrls } from '~/util/radix-tree';
-// import { prettyPrint } from '~/util/pretty-print';
-// import { suspiciousAbstractRegexes } from '~/extract/field-extract-utils';
-
-export type Verified = 'correct' | 'incorrect' ;
+export type Verified = "correct" | "incorrect";
 
 export interface ExtractError {
   msg: string;
@@ -20,7 +12,6 @@ export interface Field {
   verified?: Verified;
   value?: string;
 }
-
 
 export interface DocumentMeta {
   fields: Field[];
@@ -118,7 +109,6 @@ export interface DocumentMeta {
 //     const grouped = _.groupBy(allErrors);
 //     const errorCounts = _.mapValues(grouped, v => v.length);
 
-
 //     const domainsWoAbs = noAbstractsNoErrors.map((dm: DocumentMeta) => {
 //       let url = dm.url;
 
@@ -130,10 +120,7 @@ export interface DocumentMeta {
 //       return url;
 //     });
 
-
-
 //     const uniqDomains = _.uniq(domainsWoAbs);
-
 
 //     const examples = _.map(uniqDomains, (domain) => {
 //       const domainFields = noAbstractsNoErrors
@@ -173,7 +160,6 @@ export interface DocumentMeta {
 //       });
 //     });
 
-
 //     // _.each(noAbstractsNoErrors, dm => {
 //     //   const p = dm.path;
 //     //   const i = p.indexOf('dld.d');
@@ -185,18 +171,3 @@ export interface DocumentMeta {
 //   });
 
 // }
-
-
-
-
-
-// function makePath(rootDir: string, hashId: string, treePath: string[]): string|undefined {
-//   const basepathArr = _.concat(treePath, [hashId]);
-//   const basepath = path.join(rootDir, ...basepathArr);
-//   // const filepath = path.join(basepath, 'download.html');
-//   const exists = fs.existsSync(basepath);
-//   return exists? basepath : undefined;
-// }
-
-
-

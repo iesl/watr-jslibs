@@ -3,28 +3,12 @@ import _ from "lodash";
 import path from "path";
 import yargs, {Argv} from "yargs";
 import {yall, opt} from "./arglib";
-import {corpusStats} from "~/corpora/corpus-browser";
 import {createCorpusEntryManifests} from "~/corpora/bundler";
 import {prettyPrint} from "~/util/pretty-print";
 
 yargs.command(
-  "stats",
+  "collect-stats",
   "collect some coverage stats",
-  function config(ya: Argv) {
-    yall(ya, [
-      opt.config,
-      opt.setCwd,
-      opt.existingDir("corpus-root: root directory for corpus files"),
-    ]);
-  },
-  function exec(args: any) {
-    corpusStats(args.corpusRoot);
-  },
-);
-
-yargs.command(
-  "create-manifests",
-  "",
   function config(ya: Argv) {
     yall(ya, [
       opt.setCwd,
