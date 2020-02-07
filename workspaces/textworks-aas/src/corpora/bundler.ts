@@ -5,11 +5,15 @@ import pump from "pump";
 import {csvStream} from "~/util/parse-csv";
 import {throughFunc, sliceStream, progressCount} from "~/util/stream-utils";
 
-// import {prettyPrint} from "~/util/pretty-print";
-
 import hash from "object-hash";
-import {expandedDir} from "./corpus-browser";
-import { prettyPrint } from '~/util/pretty-print';
+import {expandedDir, ExpandedDir} from "./corpus-browser";
+import {prettyPrint} from "~/util/pretty-print";
+import {
+  createRadix,
+  insertRadix,
+  traverseRadixValues,
+  upsertRadix,
+} from "~/util/radix-tree";
 
 interface Accum {
   noteId: string;
@@ -40,15 +44,26 @@ export function makeCorpusEntryLeadingPath(s: string): string {
 const matchingFiles = (re: RegExp) => (fs: string[]) =>
   fs.filter(f => re.test(f));
 
+interface CorpusStats {
+  urlCount: number;
+  absCount: number;
+  missingAbs: number;
+}
+
+function gatherAbstracts(expDir: ExpandedDir): string[] {
+  const afs = matchingFiles(/ex.abs.json$/)(expDir.files);
+  return afs.map(af => {
+    const exAbs = fs.readJsonSync(path.join(expDir.dir, af));
+    // prettyPrint({ exAbs });
+    return exAbs.value;
+  });
+}
+
 export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
   console.log(`createCorpusEntryManifests`);
+  const radStats = createRadix<CorpusStats>();
 
-  const jsonify = _.curry(jsonifyCSV)(["noteId", "dblpConfId", "url"]);
-  const csvToObj = throughFunc(jsonify);
-
-  const csvstr = csvStream(urlCsv);
-
-  const rewrite = throughFunc((acc: Partial<Accum>) => {
+  const collectStats = throughFunc((acc: Partial<Accum>) => {
     const url: string = acc.url!;
     if (url === "no_url") return;
 
@@ -61,9 +76,26 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
     const entryPathExists = fs.existsSync(entryPath);
     if (entryPathExists) {
       const expDir = expandedDir(entryPath);
-      const entryProps = fs.readJsonSync(path.join(expDir.dir, 'entry-props.json'));
+      const entryProps = fs.readJsonSync(
+        path.join(expDir.dir, "entry-props.json"),
+      );
 
-      prettyPrint({ entryProps });
+      // prettyPrint({expDir});
+      const urlAbstracts = gatherAbstracts(expDir);
+      const absCount = urlAbstracts.length === 0 ? 0 : 1;
+      const missingAbs = urlAbstracts.length === 0 ? 1 : 0;
+
+      const dblpId: string = entryProps.dblpConfId;
+      const dblpParts = _.tail(dblpId.split("/"));
+      dblpParts.push(noteId);
+
+
+      insertRadix(radStats, dblpParts, {urlCount: 1, absCount, missingAbs});
+      // insertRadix(radStats, dblpParts, {
+      //   urlCount: 1,
+      //   // absCount: 0,
+      //   // missingAbs: 0,
+      // });
 
       return;
     }
@@ -72,16 +104,54 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
     return;
   });
 
+  const csvRowToJson = _.curry(jsonifyCSV)(["noteId", "dblpConfId", "url"]);
+
   const pipeline = pump(
-    csvstr,
-    sliceStream(0, 10),
+    csvStream(urlCsv),
+    // sliceStream(0, 10),
     progressCount(1000),
-    csvToObj,
-    rewrite,
+    throughFunc(csvRowToJson),
+    collectStats,
     (err: Error) => {
       console.log(`Error:`, err);
     },
   );
+
+
+  pipeline.on("end", () => {
+    console.log("accumulating stats");
+
+    const accumStats = createRadix<CorpusStats>();
+
+    traverseRadixValues(radStats, (path, stats) => {
+      path.pop();
+      while (path.length > 0) {
+        upsertRadix(accumStats, path, accStats => {
+          if (accStats) {
+            return {
+              urlCount: stats.urlCount + accStats.urlCount,
+              absCount: stats.absCount + accStats.absCount,
+              missingAbs: stats.missingAbs + accStats.missingAbs,
+            };
+          }
+          return stats;
+        });
+        path.pop();
+      }
+    });
+
+    const allStats: string[] = [];
+    traverseRadixValues(accumStats, (path, stats) => {
+      const {urlCount, absCount, missingAbs} = stats;
+      const venue = _.join(path, " / ").padEnd(24);
+      allStats.push(
+        `${venue} urls: ${urlCount}; abs# ${absCount}; missing# ${missingAbs}`,
+      );
+    });
+    const sorted = _.sortBy(allStats);
+
+    console.log(_.join(sorted, "\n"));
+  });
 
   pipeline.on("data", () => {});
 }

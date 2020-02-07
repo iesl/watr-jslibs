@@ -39,13 +39,13 @@ export function tapStream(msg: string): Transform {
 export function sliceStream(start: number, len: number): Transform {
   let currIndex = -1;
   return through.obj(
-    (chunk: any, _enc: string, next: (err: any, v: any) => void) => {
+    function (chunk: any, _enc: string, next: (err: any, v: any) => void) {
       currIndex++;
       if (start <= currIndex) {
         if (currIndex < start + len) {
           return next(null, chunk);
         }
-        return next("done", null);
+        return next(null, null);
       }
       return next(null, null);
     },

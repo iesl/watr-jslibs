@@ -16,10 +16,7 @@ const cleanPath = (p: string | string[]) => {
   }
   return _.map(pathParts, pp => {
     const part = pp.trim();
-    if (/^\d+$/.test(part)) {
-      return `_${part}`;
-    }
-    if (/^_[$]$/.test(part)) {
+    if (/^(\d+|_[$])$/.test(part)) {
       return `_${part}`;
     }
     return part;
@@ -45,7 +42,7 @@ export const upsertRadix = <T>(
 
 export const traverseRadixValues = <T>(
   radix: Radix<T>,
-  f: (path: RadixPath, t?: T) => void,
+  f: (path: RadixPath, t: T) => void,
 ) => {
   function _loop(rad: Radix<T>, lpath: string[]) {
     const kvs = _.toPairs(rad);
