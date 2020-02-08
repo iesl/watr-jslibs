@@ -3,7 +3,9 @@ import pump from "pump";
 import path from "path";
 import fs from "fs-extra";
 
+import es from "event-stream";
 import {createLogger, format, transports, Logger} from "winston";
+import logform from "logform";
 
 import {
   newCorpusEntryStream,
@@ -11,14 +13,10 @@ import {
   ExpandedDir,
 } from "~/corpora/corpus-browser";
 
-import {
-  sliceStream,
-  progressCount,
-  prettyPrintTrans,
-  tapStream,
-  stanzaChunker,
-} from "~/util/stream-utils";
+import {sliceStream, prettyPrintTrans, tapStream} from "~/util/stream-utils";
+
 import {gatherAbstractRecs} from "~/corpora/bundler";
+import {prettyPrint} from "~/util/pretty-print";
 
 function resolveLogfileName(logpath: string, phase: string): string {
   return path.resolve(logpath, logfileName(phase));
@@ -26,15 +24,41 @@ function resolveLogfileName(logpath: string, phase: string): string {
 function logfileName(phase: string): string {
   return `qa-review-${phase}-log.json`;
 }
+
+export function newIdGenerator() {
+  let currId = -1;
+  const nextId = () => {
+    currId +=1;
+    return currId;
+  };
+  return nextId;
+}
+
+const nextId = newIdGenerator();
+
+
+const uniqIdFormat = logform.format((info, _opts) => {
+  info.id = nextId();
+  return info;
+});
+
 function initLogger(logpath: string, phase: string): Logger {
-  // if log already exists, exit..
+  // TODO if log already exists, exit..
+
   const logname = resolveLogfileName(logpath, phase);
   const logger = createLogger({
     level: "info",
-    format: format.prettyPrint(),
+    format: format.combine(
+      uniqIdFormat()
+    ),
     transports: [
-      new transports.File({filename: logname}),
-      new transports.Console(),
+      new transports.File({
+        filename: logname,
+        format: format.combine(format.timestamp(), format.json()),
+      }),
+      new transports.Console({
+        format: format.combine(format.prettyPrint()),
+      }),
     ],
   });
 
@@ -108,19 +132,23 @@ async function interactiveReviewCorpus({
 }: ReviewCorpusArgs) {
   const logger = initLogger(logpath, phase);
   const prevLog = resolveLogfileName(logpath, prevPhase);
+  prettyPrint({prevLog});
+
   const logReader = fs.createReadStream(prevLog);
-  const jsonObjChunker = stanzaChunker(
-    line => /^[{]$/.test(line),
-    line => /^[}]$/.test(line),
-    { endOffset: 0 }
+
+  const pipe = pump(
+    logReader,
+    es.split(),
+    es.parse(),
+    prettyPrintTrans("json"),
+    (err?: Error) => {
+      if (err) {
+        console.log(`Error:`, err);
+      } else {
+        console.log(`Done.`);
+      }
+    },
   );
-  const pipe = pump(logReader, jsonObjChunker, (err?: Error) => {
-    if (err) {
-      console.log(`Error:`, err);
-    } else {
-      console.log(`Done.`);
-    }
-  });
 
   pipe.on("data", () => {});
 }
@@ -132,10 +160,10 @@ function initReviewCorpus({corpusRoot, logpath}: Partial<ReviewCorpusArgs>) {
   const pipe = pump(
     entryStream,
     sliceStream(0, 10),
-    progressCount(3),
+    // progressCount(3),
     expandDirTrans,
     tapStream(reviewFunc),
-    prettyPrintTrans("progress"),
+    // prettyPrintTrans("progress"),
     (err?: Error) => {
       if (err) {
         console.log(`Error:`, err);

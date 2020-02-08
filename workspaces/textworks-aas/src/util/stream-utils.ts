@@ -1,8 +1,9 @@
 import _ from "lodash";
 import fs from "fs-extra";
 import through from "through2";
-import {Transform, Readable} from "stream";
+import {Transform} from "stream";
 import {prettyPrint} from "./pretty-print";
+import es, {MapStream} from "event-stream";
 
 export function throughFunc<T, R>(
   f: (t: T, onerr?: (e: any) => void) => R,
@@ -68,17 +69,15 @@ export function progressCount(everyN?: number): Transform {
   );
 }
 
-export function createReadStream(filename: string): Readable {
-  const str = fs.createReadStream(filename);
-  str.on("end", () => {
-    str.destroy();
-  });
+export function createReadLineStream(filename: string): MapStream {
+  const str: es.MapStream = fs.createReadStream(filename).pipe(es.split());
+
   return str;
 }
 
 /**
- * Turn a stream of text lines into a stream of grouped lines (stanzas)
- * TODO stanzaChunker not yet implemented
+ * Turn a stream of text lines into a stream of multi-line string blocks   (stanzas)
+ * TODO this does not yet work very well...
  */
 export function stanzaChunker(
   testStart: (s: string) => boolean,
@@ -88,45 +87,33 @@ export function stanzaChunker(
     endOffset?: number;
   },
 ): Transform {
+  let stanzaBuffer: string[] = [];
+  let state: string = "awaiting-start";
+
   const chunker = through.obj(
-    function(line: Buffer, _enc: string, cb) {
-      // const lineChunk = blineChunk.toString();
-      // const isStart = /^extracting/.test(lineChunk);
-      // const isAbstract = /^  >/.test(lineChunk);
+    function(line: string, _enc: string, cb) {
+      const isStart = testStart(line);
+      const isEnd = testEnd(line);
 
-      // if (isStart) {
-      //   if (noteId && abs) {
-      //     nextRec = {
-      //       entryPath,
-      //       noteId,
-      //       fields: [{name: "abstract", value: abs}],
-      //     };
-      //   }
-      //   entryPath = noteId = abs = undefined;
+      if (state === "awaiting-start" && isStart) {
+        stanzaBuffer = [];
+        stanzaBuffer.push(line);
+        state = "in-stanza";
+      } else if (state === "in-stanza") {
+        stanzaBuffer.push(line);
+      }
 
-      //   const matchHashId = /^extracting (.*)\/([^\/]+)\/download.html$/.exec(
-      //     lineChunk,
-      //   );
-      //   if (!matchHashId) {
-      //     throw Error(`matchHashId should have succeeded on ${lineChunk}`);
-      //   }
-      //   entryPath = matchHashId[1];
-      //   noteId = matchHashId[2];
-      //   entryPath = path.join(entryPath, noteId);
-
-      //   if (nextRec) {
-      //     const z = nextRec;
-      //     nextRec = undefined;
-      //     return cb(null, z);
-      //   }
-      // } else if (isAbstract) {
-      //   const a = lineChunk.split(">")[1].trim();
-      //   abs = a;
-      // }
+      if (isEnd) {
+        state = "awaiting-start";
+        const stanza = _.join(stanzaBuffer, "");
+        stanzaBuffer = [];
+        return cb(null, stanza);
+      }
 
       return cb(null, null);
     },
     function flush(cb) {
+      // TODO handle error if buffer has leftovers w/o seeing end marker
       cb();
     },
   );
