@@ -18,6 +18,7 @@ import {
   radTraverseValues,
   radUpsert,
 } from "~/util/radix-tree";
+import { Field } from '~/extract/field-extract';
 
 interface Accum {
   noteId: string;
@@ -54,103 +55,113 @@ interface CorpusStats {
   missingAbs: number;
 }
 
-export function gatherAbstractRecs(expDir: ExpandedDir): any[] {
+export function gatherAbstractRecs(expDir: ExpandedDir): Field[][] {
   const afs = matchingFiles(/ex.abs.json$/)(expDir.files);
   return afs.map(af => {
-    return fs.readJsonSync(path.join(expDir.dir, af));
+    const fields: Field[] = fs.readJsonSync(path.join(expDir.dir, af));
+    return fields;
   });
 }
 
-export function gatherAbstracts(expDir: ExpandedDir): string[] {
-  return gatherAbstractRecs(expDir)
-    .map(r => r.value);
+export function gatherAbstractFiles(expDir: ExpandedDir): Array<[string, Field[]]> {
+  const afs = matchingFiles(/ex.abs.json$/)(expDir.files);
+  return afs.map(af => {
+    const fields: Field[] = fs.readJsonSync(path.join(expDir.dir, af));
+    return [af, fields];
+  });
 }
+
+// function gatherAbstracts(expDir: ExpandedDir) {
+//   return gatherAbstractRecs(expDir)
+//     .map(r => r.map(v => v.value));
+// }
 
 export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
-  console.log(`createCorpusEntryManifests`);
-  const radStats = createRadix<CorpusStats>();
-
-  const collectStats = throughFunc((acc: Partial<Accum>) => {
-    const url: string = acc.url!;
-    if (url === "no_url") return;
-
-    const noteId: string = acc.noteId!;
-
-    const leadingPath = makeCorpusEntryLeadingPath(url);
-    const leafPath = `${acc.noteId}.d`;
-    const entryPath = path.join(corpusRoot, leadingPath, leafPath);
-
-    const entryPathExists = fs.existsSync(entryPath);
-    if (entryPathExists) {
-      const expDir = expandDir(entryPath);
-      const entryProps = fs.readJsonSync(
-        path.join(expDir.dir, "entry-props.json"),
-      );
-
-      const urlAbstracts = gatherAbstracts(expDir);
-      const absCount = urlAbstracts.length === 0 ? 0 : 1;
-      const missingAbs = urlAbstracts.length === 0 ? 1 : 0;
-
-      const dblpId: string = entryProps.dblpConfId;
-      const dblpParts = _.tail(dblpId.split("/"));
-      dblpParts.push(noteId);
-
-      radInsert(radStats, dblpParts, {urlCount: 1, absCount, missingAbs});
-
-      return;
-    }
-
-    console.log(`Error: problem processing ${noteId} ${url}`);
-    return;
-  });
-
-  const csvRowToJson = _.curry(jsonifyCSV)(["noteId", "dblpConfId", "url"]);
-
-  const pipeline = pump(
-    csvStream(urlCsv),
-    // sliceStream(0, 10),
-    progressCount(1000),
-    throughFunc(csvRowToJson),
-    collectStats,
-    (err: Error) => {
-      console.log(`Error:`, err);
-    },
-  );
-
-  pipeline.on("end", () => {
-    console.log("accumulating stats");
-
-    const accumStats = createRadix<CorpusStats>();
-
-    radTraverseValues(radStats, (path, stats) => {
-      path.pop();
-      while (path.length > 0) {
-        radUpsert(accumStats, path, accStats => {
-          if (accStats) {
-            return {
-              urlCount: stats.urlCount + accStats.urlCount,
-              absCount: stats.absCount + accStats.absCount,
-              missingAbs: stats.missingAbs + accStats.missingAbs,
-            };
-          }
-          return stats;
-        });
-        path.pop();
-      }
-    });
-
-    const allStats: string[] = [];
-    radTraverseValues(accumStats, (path, stats) => {
-      const {urlCount, absCount, missingAbs} = stats;
-      const venue = _.join(path, " / ").padEnd(24);
-      allStats.push(
-        `${venue} urls: ${urlCount}; abs# ${absCount}; missing# ${missingAbs}`,
-      );
-    });
-    const sorted = _.sortBy(allStats);
-
-    console.log(_.join(sorted, "\n"));
-  });
-
-  pipeline.on("data", () => {});
 }
+//   console.log(`createCorpusEntryManifests`);
+//   const radStats = createRadix<CorpusStats>();
+
+//   const collectStats = throughFunc((acc: Partial<Accum>) => {
+//     const url: string = acc.url!;
+//     if (url === "no_url") return;
+
+//     const noteId: string = acc.noteId!;
+
+//     const leadingPath = makeCorpusEntryLeadingPath(url);
+//     const leafPath = `${acc.noteId}.d`;
+//     const entryPath = path.join(corpusRoot, leadingPath, leafPath);
+
+//     const entryPathExists = fs.existsSync(entryPath);
+//     if (entryPathExists) {
+//       const expDir = expandDir(entryPath);
+//       const entryProps = fs.readJsonSync(
+//         path.join(expDir.dir, "entry-props.json"),
+//       );
+
+//       // const urlAbstracts = gatherAbstracts(expDir);
+//       const absCount = urlAbstracts.length === 0 ? 0 : 1;
+//       const missingAbs = urlAbstracts.length === 0 ? 1 : 0;
+
+//       const dblpId: string = entryProps.dblpConfId;
+//       const dblpParts = _.tail(dblpId.split("/"));
+//       dblpParts.push(noteId);
+
+//       radInsert(radStats, dblpParts, {urlCount: 1, absCount, missingAbs});
+
+//       return;
+//     }
+
+//     console.log(`Error: problem processing ${noteId} ${url}`);
+//     return;
+//   });
+
+//   const csvRowToJson = _.curry(jsonifyCSV)(["noteId", "dblpConfId", "url"]);
+
+//   const pipeline = pump(
+//     csvStream(urlCsv),
+//     // sliceStream(0, 10),
+//     progressCount(1000),
+//     throughFunc(csvRowToJson),
+//     collectStats,
+//     (err: Error) => {
+//       console.log(`Error:`, err);
+//     },
+//   );
+
+//   pipeline.on("end", () => {
+//     console.log("accumulating stats");
+
+//     const accumStats = createRadix<CorpusStats>();
+
+//     radTraverseValues(radStats, (path, stats) => {
+//       path.pop();
+//       while (path.length > 0) {
+//         radUpsert(accumStats, path, accStats => {
+//           if (accStats) {
+//             return {
+//               urlCount: stats.urlCount + accStats.urlCount,
+//               absCount: stats.absCount + accStats.absCount,
+//               missingAbs: stats.missingAbs + accStats.missingAbs,
+//             };
+//           }
+//           return stats;
+//         });
+//         path.pop();
+//       }
+//     });
+
+//     const allStats: string[] = [];
+//     radTraverseValues(accumStats, (path, stats) => {
+//       const {urlCount, absCount, missingAbs} = stats;
+//       const venue = _.join(path, " / ").padEnd(24);
+//       allStats.push(
+//         `${venue} urls: ${urlCount}; abs# ${absCount}; missing# ${missingAbs}`,
+//       );
+//     });
+//     const sorted = _.sortBy(allStats);
+
+//     console.log(_.join(sorted, "\n"));
+//   });
+
+//   pipeline.on("data", () => {});
+// }

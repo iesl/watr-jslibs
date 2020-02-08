@@ -13,9 +13,14 @@ import {
   ExpandedDir,
 } from "~/corpora/corpus-browser";
 
-import {sliceStream, prettyPrintTrans, tapStream} from "~/util/stream-utils";
+import {
+  sliceStream,
+  prettyPrintTrans,
+  tapStream,
+  progressCount,
+} from "~/util/stream-utils";
 
-import {gatherAbstractRecs} from "~/corpora/bundler";
+import {gatherAbstractFiles} from "~/corpora/bundler";
 import {prettyPrint} from "~/util/pretty-print";
 
 function resolveLogfileName(logpath: string, phase: string): string {
@@ -28,14 +33,13 @@ function logfileName(phase: string): string {
 export function newIdGenerator() {
   let currId = -1;
   const nextId = () => {
-    currId +=1;
+    currId += 1;
     return currId;
   };
   return nextId;
 }
 
 const nextId = newIdGenerator();
-
 
 const uniqIdFormat = logform.format((info, _opts) => {
   info.id = nextId();
@@ -48,13 +52,15 @@ function initLogger(logpath: string, phase: string): Logger {
   const logname = resolveLogfileName(logpath, phase);
   const logger = createLogger({
     level: "info",
-    format: format.combine(
-      uniqIdFormat()
-    ),
+    format: format.combine(uniqIdFormat()),
     transports: [
       new transports.File({
         filename: logname,
         format: format.combine(format.timestamp(), format.json()),
+      }),
+      new transports.File({
+        filename: `pretty-${logname}`,
+        format: format.combine(format.prettyPrint()),
       }),
       new transports.Console({
         format: format.combine(format.prettyPrint()),
@@ -65,45 +71,88 @@ function initLogger(logpath: string, phase: string): Logger {
   return logger;
 }
 
-// function logStatus(log: Logger, entryDir: ExpandedDir, status: string): void {
-//   log.info({
-//     status,
-//   });
-// }
-// const writeStatus = _.curry(logStatus)(log, entryDir);
+function logStatus(
+  log: Logger,
+  entryDir: ExpandedDir,
+  statusLogs: string[],
+): void {
+  const entry = entryDir.dir;
+  log.info({
+    entry,
+    statusLogs,
+  });
+}
 
+// function sanityCheckAbstract()
 function reviewEntry(log: Logger, entryDir: ExpandedDir) {
   const statusLogs: string[] = [];
   const writeStatus = (s: string) => statusLogs.push(s);
-  const abstractRecs = gatherAbstractRecs(entryDir);
-  const abstractStrs = abstractRecs
-    .map(r => r.value)
-    .filter(r => r !== undefined);
+  const abstractFiles = gatherAbstractFiles(entryDir);
+  const abstractStrs = _(abstractFiles)
+    .flatMap(([filename, fields]) => {
+      return _.map(fields, (f, i) => [filename, f.value, i] as const).filter(
+        ([, v]) => v !== undefined,
+      );
+    })
+    .map(([fn, f, i]) => [fn, f!.trim(), i])
+    .value();
 
-  if (abstractRecs.length === 0) {
+  if (abstractFiles.length === 0) {
     // No extraction files exist
     writeStatus("field.abstract.files=false");
   } else if (abstractStrs.length === 0) {
     // no discernable abstracts identified
     writeStatus("field.abstract.instance=false");
   } else {
-    // at least one abstract available.
-    writeStatus(`field.abstract.instance.count=${abstractStrs.length}`);
-    // sanityCheckAbstract()
-    //    if startsWith('abstract') 'field.abstract.ok.leadword'
-    //    if field.len>40 'field.abstract.ok.length'
-    //       else 'field.abstract.not-ok.length'
-    //    if field.matches(some-filter-regex-list) 'field.abstract.not-ok.length'
+    const uniqAbs = _.uniqBy(abstractStrs, v => v[1]);
+    const uniqAbsCount = uniqAbs.length;
+    const absCount = abstractStrs.length;
+
+    writeStatus(`field.abstract.instance.count=${absCount}`);
+    if (uniqAbsCount !== absCount) {
+      writeStatus(`field.abstract.instance.uniq.count=${uniqAbsCount}`);
+    }
+
+    _.each(uniqAbs, ([filename, field, fieldNum]) => {
+      let abstractStr = field as string;
+
+      if (abstractStr == undefined) {
+        return;
+      }
+      abstractStr = abstractStr.trim();
+      const lowcase = abstractStr.toLowerCase();
+
+      if (abstractStr.length < 40) {
+        writeStatus(
+          `field.abstract.instance[${filename}:${fieldNum}].length.not-ok`,
+        );
+      } else {
+        writeStatus(
+          `field.abstract.instance[${filename}:${fieldNum}].length.ok`,
+        );
+      }
+
+      if (lowcase.startsWith("abstract")) {
+        writeStatus(
+          `field.abstract.instance[${filename}:${fieldNum}].startword.ok`,
+        );
+      }
+
+      const filterExprs = [/abstract[ ]+unavailable/];
+
+      _.each(filterExprs, exp => {
+        if (exp.test(lowcase)) {
+          writeStatus(
+            `field.abstract.instance[${filename}:${fieldNum}].filter[${exp.source}].not-ok`,
+          );
+        }
+      });
+    });
+
   }
 
-  log.info({
-    statusLogs,
-  });
+  logStatus(log, entryDir, statusLogs);
 }
-
-//
-// export async function reviewCorpus(): walk review status logs, filter by status, url, venue
-// export async function initCorpusReview: write init status log per entry
 
 interface ReviewCorpusArgs {
   corpusRoot: string;
@@ -125,7 +174,7 @@ export async function reviewCorpus({
 }
 
 async function interactiveReviewCorpus({
-  corpusRoot,
+  // corpusRoot,
   logpath,
   phase,
   prevPhase,
@@ -159,11 +208,11 @@ function initReviewCorpus({corpusRoot, logpath}: Partial<ReviewCorpusArgs>) {
   const reviewFunc = _.curry(reviewEntry)(logger);
   const pipe = pump(
     entryStream,
-    sliceStream(0, 10),
-    // progressCount(3),
+    sliceStream(0, 400),
+    progressCount(50),
     expandDirTrans,
-    tapStream(reviewFunc),
     // prettyPrintTrans("progress"),
+    tapStream(reviewFunc),
     (err?: Error) => {
       if (err) {
         console.log(`Error:`, err);
