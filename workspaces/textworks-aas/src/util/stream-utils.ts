@@ -15,7 +15,7 @@ export function throughFunc<T, R>(
   );
 }
 
-export function tapFunc<T>(f: (t: T, i?: number) => void): Transform {
+export function tapStream<T>(f: (t: T, i?: number) => void): Transform {
   let currIndex = -1;
 
   return through.obj(
@@ -27,7 +27,7 @@ export function tapFunc<T>(f: (t: T, i?: number) => void): Transform {
   );
 }
 
-export function tapStream(msg: string): Transform {
+export function prettyPrintTrans(msg: string): Transform {
   return through.obj(
     (data: any, _enc: string, next: (err: any, v: any) => void) => {
       prettyPrint({msg, data});
@@ -38,23 +38,25 @@ export function tapStream(msg: string): Transform {
 
 export function sliceStream(start: number, len: number): Transform {
   let currIndex = -1;
-  return through.obj(
-    function (chunk: any, _enc: string, next: (err: any, v: any) => void) {
-      currIndex++;
-      if (start <= currIndex) {
-        if (currIndex < start + len) {
-          return next(null, chunk);
-        }
-        return next(null, null);
+  return through.obj(function(
+    chunk: any,
+    _enc: string,
+    next: (err: any, v: any) => void,
+  ) {
+    currIndex++;
+    if (start <= currIndex) {
+      if (currIndex < start + len) {
+        return next(null, chunk);
       }
       return next(null, null);
-    },
-  );
+    }
+    return next(null, null);
+  });
 }
 
 export function progressCount(everyN?: number): Transform {
   let currIndex = 0;
-  const outputOn = everyN? everyN : 1;
+  const outputOn = everyN ? everyN : 1;
   return through.obj(
     (chunk: any, _enc: string, next: (err: any, v: any) => void) => {
       if (currIndex % outputOn === 0) {
@@ -80,7 +82,11 @@ export function createReadStream(filename: string): Readable {
  */
 export function stanzaChunker(
   testStart: (s: string) => boolean,
-  testEnd?: (s: string) => boolean,
+  testEnd: (s: string) => boolean,
+  opts?: {
+    beginOffset?: number;
+    endOffset?: number;
+  },
 ): Transform {
   const chunker = through.obj(
     function(line: Buffer, _enc: string, cb) {

@@ -3,10 +3,14 @@ import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
 
-import {Argv, Arguments} from "yargs";
+import {Argv, Arguments, Options} from "yargs";
 import {prettyPrint} from "~/util/pretty-print";
 
 type ArgvApp = (ya: Argv) => Argv;
+
+export function config(...fs: ArgvApp[]): ArgvApp {
+  return ya => yall(ya, fs)
+}
 
 export function yall(ya: Argv, fs: ArgvApp[]): Argv {
   return _.reduce(fs, (acc, f) => f(acc), ya);
@@ -40,6 +44,18 @@ export const setCwd = (ya: Argv) =>
     requiresArg: true,
   });
 
+const optAndDesc = (optAndDesc: string, ext?: Options) => (ya: Argv) => {
+  let [optname, desc] = optAndDesc.includes(":")
+    ? optAndDesc.split(":").map(o => o.trim())
+    : [optAndDesc, ""];
+
+  const opts = ext || {};
+  if (desc.length > 0) {
+    opts.description = desc;
+  }
+
+  return ya.option(optname, opts);
+};
 const existingPath = (pathAndDesc: string) => (ya: Argv) => {
   let [pathname, desc] = pathAndDesc.includes(":")
     ? pathAndDesc.split(":")
@@ -75,7 +91,7 @@ export const existingFile = (fileAndDesc: string) => {
   return existingPath(fileAndDesc);
 };
 
-export const config = (ya: Argv) => {
+export const configFile = (ya: Argv) => {
   ya.option("config", {
     describe: "optional path to configuration file",
     type: "string",
@@ -111,15 +127,19 @@ export const config = (ya: Argv) => {
 };
 
 export const setOpt = (ya: Argv) => {
-  ya.option;
+  return ya.option;
 };
 
 export const opt = {
   setCwd,
-  config,
+  config: configFile,
   existingDir,
   existingFile,
   obj: setOpt,
+  dir: existingDir,
+  file: existingFile,
+  cwd: setCwd,
+  ion: optAndDesc,
 };
 
 // const configPath = findUp.sync(configFile, {

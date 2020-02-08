@@ -3,11 +3,15 @@ import path from "path";
 import fs from "fs-extra";
 import pump from "pump";
 import {csvStream} from "~/util/parse-csv";
-import {throughFunc, sliceStream, progressCount} from "~/util/stream-utils";
+import {throughFunc, progressCount} from "~/util/stream-utils";
 
 import hash from "object-hash";
-import {expandedDir, ExpandedDir} from "./corpus-browser";
-import {prettyPrint} from "~/util/pretty-print";
+import {
+  expandDir,
+  ExpandedDir,
+} from "./corpus-browser";
+
+
 import {
   createRadix,
   radInsert,
@@ -50,12 +54,16 @@ interface CorpusStats {
   missingAbs: number;
 }
 
-function gatherAbstracts(expDir: ExpandedDir): string[] {
+export function gatherAbstractRecs(expDir: ExpandedDir): any[] {
   const afs = matchingFiles(/ex.abs.json$/)(expDir.files);
   return afs.map(af => {
-    const exAbs = fs.readJsonSync(path.join(expDir.dir, af));
-    return exAbs.value;
+    return fs.readJsonSync(path.join(expDir.dir, af));
   });
+}
+
+export function gatherAbstracts(expDir: ExpandedDir): string[] {
+  return gatherAbstractRecs(expDir)
+    .map(r => r.value);
 }
 
 export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
@@ -74,7 +82,7 @@ export function createCorpusEntryManifests(urlCsv: string, corpusRoot: string) {
 
     const entryPathExists = fs.existsSync(entryPath);
     if (entryPathExists) {
-      const expDir = expandedDir(entryPath);
+      const expDir = expandDir(entryPath);
       const entryProps = fs.readJsonSync(
         path.join(expDir.dir, "entry-props.json"),
       );

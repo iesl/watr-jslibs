@@ -22,11 +22,11 @@ import {
 
 import {
   newCorpusEntryStream,
-  expandDir,
+  expandDirTrans,
   ExpandedDir,
 } from "~/corpora/corpus-browser";
 
-import {tapFunc} from "~/util/stream-utils";
+import {tapStream} from "~/util/stream-utils";
 
 export function extractAbstractTransform(): Transform {
   return through.obj(
@@ -45,10 +45,10 @@ export async function extractAbstractFromHtmls(corpusRoot: string) {
   const entryStream = newCorpusEntryStream(corpusRoot);
   const pipe = pump(
     entryStream,
-    tapFunc((d, i) => {
+    tapStream((d, i) => {
       console.log(`${i}: ${d}`);
     }),
-    expandDir,
+    expandDirTrans,
     extractAbstractTransform(),
     (err?: Error) => {
       if (err) {

@@ -30,7 +30,7 @@ export function newCorpusEntryStream(corpusRoot: string): Readable {
   return corpusDirStream.pipe(entryDirFilter);
 }
 
-export function expandedDir(path: string) {
+export function expandDir(path: string) {
   const dirEntries = fs.readdirSync(path, {withFileTypes: true});
   const files = dirEntries
     .filter(dirent => dirent.isFile())
@@ -43,4 +43,4 @@ export function expandedDir(path: string) {
   return data;
 }
 
-export const expandDir = throughFunc(expandedDir);
+export const expandDirTrans = throughFunc(expandDir);

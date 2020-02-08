@@ -13,8 +13,8 @@ import * as cheerio from 'cheerio';
 // TODO peruse: https://github.com/lorien/awesome-web-scraping/blob/master/javascript.md
 
 import { prettyPrint } from '~/util/pretty-print';
-import { newCorpusEntryStream, expandDir, ExpandedDir } from '~/corpora/corpus-browser';
-import { tapStream } from '~/util/stream-utils';
+import { newCorpusEntryStream, expandDirTrans, ExpandedDir } from '~/corpora/corpus-browser';
+import { prettyPrintTrans } from '~/util/stream-utils';
 // import { sliceStream } from '~/util/stream-utils';
 
 type Attrs = { [k: string]: string };
@@ -202,8 +202,8 @@ export async function normalizeHtmls(corpusRoot: string) {
 
   const pipe = pump(
     entryStream,
-    tapStream('normalize'),
-    expandDir,
+    prettyPrintTrans('normalize'),
+    expandDirTrans,
     htmlToCssNormTransform(),
     (err?: Error) => {
       if (err) {
