@@ -56,15 +56,15 @@ import path from "path";
  *   - e.g., find corpus.d -type f -name 'bundle.json' -exec cat {} ';' | jq '[ .fields ]' > mega-bundle.json
  */
 
-const Sample = {
-  name: "header-field",
-};
+// const Sample = {
+//   name: "header-field",
+// };
 
-const QAEditStates = [
-  "spider.downloads.htmls: 3",
-  "spider.downloads.pdfs: 1",
-  "extractor.fields.abstracts: 1",
-  "extractor.fields.abstract.qa: ",
-  "spider.downloads.pdfs: 1",
-  "spider.downloads.pdfs: 1",
-];
+// const QAEditStates = [
+//   "spider.downloads.htmls: 3",
+//   "spider.downloads.pdfs: 1",
+//   "extractor.fields.abstracts: 1",
+//   "extractor.fields.abstract.qa: ",
+//   "spider.downloads.pdfs: 1",
+//   "spider.downloads.pdfs: 1",
+// ];

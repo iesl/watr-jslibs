@@ -2,7 +2,6 @@ import _ from "lodash";
 import pump from "pump";
 import path from "path";
 import fs from "fs-extra";
-import through from "through2";
 
 import es from "event-stream";
 import {createLogger, format, transports, Logger} from "winston";
@@ -16,7 +15,6 @@ import {
 } from "~/corpora/corpus-browser";
 
 import {
-  sliceStream,
   prettyPrintTrans,
   tapStream,
   progressCount,
@@ -25,7 +23,6 @@ import {
 } from "~/util/stream-utils";
 
 import {gatherAbstractFiles} from "~/corpora/bundler";
-import {prettyPrint} from "~/util/pretty-print";
 
 function resolveLogfileName(logpath: string, phase: string): string {
   return path.resolve(logpath, logfileName(phase));
@@ -50,14 +47,36 @@ const uniqIdFormat = logform.format((info, _opts) => {
   return info;
 });
 
+type Loggable = string | object;
+interface BufferedLogger {
+  logger: Logger;
+  logBuffer: Loggable[];
+  append(obj: Loggable): void;
+  commitLogs(): void;
+}
+
+function initBufferedLogger(logpath: string, phase: string): BufferedLogger {
+  return {
+    logger: initLogger(logpath, phase),
+    logBuffer: [],
+    append: function(o: Loggable) {
+      this.logBuffer.push(o);
+    },
+    commitLogs: function() {
+      const logBuffer = this.logBuffer;
+      this.logger.info({
+        logBuffer,
+      });
+      _.remove(logBuffer, () => true);
+    },
+  };
+}
 function initLogger(logpath: string, phase: string): Logger {
-  // TODO if log already exists, exit..
-
-
-
   const logname = resolveLogfileName(logpath, phase);
   if (fs.existsSync(logname)) {
-    throw new Error(`log ${logname} already exists. Move or delete before running`);
+    throw new Error(
+      `log ${logname} already exists. Move or delete before running`,
+    );
   }
 
   const logger = createLogger({
@@ -78,17 +97,17 @@ function initLogger(logpath: string, phase: string): Logger {
   return logger;
 }
 
-function logStatus(
-  log: Logger,
-  entryDir: ExpandedDir,
-  statusLogs: string[],
-): void {
-  const entry = entryDir.dir;
-  log.info({
-    entry,
-    statusLogs,
-  });
-}
+// function logStatus(
+//   log: Logger,
+//   entryDir: ExpandedDir,
+//   statusLogs: string[],
+// ): void {
+//   const entry = entryDir.dir;
+//   log.info({
+//     entry,
+//     statusLogs,
+//   });
+// }
 
 export function filteredReviewLogStream(
   logpath: string,
@@ -106,33 +125,14 @@ export function filteredReviewLogStream(
     filterStream((chunk: any) => {
       if (filters.length === 0) return true;
 
-      const statusLogs: string[] = chunk.message.statusLogs;
+      const statusLogs: string[] = chunk.message.logBuffer;
       return _.every(filters, f => _.some(statusLogs, l => f.test(l)));
     }),
     handlePumpError,
   );
 }
 
-function reviewEntry(log: Logger, entryDir: ExpandedDir) {
-  const statusLogs: string[] = [];
-
-  const propfile = path.join(entryDir.dir, "entry-props.json");
-  if (!fs.existsSync(propfile)) return;
-
-  const entryProps = fs.readJsonSync(
-    path.join(entryDir.dir, "entry-props.json"),
-  );
-
-  const writeStatus = (s: string) => statusLogs.push(s);
-
-  const dblpId: string = entryProps.dblpConfId;
-  const [, , venue, year] = dblpId.split("/");
-  const url: string = entryProps.url;
-  const urlp = urlparse(url);
-  writeStatus(`entry.url.host=${urlp.host}`);
-  writeStatus(`entry.venue=${venue}`);
-  writeStatus(`entry.venue.year=${year}`);
-
+function sanityCheckAbstract(log: BufferedLogger, entryDir: ExpandedDir): void {
   const abstractFiles = gatherAbstractFiles(entryDir);
   const abstractStrs = _(abstractFiles)
     .flatMap(([filename, fields]) => {
@@ -145,19 +145,19 @@ function reviewEntry(log: Logger, entryDir: ExpandedDir) {
 
   if (abstractFiles.length === 0) {
     // No extraction files exist
-    writeStatus("field.abstract.files=false");
+    log.append("field.abstract.files=false");
   } else if (abstractStrs.length === 0) {
     // no discernable abstracts identified
-    writeStatus("field.abstract.instance=false");
+    log.append("field.abstract.instance=false");
   } else {
     const uniqAbs = _.uniqBy(abstractStrs, v => v[1]);
     const uniqAbsCount = uniqAbs.length;
     const absCount = abstractStrs.length;
     let entryStatus = "ok";
 
-    writeStatus(`field.abstract.instance.count=${absCount}`);
+    log.append(`field.abstract.instance.count=${absCount}`);
     if (uniqAbsCount !== absCount) {
-      writeStatus(`field.abstract.instance.uniq.count=${uniqAbsCount}`);
+      log.append(`field.abstract.instance.uniq.count=${uniqAbsCount}`);
     }
 
     _.each(uniqAbs, ([filename, field, fieldNum]) => {
@@ -170,17 +170,15 @@ function reviewEntry(log: Logger, entryDir: ExpandedDir) {
       const lowcase = abstractStr.toLowerCase();
 
       if (abstractStr.length < 40) {
-        writeStatus(
+        log.append(
           `field.abstract.instance[${filename}:${fieldNum}].length.not-ok`,
         );
       } else {
-        writeStatus(
-          `field.abstract.instance[${filename}:${fieldNum}].length.ok`,
-        );
+        log.append(`field.abstract.instance[${filename}:${fieldNum}].length.ok`);
       }
 
       if (lowcase.startsWith("abstract")) {
-        writeStatus(
+        log.append(
           `field.abstract.instance[${filename}:${fieldNum}].startword.ok`,
         );
       }
@@ -189,15 +187,37 @@ function reviewEntry(log: Logger, entryDir: ExpandedDir) {
 
       _.each(filterExprs, exp => {
         if (exp.test(lowcase)) {
-          writeStatus(
+          log.append(
             `field.abstract.instance[${filename}:${fieldNum}].filter[${exp.source}].not-ok`,
           );
         }
       });
     });
   }
+}
+function reviewEntry(log: BufferedLogger, entryDir: ExpandedDir) {
+  // const statusLogs: string[] = [];
 
-  logStatus(log, entryDir, statusLogs);
+  const propfile = path.join(entryDir.dir, "entry-props.json");
+  if (!fs.existsSync(propfile)) return;
+
+  const entryProps = fs.readJsonSync(
+    path.join(entryDir.dir, "entry-props.json"),
+  );
+
+  // const log.append = (s: string) => log.append(s);
+
+  const dblpId: string = entryProps.dblpConfId;
+  const [, , venue, year] = dblpId.split("/");
+  const url: string = entryProps.url;
+  const urlp = urlparse(url);
+  log.append(`entry.url.host=${urlp.host}`);
+  log.append(`entry.venue=${venue}`);
+  log.append(`entry.venue.year=${year}`);
+
+  sanityCheckAbstract(log, entryDir);
+
+  log.commitLogs();
 }
 
 interface ReviewCorpusArgs {
@@ -223,7 +243,7 @@ export async function reviewCorpus({
 export async function interactiveReviewCorpus({
   // corpusRoot,
   logpath,
-  phase,
+  // phase,
   prevPhase,
   filters,
 }: ReviewCorpusArgs) {
@@ -251,7 +271,7 @@ export async function interactiveReviewCorpus({
 
 function initReviewCorpus({corpusRoot, logpath}: Partial<ReviewCorpusArgs>) {
   const entryStream = newCorpusEntryStream(corpusRoot!);
-  const logger = initLogger(logpath!, "init");
+  const logger = initBufferedLogger(logpath!, "init");
   const reviewFunc = _.curry(reviewEntry)(logger);
   const pipe = pump(
     entryStream,

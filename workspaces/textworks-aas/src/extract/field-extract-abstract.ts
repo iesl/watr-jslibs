@@ -76,7 +76,7 @@ export const AbstractPipeline: PipelineFunction[] = [
   findAbstractV10,
 ];
 
-export function extractAbstract(exDir: ExpandedDir): void {
+function extractAbstract(exDir: ExpandedDir): void {
   const htmlFiles = exDir.files
     .filter(f => f.endsWith(".html"))
     .map(f => path.resolve(exDir.dir, f));
@@ -323,7 +323,7 @@ export function findAbstractV10(
 ): Field {
   let field: Field = {
     name: "abstract",
-    evidence: "div#body > div#main > div#content > div#abstract",
+    evidence: "div#Abs1-content > p",
   };
 
   const $ = cheerio.load(fileContent);
