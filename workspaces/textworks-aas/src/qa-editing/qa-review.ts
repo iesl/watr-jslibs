@@ -2,10 +2,12 @@ import _ from "lodash";
 import pump from "pump";
 import path from "path";
 import fs from "fs-extra";
+import through from "through2";
 
 import es from "event-stream";
 import {createLogger, format, transports, Logger} from "winston";
 import logform from "logform";
+import urlparse from "url-parse";
 
 import {
   newCorpusEntryStream,
@@ -18,6 +20,8 @@ import {
   prettyPrintTrans,
   tapStream,
   progressCount,
+  handlePumpError,
+  filterStream,
 } from "~/util/stream-utils";
 
 import {gatherAbstractFiles} from "~/corpora/bundler";
@@ -49,7 +53,13 @@ const uniqIdFormat = logform.format((info, _opts) => {
 function initLogger(logpath: string, phase: string): Logger {
   // TODO if log already exists, exit..
 
+
+
   const logname = resolveLogfileName(logpath, phase);
+  if (fs.existsSync(logname)) {
+    throw new Error(`log ${logname} already exists. Move or delete before running`);
+  }
+
   const logger = createLogger({
     level: "info",
     format: format.combine(uniqIdFormat()),
@@ -59,10 +69,7 @@ function initLogger(logpath: string, phase: string): Logger {
         format: format.combine(format.timestamp(), format.json()),
       }),
       new transports.File({
-        filename: `pretty-${logname}`,
-        format: format.combine(format.prettyPrint()),
-      }),
-      new transports.Console({
+        filename: `${logname}.pretty.txt`,
         format: format.combine(format.prettyPrint()),
       }),
     ],
@@ -83,10 +90,49 @@ function logStatus(
   });
 }
 
-// function sanityCheckAbstract()
+export function filteredReviewLogStream(
+  logpath: string,
+  phase: string,
+  filters: RegExp[],
+): pump.Stream {
+  const logfile = resolveLogfileName(logpath, phase);
+  const logReader = fs.createReadStream(logfile);
+
+  return pump(
+    logReader,
+    es.split(),
+    es.parse(),
+
+    filterStream((chunk: any) => {
+      if (filters.length === 0) return true;
+
+      const statusLogs: string[] = chunk.message.statusLogs;
+      return _.every(filters, f => _.some(statusLogs, l => f.test(l)));
+    }),
+    handlePumpError,
+  );
+}
+
 function reviewEntry(log: Logger, entryDir: ExpandedDir) {
   const statusLogs: string[] = [];
+
+  const propfile = path.join(entryDir.dir, "entry-props.json");
+  if (!fs.existsSync(propfile)) return;
+
+  const entryProps = fs.readJsonSync(
+    path.join(entryDir.dir, "entry-props.json"),
+  );
+
   const writeStatus = (s: string) => statusLogs.push(s);
+
+  const dblpId: string = entryProps.dblpConfId;
+  const [, , venue, year] = dblpId.split("/");
+  const url: string = entryProps.url;
+  const urlp = urlparse(url);
+  writeStatus(`entry.url.host=${urlp.host}`);
+  writeStatus(`entry.venue=${venue}`);
+  writeStatus(`entry.venue.year=${year}`);
+
   const abstractFiles = gatherAbstractFiles(entryDir);
   const abstractStrs = _(abstractFiles)
     .flatMap(([filename, fields]) => {
@@ -107,6 +153,7 @@ function reviewEntry(log: Logger, entryDir: ExpandedDir) {
     const uniqAbs = _.uniqBy(abstractStrs, v => v[1]);
     const uniqAbsCount = uniqAbs.length;
     const absCount = abstractStrs.length;
+    let entryStatus = "ok";
 
     writeStatus(`field.abstract.instance.count=${absCount}`);
     if (uniqAbsCount !== absCount) {
@@ -148,7 +195,6 @@ function reviewEntry(log: Logger, entryDir: ExpandedDir) {
         }
       });
     });
-
   }
 
   logStatus(log, entryDir, statusLogs);
@@ -159,6 +205,7 @@ interface ReviewCorpusArgs {
   logpath: string;
   phase: string;
   prevPhase: string;
+  filters?: string[];
 }
 
 export async function reviewCorpus({
@@ -173,31 +220,31 @@ export async function reviewCorpus({
   return interactiveReviewCorpus({corpusRoot, logpath, phase, prevPhase});
 }
 
-async function interactiveReviewCorpus({
+export async function interactiveReviewCorpus({
   // corpusRoot,
   logpath,
   phase,
   prevPhase,
+  filters,
 }: ReviewCorpusArgs) {
-  const logger = initLogger(logpath, phase);
-  const prevLog = resolveLogfileName(logpath, prevPhase);
-  prettyPrint({prevLog});
+  // const logger = initLogger(logpath, phase);
+  // const prevLog = resolveLogfileName(logpath, prevPhase);
+  // prettyPrint({prevLog});
+  let filterREs: RegExp[] = [];
+  if (filters !== undefined) {
+    filterREs = filters.map(f => new RegExp(f));
+  }
 
-  const logReader = fs.createReadStream(prevLog);
+  // const logReader = fs.createReadStream(prevLog);
+  const instr = filteredReviewLogStream(logpath, prevPhase, filterREs);
 
-  const pipe = pump(
-    logReader,
-    es.split(),
-    es.parse(),
-    prettyPrintTrans("json"),
-    (err?: Error) => {
-      if (err) {
-        console.log(`Error:`, err);
-      } else {
-        console.log(`Done.`);
-      }
-    },
-  );
+  const pipe = pump(instr, prettyPrintTrans("json"), (err?: Error) => {
+    if (err) {
+      console.log(`Error:`, err);
+    } else {
+      console.log(`Done.`);
+    }
+  });
 
   pipe.on("data", () => {});
 }
@@ -208,8 +255,8 @@ function initReviewCorpus({corpusRoot, logpath}: Partial<ReviewCorpusArgs>) {
   const reviewFunc = _.curry(reviewEntry)(logger);
   const pipe = pump(
     entryStream,
-    sliceStream(0, 400),
-    progressCount(50),
+    // sliceStream(0, 400),
+    progressCount(500),
     expandDirTrans,
     // prettyPrintTrans("progress"),
     tapStream(reviewFunc),

@@ -73,6 +73,7 @@ export const AbstractPipeline: PipelineFunction[] = [
   findAbstractV7,
   findAbstractV8,
   findAbstractV9,
+  findAbstractV10,
 ];
 
 export function extractAbstract(exDir: ExpandedDir): void {
@@ -315,3 +316,34 @@ export function findAbstractV9(
 
   return field;
 }
+
+export function findAbstractV10(
+  _normLines: string[],
+  fileContent: string,
+): Field {
+  let field: Field = {
+    name: "abstract",
+    evidence: "div#body > div#main > div#content > div#abstract",
+  };
+
+  const $ = cheerio.load(fileContent);
+
+  const maybeAbstract = $("div#Abs1-content > p");
+  const cssNormal = makeCssTreeNormalFormFromNode(maybeAbstract);
+  const justText = filterText(cssNormal);
+  const abs = _.join(justText, " ").trim();
+
+  if (abs.length > 0) {
+    field.value = abs;
+  }
+
+  return field;
+}
+//  div .c-article-body data-article-body='true' data-track-component='article body'
+//     section aria-labelledby='Abs1' lang='en'
+//       div #Abs1-section .c-article-section
+//         h2 #Abs1
+//           | Abstract
+//         div #Abs1-content .c-article-section__content
+//           p
+//             | An approach is presented to match imaged trajectories of anatomical landmarks (e.g. hands, shoulders and feet) using semantic correspondences between human bodies. These correspondences are used to provide geometric constraints for matching actions observed

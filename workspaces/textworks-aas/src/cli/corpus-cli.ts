@@ -5,7 +5,7 @@ import yargs, {Argv} from "yargs";
 import {yall, opt, config} from "./arglib";
 import {createCorpusEntryManifests} from "~/corpora/bundler";
 import {prettyPrint} from "~/util/pretty-print";
-import {reviewCorpus} from "~/qa-editing/qa-review";
+import {reviewCorpus, interactiveReviewCorpus} from "~/qa-editing/qa-review";
 
 yargs.command(
   "collect-stats",
@@ -45,8 +45,40 @@ yargs.command(
     const prevPhase = args.prevPhase;
     const corpusRoot = path.resolve(args.cwd, args.corpusRoot);
     const logpath = path.resolve(args.cwd, args.logpath);
-    prettyPrint({args});
     reviewCorpus({corpusRoot, logpath, phase, prevPhase});
+  },
+);
+
+yargs.command(
+  "qa-filter",
+  "run filtered stream",
+  config(
+    opt.cwd,
+    opt.dir("logpath: directory for log files"),
+    opt.dir("corpus-root: root directory for corpus files"),
+    opt.ion("phase: name of review phase (e.g., 'init')", {
+      requiresArg: true,
+      required: true,
+    }),
+    opt.ion("prev-phase: use logs from prev phase to drive review", {
+      requiresArg: true,
+      implies: ["phase"],
+    }),
+    opt.ion("regex: only include matching records", {
+      alias: "m",
+      requiresArg: true,
+      array: true,
+      required: false,
+    }),
+  ),
+
+  function exec(args: any) {
+    const corpusRoot = path.resolve(args.cwd, args.corpusRoot);
+    const logpath = path.resolve(args.cwd, args.logpath);
+    const phase = args.phase;
+    const prevPhase = args.prevPhase;
+    const filters = args.regex;
+    interactiveReviewCorpus({corpusRoot, logpath, phase, prevPhase, filters});
   },
 );
 

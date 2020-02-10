@@ -16,6 +16,23 @@ export function throughFunc<T, R>(
   );
 }
 
+export function handlePumpError(error: Error): void {
+  if (error) {
+    console.log(`Error:`, error);
+  }
+}
+
+export function filterStream<T>(f: (t: T) => boolean): Transform {
+  return through.obj(
+    (data: T, _enc: string, next: (err: any, v: any) => void) => {
+      if (f(data)) {
+        return next(null, data);
+      }
+      return next(null, null);
+    },
+  );
+}
+
 export function tapStream<T>(f: (t: T, i?: number) => void): Transform {
   let currIndex = -1;
 
