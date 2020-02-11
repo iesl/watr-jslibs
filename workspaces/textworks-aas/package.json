@@ -14,7 +14,7 @@
     "build": "tsc",
     "cli": "ts-node -r tsconfig-paths/register src/cli/index.ts",
     "main": "ts-node -r tsconfig-paths/register src/cli/main.ts",
-    "corpus": "ts-node -r tsconfig-paths/register src/cli/corpus-cli.ts",
+    "corpus": "ts-node --files -r tsconfig-paths/register src/cli/corpus-cli.ts",
     "test": "jest"
   },
   "dependencies": {
@@ -30,8 +30,6 @@
     "@types/parallel-transform": "^1.1.0",
     "@types/parse5": "^5.0.2",
     "@types/prompts": "^2.0.3",
-    "@types/pump": "^1.1.0",
-    "@types/pumpify": "^1.4.1",
     "@types/selenium-webdriver": "^4.0.6",
     "@types/split2": "^2.1.6",
     "@types/through2": "^2.0.34",

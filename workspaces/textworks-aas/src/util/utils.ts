@@ -15,8 +15,8 @@ export function dirOrDie(file: string|undefined, ...ps: string[]): string {
   if (file) {
     pres = path.resolve(...ps, file)
     const exists = fs.existsSync(pres);
-    // fs.statSync(pres).is
     const valid = exists? fs.statSync(pres).isDirectory() : false;
+
     if (valid) {
       return pres;
     }

@@ -1,6 +1,6 @@
 import _ from "lodash";
 import path from "path";
-import pump from "pump";
+import pumpify from "pumpify";
 import {Transform} from "stream";
 import through from "through2";
 
@@ -26,7 +26,7 @@ import {
   ExpandedDir,
 } from "~/corpora/corpus-browser";
 
-import {tapStream} from "~/util/stream-utils";
+import {tapStream, handlePumpError} from "~/util/stream-utils";
 
 export function extractAbstractTransform(): Transform {
   return through.obj(
@@ -36,27 +36,22 @@ export function extractAbstractTransform(): Transform {
       } catch (err) {
         console.log(`err ${err}`);
       }
-      next(null, exDir);
+      return next(null, exDir);
     },
   );
 }
 
 export async function extractAbstractFromHtmls(corpusRoot: string) {
   const entryStream = newCorpusEntryStream(corpusRoot);
-  const pipe = pump(
+  const pipe = pumpify.obj(
+    // TODO pumpify...
     entryStream,
     tapStream((d, i) => {
       console.log(`${i}: ${d}`);
     }),
     expandDirTrans,
     extractAbstractTransform(),
-    (err?: Error) => {
-      if (err) {
-        console.log(`Error:`, err);
-      } else {
-        console.log(`Done.`);
-      }
-    },
+    handlePumpError,
   );
 
   pipe.on("data", () => {});
@@ -339,11 +334,3 @@ export function findAbstractV10(
 
   return field;
 }
-//  div .c-article-body data-article-body='true' data-track-component='article body'
-//     section aria-labelledby='Abs1' lang='en'
-//       div #Abs1-section .c-article-section
-//         h2 #Abs1
-//           | Abstract
-//         div #Abs1-content .c-article-section__content
-//           p
-//             | An approach is presented to match imaged trajectories of anatomical landmarks (e.g. hands, shoulders and feet) using semantic correspondences between human bodies. These correspondences are used to provide geometric constraints for matching actions observed

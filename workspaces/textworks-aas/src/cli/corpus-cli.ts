@@ -3,9 +3,9 @@ import _ from "lodash";
 import path from "path";
 import yargs, {Argv} from "yargs";
 import {yall, opt, config} from "./arglib";
-import {createCorpusEntryManifests} from "~/corpora/bundler";
 import {prettyPrint} from "~/util/pretty-print";
 import {reviewCorpus, interactiveReviewCorpus} from "~/qa-editing/qa-review";
+import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 
 yargs.command(
   "collect-stats",
@@ -13,14 +13,14 @@ yargs.command(
   function config(ya: Argv) {
     yall(ya, [
       opt.setCwd,
-      opt.existingFile("csv: csv with noteId, dblpIds, urls"),
+      opt.existingFile("logfile: logfile on which to base the stats"),
       opt.existingDir("corpus-root: root directory for corpus files"),
     ]);
   },
 
   function exec(args: any) {
-    const fromc = path.resolve(args.cwd, args.corpusRoot);
-    createCorpusEntryManifests(args.csv, fromc);
+    const fromLog = path.resolve(args.cwd, args.logfile);
+    collectAbstractExtractionStats(fromLog, [])
   },
 );
 
