@@ -17,7 +17,6 @@ import {
 import {
   tapStream,
   progressCount,
-  handlePumpError,
   filterStream,
   throughFunc,
 } from "~/util/stream-utils";
@@ -85,7 +84,7 @@ function sanityCheckAbstract(log: BufferedLogger, entryDir: ExpandedDir): void {
     const uniqAbs = _.uniqBy(abstractStrs, v => v[1]);
     const uniqAbsCount = uniqAbs.length;
     const absCount = abstractStrs.length;
-    let entryStatus = "ok";
+    // let entryStatus = "ok";
 
     log.append(`field.abstract.instance.count=${absCount}`);
     if (uniqAbsCount !== absCount) {
@@ -182,11 +181,11 @@ export async function reviewCorpus({
 export async function interactiveReviewCorpus({
   // corpusRoot,
   logpath,
-  // phase,
+  phase,
   prevPhase,
   filters,
 }: ReviewCorpusArgs) {
-  // const logger = initLogger(logpath, phase);
+  const logger = initLogger(logpath, phase);
   // const prevLog = resolveLogfileName(logpath, prevPhase);
 
   const filterREs: RegExp[] =
@@ -200,16 +199,19 @@ export async function interactiveReviewCorpus({
     // e.g., run abstract extraction
     throughFunc((log: any) => log.message.entry),
     expandDirTrans,
-    extractAbstractTransform(),
+    extractAbstractTransform(logger),
     // handlePumpError,
   );
 
   pipef.on("data", () => true);
 }
 
-function initReviewCorpus({corpusRoot, logpath}: Partial<ReviewCorpusArgs>) {
-  const entryStream = newCorpusEntryStream(corpusRoot!);
-  const logger = initLogger(logpath!, "init");
+function initReviewCorpus({
+  corpusRoot,
+  logpath,
+}: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">) {
+  const entryStream = newCorpusEntryStream(corpusRoot);
+  const logger = initLogger(logpath, "init");
   const reviewFunc = _.curry(reviewEntry)(logger);
   const pipe = pumpify.obj(
     entryStream,
