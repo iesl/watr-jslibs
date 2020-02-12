@@ -19,8 +19,8 @@ import {
   radTraverseValues,
 } from "~/util/radix-tree";
 
-import {createFilteredLogStream} from "./qa-review";
 import {prettyPrint} from "~/util/pretty-print";
+import { createFilteredLogStream } from './qa-logging';
 
 interface CorpusStats {
   urlCount: number;

@@ -6,10 +6,11 @@ import {yall, opt, config} from "./arglib";
 import {prettyPrint} from "~/util/pretty-print";
 import {reviewCorpus, interactiveReviewCorpus} from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
+import { reviewAbstractQuality } from '~/qa-editing/qa-edits';
 
 yargs.command(
   "collect-stats",
-  "collect some coverage stats",
+  "collect some coverage stats regarding abstract extraction",
   function config(ya: Argv) {
     yall(ya, [
       opt.setCwd,
@@ -31,34 +32,9 @@ yargs.command(
     opt.cwd,
     opt.dir("logpath: directory to put log files"),
     opt.dir("corpus-root: root directory for corpus files"),
-    opt.ion("phase: name of review phase (start with 'init')", {
+    opt.ion("phase: name of review phase (defaults to 'init')", {
       requiresArg: true,
-    }),
-    opt.ion("prev-phase: use logs from prev phase to drive review", {
-      requiresArg: true,
-      implies: ["phase"],
-    }),
-  ),
-
-  function exec(args: any) {
-    const phase = args.phase;
-    const prevPhase = args.prevPhase;
-    const corpusRoot = path.resolve(args.cwd, args.corpusRoot);
-    const logpath = path.resolve(args.cwd, args.logpath);
-    reviewCorpus({corpusRoot, logpath, phase, prevPhase});
-  },
-);
-
-yargs.command(
-  "qa-filter",
-  "run filtered stream",
-  config(
-    opt.cwd,
-    opt.dir("logpath: directory for log files"),
-    opt.dir("corpus-root: root directory for corpus files"),
-    opt.ion("phase: name of review phase (e.g., 'init')", {
-      requiresArg: true,
-      required: true,
+      default: "init",
     }),
     opt.ion("prev-phase: use logs from prev phase to drive review", {
       requiresArg: true,
@@ -73,12 +49,43 @@ yargs.command(
   ),
 
   function exec(args: any) {
-    const corpusRoot = path.resolve(args.cwd, args.corpusRoot);
-    const logpath = path.resolve(args.cwd, args.logpath);
     const phase = args.phase;
     const prevPhase = args.prevPhase;
+    const corpusRoot = path.resolve(args.cwd, args.corpusRoot);
+    const logpath = path.resolve(args.cwd, args.logpath);
     const filters = args.regex;
-    interactiveReviewCorpus({corpusRoot, logpath, phase, prevPhase, filters});
+    reviewCorpus({corpusRoot, logpath, phase, prevPhase, filters});
+  },
+);
+
+yargs.command(
+  "qa-interactive",
+  "",
+  config(
+    opt.cwd,
+    opt.dir("logpath: directory to put log files"),
+    opt.dir("corpus-root: root directory for corpus files"),
+    // opt.ion("phase: name of review phase (defaults to 'init')", {
+    //   requiresArg: true,
+    //   default: "init",
+    // }),
+    // opt.ion("prev-phase: use logs from prev phase to drive review", {
+    //   requiresArg: true,
+    //   implies: ["phase"],
+    // }),
+    // opt.ion("regex: only include matching records", {
+    //   alias: "m",
+    //   requiresArg: true,
+    //   array: true,
+    //   required: false,
+    // }),
+  ),
+
+  function exec(args: any) {
+    const corpusRoot = path.resolve(args.cwd, args.corpusRoot);
+    const logpath = path.resolve(args.cwd, args.logpath);
+    // runQAInteractive();
+    reviewAbstractQuality({ corpusRoot, logpath });
   },
 );
 

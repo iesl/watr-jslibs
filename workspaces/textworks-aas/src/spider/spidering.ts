@@ -1,14 +1,14 @@
-import prompts from 'prompts';
-import _ from 'lodash';
-import fs from 'fs-extra';
-import path from 'path';
+import prompts from "prompts";
+import _ from "lodash";
+import fs from "fs-extra";
+import path from "path";
 
-import { fetchUrl } from '~/spider/axios-scraper';
+import {fetchUrl} from "~/spider/axios-scraper";
 
-import { runMapThenables } from '~/util/utils';
-import { createLogger, format, transports, Logger } from 'winston';
-import { fetchViaFirefox, FetchUrlFn, ShutdownFn } from './browser-scraper';
-const { combine, timestamp } = format;
+import {runMapThenables} from "~/util/utils";
+import {createLogger, format, transports, Logger} from "winston";
+import {fetchViaFirefox, FetchUrlFn, ShutdownFn} from "./browser-scraper";
+const {combine, timestamp} = format;
 
 export interface SpideringEnv {
   logger: Logger;
@@ -27,11 +27,10 @@ export interface SpideringOptions {
 export const defaultSpideringOptions: SpideringOptions = {
   interactive: true,
   useBrowser: true,
-  cwd: '.',
-  downloads: '.',
-  logpath: './spidering.log',
-}
-
+  cwd: ".",
+  downloads: ".",
+  logpath: "./spidering.log",
+};
 
 interface SpideringRecs extends SpideringOptions {
   recs: SpideringRec[];
@@ -47,17 +46,14 @@ interface SpideringRec {
 }
 
 function initLogger(logpath: string): Logger {
-  const logname = path.resolve(logpath, 'spider-log.json');
+  const logname = path.resolve(logpath, "spider-log.json");
   const logger = createLogger({
-    level: 'info',
-    format: combine(
-      timestamp(),
-      format.prettyPrint()
-    ),
+    level: "info",
+    format: combine(timestamp(), format.prettyPrint()),
     transports: [
-      new transports.File({ filename: logname }),
-      new transports.Console()
-    ]
+      new transports.File({filename: logname}),
+      new transports.Console(),
+    ],
   });
 
   return logger;
@@ -65,11 +61,11 @@ function initLogger(logpath: string): Logger {
 
 export async function createSpider(opts: SpideringOptions) {
   const logger = initLogger(opts.logpath);
-  logger.info({ event: 'initializing spider', config: opts });
+  logger.info({event: "initializing spider", config: opts});
 
   const input = opts.input;
   if (!input) {
-    logger.info({ event: 'fatal error: no input file', config: opts });
+    logger.info({event: "fatal error: no input file", config: opts});
   }
   const inputBuf = fs.readFileSync(input!);
   const rawRecs: Partial<SpideringRec>[] = JSON.parse(inputBuf.toString());
@@ -81,8 +77,10 @@ export async function createSpider(opts: SpideringOptions) {
       url: rec.url!,
       path: p1,
       outpath: p2,
-      dlpath() { return p1? p1 : p2? p2 : 'tmp-spider-dl.html' }
-    }
+      dlpath() {
+        return p1 ? p1 : p2 ? p2 : "tmp-spider-dl.html";
+      },
+    };
   });
   const spideringRecs: SpideringRecs = {
     ...opts,
@@ -94,23 +92,23 @@ export async function createSpider(opts: SpideringOptions) {
     },
     getRecDownloadFilename(rec: SpideringRec): string {
       const basepath = this.getRecDownloadDirectory(rec);
-      return path.join(basepath, 'download.html');
-    }
-  };;
+      return path.join(basepath, "download.html");
+    },
+  };
 
-  let prompt = opts.interactive?  promptForAction : alwaysDownload;
-  const fetchfn = opts.useBrowser? fetchViaFirefox: fetchViaAxios;
+  let prompt = opts.interactive ? promptForAction : alwaysDownload;
+  const fetchfn = opts.useBrowser ? fetchViaFirefox : fetchViaAxios;
 
   const [fetcher, closeFetcher] = await fetchfn();
 
   const env: SpideringEnv = {
     logger,
-    takeScreenshot: false
+    takeScreenshot: false,
   };
 
-  logger.info({ event: 'starting spider' });
+  logger.info({event: "starting spider"});
 
-  let filter = '.*';
+  let filter = ".*";
 
   await runMapThenables(spideringRecs.recs, async (rec: SpideringRec) => {
     const url = rec.url;
@@ -121,37 +119,37 @@ export async function createSpider(opts: SpideringOptions) {
     let fetched: string | undefined;
 
     async function _loop(actions: UserAction[]): Promise<void> {
-      if (actions.length===0) return;
+      if (actions.length === 0) return;
       const nextAction = actions[0];
 
       switch (nextAction.action) {
-        case 'download':
+        case "download":
           fetched = await fetcher(env, url);
           break;
-        case 'skip':
+        case "skip":
           break;
-        case 'all':
+        case "all":
           prompt = alwaysDownload;
           fetched = await fetcher(env, url);
           break;
-        case 'mark':
+        case "mark":
           break;
-        case 'filter':
+        case "filter":
           filter = nextAction.value!;
           break;
-        case 'quit':
-          logger.info({ event: 'user exiting spider' });
+        case "quit":
+          logger.info({event: "user exiting spider"});
           closeFetcher();
           process.exit();
       }
       return _loop(_.tail(actions));
-    };
+    }
 
     const nextActions = await prompt(rec.url);
     await _loop(nextActions);
 
     if (fetched) {
-      logger.info({ event: 'url fetched', url });
+      logger.info({event: "url fetched", url});
       const downloadDir = spideringRecs.getRecDownloadDirectory(rec);
       const downloadFilename = spideringRecs.getRecDownloadFilename(rec);
       const exists = fs.existsSync(downloadFilename);
@@ -160,12 +158,10 @@ export async function createSpider(opts: SpideringOptions) {
       }
       fs.mkdirsSync(downloadDir);
       fs.writeFileSync(downloadFilename, fetched);
-
     } else {
-      logger.info({ event: 'url not fetched', url });
+      logger.info({event: "url not fetched", url});
     }
   });
-
 
   closeFetcher();
 }
@@ -174,14 +170,12 @@ async function fetchViaAxios(): Promise<[FetchUrlFn, ShutdownFn]> {
   const fetch: FetchUrlFn = async (env, url) => {
     return fetchUrl(env, url);
   };
-  const shutdown: ShutdownFn = async () => {
-  };
+  const shutdown: ShutdownFn = async () => {};
   return [fetch, shutdown];
 }
 
-
 async function alwaysDownload(): Promise<UserAction[]> {
-  return [{ action: 'download'}];
+  return [{action: "download"}];
 }
 
 interface UserAction {
@@ -190,38 +184,37 @@ interface UserAction {
 }
 
 async function promptForAction(url: string): Promise<UserAction[]> {
-
   async function _loop(actionQueue: UserAction[]) {
     const actions: UserAction[] = [];
     const res = await prompts({
-      type: 'select',
-      name: 'value',
+      type: "select",
+      name: "value",
       message: `What to do with ${url}?`,
       choices: [
-        { title: 'Download', value: 'download' },
-        { title: 'Skip', value: 'skip' },
-        { title: 'Mark', value: 'mark' },
-        { title: 'Filter', value: 'filter' },
-        { title: 'Continue non-interactive', value: 'all' },
-        { title: 'Quit', value: 'quit' }
+        {title: "Download", value: "download"},
+        {title: "Skip", value: "skip"},
+        {title: "Mark", value: "mark"},
+        {title: "Filter", value: "filter"},
+        {title: "Continue non-interactive", value: "all"},
+        {title: "Quit", value: "quit"},
       ],
-      initial: 0
+      initial: 0,
     });
 
     const action = res.value;
 
     switch (action) {
-      case 'mark':
-        actions.push({ action });
-        actions.push(...await _loop([]));
+      case "mark":
+        actions.push({action});
+        actions.push(...(await _loop([])));
         break;
-      case 'filter':
+      case "filter":
         const filter = await promptForFilter();
-        actions.push({ action, value: filter });
-        actions.push(...await _loop([]));
+        actions.push({action, value: filter});
+        actions.push(...(await _loop([])));
         break;
       default:
-        actions.push({ action });
+        actions.push({action});
         break;
     }
 
@@ -232,8 +225,8 @@ async function promptForAction(url: string): Promise<UserAction[]> {
 }
 async function promptForFilter(): Promise<string> {
   return prompts({
-    type: 'text',
-    name: 'value',
-    message: `Enter url filter regex`
+    type: "text",
+    name: "value",
+    message: `Enter url filter regex`,
   }).then(r => r.value);
 }

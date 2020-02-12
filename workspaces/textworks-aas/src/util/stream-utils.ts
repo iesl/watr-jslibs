@@ -85,6 +85,20 @@ export function throughFunc<T, R>(
   );
 }
 
+export function throughAsyncFunc<T, R>(
+  f: (t: T) => Promise<R>,
+): Transform {
+  const thru = through.obj(
+    (chunk: T, _enc: string, next: (err: any, v: any) => void) => {
+      f(chunk).then((res) => {
+        next(null, res);
+      });
+    },
+  );
+
+  return thru;
+}
+
 export function throughAccum<T, Acc>(
   f: (acc: Acc, t: T, onerr?: (e: any) => void) => Acc,
   init: Acc,

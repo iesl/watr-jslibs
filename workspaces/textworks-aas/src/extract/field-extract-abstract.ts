@@ -23,6 +23,7 @@ import {ExpandedDir} from "~/corpora/corpus-browser";
 import {BufferedLogger} from "~/util/logging";
 
 import urlparse from "url-parse";
+import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
 
 type PipelineFunction = (lines: string[], content: string) => Field;
 
@@ -166,24 +167,7 @@ export function extractAbstractTransform(log: BufferedLogger): Transform {
   return through.obj(
     (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
       try {
-        // TODO get rid of this logging  copypasta
-        const propfile = path.join(exDir.dir, "entry-props.json");
-        if (!fs.existsSync(propfile)) return;
-
-        const entryProps = fs.readJsonSync(
-          path.join(exDir.dir, "entry-props.json"),
-        );
-
-        const dblpId: string = entryProps.dblpConfId;
-        const [, , venue, year] = dblpId.split("/");
-        const url: string = entryProps.url;
-        const urlp = urlparse(url);
-
-        log.setHeader("entry", exDir.dir);
-
-        log.append(`entry.url.host=${urlp.host}`);
-        log.append(`entry.venue=${venue}`);
-        log.append(`entry.venue.year=${year}`);
+        writeDefaultEntryLogs(log, exDir);
         extractAbstract(exDir, log);
         log.commitLogs();
       } catch (err) {

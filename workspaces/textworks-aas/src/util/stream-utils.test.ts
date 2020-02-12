@@ -1,17 +1,45 @@
 import _ from "lodash";
 import "chai/register-should";
-
 import {prettyPrint} from "./pretty-print";
+
 import {
   stanzaChunker,
   prettyPrintTrans,
-  throughFunc,
   createPump,
+  throughAsyncFunc,
 } from "./stream-utils";
+
 import es from "event-stream";
 import pumpify from "pumpify";
 
+
 describe("Stream utils ", () => {
+  const delay = (t: number) => new Promise(resolve => setTimeout(resolve, t));
+
+  async function doAsyncStuff(s: string): Promise<string> {
+    return delay(300).then(() => {
+      return Promise.resolve(s+"_"+s);
+    })
+  }
+
+  it.only("should merge a pipeline stream", async done => {
+    const astr = es.readArray("abc".split(""));
+    const pipe = pumpify.obj(
+      astr,
+      // prettyPrintTrans("pre"),
+      throughAsyncFunc(doAsyncStuff),
+      // prettyPrintTrans("post"),
+    );
+
+    pipe.on("data", (data: string) => {
+      prettyPrint({data});
+    });
+
+    pipe.on("end", () => {
+      done();
+    });
+  });
+
   it("should properly catch pipeline errors", async done => {
     const astr = es.readArray("abcde".split(""));
     const pipe = pumpify.obj(astr, prettyPrintTrans("aabb"));
@@ -22,7 +50,7 @@ describe("Stream utils ", () => {
     });
   });
 
-  it.only("should compose pipeline function with type safety", async done => {
+  it("should compose pipeline function with type safety", async done => {
     const f1: (s: string) => string[] = s => s.split(" ");
     const f2: (s: string[]) => number[] = s => s.map(s0 => parseInt(s0));
     const astr = es.readArray(["0 1 2 -30 100"]);

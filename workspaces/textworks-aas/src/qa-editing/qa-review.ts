@@ -4,8 +4,6 @@ import pumpify from "pumpify";
 import path from "path";
 import fs from "fs-extra";
 
-import es from "event-stream";
-import {Stream} from "stream";
 import urlparse from "url-parse";
 
 import {
@@ -14,54 +12,17 @@ import {
   ExpandedDir,
 } from "~/corpora/corpus-browser";
 
-import {
-  tapStream,
-  progressCount,
-  filterStream,
-  throughFunc,
-} from "~/util/stream-utils";
+import {tapStream, progressCount, throughFunc} from "~/util/stream-utils";
 
 import {gatherAbstractFiles} from "~/corpora/bundler";
-import {BufferedLogger, initBufferedLogger} from "~/util/logging";
+import {BufferedLogger} from "~/util/logging";
 import {extractAbstractTransform} from "~/extract/field-extract-abstract";
-
-function resolveLogfileName(logpath: string, phase: string): string {
-  return path.resolve(logpath, logfileName(phase));
-}
-
-function logfileName(phase: string): string {
-  return `qa-review-${phase}-log.json`;
-}
-
-function initLogger(logpath: string, phase: string): BufferedLogger {
-  const logname = resolveLogfileName(logpath, phase);
-  if (fs.existsSync(logname)) {
-    throw new Error(
-      `log ${logname} already exists. Move or delete before running`,
-    );
-  }
-  return initBufferedLogger(logname);
-}
-
-export function createFilteredLogStream(
-  logfile: string,
-  filters: RegExp[],
-): Stream {
-  const logReader: fs.ReadStream = fs.createReadStream(logfile);
-
-  return pumpify.obj(
-    logReader,
-    es.split(),
-    es.parse(),
-
-    filterStream((chunk: any) => {
-      if (filters.length === 0) return true;
-
-      const statusLogs: string[] = chunk.message.logBuffer;
-      return _.every(filters, f => _.some(statusLogs, l => f.test(l)));
-    }),
-  );
-}
+import {
+  initLogger,
+  resolveLogfileName,
+  createFilteredLogStream,
+  writeDefaultEntryLogs,
+} from "./qa-logging";
 
 function sanityCheckAbstract(log: BufferedLogger, entryDir: ExpandedDir): void {
   const abstractFiles = gatherAbstractFiles(entryDir);
@@ -130,26 +91,8 @@ function sanityCheckAbstract(log: BufferedLogger, entryDir: ExpandedDir): void {
 }
 
 function reviewEntry(log: BufferedLogger, entryDir: ExpandedDir) {
-  // const statusLogs: string[] = [];
   try {
-    const propfile = path.join(entryDir.dir, "entry-props.json");
-    if (!fs.existsSync(propfile)) return;
-
-    const entryProps = fs.readJsonSync(
-      path.join(entryDir.dir, "entry-props.json"),
-    );
-
-    const dblpId: string = entryProps.dblpConfId;
-    const [, , venue, year] = dblpId.split("/");
-    const url: string = entryProps.url;
-    const urlp = urlparse(url);
-
-    log.setHeader("entry", entryDir.dir);
-
-    log.append(`entry.url.host=${urlp.host}`);
-    log.append(`entry.venue=${venue}`);
-    log.append(`entry.venue.year=${year}`);
-
+    writeDefaultEntryLogs(log, entryDir);
     sanityCheckAbstract(log, entryDir);
   } catch (e) {
     console.log(`Error: `, e);
@@ -171,11 +114,12 @@ export async function reviewCorpus({
   logpath,
   phase,
   prevPhase,
+  filters,
 }: ReviewCorpusArgs) {
   if (phase === "init") {
     return initReviewCorpus({corpusRoot, logpath});
   }
-  interactiveReviewCorpus({corpusRoot, logpath, phase, prevPhase});
+  interactiveReviewCorpus({corpusRoot, logpath, phase, prevPhase, filters});
 }
 
 export async function interactiveReviewCorpus({
