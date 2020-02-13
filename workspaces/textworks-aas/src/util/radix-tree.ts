@@ -21,6 +21,15 @@ export const radUpsert = <T>(
   _.set(radix, valpath, upVal);
 };
 
+export const radGet = <T>(
+  radix: Radix<T>,
+  path: string | string[],
+) => {
+  const valpath = [...cleanPath(path), RadixValKey];
+  const v: T|undefined =  _.get(radix, valpath);
+  return v;
+};
+
 export const radTraverseValues = <T>(
   radix: Radix<T>,
   f: (path: RadixPath, t: T) => void,

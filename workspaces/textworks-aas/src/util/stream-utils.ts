@@ -74,29 +74,52 @@ export function createPump<ChunkT>(): PumpBuilder<ChunkT> {
   };
   return pb0;
 }
+
 export function throughFunc<T, R>(
   f: (t: T, onerr?: (e: any) => void) => R,
 ): Transform {
   return through.obj(
     (chunk: T, _enc: string, next: (err: any, v: any) => void) => {
       const res = f(chunk, (err: any) => next(err, null));
-      next(null, res);
+      Promise.resolve(res)
+        .then((res) => next(null, res));
     },
   );
 }
 
-export function throughAsyncFunc<T, R>(
-  f: (t: T) => Promise<R>,
+export function initEnv<T, E>(
+  f: (t: T) => E,
 ): Transform {
-  const thru = through.obj(
+  return through.obj(
     (chunk: T, _enc: string, next: (err: any, v: any) => void) => {
-      f(chunk).then((res) => {
-        next(null, res);
-      });
+      const initEnv = f(chunk);
+      Promise.resolve(initEnv)
+        .then((env) => next(null, [chunk, env]));
     },
   );
+}
 
-  return thru;
+export function throughEnvFunc<T, R, E>(
+  f: (t: T, env: E) => R,
+): Transform {
+  return through.obj(
+    (chunk: [T, E], _enc: string, next: (err: any, v: any) => void) => {
+      const [tchunk, env] = chunk;
+      const res = f(tchunk, env);
+      Promise.resolve(res)
+        .then((res) => next(null, [res, env]));
+    },
+  );
+}
+export function filterEnvStream<T, E>(f: (t: T, env: E) => boolean): Transform {
+  return through.obj(
+    (chunk: [T, E], _enc: string, next: (err: any, v: any) => void) => {
+      const [tchunk, env] = chunk;
+      const res = f(tchunk, env);
+      Promise.resolve(res)
+        .then((res) => res? next(null, [tchunk, env]) : next(null, null));
+    },
+  );
 }
 
 export function throughAccum<T, Acc>(

@@ -4,10 +4,7 @@ import pumpify from "pumpify";
 import {
   throughFunc,
   throughAccum,
-  handlePumpError,
-  sliceStream,
   progressCount,
-  createPump,
 } from "~/util/stream-utils";
 
 import {

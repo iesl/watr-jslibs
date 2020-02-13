@@ -67,6 +67,7 @@ export interface BufferedLogger {
   append(obj: Loggable): void;
   setHeader(key: string, value: string): void;
   commitLogs(): void;
+  commitAndClose(): void;
 }
 
 export function initBufferedLogger(logname: string): BufferedLogger {
@@ -76,6 +77,9 @@ export function initBufferedLogger(logname: string): BufferedLogger {
     headers: [],
     append: function(o: Loggable) {
       this.logBuffer.push(o);
+    },
+    setHeader: function (key: string, value: string) {
+      this.headers.push([key, value]);
     },
     commitLogs: function() {
       const logBuffer = this.logBuffer;
@@ -88,8 +92,9 @@ export function initBufferedLogger(logname: string): BufferedLogger {
       _.remove(logBuffer, () => true);
       _.remove(this.headers, () => true);
     },
-    setHeader: function (key: string, value: string) {
-      this.headers.push([key, value]);
-    }
+    commitAndClose: function() {
+      this.commitLogs();
+      this.logger.close();
+    },
   };
 }

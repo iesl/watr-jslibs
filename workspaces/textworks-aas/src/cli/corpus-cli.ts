@@ -63,29 +63,29 @@ yargs.command(
   "",
   config(
     opt.cwd,
-    opt.dir("logpath: directory to put log files"),
+    opt.dir("logpath: directory in which to find/put log files"),
     opt.dir("corpus-root: root directory for corpus files"),
-    // opt.ion("phase: name of review phase (defaults to 'init')", {
-    //   requiresArg: true,
-    //   default: "init",
-    // }),
-    // opt.ion("prev-phase: use logs from prev phase to drive review", {
-    //   requiresArg: true,
-    //   implies: ["phase"],
-    // }),
-    // opt.ion("regex: only include matching records", {
-    //   alias: "m",
-    //   requiresArg: true,
-    //   array: true,
-    //   required: false,
-    // }),
+    opt.ion("inputlog: log from which to stream input entries", {
+      requiresArg: true
+    }),
+    opt.ion("outputlog: output logfile name", {
+      requiresArg: true
+    }),
+    opt.ion("regex: only include matching records", {
+      alias: "m",
+      requiresArg: true,
+      array: true,
+      required: false,
+    }),
   ),
 
   function exec(args: any) {
     const corpusRoot = path.resolve(args.cwd, args.corpusRoot);
     const logpath = path.resolve(args.cwd, args.logpath);
-    // runQAInteractive();
-    reviewAbstractQuality({ corpusRoot, logpath });
+    const inputlog = path.resolve(logpath, args.inputlog);
+    const outputlog = path.resolve(logpath, args.outputlog);
+    const filters = args.regex;
+    reviewAbstractQuality({ corpusRoot, logpath, inputlog, outputlog, filters });
   },
 );
 
