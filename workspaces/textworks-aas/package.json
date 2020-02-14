@@ -38,7 +38,6 @@
     "@types/url-parse": "^1.4.3",
     "@types/wrap-ansi": "^3.0.0",
     "@types/yargs": "^15.0.2",
-    "@types/yoga-layout": "^1.9.1",
     "ansi-escapes": "^4.3.0",
     "async": "^3.1.0",
     "blessed": "^0.1.81",
@@ -68,8 +67,7 @@
     "url-parse": "^1.4.7",
     "winston": "^3.2.1",
     "wrap-ansi": "^6.2.0",
-    "yargs": "^15.1.0",
-    "yoga-layout-prebuilt": "^1.9.3"
+    "yargs": "^15.1.0"
   },
   "devDependencies": {
     "jest": "^25.1.0",
