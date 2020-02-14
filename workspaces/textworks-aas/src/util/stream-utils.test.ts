@@ -6,7 +6,7 @@ import {
   stanzaChunker,
   prettyPrintTrans,
   createPump,
-  throughAsyncFunc,
+  throughFunc,
 } from "./stream-utils";
 
 import es from "event-stream";
@@ -27,7 +27,7 @@ describe("Stream utils ", () => {
     const pipe = pumpify.obj(
       astr,
       // prettyPrintTrans("pre"),
-      throughAsyncFunc(doAsyncStuff),
+      throughFunc(doAsyncStuff),
       // prettyPrintTrans("post"),
     );
 
