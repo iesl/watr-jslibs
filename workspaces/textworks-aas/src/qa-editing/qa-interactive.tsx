@@ -6,12 +6,12 @@ import * as ink from "ink";
 export type KeyDef = [string, () => void];
 import MultiSelect, { ListedItem } from "ink-multi-select";
 import { CleaningRule } from './qa-edits';
-import ansiEscapes from 'ansi-escapes';
-import wrapAnsi from 'wrap-ansi';
 import { BufferedLogger } from "~/util/logging";
+import ansiEscapes from 'ansi-escapes';
 
 //@ts-ignore
 import Divider from 'ink-divider';
+import { clipParagraph } from '~/util/string-utils';
 
 interface CleaningRulesArgs {
   abstractStr: string;
@@ -22,40 +22,31 @@ interface CleaningRulesArgs {
 
 interface RuleSelection extends ListedItem {
   rule: CleaningRule;
+  ruleDidMatch: boolean;
   label: string;
   value: string;
 }
 
 
-const CleaningRules: React.FC<CleaningRulesArgs> = ({ cleaningRules, abstractStr, setAbstract }: CleaningRulesArgs) => {
-  const items: ListedItem[] = _.map(cleaningRules, (rule, i) => {
+const CleaningRules: React.FC<CleaningRulesArgs> = ({ cleaningRules, abstractStr }: CleaningRulesArgs) => {
 
-    const ruleMatches = rule.precondition(abstractStr);
-    return {
-      rule,
-      label: `${rule.name} matches=${ruleMatches}`,
-      value: `rule#${i}`,
-      key: `rule#${i}`
-    };
+  const items  = _.map(cleaningRules, (rule, i) => {
+    const ruleDidMatch = rule.precondition(abstractStr);
+    const label = `${rule.name} matches=${ruleDidMatch}`
+    let rgb: [number, number, number] = [255, 255, 255];
+    if (ruleDidMatch) {
+      rgb = [255, 0, 0];
+    }
+
+    return (
+      <Color key={i} rgb={rgb}>
+        <Text >{label}</Text>
+      </Color>
+    );
   });
 
-  function onSelect(this: MultiSelect, item: ListedItem) {
-    const ruleSel = item as any as RuleSelection;
-    const rule = ruleSel.rule;
-    if (rule.precondition(abstractStr)) {
-      const newAbs = rule.run(abstractStr);
-      setAbstract(newAbs);
-    }
-    return this;
-  };
-
   return (
-    <Box>
-      <MultiSelect
-        onSelect={onSelect}
-        items={items}
-      />
-    </Box>
+    <Box flexDirection="column"> { items } </Box>
   );
 };
 
@@ -65,27 +56,6 @@ interface RunInteractive {
   cleaningRules: CleaningRule[];
   logger: BufferedLogger;
 }
-
-function clipParagraph(width: number, height: number, para: string): string {
-
-  const wrappedLines = wrapAnsi(para, width).split('\n');
-
-  const elidedStartLine = height-4;
-  let clipped: string;
-  if (wrappedLines.length > height) {
-    const clippedHead = wrappedLines.slice(0, elidedStartLine).join("\n");
-    const len = wrappedLines.length;
-    const clippedEnd = wrappedLines.slice(len-3).join("\n");
-    const clippedCount = len-height;
-    const middle = `... + ${clippedCount} lines`;
-    clipped = _.join([clippedHead, middle, clippedEnd], '\n');
-  } else {
-    clipped = wrappedLines.join("\n");
-  }
-
-  return clipped;
-}
-
 
 const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: RunInteractive) => {
   const {exit} = useApp();
@@ -117,7 +87,7 @@ const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: R
     let cleanedAbs = abstractStr;
 
     _.map(cleaningRules, rule => {
-      if (rule.precondition(abstractStr)) {
+      if (rule.precondition(cleanedAbs)) {
         cleanedAbs = rule.run(cleanedAbs);
       }
     });
@@ -135,8 +105,12 @@ const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: R
   const rawAbsViewHeight = 15;
   const cleanAbsViewHeight = 10;
 
-  const clippedAbs = clipParagraph(viewWidth, rawAbsViewHeight, currAbstract);
-  const clippedCleanAbs = clipParagraph(viewWidth, cleanAbsViewHeight, cleanedAbstract);
+  let clippedAbs = clipParagraph(viewWidth, rawAbsViewHeight, currAbstract);
+  clippedAbs = clippedAbs.length === 0 ? "<empty>" : clippedAbs;
+
+  let clippedCleanAbs = clipParagraph(viewWidth, cleanAbsViewHeight, cleanedAbstract);
+  clippedCleanAbs = clippedCleanAbs.length === 0 ? "<empty>" : clippedCleanAbs;
+
   let title = "Abstract (cleaned)";
 
   if (currAbstract === cleanedAbstract) {
@@ -180,6 +154,8 @@ export function runInteractive({ abstractStr, cleaningRules, logger }: RunIntera
   process.stdout.write(ansiEscapes.clearTerminal);
   process.stdout.write(ansiEscapes.clearScreen);
   process.stdout.write(ansiEscapes.cursorDown(1));
+  /* prettyPrint({ abstractStr, cleaningRules, }); */
+
 
   const app = ink.render(
     <App

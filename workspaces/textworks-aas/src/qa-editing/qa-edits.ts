@@ -7,8 +7,9 @@ import {
   ExpandedDir,
   expandDir,
 } from "~/corpora/corpus-browser";
+
 import { writeDefaultEntryLogs, createFilteredLogStream} from "./qa-logging";
-import { sliceStream, initEnv, throughEnvFunc, throughFunc, filterStream, filterEnvStream} from "~/util/stream-utils";
+import {  initEnv, throughEnvFunc, throughFunc,  filterEnvStream} from "~/util/stream-utils";
 import { BufferedLogger, initBufferedLogger} from "~/util/logging";
 import {gatherAbstractFiles} from "~/corpora/bundler";
 import {Field} from "~/extract/field-extract";
@@ -30,6 +31,7 @@ interface ReviewArgs {
 
 interface ReviewEnv {
   logger: BufferedLogger;
+  interactive: boolean;
 }
 
 function entryPathToRadPath(entry: string): string[] {
@@ -80,7 +82,7 @@ export async function reviewAbstractQuality({
 
   const pipef = pumpify.obj(
     createFilteredLogStream(inputlog, filterREs),
-    initEnv(() => ({ logger: initBufferedLogger(outputlog) })),
+    initEnv<any, ReviewEnv>(() => ({ logger: initBufferedLogger(outputlog), interactive: false })),
     throughEnvFunc((log: any) => log.message.entry),
     filterEnvStream(shouldSkip),
     throughEnvFunc(expandDir),
@@ -93,7 +95,11 @@ export async function reviewAbstractQuality({
 async function reviewEntry(entryDir: ExpandedDir, env: ReviewEnv) {
   const { logger } = env;
   writeDefaultEntryLogs(logger, entryDir);
-  await reviewInteractive(logger, entryDir);
+  if (env.interactive) {
+    await reviewInteractive(logger, entryDir);
+  } else {
+    await reviewNonInteractive(logger, entryDir);
+  }
   logger.commitAndClose();
 }
 
@@ -129,6 +135,121 @@ const CleaningRules: CleaningRule[] = [
     }
   },
 
+  { name: "clip @ 'Keywords'",
+    precondition: (str) => {
+      const regex = /(Keywords)/;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: (str) => {
+      const regex = /(Keywords).*$/;
+      const strim = str.trim();
+      return strim.replace(regex, "");
+    }
+  },
+  { name: "clip @ 'Full Text: PDF'",
+    precondition: (str) => {
+      const regex = /(Full Text:).*$/;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: (str) => {
+      const regex = /(Full Text:).*$/;
+      const strim = str.trim();
+      return strim.replace(regex, "");
+    }
+  },
+  { name: "clip @ 'Related Material'",
+    precondition: (str) => {
+      const regex = /Related Material/;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: (str) => {
+      const regex = /Related Material.*$/;
+      const strim = str.trim();
+      return strim.replace(regex, "");
+    }
+  },
+
+  { name: "No Abstract Available",
+    precondition: (str) => {
+      const regex = /no abstract available/i;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: () => {
+      return '';
+    }
+  },
+
+  { name: "clip @ Disqus comments",
+    precondition: (str) => {
+      const regex = /Comments[\d ]+Comments.*$/i;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: (str) => {
+      const regex = /Comments[\d ]+Comments.*$/i;
+      const strim = str.trim();
+      return strim.replace(regex, "");
+    }
+  },
+  { name: "clip @ trailing tags <.. />",
+    precondition: (str) => {
+      const regex = /<ETX.*$/i;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: (str) => {
+      const regex = /<ETX.*$/i;
+      const strim = str.trim();
+      return strim.replace(regex, "");
+    }
+  },
+  { name: "clip @ trailing <",
+    precondition: (str) => {
+      const regex = /<$/i;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: (str) => {
+      const regex = /<$/i;
+      const strim = str.trim();
+      return strim.replace(regex, "");
+    }
+  },
+  { name: "trim extra space",
+    precondition: (str) => {
+      const regex = /[ ][ ]+/g;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: (str) => {
+      const regex = /[ ]+/g;
+      const strim = str.trim();
+      return strim.replace(regex, " ");
+    }
+  },
+  { name: "remove newlines",
+    precondition: () => {
+      return true;
+    },
+    run: (str) => {
+      return str.split('\n').join(' ');
+    }
+  },
+  { name: "abstract too short",
+    precondition: (str) => {
+      return str.length < 120;
+    },
+    run: (str) => {
+      if (str.length < 120) {
+        return '';
+      }
+      return str;
+    }
+  },
 ];
 
 type TupleSSN = readonly [string, string, number];
@@ -150,4 +271,37 @@ async function reviewInteractive(logger: BufferedLogger, entryDir: ExpandedDir):
     const [filename, abs, num] = abstractStrs[0];
     return runInteractive({ abstractStr: abs, cleaningRules: CleaningRules, logger });
   }
+}
+
+async function reviewNonInteractive(logger: BufferedLogger, entryDir: ExpandedDir): Promise<void> {
+  const abstractFilesWithFields: Array<[string, Field[]]> =
+    gatherAbstractFiles(entryDir);
+
+  const abstractStrs: Array<TupleSSN> =
+    _(abstractFilesWithFields)
+    .flatMap(([filename, fields]) => {
+      return _.map(fields, (f, i) => [filename, f.value, i] as TupleSSN)
+        .filter(([, v]) => v !== undefined);
+    })
+    .map(([fn, f, i]) => {
+      const cleaned = applyCleaningRules(f!.trim());
+      return [fn, cleaned, i] as TupleSSN;
+    })
+    .filter(([, f,]) => f!==undefined && f.length > 0)
+    .value();
+
+  if (abstractStrs.length > 0) {
+    const abs = abstractStrs[0][1];
+    logger.append(`field.abstract.value=${abs}`);
+  }
+}
+
+function applyCleaningRules(abstractStr: string): string {
+  let cleanedAbs = abstractStr;
+  _.each(CleaningRules, (rule, i) => {
+    if (rule.precondition(cleanedAbs)) {
+      cleanedAbs = rule.run(cleanedAbs);
+    }
+  });
+  return cleanedAbs.trim();
 }

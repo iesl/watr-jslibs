@@ -10,15 +10,6 @@ export interface ExpandedDir {
   files: string[];
 }
 
-export function oldCorpusEntryStream(corpusRoot: string): Readable {
-  const corpusDirStream = dirsteam(corpusRoot);
-
-  const entryDirFilter = stringStreamFilter((dir: string) => {
-    return /_urls_\/.+$/.test(dir);
-  });
-
-  return corpusDirStream.pipe(entryDirFilter);
-}
 
 export function newCorpusEntryStream(corpusRoot: string): Readable {
   const corpusDirStream = dirsteam(corpusRoot);

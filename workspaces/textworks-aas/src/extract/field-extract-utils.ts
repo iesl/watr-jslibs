@@ -21,7 +21,6 @@ export function readFile(
 }
 
 export function indentLevel(s: string): number {
-  // TODO remove this hack
   if (!s) return -1;
 
   let i = 0;
@@ -153,21 +152,3 @@ export function getSubtextOrUndef(strs: string[]): string | undefined {
   }
   return undefined;
 }
-
-export const suspiciousAbstractRegexes = [
-  "^</div>",
-  '^<div class="item abstract">',
-  "^<p><i>",
-  "^limited training samples and prevent",
-  "^each argume",
-  "^However, m",
-  "^Frontmatter for Workshop Proceedings.",
-  "^This is the preface",
-  "^Preface to the 2018 KDD Workshop on Cau",
-  "^Presents the welcome message from the conference proceedings.",
-  "^The conference offers a note of thanks and lists its reviewers.",
-  "^Provides a listing of current committee members and society officers.",
-  "^This correspondence calls attenti",
-  "^Prospective authors are requested to submit new, unpublished manuscripts",
-  "^The seven papers in this special section",
-].map(s => new RegExp(s));

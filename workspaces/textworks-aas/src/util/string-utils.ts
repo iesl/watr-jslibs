@@ -2,6 +2,7 @@ import _ from "lodash";
 
 import sliceAnsi from 'slice-ansi';
 import chalk from 'chalk';
+import wrapAnsi from 'wrap-ansi';
 import { prettyPrint } from './pretty-print';
 
 
@@ -20,26 +21,7 @@ export function matchAll(re: RegExp, str: string): Array<[number, number]> {
 }
 
 
-export function highlightRegions2(input: string, matches: Array<[number, number]>): string {
-  let res = input;
-  _.each(matches, ([mstart, mend], mindex) => {
-    const pre = sliceAnsi(res, 0, mstart);
-    const mid = sliceAnsi(res, mstart, mend);
-    const end = sliceAnsi(res, mend);
-    // prettyPrint({ pre, mid, end });
-    const r = (mindex * 13 * 13) % 64;
-    const g = (mindex * 7 * 13) % 64;
-    const b = (mindex * 5 * 13) % 64;
-    const midclr = chalk // .underline(mid);
-      .rgb(r+128, g+128, b+128)
-      .bgRgb(b, g, r)(mid);
-
-    res = pre + midclr + end;
-  });
-
-  return res;
-}
-export function highlightRegions0(input: string, matches: Array<[number, number]>): string {
+export function highlightRegions(input: string, matches: Array<[number, number]>): string {
   let res = input;
   _.each(matches, ([mstart, mend], mindex) => {
     const pre = sliceAnsi(res, 0, mstart);
@@ -68,60 +50,23 @@ export function highlightRegions0(input: string, matches: Array<[number, number]
  *                            [ ['a', {env}], ['b', {env}], ['c', {env}], ['d', {env}], ['e', {env}] ]
  */
 
-export function highlightRegions(input: string, matches: Array<[number, number]>): string {
-  type ArrT = string | [string, number[]];
-  // highlight rule matches
-  const inputArr: ArrT[] = input.split('');
 
-  _.each(matches, ([mstart, mend], mindex) => {
-    const whichHL = mindex + 1;
-    const st = inputArr[mstart];
-    const end = inputArr[mend];
-    let st1: ArrT = st;
-    let end1: ArrT = end;
-    if (typeof st === 'string') {
-      st1 = [st, [whichHL]];
-    } else {
-      const [ch, offsets] = st;
-      offsets.push(whichHL);
-      st1 = [ch, offsets];
-    }
-    if (typeof end === 'string') {
-      end1 = [end, [-whichHL]];
-    } else {
-      const [ch, offsets] = end;
-      offsets.push(-whichHL);
-      end1 = [ch, offsets];
-    }
-    inputArr[mstart] = st1;
-    inputArr[mend] = end1;
-  });
+export function clipParagraph(width: number, height: number, para: string): string {
 
-  const hlstrings: string[] = [];
-  let currString: string[] = [];
-  let activeHLs: number[] = [];
-  _.each(inputArr, elem => {
-    if (typeof elem === 'string') {
-      currString.push(elem);
-    } else {
-      const [ch, offsets] = elem;
-      // apply current hightlights
-      const lastStr = currString.join("")
-      let hlstr = lastStr;
-      if (activeHLs.length > 0) {
-        hlstr = chalk.rgb(255, 240, 10)(lastStr);
-      }
-      hlstrings.push(hlstr);
-      currString = [ch];
+  const wrappedLines = wrapAnsi(para, width).split('\n');
 
-      const begins = offsets.filter(o => o > 0);
-      const ends = offsets.filter(o => o < 0);
-      const hl0 = _.filter(activeHLs, (h) => !_.includes(ends, -h));
-      const hl1 = _.concat(hl0, begins);
-      const hl2 = _.uniq(hl1);
-      activeHLs = hl2;
-    }
-  });
-  const finalHl = hlstrings.join("") + currString.join("");
-  return finalHl;
+  let clipped: string;
+  if (wrappedLines.length > height) {
+    const elidedStartLine = _.clamp(height-4, 1, wrappedLines.length);
+    const clippedHead = wrappedLines.slice(0, elidedStartLine).join("\n");
+    const len = wrappedLines.length;
+    const clippedEnd = wrappedLines.slice(len-3).join("\n");
+    const clippedCount = len-height;
+    const middle = `... + ${clippedCount} lines`;
+    clipped = _.join([clippedHead, middle, clippedEnd], '\n');
+  } else {
+    clipped = wrappedLines.join("\n");
+  }
+
+  return clipped;
 }

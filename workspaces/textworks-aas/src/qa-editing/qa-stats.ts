@@ -9,8 +9,6 @@ import {
 
 import {
   createRadix,
-  // radInsert,
-  // radTraverseValues,
   radUpsert,
   Radix,
   radTraverseValues,
@@ -92,11 +90,13 @@ const cstats = throughAccum<any, Radix<CorpusStats>>(
     // const entryPath: string = t.entry;
     const host = getLogEntry("entry.url.host", logBuffer)!;
     const venue = getLogEntry("entry.venue", logBuffer)!;
-    const numAbstracts = getLogEntry("abstract.instance.count", logBuffer);
-    const hasAbsFiles = getLogEntry("abstract.files=false", logBuffer);
+    // const numAbstracts = getLogEntry("abstract.instance.count", logBuffer);
+    const abstractValue = getLogEntry("field.abstract.value", logBuffer);
+    // const hasAbsFiles = getLogEntry("abstract.files=false", logBuffer);
 
-    const absCount = numAbstracts === undefined ? 0 : 1;
-    const missingAbs = hasAbsFiles === undefined ? 0 : 1;
+    // const absCount = numAbstracts === undefined ? 0 : 1;
+    const absCount = abstractValue === undefined ? 0 : 1;
+    const missingAbs = absCount === 1 ? 0 : 1;
 
     // prettyPrint({ logBuffer, numAbstracts, hasAbsFiles });
     const hostpath = host.split(".").reverse();
