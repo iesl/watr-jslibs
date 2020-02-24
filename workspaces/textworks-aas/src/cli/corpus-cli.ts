@@ -4,7 +4,7 @@ import path from "path";
 import yargs, {Argv} from "yargs";
 import {yall, opt, config} from "./arglib";
 import {prettyPrint} from "~/util/pretty-print";
-import {reviewCorpus, interactiveReviewCorpus} from "~/qa-editing/qa-review";
+import {reviewCorpus} from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import { reviewAbstractQuality } from '~/qa-editing/qa-edits';
 

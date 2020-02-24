@@ -14,7 +14,6 @@ import {
   radTraverseValues,
 } from "~/util/radix-tree";
 
-import {prettyPrint} from "~/util/pretty-print";
 import { createFilteredLogStream } from './qa-logging';
 
 interface CorpusStats {
@@ -94,7 +93,6 @@ const cstats = throughAccum<any, Radix<CorpusStats>>(
     const abstractValue = getLogEntry("field.abstract.value", logBuffer);
     // const hasAbsFiles = getLogEntry("abstract.files=false", logBuffer);
 
-    // const absCount = numAbstracts === undefined ? 0 : 1;
     const absCount = abstractValue === undefined ? 0 : 1;
     const missingAbs = absCount === 1 ? 0 : 1;
 

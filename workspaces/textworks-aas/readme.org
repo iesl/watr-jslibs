@@ -1,10 +1,21 @@
 
-** Service topology
+* Textworks as a service
+
    
-*** Spider
+** Usage Overview
+*** Spidering/Scraping
 
+*** Abstract Field Extraction
+   
+*** Q/A Workflow
 
-   TextworksService
+**** Collecting stats
+     yarn workspace textworks-aas corpus collect-stats --cwd=../../orc.d --corpus-root=corpus.d --logfile logs.d/qa-write-abstracts.json
 
-   api.watrworks.org/
-
+     cat orc.d/logs.d/qa-write-abstracts.json.pretty.txt | 
+     grep "'entry.venue=PAMI"  -A 2 -B 3 | 
+     grep -B 5 '    ]' |  
+     grep "entry:" | 
+     perl -pne "s|^.*/corpus.d/||g && s/',//g" | 
+     xargs -i find  "orc.d/corpus.d/{}"  -type f -name 'entry-props.json' | 
+     xargs -i  cat {} | jq '.url' | head -n 3 | xargs -i firefox-stable {}

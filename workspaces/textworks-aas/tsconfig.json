@@ -47,7 +47,6 @@
   "include": [
     "src",
     "@types"
-  ],
-
+  ]
 
 }

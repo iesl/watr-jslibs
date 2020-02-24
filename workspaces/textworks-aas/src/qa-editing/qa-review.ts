@@ -1,10 +1,6 @@
 import _ from "lodash";
 
 import pumpify from "pumpify";
-import path from "path";
-import fs from "fs-extra";
-
-import urlparse from "url-parse";
 
 import {
   newCorpusEntryStream,

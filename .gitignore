@@ -41,19 +41,13 @@ dist
 *debuglog.txt
 
 *.d/
+*.d
 
 ## packaged lib
 *.tgz     
 
 .cache
-
-asdf.*
-qwer.*
-tmp*
 .vscode
 
-auth_config.json
-
 .nuxt
-
 .clinic

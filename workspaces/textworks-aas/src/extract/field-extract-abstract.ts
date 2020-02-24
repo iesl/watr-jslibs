@@ -22,7 +22,6 @@ import {ExpandedDir} from "~/corpora/corpus-browser";
 
 import {BufferedLogger} from "~/util/logging";
 
-import urlparse from "url-parse";
 import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
 
 type PipelineFunction = (lines: string[], content: string) => Field;

@@ -3,7 +3,6 @@ import _ from "lodash";
 import sliceAnsi from 'slice-ansi';
 import chalk from 'chalk';
 import wrapAnsi from 'wrap-ansi';
-import { prettyPrint } from './pretty-print';
 
 
 export function matchAll(re: RegExp, str: string): Array<[number, number]> {
