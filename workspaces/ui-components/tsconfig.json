@@ -30,6 +30,9 @@
     "inlineSourceMap": true,
     "preserveConstEnums": true,
 
+    "jsx": "preserve",
+    "jsxFactory": "h",
+
     "types": [
       "jest",
       "chai",

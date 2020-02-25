@@ -2,11 +2,12 @@
   "plugins": ["macros"],
   "presets": [
     [ "@babel/env",
+      "@vue/babel-preset-jsx",
       {
-        modules: false,
-        loose: false,
-        debug: true,
-        targets: {
+        "modules": false,
+        "loose": false,
+        "debug": true,
+        "targets": {
           "node": "current"
         }
       }
@@ -18,10 +19,11 @@
       "presets": [
         [
           "@babel/env",
+          "@vue/babel-preset-jsx",
           {
-            modules: false,
-            loose: true,
-            debug: true,
+            "modules": false,
+            "loose": false,
+            "debug": true,
             "targets": {
               "node": "current"
             }
