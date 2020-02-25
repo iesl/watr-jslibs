@@ -4,4 +4,3 @@
 // story-title=Text Overlay
 // story-category=core/elements
 </script>
-<style lang="scss" src="./text-overlay-story.scss" scoped></style>

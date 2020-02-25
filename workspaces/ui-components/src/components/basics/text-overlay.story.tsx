@@ -6,6 +6,7 @@ import {
   ref,
   Ref,
   watch,
+  createComponent
 } from '@vue/composition-api';
 
 
@@ -13,17 +14,9 @@ import { useSuperimposedElements, ElementTypes } from '~/components/basics/super
 import { useTextOverlay } from '~/components/basics/text-overlay';
 import { initState, waitFor } from '~/components/basics/component-basics';
 import { TextStyle } from '~/lib/html-text-metrics';
-/* import { BBox } from '~/lib/coord-sys'; */
 
-
-export default {
-  /* props: {
-   *   textSize: ref(45)
-   * },
-   */
-
-  setup(props: any) {
-    /* const self = this; */
+export default createComponent({
+  setup() {
 
     const state = initState();
 
@@ -90,6 +83,7 @@ export default {
           const dimStrs = _.map(dims, d => {
             return `[${d.x}, ${d.y}, ${d.width}, ${d.height}]`;
           });
+
           const dimFmt = _.join(dimStrs, '\n');
           textDimensions.value = dimFmt;
 
@@ -113,30 +107,46 @@ export default {
 
   render() {
 
-    //const textFieldz = (model: Ref<any>) => {
-    //  return (
-    //    <v-text-field outlined hide-details dense
-    //      class="mt-3"
-    //      label="Font Family"
-    //      persistent-hint
-    //      vModel={model}
-    //    />
-    //  );
-    //}
+    const controls = (
+      <v-container>
+        <v-row>
+          <v-col justify="space-between" cols="4">
 
-    ///* const textSize = this.props.textSize; */
-    //const controls = (
-    //  <v-container>
-    //    <v-row>
-    //      <v-col justify="space-between" cols="4">
-    //        {/* {textFieldz(textSize)} */}
-    //        {/* {textFieldz(textTop)} */}
-    //        {/* {textFieldz(textLeft)} */}
-    //        {/* {textFieldz(textFamily)} */}
-    //      </v-col>
-    //    </v-row>
-    //  </v-container>
-    // );
+            <v-textarea outlined hide-details dense class=""
+              label="Input Text"
+              v-model={this.inputText}
+            />
+
+            <v-text-field outlined hide-details dense
+              class="mt-3"
+              label="Text Size"
+              persistent-hint
+              vModel={this.textSize} />
+
+            <v-text-field outlined hide-details dense
+              class="mt-3"
+              label="Text Top"
+              persistent-hint
+              vModel={this.textTop} />
+
+            <v-text-field outlined hide-details dense
+              class="mt-3"
+              label="Left"
+              persistent-hint
+              v-model={this.textLeft}
+            />
+
+            <v-text-field outlined hide-details dense
+              class="mt-3"
+              label="Font Family"
+              persistent-hint
+              v-model={this.textFamily}
+            />
+
+          </v-col>
+        </v-row>
+      </v-container>
+    );
 
     const scopedSlots = {
       title: () => 'Text Overlay',
@@ -148,7 +158,7 @@ export default {
         <li>Hovering</li>
         <li>Transparency</li>
       </ul>),
-      /* controls: () => controls */
+      controls: () => controls
     };
 
     return (
@@ -159,4 +169,4 @@ export default {
 
   }
 
-};
+});
