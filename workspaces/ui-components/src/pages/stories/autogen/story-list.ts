@@ -11,7 +11,6 @@ export const storyItems: StoryEntry[] = [
   { title: 'Sketchpad shape drawing primitives', to: '/stories/autogen/sketchpad' },
   { title: 'Superimposed Elements Story', to: '/stories/autogen/superimposedElementsStory' },
   { title: 'Text Overlay', to: '/stories/autogen/textOverlay' },
-  { title: 'Text Overlay (tsx)', to: '/stories/autogen/textOverlay2' },
   { title: 'Pdf Page Viewer', to: '/stories/autogen/pdfPageViewer' },
   { title: 'Pdf Text Viewer', to: '/stories/autogen/pdfTextViewer' },
   { title: 'Selection narrowing filter', to: '/stories/autogen/narrowingFilter' },

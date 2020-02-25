@@ -19,13 +19,9 @@ module.exports = {
     'vue/no-unused-components': 0,
     'vue/multiline-html-element-content-newline': 0,
 
-    "vue/html-indent": ["warn", 4, {
-      "attribute": 1,
-      "baseIndent": 0,
-      "closeBracket": 0,
-      "alignAttributesVertically": true,
-      "ignores": []
-    }],
+    "vue/html-indent": ["off"],
+    "vue/max-attributes-per-line": ["off"],
+    "vue/attributes-order": ["off"],
 
     "vue/script-indent": ["warn", 2, {
       "baseIndent": 1,
@@ -42,6 +38,7 @@ module.exports = {
     }],
     'space-before-function-paren': ['off']
   },
+
 
   "overrides": [
     {
