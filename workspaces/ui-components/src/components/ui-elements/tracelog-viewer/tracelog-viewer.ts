@@ -1,58 +1,58 @@
-/**
- *
- */
-
 import _ from 'lodash';
 
 import {
   Ref,
+  createComponent,
+  provide,
+  ref
 } from '@vue/composition-api';
 
 
-import { usePdfPageViewer } from '~/components/subsystems/pdf-page-viewer';
+import { useTracelogPdfPageViewer } from '~/components/subsystems/pdf-page-viewer';
 import { divRef } from '~/lib/vue-composition-lib';
-import { StateArgs, waitFor } from '~/components/basics/component-basics';
+import { initState } from '~/components/basics/component-basics';
 import NarrowingFilter from '~/components/ui-elements/narrowing-filter/index.vue';
+import { ProvidedChoices } from '~/components/ui-elements/narrowing-filter/narrowing-filter';
+import { configAxios } from '~/lib/axios';
+import { groupTracelogsByKey } from '~/lib/tracelogs';
 
 export interface TracelogViewer {
   pageViewerMount: Ref<HTMLDivElement|null>;
 }
 
-type Args = StateArgs & {
-  mountPoint: Ref<HTMLDivElement|null>;
-};
 
-// TODO this should be an assembly perhaps? should it be a .vue? you decide...
-export function useTracelogViewer({
-  state,
-  mountPoint,
-}: Args): TracelogViewer {
-
-  const pageViewerMount = divRef();
-  // const selectionFilterMount = divRef();
-
-  // One per pdf page: 
-  const pdfPageViewer = usePdfPageViewer({ mountPoint: pageViewerMount, state });
-  // + tracelog shape viewer
-  // + selection filter
-
-  return {
-    pageViewerMount
-  }
-}
-
-function setup() {
-  // const state = initState();
-
-  const mountPoint = divRef();
-
-  return {
-    mountPoint
-  }
-}
-
-export default {
+export default createComponent({
   components: { NarrowingFilter },
-  setup,
-  useTracelogViewer,
-}
+  setup(_props, context) {
+
+    const { params, query } = context.root.$route;
+    console.log('params', params);
+    console.log('query', query);
+    const choicesRef: Ref<Array<string> | null> = ref(null)
+
+    const dbgTracelogUrl = '/tracelogs/tracelog.json';
+    const entryId = query.id;
+    configAxios().get(dbgTracelogUrl)
+      .then(resp => {
+        const tracelogJson = resp.data;
+
+        const logEntryGroups = groupTracelogsByKey(tracelogJson);
+        const choices = _.map(logEntryGroups, ({groupKey}) => groupKey);
+        choicesRef.value = choices;
+      });
+
+    provide(ProvidedChoices, choicesRef);
+
+    const state = initState();
+    const pageViewerMount = divRef();
+
+    const mountPoint = divRef();
+    const pdfPageViewer = useTracelogPdfPageViewer({ mountPoint: pageViewerMount, state });
+    const { setGrid } = pdfPageViewer;
+
+    return {
+      mountPoint,
+      pageViewerMount
+    }
+  }
+})

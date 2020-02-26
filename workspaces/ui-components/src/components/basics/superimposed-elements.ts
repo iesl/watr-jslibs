@@ -67,7 +67,7 @@ export function useSuperimposedElements({
     el.classList.add('layer', 'text-layer');
   }
 
-  const dimensions: Ref<[number, number]> = ref([10, 10]);
+  const dimensions: Ref<[number, number]> = ref([200, 500]);
 
   const width = () => dimensions.value[0];
   const height = () => dimensions.value[1];

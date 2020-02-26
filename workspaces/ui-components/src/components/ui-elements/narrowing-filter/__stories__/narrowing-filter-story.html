@@ -5,7 +5,7 @@
     </template>
 
     <template v-slot:description>
-        Text with rtree-hovering enabled
+        Fuzzy search/narrowing for a list of items
     </template>
 
     <template v-slot:controls>
@@ -25,7 +25,9 @@
     </template>
 
     <template v-slot:main>
-        <narrowingFilter ref="mountPoint" />
+        <NarrowingFilter
+            v-on:items-selected="onItemsSelected"
+        />
     </template>
 
 </layout>

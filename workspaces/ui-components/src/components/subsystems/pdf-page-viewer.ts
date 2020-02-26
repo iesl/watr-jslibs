@@ -92,7 +92,6 @@ export function useTracelogPdfPageViewer({
 
   const setGrid = glyphOverlays.setGrid;
 
-
   // Inputs:
   //  - shape drawing/clearing over image
   //  - focus points/hovered glyphs (in pdf text viewer, indicate corresponding point on pdf page image)
@@ -107,15 +106,7 @@ export function useTracelogPdfPageViewer({
   }
 }
 
-// interface Props {
-//   p: string;
-// }
-
 export default {
-  // props: {
-  //   p: String
-  // },
-  // setup(props: Props, ctx: SetupContext) {
   setup() {
 
   }

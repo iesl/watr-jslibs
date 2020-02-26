@@ -1,4 +1,4 @@
-<div class="">
+<div>
     <div class="mt-1 mb-3 d-flex align-center">
         <v-text-field
             label="Search terms"
@@ -6,11 +6,12 @@
             outlined
             hide-details
             dense
+            @keyup.enter="onSubmit"
             v-model="queryTextRef"
             class="mx-3"
         ></v-text-field>
 
-        <v-btn v-on:click="resetButton += 1" class="mx-3" small color="primary">Reset</v-btn>
+        <v-btn v-on:click="onReset" class="mx-3" small color="primary">Reset</v-btn>
 
     </div>
     <ul class="selection">

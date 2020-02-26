@@ -1,6 +1,4 @@
-//
 import _ from "lodash";
-
 
 interface ShapeMetaInfo {
   id: number;
@@ -22,6 +20,32 @@ export interface ILogEntry {
   body: ShapeAndMeta[];
   logType: string;
   page: number;
+}
+
+export type Tracelog = ILogEntry[];
+
+export interface LogEntryGroup {
+  groupKey: string;
+  logEntries: ILogEntry[];
+}
+
+export function groupTracelogsByKey(tracelog: Tracelog): LogEntryGroup[] {
+  const keyFunc = (l: ILogEntry) => {
+    return `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`;
+  };
+
+  const keyedLogs = _.map(tracelog, tl => [tl, keyFunc(tl)] as const);
+
+  const groupedLogs = _.groupBy(keyedLogs, ([,key]) => key);
+  const groupedLogPairs = _.toPairs(groupedLogs);
+  const entryGroups = _.map(groupedLogPairs, ([groupKey, logs])=> {
+    return {
+      groupKey,
+      logEntries: logs.map(([l,]) => l)
+    }
+  });
+
+  return entryGroups;
 }
 
 
@@ -273,9 +297,6 @@ type ShapeForKind<T extends ShapeKind> =
   T extends Trapezoid['kind'] ? Trapezoid :
   never;
 
-// export type InitFn<K extends ShapeKind, S extends ShapeForKind<K>> = (s: S) => void;
-// export type InitFn<K extends ShapeKind> =
-//   <S extends ShapeForKind<K>>(s: S) => S
 export type InitFn<S extends Shape> = (s: S) => S
 
 type Ret<T extends ShapeKind> =
