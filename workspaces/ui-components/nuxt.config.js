@@ -1,17 +1,17 @@
-import colors from 'vuetify/es5/util/colors'
 
-import path from 'path';
-import util from 'util';
-const resolve = path.resolve;
+import path from 'path'
+import util from 'util'
+import colors from 'vuetify/es5/util/colors'
+const resolve = path.resolve
 
 const modulesDir = [
   resolve(__dirname, '../../node_modules/'),
   resolve(__dirname, './node_modules/')
 ]
 
-const rootDir = __dirname;
-const srcDir = resolve( rootDir, 'src');
-const tsconfigFile = resolve( rootDir, 'tsconfig.json');
+const rootDir = __dirname
+const srcDir = resolve(rootDir, 'src')
+const tsconfigFile = resolve(rootDir, 'tsconfig.json')
 
 export default {
   rootDir,
@@ -121,7 +121,7 @@ export default {
     extend(config, ctx) {
     },
     babel: {
-      presets({ isServer }, [ preset, options ]) {
+      presets({ isServer }, [preset, options]) {
       }
     }
   }

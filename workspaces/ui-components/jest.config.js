@@ -1,7 +1,7 @@
 module.exports = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
-    '^~/(.*)$': '<rootDir>/src/$1',
+    '^~/(.*)$': '<rootDir>/src/$1'
   },
   moduleFileExtensions: ['ts', 'js', 'vue', 'json'],
   transform: {
@@ -10,14 +10,14 @@ module.exports = {
   },
   collectCoverage: false,
   collectCoverageFrom: [
-    '<rootDir>/src/**/*.ts',
+    '<rootDir>/src/**/*.ts'
   ],
   roots: [
-    "<rootDir>/src"
+    '<rootDir>/src'
   ],
   globals: {
-    "ts-jest": {
-      tsConfig: "tsconfig.json",
+    'ts-jest': {
+      tsConfig: 'tsconfig.json',
       diagnostics: {
         ignoreCodes: [
           151001,
@@ -26,5 +26,5 @@ module.exports = {
       }
     }
   },
-  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$"
-};
+  testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$'
+}
