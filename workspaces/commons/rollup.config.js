@@ -3,8 +3,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import typescript from 'rollup-plugin-typescript2';
 import pkg from './package.json';
 import rootPkg from '../../package.json';
-import tsConfigPaths from 'rollup-plugin-ts-paths';
-import path from 'path';
 
 export default [
 	{
@@ -16,9 +14,6 @@ export default [
       }),
       commonjs({
         include: /node_modules/
-      }),
-      tsConfigPaths({
-        tsConfigDirectory: process.cwd()
       }),
       typescript({
         typescript: require('typescript'),
@@ -35,6 +30,7 @@ export default [
       ...Object.keys(pkg.peerDependencies || {}),
       ...Object.keys(rootPkg.dependencies || {}),
       ...Object.keys(rootPkg.peerDependencies || {}),
+      'path', 'util', 'stream', 'os', 'tty', 'events', 'buffer'
     ],
 	}
 
