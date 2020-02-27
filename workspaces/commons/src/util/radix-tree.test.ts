@@ -1,7 +1,8 @@
 import "chai/register-should";
 
 import _ from "lodash";
-import {prettyPrint} from "~/util/pretty-print";
+import {prettyPrint} from "./pretty-print";
+
 import {
   createRadix,
   radUpsert,

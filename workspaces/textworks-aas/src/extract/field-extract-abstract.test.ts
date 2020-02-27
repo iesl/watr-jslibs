@@ -6,7 +6,7 @@ import {
   AbstractPipeline,
   findAbstractV2,
 } from "~/extract/field-extract-abstract";
-import {prettyPrint} from "~/util/pretty-print";
+import {prettyPrint} from "commons";
 import {stripMargin} from "./field-extract-utils";
 // import {makeCssTreeNormalForm} from "./reshape-html";
 // import {stripMargin} from "~/extract/field-extract-utils";

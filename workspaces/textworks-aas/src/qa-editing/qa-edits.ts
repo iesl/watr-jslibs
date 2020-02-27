@@ -9,8 +9,8 @@ import {
 } from "~/corpora/corpus-browser";
 
 import { writeDefaultEntryLogs, createFilteredLogStream} from "./qa-logging";
-import {  initEnv, throughEnvFunc, throughFunc,  filterEnvStream} from "~/util/stream-utils";
-import { BufferedLogger, initBufferedLogger} from "~/util/logging";
+import {  initEnv, throughEnvFunc, throughFunc,  filterEnvStream} from "commons";
+import { BufferedLogger, initBufferedLogger} from "commons";
 import {gatherAbstractFiles} from "~/corpora/bundler";
 import {Field} from "~/extract/field-extract";
 import { runInteractive } from './qa-interactive';
@@ -19,7 +19,7 @@ import {
   Radix,
   radInsert,
   radGet,
-} from "~/util/radix-tree";
+} from "commons";
 
 interface ReviewArgs {
   corpusRoot: string;

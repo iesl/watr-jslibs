@@ -27,9 +27,7 @@
     "types": [
       "jest",
       "chai",
-      "vuetify",
-      "@types/node",
-      "@nuxt/types"
+      "@types/node"
     ],
 
     "paths": {
@@ -38,15 +36,16 @@
       "~~/*": ["./src/*"],
       "@@/*": ["./src/*"]
     }
-
   },
 
-  "typeRoots": ["@types", "node_modules/@types"],
-
+  "typeRoots": ["./@types", "node_modules/@types"],
 
   "include": [
-    "src",
-    "@types"
-  ]
+    "./src",
+    "./@types"
+  ],
 
+  "exclude": [
+    "node_modules"
+  ]
 }

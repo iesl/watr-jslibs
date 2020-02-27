@@ -1,7 +1,7 @@
 import _ from "lodash";
 import {Argv} from "yargs";
 import {yall, opt} from "./arglib";
-import {prettyPrint} from "~/util/pretty-print";
+import {prettyPrint} from "commons";
 import {createSpider} from "~/spider/spidering";
 
 export const command = "spider";

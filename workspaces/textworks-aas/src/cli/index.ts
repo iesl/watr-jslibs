@@ -1,6 +1,6 @@
 import yargs, {Argv} from "yargs";
 
-import {prettyPrint} from "~/util/pretty-print";
+import {prettyPrint} from "commons";
 import {yall, opt} from "./arglib";
 import {normalizeHtmls} from "~/extract/reshape-html";
 

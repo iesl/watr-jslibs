@@ -3,7 +3,7 @@ import _ from "lodash";
 import path from "path";
 import yargs, {Argv} from "yargs";
 import {yall, opt, config} from "./arglib";
-import {prettyPrint} from "~/util/pretty-print";
+import {prettyPrint} from "commons";
 import {reviewCorpus} from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import { reviewAbstractQuality } from '~/qa-editing/qa-edits';

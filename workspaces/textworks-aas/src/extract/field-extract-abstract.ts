@@ -5,7 +5,7 @@ import through from "through2";
 
 import fs from "fs-extra";
 import {Field} from "~/extract/field-extract";
-import {prettyPrint} from "~/util/pretty-print";
+import {prettyPrint} from "commons";
 
 import {makeCssTreeNormalFormFromNode} from "./reshape-html";
 
@@ -20,7 +20,7 @@ import {
 
 import {ExpandedDir} from "~/corpora/corpus-browser";
 
-import {BufferedLogger} from "~/util/logging";
+import {BufferedLogger} from "commons/dist/util/logging";
 
 import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
 

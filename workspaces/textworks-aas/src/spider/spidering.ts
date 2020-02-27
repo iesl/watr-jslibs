@@ -5,7 +5,9 @@ import path from "path";
 
 import {fetchUrl} from "~/spider/axios-scraper";
 
-import {runMapThenables} from "~/util/utils";
+import {runMapThenables} from "commons";
+
+
 import {createLogger, format, transports, Logger} from "winston";
 import {fetchViaFirefox, FetchUrlFn, ShutdownFn} from "./browser-scraper";
 const {combine, timestamp} = format;

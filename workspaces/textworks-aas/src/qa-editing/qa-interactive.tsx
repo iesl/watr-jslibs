@@ -6,12 +6,12 @@ import * as ink from "ink";
 export type KeyDef = [string, () => void];
 import MultiSelect, { ListedItem } from "ink-multi-select";
 import { CleaningRule } from './qa-edits';
-import { BufferedLogger } from "~/util/logging";
+import { BufferedLogger } from "commons";
 import ansiEscapes from 'ansi-escapes';
 
 //@ts-ignore
 import Divider from 'ink-divider';
-import { clipParagraph } from '~/util/string-utils';
+import { clipParagraph } from 'commons';
 
 interface CleaningRulesArgs {
   abstractStr: string;

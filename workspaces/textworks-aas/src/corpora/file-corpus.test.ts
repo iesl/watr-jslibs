@@ -1,7 +1,7 @@
 import 'chai/register-should';
 
 import _ from 'lodash';
-import { prettyPrint } from '~/util/pretty-print';
+import { prettyPrint } from 'commons';
 import through from 'through2';
 import { dirsteam } from './dirstream';
 

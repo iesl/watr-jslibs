@@ -3,7 +3,10 @@ import fs from "fs-extra";
 import {Readable} from "stream";
 
 import {dirsteam, stringStreamFilter} from "./dirstream";
-import {throughFunc} from "~/util/stream-utils";
+// import {throughFunc} from "commons";
+
+import { throughFunc } from "commons";
+
 
 export interface ExpandedDir {
   dir: string;

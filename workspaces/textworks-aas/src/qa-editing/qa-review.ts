@@ -8,10 +8,10 @@ import {
   ExpandedDir,
 } from "~/corpora/corpus-browser";
 
-import {tapStream, progressCount, throughFunc} from "~/util/stream-utils";
+import {tapStream, progressCount, throughFunc} from "commons";
 
 import {gatherAbstractFiles} from "~/corpora/bundler";
-import {BufferedLogger} from "~/util/logging";
+import {BufferedLogger} from "commons";
 import {extractAbstractTransform} from "~/extract/field-extract-abstract";
 import {
   initLogger,
