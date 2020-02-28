@@ -62,7 +62,8 @@
     "watch": "tsc --watch",
     "serve": "nodemon -w dist dist/server.js",
     "lint": "eslint --config .eslintrc.js --ext .ts --ignore-path ../../.gitignore ./src",
-    "test": "jest"
+    "test": "jest",
+    "setup": "yarn link commons && npm install"
   },
   "bugs": {
     "url": "https://github.com/iesl/watr-jslibs/issues"

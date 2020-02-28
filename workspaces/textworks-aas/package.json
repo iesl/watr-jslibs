@@ -16,10 +16,10 @@
     "cli": "bin/ts-node src/cli/index.ts",
     "main": "bin/ts-node src/cli/main.ts",
     "corpus": "bin/ts-node src/cli/corpus-cli.ts",
-    "test": "jest"
+    "test": "jest",
+    "setup": "yarn link commons && npm install"
   },
   "dependencies": {
-    "@types/axios": "^0.14.0",
     "ansi-escapes": "^4.3.0",
     "axios": "^0.19.2",
     "chalk": "^3.0.0",
@@ -48,6 +48,7 @@
     "yargs": "^15.1.0"
   },
   "devDependencies": {
+    "@types/axios": "^0.14.0",
     "@types/chai": "^4.2.9",
     "@types/cheerio": "^0.22.15",
     "@types/event-stream": "^3.3.34",
