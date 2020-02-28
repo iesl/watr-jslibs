@@ -25,12 +25,6 @@
   "dependencies": {
     "@types/chai": "^4.2.9",
     "@types/through2": "^2.0.34",
-    "@typescript-eslint/eslint-plugin": "^2.21.0",
-    "@typescript-eslint/parser": "^2.21.0",
-    "chai": "^4.2.0",
-    "eslint": "^6.8.0",
-    "eslint-import-resolver-typescript": "^2.0.0",
-    "eslint-plugin-chai-expect": "^2.1.0",
     "event-stream": "^4.0.1",
     "fast-csv": "^4.0.2",
     "from2": "^2.3.0",
@@ -56,6 +50,14 @@
     "@types/url-parse": "^1.4.3",
     "@types/wrap-ansi": "^3.0.0",
     "@types/yargs": "^15.0.2",
+
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-import-resolver-typescript": "^2.0.0",
+    "eslint-plugin-chai-expect": "^2.1.0",
+
     "jest": "^25.1.0",
     "rollup-plugin-typescript2": "^0.26.0",
     "ts-jest": "^25.0.0",

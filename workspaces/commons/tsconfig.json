@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "allowJs": true,
 
     "target": "es5",
     "module": "es6",
@@ -49,7 +48,7 @@
 
   "exclude": [
     "node_modules",
-    "../..node_modules",
+    "../..node_modules"
   ]
 
 }

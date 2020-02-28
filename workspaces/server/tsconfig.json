@@ -1,43 +1,16 @@
 {
-  "extends": "../shared/tsconfig-base.json",
+  "extends": "../commons/tsconfig.json",
 
   "compilerOptions": {
-    "baseUrl": ".",
-
-    "target": "es6",
-    "module": "commonjs",
-    "moduleResolution": "node",
-
-    "esModuleInterop": true,
-    "noEmit": false,
-    "importHelpers": true,
-    "allowSyntheticDefaultImports": true,
-
-    "types": [
-      "jest",
-      "chai",
-      "node"
-    ],
-    "noImplicitReturns": true,
-
-    "noUnusedParameters": false,
-    "noUnusedLocals": false,
-
-    "inlineSourceMap": true,
-    "preserveConstEnums": true,
-
-    "diagnostics": true,
-
-    "outDir": "./dist"
+    "baseUrl": "."
   },
 
   "include": [
-    "src/**/*"
+    "./src"
   ],
 
   "exclude": [
     "node_modules",
-    "dist"
+    "../..node_modules"
   ]
-
 }
