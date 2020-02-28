@@ -12,6 +12,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "lint": "eslint --config .eslintrc.js --ext .ts --ignore-path ../../.gitignore ./src",
     "cli": "bin/ts-node src/cli/index.ts",
     "main": "bin/ts-node src/cli/main.ts",
     "corpus": "bin/ts-node src/cli/corpus-cli.ts",
@@ -58,6 +59,14 @@
     "@types/url-parse": "^1.4.3",
     "@types/wrap-ansi": "^3.0.0",
     "@types/yargs": "^15.0.2",
+
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-import-resolver-typescript": "^2.0.0",
+    "eslint-plugin-chai-expect": "^2.1.0",
+
     "jest": "^25.1.0",
     "prettier": "1.19.1",
     "ts-jest": "^25.0.0",
