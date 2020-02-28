@@ -39,7 +39,7 @@ export async function getPageHtml(env: SpideringEnv, driver: WebDriver, url: str
     throw Error('no no applicable spidering rules for ${url}');
   }
 
-  let rule: SpideringRule = applicableRules[0];
+  const rule: SpideringRule = applicableRules[0];
 
   logger.info({
     event: `use rule: match ${rule.urlre.source}`,

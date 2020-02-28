@@ -45,7 +45,7 @@ export const setCwd = (ya: Argv) =>
   });
 
 const optAndDesc = (optAndDesc: string, ext?: Options) => (ya: Argv) => {
-  let [optname, desc] = optAndDesc.includes(":")
+  const [optname, desc] = optAndDesc.includes(":")
     ? optAndDesc.split(":").map(o => o.trim())
     : [optAndDesc, ""];
 

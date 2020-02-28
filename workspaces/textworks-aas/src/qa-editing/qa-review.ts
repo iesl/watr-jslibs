@@ -28,7 +28,7 @@ function sanityCheckAbstract(log: BufferedLogger, entryDir: ExpandedDir): void {
         ([, v]) => v !== undefined,
       );
     })
-    .map(([fn, f, i]) => [fn, f!.trim(), i])
+    .map(([fn, f, i]) => [fn, f? f.trim() : "", i])
     .value();
 
   if (abstractFiles.length === 0) {
@@ -159,5 +159,5 @@ function initReviewCorpus({
     tapStream(reviewFunc),
   );
 
-  pipe.on("data", () => {});
+  pipe.on("data", () => undefined);
 }

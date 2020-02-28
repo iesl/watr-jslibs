@@ -11,7 +11,7 @@ export interface SpideringRule {
 
 // Rules:
 export const SpideringRules: SpideringRule[] = [
-  { urlre: new RegExp('aaai\.org.+/paper/view/.*'),
+  { urlre: new RegExp('aaai.org.+/paper/view/.*'),
     rule: async (env, wd: WebDriver, url: string) => {
       // re-write the url
       const newUrl = url.replace('/view/', '/viewPaper/');
@@ -25,7 +25,7 @@ export const SpideringRules: SpideringRule[] = [
       }
       return pageSource;
     }},
-  { urlre: new RegExp('//doi\.org/.*'),
+  { urlre: new RegExp('//doi.org/.*'),
     rule: async (env, wd: WebDriver, url: string) => {
 
       await waitForDocReady(env, wd, url);

@@ -84,12 +84,17 @@ function getLogEntry(key: string, entries: string[]): string | undefined {
   return fs.length > 0 ? fs[0] : undefined;
 }
 
+
 const cstats = throughAccum<any, Radix<CorpusStats>>(
   (radix: Radix<CorpusStats>, t: any) => {
     const logBuffer: string[] = t.logBuffer;
     // const entryPath: string = t.entry;
-    const host = getLogEntry("entry.url.host", logBuffer)!;
-    const venue = getLogEntry("entry.venue", logBuffer)!;
+    const host = getLogEntry("entry.url.host", logBuffer);
+    const venue = getLogEntry("entry.venue", logBuffer);
+    if (!host || !venue) {
+      return radix;
+    }
+
     // const numAbstracts = getLogEntry("abstract.instance.count", logBuffer);
     const abstractValue = getLogEntry("field.abstract.value", logBuffer);
     // const hasAbsFiles = getLogEntry("abstract.files=false", logBuffer);

@@ -30,8 +30,7 @@ export async function fetchUrl(_env: SpideringEnv, url: string): Promise<string>
       resp.on('end', () => {
         resolve(buf.join());
       })
-      resp.on('close', () => {
-      })
+      resp.on('close', () => undefined)
     })
   });
 }

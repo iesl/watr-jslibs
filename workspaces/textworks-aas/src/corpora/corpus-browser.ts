@@ -18,7 +18,7 @@ export function newCorpusEntryStream(corpusRoot: string): Readable {
   const corpusDirStream = dirsteam(corpusRoot);
 
   const entryDirFilter = stringStreamFilter((dir: string) => {
-    return /[\/][^\/]+\.d$/.test(dir);
+    return /[/][^/]+\.d$/.test(dir);
   });
 
   return corpusDirStream.pipe(entryDirFilter);

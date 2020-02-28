@@ -18,7 +18,7 @@ export function logfileName(phase: string): string {
   return `qa-review-${phase}-log.json`;
 }
 
-export function initLogger(logpath: string, phase: string, append: boolean = false): BufferedLogger {
+export function initLogger(logpath: string, phase: string, append = false): BufferedLogger {
   const logname = resolveLogfileName(logpath, phase);
   if (fs.existsSync(logname)) {
     if (!append) {

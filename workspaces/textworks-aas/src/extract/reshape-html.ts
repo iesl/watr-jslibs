@@ -25,7 +25,7 @@ type Attrs = {[k: string]: string};
 
 function parseAttrs(attrs: Attrs): string[][] {
   const keys = _.keys(attrs);
-  let kvs: string[][] = [];
+  const kvs: string[][] = [];
   const stdKeys = [
     ["id", "#"],
     ["class", "."],
@@ -83,7 +83,7 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
       const tn = node.tagName;
       const tp = node["type"];
 
-      let lpad = "".padStart(depth * 2);
+      const lpad = "".padStart(depth * 2);
       const attrs = node.attribs;
       let attrsStr = "";
       if (attrs) {
@@ -132,9 +132,10 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
           break;
         }
 
-        default:
+        default: {
           const line = `${lpad}${tn}[${tp}] ${attrsStr}`;
           finalTree.push(line);
+        }
       }
     });
   });
@@ -231,7 +232,7 @@ export async function normalizeHtmls(corpusRoot: string) {
     },
   );
 
-  pipe.on("data", () => {});
+  pipe.on("data", () => undefined);
 }
 
 function readFile(leading: string, ...more: string[]): string | undefined {

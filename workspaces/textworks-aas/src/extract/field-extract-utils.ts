@@ -48,7 +48,7 @@ export function filterText(lines: string[]): string[] {
 export function findIndexForLines(
   fileLines: string[],
   matchLines: string[],
-  startIndex: number = 0,
+  startIndex = 0,
 ): number {
   if (matchLines.length === 0) {
     return -1;
@@ -81,7 +81,7 @@ export function queryContent(
   query: string,
   fileContent: string,
 ): [Field, Cheerio, CheerioStatic] {
-  let field: Field = {
+  const field: Field = {
     name: "abstract",
     evidence: `query=${query}`,
   };
@@ -114,7 +114,7 @@ function _byLineMatchEnd(
   evidenceOffset: number,
   cssNormLines: string[],
 ): Field {
-  let field: Field = {
+  const field: Field = {
     name: "abstract",
     evidence: _.join(evidence, " > "),
   };

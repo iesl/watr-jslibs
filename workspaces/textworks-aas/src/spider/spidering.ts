@@ -68,15 +68,18 @@ export async function createSpider(opts: SpideringOptions) {
   const input = opts.input;
   if (!input) {
     logger.info({event: "fatal error: no input file", config: opts});
+    return;
   }
-  const inputBuf = fs.readFileSync(input!);
+  const inputBuf = fs.readFileSync(input);
   const rawRecs: Partial<SpideringRec>[] = JSON.parse(inputBuf.toString());
 
   const srecs: SpideringRec[] = rawRecs.map(rec => {
     const p1 = rec.outpath;
     const p2 = rec.path;
+    const url = rec.url || 'undefined_url';
+
     return {
-      url: rec.url!,
+      url,
       path: p1,
       outpath: p2,
       dlpath() {
@@ -137,7 +140,7 @@ export async function createSpider(opts: SpideringOptions) {
         case "mark":
           break;
         case "filter":
-          filter = nextAction.value!;
+          filter = nextAction.value? nextAction.value : filter;
           break;
         case "quit":
           logger.info({event: "user exiting spider"});
@@ -172,7 +175,7 @@ async function fetchViaAxios(): Promise<[FetchUrlFn, ShutdownFn]> {
   const fetch: FetchUrlFn = async (env, url) => {
     return fetchUrl(env, url);
   };
-  const shutdown: ShutdownFn = async () => {};
+  const shutdown: ShutdownFn = async () => undefined;
   return [fetch, shutdown];
 }
 
@@ -210,11 +213,12 @@ async function promptForAction(url: string): Promise<UserAction[]> {
         actions.push({action});
         actions.push(...(await _loop([])));
         break;
-      case "filter":
+      case "filter": {
         const filter = await promptForFilter();
         actions.push({action, value: filter});
         actions.push(...(await _loop([])));
         break;
+      }
       default:
         actions.push({action});
         break;

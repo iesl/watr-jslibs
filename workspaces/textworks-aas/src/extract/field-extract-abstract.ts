@@ -72,7 +72,7 @@ export function findAbstractV8(
   const query = "div.content > div > div.row > div.col-md-12";
   const [field, maybeAbstract] = queryContent(query, fileContent);
   const cssNormal = makeCssTreeNormalFormFromNode(maybeAbstract);
-  let maybeAbstr = _.takeWhile(
+  const maybeAbstr = _.takeWhile(
     cssNormal.slice(1),
     l => !l.includes("col-md-12"),
   );

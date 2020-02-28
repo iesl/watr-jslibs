@@ -260,15 +260,15 @@ async function reviewInteractive(logger: BufferedLogger, entryDir: ExpandedDir):
 
   const abstractStrs: Array<TupleSSN> =
     _(abstractFilesWithFields)
-    .flatMap(([filename, fields]) => {
-      return _.map(fields, (f, i) => [filename, f.value, i] as TupleSSN)
-        .filter(([, v]) => v !== undefined);
-    })
-    .map(([fn, f, i]) => [fn, f!.trim(), i] as TupleSSN)
-    .value();
+      .flatMap(([filename, fields]) => {
+        return _.map(fields, (f, i) => [filename, f.value, i] as TupleSSN)
+          .filter(([, v]) => v !== undefined);
+      })
+      .map(([fn, f, i]) => [fn, f? f.trim():"", i] as TupleSSN)
+      .value();
 
   if (abstractStrs.length > 0) {
-    const [filename, abs, num] = abstractStrs[0];
+    const [, abs] = abstractStrs[0];
     return runInteractive({ abstractStr: abs, cleaningRules: CleaningRules, logger });
   }
 }
@@ -279,16 +279,16 @@ async function reviewNonInteractive(logger: BufferedLogger, entryDir: ExpandedDi
 
   const abstractStrs: Array<TupleSSN> =
     _(abstractFilesWithFields)
-    .flatMap(([filename, fields]) => {
-      return _.map(fields, (f, i) => [filename, f.value, i] as TupleSSN)
-        .filter(([, v]) => v !== undefined);
-    })
-    .map(([fn, f, i]) => {
-      const cleaned = applyCleaningRules(f!.trim());
-      return [fn, cleaned, i] as TupleSSN;
-    })
-    .filter(([, f,]) => f!==undefined && f.length > 0)
-    .value();
+      .flatMap(([filename, fields]) => {
+        return _.map(fields, (f, i) => [filename, f.value, i] as TupleSSN)
+          .filter(([, v]) => v !== undefined);
+      })
+      .map(([fn, f, i]) => {
+        const cleaned = applyCleaningRules(f? f.trim() : "");
+        return [fn, cleaned, i] as TupleSSN;
+      })
+      .filter(([, f,]) => f!==undefined && f.length > 0)
+      .value();
 
   if (abstractStrs.length > 0) {
     const abs = abstractStrs[0][1];
@@ -298,7 +298,7 @@ async function reviewNonInteractive(logger: BufferedLogger, entryDir: ExpandedDi
 
 function applyCleaningRules(abstractStr: string): string {
   let cleanedAbs = abstractStr;
-  _.each(CleaningRules, (rule, i) => {
+  _.each(CleaningRules, (rule) => {
     if (rule.precondition(cleanedAbs)) {
       cleanedAbs = rule.run(cleanedAbs);
     }
