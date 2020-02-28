@@ -119,7 +119,7 @@ function findStories(project: Project): StoryPaths[] {
         storyBaseName = _.camelCase(storyBaseName);
         storyBaseName = maybeStoryName || storyBaseName;
 
-        let generatedStoryVueFile = `${storyBaseName}.vue`;
+        const generatedStoryVueFile = `${storyBaseName}.vue`;
         const vueImportName = `~/${postSrcPath}`;
         const storyTitle = maybeStoryTitle? maybeStoryTitle : storyBaseName;
 

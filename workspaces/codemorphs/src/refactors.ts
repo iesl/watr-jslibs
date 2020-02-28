@@ -39,7 +39,9 @@ export function setupVueComponent(tsconfigPath: string, componentName: string, r
   });
 
   console.log(`vue component setup for component ${componentName} in root path=${rootPath}`);
-  const baseUrl = project.getCompilerOptions().baseUrl!;
+  const baseUrl = project.getCompilerOptions().baseUrl;
+
+  if (!baseUrl) return;
 
   const at = (fname: string) => {
     const p = path.join(baseUrl, rootPath, componentName, fname)
