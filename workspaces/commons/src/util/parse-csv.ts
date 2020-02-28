@@ -1,4 +1,3 @@
-import _ from "lodash";
 import fs from "fs-extra";
 import * as csv from "fast-csv";
 import path from "path";

@@ -9,13 +9,14 @@ function getCallerContext() {
 
   // Get caller context
   const err = getErrorObject();
-  let lines = err.stack!.split("\n");
+  const stack = err.stack;
+  let lines = stack? stack.split('\n') : [];
   lines = _.dropWhile(lines, (l) => !l.includes('at prettyPrint'));
   lines = _.drop(lines, 1);
   lines = _.takeWhile(lines, l => !l.includes('node_modules'));
   lines = _.take(lines, 3);
   let lpad = '  ';
-  let callerContext = _.join(
+  const callerContext = _.join(
     _.map(_.reverse(lines), l => {
       let line = _.trim(l);
       const index = line.indexOf("at ");
@@ -24,7 +25,6 @@ function getCallerContext() {
       const callingContext = _.trim(parts[0]);
       const [path, lineNum, col] = _.split(parts[1], ':');
 
-      // @ts-ignore
       _.dropRight(col, 1);
 
       const pathParts = _.split(path, '/');

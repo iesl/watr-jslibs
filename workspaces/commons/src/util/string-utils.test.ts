@@ -1,8 +1,6 @@
-import "chai/register-should";
+import "chai";
 
-import _ from "lodash";
 import { matchAll, highlightRegions, clipParagraph } from './string-utils';
-
 
 describe("String utils", () => {
 
@@ -30,7 +28,5 @@ describe("String utils", () => {
     const result = clipParagraph(3, 2, p);
 
     console.log(result);
-
-
   });
 });

@@ -36,6 +36,30 @@ function appendStream<ChunkT>(
   return newBuilder;
 }
 
+export function throughFunc<T, R>(
+  f: (t: T, onerr?: (e: any) => void) => R,
+): Transform {
+  return through.obj(
+    (chunk: T, _enc: string, next: (err: any, v: any) => void) => {
+      const res = f(chunk, (err: any) => next(err, null));
+      Promise.resolve(res)
+        .then((res) => next(null, res));
+    },
+  );
+}
+
+export function tapStream<T>(f: (t: T, i?: number) => void): Transform {
+  let currIndex = -1;
+
+  return through.obj(
+    (data: T, _enc: string, next: (err: any, v: any) => void) => {
+      currIndex++;
+      f(data, currIndex);
+      return next(null, data);
+    },
+  );
+}
+
 export function createPump<ChunkT>(): PumpBuilder<ChunkT> {
   const merge = (builder: PumpBuilder<ChunkT>, part: PartialPB<ChunkT>) =>
     _.merge({}, builder, part);
@@ -68,24 +92,13 @@ export function createPump<ChunkT>(): PumpBuilder<ChunkT> {
       if (this.onEndF) {
         pipe.on("end", this.onEndF);
       }
-      pipe.on("data", this.onDataF ? this.onDataF : () => {});
+      pipe.on("data", this.onDataF ? this.onDataF : () => 0);
       return pipe;
     },
   };
   return pb0;
 }
 
-export function throughFunc<T, R>(
-  f: (t: T, onerr?: (e: any) => void) => R,
-): Transform {
-  return through.obj(
-    (chunk: T, _enc: string, next: (err: any, v: any) => void) => {
-      const res = f(chunk, (err: any) => next(err, null));
-      Promise.resolve(res)
-        .then((res) => next(null, res));
-    },
-  );
-}
 
 export function initEnv<T, E>(
   f: (t: T) => E,
@@ -158,17 +171,6 @@ export function filterStream<T>(f: (t: T) => boolean): Transform {
   );
 }
 
-export function tapStream<T>(f: (t: T, i?: number) => void): Transform {
-  let currIndex = -1;
-
-  return through.obj(
-    (data: T, _enc: string, next: (err: any, v: any) => void) => {
-      currIndex++;
-      f(data, currIndex);
-      return next(null, data);
-    },
-  );
-}
 
 export function prettyPrintTrans(msg: string): Transform {
   return through.obj(
@@ -230,7 +232,7 @@ export function stanzaChunker(
   // },
 ): Transform {
   let stanzaBuffer: string[] = [];
-  let state: string = "awaiting-start";
+  let state = "awaiting-start";
 
   const chunker = through.obj(
     function(line: string, _enc: string, cb) {

@@ -11,6 +11,22 @@ import {
 const {combine, timestamp, prettyPrint} = format;
 import logform from "logform";
 
+export function newIdGenerator() {
+  let currId = -1;
+  const nextId = () => {
+    currId += 1;
+    return currId;
+  };
+  return nextId;
+}
+
+const nextId = newIdGenerator();
+
+const uniqIdFormat = logform.format((info) => {
+  info.id = nextId();
+  return info;
+});
+
 export function progressLogger(logname: string): LeveledLogMethod {
   const logger = createLogger({
     level: "info",
@@ -43,21 +59,6 @@ function initLogger(logname: string): Logger {
   return logger;
 }
 
-export function newIdGenerator() {
-  let currId = -1;
-  const nextId = () => {
-    currId += 1;
-    return currId;
-  };
-  return nextId;
-}
-
-const nextId = newIdGenerator();
-
-const uniqIdFormat = logform.format((info, _opts) => {
-  info.id = nextId();
-  return info;
-});
 
 type Loggable = string | object;
 export interface BufferedLogger {

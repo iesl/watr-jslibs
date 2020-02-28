@@ -1,5 +1,4 @@
-import _ from "lodash";
-import "chai/register-should";
+import "chai";
 import {prettyPrint} from "./pretty-print";
 
 import {

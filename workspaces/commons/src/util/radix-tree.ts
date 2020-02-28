@@ -7,8 +7,22 @@ const RadixValKey = "_$";
 
 export const createRadix = <T>() => ({} as Radix<T>);
 
-export const radInsert = <T>(radix: Radix<T>, path: string | string[], t: T) =>
-  radUpsert(radix, path, () => t);
+function cleanPath(p: string | string[]): string[] {
+  let pathParts: string[];
+  if (typeof p === "string") {
+    pathParts = p.split(".");
+  } else {
+    pathParts = p;
+  }
+  return _.map(pathParts, pp => {
+    const part = pp.trim();
+    if (/^(\d+|_[$])$/.test(part)) {
+      return `_${part}`;
+    }
+    return part;
+  }).filter(p => p.length > 0);
+}
+
 
 export const radUpsert = <T>(
   radix: Radix<T>,
@@ -20,6 +34,10 @@ export const radUpsert = <T>(
   const upVal = f(prior);
   _.set(radix, valpath, upVal);
 };
+
+
+export const radInsert = <T>(radix: Radix<T>, path: string | string[], t: T) =>
+  radUpsert(radix, path, () => t);
 
 export const radGet = <T>(
   radix: Radix<T>,
@@ -48,18 +66,3 @@ export const radTraverseValues = <T>(
   _loop(radix, []);
 };
 
-function cleanPath(p: string | string[]): string[] {
-  let pathParts: string[];
-  if (typeof p === "string") {
-    pathParts = p.split(".");
-  } else {
-    pathParts = p;
-  }
-  return _.map(pathParts, pp => {
-    const part = pp.trim();
-    if (/^(\d+|_[$])$/.test(part)) {
-      return `_${part}`;
-    }
-    return part;
-  }).filter(p => p.length > 0);
-}
