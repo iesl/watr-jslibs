@@ -5,24 +5,22 @@
   "description": "Utilities to generate and manipulate typescript code",
   "keywords": [],
   "author": "Adam Saunders <saunders@cs.umass.edu>",
-  "dependencies": {
-    "@types/fs-extra": "^8.0.1",
-    "commander": "^4.0.1",
-    "fs-extra": "^8.1.0",
-    "ts-morph": "^5.0.0"
-  },
   "license": "ISC",
   "main": "./dist/main.js",
   "directories": {
     "src": "src"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/iesl/watr-jslibs.git"
+  "dependencies": {
+    "commander": "^4.0.1",
+    "fs-extra": "^8.1.0",
+    "ts-morph": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^8.0.1",
+    "@types/jest": "^24.0.23"
   },
   "scripts": {
     "build": "tsc",
-    "ver": "tsc --version && which tsc",
     "watch": "tsc --watch",
     "morph": "node dist/main.js",
     "mainxx": "npm-run-all --serial build \"morph -- {@}\" --",
@@ -33,34 +31,13 @@
     "url": "https://github.com/iesl/watr-jslibs/issues"
   },
   "jest": {
+    "preset": "ts-jest",
     "roots": [
       "<rootDir>/src"
     ],
-    "globals": {
-      "ts-jest": {
-        "tsConfig": "tsconfig.json",
-        "diagnostics": {
-          "ignoreCodes": [
-            151001,
-            7016
-          ]
-        }
-      }
-    },
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
-  },
-  "devDependencies": {
-    "@types/jest": "^24.0.23"
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1",
+      "^~/(.*)$": "<rootDir>/src/$1"
+    }
   }
 }

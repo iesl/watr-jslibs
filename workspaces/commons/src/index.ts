@@ -97,11 +97,9 @@ export {
 };
 
 import {
-  fileOrDie,
   runMapThenables
 } from "./util/utils"
 
 export {
-  fileOrDie,
   runMapThenables
 };

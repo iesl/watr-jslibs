@@ -13,10 +13,6 @@
   "author": "Adam Saunders <saunders@cs.umass.edu>",
   "homepage": "https://github.com/iesl/watr-jslibs#readme",
   "dependencies": {
-    "@types/koa": "^2.11.2",
-    "@types/koa-json": "^2.0.18",
-    "@types/koa-router": "^7.4.0",
-    "@types/koa-send": "^4.1.2",
     "commander": "^4.0.1",
     "fs-extra": "^8.1.0",
     "klaw": "^3.0.0",
@@ -33,13 +29,24 @@
     "yargs": "^15.1.0"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.9",
+    "@types/fs-extra": "^8.1.0",
+    "@types/jest": "^25.1.3",
+    "@types/koa": "^2.11.2",
+    "@types/koa-json": "^2.0.18",
+    "@types/koa-router": "^7.4.0",
+    "@types/koa-send": "^4.1.2",
+    "@types/lodash": "^4.14.149",
     "@typescript-eslint/eslint-plugin": "^2.21.0",
     "@typescript-eslint/parser": "^2.21.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-import-resolver-typescript": "^2.0.0",
     "eslint-plugin-chai-expect": "^2.1.0",
-    "jest": "^25.1.0"
+    "eslint-plugin-import": "^2.20.1",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.1",
+    "typescript": "^3.8.3"
   },
   "license": "ISC",
   "main": "./src/server.ts",

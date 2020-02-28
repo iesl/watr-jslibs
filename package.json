@@ -4,12 +4,11 @@
   "private": true,
   "devDependencies": {
     "eslint": "^6.7.2",
-    "lerna": "^3.18.3"
+    "lerna": "^3.18.3",
+    "yarn": "^2.0.0-rc.27"
   },
   "scripts": {
     "clean": "lerna clean -y && rm -r node_modules"
-  },
-  "dependencies": {
   },
   "workspaces": {
     "packages": [
