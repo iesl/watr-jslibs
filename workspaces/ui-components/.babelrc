@@ -1,34 +1,26 @@
 {
-  "plugins": ["macros"],
   "presets": [
-    [ "@babel/env",
-      "@vue/babel-preset-jsx",
-      {
-        "modules": false,
-        "loose": false,
-        "debug": true,
-        "targets": {
-          "node": "current"
-        }
+    [ "@babel/env", {
+      "modules": false,
+      "loose": false,
+      "debug": true,
+      "targets": {
+        "node": "current"
       }
-    ],
+    }],
     "@babel/typescript"
   ],
   "env": {
     "test": {
       "presets": [
-        [
-          "@babel/env",
-          "@vue/babel-preset-jsx",
-          {
-            "modules": false,
-            "loose": false,
-            "debug": true,
-            "targets": {
-              "node": "current"
-            }
+        ["@babel/env", {
+          "modules": false,
+          "loose": false,
+          "debug": true,
+          "targets": {
+            "node": "current"
           }
-        ],
+        }],
         "@babel/preset-typescript"
       ]
     }

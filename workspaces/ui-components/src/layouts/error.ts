@@ -1,6 +1,7 @@
+import { createComponent } from '@vue/composition-api'
 
 /* @ts-ignore */
-export default {
+export default createComponent({
   layout: 'empty',
   props: {
     error: {
@@ -8,17 +9,18 @@ export default {
       default: null
     }
   },
+
   data(): object {
     return {
       pageNotFound: '404 Not Found',
       otherError: 'An error occurred'
     }
   },
+
   head(): any {
-    // @ts-ignore
     const title = this.error.statusCode === 404 ? this.pageNotFound : this.otherError
     return {
       title
     }
   }
-}
+});

@@ -1,6 +1,7 @@
 //
 import _ from "lodash";
 import pumpify from "pumpify";
+import fs from "fs-extra";
 
 import {
   throughFunc,
@@ -35,44 +36,52 @@ export function collectAbstractExtractionStats(
     throughFunc((log: any) => log.message),
     progressCount(1000),
     // sliceStream(0, 10),
-    cstats,
+    // cstats,
+    writeAbstracts
   );
 
-  pipef.on("data", (radStats: Radix<CorpusStats>) => {
+  pipef.on("data", (data: any[]) => {
     // prettyPrint({summary});
-    console.log("accumulating stats");
+    console.log("write abstracts");
+    fs.writeJsonSync('abstracts-25k.json', data);
 
-    const accumStats = createRadix<CorpusStats>();
-
-    radTraverseValues(radStats, (path, stats) => {
-      // path.pop();
-      while (path.length > 0) {
-        radUpsert(accumStats, path, accStats => {
-          if (accStats) {
-            return {
-              urlCount: stats.urlCount + accStats.urlCount,
-              absCount: stats.absCount + accStats.absCount,
-              missingAbs: stats.missingAbs + accStats.missingAbs,
-            };
-          }
-          return stats;
-        });
-        path.pop();
-      }
-    });
-
-    const allStats: string[] = [];
-    radTraverseValues(accumStats, (path, stats) => {
-      const {urlCount, absCount, missingAbs} = stats;
-      const venue = _.join(path, " / ").padEnd(24);
-      allStats.push(
-        `${venue} urls: ${urlCount}; abs# ${absCount}; missing# ${missingAbs}`,
-      );
-    });
-    const sorted = _.sortBy(allStats);
-
-    console.log(_.join(sorted, "\n"));
   });
+
+  // pipef.on("data", (radStats: Radix<CorpusStats>) => {
+  //   // prettyPrint({summary});
+  //   console.log("accumulating stats");
+
+  //   const accumStats = createRadix<CorpusStats>();
+
+  //   radTraverseValues(radStats, (path, stats) => {
+  //     // path.pop();
+  //     while (path.length > 0) {
+  //       radUpsert(accumStats, path, accStats => {
+  //         if (accStats) {
+  //           return {
+  //             urlCount: stats.urlCount + accStats.urlCount,
+  //             absCount: stats.absCount + accStats.absCount,
+  //             missingAbs: stats.missingAbs + accStats.missingAbs,
+  //           };
+  //         }
+  //         return stats;
+  //       });
+  //       path.pop();
+  //     }
+  //   });
+
+  //   const allStats: string[] = [];
+  //   radTraverseValues(accumStats, (path, stats) => {
+  //     const {urlCount, absCount, missingAbs} = stats;
+  //     const venue = _.join(path, " / ").padEnd(24);
+  //     allStats.push(
+  //       `${venue} urls: ${urlCount}; abs# ${absCount}; missing# ${missingAbs}`,
+  //     );
+  //   });
+  //   const sorted = _.sortBy(allStats);
+
+  //   console.log(_.join(sorted, "\n"));
+  // });
 }
 
 function getLogEntry(key: string, entries: string[]): string | undefined {
@@ -121,4 +130,32 @@ const cstats = throughAccum<any, Radix<CorpusStats>>(
     return radix;
   },
   createRadix(),
+);
+
+type ZZ = any[];
+
+const writeAbstracts = throughAccum<any, ZZ>(
+  (accum: any[], t: any) => {
+    const logBuffer: string[] = t.logBuffer;
+    const entryPath: string = t.entry;
+    const lpart = _.last(entryPath.split('/'));
+    if (lpart) {
+      const noteId = lpart.slice(0, lpart.length-2);
+
+      const abstractValue = getLogEntry("field.abstract.value", logBuffer);
+      const res = {
+        noteId,
+        fields: [
+          {
+            name: "abstract",
+            value: abstractValue
+          }
+        ]
+      };
+
+      return _.concat(accum, res);
+    }
+    return accum;
+  },
+  []
 );

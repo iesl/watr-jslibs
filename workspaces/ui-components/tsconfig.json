@@ -30,9 +30,6 @@
     "inlineSourceMap": true,
     "preserveConstEnums": true,
 
-    "jsx": "preserve",
-    "jsxFactory": "h",
-
     "types": [
       "jest",
       "chai",
@@ -50,9 +47,9 @@
 
   },
 
-  "exclude": ["node_modules", "../../node_modules", ".nuxt", "dist"],
+  "exclude": ["node_modules", ".nuxt"],
 
   "include": [
     "src/**/*"
-  ],
+  ]
 }

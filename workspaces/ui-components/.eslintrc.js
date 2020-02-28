@@ -8,9 +8,6 @@ module.exports = {
     '@nuxtjs',
     'plugin:nuxt/recommended'
   ],
-  plugins: [
-  ],
-  // add your custom rules here
   rules: {
     'no-unused-vars': 0,
     'vue/no-unused-components': 0,
