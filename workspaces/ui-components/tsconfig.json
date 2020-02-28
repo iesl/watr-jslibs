@@ -33,9 +33,7 @@
     "types": [
       "jest",
       "chai",
-      "vuetify",
-      "@types/node",
-      "@nuxt/types"
+      "node"
     ],
 
     "paths": {

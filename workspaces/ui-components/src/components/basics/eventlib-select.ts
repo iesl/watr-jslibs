@@ -2,7 +2,14 @@
  * Provide the ability to draw selection rectangles and emit selection events
  */
 import _ from 'lodash';
-import * as d3 from 'd3';
+
+import * as d3 from "d3-selection";
+
+// import {
+//   Selection,
+//   BaseType,
+//   select
+// } from "d3-selection";
 
 import {
   ref,

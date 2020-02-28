@@ -37,7 +37,7 @@ export function getTextWidth(ctx: CanvasRenderingContext2D, text: string, font: 
   return metrics.width;
 }
 
-import $ from 'jquery';
+// import $ from 'jquery';
 import _ from 'lodash';
 
 // TODO make sure that div.offsetWidth/Height are equivalent crossbrowser to $(div).outerWidth
@@ -50,7 +50,7 @@ export function showText(text: string, div: HTMLDivElement, atX: number, atY: nu
   const sizes = [];
   for (let i=0; i<text.length; i++) {
     init += text.charAt(i);
-    $(div).text(init)
+    // $(div).text(init)
 
     const currWidth = div.offsetWidth;
     const charWidth = currWidth - currX + atX;

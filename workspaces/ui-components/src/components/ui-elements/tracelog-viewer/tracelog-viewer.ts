@@ -4,7 +4,8 @@ import {
   Ref,
   createComponent,
   provide,
-  ref
+  ref,
+  SetupContext
 } from '@vue/composition-api';
 
 
@@ -23,15 +24,15 @@ export interface TracelogViewer {
 
 export default createComponent({
   components: { NarrowingFilter },
-  setup(_props, context) {
+  setup(_props, context: SetupContext) {
 
-    const { params, query } = context.root.$route;
-    console.log('params', params);
-    console.log('query', query);
+    // const { params, query } = context.root.$route;
+    // console.log('params', params);
+    // console.log('query', query);
     const choicesRef: Ref<Array<string> | null> = ref(null)
 
     const dbgTracelogUrl = '/tracelogs/tracelog.json';
-    const entryId = query.id;
+    // const entryId = query.id;
     configAxios().get(dbgTracelogUrl)
       .then(resp => {
         const tracelogJson = resp.data;

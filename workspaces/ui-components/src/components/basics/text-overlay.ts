@@ -8,8 +8,7 @@ import _ from 'lodash';
 
 import { StateArgs } from '~/components/basics/component-basics'
 import { SuperimposedElements  } from './superimposed-elements';
-import { TextStyle, makeStyleString, LineDimensions, showText } from '~/lib/html-text-metrics';
-
+import { TextStyle, makeStyleString, LineDimensions } from '~/lib/html-text-metrics';
 
 type PutText = (style: TextStyle, x: number, y: number, text: string) => LineDimensions;
 type ClearText = () => void;
@@ -43,10 +42,17 @@ export function useTextOverlay({
     const node = document.createTextNode(text);
     div.append(node)
     textDiv.appendChild(div);
-    const lineDimensions = showText(text, div, x, y);
+    // const lineDimensions = showText(text, div, x, y);
     div.style.visibility = 'visible';
 
-    return lineDimensions;
+    const fakeLineDimensions: LineDimensions = {
+      x: 0, y: 0,
+      width: 100,
+      height: 100,
+      elementDimensions: []
+    };
+
+    return fakeLineDimensions;
   }
 
   const clearText: ClearText = () => {

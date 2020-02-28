@@ -4,10 +4,6 @@
 
 import _ from "lodash";
 
-export function pp(a: any): string {
-  return JSON.stringify(a, undefined, 2);
-}
-
 export function getOrDie<T>(v: T | null | undefined, msg: string = "null|undef"): T {
   if (v === null || v === undefined) {
     throw new Error(`Error: ${msg}`);
@@ -41,36 +37,3 @@ export function newIdGenerator() {
   };
   return nextId;
 }
-
-
-// export function eventHasLeftClick(event: JQueryInputEventObject) {
-export function eventHasLeftClick(event: JQuery.Event) {
-  // buttons: 0=none, 1=left, 3=middle, 2=right
-  const b = event.buttons;
-  return b === 1;
-}
-
-// export function getDescendantTree(rootSelector: string): any {
-
-//   function loop($elem: JQuery): any {
-
-//     const maybeId = $elem.attr('id');
-//     const cls = $elem.attr('class');
-//     const id = maybeId === undefined ? '' : `#${maybeId}`;
-
-//     const childs = _.map($elem.children(), (elemChild: JQuery) => {
-//       return loop(elemChild);
-//     });
-//     if (childs.length > 0) {
-//       return Tree.Node(`${id}.${cls}`, childs);
-//     }
-//     return Tree.Leaf(`${id}.${cls}`);
-//   }
-
-//   return loop($(rootSelector));
-// }
-
-// export function getDescendantTreeString(rootSelector: string): string {
-//   const desc = getDescendantTree(rootSelector);
-//   return Tree.drawTree(desc).toString();
-// }

@@ -10,7 +10,7 @@ import {
 
 
 
-import * as d3 from 'd3';
+import * as d3 from 'd3-selection';
 
 import { StateArgs } from '~/components/basics/component-basics'
 import { EventlibCore } from '~/components/basics/eventlib-core';

@@ -8,6 +8,8 @@ module.exports = {
     '@nuxtjs',
     'plugin:nuxt/recommended'
   ],
+
+  parser: '@typescript-eslint/parser',
   rules: {
     'no-unused-vars': 0,
     'vue/no-unused-components': 0,

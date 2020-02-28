@@ -2,7 +2,7 @@
  * Provide a means to draw shape primitives to an underlying SVG.
  */
 import _ from 'lodash';
-import * as d3 from 'd3';
+import * as d3 from 'd3-selection';
 
 // import {
 //   Ref,
@@ -12,6 +12,7 @@ import { StateArgs } from './component-basics';
 import { SuperimposedElements } from './superimposed-elements';
 import { Line, Point, Rect, Trapezoid, Shape, ShapeIntRepsToFloats, foldShape, mapShape, FoldF } from '~/lib/tracelogs';
 import { Ref, ref, watch } from '@vue/composition-api';
+
 import {
   Selection,
   BaseType,
