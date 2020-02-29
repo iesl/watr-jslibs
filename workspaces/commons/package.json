@@ -23,6 +23,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "chalk": "^3.0.0",
     "event-stream": "^4.0.1",
     "fast-csv": "^4.0.2",
     "from2": "^2.3.0",
@@ -35,11 +36,13 @@
     "url-parse": "^1.4.7",
     "winston": "^3.2.1",
     "wrap-ansi": "^6.2.0",
+    "tslib": "^1.10.0",
     "yargs": "^15.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.0.2",
     "@rollup/plugin-node-resolve": "^7.1.1",
+    "@types/node": "^13.7.6",
     "@types/chai": "^4.2.9",
     "@types/event-stream": "^3.3.34",
     "@types/from2": "^2.3.0",
