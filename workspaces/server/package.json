@@ -13,7 +13,7 @@
   "author": "Adam Saunders <saunders@cs.umass.edu>",
   "homepage": "https://github.com/iesl/watr-jslibs#readme",
   "dependencies": {
-    "commander": "^4.0.1",
+    "commander": "^4.1.1",
     "fs-extra": "^8.1.0",
     "klaw": "^3.0.0",
     "klaw-sync": "^6.0.0",
@@ -22,10 +22,10 @@
     "koa-bodyparser": "^4.2.1",
     "koa-ejs": "^4.3.0",
     "koa-json": "^2.0.2",
-    "koa-router": "^7.4.0",
+    "koa-router": "^8.0.8",
     "koa-send": "^5.0.0",
-    "nodemon": "^2.0.1",
-    "tslib": "^1.10.0",
+    "nodemon": "^2.0.2",
+    "tslib": "^1.11.1",
     "yargs": "^15.1.0"
   },
   "devDependencies": {

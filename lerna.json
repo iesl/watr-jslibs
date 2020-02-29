@@ -3,5 +3,5 @@
   "packages": [
     "workspaces/*"
   ],
-  "npmClient": "pnpm"
+  "npmClient": "npm"
 }
