@@ -1,0 +1,12 @@
+
+** Building
+*** Linking local modules
+    yarn workspace commons link
+    yarn workspace server link commons
+    yarn workspace other-proj link commons
+    
+*** lerna to run shared steps
+    lerna run lint/build/test  (setup?)
+
+
+
