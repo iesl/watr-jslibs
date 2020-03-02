@@ -20,7 +20,7 @@
     "setup": "yarn link commons && npm install"
   },
   "dependencies": {
-    "ansi-escapes": "^4.3.0",
+    "ansi-escapes": "^4.3.1",
     "axios": "^0.19.2",
     "chalk": "^3.0.0",
     "cheerio": "^1.0.0-rc.3",
@@ -48,7 +48,7 @@
     "yargs": "^15.1.0"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.9",
+    "@types/chai": "^4.2.10",
     "@types/cheerio": "^0.22.16",
     "@types/event-stream": "^3.3.34",
     "@types/from2": "^2.3.0",
@@ -59,14 +59,14 @@
     "@types/parse5": "^5.0.2",
     "@types/prompts": "^2.0.3",
     "@types/react": "^16.9.23",
-    "@types/selenium-webdriver": "^4.0.8",
+    "@types/selenium-webdriver": "^4.0.9",
     "@types/slice-ansi": "^2.0.0",
     "@types/through2": "^2.0.34",
     "@types/url-parse": "^1.4.3",
     "@types/wrap-ansi": "^3.0.0",
     "@types/yargs": "^15.0.4",
-    "@typescript-eslint/eslint-plugin": "^2.21.0",
-    "@typescript-eslint/parser": "^2.21.0",
+    "@typescript-eslint/eslint-plugin": "^2.22.0",
+    "@typescript-eslint/parser": "^2.22.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-import-resolver-typescript": "^2.0.0",
