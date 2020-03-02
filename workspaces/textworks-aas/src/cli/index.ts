@@ -1,7 +1,7 @@
 import yargs, {Argv} from "yargs";
 
 import {prettyPrint} from "commons";
-import {yall, opt} from "./arglib";
+import {yall, opt} from "commons/dist/cli/arglib";
 import {normalizeHtmls} from "~/extract/reshape-html";
 
 yargs.commandDir(".", {

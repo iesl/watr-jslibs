@@ -13,11 +13,14 @@ import * as cheerio from "cheerio";
 // TODO peruse: https://github.com/lorien/awesome-web-scraping/blob/master/javascript.md
 
 import {prettyPrint} from "commons";
+
 import {
-  newCorpusEntryStream,
+  corpusEntryStream,
   expandDirTrans,
   ExpandedDir,
-} from "~/corpora/corpus-browser";
+} from "commons";
+
+
 import {prettyPrintTrans} from "commons";
 // import { sliceStream } from 'commons';
 
@@ -216,7 +219,7 @@ export function htmlToCssNormTransform(): Transform {
 }
 
 export async function normalizeHtmls(corpusRoot: string) {
-  const entryStream = newCorpusEntryStream(corpusRoot);
+  const entryStream = corpusEntryStream(corpusRoot);
 
   const pipe = pumpify.obj(
     entryStream,

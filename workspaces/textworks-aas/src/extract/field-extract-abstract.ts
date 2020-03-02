@@ -18,7 +18,7 @@ import {
   queryContent,
 } from "~/extract/field-extract-utils";
 
-import {ExpandedDir} from "~/corpora/corpus-browser";
+import {ExpandedDir} from "commons/dist/corpora";
 
 import {BufferedLogger} from "commons/dist/util/logging";
 

@@ -4,7 +4,6 @@ import fs from "fs-extra";
 import path from "path";
 
 import {Argv, Arguments, Options} from "yargs";
-import {prettyPrint} from "commons";
 
 type ArgvApp = (ya: Argv) => Argv;
 
@@ -74,7 +73,6 @@ const existingPath = (pathAndDesc: string) => (ya: Argv) => {
     if (p && fs.existsSync(p)) {
       return argv;
     }
-    console.log(`option ${pathname} specified non-existent file ${p}`);
     return ya.check(() => {
       return false;
     });
@@ -99,21 +97,17 @@ export const configFile = (ya: Argv) => {
   });
 
   ya.middleware((argv: Arguments) => {
-    console.log("running middleware config");
     if (typeof argv.config === "string") {
       const configFile = resolveArgPath(argv, "config");
-      console.log(`resolved config to ${configFile}`);
       if (!configFile) {
         throw new Error(`Non-existent config file specified`);
       }
       // Set working directory to config file dir if not already set
       if (!argv["cwd"]) {
         argv["cwd"] = path.dirname(configFile);
-        console.log(`resolved cwd in config to ${argv.cwd}`);
       }
       const buf = fs.readFileSync(configFile);
       const conf = JSON.parse(buf.toString());
-      prettyPrint({msg: "config file", conf});
       const confKVs = _.toPairs(conf);
       _.each(confKVs, ([k, v]) => {
         argv[k] = v;

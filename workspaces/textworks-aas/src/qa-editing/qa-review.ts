@@ -3,10 +3,11 @@ import _ from "lodash";
 import pumpify from "pumpify";
 
 import {
-  newCorpusEntryStream,
+  corpusEntryStream,
   expandDirTrans,
   ExpandedDir,
-} from "~/corpora/corpus-browser";
+} from "commons";
+
 
 import {tapStream, progressCount, throughFunc} from "commons";
 
@@ -148,7 +149,7 @@ function initReviewCorpus({
   corpusRoot,
   logpath,
 }: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">) {
-  const entryStream = newCorpusEntryStream(corpusRoot);
+  const entryStream = corpusEntryStream(corpusRoot);
   const logger = initLogger(logpath, "init");
   const reviewFunc = _.curry(reviewEntry)(logger);
   const pipe = pumpify.obj(

@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "allowJs": true,
 
-    "target": "es6",
+    "target": "esnext",
     "module": "commonjs",
     "moduleResolution": "node",
 
@@ -43,9 +43,6 @@
   "include": [
     "./src",
     "./@types"
-  ],
-
-  "exclude": [
-    "node_modules"
   ]
+
 }

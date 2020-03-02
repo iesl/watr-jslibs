@@ -2,11 +2,7 @@ import _ from "lodash";
 import path from "path";
 import fs from "fs-extra";
 
-import hash from "object-hash";
-import {
-  ExpandedDir,
-} from "./corpus-browser";
-
+import {ExpandedDir} from "commons/dist/corpora";
 import { Field } from '~/extract/field-extract';
 
 interface Accum {
@@ -26,14 +22,6 @@ export function jsonifyCSV(fields: AccumKey[], row: string[]): Partial<Accum> {
   return acc;
 }
 
-export function makeCorpusEntryLeadingPath(s: string): string {
-  const sHash = hash(s, {algorithm: "sha1", encoding: "hex"});
-  const leadingPath = sHash
-    .slice(0, 2)
-    .split("")
-    .join("/");
-  return leadingPath;
-}
 
 const matchingFiles = (re: RegExp) => (fs: string[]) =>
   fs.filter(f => re.test(f));

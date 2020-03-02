@@ -1,8 +1,8 @@
 import _ from "lodash";
 import {Argv} from "yargs";
-import {yall, opt} from "./arglib";
 import {prettyPrint} from "commons";
 import {createSpider} from "~/spider/spidering";
+import {yall, opt} from "commons/dist/cli/arglib";
 
 export const command = "spider";
 

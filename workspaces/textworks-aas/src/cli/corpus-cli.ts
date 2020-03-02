@@ -2,7 +2,7 @@ import _ from "lodash";
 
 import path from "path";
 import yargs, {Argv} from "yargs";
-import {yall, opt, config} from "./arglib";
+import {yall, opt, config} from "commons/dist/cli/arglib";
 import {prettyPrint} from "commons";
 import {reviewCorpus} from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';

@@ -11,9 +11,6 @@
   "types": [
     "dist/index.d.ts"
   ],
-  "files": [
-    "dist"
-  ],
   "directories": {
     "src": "src"
   },

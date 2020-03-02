@@ -1,9 +1,9 @@
 import 'chai/register-should';
 
 import _ from 'lodash';
-import { prettyPrint } from 'commons';
 import through from 'through2';
 import { dirsteam } from './dirstream';
+import { prettyPrint } from '~/util/pretty-print';
 
 describe('File corpus operations',  () => {
   const testDirPath = './test/resources/test-dirs';

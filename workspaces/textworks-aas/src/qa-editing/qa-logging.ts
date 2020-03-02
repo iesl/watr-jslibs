@@ -6,9 +6,9 @@ import pumpify from "pumpify";
 import es from "event-stream";
 import urlparse from "url-parse";
 
-import {initBufferedLogger, BufferedLogger} from "commons";
-import {filterStream} from "commons";
-import {ExpandedDir} from "~/corpora/corpus-browser";
+import {initBufferedLogger, BufferedLogger} from "commons/dist/util/logging";
+import {filterStream} from "commons/dist/util/stream-utils";
+import {ExpandedDir} from "commons/dist/corpora";
 
 export function resolveLogfileName(logpath: string, phase: string): string {
   return path.resolve(logpath, logfileName(phase));

@@ -6,7 +6,7 @@ import path from "path";
 import {
   ExpandedDir,
   expandDir,
-} from "~/corpora/corpus-browser";
+} from "commons";
 
 import { writeDefaultEntryLogs, createFilteredLogStream} from "./qa-logging";
 import {  initEnv, throughEnvFunc, throughFunc,  filterEnvStream} from "commons";

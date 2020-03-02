@@ -103,3 +103,17 @@ import {
 export {
   runMapThenables
 };
+
+// import {
+//   config,
+//   yall,
+//   setCwd,
+//   existingDir,
+//   existingFile,
+//   configFile,
+//   setOpt,
+//   opt,
+// } from "./cli/arglib"
+
+export * as arglib from "./cli/arglib"
+export * from "./corpora"
