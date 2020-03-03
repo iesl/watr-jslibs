@@ -16,6 +16,4 @@
    lerna --concurrency 1 exec -- ncu  --loglevel verbose
 *** Update package.json files
    lerna --concurrency 1 exec -- ncu -u  --loglevel verbose
-*** Fetch 
-    lerna bootstrap
 

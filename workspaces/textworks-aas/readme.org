@@ -1,10 +1,10 @@
 
 * Textworks as a service
-
    
 ** Usage Overview
 *** Spidering/Scraping
-
+**** Define spidering input records 
+     List of json-formatted lines { "url": "http://xxx", ... }
 *** Abstract Field Extraction
    
 *** Q/A Workflow
@@ -12,10 +12,3 @@
 **** Collecting stats
      yarn workspace textworks-aas corpus collect-stats --cwd=../../orc.d --corpus-root=corpus.d --logfile logs.d/qa-write-abstracts.json
 
-     cat orc.d/logs.d/qa-write-abstracts.json.pretty.txt | 
-     grep "'entry.venue=PAMI"  -A 2 -B 3 | 
-     grep -B 5 '    ]' |  
-     grep "entry:" | 
-     perl -pne "s|^.*/corpus.d/||g && s/',//g" | 
-     xargs -i find  "orc.d/corpus.d/{}"  -type f -name 'entry-props.json' | 
-     xargs -i  cat {} | jq '.url' | head -n 3 | xargs -i firefox-stable {}

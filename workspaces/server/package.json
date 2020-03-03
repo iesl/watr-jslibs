@@ -7,6 +7,7 @@
   ],
   "dependencies": {
     "commander": "^4.1.1",
+    "commons": "0.1.0",
     "fs-extra": "^8.1.0",
     "klaw": "^3.0.0",
     "klaw-sync": "^6.0.0",
@@ -18,7 +19,9 @@
     "koa-router": "^8.0.8",
     "koa-send": "^5.0.0",
     "nodemon": "^2.0.2",
-    "tslib": "^1.11.1",
+    "pumpify": "^2.0.1",
+    "through2": "^3.0.1",
+    "winston": "^3.2.1",
     "yargs": "^15.1.0"
   },
   "devDependencies": {
@@ -30,6 +33,7 @@
     "@types/koa-router": "^7.4.0",
     "@types/koa-send": "^4.1.2",
     "@types/lodash": "^4.14.149",
+    "@types/through2": "^2.0.34",
     "@types/node": "^13.7.7",
     "@typescript-eslint/eslint-plugin": "^2.22.0",
     "@typescript-eslint/parser": "^2.22.0",
@@ -40,6 +44,7 @@
     "eslint-plugin-import": "^2.20.1",
     "jest": "^25.1.0",
     "ts-jest": "^25.2.1",
+    "tslib": "^1.11.1",
     "typescript": "^3.8.3"
   },
   "license": "ISC",
@@ -47,20 +52,12 @@
   "directories": {
     "src": "src"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/iesl/watr-jslibs.git"
-  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
     "serve": "nodemon -w dist dist/server.js",
     "lint": "eslint --config .eslintrc.js --ext .ts --ignore-path ../../.gitignore ./src",
-    "test": "jest",
-    "setup": "yarn link commons && npm install"
-  },
-  "bugs": {
-    "url": "https://github.com/iesl/watr-jslibs/issues"
+    "test": "jest"
   },
   "jest": {
     "preset": "ts-jest",

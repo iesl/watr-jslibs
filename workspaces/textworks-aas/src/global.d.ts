@@ -1,5 +1,5 @@
 
-import 'cheerio-get-css-selector';
+// import 'cheerio-get-css-selector';
 
 // declare module 'cheerio-get-css-selector' {
 // }

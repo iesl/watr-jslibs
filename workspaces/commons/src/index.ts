@@ -96,14 +96,6 @@ export {
   clipParagraph
 };
 
-import {
-  runMapThenables
-} from "./util/utils"
-
-export {
-  runMapThenables
-};
-
 // import {
 //   config,
 //   yall,

@@ -8,7 +8,5 @@ export function csvStream(csvfile: string): Readable {
   const csvabs = path.resolve(csvfile);
   const str = fs.createReadStream(csvabs);
 
-  return str.pipe(csv.parse({headers: false})).on("end", () => {
-    str.destroy();
-  });
+  return str.pipe(csv.parse({headers: false}));
 }

@@ -1,81 +1,53 @@
 
 import _ from 'lodash';
 
+import pumpify from "pumpify";
+
 import { Context } from "koa";
-import path from "path";
 import  Router from "koa-router";
-import fs, { realpathSync } from "fs-extra";
 
-// import klaw from "klaw-sync";
-// type ArtifactType = "pdf" | "page-images" | "page-thumbs" | "textgrids" | "tracelogs";
+import {
+  corpusEntryStream,
+  expandDirTrans,
+  CorpusEntry,
+} from "commons/dist/corpora";
 
-export interface CorpusArtifacts {
-  stableId: string;
-  artifacts: string[];
-}
-export interface CorpusEntry {
-  stableId: string;
-  artifacts: [string, string[]][];
-}
+import {
+  sliceStream
+} from "commons/dist/util/stream-utils";
+
+import { realpathSync } from 'fs-extra';
 
 export interface CorpusPage {
   corpusEntries: CorpusEntry[];
-  corpusSize: number;
   offset: number;
-
 }
 
-export function readCorpusEntries(
+export async function readCorpusEntries(
   corpusRoot: string,
   start: number,
   len: number
-): CorpusPage {
-  const entryNames = fs.readdirSync(corpusRoot);
-  const entryWindow = entryNames.slice(start, start+len);
+): Promise<CorpusPage> {
+  const entryStream = corpusEntryStream(corpusRoot);
+  const pipe = pumpify.obj(
+    entryStream,
+    sliceStream(start, len),
+    expandDirTrans,
+  );
 
-  const entries: CorpusEntry[] = _.flatMap(entryWindow, (entryName) => {
-    const entryPath = path.join(corpusRoot, entryName);
-    const statEntry = fs.statSync(entryPath);
-    if (statEntry.isDirectory()) {
-
-      const entryListing = fs.readdirSync(entryPath);
-      const hasPdf = entryListing.find(e => e.endsWith(".pdf"));
-      const subDirs: [string, string[]][] = _.flatMap(entryListing, (e) => {
-        const subDir = path.join(entryPath, e);
-        const stat = fs.statSync(subDir);
-        const isDir = stat.isDirectory();
-        let result:  [string, string[]][] = []
-        if (isDir) {
-          const artifactContent = fs.readdirSync(subDir);
-          if ( artifactContent.length > 0 ) {
-            result = [ [e, artifactContent] ];
-          }
-        }
-
-        return result;
-      });
-
-
-      if (hasPdf) {
-        const stableId = entryName.slice(0, entryName.length - ('.d'.length));
-        const e: CorpusEntry = {
-          stableId,
-          artifacts: subDirs
-        };
-        return [e];
-      }
-    }
-    return [];
-
-  });
-
-  const corpusPage = {
-    corpusEntries: entries,
-    corpusSize: entryNames.length,
-    offset: start
-  };
-
-  return corpusPage;
+  return new Promise((resolve) => {
+    const entries: CorpusEntry[] = [];
+    pipe.on("data", (data: CorpusEntry) => {
+      entries.push(data);
+    });
+    pipe.on("end", () => {
+      const corpusPage = {
+        corpusEntries: entries,
+        offset: start
+      };
+      resolve(corpusPage);
+    });
+  })
 }
 
 

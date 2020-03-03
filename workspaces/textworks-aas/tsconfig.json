@@ -23,6 +23,7 @@
     "inlineSourceMap": true,
     "preserveConstEnums": true,
     "jsx": "react",
+    "build": true,
 
     "types": [
       "jest",
@@ -37,6 +38,10 @@
       "@@/*": ["./src/*"]
     }
   },
+
+  "references": [
+    {"src": "../commons"}
+  ],
 
   "typeRoots": ["./@types", "node_modules/@types"],
 

@@ -113,17 +113,19 @@ export function initEnv<T, E>(
 }
 
 export function throughEnvFunc<T, R, E>(
-  f: (t: T, env: E) => R,
+  f: (t: T, env: E, currTransform: Transform) => R,
 ): Transform {
   return through.obj(
-    (chunk: [T, E], _enc: string, next: (err: any, v: any) => void) => {
+    function (chunk: [T, E], _enc: string, next: (err: any, v: any) => void) {
+      const self = this;
       const [tchunk, env] = chunk;
-      const res = f(tchunk, env);
+      const res = f(tchunk, env, self);
       Promise.resolve(res)
         .then((res) => next(null, [res, env]));
     },
   );
 }
+
 export function filterEnvStream<T, E>(f: (t: T, env: E) => boolean): Transform {
   return through.obj(
     (chunk: [T, E], _enc: string, next: (err: any, v: any) => void) => {

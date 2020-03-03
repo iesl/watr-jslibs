@@ -26,6 +26,10 @@ module.exports = {
     "@typescript-eslint/no-inferrable-types": ["off"],
     "@typescript-eslint/no-use-before-define": ["off"],
     "@typescript-eslint/no-unused-vars": ["off"],
+    "@typescript-eslint/no-this-alias": ["error", {
+      allowDestructuring: true, // Allow `const { props, state } = this`; false by default
+      allowedNames: ['self'], // Allow `const self = this`; `[]` by default
+    }]
   },
 
   "overrides": [

@@ -2,19 +2,30 @@ import prompts from "prompts";
 import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
+import {Stream, Transform} from "stream";
+import pumpify from "pumpify";
 
 import {fetchUrl} from "~/spider/axios-scraper";
 
-import {runMapThenables} from "commons";
+import { throughFunc, csvStream, initEnv, throughEnvFunc, sliceStream, makeCorpusEntryLeadingPath} from "commons";
 
 
 import {createLogger, format, transports, Logger} from "winston";
 import {fetchViaFirefox, FetchUrlFn, ShutdownFn} from "./browser-scraper";
+import { makeNowTimeString } from 'commons/dist/util/utils';
 const {combine, timestamp} = format;
+
+type CorpusPath = string
+type UrlToCorpusPath = (url: string, noteId: string) => CorpusPath;
+type TimestampFilename = (fn: string) => string;
 
 export interface SpideringEnv {
   logger: Logger;
   takeScreenshot: boolean;
+  fetchFunction: FetchUrlFn;
+  promptFunction: (url: string) => Promise<UserAction[]>;
+  urlToCorpusPath: UrlToCorpusPath;
+  timestampFilename: TimestampFilename;
 }
 
 export interface SpideringOptions {
@@ -34,17 +45,13 @@ export const defaultSpideringOptions: SpideringOptions = {
   logpath: "./spidering.log",
 };
 
-interface SpideringRecs extends SpideringOptions {
-  recs: SpideringRec[];
-  getRecDownloadDirectory(rec: SpideringRec): string;
-  getRecDownloadFilename(rec: SpideringRec): string;
-}
 
 interface SpideringRec {
   url: string;
-  outpath?: string;
-  path?: string;
-  dlpath: () => string;
+  noteId: string;
+  // outpath?: string;
+  // path?: string;
+  // dlpath: () => string;
 }
 
 function initLogger(logpath: string): Logger {
@@ -61,6 +68,64 @@ function initLogger(logpath: string): Logger {
   return logger;
 }
 
+export function createSpideringInputStream(csvfile: string): Stream {
+  return pumpify.obj(
+    csvStream(csvfile),
+    throughFunc((csvRec: string[]) => {
+      const [noteId, dblpConfId, paperTitle, url] = csvRec;
+      return {
+        url,
+        noteId,
+        dblpConfId,
+        paperTitle,
+      }
+    })
+  );
+}
+
+async function processOneSpiderRec(rec: SpideringRec, env: SpideringEnv, currStream: Transform) {
+  const url = rec.url;
+
+  let fetched: string | undefined;
+
+  async function _loop(actions: UserAction[]): Promise<void> {
+    if (actions.length === 0) return;
+    const nextAction = actions[0];
+
+    switch (nextAction.action) {
+      case "download":
+        fetched = await env.fetchFunction(env, url);
+        break;
+      case "skip":
+        break;
+      case "quit":
+        env.logger.info({event: "user exiting spider"});
+        currStream.destroy();
+        break;
+    }
+    return _loop(_.tail(actions));
+  }
+
+  const nextActions = await env.promptFunction(rec.url);
+  await _loop(nextActions);
+
+  if (fetched) {
+    env.logger.info({event: "url fetched", url});
+    const downloadDir = env.urlToCorpusPath(url, rec.noteId);
+    const downloadFilename = env.timestampFilename("download.html");
+    const downloadFilepath = path.resolve(downloadDir, downloadFilename);
+      // const downloadFilename = spideringRecs.getRecDownloadFilename(rec);
+    const exists = fs.existsSync(downloadFilepath);
+    if (exists) {
+      fs.removeSync(downloadFilename);
+    }
+    fs.mkdirsSync(downloadDir);
+    fs.writeFileSync(downloadFilename, fetched);
+  } else {
+    env.logger.info({event: "url not fetched", url});
+  }
+}
+
 export async function createSpider(opts: SpideringOptions) {
   const logger = initLogger(opts.logpath);
   logger.info({event: "initializing spider", config: opts});
@@ -70,38 +135,20 @@ export async function createSpider(opts: SpideringOptions) {
     logger.info({event: "fatal error: no input file", config: opts});
     return;
   }
-  const inputBuf = fs.readFileSync(input);
-  const rawRecs: Partial<SpideringRec>[] = JSON.parse(inputBuf.toString());
 
-  const srecs: SpideringRec[] = rawRecs.map(rec => {
-    const p1 = rec.outpath;
-    const p2 = rec.path;
-    const url = rec.url || 'undefined_url';
-
-    return {
-      url,
-      path: p1,
-      outpath: p2,
-      dlpath() {
-        return p1 ? p1 : p2 ? p2 : "tmp-spider-dl.html";
-      },
-    };
-  });
-  const spideringRecs: SpideringRecs = {
-    ...opts,
-    recs: srecs,
-    getRecDownloadDirectory(rec: SpideringRec): string {
-      const root = opts.cwd;
-      const rel = rec.dlpath();
-      return path.join(root, rel);
-    },
-    getRecDownloadFilename(rec: SpideringRec): string {
-      const basepath = this.getRecDownloadDirectory(rec);
-      return path.join(basepath, "download.html");
-    },
+  const timestampFilename = (filename: string) => {
+    const timeString = makeNowTimeString();
+    const basename = path.basename(filename);
+    const ext = path.extname(filename);
+    return `${basename}-${timeString}${ext}`;
   };
 
-  let prompt = opts.interactive ? promptForAction : alwaysDownload;
+  const urlToCorpusPath = (url: string, noteId: string) => {
+    const leading = makeCorpusEntryLeadingPath(url);
+    return `${leading}/${noteId}.d`;
+  };
+
+  const prompt = opts.interactive ? promptForAction : alwaysDownload;
   const fetchfn = opts.useBrowser ? fetchViaFirefox : fetchViaAxios;
 
   const [fetcher, closeFetcher] = await fetchfn();
@@ -109,63 +156,23 @@ export async function createSpider(opts: SpideringOptions) {
   const env: SpideringEnv = {
     logger,
     takeScreenshot: false,
+    fetchFunction: fetcher,
+    promptFunction: prompt,
+    timestampFilename,
+    urlToCorpusPath,
   };
 
+  const inputStream = createSpideringInputStream(input);
+  const str = pumpify.obj(
+    inputStream,
+    sliceStream(0, 4),
+    initEnv(() => env),
+    throughEnvFunc(processOneSpiderRec),
+  );
+
   logger.info({event: "starting spider"});
-
-  let filter = ".*";
-
-  await runMapThenables(spideringRecs.recs, async (rec: SpideringRec) => {
-    const url = rec.url;
-
-    if (url.match(filter) === null) {
-      return;
-    }
-    let fetched: string | undefined;
-
-    async function _loop(actions: UserAction[]): Promise<void> {
-      if (actions.length === 0) return;
-      const nextAction = actions[0];
-
-      switch (nextAction.action) {
-        case "download":
-          fetched = await fetcher(env, url);
-          break;
-        case "skip":
-          break;
-        case "all":
-          prompt = alwaysDownload;
-          fetched = await fetcher(env, url);
-          break;
-        case "mark":
-          break;
-        case "filter":
-          filter = nextAction.value? nextAction.value : filter;
-          break;
-        case "quit":
-          logger.info({event: "user exiting spider"});
-          closeFetcher();
-          process.exit();
-      }
-      return _loop(_.tail(actions));
-    }
-
-    const nextActions = await prompt(rec.url);
-    await _loop(nextActions);
-
-    if (fetched) {
-      logger.info({event: "url fetched", url});
-      const downloadDir = spideringRecs.getRecDownloadDirectory(rec);
-      const downloadFilename = spideringRecs.getRecDownloadFilename(rec);
-      const exists = fs.existsSync(downloadFilename);
-      if (exists) {
-        fs.removeSync(downloadFilename);
-      }
-      fs.mkdirsSync(downloadDir);
-      fs.writeFileSync(downloadFilename, fetched);
-    } else {
-      logger.info({event: "url not fetched", url});
-    }
+  str.on("data", () => {
+    //
   });
 
   closeFetcher();
@@ -198,9 +205,6 @@ async function promptForAction(url: string): Promise<UserAction[]> {
       choices: [
         {title: "Download", value: "download"},
         {title: "Skip", value: "skip"},
-        {title: "Mark", value: "mark"},
-        {title: "Filter", value: "filter"},
-        {title: "Continue non-interactive", value: "all"},
         {title: "Quit", value: "quit"},
       ],
       initial: 0,
@@ -236,3 +240,131 @@ async function promptForFilter(): Promise<string> {
     message: `Enter url filter regex`,
   }).then(r => r.value);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// export async function createSpiderOldVer(opts: SpideringOptions) {
+//   const logger = initLogger(opts.logpath);
+//   logger.info({event: "initializing spider", config: opts});
+
+//   const input = opts.input;
+//   if (!input) {
+//     logger.info({event: "fatal error: no input file", config: opts});
+//     return;
+//   }
+//   const inputBuf = fs.readFileSync(input);
+//   const rawRecs: Partial<SpideringRec>[] = JSON.parse(inputBuf.toString());
+
+//   const srecs: SpideringRec[] = rawRecs.map(rec => {
+//     const p1 = rec.outpath;
+//     const p2 = rec.path;
+//     const url = rec.url || 'undefined_url';
+
+//     return {
+//       url,
+//       path: p1,
+//       outpath: p2,
+//       dlpath() {
+//         return p1 ? p1 : p2 ? p2 : "tmp-spider-dl.html";
+//       },
+//     };
+//   });
+//   const spideringRecs: SpideringRecs = {
+//     ...opts,
+//     recs: srecs,
+//     getRecDownloadDirectory(rec: SpideringRec): string {
+//       const root = opts.cwd;
+//       const rel = rec.dlpath();
+//       return path.join(root, rel);
+//     },
+//     getRecDownloadFilename(rec: SpideringRec): string {
+//       const basepath = this.getRecDownloadDirectory(rec);
+//       return path.join(basepath, "download.html");
+//     },
+//   };
+
+//   let prompt = opts.interactive ? promptForAction : alwaysDownload;
+//   const fetchfn = opts.useBrowser ? fetchViaFirefox : fetchViaAxios;
+
+//   const [fetcher, closeFetcher] = await fetchfn();
+
+//   const env: SpideringEnv = {
+//     logger,
+//     takeScreenshot: false,
+//   };
+
+//   logger.info({event: "starting spider"});
+
+//   let filter = ".*";
+
+//   await runMapThenables(spideringRecs.recs, async (rec: SpideringRec) => {
+//     const url = rec.url;
+
+//     if (url.match(filter) === null) {
+//       return;
+//     }
+//     let fetched: string | undefined;
+
+//     async function _loop(actions: UserAction[]): Promise<void> {
+//       if (actions.length === 0) return;
+//       const nextAction = actions[0];
+
+//       switch (nextAction.action) {
+//         case "download":
+//           fetched = await fetcher(env, url);
+//           break;
+//         case "skip":
+//           break;
+//         case "all":
+//           prompt = alwaysDownload;
+//           fetched = await fetcher(env, url);
+//           break;
+//         case "mark":
+//           break;
+//         case "filter":
+//           filter = nextAction.value? nextAction.value : filter;
+//           break;
+//         case "quit":
+//           logger.info({event: "user exiting spider"});
+//           closeFetcher();
+//           process.exit();
+//       }
+//       return _loop(_.tail(actions));
+//     }
+
+//     const nextActions = await prompt(rec.url);
+//     await _loop(nextActions);
+
+//     if (fetched) {
+//       logger.info({event: "url fetched", url});
+//       const downloadDir = spideringRecs.getRecDownloadDirectory(rec);
+//       const downloadFilename = spideringRecs.getRecDownloadFilename(rec);
+//       const exists = fs.existsSync(downloadFilename);
+//       if (exists) {
+//         fs.removeSync(downloadFilename);
+//       }
+//       fs.mkdirsSync(downloadDir);
+//       fs.writeFileSync(downloadFilename, fetched);
+//     } else {
+//       logger.info({event: "url not fetched", url});
+//     }
+//   });
+
+//   closeFetcher();
+// }

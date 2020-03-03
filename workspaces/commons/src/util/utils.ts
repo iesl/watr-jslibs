@@ -22,18 +22,6 @@ export function fileOrUndef(file: string|undefined, ...ps: string[]): string|und
   return undefined;
 }
 
-export async function runMapThenables<V>(vs: ArrayLike<V>, f: (v: V) => Promise<any>): Promise<void> {
-  if (vs.length > 0) {
-    const v0 = vs[0];
-    return f(v0).then(() => {
-      return runMapThenables(_.tail(vs), f);
-    }).catch(err => {
-      console.log("runMapThenables: error: ", err);
-    });
-  }
-  return Promise.resolve();
-}
-
 
 export function makeNowTimeString(): string {
   const now = new Date();

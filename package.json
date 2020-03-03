@@ -2,13 +2,12 @@
   "name": "root",
   "version": "0.1.0",
   "private": true,
-  "devDependencies": {
-    "eslint": "^6.7.2",
-    "lerna": "^3.18.3",
-    "yarn": "^2.0.0-rc.27"
-  },
+  "devDependencies": {},
   "scripts": {
-    "clean": "lerna clean -y && rm -r node_modules"
+    "clean": "lerna clean -y && rm -r node_modules",
+    "deps:check": "lerna --concurrency 1 exec -- ncu  --loglevel verbose",
+    "deps:update": "lerna --concurrency 1 exec -- ncu -u --loglevel verbose",
+    "bootstrap": "lerna bootstrap"
   },
   "workspaces": {
     "packages": [
