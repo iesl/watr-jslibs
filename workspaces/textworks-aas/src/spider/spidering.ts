@@ -2,18 +2,23 @@ import prompts from "prompts";
 import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
-import {Stream, Transform} from "stream";
+import { Stream, Transform } from "stream";
 import pumpify from "pumpify";
 
-import {fetchUrl} from "~/spider/axios-scraper";
+import { fetchUrl } from "~/spider/axios-scraper";
 
-import { throughFunc, csvStream, initEnv, throughEnvFunc, sliceStream, makeCorpusEntryLeadingPath} from "commons";
+import {
+  throughFunc,
+  csvStream,
+  initEnv, throughEnvFunc, sliceStream, makeCorpusEntryLeadingPath,
+  prettyPrint
+} from "commons";
 
 
-import {createLogger, format, transports, Logger} from "winston";
-import {fetchViaFirefox, FetchUrlFn, ShutdownFn} from "./browser-scraper";
-import { makeNowTimeString } from 'commons/dist/util/utils';
-const {combine, timestamp} = format;
+import { createLogger, format, transports, Logger } from "winston";
+import { fetchViaFirefox, FetchUrlFn, ShutdownFn } from "./browser-scraper";
+import { makeNowTimeString } from 'commons';
+const { combine, timestamp } = format;
 
 type CorpusPath = string
 type UrlToCorpusPath = (url: string, noteId: string) => CorpusPath;
@@ -32,7 +37,7 @@ export interface SpideringOptions {
   interactive: boolean;
   useBrowser: boolean;
   cwd: string;
-  downloads: string;
+  corpusRoot: string;
   logpath: string;
   input?: string;
 }
@@ -41,7 +46,7 @@ export const defaultSpideringOptions: SpideringOptions = {
   interactive: true,
   useBrowser: true,
   cwd: ".",
-  downloads: ".",
+  corpusRoot: ".",
   logpath: "./spidering.log",
 };
 
@@ -60,7 +65,7 @@ function initLogger(logpath: string): Logger {
     level: "info",
     format: combine(timestamp(), format.prettyPrint()),
     transports: [
-      new transports.File({filename: logname}),
+      new transports.File({ filename: logname }),
       new transports.Console(),
     ],
   });
@@ -72,12 +77,12 @@ export function createSpideringInputStream(csvfile: string): Stream {
   return pumpify.obj(
     csvStream(csvfile),
     throughFunc((csvRec: string[]) => {
-      const [noteId, dblpConfId, paperTitle, url] = csvRec;
+      const [noteId, dblpConfId] = csvRec;
+      const url = csvRec[csvRec.length-1];
       return {
         url,
         noteId,
-        dblpConfId,
-        paperTitle,
+        dblpConfId
       }
     })
   );
@@ -99,7 +104,7 @@ async function processOneSpiderRec(rec: SpideringRec, env: SpideringEnv, currStr
       case "skip":
         break;
       case "quit":
-        env.logger.info({event: "user exiting spider"});
+        env.logger.info({ event: "user exiting spider" });
         currStream.destroy();
         break;
     }
@@ -110,29 +115,29 @@ async function processOneSpiderRec(rec: SpideringRec, env: SpideringEnv, currStr
   await _loop(nextActions);
 
   if (fetched) {
-    env.logger.info({event: "url fetched", url});
+    env.logger.info({ event: "url fetched", url });
     const downloadDir = env.urlToCorpusPath(url, rec.noteId);
-    const downloadFilename = env.timestampFilename("download.html");
-    const downloadFilepath = path.resolve(downloadDir, downloadFilename);
-      // const downloadFilename = spideringRecs.getRecDownloadFilename(rec);
+    const downloadFilenamez = env.timestampFilename("download.html");
+    const downloadFilepath = path.resolve(downloadDir, downloadFilenamez);
+    // const downloadFilename = spideringRecs.getRecDownloadFilename(rec);
     const exists = fs.existsSync(downloadFilepath);
     if (exists) {
-      fs.removeSync(downloadFilename);
+      fs.removeSync(downloadFilepath);
     }
     fs.mkdirsSync(downloadDir);
-    fs.writeFileSync(downloadFilename, fetched);
+    fs.writeFileSync(downloadFilepath, fetched);
   } else {
-    env.logger.info({event: "url not fetched", url});
+    env.logger.info({ event: "url not fetched", url });
   }
 }
 
 export async function createSpider(opts: SpideringOptions) {
   const logger = initLogger(opts.logpath);
-  logger.info({event: "initializing spider", config: opts});
+  logger.info({ event: "initializing spider", config: opts });
 
   const input = opts.input;
   if (!input) {
-    logger.info({event: "fatal error: no input file", config: opts});
+    logger.info({ event: "fatal error: no input file", config: opts });
     return;
   }
 
@@ -144,8 +149,10 @@ export async function createSpider(opts: SpideringOptions) {
   };
 
   const urlToCorpusPath = (url: string, noteId: string) => {
+    const cwd = opts.cwd;
+    const corpusRoot = path.resolve(cwd, opts.corpusRoot);
     const leading = makeCorpusEntryLeadingPath(url);
-    return `${leading}/${noteId}.d`;
+    return path.resolve(corpusRoot, leading, `${noteId}.d`)
   };
 
   const prompt = opts.interactive ? promptForAction : alwaysDownload;
@@ -170,12 +177,15 @@ export async function createSpider(opts: SpideringOptions) {
     throughEnvFunc(processOneSpiderRec),
   );
 
-  logger.info({event: "starting spider"});
-  str.on("data", () => {
-    //
+  logger.info({ event: "starting spider" });
+
+  str.on("data", () => undefined);
+
+  str.on("end", () => {
+    logger.info({ event: "shutting down spider" });
+    closeFetcher();
   });
 
-  closeFetcher();
 }
 
 async function fetchViaAxios(): Promise<[FetchUrlFn, ShutdownFn]> {
@@ -187,7 +197,7 @@ async function fetchViaAxios(): Promise<[FetchUrlFn, ShutdownFn]> {
 }
 
 async function alwaysDownload(): Promise<UserAction[]> {
-  return [{action: "download"}];
+  return [{ action: "download" }];
 }
 
 interface UserAction {
@@ -203,9 +213,9 @@ async function promptForAction(url: string): Promise<UserAction[]> {
       name: "value",
       message: `What to do with ${url}?`,
       choices: [
-        {title: "Download", value: "download"},
-        {title: "Skip", value: "skip"},
-        {title: "Quit", value: "quit"},
+        { title: "Download", value: "download" },
+        { title: "Skip", value: "skip" },
+        { title: "Quit", value: "quit" },
       ],
       initial: 0,
     });
@@ -214,17 +224,17 @@ async function promptForAction(url: string): Promise<UserAction[]> {
 
     switch (action) {
       case "mark":
-        actions.push({action});
+        actions.push({ action });
         actions.push(...(await _loop([])));
         break;
       case "filter": {
         const filter = await promptForFilter();
-        actions.push({action, value: filter});
+        actions.push({ action, value: filter });
         actions.push(...(await _loop([])));
         break;
       }
       default:
-        actions.push({action});
+        actions.push({ action });
         break;
     }
 

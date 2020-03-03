@@ -18,6 +18,14 @@ import {
   stanzaChunker,
 } from "./util/stream-utils";
 
+import { 
+  makeNowTimeString
+} from "./util/utils";
+
+export {
+  makeNowTimeString
+};
+
 export {
   PumpBuilder,
   createPump,

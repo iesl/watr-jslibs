@@ -18,9 +18,9 @@ import {
   queryContent,
 } from "~/extract/field-extract-utils";
 
-import {ExpandedDir} from "commons/dist/corpora";
+import {ExpandedDir} from "commons";
 
-import {BufferedLogger} from "commons/dist/util/logging";
+import {BufferedLogger} from "commons";
 
 import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
 

@@ -2,11 +2,13 @@ import _ from "lodash";
 
 import path from "path";
 import yargs, {Argv} from "yargs";
-import {yall, opt, config} from "commons/dist/cli/arglib";
+import { arglib } from "commons";
 import {prettyPrint} from "commons";
 import {reviewCorpus} from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import { reviewAbstractQuality } from '~/qa-editing/qa-edits';
+
+const { opt, config, yall } = arglib;
 
 yargs.command(
   "collect-stats",
@@ -88,13 +90,3 @@ yargs.command(
     reviewAbstractQuality({ corpusRoot, logpath, inputlog, outputlog, filters });
   },
 );
-
-yargs
-  .demandCommand(1, "You need at least one command before moving on")
-  .strict()
-  .help()
-  .fail(function(msg, err, _yargs) {
-    const errmsg = err ? `${err.name}: ${err.message}` : "";
-    prettyPrint({msg, errmsg});
-    process.exit(1);
-  }).argv;

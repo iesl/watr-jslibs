@@ -14,8 +14,6 @@
     "build": "tsc",
     "lint": "eslint --config .eslintrc.js --ext .ts --ignore-path ../../.gitignore ./src",
     "cli": "bin/ts-node src/cli/index.ts",
-    "main": "bin/ts-node src/cli/main.ts",
-    "corpus": "bin/ts-node src/cli/corpus-cli.ts",
     "test": "jest",
     "setup": "yarn link commons && npm install"
   },

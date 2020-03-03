@@ -1,8 +1,13 @@
 import yargs, {Argv} from "yargs";
 
 import {prettyPrint} from "commons";
-import {yall, opt} from "commons/dist/cli/arglib";
+import { arglib } from "commons";
 import {normalizeHtmls} from "~/extract/reshape-html";
+
+const { opt, yall } = arglib;
+
+import "./spider-cli";
+import "./corpus-cli";
 
 yargs.commandDir(".", {
   recurse: false,

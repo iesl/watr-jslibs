@@ -108,7 +108,7 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
         }
 
         case "text": {
-          const d = node.data?.trim();
+          const d = node.data? node.data.trim() : undefined;
           if (d && d.length > 0) {
             const lines = d.split("\n");
             const indentedLines = indentStrings(
@@ -123,7 +123,7 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
         case "comment": {
           const line = `${lpad}comment`;
           finalTree.push(line);
-          const d = node.data?.trim();
+          const d = node.data? node.data.trim() : undefined;
           if (d && d.length > 0) {
             const lines = d.split("\n");
             const indentedLines = indentStrings(
