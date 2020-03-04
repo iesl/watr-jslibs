@@ -35,6 +35,9 @@ export function writeDefaultEntryLogs(
   entryDir: ExpandedDir,
 ): void {
   const propfile = path.join(entryDir.dir, "entry-props.json");
+
+  log.setHeader("entry", entryDir.dir);
+
   if (!fs.existsSync(propfile)) return;
 
   const entryProps = fs.readJsonSync(
@@ -46,8 +49,7 @@ export function writeDefaultEntryLogs(
   const url: string = entryProps.url;
   const urlp = urlparse(url);
 
-  log.setHeader("entry", entryDir.dir);
-
+  log.append(`entry.url=${url}`);
   log.append(`entry.url.host=${urlp.host}`);
   log.append(`entry.venue=${venue}`);
   log.append(`entry.venue.year=${year}`);

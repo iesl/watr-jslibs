@@ -1,29 +1,38 @@
 import _ from "lodash";
 
 import path from "path";
-import yargs, {Argv} from "yargs";
+import yargs from "yargs";
 import { arglib } from "commons";
-import {prettyPrint} from "commons";
-import {reviewCorpus} from "~/qa-editing/qa-review";
+import { reviewCorpus, runAbstractFinder } from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import { reviewAbstractQuality } from '~/qa-editing/qa-edits';
 
-const { opt, config, yall } = arglib;
+const { opt, config } = arglib;
 
 yargs.command(
   "collect-stats",
   "collect some coverage stats regarding abstract extraction",
-  function config(ya: Argv) {
-    yall(ya, [
-      opt.setCwd,
-      opt.existingFile("logfile: logfile on which to base the stats"),
-      opt.existingDir("corpus-root: root directory for corpus files"),
-    ]);
-  },
-
-  function exec(args: any) {
+  config(
+    opt.cwd,
+    opt.existingFile("logfile: logfile on which to base the stats"),
+    opt.existingDir("corpus-root: root directory for corpus files"),
+  ),
+  (args: any) => {
     const fromLog = path.resolve(args.cwd, args.logfile);
     collectAbstractExtractionStats(fromLog, [])
+  },
+);
+
+yargs.command(
+  "find-abstracts",
+  "run the abstract finder over htmls in corpus",
+  config(
+    opt.cwd,
+    opt.existingDir("logpath: directory to put log files"),
+    opt.existingDir("corpus-root: root directory for corpus files"),
+  ),
+  (args: any) => {
+    runAbstractFinder(args);
   },
 );
 
@@ -56,7 +65,7 @@ yargs.command(
     const corpusRoot = path.resolve(args.cwd, args.corpusRoot);
     const logpath = path.resolve(args.cwd, args.logpath);
     const filters = args.regex;
-    reviewCorpus({corpusRoot, logpath, phase, prevPhase, filters});
+    reviewCorpus({ corpusRoot, logpath, phase, prevPhase, filters });
   },
 );
 

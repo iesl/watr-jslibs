@@ -11,6 +11,8 @@ import {
   throughFunc,
   csvStream,
   initEnv, throughEnvFunc, sliceStream, makeCorpusEntryLeadingPath,
+  filterEnvStream,
+  expandDir,
   prettyPrint
 } from "commons";
 
@@ -73,6 +75,56 @@ function initLogger(logpath: string): Logger {
   return logger;
 }
 
+export function oneoff(inputCsv: string, inputJson: string, logpath: string) {
+  const logname = path.resolve(logpath, "oneoff.log");
+  const logger = createLogger({
+    level: "info",
+    format: combine(timestamp(), format.prettyPrint()),
+    transports: [
+      new transports.File({
+        filename: logname,
+        format: format.combine(format.timestamp(), format.json()),
+      }),
+      new transports.Console(),
+    ],
+  });
+
+  const jsobj: any[] = fs.readJsonSync(inputJson);
+
+  const pairs = _.map(jsobj, ({ url, finalUrl }) => {
+    return [url, { url, finalUrl }];
+  });
+  const dict = _.fromPairs(pairs);
+
+  const pump = pumpify.obj(
+    csvStream(inputCsv),
+    throughFunc((csvRec: string[]) => {
+      const [noteId, dblpConfId] = csvRec;
+      const url = csvRec[csvRec.length-1];
+      if (_.has(dict, url)) {
+        _.update(dict, [url], (prev: object) => {
+          return {
+            noteId, dblpConfId,
+            ...prev
+          };
+        });
+      }
+      return true;
+    })
+  );
+
+  pump.on("data", () => true);
+  pump.on("end", () => {
+    const recs = _.toPairs(dict)
+      .map(([, v]) => v);
+
+    _.each(recs, r => {
+      logger.info(r);
+    });
+    // fs.writeJSONSync("oneoff.json", recs);
+  });
+}
+
 export function createSpideringInputStream(csvfile: string): Stream {
   return pumpify.obj(
     csvStream(csvfile),
@@ -131,6 +183,27 @@ async function processOneSpiderRec(rec: SpideringRec, env: SpideringEnv, currStr
   }
 }
 
+
+const filterUndownloadedUrls = filterEnvStream((rec: SpideringRec, env: SpideringEnv) => {
+  const downloadDir = env.urlToCorpusPath(rec.url, rec.noteId);
+  const dirExists = fs.existsSync(downloadDir);
+  if (!dirExists) {
+    return true;
+  }
+
+  const expanded = expandDir(downloadDir);
+
+  const hasHtml = _.some(
+    expanded.files,
+    f => f.startsWith("download") && f.endsWith("html")
+  );
+  if (hasHtml) {
+    env.logger.info({ event: "skipping url: already downloaded"});
+  }
+
+  return !hasHtml;
+});
+
 export async function createSpider(opts: SpideringOptions) {
   const logger = initLogger(opts.logpath);
   logger.info({ event: "initializing spider", config: opts });
@@ -172,8 +245,8 @@ export async function createSpider(opts: SpideringOptions) {
   const inputStream = createSpideringInputStream(input);
   const str = pumpify.obj(
     inputStream,
-    sliceStream(0, 4),
     initEnv(() => env),
+    filterUndownloadedUrls,
     throughEnvFunc(processOneSpiderRec),
   );
 

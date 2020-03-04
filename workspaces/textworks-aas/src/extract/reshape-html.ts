@@ -221,21 +221,13 @@ export function htmlToCssNormTransform(): Transform {
 export async function normalizeHtmls(corpusRoot: string) {
   const entryStream = corpusEntryStream(corpusRoot);
 
-  const pipe = pumpify.obj(
+  const pipef = pumpify.obj(
     entryStream,
-    prettyPrintTrans("normalize"),
     expandDirTrans,
-    htmlToCssNormTransform(),
-    (err?: Error) => {
-      if (err) {
-        console.log(`Error:`, err);
-      } else {
-        console.log(`Done.`);
-      }
-    },
+    htmlToCssNormTransform()
   );
 
-  pipe.on("data", () => undefined);
+  pipef.on("data", () => undefined);
 }
 
 function readFile(leading: string, ...more: string[]): string | undefined {

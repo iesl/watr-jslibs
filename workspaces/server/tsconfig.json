@@ -8,6 +8,9 @@
   "include": [
     "./src",
     "../commons/@types/**/*"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 
 }

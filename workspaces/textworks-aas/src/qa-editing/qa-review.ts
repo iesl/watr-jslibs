@@ -6,6 +6,7 @@ import {
   corpusEntryStream,
   expandDirTrans,
   ExpandedDir,
+  sliceStream,
 } from "commons";
 
 
@@ -158,6 +159,22 @@ function initReviewCorpus({
     progressCount(500),
     expandDirTrans,
     tapStream(reviewFunc),
+  );
+
+  pipe.on("data", () => undefined);
+}
+
+export function runAbstractFinder({
+  corpusRoot,
+  logpath,
+}: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">) {
+  const entryStream = corpusEntryStream(corpusRoot);
+  const logger = initLogger(logpath, "abstract-finder");
+  const pipe = pumpify.obj(
+    entryStream,
+    progressCount(500),
+    expandDirTrans,
+    extractAbstractTransform(logger),
   );
 
   pipe.on("data", () => undefined);

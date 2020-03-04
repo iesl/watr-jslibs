@@ -152,9 +152,10 @@ function extractAbstract(exDir: ExpandedDir, log: BufferedLogger): void {
     if (writeAbstracts) {
       if (abstractFields.length > 0) {
         console.log(`writing ${abstractFields.length} abstracts to ${extrAbsFilename}`,);
+        log.append(`field.abstract.extract=true`);
+        log.append(`field.abstract.extract.count=${abstractFields.length}`);
         fs.writeJsonSync(extrAbsFilename, abstractFields);
       } else {
-        console.log(`no abstracts: ${htmlFile}`);
         log.append(`field.abstract.extract=false`);
       }
     }
@@ -168,10 +169,10 @@ export function extractAbstractTransform(log: BufferedLogger): Transform {
       try {
         writeDefaultEntryLogs(log, exDir);
         extractAbstract(exDir, log);
-        log.commitLogs();
       } catch (err) {
         console.log(`err ${err}`);
       }
+      log.commitLogs();
       return next(null, exDir);
     },
   );

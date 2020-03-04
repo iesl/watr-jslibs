@@ -1,33 +1,42 @@
-import yargs, {Argv} from "yargs";
+import yargs from "yargs";
 
-import {prettyPrint} from "commons";
+import { prettyPrint } from "commons";
 import { arglib } from "commons";
-import {normalizeHtmls} from "~/extract/reshape-html";
+import { normalizeHtmls } from "~/extract/reshape-html";
 
-const { opt, yall } = arglib;
+const { opt, config } = arglib;
 
 import "./spider-cli";
 import "./corpus-cli";
-
-yargs.commandDir(".", {
-  recurse: false,
-  extensions: ["ts"],
-  include: /.*-cmd.ts/,
-});
+import { oneoff } from '~/spider/spidering';
 
 yargs.command(
   "write-norms",
-  "desc.",
-  (yargs: Argv) => {
-    yall(yargs, [
-      opt.existingDir("corpus-root: root directory for downloaded files"),
-    ]);
-  },
+  "Turn *.html files into a normalized form",
+  config(
+    opt.cwd,
+    opt.existingDir("corpus-root: root directory for corpus files"),
+  ),
   (argv: any) => {
-    const {corpusRoot} = argv;
+    const { corpusRoot } = argv;
     normalizeHtmls(corpusRoot);
   },
 );
+
+yargs.command(
+  "oneoff",
+  "desc.",
+  config(
+    opt.cwd,
+    opt.existingDir("logpath: directory to put log files"),
+    opt.existingFile("input-csv: ..."),
+    opt.existingFile("input-json: ..."),
+  ),
+  (opts: any) => {
+    oneoff(opts.inputCsv, opts.inputJson, opts.logpath);
+  },
+);
+
 
 
 yargs
@@ -36,6 +45,6 @@ yargs
   .help()
   .fail(function(msg, err, _yargs) {
     const errmsg = err ? `${err.name}: ${err.message}` : "";
-    prettyPrint({msg, errmsg});
+    prettyPrint({ msg, errmsg });
     process.exit(1);
   }).argv;

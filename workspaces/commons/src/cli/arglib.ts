@@ -3,16 +3,12 @@ import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
 
-import {Argv, Arguments, Options} from "yargs";
+import { Argv, Arguments, Options } from "yargs";
 
-type ArgvApp = (ya: Argv) => Argv;
+export type ArgvApp = (ya: Argv) => Argv;
 
 export function config(...fs: ArgvApp[]): ArgvApp {
-  return ya => yall(ya, fs)
-}
-
-export function yall(ya: Argv, fs: ArgvApp[]): Argv {
-  return _.reduce(fs, (acc, f) => f(acc), ya);
+  return ya => _.reduce(fs, (acc, f) => f(acc), ya);
 }
 
 function resolveArgPath(argv: Arguments, pathkey: string): string | undefined {
@@ -31,7 +27,11 @@ function resolveArgPath(argv: Arguments, pathkey: string): string | undefined {
     }
   }
   pathvalue = path.normalize(pathvalue);
+  const ccKey = _.camelCase(pathkey);
+
   argv[pathkey] = pathvalue;
+  argv[ccKey] = pathvalue;
+
   return pathvalue;
 }
 
@@ -55,6 +55,7 @@ const optAndDesc = (optAndDesc: string, ext?: Options) => (ya: Argv) => {
 
   return ya.option(optname, opts);
 };
+
 const existingPath = (pathAndDesc: string) => (ya: Argv) => {
   let [pathname, desc] = pathAndDesc.includes(":")
     ? pathAndDesc.split(":")
@@ -73,10 +74,12 @@ const existingPath = (pathAndDesc: string) => (ya: Argv) => {
     if (p && fs.existsSync(p)) {
       return argv;
     }
-    return ya.check(() => {
-      return false;
+    _.update(argv, ['errors'], (prev: string[]|undefined|null) => {
+      const newval = prev || [];
+      return _.concat(newval, [`--${pathname}: ${p} doesn't exist`]);
     });
-  }, true);
+    return argv;
+  }, /* applyBeforeValidation= */ true);
 
   return ya;
 };
@@ -115,7 +118,7 @@ export const configFile = (ya: Argv) => {
       return argv;
     }
     return argv;
-  }, true);
+  }, /* applyBeforeValidation= */ true);
 
   return ya;
 };
@@ -124,8 +127,8 @@ export const setOpt = (ya: Argv) => {
   return ya.option;
 };
 
+// opt.dir.(exists|parentExists|ancestorExists)
 export const opt = {
-  setCwd,
   config: configFile,
   existingDir,
   existingFile,
@@ -135,37 +138,3 @@ export const opt = {
   cwd: setCwd,
   ion: optAndDesc,
 };
-
-// const configPath = findUp.sync(configFile, {
-//   cwd: process.cwd(),
-//   type: 'file',
-//   allowSymlinks: true
-// });
-
-/**
-   Options:
-   alias                     // string or array of strings, alias(es) for the canonical option key, see alias()
-   array                     // boolean, interpret option as an array, see array()
-   boolean                   // boolean, interpret option as a boolean flag, see boolean()
-   choices                   // value or array of values, limit valid option arguments to a predefined set, see choices()
-   coerce                    // function, coerce or transform parsed command line values into another value, see coerce()
-   config                    // boolean, interpret option as a path to a JSON config file, see config()
-   configParser              // function, provide a custom config parsing function, see config()
-   conflicts                 // string or array of strings, require certain keys not to be set, see conflicts()
-   count                     // boolean, interpret option as a count of boolean flags, see count()
-   default                   // value, set a default value for the option, see default()
-   defaultDescription        // string, use this description for the default value in help content, see default()
-   demandOption              // boolean or string, demand the option be given, with optional error message, see demandOption()
-   desc/describe/description // string, the option description for help content, see describe()
-   global                    // boolean, indicate that this key should not be reset when a command is invoked, see global()
-   group                     // string, when displaying usage instructions place the option under an alternative group heading, see group()
-   hidden                    // don’t display option in help output.
-   implies                   // string or array of strings, require certain keys to be set, see implies()
-   nargs                     // number, specify how many arguments should be consumed for the option, see nargs()
-   normalize: true,                 // boolean, apply path.normalize() to the option, see normalize()
-   number                    // boolean, interpret option as a number, number()
-   requiresArg               // boolean, require the option be specified with a value, see requiresArg()
-   skipValidation: false,    // boolean, skips validation if the option is present, see skipValidation()
-   string: true,             // boolean, interpret option as a string, see string()
-   type: 'array'             // | 'boolean' | 'count'| 'number' |'string'
-*/

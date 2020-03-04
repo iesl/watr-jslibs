@@ -21,7 +21,7 @@ describe("Stream utils ", () => {
     })
   }
 
-  it.only("should merge a pipeline stream", async done => {
+  it("should merge a pipeline stream", async done => {
     const astr = es.readArray("abc".split(""));
     const pipe = pumpify.obj(
       astr,
@@ -78,10 +78,7 @@ describe("Stream utils ", () => {
     const pipe = pumpify.obj(
       astr,
       prettyPrintTrans("line"),
-      chunker,
-      (err: Error) => {
-        console.log("err", err);
-      },
+      chunker
     );
 
     pipe.on("data", (data: string) => {
