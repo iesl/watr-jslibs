@@ -22,7 +22,7 @@ import {
   writeDefaultEntryLogs,
 } from "./qa-logging";
 
-function sanityCheckAbstract(log: BufferedLogger, entryDir: ExpandedDir): void {
+export function sanityCheckAbstract(log: BufferedLogger, entryDir: ExpandedDir): void {
   const abstractFiles = gatherAbstractFiles(entryDir);
   const abstractStrs = _(abstractFiles)
     .flatMap(([filename, fields]) => {

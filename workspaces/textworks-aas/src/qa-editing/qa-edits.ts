@@ -6,19 +6,19 @@ import path from "path";
 import {
   ExpandedDir,
   expandDir,
+  makeCorpusEntryLeadingPath,
 } from "commons";
 
-import { writeDefaultEntryLogs, createFilteredLogStream} from "./qa-logging";
-import {  initEnv, throughEnvFunc, throughFunc,  filterEnvStream} from "commons";
-import { BufferedLogger, initBufferedLogger} from "commons";
-import {gatherAbstractFiles} from "~/corpora/bundler";
-import {Field} from "~/extract/field-extract";
+import { writeDefaultEntryLogs, createFilteredLogStream } from "./qa-logging";
+import { initEnv, throughEnvFunc, throughFunc, filterEnvStream } from "commons";
+import { BufferedLogger, initBufferedLogger } from "commons";
+import { gatherAbstractFiles } from "~/corpora/bundler";
+import { Field } from "~/extract/field-extract";
 import { runInteractive } from './qa-interactive';
 import {
   createRadix,
   Radix,
   radInsert,
-  radGet,
 } from "commons";
 
 interface ReviewArgs {
@@ -64,18 +64,19 @@ export async function reviewAbstractQuality({
   outputlog,
   inputlog,
   filters,
+  corpusRoot
 }: ReviewArgs) {
 
-  // outputlog exists, start from where it left off...
-  const radFilter = await createResumeFilter(outputlog);
-  const shouldSkip = (entryPath: string) => {
-    const radpath = entryPathToRadPath(entryPath);
-    const isInFilter = radGet(radFilter, radpath) !== undefined;
-    if (isInFilter) {
-      console.log(`Skipping filtered ${entryPath}`)
-    }
-    return !isInFilter;
-  };
+  // // outputlog exists, start from where it left off...
+  // const radFilter = await createResumeFilter(outputlog);
+  // const shouldSkip = (entryPath: string) => {
+  //   const radpath = entryPathToRadPath(entryPath);
+  //   const isInFilter = radGet(radFilter, radpath) !== undefined;
+  //   if (isInFilter) {
+  //     console.log(`Skipping filtered ${entryPath}`)
+  //   }
+  //   return !isInFilter;
+  // };
 
   const filterREs: RegExp[] =
     filters !== undefined ? filters.map(f => new RegExp(f)) : [];
@@ -83,8 +84,22 @@ export async function reviewAbstractQuality({
   const pipef = pumpify.obj(
     createFilteredLogStream(inputlog, filterREs),
     initEnv<any, ReviewEnv>(() => ({ logger: initBufferedLogger(outputlog), interactive: false })),
-    throughEnvFunc((log: any) => log.message.entry),
-    filterEnvStream(shouldSkip),
+    throughEnvFunc((log: any) => {
+      const { url, noteId } = log.message;
+      const leading = makeCorpusEntryLeadingPath(url);
+      const entryPath = path.resolve(corpusRoot, leading, `${noteId}.d`)
+
+      const propfile = path.join(entryPath, "entry-props.json");
+
+      const entryExists = fs.existsSync(entryPath);
+      const propfileExists = fs.existsSync(propfile);
+
+      if (entryExists && !propfileExists) {
+        fs.writeJsonSync(propfile, log.message);
+      }
+      return entryPath;
+    }),
+    filterEnvStream((path: string) => fs.existsSync(path)),
     throughEnvFunc(expandDir),
     throughEnvFunc(reviewEntry),
   );
@@ -111,7 +126,8 @@ export interface CleaningRule {
 
 }
 const CleaningRules: CleaningRule[] = [
-  { name: "starts w/'abstract'",
+  {
+    name: "starts w/'abstract'",
     precondition: (str) => {
       const strim = str.trim();
       return (/^abstract/i).test(strim);
@@ -122,7 +138,8 @@ const CleaningRules: CleaningRule[] = [
     }
   },
 
-  { name: "clip @ 'References'",
+  {
+    name: "clip @ 'References'",
     precondition: (str) => {
       const regex = /(References|REFERENCES)/;
       const strim = str.trim();
@@ -135,7 +152,8 @@ const CleaningRules: CleaningRule[] = [
     }
   },
 
-  { name: "clip @ 'Keywords'",
+  {
+    name: "clip @ 'Keywords'",
     precondition: (str) => {
       const regex = /(Keywords)/;
       const strim = str.trim();
@@ -147,7 +165,8 @@ const CleaningRules: CleaningRule[] = [
       return strim.replace(regex, "");
     }
   },
-  { name: "clip @ 'Full Text: PDF'",
+  {
+    name: "clip @ 'Full Text: PDF'",
     precondition: (str) => {
       const regex = /(Full Text:).*$/;
       const strim = str.trim();
@@ -159,7 +178,8 @@ const CleaningRules: CleaningRule[] = [
       return strim.replace(regex, "");
     }
   },
-  { name: "clip @ 'Related Material'",
+  {
+    name: "clip @ 'Related Material'",
     precondition: (str) => {
       const regex = /Related Material/;
       const strim = str.trim();
@@ -172,7 +192,8 @@ const CleaningRules: CleaningRule[] = [
     }
   },
 
-  { name: "No Abstract Available",
+  {
+    name: "No Abstract Available",
     precondition: (str) => {
       const regex = /no abstract available/i;
       const strim = str.trim();
@@ -183,7 +204,8 @@ const CleaningRules: CleaningRule[] = [
     }
   },
 
-  { name: "clip @ Disqus comments",
+  {
+    name: "clip @ Disqus comments",
     precondition: (str) => {
       const regex = /Comments[\d ]+Comments.*$/i;
       const strim = str.trim();
@@ -195,7 +217,8 @@ const CleaningRules: CleaningRule[] = [
       return strim.replace(regex, "");
     }
   },
-  { name: "clip @ trailing tags <.. />",
+  {
+    name: "clip @ trailing tags <.. />",
     precondition: (str) => {
       const regex = /<ETX.*$/i;
       const strim = str.trim();
@@ -207,7 +230,8 @@ const CleaningRules: CleaningRule[] = [
       return strim.replace(regex, "");
     }
   },
-  { name: "clip @ trailing <",
+  {
+    name: "clip @ trailing <",
     precondition: (str) => {
       const regex = /<$/i;
       const strim = str.trim();
@@ -219,7 +243,8 @@ const CleaningRules: CleaningRule[] = [
       return strim.replace(regex, "");
     }
   },
-  { name: "trim extra space",
+  {
+    name: "trim extra space",
     precondition: (str) => {
       const regex = /[ ][ ]+/g;
       const strim = str.trim();
@@ -231,7 +256,8 @@ const CleaningRules: CleaningRule[] = [
       return strim.replace(regex, " ");
     }
   },
-  { name: "remove newlines",
+  {
+    name: "remove newlines",
     precondition: () => {
       return true;
     },
@@ -239,7 +265,8 @@ const CleaningRules: CleaningRule[] = [
       return str.split('\n').join(' ');
     }
   },
-  { name: "abstract too short",
+  {
+    name: "abstract too short",
     precondition: (str) => {
       return str.length < 120;
     },
@@ -264,7 +291,7 @@ async function reviewInteractive(logger: BufferedLogger, entryDir: ExpandedDir):
         return _.map(fields, (f, i) => [filename, f.value, i] as TupleSSN)
           .filter(([, v]) => v !== undefined);
       })
-      .map(([fn, f, i]) => [fn, f? f.trim():"", i] as TupleSSN)
+      .map(([fn, f, i]) => [fn, f ? f.trim() : "", i] as TupleSSN)
       .value();
 
   if (abstractStrs.length > 0) {
@@ -284,10 +311,10 @@ async function reviewNonInteractive(logger: BufferedLogger, entryDir: ExpandedDi
           .filter(([, v]) => v !== undefined);
       })
       .map(([fn, f, i]) => {
-        const cleaned = applyCleaningRules(f? f.trim() : "");
+        const cleaned = applyCleaningRules(f ? f.trim() : "");
         return [fn, cleaned, i] as TupleSSN;
       })
-      .filter(([, f,]) => f!==undefined && f.length > 0)
+      .filter(([, f,]) => f !== undefined && f.length > 0)
       .value();
 
   if (abstractStrs.length > 0) {

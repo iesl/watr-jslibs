@@ -77,52 +77,14 @@ function initLogger(logpath: string): Logger {
 
 export function oneoff(inputCsv: string, inputJson: string, logpath: string) {
   const logname = path.resolve(logpath, "oneoff.log");
-  const logger = createLogger({
-    level: "info",
-    format: combine(timestamp(), format.prettyPrint()),
-    transports: [
-      new transports.File({
-        filename: logname,
-        format: format.combine(format.timestamp(), format.json()),
-      }),
-      new transports.Console(),
-    ],
-  });
-
-  const jsobj: any[] = fs.readJsonSync(inputJson);
-
-  const pairs = _.map(jsobj, ({ url, finalUrl }) => {
-    return [url, { url, finalUrl }];
-  });
-  const dict = _.fromPairs(pairs);
 
   const pump = pumpify.obj(
     csvStream(inputCsv),
-    throughFunc((csvRec: string[]) => {
-      const [noteId, dblpConfId] = csvRec;
-      const url = csvRec[csvRec.length-1];
-      if (_.has(dict, url)) {
-        _.update(dict, [url], (prev: object) => {
-          return {
-            noteId, dblpConfId,
-            ...prev
-          };
-        });
-      }
-      return true;
-    })
   );
 
   pump.on("data", () => true);
-  pump.on("end", () => {
-    const recs = _.toPairs(dict)
-      .map(([, v]) => v);
 
-    _.each(recs, r => {
-      logger.info(r);
-    });
-    // fs.writeJSONSync("oneoff.json", recs);
-  });
+
 }
 
 export function createSpideringInputStream(csvfile: string): Stream {
