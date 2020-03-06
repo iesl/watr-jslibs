@@ -1,25 +1,21 @@
+// import { storyItems } from '~/pages/stories/autogen/story-list';
+
 export default {
+  components: {},
+
   data() {
     return {
       clipped: false,
       drawer: false,
       fixed: false,
       items: [
-        {
-          icon: 'mdi-apps',
-          title: 'Welcome',
-          to: '/'
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire'
-        }
+        { icon: 'mdi-apps', title: 'Home', to: '/' },
+        // ...storyItems
       ],
       miniVariant: false,
-      right: true,
+      right: false,
       rightDrawer: false,
-      title: 'Vuetify.js'
+      title: 'UI Component Development Stories'
     }
   }
 }
