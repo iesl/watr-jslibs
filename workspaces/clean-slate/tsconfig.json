@@ -1,34 +1,36 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "allowJs": true,
+
     "target": "es2018",
     "module": "esnext",
     "moduleResolution": "node",
+
     "lib": [
       "esnext",
       "esnext.asynciterable",
       "dom"
     ],
+
     "esModuleInterop": true,
-    "allowJs": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
     "noEmit": true,
-    "baseUrl": ".",
-    "paths": {
-      "~/*": [
-        "./src/*"
-      ],
-      "@/*": [
-        "./src/*"
-      ]
-    },
+
     "types": [
       "@types/jest",
       "@types/node",
       "@nuxt/types"
-    ]
+    ],
+
+    "paths": {
+      "~/*": ["./src/*"],
+      "@/*": ["./src/*"]
+    }
   },
+
   "exclude": [
     "node_modules"
   ]
