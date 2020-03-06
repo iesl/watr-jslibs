@@ -1,5 +1,11 @@
 {
   "semi": false,
   "arrowParens": "always",
-  "singleQuote": true
+  "singleQuote": true,
+  "overrides": [
+    {
+      "files": ["*.html", "*.vue"],
+      "html-whitespace-sensitivity": "ignore"
+    }
+  ]
 }
