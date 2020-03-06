@@ -1,7 +1,7 @@
 {
-  "name": "clean-slate",
-  "version": "1.0.0",
-  "description": "My excellent Nuxt.js project",
+  "name": "watrfront",
+  "version": "0.1.0",
+  "description": "Web Frontends for WatrWorks projects",
   "author": "Adam Saunders",
   "private": true,
   "scripts": {
