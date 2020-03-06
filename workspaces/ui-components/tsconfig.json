@@ -3,8 +3,8 @@
     "baseUrl": ".",
     "allowJs": true,
 
-    "target": "esnext",
-    "module": "es6",
+    "target": "es2018",
+    "module": "esnext",
     "moduleResolution": "node",
 
     "lib": [
@@ -15,43 +15,23 @@
 
     "esModuleInterop": true,
     "resolveJsonModule": true,
-
-    "importHelpers": true,
-    "allowSyntheticDefaultImports": true,
-
-    "experimentalDecorators": true,
+    "sourceMap": true,
     "strict": true,
     "noEmit": true,
 
-
-    "noImplicitReturns": true,
-    "noUnusedParameters": false,
-    "noUnusedLocals": false,
-
-    "inlineSourceMap": true,
-    "preserveConstEnums": true,
-
     "types": [
-      "jest",
-      "chai",
-      "@types/node"
+      "@types/jest",
+      "@types/node",
+      "@nuxt/types"
     ],
 
     "paths": {
-      "~/*":  ["./src/*"],
-      "@/*":  ["./*"],
-      "~~/*": ["./src/*"],
-      "@@/*": ["./*"]
+      "~/*": ["./src/*"],
+      "@/*": ["./src/*"]
     }
-
   },
-
-  "include": [
-    "src/**/*"
-  ],
 
   "exclude": [
     "node_modules"
   ]
-
 }

@@ -4,13 +4,20 @@ module.exports = {
     browser: true,
     node: true
   },
-
+  parserOptions: {
+    parser: 'babel-eslint'
+  },
   extends: [
-    '@nuxtjs/eslint-config-typescript',
-    // '@nuxtjs',
-    // 'plugin:nuxt/recommended'
+    '@nuxtjs',
+    // 'prettier',
+    // 'prettier/vue',
+    // 'plugin:prettier/recommended',
+    'plugin:nuxt/recommended'
   ],
-
+  plugins: [
+    'prettier'
+  ],
+  // add your custom rules here
   rules: {
     'no-unused-vars': 0,
     'vue/no-unused-components': 0,
@@ -20,11 +27,7 @@ module.exports = {
     "vue/max-attributes-per-line": ["off"],
     "vue/attributes-order": ["off"],
 
-    "vue/script-indent": ["warn", 2, {
-      "baseIndent": 1,
-      "switchCase": 0,
-      "ignores": []
-    }],
+    "vue/script-indent": ['off'],
 
     'vue/html-self-closing': ['warn', {
       'html': {
@@ -36,7 +39,6 @@ module.exports = {
     'space-before-function-paren': ['off']
   },
 
-
   "overrides": [
     {
       "files": ["*.vue"],
@@ -45,5 +47,4 @@ module.exports = {
       }
     }
   ]
-
 }
