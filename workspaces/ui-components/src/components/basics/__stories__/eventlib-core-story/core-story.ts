@@ -27,7 +27,6 @@ function setup() {
 
   const { selectionRef }  = eventlibSelect;
 
-
   function showMouseEvent(e: EMouseEvent) {
     const etype = e.origMouseEvent.type;
     const {x, y} = e.pos;

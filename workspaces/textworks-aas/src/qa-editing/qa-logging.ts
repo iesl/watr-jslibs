@@ -1,14 +1,14 @@
 import _ from "lodash";
 import path from "path";
 import fs from "fs-extra";
-import {Stream} from "stream";
+import { Stream } from "stream";
 import pumpify from "pumpify";
 import es from "event-stream";
 import urlparse from "url-parse";
 
-import {initBufferedLogger, BufferedLogger} from "commons/dist/util/logging";
-import {filterStream} from "commons/dist/util/stream-utils";
-import {ExpandedDir} from "commons/dist/corpora";
+import { initBufferedLogger, BufferedLogger } from "commons";
+import { filterStream } from "commons";
+import { ExpandedDir } from "commons";
 
 export function resolveLogfileName(logpath: string, phase: string): string {
   return path.resolve(logpath, logfileName(phase));

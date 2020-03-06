@@ -1,13 +1,12 @@
-
 import path from 'path'
 import util from 'util'
 import colors from 'vuetify/es5/util/colors'
 const resolve = path.resolve
 
-const modulesDir = [
-  resolve(__dirname, '../../node_modules/'),
-  resolve(__dirname, './node_modules/')
-]
+// const modulesDir = [
+//   // resolve(__dirname, '../../node_modules/'),
+//   resolve(__dirname, './node_modules/')
+// ]
 
 const rootDir = __dirname
 const srcDir = resolve(rootDir, 'src')
@@ -16,7 +15,7 @@ const tsconfigFile = resolve(rootDir, 'tsconfig.json')
 export default {
   rootDir,
   srcDir,
-  modulesDir,
+  // modulesDir,
 
   env: {
   },
@@ -70,15 +69,10 @@ export default {
    ** Nuxt.js dev-modules
    */
   buildModules: [
-    ['@nuxtjs/eslint-module', {
-      useEslintrc: true,
-      ignorePattern: [
-        '**/autogen/*.vue'
-      ]
-    }],
     '@nuxtjs/vuetify',
     '@nuxt/typescript-build'
   ],
+
   /*
    ** Nuxt.js modules
    */
@@ -120,8 +114,10 @@ export default {
     // You can extend webpack config here
     extend(config, ctx) {
     },
+
     babel: {
       presets({ isServer }, [preset, options]) {
+        console.log('babel', isServer);
       }
     }
   }

@@ -2,7 +2,16 @@
   "extends": "../commons/tsconfig.json",
 
   "compilerOptions": {
-    "baseUrl": "."
+    "baseUrl": ".",
+    "target": "es6",
+    "module": "commonjs",
+
+    "types": [
+      "jest",
+      "chai",
+      "@types/node",
+      "../commons/@types/pumpify"
+    ]
   },
 
   "include": [

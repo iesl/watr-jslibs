@@ -1,9 +1,7 @@
 
 import Koa, { Context } from 'koa';
-import  Router from 'koa-router';
-import  path   from 'path';
-import  send   from 'koa-send';
-import  json   from 'koa-json';
+import Router from 'koa-router';
+import json from 'koa-json';
 import opts from 'commander';
 
 import { initFileBasedRoutes } from './corpusRoutes';
@@ -16,38 +14,27 @@ opts
   .option('--corpus <path>', 'Path to corpus')
   .option('--public <path>', 'Path public assets')
   .parse(process.argv)
-;
+  ;
 
-const distRoot =  opts.public;
-const corpusRoot =  opts.corpus;
+const distRoot = opts.public;
+const corpusRoot = opts.corpus;
 
-rootRouter
-  .get('/', async function (ctx: Context) {
-    await send(ctx, 'index.html', { root: distRoot  });
-  })
-  // .get('/:file', async function(ctx: Context) {
-  //   console.log('getting file ', cts.params.file)
-  //   await send(ctx, ctx.params.file, { root: distRoot  });
-  // })
-  .get('/fonts/:file', async function(ctx: Context) {
-    await send(ctx, ctx.params.file, { root: path.join(distRoot, 'fonts') });
-  })
-  .get('/*', async function (ctx: Context) {
-    await send(ctx, 'index.html', { root: distRoot  });
-  })
-;
 
 const apiRouter = initFileBasedRoutes(corpusRoot);
 
-rootRouter.use(async function (ctx: Context, next) {
-  ctx.set('Access-Control-Allow-Origin', '*');
-  return next();
-}, apiRouter.routes());
+rootRouter
+  .use("/", ((ctx: Context, next) => {
+    ctx.set('Access-Control-Allow-Origin', '*');
+    return next();
+  }))
+  .use(apiRouter.routes())
+  .use(apiRouter.allowedMethods())
+;
 
 app
   .use(rootRouter.routes())
   .use(rootRouter.allowedMethods())
-  .use(json())
+  .use(json({ pretty: false }))
 ;
 
 app.listen(9000, function() {

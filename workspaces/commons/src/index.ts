@@ -18,7 +18,7 @@ import {
   stanzaChunker,
 } from "./util/stream-utils";
 
-import { 
+import {
   makeNowTimeString
 } from "./util/utils";
 
@@ -104,16 +104,16 @@ export {
   clipParagraph
 };
 
-// import {
-//   config,
-//   yall,
-//   setCwd,
-//   existingDir,
-//   existingFile,
-//   configFile,
-//   setOpt,
-//   opt,
-// } from "./cli/arglib"
-
 export * as arglib from "./cli/arglib"
 export * from "./corpora"
+export * from "./corpora/dirstream"
+
+// import {
+//   dirstream,
+//   stringStreamFilter
+// } from "./corpora/dirstream";
+
+// export {
+//   dirstream,
+//   stringStreamFilter
+// }

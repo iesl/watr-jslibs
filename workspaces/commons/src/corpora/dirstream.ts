@@ -3,21 +3,35 @@ import path from "path";
 import fs, {} from 'fs-extra';
 import stream, { Readable, Transform }  from 'stream';
 import through from 'through2';
+import { prettyPrint } from '~/util/pretty-print';
 
 
 interface DirStackEntry {
   fullpath: string;
   expanded: boolean;
+  files: string[];
 }
 
-export function dirsteam(root: string): Readable {
-  const stack: DirStackEntry[] = [{ fullpath: root, expanded: false }];
+export function dirstream(root: string, includeFiles?: boolean): Readable {
+  const incFiles = includeFiles || false;
+  const stack: DirStackEntry[] = [{ fullpath: root, expanded: false, files: [] }];
 
   function expand(): DirStackEntry | undefined {
     let top = _.last(stack)
     while ( top && !top.expanded ) {
       const topPath = top.fullpath;
       const dirEntries = fs.readdirSync(top.fullpath, {withFileTypes: true});
+      let fileNames: string[] = [];
+      if (incFiles) {
+        fileNames = _(dirEntries)
+          .filter(e => e.isFile())
+          .map(e => e.name)
+          .sort()
+          .map(e => path.join(topPath, e))
+          .value();
+
+      }
+
       const dirNames = _(dirEntries)
         .filter(e => e.isDirectory())
         .map(e => e.name)
@@ -27,12 +41,14 @@ export function dirsteam(root: string): Readable {
           const fullpath = path.join(topPath, e);
           return {
             fullpath,
-            expanded: false
+            expanded: false,
+            files: []
           }
         })
         .value();
 
       top.expanded = true;
+      top.files.push(...fileNames)
       stack.push(...dirNames);
       top = _.last(stack)
     }
@@ -46,6 +62,7 @@ export function dirsteam(root: string): Readable {
       const data = expand();
       if (data) {
         this.push(data.fullpath);
+        data.files.forEach(f => this.push(f));
         return;
       }
       this.push(null)

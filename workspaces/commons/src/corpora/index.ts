@@ -1,7 +1,7 @@
 //
-import {Readable} from "stream";
+import { Readable } from "stream";
 import hash from "object-hash";
-import {dirsteam, stringStreamFilter} from "./dirstream";
+import { dirstream, stringStreamFilter } from "./dirstream";
 import fs from "fs-extra";
 import { throughFunc } from '~/util/stream-utils';
 
@@ -17,7 +17,7 @@ export interface CorpusEntry {
 }
 
 export function makeCorpusEntryLeadingPath(s: string): string {
-  const sHash = hash(s, {algorithm: "sha1", encoding: "hex"});
+  const sHash = hash(s, { algorithm: "sha1", encoding: "hex" });
   const leadingPath = sHash
     .slice(0, 2)
     .split("")
@@ -32,7 +32,7 @@ export interface ExpandedDir {
 
 
 export function corpusEntryStream(corpusRoot: string): Readable {
-  const corpusDirStream = dirsteam(corpusRoot);
+  const corpusDirStream = dirstream(corpusRoot);
 
   const entryDirFilter = stringStreamFilter((dir: string) => {
     return /[/][^/]+\.d$/.test(dir);
@@ -41,20 +41,17 @@ export function corpusEntryStream(corpusRoot: string): Readable {
   return corpusDirStream.pipe(entryDirFilter);
 }
 
-export function expandDir(path: string) {
-  const dirEntries = fs.readdirSync(path, {withFileTypes: true});
+export function expandDir(path: string): ExpandedDir {
+  const dirEntries = fs.readdirSync(path, { withFileTypes: true });
   const files = dirEntries
     .filter(dirent => dirent.isFile())
     .map(dirent => dirent.name);
 
-  const data: ExpandedDir = {
+  const res: ExpandedDir = {
     dir: path,
     files,
   };
-  return data;
+  return res;
 }
-
-
-
 
 export const expandDirTrans = throughFunc(expandDir);

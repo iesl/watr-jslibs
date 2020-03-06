@@ -2,7 +2,7 @@ import _ from "lodash";
 import path from "path";
 import fs from "fs-extra";
 
-import {ExpandedDir} from "commons/dist/corpora";
+import { ExpandedDir } from "commons";
 import { Field } from '~/extract/field-extract';
 
 interface Accum {

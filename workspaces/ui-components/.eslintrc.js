@@ -4,12 +4,13 @@ module.exports = {
     browser: true,
     node: true
   },
+
   extends: [
-    '@nuxtjs',
-    'plugin:nuxt/recommended'
+    '@nuxtjs/eslint-config-typescript',
+    // '@nuxtjs',
+    // 'plugin:nuxt/recommended'
   ],
 
-  parser: '@typescript-eslint/parser',
   rules: {
     'no-unused-vars': 0,
     'vue/no-unused-components': 0,

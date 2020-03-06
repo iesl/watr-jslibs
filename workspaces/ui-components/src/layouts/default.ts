@@ -1,4 +1,3 @@
-
 import { storyItems } from '~/pages/stories/autogen/story-list';
 
 export default {

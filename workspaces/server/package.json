@@ -45,6 +45,7 @@
     "jest": "^25.1.0",
     "ts-jest": "^25.2.1",
     "tslib": "^1.11.1",
+    "ts-node": "^8.6.2",
     "typescript": "^3.8.3"
   },
   "license": "ISC",
@@ -55,9 +56,16 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
-    "serve": "nodemon -w dist dist/server.js",
+    "serve": "./bin/ts-node ./src/server.ts",
+    "start": "nodemon",
     "lint": "eslint --config .eslintrc.js --ext .ts --ignore-path ../../.gitignore ./src",
     "test": "jest"
+  },
+  "nodemonConfig": {
+    "ignore": ["**/*.test.ts","**/*.spec.ts",".git","node_modules"],
+    "watch": ["src"],
+    "exec": "yarn serve",
+    "ext": "ts"
   },
   "jest": {
     "preset": "ts-jest",

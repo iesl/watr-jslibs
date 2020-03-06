@@ -4,7 +4,7 @@
     "allowJs": true,
 
     "target": "esnext",
-    "module": "esnext",
+    "module": "es6",
     "moduleResolution": "node",
 
     "lib": [
@@ -33,7 +33,7 @@
     "types": [
       "jest",
       "chai",
-      "node"
+      "@types/node"
     ],
 
     "paths": {
@@ -45,9 +45,14 @@
 
   },
 
-  "exclude": ["node_modules", ".nuxt"],
-
   "include": [
     "src/**/*"
+  ],
+
+  "exclude": [
+    "node_modules",
+    ".nuxt",
+    "dist"
   ]
+
 }
