@@ -1,6 +1,6 @@
+import colors from 'vuetify/es5/util/colors'
 import path from 'path'
 import util from 'util'
-import colors from 'vuetify/es5/util/colors'
 const resolve = path.resolve
 
 const modulesDir = [
@@ -10,26 +10,10 @@ const modulesDir = [
 
 const rootDir = __dirname
 const srcDir = resolve(rootDir, 'src')
-const tsconfigFile = resolve(rootDir, 'tsconfig.json')
 
 export default {
-  rootDir,
-  srcDir,
-  modulesDir,
-
-  env: {
-  },
-
-  typescript: {
-    loaders: {
-      // ts-loader options
-      ts: {
-        configFile: tsconfigFile
-      }
-    }
-  },
-
   mode: 'spa',
+  srcDir,
   /*
    ** Headers of the page
    */
@@ -51,40 +35,31 @@ export default {
    ** Customize the progress-bar color
    */
   loading: { color: '#fff' },
-
   /*
    ** Global CSS
    */
-  css: [
-    '~/assets/sass/main.scss'
-  ],
+  css: [],
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: [
-    '~/plugins/composition-api',
-    '~/plugins/global-components'
-  ],
+  plugins: [],
   /*
    ** Nuxt.js dev-modules
    */
   buildModules: [
-    ['@nuxtjs/eslint-module', {
-      useEslintrc: true,
-      ignorePattern: [
-        '**/autogen/*.vue'
-      ]
-    }],
+    // Doc: https://github.com/nuxt-community/eslint-module
+    '@nuxtjs/eslint-module',
     '@nuxtjs/vuetify',
     '@nuxt/typescript-build'
   ],
-
   /*
    ** Nuxt.js modules
    */
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    // Doc: https://github.com/nuxt-community/dotenv-module
+    '@nuxtjs/dotenv'
   ],
   /*
    ** Axios module configuration
@@ -112,19 +87,13 @@ export default {
       }
     }
   },
-
   /*
    ** Build configuration
    */
   build: {
-    // You can extend webpack config here
-    extend(config, ctx) {
-    },
-
-    babel: {
-      presets({ isServer }, [preset, options]) {
-      }
-    }
+    /*
+     ** You can extend webpack config here
+     */
+    extend(config, ctx) {}
   }
-
 }
