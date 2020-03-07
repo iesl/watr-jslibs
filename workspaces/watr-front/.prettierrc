@@ -1,7 +1,7 @@
 {
-  "semi": false,
+  "semi": true,
   "arrowParens": "always",
-  "singleQuote": true,
+  "singleQuote": false,
   "overrides": [
     {
       "files": ["*.html", "*.vue"],

@@ -39,9 +39,8 @@ export interface EventlibCore {
 }
 
 type Args = StateArgs & {
-  targetDivRef: Ref<HTMLDivElement|null>
+  targetDivRef: Ref<HTMLDivElement|null>;
 };
-
 
 export function useEventlibCore({
   state,
@@ -58,20 +57,20 @@ export function useEventlibCore({
 
   const handlerQueue: Ref<MouseHandlerInit[]> = ref([]);
 
-  const hoverHandlers: MouseHandlerInit = () =>  {
-    const mousemove = (e: EMouseEvent) => {
-      const pos = e.pos;
-      const mousePt = coords.mkPoint.fromXy(pos.x, pos.y);
-      const queryBox = coords.boxCenteredAt(mousePt, 1, 1);
-      const hits = eventRTree.search(queryBox);
-      _.each(hits, (q) => {
-      });
-    }
+  // const hoverHandlers: MouseHandlerInit = () =>  {
+  //   const mousemove = (e: EMouseEvent) => {
+  //     const pos = e.pos;
+  //     const mousePt = coords.mkPoint.fromXy(pos.x, pos.y);
+  //     const queryBox = coords.boxCenteredAt(mousePt, 1, 1);
+  //     const hits = eventRTree.search(queryBox);
+  //     _.each(hits, (q) => {
+  //     });
+  //   }
 
-    return {
-      mousemove,
-    }
-  }
+  //   return {
+  //     mousemove,
+  //   }
+  // }
 
 
   waitFor('EventlibCore', {

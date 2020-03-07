@@ -1,4 +1,3 @@
-
 import * as coords from '~/lib/coord-sys';
 import { BBox } from '~/lib/coord-sys';
 

@@ -33,7 +33,7 @@ type Args = StateArgs & {
 
 
 export function useSketchpad({
-  state,
+  // state,
   superimposedElements,
 }: Args): Sketchpad {
 
@@ -45,7 +45,7 @@ export function useSketchpad({
   watch(drawablesRef, (drawables)=> {
     const dr0 = _.map(drawables, d => mapShape(d, ShapeIntRepsToFloats))
 
-    const d3s = _.map(dr0, d => foldShape(d, svgToD3))
+    _.map(dr0, d => foldShape(d, svgToD3))
 
   });
 
@@ -56,8 +56,8 @@ export function useSketchpad({
 export function shapeToD3Fold
   <GElement extends BaseType, Datum, PElement extends BaseType, PDatum> (
   sel: Selection<GElement, Datum, PElement, PDatum>
-) {
-  return <FoldF<void>>{
+): FoldF<void> {
+  return {
     line: (sh: Line) => {
       const x1 = `${sh.p1.x}`;
       const y1 = `${sh.p1.y}`;

@@ -4,7 +4,7 @@ import axios, {
   AxiosInstance
 } from "axios";
 
-
+// (executable-find-prefer-node-modules "tsc")
 export function configRequest(): AxiosRequestConfig {
   let auth = {};
   // if (runState && runState.credentials) {

@@ -79,6 +79,8 @@ export function setMouseHandlers(
   handlers: MouseHandlerInit[]
 ): void {
 
+
+
   const targetDiv = targetDivRef.value!;
 
   _.each(MouseEvents, eventType => {

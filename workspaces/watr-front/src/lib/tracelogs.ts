@@ -7,7 +7,6 @@ interface ShapeMetaInfo {
 
 type ShapeAndMeta = Shape&ShapeMetaInfo;
 
-
 export interface ILogHeaders {
   tags: string;
   name: string;

@@ -1,13 +1,11 @@
 
 ** Building
-*** Inter-module linking 
-    Uses yarn link
+*** Inter-module linking
+    lerna bootstrap (or lerna link)
     e.g., link module 'commons' as dependency of 'server'
-    > yarn workspace commons link
-    > yarn workspace server link commons
-    
+
 *** Run shared steps
-    lerna run lint/build/test  (setup?)
+    lerna run lint/build/test
 
 
 ** Checking/Updating dependency versions
@@ -16,4 +14,3 @@
    lerna --concurrency 1 exec -- ncu  --loglevel verbose
 *** Update package.json files
    lerna --concurrency 1 exec -- ncu -u  --loglevel verbose
-

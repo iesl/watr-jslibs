@@ -5,15 +5,10 @@ module.exports = {
     mocha: true,
     es6: true
   },
-
   parser: '@typescript-eslint/parser',
   extends: [
-    // '@nuxtjs',
-    // 'prettier',
-    // 'prettier/vue',
-    // 'plugin:prettier/recommended',
-    // 'plugin:nuxt/recommended',
     "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
   plugins: [
@@ -47,5 +42,4 @@ module.exports = {
       }
     }
   ]
-
 }
