@@ -27,7 +27,7 @@ describe('Tweening support',  () => {
 
   it('smokescreen', async () => {
 
-    let position = {x: 100};
+    const position = {x: 100};
     const waypoint1 = {x: 150};
 
     const anim0 = anime({

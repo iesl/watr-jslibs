@@ -16,7 +16,7 @@ export interface WaitForOptions {
   state: ComponentState;
   dependsOn?: Array<Ref<any>>;
   ensureTruthy?: Array<Ref<any>>;
-};
+}
 
 export function watchAll(rs?: Ref<any>[]) {
   if (!rs) return toRefs(reactive({
@@ -25,7 +25,7 @@ export function watchAll(rs?: Ref<any>[]) {
     curr: 0
   }));
 
-  let curr = rs;
+  const curr = rs;
   const next = ref(0);
   const state = toRefs(reactive({
     done: false,
@@ -135,7 +135,7 @@ export interface ComponentState {
 }
 
 export type StateArgs = {
-  state: ComponentState
+  state: ComponentState;
 };
 
 /**

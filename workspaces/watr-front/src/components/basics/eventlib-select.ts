@@ -29,10 +29,10 @@ const { initStroke, initFill, initRect } = d3x;
 import { SuperimposedElements } from './superimposed-elements';
 
 function pointsToRect(p1: Point, p2: Point): BBox {
-  let ny = Math.min(p1.y, p2.y);
-  let nx = Math.min(p1.x, p2.x);
-  let nwidth = Math.abs(p1.x - p2.x);
-  let nheight = Math.abs(p1.y - p2.y);
+  const ny = Math.min(p1.y, p2.y);
+  const nx = Math.min(p1.x, p2.x);
+  const nwidth = Math.abs(p1.x - p2.x);
+  const nheight = Math.abs(p1.y - p2.y);
 
   return new BBox(nx, ny, nwidth, nheight);
 }
@@ -43,8 +43,8 @@ export interface EventlibSelect {
 }
 
 type Args = StateArgs & {
-  superimposedElements: SuperimposedElements,
-  eventlibCore: EventlibCore,
+  superimposedElements: SuperimposedElements;
+  eventlibCore: EventlibCore;
 };
 
 export function useEventlibSelect({

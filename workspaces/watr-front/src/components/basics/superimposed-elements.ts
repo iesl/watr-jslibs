@@ -10,14 +10,14 @@ import { StateArgs, waitFor } from '~/components/basics/component-basics'
 
 export const enum ElementTypes {
   Canvas, Svg, Text, Img
-};
+}
 
 export interface OverlayElements {
   img?      : HTMLImageElement;
   canvas?   : HTMLCanvasElement;
   svg?      : SVGElement;
   textDiv?  : HTMLDivElement;
-  eventDiv  : HTMLDivElement;
+  eventDiv: HTMLDivElement;
 }
 
 export interface SuperimposedElements {
@@ -28,7 +28,7 @@ export interface SuperimposedElements {
 }
 
 type Args = StateArgs & {
-  mountPoint: Ref<HTMLDivElement|null>
+  mountPoint: Ref<HTMLDivElement|null>;
   includeElems: ElementTypes[];
 };
 

@@ -6,7 +6,7 @@ import axios, {
 
 // (executable-find-prefer-node-modules "tsc")
 export function configRequest(): AxiosRequestConfig {
-  let auth = {};
+  const auth = {};
   // if (runState && runState.credentials) {
   //   auth = {
   //     Authorization: `Bearer ${runState.credentials!.token}`

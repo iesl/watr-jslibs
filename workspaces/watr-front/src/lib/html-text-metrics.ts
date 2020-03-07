@@ -4,12 +4,12 @@
  **/
 
 export interface TextStyle {
-  style: string,
-  variant?: string,
-  weight: string,
-  size: number,
-  family: string
-};
+  style: string;
+  variant?: string;
+  weight: string;
+  size: number;
+  family: string;
+}
 
 export function makeStyleString(style: TextStyle): string {
   return `${style.weight} ${style.size}px ${style.family}`;
@@ -28,7 +28,7 @@ export interface TextDimensions {
   y: number;
   width: number;
   height: number;
-};
+}
 
 
 export function getTextWidth(ctx: CanvasRenderingContext2D, text: string, font: string): number {

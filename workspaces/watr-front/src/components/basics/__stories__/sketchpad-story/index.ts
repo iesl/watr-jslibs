@@ -14,11 +14,11 @@ import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useEventlibSelect, selectExtentHandlers } from '~/components/basics/eventlib-select'
 import { initState, waitFor } from '~/components/basics/component-basics'
 
-import { Line, Point, Rect, Trapezoid, ShapeKind, zeroShape1, Shape } from '~/lib/tracelogs';
+import { ShapeKind } from '~/lib/tracelogs';
 import { useSketchpad } from '../../sketchpad';
 
 type InkwellItem = {
-  title: ShapeKind
+  title: ShapeKind;
 }
 const inkwellOptions: InkwellItem[]  = [
   { title: 'point' },
@@ -32,21 +32,16 @@ export function clickToDrawHandlers(shapeKindRef: Ref<string>) {
   const { origin, current, cancelled } = extentHandlers.refs;
   const handlers = extentHandlers.handlers;
 
-  watch(origin, (o) => {
-    // initShapeForSelection(shapeKindRef.value)
-
-
-  });
-  watch(current, (c) => {
-
-  });
+  // watch(origin, (o) => {
+  //   // initShapeForSelection(shapeKindRef.value)
+  // });
+  // watch(current, (c) => {});
   // const install = () => {};
   // const uninstall = () => {};
-  const keyHandlers = {
-    // kepress/1: setShape(Point)
-    // kepress/2: setShape(Rect)
-
-  };
+  // const keyHandlers = {
+  //   // kepress/1: setShape(Point)
+  //   // kepress/2: setShape(Rect)
+  // };
 }
 
 export default {

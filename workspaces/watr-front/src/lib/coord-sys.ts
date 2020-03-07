@@ -29,14 +29,14 @@ export interface MinMaxBox {
   maxY: number;
 }
 
-interface ILTBoundsIntRep {
+interface LTBoundsIntRep {
   left: number;
   top: number;
   width: number;
   height: number;
 }
 
-export interface ILTBounds {
+export interface LTBounds {
   left: number;
   top: number;
   width: number;
@@ -122,7 +122,7 @@ class Trapezoid {
 
 export type AnyShape = Point | Line | Trapezoid | BBox;
 
-export let mkPoint = {
+export const mkPoint = {
   fromXy: (x: number, y: number, sys: CoordSys = CoordSys.Unknown) => {
     return new Point(x, y, sys);
   },
@@ -148,7 +148,7 @@ export function pointFloor(p: Point) {
  *  General purpose bounding box data that meets the interface requirements
  *  for the various libraries in use
  */
-export class BBox implements ILTBounds {
+export class BBox implements LTBounds {
   public left: number;
   public top: number;
   public width: number;
@@ -243,8 +243,8 @@ export class BBox implements ILTBounds {
   }
 }
 
-export let mk = {
-  fromLtwhFloatReps: (o: ILTBoundsIntRep) => {
+export const mk = {
+  fromLtwhFloatReps: (o: LTBoundsIntRep) => {
     return new BBox(
       o.left / 100.0,
       o.top / 100.0,
@@ -258,7 +258,7 @@ export let mk = {
     return new BBox(l, t, w, h, CoordSys.Unknown);
   },
 
-  fromLtwhObj: (o: ILTBounds) => {
+  fromLtwhObj: (o: LTBounds) => {
     return new BBox(o.left, o.top, o.width, o.height, CoordSys.Unknown);
   },
 

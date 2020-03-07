@@ -41,18 +41,18 @@ export type MouseEventT = {
 }[keyof GEMap];
 
 interface MouseEventMap {
-  auxclick    : EMouseEventHandler;
-  click       : EMouseEventHandler;
-  contextmenu : EMouseEventHandler;
-  dblclick    : EMouseEventHandler;
-  mousedown   : EMouseEventHandler;
-  mouseenter  : EMouseEventHandler;
-  mouseleave  : EMouseEventHandler;
-  mousemove   : EMouseEventHandler;
-  mouseout    : EMouseEventHandler;
-  mouseover   : EMouseEventHandler;
-  mouseup     : EMouseEventHandler;
-  wheel       : EMouseEventHandler;
+  auxclick: EMouseEventHandler;
+  click: EMouseEventHandler;
+  contextmenu: EMouseEventHandler;
+  dblclick: EMouseEventHandler;
+  mousedown: EMouseEventHandler;
+  mouseenter: EMouseEventHandler;
+  mouseleave: EMouseEventHandler;
+  mousemove: EMouseEventHandler;
+  mouseout: EMouseEventHandler;
+  mouseover: EMouseEventHandler;
+  mouseup: EMouseEventHandler;
+  wheel: EMouseEventHandler;
 }
 
 const MouseEvents: MouseEventT[] = [
