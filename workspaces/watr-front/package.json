@@ -9,7 +9,7 @@
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+    "lint": "eslint --no-eslintrc --config .eslintrc.emacs.js --ext .ts --ignore-path ../../.gitignore src/",
     "test": "jest",
     "serve:json": "json-server --port 3100 ./dev-data/db.json --static ./dev-data --routes ./dev-data/routes.json",
     "dev": "npm-run-all -p -r nuxt serve:json"

@@ -5,39 +5,39 @@ interface ShapeMetaInfo {
   labels: string;
 }
 
-type ShapeAndMeta = Shape&ShapeMetaInfo;
+type ShapeAndMeta = Shape & ShapeMetaInfo;
 
-export interface ILogHeaders {
+export interface LogHeaders {
   tags: string;
   name: string;
   callSite: string;
   timestamp: number;
 }
 
-export interface ILogEntry {
-  headers: ILogHeaders;
+export interface LogEntry {
+  headers: LogHeaders;
   body: ShapeAndMeta[];
   logType: string;
   page: number;
 }
 
-export type Tracelog = ILogEntry[];
+export type Tracelog = LogEntry[];
 
 export interface LogEntryGroup {
   groupKey: string;
-  logEntries: ILogEntry[];
+  logEntries: LogEntry[];
 }
 
 export function groupTracelogsByKey(tracelog: Tracelog): LogEntryGroup[] {
-  const keyFunc = (l: ILogEntry) => {
-    return `p${l.page+1}. ${l.headers.callSite} ${l.headers.tags}`;
+  const keyFunc = (l: LogEntry) => {
+    return `p${l.page + 1}. ${l.headers.callSite} ${l.headers.tags}`;
   };
 
   const keyedLogs = _.map(tracelog, tl => [tl, keyFunc(tl)] as const);
 
-  const groupedLogs = _.groupBy(keyedLogs, ([,key]) => key);
+  const groupedLogs = _.groupBy(keyedLogs, ([, key]) => key);
   const groupedLogPairs = _.toPairs(groupedLogs);
-  const entryGroups = _.map(groupedLogPairs, ([groupKey, logs])=> {
+  const entryGroups = _.map(groupedLogPairs, ([groupKey, logs]) => {
     return {
       groupKey,
       logEntries: logs.map(([l,]) => l)
@@ -54,7 +54,7 @@ export interface Point {
   y: number;
 }
 
-export interface Line  {
+export interface Line {
   kind: 'line';
   p1: Point;
   p2: Point;
@@ -80,9 +80,9 @@ export type Shape = Line | Rect | Point | Trapezoid;
 export type ShapeKind = Shape['kind'];
 
 
-type LineFold<T>      = (l: Line) => T
-type RectFold<T>  = (l: Rect) => T
-type PointFold<T>     = (l: Point) => T
+type LineFold<T> = (l: Line) => T
+type RectFold<T> = (l: Rect) => T
+type PointFold<T> = (l: Point) => T
 type TrapezoidFold<T> = (l: Trapezoid) => T
 
 export interface FoldF<T> {
@@ -101,40 +101,40 @@ export interface FoldX<T, U, V, W> {
 
 export type Folds<T> = Partial<FoldF<T>>;
 
-export function foldShape<T>(shape: Shape, fs:Folds<T>): T|undefined {
-  switch(shape.kind) {
-    case 'line': return fs.line? fs.line(shape) : undefined;
-    case 'rect': return fs.rect? fs.rect(shape) : undefined;
-    case 'point': return fs.point? fs.point(shape) : undefined;
-    case 'trapezoid': return fs.trapezoid? fs.trapezoid(shape) : undefined;
+export function foldShape<T>(shape: Shape, fs: Folds<T>): T | undefined {
+  switch (shape.kind) {
+    case 'line': return fs.line ? fs.line(shape) : undefined;
+    case 'rect': return fs.rect ? fs.rect(shape) : undefined;
+    case 'point': return fs.point ? fs.point(shape) : undefined;
+    case 'trapezoid': return fs.trapezoid ? fs.trapezoid(shape) : undefined;
   }
 }
 
-export function mapShape(shape: Shape, fs:FoldF<Shape>): Shape {
+export function mapShape(shape: Shape, fs: FoldF<Shape>): Shape {
   const f = foldShape(shape, fs);
   return f!;
 }
 
-export function foldShapeTotal<S, T, U, V>(shape: Shape, fs:FoldX<S, T, U, V>): S|T|U|V {
-  switch(shape.kind) {
-    case 'line'      : return fs.line(shape);
-    case 'rect'      : return fs.rect(shape);
-    case 'point'     : return fs.point(shape);
-    case 'trapezoid' : return fs.trapezoid(shape);
+export function foldShapeTotal<S, T, U, V>(shape: Shape, fs: FoldX<S, T, U, V>): S | T | U | V {
+  switch (shape.kind) {
+    case 'line': return fs.line(shape);
+    case 'rect': return fs.rect(shape);
+    case 'point': return fs.point(shape);
+    case 'trapezoid': return fs.trapezoid(shape);
   }
 }
 
-export function transformShape<S, T, U, V>(shape: Shape, fs:FoldX<S, T, U, V>): S|T|U|V {
-  switch(shape.kind) {
-    case 'line'      : return fs.line(shape);
-    case 'rect'      : return fs.rect(shape);
-    case 'point'     : return fs.point(shape);
-    case 'trapezoid' : return fs.trapezoid(shape);
+export function transformShape<S, T, U, V>(shape: Shape, fs: FoldX<S, T, U, V>): S | T | U | V {
+  switch (shape.kind) {
+    case 'line': return fs.line(shape);
+    case 'rect': return fs.rect(shape);
+    case 'point': return fs.point(shape);
+    case 'trapezoid': return fs.trapezoid(shape);
   }
 }
 
 
-function adjustUnitsPoint(p: Point): Point  {
+function adjustUnitsPoint(p: Point): Point {
   const x = p.x / 100.0;
   const y = p.y / 100.0;
   const { kind } = p;
@@ -159,9 +159,9 @@ export const ShapeIntRepsToFloats: FoldF<Shape> = {
 
   rect: (sh: Rect) => {
     const [l, t, w, h] = sh.bounds;
-    const x      = l / 100.0;
-    const y      = t / 100.0;
-    const width  = w / 100.0;
+    const x = l / 100.0;
+    const y = t / 100.0;
+    const width = w / 100.0;
     const height = h / 100.0;
     const { kind } = sh;
     return {
@@ -231,7 +231,7 @@ export const ShapeToSvgFold: Folds<object> = {
 
 export const ShapeToSvgElement: Folds<SVGGraphicsElement> = {
   line: (sh: Line) => {
-    const elem: SVGLineElement  = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    const elem: SVGLineElement = document.createElementNS("http://www.w3.org/2000/svg", "line");
     const x1 = `${sh.p1.x}`;
     const y1 = `${sh.p1.y}`;
     const x2 = `${sh.p2.x}`;
@@ -259,7 +259,7 @@ export const ShapeToSvgElement: Folds<SVGGraphicsElement> = {
   },
 
   rect: (sh: Rect) => {
-    const elem  = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    const elem = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     const [x0, y0, width0, height0] = sh.bounds;
     const x = `${x0}`;
     const y = `${y0}`;
@@ -276,14 +276,14 @@ export const ShapeToSvgElement: Folds<SVGGraphicsElement> = {
   },
 
   trapezoid: (sh: Trapezoid) => {
-    const elem: SVGPathElement  = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    const elem: SVGPathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
     const p1 = sh.topLeft;
     const p2x = p1.x + sh.topWidth;
     const p2y = p1.y;
     const p3x = sh.bottomLeft.x + sh.bottomWidth;
     const p3y = sh.bottomLeft.y;
     const p4 = sh.bottomLeft;
-    const  d = `M ${p1.x} ${p1.y} L ${p2x} ${p2y} L ${p3x} ${p3y} L ${p4.x} ${p4.y} Z`;
+    const d = `M ${p1.x} ${p1.y} L ${p2x} ${p2y} L ${p3x} ${p3y} L ${p4.x} ${p4.y} Z`;
     elem.setAttribute("d", d);
     return elem;
   }
@@ -313,11 +313,11 @@ type InitT<T extends ShapeKind> =
   T extends Line['kind'] ? [PointInits, PointInits] :
   T extends Trapezoid['kind'] ? [PointInits, PointInits, number, number] :
   never
-;
+  ;
 
 
 export function initShape<S extends ShapeKind, V extends Ret<S>>(kind: S, initVals: InitT<S>): V {
-  switch(kind) {
+  switch (kind) {
     case 'point': {
       const [x, y] = initVals as InitT<'point'>;
       const point: Point = {
@@ -342,114 +342,119 @@ export function initShape<S extends ShapeKind, V extends Ret<S>>(kind: S, initVa
       };
       return rect as V;
     }
-    case "trapezoid":
+    case "trapezoid": {
       const [tl, bl, topWidth, bottomWidth] = initVals as InitT<'trapezoid'>;
-      const topLeft: Point = initShape('point', tl) ;
-      const bottomLeft: Point = initShape('point', bl) ;
+      const topLeft: Point = initShape('point', tl);
+      const bottomLeft: Point = initShape('point', bl);
 
       const trap: Trapezoid = {
         kind: 'trapezoid', topLeft, bottomLeft, topWidth, bottomWidth
       };
 
       return trap as V;
-
-  };
+    }
+  }
 
   return undefined as any as V;
 }
 
 export function zeroShape0
   <K extends ShapeKind, S extends ShapeForKind<K>>
-  (kind: K, f: (s: S) => S = s => s) : S {
-    const x = 0;
-    const y = 0;
-    const p: Point = zeroShape0('point') ;
-    switch(kind) {
-      case 'point': {
-        const point: Point = {
-          kind: 'point', x, y
-        };
+  (kind: K, f: (s: S) => S = s => s): S {
+  const x = 0;
+  const y = 0;
+  const p: Point = zeroShape0('point');
+  switch (kind) {
+    case 'point': {
+      const point: Point = {
+        kind: 'point', x, y
+      };
 
-        return f(point as S);
-      }
-      case "line": {
-        const line: Line = {
-          kind: 'line', p1: p, p2: p,
-        };
+      return f(point as S);
+    }
+    case "line": {
+      const line: Line = {
+        kind: 'line', p1: p, p2: p,
+      };
 
-        return f(line as S);
-      }
-      case "rect": {
-        const rect: Rect = {
-          kind: 'rect', bounds: [0, 0, 0, 0]
-        };
+      return f(line as S);
+    }
+    case "rect": {
+      const rect: Rect = {
+        kind: 'rect', bounds: [0, 0, 0, 0]
+      };
 
-        return f(rect as S);
-      }
-      case "trapezoid":
-        const trap: Trapezoid = {
-          kind: 'trapezoid', topLeft: p, bottomLeft: p, topWidth: 0, bottomWidth: 0
-        };
+      return f(rect as S);
+    }
+    case "trapezoid": {
 
-        return f(trap as S);
-    };
+      const trap: Trapezoid = {
+        kind: 'trapezoid', topLeft: p, bottomLeft: p, topWidth: 0, bottomWidth: 0
+      };
 
-    return undefined as any as S;
+      return f(trap as S);
+    }
   }
+
+  return undefined as any as S;
+}
 
 export function zeroShape1
   <K extends ShapeKind,
-S extends ShapeForKind<K>,
-T extends ShapeForKind<K>,
-U extends ShapeForKind<K>,
-V extends ShapeForKind<K>
+    S extends ShapeForKind<K>,
+    T extends ShapeForKind<K>,
+    U extends ShapeForKind<K>,
+    V extends ShapeForKind<K>
   >
-  (kind: K, fold: FoldX<S, T, U, V>|undefined = undefined) : S|T|U|V {
-    const x = 0;
-    const y = 0;
-    switch(kind) {
-      case 'point': {
-        const point: Point = {
-          kind: 'point', x, y
-        };
+  (kind: K, fold: FoldX<S, T, U, V> | undefined = undefined): S | T | U | V {
+  const x = 0;
+  const y = 0;
+  switch (kind) {
+    case 'point': {
+      const point: Point = {
+        kind: 'point', x, y
+      };
 
-        if (fold) {
-          return foldShapeTotal(point, fold);
-        }
-        return point as S;
+      if (fold) {
+        return foldShapeTotal(point, fold);
       }
-      case "line": {
-        const p: Point = zeroShape1('point') ;
-        const line: Line = {
-          kind: 'line', p1: p, p2: p,
-        };
-        if (fold) {
-          return foldShapeTotal(line, fold);
-        }
-
-        return line as S;
+      return point as S;
+    }
+    case "line": {
+      const p: Point = zeroShape1('point');
+      const line: Line = {
+        kind: 'line', p1: p, p2: p,
+      };
+      if (fold) {
+        return foldShapeTotal(line, fold);
       }
-      case "rect": {
-        const rect: Rect = {
-          kind: 'rect', bounds: [0, 0, 0, 0]
-        };
 
-        if (fold) {
-          return foldShapeTotal(rect, fold);
-        }
-        return rect as S;
+      return line as S;
+    }
+    case "rect": {
+      const rect: Rect = {
+        kind: 'rect', bounds: [0, 0, 0, 0]
+      };
+
+      if (fold) {
+        return foldShapeTotal(rect, fold);
       }
-      case "trapezoid":
-        const p: Point = zeroShape1('point') ;
-        const trap: Trapezoid = {
-          kind: 'trapezoid', topLeft: p, bottomLeft: p, topWidth: 0, bottomWidth: 0
-        };
+      return rect as S;
+    }
+    case "trapezoid": {
 
-        if (fold) {
-          return foldShapeTotal(trap, fold);
-        }
-        return trap as S;
-    };
 
-    return undefined as any as S;
+      const p: Point = zeroShape1('point');
+      const trap: Trapezoid = {
+        kind: 'trapezoid', topLeft: p, bottomLeft: p, topWidth: 0, bottomWidth: 0
+      };
+
+      if (fold) {
+        return foldShapeTotal(trap, fold);
+      }
+      return trap as S;
+    }
   }
+
+  return undefined as any as S;
+}
