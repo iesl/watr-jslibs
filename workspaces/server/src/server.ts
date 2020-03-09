@@ -19,7 +19,6 @@ opts
 const distRoot = opts.public;
 const corpusRoot = opts.corpus;
 
-
 const apiRouter = initFileBasedRoutes(corpusRoot);
 
 rootRouter

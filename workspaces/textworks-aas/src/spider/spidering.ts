@@ -84,7 +84,6 @@ export function oneoff(inputCsv: string, inputJson: string, logpath: string) {
 
   pump.on("data", () => true);
 
-
 }
 
 export function createSpideringInputStream(csvfile: string): Stream {

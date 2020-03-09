@@ -9,6 +9,7 @@ import { reviewAbstractQuality } from '~/qa-editing/qa-edits';
 
 const { opt, config } = arglib;
 
+
 yargs.command(
   "collect-stats",
   "collect some coverage stats regarding abstract extraction",
@@ -22,6 +23,7 @@ yargs.command(
     collectAbstractExtractionStats(fromLog, [])
   },
 );
+
 
 yargs.command(
   "find-abstracts",

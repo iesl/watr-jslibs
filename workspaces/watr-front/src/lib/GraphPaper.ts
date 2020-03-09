@@ -11,7 +11,6 @@
 import _ from "lodash";
 import * as coords from '~/lib/coord-sys';
 
-
 /**
  * Set of functions to  convert between cell-based and cartesian geometries
  */

@@ -18,6 +18,7 @@ yargs.command(
     opt.ion("useBrowser", { type: "boolean", default: false })
   ),
 
+
   (spiderOpts: any) => {
     createSpider(spiderOpts);
   }
