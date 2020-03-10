@@ -16,7 +16,7 @@ import { useSnaptoSelection } from '~/components/basics/snapto-selection';
 import { useEventlibSelect } from '~/components/basics/eventlib-select';
 import { resolveCorpusUrl } from '~/lib/axios';
 import { LogEntry } from '~/lib/tracelogs';
-import { fromFigure } from '~/lib/coord-sys';
+import { fromFigure, LTBoundsArray, mk } from '~/lib/coord-sys';
 import * as d3 from "d3-selection";
 
 type Args = StateArgs & {
@@ -24,6 +24,7 @@ type Args = StateArgs & {
   pageNumber: number;
   entryId: string;
   logEntryRef: Ref<LogEntry[]>;
+  pageBounds: LTBoundsArray;
 };
 
 export interface PdfPageViewer {
@@ -33,7 +34,7 @@ export interface PdfPageViewer {
 }
 
 export function usePdfPageViewer({
-  mountPoint, state
+  mountPoint, state, pageBounds
 }: Args): PdfPageViewer {
 
   const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state });
@@ -47,6 +48,8 @@ export function usePdfPageViewer({
   const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
   const { rtreeIndex } = glyphOverlays;
   useSnaptoSelection({ rtreeIndex, eventlibSelect, state });
+  const bounds = mk.fromArray(pageBounds);
+  superimposedElements.setDimensions(bounds.width, bounds.height);
 
   const setGrid = glyphOverlays.setGrid;
 
@@ -83,6 +86,7 @@ export function useTracelogPdfPageViewer({
   pageNumber,
   entryId,
   logEntryRef,
+  pageBounds,
   state
 }: Args): PdfPageViewer {
   const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state });
@@ -104,8 +108,9 @@ export function useTracelogPdfPageViewer({
   const setGrid = glyphOverlays.setGrid;
   const svg = superimposedElements.overlayElements.svg!;
 
+  const bounds = mk.fromArray(pageBounds);
+  superimposedElements.setDimensions(bounds.width, bounds.height);
   watch(logEntryRef, (logEntries) => {
-    console.log(`page ${pageNumber + 1} got items`, logEntries);
 
     const geometryLogs = _.filter(logEntries, e => e.logType === "Geometry");
 
@@ -129,13 +134,6 @@ export function useTracelogPdfPageViewer({
           .call(initShapeAttrs) ;
       });
   });
-
-  // Inputs:
-  //  - shape drawing/clearing over image
-  //  - focus points/hovered glyphs (in pdf text viewer, indicate corresponding point on pdf page image)
-  // Outputs:
-  //  - rectangular selection for narrowing tracelog view area
-  //  - clicked point
 
   return {
     eventlibCore,
@@ -169,7 +167,6 @@ function initShapeAttrs(r: any) {
           .attr("y", (d: any) => d.y)
           .attr("width", (d: any) => d.width)
           .attr("height", (d: any) => d.height)
-          // .attr("id", getId)
           .attr("class", getCls)
           // .attr("label", getCls)
           .attr("id", (d: any) => d.id)
@@ -187,7 +184,6 @@ function initShapeAttrs(r: any) {
       return r.attr("cx", (d: any) => d.cx)
           .attr("cy", (d: any) => d.cy)
           .attr("r", (d: any) => d.r)
-          // .attr("id", getId)
           .attr("class", getCls)
           // .attr("label", getCls)
           .attr("id", (d: any) => d.id)
@@ -203,7 +199,6 @@ function initShapeAttrs(r: any) {
           .attr("y1", (d: any) => d.y1)
           .attr("x2", (d: any) => d.x2)
           .attr("y2", (d: any) => d.y2)
-          // .attr("id", getId)
           .attr("class", getCls)
           // .attr("label", getCls)
           .attr("id", (d: any) => d.id)

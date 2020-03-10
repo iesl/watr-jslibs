@@ -18,8 +18,6 @@ import { getArtifactData } from '~/lib/axios';
 import { groupTracelogsByKey, LogEntryGroup, LogEntry } from '~/lib/tracelogs';
 import * as GridTypes from '~/lib/TextGridTypes';
 
-import * as coords from '~/lib/coord-sys';
-
 type Dictionary < T > = { [key: string]: T }
 type QObject = Dictionary<string | (string|null)[]>;
 
@@ -80,9 +78,6 @@ export default defineComponent({
           .then((textgrid: GridTypes.Grid) => {
 
             _.each(textgrid.pages, (page, pageNumber) => {
-              const geometry = page.pageGeometry;
-
-              const pageBounds = coords.mk.fromArray(geometry);
               const mount = document.createElement('div');
               pageViewersDiv.appendChild(mount);
               const mountRef = divRef();
@@ -91,16 +86,14 @@ export default defineComponent({
               const logEntryRef: Ref<LogEntry[]> = ref([]);
               tracelogRefs[pageNumber] = logEntryRef;
 
-              const pdfPageViewer = useTracelogPdfPageViewer({
+              useTracelogPdfPageViewer({
                 mountPoint: mountRef,
                 pageNumber,
                 entryId,
                 logEntryRef,
+                pageBounds: page.pageGeometry,
                 state
               });
-
-              const { superimposedElements } = pdfPageViewer;
-              superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
             });
 
           });

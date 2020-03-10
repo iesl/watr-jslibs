@@ -1,69 +1,66 @@
 // To parse this data:
-//
 //   const grid = Convert.toGrid(json);
-//
 // These functions will throw an error if the JSON doesn't
 // match the expected interface, even if the JSON is valid.
 
-/* tslint:disable: prefer-array-literal function-name no-var-keyword prefer-const */
+
 import * as coords from "./coord-sys";
 
-
 export interface Grid {
-    description: string;
-    pages:       Page[];
-    fonts:       Font[];
+  description: string;
+  pages: Page[];
+  fonts: Font[];
 }
 
 export interface Font {
-    name:                  string;
-    englishBigramEvidence: number;
-    metrics:               Metric[];
+  name: string;
+  englishBigramEvidence: number;
+  metrics: Metric[];
 }
 
 export interface Metric {
-    scale:         number;
-    glyphsPerPage: Array<number[]>;
-    heights:       Heights;
+  scale: number;
+  glyphsPerPage: Array<number[]>;
+  heights: Heights;
 }
 
 export interface Heights {
-    lowerCaseSmall: number;
-    lowerCaseLarge: number;
-    upperCase:      number;
+  lowerCaseSmall: number;
+  lowerCaseLarge: number;
+  upperCase: number;
 }
 
 export interface Page {
-  pageGeometry: [number, number, number, number];
-  textgrid:     Textgrid;
+  pageGeometry: coords.LTBoundsArray;
+  textgrid: Textgrid;
 }
 
 export interface Textgrid {
-    stableId: string;
-    rows:     Row[];
-    labels:   Labels;
+  stableId: string;
+  rows: Row[];
+  labels: Labels;
 }
 
 export interface Labels {
-    cellLabels: Array<Array<Array<CellLabelEnum | number>>>;
+  cellLabels: Array<Array<Array<CellLabelEnum | number>>>;
 }
 
 export enum CellLabelEnum {
-    SegSub = "seg:Sub",
-    SegSup = "seg:Sup",
+  SegSub = "seg:Sub",
+  SegSup = "seg:Sup",
 }
 
 export interface Row {
-    offset: number;
-    text:   string;
-    loci:   Locus[];
+  offset: number;
+  text: string;
+  loci: Locus[];
 }
 
 /**
 
    Glyph Location Data takes these forms:
-     Glyph:  {"g": [["d", 0, [10375, 17823, 684, 1071]]]  },
-     Insert: {"i":  [" ", 0, [8066, 17823, 683, 1071]] },
+   Glyph:  {"g": [["d", 0, [10375, 17823, 684, 1071]]]  },
+   Insert: {"i":  [" ", 0, [8066, 17823, 683, 1071]] },
 
 
 */
@@ -73,11 +70,11 @@ type PageNum = number;
 export type CharLocus = [string, PageNum, BBoxArray];
 
 export interface Locus {
-  g?: [ CharLocus ];
+  g?: [CharLocus];
   i?: CharLocus;
 }
 export function locusIsGlyph(l: Locus): boolean {
-  return l.g? true : false;
+  return l.g ? true : false;
 }
 export function locusCharLocus(l: Locus): CharLocus {
   return l.g ? l.g[0] : l.i!;

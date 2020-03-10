@@ -21,6 +21,8 @@ export enum CoordSys {
   PdfMedia,
 }
 
+export type LTBoundsArray = [number, number, number, number];
+
 /** Same interface used by RTree (as implemented in RBush library) */
 export interface MinMaxBox {
   minX: number;

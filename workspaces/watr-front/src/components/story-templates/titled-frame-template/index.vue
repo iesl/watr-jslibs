@@ -1,10 +1,11 @@
 <template lang="html" src="./_inc.html"></template>
 <style lang="scss" scoped>
     .story-main {
-      flex-basis: 50%;
+      flex-basis: 55%;
     }
 
     #story-container {
-       width: 90%;
+       width: 95%;
+       height: inherit;
     }
 </style>

@@ -1,9 +1,11 @@
 <template lang="html">
   <div ref="tracelogViewerMount" class="tracelogViewer">
-    <div ref="pageViewers" />
+    <div class="pageViewersFrame">
+      <div ref="pageViewers" class="pageViewers" />
+    </div>
     <NarrowingFilter
-      v-on:items-selected="onItemsSelected"
-      v-on:items-reset="onItemsReset"
+      @items-selected="onItemsSelected"
+      @items-reset="onItemsReset"
       />
   </div>
 </template>
@@ -14,9 +16,30 @@
 // story-category:page
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" >
 .tracelogViewer {
   display: flex;
   flex-direction: row;
+  height: 100%;
 }
+
+.pageViewersFrame {
+  border: 3px solid red;
+  margin: 2px;
+  height: auto;
+}
+
+.pageViewers {
+  border: 3px solid yellow;
+  margin: 3px;
+  overflow: scroll;
+  height: 100vh;
+
+  .layers {
+    margin: 1em;
+    border: 3px solid blue;
+    overflow: hidden;
+  }
+}
+
 </style>
