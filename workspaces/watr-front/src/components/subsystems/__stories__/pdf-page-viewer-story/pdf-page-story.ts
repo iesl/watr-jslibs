@@ -13,6 +13,7 @@ import * as coords from '~/lib/coord-sys';
 import * as GridTypes from '~/lib/TextGridTypes';
 import { initGridData, gridDataToGlyphData } from '~/lib/TextGlyphDataTypes';
 import { Point } from '~/lib/coord-sys';
+import { resolveCorpusUrl } from '~/lib/axios';
 
 export default {
   setup() {
@@ -29,7 +30,8 @@ export default {
 
 
     onMounted(() => {
-      superimposedElements.setImageSource(`http://localhost:3100/corpus-entry-0/page-images/page-1.opt.png`);
+      const imageUrl = resolveCorpusUrl('1503.00580.pdf.d', 'image', '1');
+      superimposedElements.setImageSource(imageUrl);
       const grid: GridTypes.Grid = textgrid00 as any as GridTypes.Grid;
       const page0 = grid.pages[0]
       // // TODO: why is this margin here? hardcoded?
@@ -41,8 +43,6 @@ export default {
       const glyphData = gridDataToGlyphData(gridData.textDataPoints);
 
       waitFor('PdfPageStory', { state }, () => {
-        // TODO figure out how to set the correct dimensions for the img/canvas elems
-        superimposedElements.setDimensions(910, 1213);
         pdfPageViewer.setGrid(glyphData, pageBounds);
       });
 

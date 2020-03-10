@@ -12,14 +12,13 @@ const app = new Koa();
 opts
   .version('0.1.0')
   .option('--corpus <path>', 'Path to corpus')
-  .option('--public <path>', 'Path public assets')
+  .option('--port <port>', 'port to listen to')
   .parse(process.argv)
   ;
 
-const distRoot = opts.public;
-const corpusRoot = opts.corpus;
+const { corpus } = opts;
 
-const apiRouter = initFileBasedRoutes(corpusRoot);
+const apiRouter = initFileBasedRoutes(corpus);
 
 rootRouter
   .use("/", ((ctx: Context, next) => {
@@ -28,14 +27,14 @@ rootRouter
   }))
   .use(apiRouter.routes())
   .use(apiRouter.allowedMethods())
-;
+  ;
 
 app
   .use(rootRouter.routes())
   .use(rootRouter.allowedMethods())
   .use(json({ pretty: false }))
-;
+  ;
 
-app.listen(9000, function() {
-  console.log('Koa is listening to http://localhost:9000');
+app.listen(3100, function() {
+  console.log('Koa is listening to http://localhost:3100');
 });

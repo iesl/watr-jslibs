@@ -1,20 +1,22 @@
 <template lang="html">
-    <div ref="tracelogViewerMount" id="tracelog">
-        <div ref="pageViewerMount" />
-        <NarrowingFilter />
-    </div>
+  <div ref="tracelogViewerMount" class="tracelogViewer">
+    <div ref="pageViewers" />
+    <NarrowingFilter
+      v-on:items-selected="onItemsSelected"
+      v-on:items-reset="onItemsReset"
+      />
+  </div>
 </template>
 
 <script lang="ts" src="./tracelog-viewer.ts">
-// story-name:tracelogViewer
+// story-name:tracelogViewer?id=1503.00580.pdf.d
 // story-title:Tracelog Viewer
 // story-category:page
 </script>
 
 <style lang="scss" scoped>
-#tracelog {
+.tracelogViewer {
   display: flex;
   flex-direction: row;
 }
-
 </style>

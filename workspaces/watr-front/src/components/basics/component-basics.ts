@@ -18,6 +18,38 @@ export interface WaitForOptions {
   ensureTruthy?: Array<Ref<any>>;
 }
 
+/**
+ * watch a ref for non-null/undefined values, then run callback
+ */
+export function watchFor<T>(tref: Ref<T | null | undefined>, fn: (t: T) => void) {
+  watch(tref, (tval) => {
+    if (!tval) return;
+    fn(tval);
+  });
+}
+
+/**
+ * watch (once) a ref for non-null/undefined values, then run callback
+ */
+export function watchOnceFor<T>(tref: Ref<T | null | undefined>, fn: (t: T) => void) {
+  const tv = tref.value;
+  if (tv !== null && tv !== undefined) {
+    // Check initial ref value, as the watch must be run lazily (skip initial check)
+    //   to use the stop function
+    fn(tv);
+    return;
+  }
+  const stop = watch(tref, (tval) => {
+    if (!tval) return;
+    stop();
+    fn(tval);
+  }, { lazy: true });
+}
+
+/**
+ * Create a watchable object that signals when all passed in
+ * refs have a value !== null/undefined
+ */
 export function watchAll(rs?: Ref<any>[]) {
   if (!rs) return toRefs(reactive({
     done: true,
@@ -51,7 +83,7 @@ export function watchAll(rs?: Ref<any>[]) {
         next.value += 1;
       }
 
-    }, {lazy: true});
+    }, { lazy: true });
 
     startFlag.value = true;
   }, { lazy: true });
@@ -76,7 +108,7 @@ export function waitFor(
   { state, dependsOn, ensureTruthy }: WaitForOptions,
   userFunc: () => void
 ) {
-  state.register(name);
+  // state.register(name);
 
   const startFlag = ref(false);
   const upstreamsReady = ref(false);
@@ -108,7 +140,7 @@ export function waitFor(
       userFunc();
       userFuncRan.value = true;
     }
-  }, {lazy: true, deep: true});
+  }, { lazy: true, deep: true });
 
   const downstreamWatcher = watchAll(ensureTruthy);
 

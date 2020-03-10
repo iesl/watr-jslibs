@@ -98,13 +98,13 @@ export function useEventlibCore({
     }
   }
 
-  // TODO switch onUnmounted to beforeUnmounted ??
-  onUnmounted(() => {
-    const targetDiv = targetDivRef.value;
-    if (targetDiv) {
-      targetDiv.removeEventListener('mousemove', onMouseMove);
-    }
-  })
+  // // TODO switch onUnmounted to beforeUnmounted ??
+  // onUnmounted(() => {
+  //   const targetDiv = targetDivRef.value;
+  //   if (targetDiv) {
+  //     targetDiv.removeEventListener('mousemove', onMouseMove);
+  //   }
+  // })
 
   // function addShape(shape: RTreeIndexable): void {
   //   eventRTree.insert(shape);

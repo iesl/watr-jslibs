@@ -58,13 +58,14 @@
     "watch": "tsc --watch",
     "serve": "./bin/ts-node ./src/server.ts",
     "start": "nodemon",
+    "ui:dev": "./bin/ts-node ./src/server.ts --corpus ../../corpus-test.d",
     "lint": "eslint --config .eslintrc.js --ext .ts --ignore-path ../../.gitignore ./src",
     "test": "jest"
   },
   "nodemonConfig": {
     "ignore": ["**/*.test.ts","**/*.spec.ts",".git","node_modules"],
     "watch": ["src"],
-    "exec": "yarn serve",
+    "exec": "npm run serve",
     "ext": "ts"
   },
   "jest": {

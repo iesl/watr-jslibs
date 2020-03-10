@@ -34,8 +34,8 @@ export interface Heights {
 }
 
 export interface Page {
-    pageGeometry: number[];
-    textgrid:     Textgrid;
+  pageGeometry: [number, number, number, number];
+  textgrid:     Textgrid;
 }
 
 export interface Textgrid {
@@ -276,6 +276,3 @@ export function locusChar(l: Locus): string {
 //         ],
 //     };
 // }
-
-
-

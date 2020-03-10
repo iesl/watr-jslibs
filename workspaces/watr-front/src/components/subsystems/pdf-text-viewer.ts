@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import { ref, watch, Ref, createComponent, inject, onMounted, provide  } from '@vue/composition-api';
+import { ref, watch, Ref, defineComponent, inject, onMounted, provide  } from '@vue/composition-api';
 
 import { StateArgs } from '~/components/basics/component-basics'
 import { initState } from '~/components/basics/component-basics'

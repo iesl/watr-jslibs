@@ -28,4 +28,10 @@
     </layout>
 
 </template>
-<script lang="ts" src="./tracelog-viewer-story.ts"></script>
+
+<script lang="ts">
+  import TracelogViewer from '~/components/ui-elements/tracelog-viewer/index.vue'
+  export default {
+    components: { TracelogViewer }
+  }
+</script>

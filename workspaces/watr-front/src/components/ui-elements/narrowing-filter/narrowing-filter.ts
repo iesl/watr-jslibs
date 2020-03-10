@@ -1,10 +1,10 @@
 import _ from 'lodash';
 
-import { ref, watch, Ref, createComponent, inject, SetupContext  } from '@vue/composition-api';
+import { ref, watch, Ref, defineComponent, inject, SetupContext  } from '@vue/composition-api';
 
 export const ProvidedChoices = 'ProvidedChoices';
 
-export default createComponent({
+export default defineComponent({
   setup(_props, ctx: SetupContext) {
     const { emit } = ctx;
 
@@ -20,6 +20,7 @@ export default createComponent({
     const onReset = () => {
       queryTextRef.value = '';
       currSelectionRef.value = [];
+      emit('items-reset');
     };
 
     watch(choicesRef, (choices: string[] | null) => {
@@ -42,11 +43,7 @@ export default createComponent({
         debounced(queryText);
       });
 
-
     });
-
-
-
 
     return {
       currSelectionRef,

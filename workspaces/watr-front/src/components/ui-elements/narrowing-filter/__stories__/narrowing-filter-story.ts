@@ -2,12 +2,12 @@ import _ from 'lodash';
 
 import NarrowingFilter from '../index.vue';
 import { ProvidedChoices } from '../narrowing-filter';
-import { ref, createComponent, provide, Ref } from '@vue/composition-api';
-import { configAxios } from '~/lib/axios';
+import { ref, defineComponent, provide, Ref } from '@vue/composition-api';
+import { configAxios, getArtifactData } from '~/lib/axios';
 import { groupTracelogsByKey } from '~/lib/tracelogs';
 
 
-export default createComponent({
+export default defineComponent({
   setup() {
     const candidatesUrl = '/tracelogs/tracelog.json';
     const choicesRef: Ref<Array<string> | null> = ref(null)
@@ -18,9 +18,9 @@ export default createComponent({
       console.log('we got items!', selection);
     }
 
-    configAxios().get(candidatesUrl)
-      .then(resp => {
-        const tracelogJson = resp.data;
+    const entryId = '1503.00580.pdf.d';
+    getArtifactData(entryId, 'tracelog', 'tracelog')
+      .then(tracelogJson => {
 
         const logEntryGroups = groupTracelogsByKey(tracelogJson);
         const choices = _.map(logEntryGroups, ({groupKey}) => groupKey);
