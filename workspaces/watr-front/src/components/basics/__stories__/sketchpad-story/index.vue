@@ -1,5 +1,5 @@
 <template lang="html">
-    <layout>
+    <story-layout>
         <template v-slot:title>
             Sketchlib Core/Trace functionality
         </template>
@@ -47,7 +47,7 @@
         <div class="mountPoint" ref="mountPoint"></div>
     </template>
 
-    </layout>
+    </story-layout>
 </template>
 
 <script lang="ts" src="./index.ts">

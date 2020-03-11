@@ -1,18 +1,19 @@
 import _ from 'lodash';
 
-import { ref, watch, Ref, defineComponent, inject, onMounted, provide  } from '@vue/composition-api';
+import { Ref } from '@vue/composition-api';
 
 import { StateArgs } from '~/components/basics/component-basics'
-import { initState } from '~/components/basics/component-basics'
+// import { initState } from '~/components/basics/component-basics'
 import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
-import { useGlyphOverlays } from '~/components/basics/glyph-overlays';
+import { useSpatialSearch } from '~/components/basics/glyph-overlays';
 import { useEventlibSelect } from '~/components/basics/eventlib-select';
 import { BBox } from '~/lib/coord-sys';
 import * as GridTypes from '~/lib/TextGridTypes';
-import { useTextOverlay  } from '~/components/basics/text-overlay';
+import { useMeasuredTextOverlay  } from '~/components/basics/measured-text-overlay';
 import { TextStyle } from '~/lib/html-text-metrics';
-
+import { newIdGenerator } from '~/lib/utils';
+import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
 
 
 export interface TextgridAndBounds {
@@ -21,15 +22,6 @@ export interface TextgridAndBounds {
 }
 
 // const ProvidedTextgrid = 'ProvidedTextgrid';
-// export type TextgridRef = Ref<TextgridAndBounds|null>;
-
-// export function provideTextGrid(t: TextgridRef): void {
-//   provide(ProvidedTextgrid, t)
-// }
-
-// export function injectTextGrid(): TextgridRef {
-//   return inject(ProvidedTextgrid, ref(null));
-// }
 
 export type SetText = (textAndBounds: TextgridAndBounds) => void;
 
@@ -47,19 +39,16 @@ export function usePdfTextViewer({
 }: Args): PdfTextViewer {
 
   const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
-  const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Text], mountPoint, state });
-  useEventlibSelect({ superimposedElements, eventlibCore, state });
-  useGlyphOverlays({ state, eventlibCore, superimposedElements });
-  const textOverlay = useTextOverlay({ superimposedElements, state });
+  const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Text, ElementTypes.Svg], mountPoint, state });
+  const spatialSearch = useSpatialSearch({ state, eventlibCore, superimposedElements });
 
-  const { putTextLn } = textOverlay;
-
+  const { putTextLn } = useMeasuredTextOverlay({ superimposedElements, state });
 
   const setText: SetText = (textAndBounds) => {
-    superimposedElements.setDimensions(600, 800);
 
-
-    const { textgrid } = textAndBounds;
+    const { textgrid, pageBounds } = textAndBounds;
+    const pageLeft = pageBounds.left;
+    const pageTop = pageBounds.top;
 
     const size = 18;
     const style: TextStyle = {
@@ -71,20 +60,44 @@ export function usePdfTextViewer({
 
     const textDiv = superimposedElements.overlayElements.textDiv!;
 
-    textDiv.style.visibility = 'hidden';
-    let currY = 0;
+    const nextId = newIdGenerator();
+
+    // textDiv.style.visibility = 'hidden';
+    textDiv.style.border = '1px solid blue';
+    textDiv.style.background = '#eee8d5';
+    textDiv.style.color = 'black';
+
+    let currY = pageTop;
     let maxWidth = 0;
-    _.each(textgrid.rows, (row) => {
+    const allIndexables = _.flatMap(textgrid.rows, (row) => {
       const text = row.text;
-      const lineDimensions = putTextLn(style, 0, currY, text);
+      const lineDimensions = putTextLn(style, pageLeft, currY, text);
+      // console.log("text", text);
+      // console.log("ld", lineDimensions);
       maxWidth = Math.max(maxWidth, lineDimensions.width);
+      const indexables: RTreeIndexable[] = lineDimensions
+        .elementDimensions
+        .map(textDimensions => {
+          const { x, y, width, height } = textDimensions;
+          return {
+            id: nextId(),
+            minX: x,
+            minY: y,
+            maxX: x + width,
+            maxY: y + height
+          };
+
+        });
 
       currY += size+2;
+      return indexables;
     });
 
-    const widthSlopFactor = 20;
+    maxWidth += pageLeft*2;
+
+    spatialSearch.setGrid(allIndexables);
+    superimposedElements.setDimensions(maxWidth, currY+pageTop);
     textDiv.style.visibility = 'visible';
-    superimposedElements.setDimensions(maxWidth+widthSlopFactor, currY+size);
 
   };
 

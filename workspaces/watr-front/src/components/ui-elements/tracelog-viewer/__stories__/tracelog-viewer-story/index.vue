@@ -1,6 +1,6 @@
 <template lang="html">
 
-    <layout>
+    <story-layout>
 
         <template v-slot:title>
             Visual Tracelog Viewer
@@ -25,13 +25,15 @@
         <template v-slot:main>
             <TracelogViewer />
         </template>
-    </layout>
+    </story-layout>
 
 </template>
 
 <script lang="ts">
-  import TracelogViewer from '~/components/ui-elements/tracelog-viewer/index.vue'
-  export default {
-    components: { TracelogViewer }
-  }
+  // story-name:tracelogViewer?id=1503.00580.pdf.d
+  // story-title:Tracelog Viewer
+import TracelogViewer from '~/components/ui-elements/tracelog-viewer/index.vue'
+export default {
+components: { TracelogViewer }
+}
 </script>

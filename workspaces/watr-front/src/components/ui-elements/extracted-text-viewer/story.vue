@@ -1,8 +1,18 @@
+<script lang="ts">
+// story-name=extractedTextViewer
+// story-args=id=1503.00580.pdf.d
+// story-title=Pdf Page + Text
+import StoryComponent from './index.vue'
+export default {
+  components: { StoryComponent }
+}
+</script>
+
 <template lang="html">
     <story-layout>
 
         <template v-slot:title>
-            Pdf page display, selection, etc
+            Pdf Page + Text Viewer
         </template>
 
         <template v-slot:description>
@@ -21,14 +31,8 @@
         </template>
 
         <template v-slot:main>
-            <div class="mountPoint" ref="mountPoint"></div>
+          <StoryComponent />
         </template>
 
     </story-layout>
 </template>
-
-<script lang="ts" src="./pdf-page-story.ts">
-// story-name=pdfPageViewer
-// story-args=id=1503.00580.pdf.d
-// story-title=Pdf Page Viewer
-</script>

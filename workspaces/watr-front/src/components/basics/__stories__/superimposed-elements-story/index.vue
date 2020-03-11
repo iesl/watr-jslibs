@@ -1,6 +1,6 @@
 <template lang="html">
 
-    <layout>
+    <story-layout>
 
         <template v-slot:title>
             Superimposed Elements Overlay
@@ -29,7 +29,7 @@
             <div class="mountPoint" ref="mountPoint"></div>
         </template>
 
-    </layout>
+    </story-layout>
 </template>
 
 <script lang="ts" src="./superimposed-elements-story.ts">

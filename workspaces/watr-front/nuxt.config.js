@@ -1,22 +1,19 @@
-import colors from 'vuetify/es5/util/colors'
-import path from 'path'
-import util from 'util'
-const resolve = path.resolve
+import colors from 'vuetify/es5/util/colors';
+import path from 'path';
+import util from 'util';
+const resolve = path.resolve;
 
 const modulesDir = [
-  // resolve(__dirname, '../../node_modules/'),
   resolve(__dirname, './node_modules/')
-]
+];
 
-const rootDir = __dirname
-const srcDir = resolve(rootDir, 'src')
+const rootDir = __dirname;
+const srcDir = resolve(rootDir, 'src');
 
 export default {
   mode: 'spa',
   srcDir,
-  /*
-   ** Headers of the page
-   */
+
   head: {
     titleTemplate: '%s - ' + process.env.npm_package_name,
     title: process.env.npm_package_name || '',
@@ -31,44 +28,31 @@ export default {
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
   },
-  /*
-   ** Customize the progress-bar color
-   */
+
+  // Customize the progress-bar color
   loading: { color: '#fff' },
-  /*
-   ** Global CSS
-   */
   css: [
     '~/assets/sass/main.scss'
   ],
-  /*
-   ** Plugins to load before mounting the App
-   */
   plugins: [
     '~/plugins/composition-api',
     '~/plugins/global-components'
   ],
-  /*
-   ** Nuxt.js dev-modules
-   */
   buildModules: [
     // Doc: https://github.com/nuxt-community/eslint-module
     '@nuxtjs/eslint-module',
     '@nuxtjs/vuetify',
     '@nuxt/typescript-build'
   ],
-  /*
-   ** Nuxt.js modules
-   */
+
   modules: [
-    // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
-    // Doc: https://github.com/nuxt-community/dotenv-module
     '@nuxtjs/dotenv'
   ],
-  /*
-   ** Axios module configuration
-   ** See https://axios.nuxtjs.org/options
+
+  /**
+   * Axios module configuration
+   * See https://axios.nuxtjs.org/options
    */
   axios: {},
   /*
@@ -92,13 +76,10 @@ export default {
       }
     }
   },
-  /*
-   ** Build configuration
-   */
+
+  // Build configuration
   build: {
-    /*
-     ** You can extend webpack config here
-     */
-    extend(config, ctx) {}
+    // Extend webpack config here
+    // extend(config, ctx) {}
   }
 }

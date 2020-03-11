@@ -2,6 +2,6 @@
 
 import Vue from 'vue';
 
-import Layout from '~/components/story-templates/titled-frame-template/index.vue';
+import StoryLayout from '~/components/story-templates/titled-frame-template/index.vue';
 
-Vue.component('layout', Layout);
+Vue.component('story-layout', StoryLayout);

@@ -1,11 +1,8 @@
-
-
-// import PdfTextViewer from '../index.vue';
-import { usePdfTextViewer } from '../../pdf-text-viewer';
-import { defineComponent, ref, onMounted } from '@vue/composition-api';
+import { usePdfTextViewer } from '~/components/subsystems/pdf-text-viewer'
+import { defineComponent } from '@vue/composition-api';
 import * as GridTypes from '~/lib/TextGridTypes';
 import * as coords from '~/lib/coord-sys';
-import { configAxios } from '~/lib/axios';
+import { getArtifactData } from '~/lib/axios';
 import { initState } from '~/components/basics/component-basics';
 import { divRef } from '~/lib/vue-composition-lib';
 
@@ -19,21 +16,15 @@ export default defineComponent({
     const pdfTextViewer = usePdfTextViewer({ mountPoint, state });
     const { setText } = pdfTextViewer;
 
-    onMounted(() => {
+    const entryId = '1503.00580.pdf.d';
 
-      configAxios().get('/textgrids/textgrid-00.json')
-        .then(resp => {
-          const grid: GridTypes.Grid = resp.data;
-          const page0 = grid.pages[0]
-          const textgrid = page0.textgrid;
-          const [l, t, w, h] = page0.pageGeometry;
-          const pageBounds = coords.mk.fromArray([l, t, w, h]);
-          setText({ textgrid, pageBounds });
-
-        });
-
-    })
-
+    getArtifactData(entryId, 'textgrid')
+      .then((grid: GridTypes.Grid) => {
+        const page0 = grid.pages[0]
+        const textgrid = page0.textgrid;
+        const pageBounds = coords.mk.fromLtwh(20, 20, 0, 0);
+        setText({ textgrid, pageBounds });
+      });
 
     return {
       mountPoint

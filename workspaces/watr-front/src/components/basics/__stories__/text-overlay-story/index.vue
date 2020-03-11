@@ -1,6 +1,6 @@
 <template lang="html">
 
-    <layout>
+    <story-layout>
 
         <template v-slot:title>
             Text Overlay
@@ -77,7 +77,7 @@
         <template v-slot:main>
             <div class="mountPoint" ref="mountPoint"></div>
         </template>
-    </layout>
+    </story-layout>
 
 </template>
 

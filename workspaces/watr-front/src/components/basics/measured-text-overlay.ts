@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 import { StateArgs } from '~/components/basics/component-basics'
 import { SuperimposedElements  } from './superimposed-elements';
-import { TextStyle, makeStyleString, LineDimensions } from '~/lib/html-text-metrics';
+import { TextStyle, makeStyleString, LineDimensions, showText } from '~/lib/html-text-metrics';
 
 type PutText = (style: TextStyle, x: number, y: number, text: string) => LineDimensions;
 type ClearText = () => void;
@@ -18,23 +18,22 @@ export interface TextOverlay {
   clearText: ClearText;
 }
 
-
 type Args = StateArgs & {
   superimposedElements: SuperimposedElements;
 };
 
-
-export function useTextOverlay({
+export function useMeasuredTextOverlay({
   superimposedElements,
 }: Args): TextOverlay {
 
-  const textDiv = superimposedElements.overlayElements.textDiv!;
 
   function putTextLn(style: TextStyle, x: number, y: number, text: string): LineDimensions {
+    const textDiv = superimposedElements.overlayElements.textDiv!;
     const fontstring = makeStyleString(style);
 
     const div = document.createElement('div');
     div.classList.add('measured');
+    div.style.visibility = 'visible';
     div.style.display = 'inline-block';
     div.style.font = fontstring;
     div.style.left = `${x}px`;
@@ -42,20 +41,13 @@ export function useTextOverlay({
     const node = document.createTextNode(text);
     div.append(node)
     textDiv.appendChild(div);
-    // const lineDimensions = showText(text, div, x, y);
-    div.style.visibility = 'visible';
+    const lineDimensions = showText(text, div, x, y);
 
-    const fakeLineDimensions: LineDimensions = {
-      x: 0, y: 0,
-      width: 100,
-      height: 100,
-      elementDimensions: []
-    };
-
-    return fakeLineDimensions;
+    return lineDimensions;
   }
 
   const clearText: ClearText = () => {
+    const textDiv = superimposedElements.overlayElements.textDiv!;
     if (textDiv) {
       textDiv.childNodes.forEach(n => n.remove());
     }

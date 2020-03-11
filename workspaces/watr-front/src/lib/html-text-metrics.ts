@@ -37,8 +37,8 @@ export function getTextWidth(ctx: CanvasRenderingContext2D, text: string, font: 
   return metrics.width;
 }
 
-// import $ from 'jquery';
 import _ from 'lodash';
+import { prettyPrint } from './pretty-print';
 
 // TODO make sure that div.offsetWidth/Height are equivalent crossbrowser to $(div).outerWidth
 export function showText(text: string, div: HTMLDivElement, atX: number, atY: number): LineDimensions {
@@ -50,11 +50,13 @@ export function showText(text: string, div: HTMLDivElement, atX: number, atY: nu
   const sizes = [];
   for (let i=0; i<text.length; i++) {
     init += text.charAt(i);
-    // $(div).text(init)
+    div.innerText = init;
 
     const currWidth = div.offsetWidth;
     const charWidth = currWidth - currX + atX;
     const size = { x: currX, y: atY, width: charWidth, height: lineHeight};
+    console.log('showText:inner', div.innerText)
+    console.log('showText:offsetWidth', div.clientWidth)
     sizes.push(size);
     currX = currWidth + atX;
   }

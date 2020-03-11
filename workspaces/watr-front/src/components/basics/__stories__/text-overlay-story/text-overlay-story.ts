@@ -9,7 +9,7 @@ import {
 
 
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
-import { useTextOverlay } from '~/components/basics/text-overlay';
+import { useMeasuredTextOverlay } from '~/components/basics/measured-text-overlay';
 import { initState, waitFor } from '~/components/basics/component-basics';
 import chroma from 'chroma-js';
 import { TextStyle } from '~/lib/html-text-metrics';
@@ -53,7 +53,7 @@ export default {
     const textTop = ref(20);
     const textLeft = ref(20);
     const textFamily = ref('arial');
-    const textOverlay = useTextOverlay({ superimposedElements, state });
+    const textOverlay = useMeasuredTextOverlay({ superimposedElements, state });
 
     // Draw text, canvas shape at same point
     // Scale/resize overlays up/down, overlays stay aligned

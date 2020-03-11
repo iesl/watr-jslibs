@@ -11,9 +11,6 @@
 </template>
 
 <script lang="ts" src="./tracelog-viewer.ts">
-// story-name:tracelogViewer?id=1503.00580.pdf.d
-// story-title:Tracelog Viewer
-// story-category:page
 </script>
 
 <style lang="scss" >
@@ -41,5 +38,4 @@
     overflow: hidden;
   }
 }
-
 </style>

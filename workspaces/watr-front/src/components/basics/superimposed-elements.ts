@@ -98,11 +98,6 @@ export function useSuperimposedElements({
     overlayContainer.append(eventDiv);
 
     if (img) {
-      // img.onload = function(this: GlobalEventHandlers, ev: Event): void {
-      //   const w = img.naturalWidth;
-      //   const h = img.naturalHeight;
-      //   setDimensions(w, h);
-      // };
       watch(imgElemSource, (src) => {
         if (src) {
           img.src = src;

@@ -9,6 +9,7 @@ interface StoryPaths {
   storyBaseName: string;
   storyTitle: string;
   vueImportName: string;
+  storyUrl: string;
 }
 
 export function setupStoryVues(tsconfigPath: string, dryrun: boolean) {
@@ -55,10 +56,11 @@ export default { components: { vueComponent } }
   });
 
   const storyRecs = _.map(storyList, (storyPath: StoryPaths) => {
-    const storyBaseName = storyPath.storyBaseName;
+    // const storyBaseName = storyPath.storyBaseName;
+    const storyUrl = storyPath.storyUrl;
     const storyTitle = storyPath.storyTitle;
     const entry = `
-{ title: '${storyTitle}', to: '/stories/autogen/${storyBaseName}' },
+{ title: '${storyTitle}', to: '/stories/autogen/${storyUrl}' },
 `.trim();
     return entry;
   });
@@ -89,46 +91,63 @@ function getStoryProp(fileContent: string, propname: string): string | undefined
   const propLine = _.filter(lines, l => l.includes(`${propname}=`));
   let propValue = undefined;
   if (propLine.length > 0) {
-    propValue = propLine[0].split('=')[1].trim();
+    const propDef: string = propLine[0];
+    const splitAt = propDef.indexOf('=');
+    propValue = propDef.substr(splitAt+1).trim();
+    // propValue = propLine[0].split('=')[1].trim();
   }
   return propValue;
 }
 
+function genStoryProps(projSubdir: string, dirEntry: Dirent) {
+
+  const vueFilePath = path.join(projSubdir, dirEntry.name);
+  const fileContent = fs.readFileSync(vueFilePath).toString();
+  const maybeStoryName = getStoryProp(fileContent, 'story-name');
+  const maybeStoryQueryArgs = getStoryProp(fileContent, 'story-args');
+  const maybeStoryTitle = getStoryProp(fileContent, 'story-title');
+  const postSrcPath = vueFilePath.split('/src/')[1];
+  const pathParts = postSrcPath.split('/');
+  let storyBaseName = pathParts[pathParts.length-2];
+
+  storyBaseName = _.camelCase(storyBaseName);
+  storyBaseName = maybeStoryName || storyBaseName;
+
+  const generatedStoryVueFile = `${storyBaseName}.vue`;
+  const vueImportName = `~/${postSrcPath}`;
+  const storyTitle = maybeStoryTitle? maybeStoryTitle : storyBaseName;
+  let storyUrl = storyBaseName;
+  if (maybeStoryQueryArgs !== undefined) {
+    storyUrl += `?${maybeStoryQueryArgs}`
+  }
+
+  return [
+    { generatedStoryVueFile, storyBaseName, vueImportName, storyTitle, storyUrl }
+  ];
+}
 
 function findStories(project: Project): StoryPaths[] {
-  // const srcFiles = project.getSourceFiles()
   const projectDirs = project.getDirectories();
   const r: StoryPaths[]  = _.flatMap(projectDirs, (dir: Directory) => {
     const projSubdir = dir.getPath();
     const isStoryPath = projSubdir.includes('__stories__');
+    const dirEntries = fs.readdirSync(projSubdir, { withFileTypes: true });
     if (isStoryPath) {
-      const dirEntries = fs.readdirSync(projSubdir, { withFileTypes: true });
       return _.flatMap(dirEntries, (dirEntry: Dirent) => {
         const vueFileName = dirEntry.name;
         const isVueFile = dirEntry.isFile() && vueFileName.endsWith('.vue');
         if (!isVueFile) return [];
 
-        const vueFilePath = path.join(projSubdir, dirEntry.name);
-        const fileContent = fs.readFileSync(vueFilePath).toString();
-        const maybeStoryName = getStoryProp(fileContent, 'story-name');
-        const maybeStoryTitle = getStoryProp(fileContent, 'story-title');
-        const postSrcPath = vueFilePath.split('/src/')[1];
-        const pathParts = postSrcPath.split('/');
-        let storyBaseName = pathParts[pathParts.length-2];
+        return genStoryProps(projSubdir, dirEntry);
 
-        storyBaseName = _.camelCase(storyBaseName);
-        storyBaseName = maybeStoryName || storyBaseName;
-
-        const generatedStoryVueFile = `${storyBaseName}.vue`;
-        const vueImportName = `~/${postSrcPath}`;
-        const storyTitle = maybeStoryTitle? maybeStoryTitle : storyBaseName;
-
-        return [
-          { generatedStoryVueFile, storyBaseName, vueImportName, storyTitle }
-        ];
       });
     }
-    return [];
+
+    const storyFiles = _.filter(dirEntries, e => e.isFile() && e.name.endsWith('story.vue'));
+
+    return _.flatMap(storyFiles, (dirEntry: Dirent) => {
+      return genStoryProps(projSubdir, dirEntry);
+    });
   });
 
   return r;

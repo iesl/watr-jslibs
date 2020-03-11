@@ -25,14 +25,14 @@ div.layers {
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 3;
+        z-index: 4;
     }
 
     div.layer.text-layer {
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 4;
+        z-index: 3;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
