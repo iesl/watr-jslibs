@@ -41,6 +41,7 @@ export function useMeasuredTextOverlay({
     const node = document.createTextNode(text);
     div.append(node)
     textDiv.appendChild(div);
+
     const lineDimensions = showText(text, div, x, y);
 
     return lineDimensions;

@@ -78,7 +78,6 @@ export function useSuperimposedElements({
     state,
     dependsOn: [mountPoint],
   }, () => {
-    console.log('starting ImgCanvasOverlays');
 
     const overlayContainer = mountPoint.value!;
     overlayContainer.classList.add('layers');
@@ -108,7 +107,6 @@ export function useSuperimposedElements({
     }
 
     watch(dimensions, ([width, height]) => {
-      console.log('setting dimensions', width, height);
 
       const w = `${width}px`;
       const h = `${height}px`;
@@ -139,9 +137,7 @@ export function useSuperimposedElements({
       eventDiv.style.width = w;
       eventDiv.style.height = h;
 
-      console.log('ending ImgCanvasOverlays (setDimensions)');
     });
-    console.log('ending ImgCanvasOverlays');
   });
 
   function setImageSource(src: string) {

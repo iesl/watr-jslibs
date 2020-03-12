@@ -29,8 +29,8 @@ const inkwellOptions: InkwellItem[]  = [
 
 export function clickToDrawHandlers(shapeKindRef: Ref<string>) {
   const extentHandlers = selectExtentHandlers();
-  const { origin, current, cancelled } = extentHandlers.refs;
-  const handlers = extentHandlers.handlers;
+  // const { origin, current, cancelled } = extentHandlers.refs;
+  // const handlers = extentHandlers.handlers;
 
   // watch(origin, (o) => {
   //   // initShapeForSelection(shapeKindRef.value)
@@ -50,50 +50,44 @@ export default {
     const state = initState();
 
     const mountPoint: Ref<HTMLDivElement|null> = ref(null);
-    const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
     const inkwellToggle = ref(0);
     const inkwellSelection: Ref<ShapeKind> = ref('point');
 
-    const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Svg], mountPoint, state });
+    useEventlibCore({ targetDivRef: mountPoint, state } ).then(eventlibCore => {
 
-    const sketchpad = useSketchpad({ superimposedElements, state });
-    const eventlibSelect = useEventlibSelect({ superimposedElements, eventlibCore, state });
-    const { selectionRef } = eventlibSelect;
+      const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Svg], mountPoint, state });
+
+      useSketchpad({ superimposedElements, state });
+      const eventlibSelect = useEventlibSelect({ superimposedElements, eventlibCore, state });
+      const { selectionRef } = eventlibSelect;
 
 
-    const myHandlers1  = () =>  {
-      return {
-        // mousedown   : onMouseDown,
-        // mousemove   : onMouseMove,
+      const myHandlers1  = () =>  {
+        return {
+          // mousedown   : onMouseDown,
+          // mousemove   : onMouseMove,
+        }
       }
-    }
-    eventlibCore.setMouseHandlers([myHandlers1])
-    // Draw shapes
-    // Hover over shapes:
-    //   visual flash
-    //   tooltip
-    //   click/select/delete
+      eventlibCore.setMouseHandlers([myHandlers1])
 
+      waitFor('SketchlibCoreStory', {
+        state,
+        dependsOn: [mountPoint]
+      }, () => {
+        superimposedElements.setDimensions(400, 600);
+        const svg = superimposedElements.overlayElements.svg!;
 
-    // UI: select and draw shape type
-    //   do hover/sel/del/...
+        watch(inkwellToggle, (inkwellSel) => {
+          inkwellSelection.value = inkwellOptions[inkwellSel].title;
+        });
 
-    waitFor('SketchlibCoreStory', {
-      state,
-      dependsOn: [mountPoint]
-    }, () => {
-      superimposedElements.setDimensions(400, 600);
-      const svg = superimposedElements.overlayElements.svg!;
+        watch(selectionRef, (selectedRect) => {
+          if (!selectedRect) return;
+          // const shapeKind = inkwellSelection.value;
+          // const newShape = initShapeForSelection(shapeKind, selectedRect);
+          // svg.append(newShape);
+        });
 
-      watch(inkwellToggle, (inkwellSel) => {
-        inkwellSelection.value = inkwellOptions[inkwellSel].title;
-      });
-
-      watch(selectionRef, (selectedRect) => {
-        if (!selectedRect) return;
-        // const shapeKind = inkwellSelection.value;
-        // const newShape = initShapeForSelection(shapeKind, selectedRect);
-        // svg.append(newShape);
       });
 
     });

@@ -3,29 +3,21 @@
  */
 import _ from 'lodash';
 
-import { onMounted, ref } from '@vue/composition-api';
+import { onMounted, ref, Ref } from '@vue/composition-api';
 import { useEventlibCore } from '~/components/basics/eventlib-core'
 import { useEventlibSelect } from '~/components/basics/eventlib-select'
 import { EMouseEvent, MouseHandlerInit } from "~/lib/EventlibHandlers";
 import { initState } from '~/components/basics/component-basics'
 
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements'
+import { BBox } from '~/lib/coord-sys';
 
 function setup() {
   const mountPoint = ref(null)
   const state = initState();
-
-  const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state });
-  const { setMouseHandlers } = eventlibCore;
-
   const mouseActivity = ref('<none>');
   const mouseActivityLog = ref(['<none>']);
-
-  const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Img, ElementTypes.Svg], mountPoint, state });
-
-  const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
-
-  const { selectionRef }  = eventlibSelect;
+  let selectionRef: Ref<BBox|null> = ref(null);
 
   function showMouseEvent(e: EMouseEvent) {
     const etype = e.origMouseEvent.type;
@@ -43,22 +35,30 @@ function setup() {
     }
   }
 
-  const myHandlers1: MouseHandlerInit = () =>  {
-    return {
-      mousemove   : e => showMouseEvent(e),
-      mousedown   : e => showMouseEvent(e),
-      mouseenter  : e => showMouseEvent(e),
-      mouseleave  : e => showMouseEvent(e),
-      mouseout    : e => showMouseEvent(e),
-      mouseover   : e => showMouseEvent(e),
-      mouseup     : e => showMouseEvent(e),
-      click       : e => showMouseEvent(e),
-      dblclick    : e => showMouseEvent(e),
-      contextmenu : e => showMouseEvent(e),
-    }
-  }
+  useEventlibCore({ targetDivRef: mountPoint, state } ).then(eventlibCore => {
+    const { setMouseHandlers } = eventlibCore;
 
-  onMounted(() => {
+    const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Img, ElementTypes.Svg], mountPoint, state });
+
+    const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
+
+    selectionRef = eventlibSelect.selectionRef;
+
+
+    const myHandlers1: MouseHandlerInit = () =>  {
+      return {
+        mousemove   : e => showMouseEvent(e),
+        mousedown   : e => showMouseEvent(e),
+        mouseenter  : e => showMouseEvent(e),
+        mouseleave  : e => showMouseEvent(e),
+        mouseout    : e => showMouseEvent(e),
+        mouseover   : e => showMouseEvent(e),
+        mouseup     : e => showMouseEvent(e),
+        click       : e => showMouseEvent(e),
+        dblclick    : e => showMouseEvent(e),
+        contextmenu : e => showMouseEvent(e),
+      }
+    }
 
     superimposedElements.setDimensions(600, 500);
     setMouseHandlers([myHandlers1]);

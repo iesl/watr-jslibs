@@ -30,12 +30,15 @@ export default defineComponent({
 
     if (entryId) {
 
+      console.time('usePdfTextViewer');
       awaitRef(pageTexts).then(pageTextsDiv => {
 
         getArtifactData(entryId, 'textgrid')
           .then((textgrid: GridTypes.Grid) => {
+            console.timeLog('usePdfTextViewer', 'got textgrid');
             _.each(textgrid.pages, async (page, pageNumber) => {
 
+              console.timeLog('usePdfTextViewer', `start page ${pageNumber}`);
               const tmount = document.createElement('div');
               pageTextsDiv.appendChild(tmount);
               const tmountRef = divRef();
@@ -47,6 +50,7 @@ export default defineComponent({
               setText({ textgrid, pageBounds });
 
 
+
               const mount = document.createElement('div');
               const pageViewersDiv = await awaitRef(pageViewers);
               pageViewersDiv.appendChild(mount);
@@ -55,7 +59,7 @@ export default defineComponent({
 
               const logEntryRef: Ref<LogEntry[]> = ref([]);
 
-              useTracelogPdfPageViewer({
+              await useTracelogPdfPageViewer({
                 mountPoint: mountRef,
                 pageNumber,
                 entryId,
@@ -63,6 +67,8 @@ export default defineComponent({
                 pageBounds: page.pageGeometry,
                 state
               });
+
+              console.timeLog('usePdfTextViewer', `end page ${pageNumber}`);
             });
 
           });

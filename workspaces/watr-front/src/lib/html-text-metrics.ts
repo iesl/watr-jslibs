@@ -38,28 +38,28 @@ export function getTextWidth(ctx: CanvasRenderingContext2D, text: string, font: 
 }
 
 import _ from 'lodash';
-import { prettyPrint } from './pretty-print';
 
 // TODO make sure that div.offsetWidth/Height are equivalent crossbrowser to $(div).outerWidth
 export function showText(text: string, div: HTMLDivElement, atX: number, atY: number): LineDimensions {
   const lineWidth = div.offsetWidth;
   const lineHeight = div.offsetHeight;
 
-  let currX = atX;
-  let init = '';
-  const sizes = [];
-  for (let i=0; i<text.length; i++) {
-    init += text.charAt(i);
-    div.innerText = init;
+  // let currX = atX;
+  // let init = '';
+  const sizes: TextDimensions[] = [];
+  // TODO re-enable char-wise size calculation when you can figure out how to do it efficiently
+  // for (let i=0; i<text.length; i++) {
+  //   init += text.charAt(i);
+  //   div.innerText = init;
 
-    const currWidth = div.offsetWidth;
-    const charWidth = currWidth - currX + atX;
-    const size = { x: currX, y: atY, width: charWidth, height: lineHeight};
-    // console.log('showText:inner', div.innerText)
-    // console.log('showText:offsetWidth', div.clientWidth)
-    sizes.push(size);
-    currX = currWidth + atX;
-  }
+  //   const currWidth = div.offsetWidth;
+  //   const charWidth = currWidth - currX + atX;
+  //   const size = { x: currX, y: atY, width: charWidth, height: lineHeight};
+  //   // console.log('showText:inner', div.innerText)
+  //   // console.log('showText:offsetWidth', div.clientWidth)
+  //   sizes.push(size);
+  //   currX = currWidth + atX;
+  // }
 
   const lineDimensions: LineDimensions = {
     x: 0, y: 0,

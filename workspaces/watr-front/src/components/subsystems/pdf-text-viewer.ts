@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import { Ref } from '@vue/composition-api';
 
-import { StateArgs } from '~/components/basics/component-basics'
+import { StateArgs, awaitRef } from '~/components/basics/component-basics'
 // import { initState } from '~/components/basics/component-basics'
 import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
@@ -43,6 +43,19 @@ export async function usePdfTextViewer({
   const spatialSearch = useSpatialSearch({ state, eventlibCore, superimposedElements });
 
   const { putTextLn } = useMeasuredTextOverlay({ superimposedElements, state });
+  const textDiv = superimposedElements.overlayElements.textDiv!;
+  const nextId = newIdGenerator();
+
+  const size = 18;
+  const style: TextStyle = {
+    size,
+    style: 'normal',
+    family: 'arial',
+    weight: 'normal'
+  };
+
+
+
 
   const setText: SetText = (textAndBounds) => {
 
@@ -50,19 +63,7 @@ export async function usePdfTextViewer({
     const pageLeft = pageBounds.left;
     const pageTop = pageBounds.top;
 
-    const size = 18;
-    const style: TextStyle = {
-      size,
-      style: 'normal',
-      family: 'arial',
-      weight: 'normal'
-    };
-
-    const textDiv = superimposedElements.overlayElements.textDiv!;
-
-    const nextId = newIdGenerator();
-
-    // textDiv.style.visibility = 'hidden';
+    textDiv.style.visibility = 'hidden';
     textDiv.style.border = '1px solid blue';
     textDiv.style.background = '#eee8d5';
     textDiv.style.color = 'black';

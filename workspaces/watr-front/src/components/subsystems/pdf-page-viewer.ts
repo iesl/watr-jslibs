@@ -33,11 +33,11 @@ export interface PdfPageViewer {
   setGrid: SetGrid;
 }
 
-export function usePdfPageViewer({
+export async function usePdfPageViewer({
   mountPoint, state, pageBounds
-}: Args): PdfPageViewer {
+}: Args): Promise<PdfPageViewer> {
 
-  const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state });
+  const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state });
 
   const superimposedElements = useSuperimposedElements({
     includeElems: [ElementTypes.Img, ElementTypes.Svg],

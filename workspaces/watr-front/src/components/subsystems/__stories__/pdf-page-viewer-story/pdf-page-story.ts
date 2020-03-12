@@ -22,10 +22,11 @@ export default {
     const mountPoint: Ref<HTMLDivElement|null> = ref(null);
     const logEntryRef: Ref<LogEntry[]> = ref([]);
 
+
     const entryId = '1503.00580.pdf.d';
 
     getArtifactData(entryId, 'textgrid')
-      .then((grid: GridTypes.Grid) => {
+      .then(async (grid: GridTypes.Grid) => {
         const page0 = grid.pages[0]
         // TODO: why is this margin here? hardcoded?
         const [l, t, w, h] = page0.pageGeometry;
@@ -35,7 +36,7 @@ export default {
         const gridData = initGridData(page0.textgrid, 0, () => 10, origin, 10);
         const glyphData = gridDataToGlyphData(gridData.textDataPoints);
 
-        const pdfPageViewer = usePdfPageViewer({
+        const pdfPageViewer = await usePdfPageViewer({
           mountPoint,
           state,
           pageNumber: 1,

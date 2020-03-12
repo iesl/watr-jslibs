@@ -13,7 +13,8 @@ export default defineComponent({
     const state = initState();
     const mountPoint = divRef();
 
-    const pdfTextViewer = usePdfTextViewer({ mountPoint, state });
+    usePdfTextViewer({ mountPoint, state }).then(pdfTextViewer => {
+
     const { setText } = pdfTextViewer;
 
     const entryId = '1503.00580.pdf.d';
@@ -25,6 +26,7 @@ export default defineComponent({
         const pageBounds = coords.mk.fromLtwh(20, 20, 0, 0);
         setText({ textgrid, pageBounds });
       });
+    });
 
     return {
       mountPoint
