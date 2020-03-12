@@ -81,15 +81,15 @@ export const PdfPageViewerModule: StateModule<PdfPageViewerState> = {
   }),
 }
 
-export function useTracelogPdfPageViewer({
+export async function useTracelogPdfPageViewer({
   mountPoint,
   pageNumber,
   entryId,
   logEntryRef,
   pageBounds,
   state
-}: Args): PdfPageViewer {
-  const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state });
+}: Args): Promise<PdfPageViewer> {
+  const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state });
 
   const superimposedElements = useSuperimposedElements({
     includeElems: [ElementTypes.Img, ElementTypes.Svg],
@@ -140,10 +140,6 @@ export function useTracelogPdfPageViewer({
     superimposedElements,
     setGrid
   }
-}
-
-export default {
-  // setup() {}
 }
 
 function getCls(data: any) {

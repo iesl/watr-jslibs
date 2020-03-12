@@ -1,14 +1,14 @@
 import _ from 'lodash';
 
 import {
-  Ref,
   defineComponent,
-  ref,
   SetupContext,
+  ref,
+  Ref,
 } from '@vue/composition-api';
 
 import { divRef } from '~/lib/vue-composition-lib';
-import { initState, watchOnceFor } from '~/components/basics/component-basics';
+import { initState, awaitRef } from '~/components/basics/component-basics';
 import { getArtifactData } from '~/lib/axios';
 import { getQueryString } from '../tracelog-viewer/tracelog-viewer';
 import * as GridTypes from '~/lib/TextGridTypes';
@@ -18,7 +18,6 @@ import { useTracelogPdfPageViewer } from '~/components/subsystems/pdf-page-viewe
 import { usePdfTextViewer } from '~/components/subsystems/pdf-text-viewer'
 
 export default defineComponent({
-  components: {  },
 
   setup(_props, context: SetupContext) {
 
@@ -31,39 +30,39 @@ export default defineComponent({
 
     if (entryId) {
 
-      // watchOnceFor(pageViewers, (pageViewersDiv) => {
-      watchOnceFor(pageTexts, (pageViewersDiv) => {
+      awaitRef(pageTexts).then(pageTextsDiv => {
+
         getArtifactData(entryId, 'textgrid')
           .then((textgrid: GridTypes.Grid) => {
-            const pageTextsDiv = pageTexts.value!;
-            _.each([textgrid.pages[0]], (page, pageNumber) => {
+            _.each(textgrid.pages, async (page, pageNumber) => {
 
               const tmount = document.createElement('div');
               pageTextsDiv.appendChild(tmount);
               const tmountRef = divRef();
               tmountRef.value = tmount;
-              const pdfTextViewer = usePdfTextViewer({ mountPoint: tmountRef, state });
+              const pdfTextViewer = await usePdfTextViewer({ mountPoint: tmountRef, state });
               const { setText } = pdfTextViewer;
               const pageBounds = coords.mk.fromLtwh(20, 20, 0, 0);
               const textgrid = page.textgrid;
               setText({ textgrid, pageBounds });
 
 
-            //   const mount = document.createElement('div');
-            //   pageViewersDiv.appendChild(mount);
-            //   const mountRef = divRef();
-            //   mountRef.value = mount;
+              const mount = document.createElement('div');
+              const pageViewersDiv = await awaitRef(pageViewers);
+              pageViewersDiv.appendChild(mount);
+              const mountRef = divRef();
+              mountRef.value = mount;
 
-            //   const logEntryRef: Ref<LogEntry[]> = ref([]);
+              const logEntryRef: Ref<LogEntry[]> = ref([]);
 
-            //   useTracelogPdfPageViewer({
-            //     mountPoint: mountRef,
-            //     pageNumber,
-            //     entryId,
-            //     logEntryRef,
-            //     pageBounds: page.pageGeometry,
-            //     state
-            //   });
+              useTracelogPdfPageViewer({
+                mountPoint: mountRef,
+                pageNumber,
+                entryId,
+                logEntryRef,
+                pageBounds: page.pageGeometry,
+                state
+              });
             });
 
           });

@@ -78,6 +78,8 @@ export function useSuperimposedElements({
     state,
     dependsOn: [mountPoint],
   }, () => {
+    console.log('starting ImgCanvasOverlays');
+
     const overlayContainer = mountPoint.value!;
     overlayContainer.classList.add('layers');
     const { img, canvas, svg, textDiv, eventDiv } = overlayElements;
@@ -137,7 +139,9 @@ export function useSuperimposedElements({
       eventDiv.style.width = w;
       eventDiv.style.height = h;
 
+      console.log('ending ImgCanvasOverlays (setDimensions)');
     });
+    console.log('ending ImgCanvasOverlays');
   });
 
   function setImageSource(src: string) {

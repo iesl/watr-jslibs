@@ -32,6 +32,8 @@
 }
 
 .pageTexts {
+  overflow: scroll;
+  height: 100vh;
 }
 
 </style>

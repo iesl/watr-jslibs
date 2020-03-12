@@ -55,8 +55,8 @@ export function showText(text: string, div: HTMLDivElement, atX: number, atY: nu
     const currWidth = div.offsetWidth;
     const charWidth = currWidth - currX + atX;
     const size = { x: currX, y: atY, width: charWidth, height: lineHeight};
-    console.log('showText:inner', div.innerText)
-    console.log('showText:offsetWidth', div.clientWidth)
+    // console.log('showText:inner', div.innerText)
+    // console.log('showText:offsetWidth', div.clientWidth)
     sizes.push(size);
     currX = currWidth + atX;
   }

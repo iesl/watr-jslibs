@@ -222,3 +222,16 @@ export function initState(): ComponentState {
 
   return st;
 }
+
+export async function resolveWhen<T>(t: T, ...refs: Ref<any>[]): Promise<T> {
+  return new Promise((resolve) => {
+    const ready = watchAll(refs);
+    watchOnceFor(ready.done, () => resolve(t));
+  });
+}
+
+export async function awaitRef<T>(tref: Ref<T|null|undefined>): Promise<T> {
+  return new Promise((resolve) => {
+    watchOnceFor(tref, (t) => resolve(t));
+  });
+}

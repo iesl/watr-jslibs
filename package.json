@@ -2,13 +2,10 @@
   "name": "root",
   "version": "0.1.0",
   "private": true,
-  "devDependencies": {},
   "scripts": {
     "clean": "lerna clean -y && rm -r node_modules",
     "deps:check": "lerna --concurrency 1 exec -- ncu  --loglevel verbose",
-    "deps:update": "lerna --concurrency 1 exec -- ncu -u --loglevel verbose",
-    "ui:dev": "lerna ",
-    "bootstrap": "lerna bootstrap"
+    "deps:update": "lerna --concurrency 1 exec -- ncu -u --loglevel verbose"
   },
   "workspaces": {
     "packages": [

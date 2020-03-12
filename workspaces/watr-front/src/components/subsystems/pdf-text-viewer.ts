@@ -34,11 +34,11 @@ export interface PdfTextViewer {
 }
 
 
-export function usePdfTextViewer({
+export async function usePdfTextViewer({
   mountPoint, state
-}: Args): PdfTextViewer {
+}: Args): Promise<PdfTextViewer> {
 
-  const eventlibCore = useEventlibCore({ targetDivRef: mountPoint, state } );
+  const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state } );
   const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Text, ElementTypes.Svg], mountPoint, state });
   const spatialSearch = useSpatialSearch({ state, eventlibCore, superimposedElements });
 
@@ -72,8 +72,6 @@ export function usePdfTextViewer({
     const allIndexables = _.flatMap(textgrid.rows, (row) => {
       const text = row.text;
       const lineDimensions = putTextLn(style, pageLeft, currY, text);
-      // console.log("text", text);
-      // console.log("ld", lineDimensions);
       maxWidth = Math.max(maxWidth, lineDimensions.width);
       const indexables: RTreeIndexable[] = lineDimensions
         .elementDimensions
@@ -86,7 +84,6 @@ export function usePdfTextViewer({
             maxX: x + width,
             maxY: y + height
           };
-
         });
 
       currY += size+2;
@@ -98,11 +95,9 @@ export function usePdfTextViewer({
     spatialSearch.setGrid(allIndexables);
     superimposedElements.setDimensions(maxWidth, currY+pageTop);
     textDiv.style.visibility = 'visible';
-
   };
 
   return {
     setText
   };
-
 }

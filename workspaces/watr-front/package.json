@@ -7,6 +7,7 @@
   "scripts": {
     "nuxt": "nuxt",
     "build": "nuxt build",
+    "build:stories": "../codemorphs/bin/gen-stories",
     "start": "nuxt start",
     "generate": "nuxt generate",
     "lint": "eslint --no-eslintrc --config .eslintrc.emacs.js --ext .ts --ignore-path ../../.gitignore src/",
