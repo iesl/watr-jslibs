@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "clean": "lerna clean -y && rm -r node_modules",
-    "deps:check": "lerna --concurrency 1 exec -- ncu  --loglevel verbose",
-    "deps:update": "lerna --concurrency 1 exec -- ncu -u --loglevel verbose"
+    "deps:check": "lerna --concurrency 1 exec --stream -- ncu",
+    "deps:update": "lerna --concurrency 1 exec --stream -- ncu -u"
   },
   "workspaces": {
     "packages": [
