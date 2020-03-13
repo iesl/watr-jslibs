@@ -1,12 +1,12 @@
 * Dev Notes
 
 ** Now:
-   - [X] Create a pixijs version of img/canvas overly component
-
-   - [ ] Create rect. selection system
-     - [ ] Still a bit flakey
 
 
+** Problem with text that appears outside of PDFs declared page geometry 
+   Example from corpus-test.d:
+   localhost:3000/stories/autogen/extractedTextViewer?id=1503.00580.pdf.d
+   [28] ... ich, and Y. Raizer,Physics of Shock Waves and High-Temperature Hydrodynamic Ph ...
 
 
 ** Current Goal(s)

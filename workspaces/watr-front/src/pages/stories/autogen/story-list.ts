@@ -8,7 +8,7 @@ export type StoryEntry = {
 
 export const storyItems: StoryEntry[] = [
   { title: 'Pdf Page + Text', to: '/stories/autogen/extractedTextViewer?id=1503.00580.pdf.d' },
-  { title: 'tracelogViewer', to: '/stories/autogen/tracelogViewer' },
+  { title: 'Tracelog Viewer', to: '/stories/autogen/tracelogViewer?id=1503.00580.pdf.d' },
   { title: 'Eventlib Core', to: '/stories/autogen/eventlibCore' },
   { title: 'Sketchpad shape drawing primitives', to: '/stories/autogen/sketchpad' },
   { title: 'Superimposed Elements Story', to: '/stories/autogen/superimposedElementsStory' },

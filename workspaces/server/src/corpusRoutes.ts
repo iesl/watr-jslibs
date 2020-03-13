@@ -115,18 +115,17 @@ export function initFileBasedRoutes(corpusRootPath: string): Router {
   apiRouter
     .get(re, async (ctx: Context, next) => {
       const p = ctx.path;
-      console.log('path = ', p);
 
       // map path entry id to physical path
       const endPath = p.substr(pathPrefix.length + 1)
       const pathParts = endPath.split('/');
       const [entryId, ...remainingPath] = pathParts;
-      console.log('entryId, remainingPath = ', entryId, remainingPath);
       const entryPath = path.resolve(corpusRootPath, entryId);
       const artifactPath = await resolveArtifact(entryPath, remainingPath)
 
       if (artifactPath) {
         const respRelFile = path.relative(corpusRootPath, artifactPath);
+        console.log('serving', respRelFile);
         return await send(ctx, respRelFile, { root: corpusRootPath });
       }
 

@@ -46,16 +46,13 @@ export async function usePdfTextViewer({
   const textDiv = superimposedElements.overlayElements.textDiv!;
   const nextId = newIdGenerator();
 
-  const size = 18;
+  const size = 15;
   const style: TextStyle = {
     size,
     style: 'normal',
     family: 'arial',
     weight: 'normal'
   };
-
-
-
 
   const setText: SetText = (textAndBounds) => {
 
@@ -64,9 +61,6 @@ export async function usePdfTextViewer({
     const pageTop = pageBounds.top;
 
     textDiv.style.visibility = 'hidden';
-    textDiv.style.border = '1px solid blue';
-    textDiv.style.background = '#eee8d5';
-    textDiv.style.color = 'black';
 
     let currY = pageTop;
     let maxWidth = 0;

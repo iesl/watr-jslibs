@@ -30,9 +30,9 @@
 </template>
 
 <script lang="ts">
-  // story-name:tracelogViewer
-  // story-args:id=1503.00580.pdf.d
-  // story-title:Tracelog Viewer
+// story-name=tracelogViewer
+// story-args=id=1503.00580.pdf.d
+// story-title=Tracelog Viewer
 import TracelogViewer from '~/components/ui-elements/tracelog-viewer/index.vue'
 export default {
   components: { TracelogViewer }
