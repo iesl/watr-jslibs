@@ -1,4 +1,3 @@
-
 import _ from 'lodash';
 
 import * as coords from '~/lib/coord-sys';
@@ -15,8 +14,6 @@ import * as utils from '~/lib/utils';
 
 export type Width = number;
 export type MeasureTextWidth = (ch: string) => Width;
-
-
 
 /**
  * Minimal interface required for RTree index
@@ -35,7 +32,6 @@ export interface GlyphCellData {
   glyphBounds: BBox;
   page: number;
 }
-
 
 export interface TextDataPoint extends RTreeIndexable {
   char: string;
@@ -76,12 +72,11 @@ export function gridDataToGlyphData(
 
 
 export interface GridDataNewVer {
-
   textDataPoints: TextDataPoint[];
   maxLineWidth: number;
   totalLineHeight: number;
-
 }
+
 export function initGridDataNewVer(
   textgrid: GridTypes.Textgrid,
   gridNum: number,
@@ -230,5 +225,4 @@ export function initGridData(
     maxLineWidth,
     totalLineHeight
   };
-
 }

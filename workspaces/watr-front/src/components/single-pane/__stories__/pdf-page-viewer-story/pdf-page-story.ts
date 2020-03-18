@@ -14,9 +14,6 @@ import { LogEntry } from '~/lib/tracelogs';
 
 export default {
   setup() {
-    // TODO: setHoveredText
-    // TODO: setClickedText
-
     const state = initState();
 
     const mountPoint: Ref<HTMLDivElement|null> = ref(null);

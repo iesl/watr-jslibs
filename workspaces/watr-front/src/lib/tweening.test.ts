@@ -1,12 +1,9 @@
 import 'chai/register-should';
 import '~/plugins/composition-api';
 
-import { prettyPrint } from './pretty-print';
+import { prettyPrint } from 'commons';
 
-// import anime from 'animejs/lib/anime.es.js';
 import anime from 'animejs';
-
-// prettyPrint({ m: 'tween.test',  TWEEN });
 
 import { tweenBBox } from './tweening';
 

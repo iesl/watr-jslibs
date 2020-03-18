@@ -81,6 +81,7 @@ export const PdfPageViewerModule: StateModule<PdfPageViewerState> = {
   }),
 }
 
+// TODO pull out all of the tracelog drawing code from useTracelogPdfPageViewer into it's own package
 export async function useTracelogPdfPageViewer({
   mountPoint,
   pageNumber,
