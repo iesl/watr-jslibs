@@ -9,11 +9,11 @@ import {
 } from '@vue/composition-api';
 
 
-import { useTracelogPdfPageViewer } from '~/components/subsystems/pdf-page-viewer';
+import { useTracelogPdfPageViewer } from '~/components/single-pane/pdf-page-viewer';
 import { divRef } from '~/lib/vue-composition-lib';
 import { initState, watchOnceFor } from '~/components/basics/component-basics';
-import NarrowingFilter from '~/components/ui-elements/narrowing-filter/index.vue';
-import { ProvidedChoices } from '~/components/ui-elements/narrowing-filter/narrowing-filter';
+import NarrowingFilter from '~/components/single-pane/narrowing-filter/index.vue';
+import { ProvidedChoices } from '~/components/single-pane/narrowing-filter/narrowing-filter';
 import { getArtifactData } from '~/lib/axios';
 import { groupTracelogsByKey, LogEntryGroup, LogEntry } from '~/lib/tracelogs';
 import * as GridTypes from '~/lib/TextGridTypes';

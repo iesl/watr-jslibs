@@ -1,4 +1,4 @@
-import { usePdfTextViewer } from '~/components/subsystems/pdf-text-viewer'
+import { usePdfTextViewer } from '~/components/single-pane/pdf-text-viewer'
 import { defineComponent } from '@vue/composition-api';
 import * as GridTypes from '~/lib/TextGridTypes';
 import * as coords from '~/lib/coord-sys';

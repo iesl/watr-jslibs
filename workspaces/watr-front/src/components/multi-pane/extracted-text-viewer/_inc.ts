@@ -14,8 +14,8 @@ import { getQueryString } from '../tracelog-viewer/tracelog-viewer';
 import * as GridTypes from '~/lib/TextGridTypes';
 import * as coords from '~/lib/coord-sys';
 import { LogEntry } from '~/lib/tracelogs';
-import { useTracelogPdfPageViewer } from '~/components/subsystems/pdf-page-viewer';
-import { usePdfTextViewer } from '~/components/subsystems/pdf-text-viewer'
+import { useTracelogPdfPageViewer } from '~/components/single-pane/pdf-page-viewer';
+import { usePdfTextViewer } from '~/components/single-pane/pdf-text-viewer'
 
 export default defineComponent({
 

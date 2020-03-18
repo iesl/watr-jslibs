@@ -4,7 +4,7 @@ import {
 } from '@vue/composition-api';
 
 import { initState } from '~/components/basics/component-basics'
-import { usePdfPageViewer } from '~/components/subsystems/pdf-page-viewer';
+import { usePdfPageViewer } from '~/components/single-pane/pdf-page-viewer';
 import * as coords from '~/lib/coord-sys';
 import * as GridTypes from '~/lib/TextGridTypes';
 import { initGridData, gridDataToGlyphData } from '~/lib/TextGlyphDataTypes';

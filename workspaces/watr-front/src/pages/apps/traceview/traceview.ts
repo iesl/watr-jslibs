@@ -1,5 +1,5 @@
 
-import TracelogViewer from '~/components/ui-elements/tracelog-viewer/index.vue'
+import TracelogViewer from '~/components/multi-pane/tracelog-viewer/index.vue'
 import { defineComponent } from '@vue/composition-api';
 
 export default defineComponent({
