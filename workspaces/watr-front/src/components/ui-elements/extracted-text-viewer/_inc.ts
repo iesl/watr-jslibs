@@ -30,15 +30,12 @@ export default defineComponent({
 
     if (entryId) {
 
-      console.time('usePdfTextViewer');
       awaitRef(pageTexts).then(pageTextsDiv => {
 
         getArtifactData(entryId, 'textgrid')
           .then((textgrid: GridTypes.Grid) => {
-            console.timeLog('usePdfTextViewer', 'got textgrid');
             _.each(textgrid.pages, async (page, pageNumber) => {
 
-              console.timeLog('usePdfTextViewer', `start page ${pageNumber}`);
               const tmount = document.createElement('div');
               pageTextsDiv.appendChild(tmount);
               const tmountRef = divRef();
@@ -68,7 +65,6 @@ export default defineComponent({
                 state
               });
 
-              console.timeLog('usePdfTextViewer', `end page ${pageNumber}`);
             });
 
           });
@@ -81,20 +77,3 @@ export default defineComponent({
   }
 
 })
-
-/**
-
-   <div class="extractedTextViewer">
-
-   <div class="pageViewersFrame">
-   <div ref="pageViewers" class="pageViewers" />
-   </div>
-
-   <div class="pageTextFrame">
-   <div ref="pageTexts" class="pageTexts" />
-   </div>
-
-   </div>
-
-
-   */

@@ -1,7 +1,7 @@
 <script lang="ts">
 // story-name=extractedTextViewer
 // story-args=id=1503.00580.pdf.d
-// story-title=Pdf Page + Text
+// story-title= Two Panel: [PageImage | Text]
 import StoryComponent from './index.vue'
 export default {
   components: { StoryComponent }
@@ -9,30 +9,30 @@ export default {
 </script>
 
 <template lang="html">
-    <story-layout>
+  <story-layout>
 
-        <template v-slot:title>
-            Pdf Page + Text Viewer
-        </template>
+    <template v-slot:title>
+      Pdf Page + Text Viewer
+    </template>
 
-        <template v-slot:description>
-        </template>
+    <template v-slot:description>
+    </template>
 
-        <template v-slot:controls>
-            <v-container>
-                <v-row>
-                    <v-col />
-                </v-row>
-            </v-container>
-        </template>
+    <template v-slot:controls>
+      <v-container>
+        <v-row>
+          <v-col />
+        </v-row>
+      </v-container>
+    </template>
 
-        <template v-slot:notes>
-            Notes...
-        </template>
+    <template v-slot:notes>
+      Notes...
+    </template>
 
-        <template v-slot:main>
-          <StoryComponent />
-        </template>
+    <template v-slot:main>
+      <StoryComponent />
+    </template>
 
-    </story-layout>
+  </story-layout>
 </template>
