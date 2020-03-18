@@ -1,7 +1,5 @@
 * Dev Notes
 
-** Now:
-
 
 ** Problem with text that appears outside of PDFs declared page geometry 
    Example from corpus-test.d:
