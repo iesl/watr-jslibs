@@ -74,7 +74,6 @@ export interface Trapezoid {
   bottomWidth: number;
 }
 
-
 export type Shape = Line | Rect | Point | Trapezoid;
 
 export type ShapeKind = Shape['kind'];

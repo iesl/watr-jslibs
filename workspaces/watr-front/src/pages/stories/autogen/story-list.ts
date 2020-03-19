@@ -7,7 +7,7 @@ export type StoryEntry = {
 }
 
 export const storyItems: StoryEntry[] = [
-  { title: 'Pdf Page + Text', to: '/stories/autogen/extractedTextViewer?id=1503.00580.pdf.d' },
+  { title: 'Two Panel: [PageImage | Text]', to: '/stories/autogen/extractedTextViewer?id=1503.00580.pdf.d' },
   { title: 'Tracelog Viewer', to: '/stories/autogen/tracelogViewer?id=1503.00580.pdf.d' },
   { title: 'Eventlib Core', to: '/stories/autogen/eventlibCore' },
   { title: 'Sketchpad shape drawing primitives', to: '/stories/autogen/sketchpad' },
@@ -15,6 +15,7 @@ export const storyItems: StoryEntry[] = [
   { title: 'Text Overlay', to: '/stories/autogen/textOverlay' },
   { title: 'Pdf Page Viewer', to: '/stories/autogen/pdfPageViewer?id=1503.00580.pdf.d' },
   { title: 'Pdf Text Viewer', to: '/stories/autogen/pdfTextViewer' },
+  { title: 'Transcribed Text Viewer', to: '/stories/autogen/transcriptionViewer' },
   { title: 'Selection narrowing filter', to: '/stories/autogen/narrowingFilter' },
 ];
 

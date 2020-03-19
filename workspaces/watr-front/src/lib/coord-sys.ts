@@ -122,6 +122,9 @@ class Trapezoid {
   }
 }
 
+export type NumArray4 = [number, number, number, number];
+export type BBoxArray = NumArray4;
+
 export type AnyShape = Point | Line | Trapezoid | BBox;
 
 export const mkPoint = {
