@@ -1,8 +1,4 @@
-import { usePdfTextViewer } from '~/components/single-pane/pdf-text-viewer'
 import { defineComponent } from '@vue/composition-api';
-import * as GridTypes from '~/lib/TextGridTypes';
-import * as coords from '~/lib/coord-sys';
-import { getArtifactData } from '~/lib/axios';
 import { initState } from '~/components/basics/component-basics';
 import { divRef } from '~/lib/vue-composition-lib';
 import { useTranscriptionViewer } from '../../transcription-viewer';
@@ -18,21 +14,12 @@ export default defineComponent({
     useTranscriptionViewer({ mountPoint, state })
       .then(transcriptionViewer => {
 
-
-
         const { setText } = transcriptionViewer;
 
         const trans: Transcription = sampleTranscription;
         const page0 = trans.pages[0];
         setText({ trPage: page0, textMarginLeft: 20, textMarginTop: 20 });
 
-        // const entryId = '1503.00580.pdf.d';
-        // getArtifactData(entryId, 'textgrid')
-        //   .then((grid: GridTypes.Grid) => {
-        //     const page0 = grid.pages[0]
-        //     const textgrid = page0.textgrid;
-        //     setText({ textgrid, textMarginLeft: 20, textMarginTop: 20 });
-        //   });
       });
 
     return {
@@ -40,6 +27,7 @@ export default defineComponent({
     };
   }
 });
+
 
 const sampleTranscription: Transcription = {
   description: "",
@@ -78,7 +66,7 @@ const sampleTranscription: Transcription = {
     }, {
       text : "affine",
       //: "ﬃ -> ffi",
-      chars : [
+      glyphs : [
         [1, 2, 3, 4],
         [1, 2, 3, 4, {"os": [1,2], "g":"ﬃ"}],
         [1, 2, 3, 4, {"o": 1}],
@@ -87,7 +75,5 @@ const sampleTranscription: Transcription = {
         [1, 2, 3, 4]
       ]
     }]
-  }],
-
-  labels: []
+  }]
 }

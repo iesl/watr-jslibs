@@ -1,7 +1,4 @@
-//
 import 'chai/register-should';
-import '~/plugins/composition-api';
-
 import _ from 'lodash';
 
 import {

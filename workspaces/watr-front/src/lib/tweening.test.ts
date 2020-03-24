@@ -1,6 +1,4 @@
 import 'chai/register-should';
-import '~/plugins/composition-api';
-
 import { prettyPrint } from 'commons';
 
 import anime from 'animejs';

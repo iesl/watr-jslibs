@@ -68,7 +68,6 @@
       ]
     },
     {"label": "header:*"},
-    {"label": "paragraph"},
     {"label": "layout:*"},
     {"label": "layout:centered"},
     {"label": "layout:left-justified"},

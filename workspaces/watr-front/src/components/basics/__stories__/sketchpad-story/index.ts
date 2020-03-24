@@ -14,8 +14,8 @@ import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useEventlibSelect, selectExtentHandlers } from '~/components/basics/eventlib-select'
 import { initState, waitFor } from '~/components/basics/component-basics'
 
-import { ShapeKind } from '~/lib/tracelogs';
 import { useSketchpad } from '../../sketchpad';
+import { ShapeKind } from '~/lib/shapes';
 
 type InkwellItem = {
   title: ShapeKind;
