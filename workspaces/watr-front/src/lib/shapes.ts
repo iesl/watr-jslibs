@@ -2,6 +2,9 @@
  * Shape types and serialization functions
  */
 
+import * as io from 'io-ts';
+import { either } from 'fp-ts/lib/Either'
+
 export interface Point {
   kind: 'point';
   x: number;
@@ -132,3 +135,21 @@ export function deserialize(ss: ShapeSer): Shape {
            topLeft: deserPoint(ss[0]), topWidth: adjustUnits(ss[1]),
            bottomLeft: deserPoint(ss[2]), bottomWidth: adjustUnits(ss[3]) };
 }
+
+
+
+export const RectRepr = io.tuple<io.NumberType, io.NumberType, io.NumberType, io.NumberType>(
+  [io.number, io.number, io.number, io.number], "RectRepr"
+);
+
+export type RectRepr = io.TypeOf<typeof RectRepr>;
+
+export const Rect = new io.Type<Rect, RectRepr, unknown>(
+  "Rect",
+  (a: any): a is Rect => a['kind'] === 'rect',
+  (u: unknown, c: io.Context) => either.chain(
+    RectRepr.validate(u, c),
+    n4 => io.success(deserRect(n4))
+  ),
+  (a: Rect) => [a.x, a.y, a.width, a.height]
+);
