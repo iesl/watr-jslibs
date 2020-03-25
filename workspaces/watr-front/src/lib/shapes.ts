@@ -100,19 +100,23 @@ function isTriangleT(s: ShapeSer): s is TriangleSer {
 //     && isPointV(s[2]) && isNumber(s[3]);
 // }
 
-function adjustUnits(n: number): number {
-  return n / 100.0
+function intToFloatRep(n: number): number {
+  return n / 100.0;
+}
+
+function floatToIntRep(n: number): number {
+  return Math.trunc(n * 100.0);
 }
 
 function deserPoint(pointSer: PointSer): Point {
   const [x, y] = pointSer;
-  return { kind: "point", x: adjustUnits(x), y: adjustUnits(y)  };
+  return { kind: "point", x: intToFloatRep(x), y: intToFloatRep(y)  };
 }
 
 export function deserRect(ss: RectSer): Rect {
   return { kind: "rect", x:
-           adjustUnits(ss[0]), y: adjustUnits(ss[1]),
-           width: adjustUnits(ss[2]), height: adjustUnits(ss[3]) };
+           intToFloatRep(ss[0]), y: intToFloatRep(ss[1]),
+           width: intToFloatRep(ss[2]), height: intToFloatRep(ss[3]) };
 }
 
 export function deserialize(ss: ShapeSer): Shape {
@@ -123,7 +127,7 @@ export function deserialize(ss: ShapeSer): Shape {
     return { kind: "line", p1: deserPoint(ss[0]), p2: deserPoint(ss[1]) };
   }
   if (isCircleT(ss)) {
-    return { kind: "circle", p: deserPoint(ss[0]), r: adjustUnits(ss[1]) };
+    return { kind: "circle", p: deserPoint(ss[0]), r: intToFloatRep(ss[1]) };
   }
   if (isTriangleT(ss)) {
     return { kind: "triangle", p1: deserPoint(ss[0]), p2: deserPoint(ss[1]), p3: deserPoint(ss[2])  };
@@ -132,8 +136,8 @@ export function deserialize(ss: ShapeSer): Shape {
     return deserRect(ss);
   }
   return { kind: "trapezoid",
-           topLeft: deserPoint(ss[0]), topWidth: adjustUnits(ss[1]),
-           bottomLeft: deserPoint(ss[2]), bottomWidth: adjustUnits(ss[3]) };
+           topLeft: deserPoint(ss[0]), topWidth: intToFloatRep(ss[1]),
+           bottomLeft: deserPoint(ss[2]), bottomWidth: intToFloatRep(ss[3]) };
 }
 
 
@@ -151,5 +155,12 @@ export const Rect = new io.Type<Rect, RectRepr, unknown>(
     RectRepr.validate(u, c),
     n4 => io.success(deserRect(n4))
   ),
-  (a: Rect) => [a.x, a.y, a.width, a.height]
+  (a: Rect) => {
+    const { x, y, width, height } = a;
+    const xi = floatToIntRep(x);
+    const yi = floatToIntRep(y);
+    const wi = floatToIntRep(width);
+    const hi = floatToIntRep(height);
+    return [xi, yi, wi, hi];
+  }
 );

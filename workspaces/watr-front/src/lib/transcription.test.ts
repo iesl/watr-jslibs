@@ -1,13 +1,24 @@
 import 'chai/register-should';
 
 import _ from "lodash";
-import { GlyphRepr, Glyph } from './transcription';
-import { either, Either, isRight } from 'fp-ts/lib/Either'
-import { prettyPrint } from 'commons';
+import { GlyphRepr, Glyph, Transcription } from './transcription';
+import { isRight } from 'fp-ts/lib/Either'
+import * as io from 'io-ts';
 import { Rect, RectRepr } from './shapes';
 
-function expectRight<E, A>(eith: Either<E, A>, onSucc: (a: A) => void): void {
-  either.bimap(eith, () => false, onSucc);
+// import { prettyPrint } from 'commons';
+
+
+function isIsomorphic<A, O, I>(ioType: io.Type<A, O, I>, a: I): boolean {
+  const dec = ioType.decode(a);
+  // prettyPrint({ m: `isIsomorphic: ${ioType.name}`, a });
+  if (isRight(dec)) {
+    const adecoded = dec.right;
+    const aencoded = ioType.encode(adecoded);
+    // prettyPrint({ adecoded, aencoded });
+    return _.isEqual(aencoded, a)
+  }
+  return false;
 }
 
 
@@ -15,32 +26,19 @@ describe('Transcription functions', () => {
 
   it('ser/deser RectRepr', () => {
 
-    either.bimap(
-      RectRepr.decode([1, 2]),
-      (err) => expect(err.length).toBeGreaterThan(0),
-      (succ) => expect(succ).toBeFalsy
-    );
-
-    // prettyPrint(RectRepr.decode([1, 2, 3, 4, { ext: 'some info' }]));
-
-    expectRight(
-      RectRepr.decode([1, 2, 3, 4]),
-      (succ) => expect(succ).toStrictEqual([1, 2, 3, 4])
-    )
-  });
-
-  it('ser/deser Rect', () => {
-    expectRight(
-      Rect.decode([120, 130, 40, 50]),
-      (succ) => expect(succ).toStrictEqual({
-        kind: "rect",
-        x: 1.20, y: 1.30, width: 0.40, height: 0.50
-      })
-    );
+    const examples: any[] = [
+      [1, 2, 3, 4],
+      [10, 20, 30, 40],
+      [11, 22, 33, 44],
+      [101, 202, 303, 404],
+    ];
+    _.each(examples, example => {
+      expect(isIsomorphic(RectRepr, example)).toBeTruthy;
+      expect(isIsomorphic(Rect, example)).toBeTruthy;
+    });
   });
 
   it('ser/deser GlyphReprs, Glyphs', () => {
-
     const examples: any[] = [
       [1, 2, 3, 4],
       [[1, 2, 3, 4], { "g": "A" }],
@@ -53,23 +51,19 @@ describe('Transcription functions', () => {
     ];
 
     _.each(examples, example => {
-      const dec = GlyphRepr.decode(example);
-      expect(isRight(dec)).toBeTruthy;
-      const renc = either.map(dec, GlyphRepr.encode);
-      expect(isRight(renc)).toBeTruthy;
-
-      const gdec = Glyph.decode(example);
-      expect(isRight(gdec)).toBeTruthy;
-      const genc = either.map(gdec, Glyph.encode);
-      expect(isRight(genc)).toBeTruthy;
-      // prettyPrint({ gdec, genc });
+      expect(isIsomorphic(GlyphRepr, example)).toBeTruthy;
+      expect(isIsomorphic(Glyph, example)).toBeTruthy;
     });
   });
 
   it('ser/deser Transcription', () => {
-    // const tr0 = TranscriptionIO.decode(sampleTranscription);
-    // prettyPrint({ tr0 });
+    const examples: any[] = [
+      sampleTranscription
+    ];
 
+    _.each(examples, example => {
+      expect(isIsomorphic(Transcription, example)).toBeTruthy;
+    });
   });
 
 });
