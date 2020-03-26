@@ -105,7 +105,7 @@ function intToFloatRep(n: number): number {
 }
 
 function floatToIntRep(n: number): number {
-  return Math.trunc(n * 100.0);
+  return Math.round(n * 100.0);
 }
 
 function deserPoint(pointSer: PointSer): Point {

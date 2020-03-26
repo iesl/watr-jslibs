@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-import { Rect, RectRepr } from "./shapes";
+import { Rect, RectRepr, Shape } from "./shapes";
 import * as io from 'io-ts';
 import { either, isRight } from 'fp-ts/lib/Either'
 
@@ -135,36 +135,132 @@ export const Page = io.type({
 export type Page = io.TypeOf<typeof Page>;
 
 
-export const Transcription = io.type({
-  description: io.string,
-  documentId: io.string,
-  pages: io.array(Page),
-  // labels: io.array(LabelIO),
-}, "Transcription");
+interface PositiveBrand {
+  readonly Positive: unique symbol;
+}
 
-export type Transcription = io.TypeOf<typeof Transcription>;
 
 type Begin = number;
+const Begin = io.number;
 type Length = number;
-export type TextSpan = readonly [Begin, Length];
+
+const PositiveNumber = io.brand(
+  io.number,
+  (n: number): n is io.Branded<number, PositiveBrand> => n >= 0,
+  "Positive"
+);
+
+const Length = PositiveNumber;
+type BLSpan = readonly [Begin, Length];
+const BLSpan = io.tuple([Begin, Length], "BLSpan");
+
+
+export const TextLabelUnit = io.keyof({
+  'text:line': null,
+  'text:char': null,
+});
+
+export const ShapeLabelUnit = io.keyof({
+  'shape:point': null,
+  'shape:line': null,
+  'shape:rect': null,
+  'shape:circle': null,
+  'shape:triangle': null,
+  'shape:trapezoid': null,
+});
+
+export const DocLabelUnit = io.keyof({
+  'doc:document': null,
+  'doc:page': null,
+});
+
+export const LabelLabelUnit = io.keyof({
+  'label': null,
+});
+
 
 export interface TextRange {
   unit: string;
   page: number;
-  at: TextSpan;
+  at: BLSpan;
 }
 
-type SpatialSpan = any;
+const TextRange = io.type({
+  unit: TextLabelUnit,
+  page: io.number,
+  at: BLSpan,
+}, "TextRange");
 
-export interface SpatialRange {
+export interface GeometricRange {
   unit: string;
   page: number;
-  at: SpatialSpan;
+  at: Shape;
 }
 
-type Range = TextRange | SpatialRange;
+const GeometricRange = io.type({
+  unit: ShapeLabelUnit,
+  page: io.number,
+  at: Rect,
+})
+
+export const DocumentRange = io.type({
+  unit: io.literal("document")
+});
+export type DocumentRange = io.TypeOf<typeof DocumentRange>;
+
+export const PageRange = io.type({
+  unit: io.literal("page"),
+  at: BLSpan,
+});
+export type PageRange = io.TypeOf<typeof PageRange>;
+
+interface LabelIDBrand {
+  readonly LabelID: unique symbol;
+}
+
+const LabelID = io.brand(
+  io.string,
+  (s): s is io.Branded<string, LabelIDBrand> => s.length > 0,
+  "LabelID"
+);
+
+export const LabelRange = io.type({
+  unit: io.literal("label"),
+  at: LabelID
+});
+export type LabelRange = io.TypeOf<typeof LabelRange>;
+
+type Range = TextRange | GeometricRange | PageRange | DocumentRange | LabelRange;
+
+export const Range = io.union([
+  TextRange, GeometricRange, PageRange, DocumentRange, LabelRange
+], "Range");
 
 export interface Label {
-  label: string;
-  ranges: Range[];
+  name: string;
+  id: string;
+  range: Range[];
+  props: { [k: string]: any };
 }
+
+export const LabelProps =
+  io.partial({
+    props: io.record(io.string, io.any, "LabelProps")
+  });
+
+export const LabelRec = io.type({
+  name: io.string,
+  id: io.string,
+  range: io.array(Range),
+}, "LabelRec");
+
+export const Label = io.intersection([LabelRec, LabelProps], "Label");
+
+export const Transcription = io.type({
+  description: io.string,
+  documentId: io.string,
+  pages: io.array(Page),
+  labels: io.array(Label),
+}, "Transcription");
+
+export type Transcription = io.TypeOf<typeof Transcription>;

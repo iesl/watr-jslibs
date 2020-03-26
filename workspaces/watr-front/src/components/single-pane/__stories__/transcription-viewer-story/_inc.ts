@@ -3,6 +3,7 @@ import { initState } from '~/components/basics/component-basics';
 import { divRef } from '~/lib/vue-composition-lib';
 import { useTranscriptionViewer } from '../../transcription-viewer';
 import { Transcription } from '~/lib/transcription';
+import { isRight } from 'fp-ts/lib/Either'
 
 export default defineComponent({
   components: {},
@@ -16,9 +17,14 @@ export default defineComponent({
 
         const { setText } = transcriptionViewer;
 
-        const trans: Transcription = sampleTranscription;
-        const page0 = trans.pages[0];
-        setText({ trPage: page0, textMarginLeft: 20, textMarginTop: 20 });
+        const transEither  = Transcription.decode(sampleTranscription);
+        console.log('transEither', transEither);
+        // sampleTranscription;
+        if (isRight(transEither)) {
+          const trans = transEither.right;
+          const page0 = trans.pages[0];
+          setText({ trPage: page0, textMarginLeft: 20, textMarginTop: 20 });
+        }
 
       });
 
@@ -29,51 +35,37 @@ export default defineComponent({
 });
 
 
-const sampleTranscription: Transcription = {
-  description: "",
-  documentId : "1503.00580.pdf.d",
-  pages : [{
-    pdfPageBounds : [0, 0, 61200, 79200],
-    lines : [{
-      //: "Here 'A' and tilde are 2 glyphs combining into single char",
-      text : "I, Ãdam",
-      glyphs : [
+const sampleTranscription = {
+  description: "desc",
+  documentId: "doc-25-id",
+  pages: [{
+    pdfPageBounds: [0, 0, 61200, 79200],
+    lines: [{
+      text: "I Ã ffi",
+      glyphs: [
         [1, 2, 3, 4],
-        [2, 2, 3, 4],
-        [5, 2, 3, 4, {}],
-        [3, 2, 3, 4, {
+        [[59, 2, 3, 4], {}],
+        [[3, 2, 3, 4], {
           "gs": [
-            [1, 2, 3, 4, {"g": "A"}],
-            [1, 2, 3, 4, {"g": "~"}]
+            [[1, 2, 3, 4], { "g": "A" }],
+            [[1, 2, 3, 4], { "g": "~" }]
           ]
         }],
-        [1, 2, 3, 4],
-        [1, 2, 3, 4],
-        [5, 2, 3, 4, {}],
-        [1, 2, 3, 4]
+        [[50, 2, 3, 4], {}],
+        [[1, 2, 3, 4], { "os": [1, 2], "g": "ﬃ" }],
+        [[1, 2, 3, 4], { "o": 1 }],
+        [[1, 2, 3, 4], { "o": 2 }],
       ]
     }, {
-      text : "Fe_{3}",
-      //: "_{} and ^{} are super/subscript escapes",
-      glyphs : [
-        [1, 2, 3, 4],
-        [2, 2, 3, 4],
-        [5, 2, 3, 4, {"o": -2}],
-        [5, 2, 3, 4, {"o": -1}],
-        [5, 2, 3, 4, {"os": [-2, -1, 1]}],
-        [5, 2, 3, 4, {"o": 1}]
-      ]
-    }, {
-      text : "affine",
-      //: "ﬃ -> ffi",
-      glyphs : [
-        [1, 2, 3, 4],
-        [1, 2, 3, 4, {"os": [1,2], "g":"ﬃ"}],
-        [1, 2, 3, 4, {"o": 1}],
-        [1, 2, 3, 4, {"o": 2}],
-        [1, 2, 3, 4],
-        [1, 2, 3, 4]
+      text: "Fe_{3}",
+      glyphs: [
+        [11, 2, 3, 4],
+        [22, 2, 3, 4],
+        [[51, 2, 3, 4], { "o": -2 }],
+        [[52, 2, 3, 4], { "o": -1 }],
+        [[53, 2, 3, 4], { "os": [-2, -1, 1] }],
+        [[54, 2, 3, 4], { "o": 1 }]
       ]
     }]
   }]
-}
+};
