@@ -169,16 +169,6 @@ export const ShapeLabelUnit = io.keyof({
   'shape:trapezoid': null,
 });
 
-export const DocLabelUnit = io.keyof({
-  'doc:document': null,
-  'doc:page': null,
-});
-
-export const LabelLabelUnit = io.keyof({
-  'label': null,
-});
-
-
 export interface TextRange {
   unit: string;
   page: number;
