@@ -168,5 +168,3 @@ describe('Transcription functions', () => {
   });
 
 });
-
-Ljc@p7C98i
