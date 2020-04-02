@@ -11,11 +11,11 @@ import { divRef } from '~/lib/vue-composition-lib';
 import { initState, awaitRef } from '~/components/basics/component-basics';
 import { getArtifactData } from '~/lib/axios';
 import { getQueryString } from '../tracelog-viewer/tracelog-viewer';
-import * as GridTypes from '~/lib/TextGridTypes';
-import * as coords from '~/lib/coord-sys';
 import { LogEntry } from '~/lib/tracelogs';
 import { useTracelogPdfPageViewer } from '~/components/single-pane/pdf-page-viewer';
-import { usePdfTextViewer } from '~/components/single-pane/pdf-text-viewer'
+import { useTranscriptionViewer } from '~/components/single-pane/transcription-viewer';
+import { isRight } from 'fp-ts/lib/Either'
+import { Transcription } from '~/lib/transcription';
 
 export default defineComponent({
 
@@ -33,39 +33,42 @@ export default defineComponent({
       awaitRef(pageTexts).then(pageTextsDiv => {
 
         getArtifactData(entryId, 'textgrid')
-          .then((textgrid: GridTypes.Grid) => {
-            _.each(textgrid.pages, async (page, pageNumber) => {
-
-              const tmount = document.createElement('div');
-              pageTextsDiv.appendChild(tmount);
-              const tmountRef = divRef();
-              tmountRef.value = tmount;
-              const pdfTextViewer = await usePdfTextViewer({ mountPoint: tmountRef, state });
-              const { setText } = pdfTextViewer;
-              const pageBounds = coords.mk.fromLtwh(20, 20, 0, 0);
-              const textgrid = page.textgrid;
-              setText({ textgrid, pageBounds });
+          .then((transcriptJson) => {
+            const transEither  = Transcription.decode(transcriptJson);
 
 
+            if (isRight(transEither)) {
+              const transcript = transEither.right;
 
-              const mount = document.createElement('div');
-              const pageViewersDiv = await awaitRef(pageViewers);
-              pageViewersDiv.appendChild(mount);
-              const mountRef = divRef();
-              mountRef.value = mount;
+              _.each(transcript.pages, async (page, pageNumber) => {
+                const tmount = document.createElement('div');
+                pageTextsDiv.appendChild(tmount);
+                const tmountRef = divRef();
+                tmountRef.value = tmount;
+                const transcriptViewer = await useTranscriptionViewer({ mountPoint: tmountRef, state });
+                const { setText } = transcriptViewer;
+                setText({ trPage: page, textMarginLeft: 20, textMarginTop: 20 });
 
-              const logEntryRef: Ref<LogEntry[]> = ref([]);
 
-              await useTracelogPdfPageViewer({
-                mountPoint: mountRef,
-                pageNumber,
-                entryId,
-                logEntryRef,
-                pageBounds: page.pageGeometry,
-                state
+                const mount = document.createElement('div');
+                const pageViewersDiv = await awaitRef(pageViewers);
+                pageViewersDiv.appendChild(mount);
+                const mountRef = divRef();
+                mountRef.value = mount;
+
+                const logEntryRef: Ref<LogEntry[]> = ref([]);
+
+                await useTracelogPdfPageViewer({
+                  mountPoint: mountRef,
+                  pageNumber,
+                  entryId,
+                  logEntryRef,
+                  pageBounds: page.pdfPageBounds,
+                  state
+                });
+
               });
-
-            });
+            }
 
           });
       });

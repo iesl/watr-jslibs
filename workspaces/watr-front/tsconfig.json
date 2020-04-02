@@ -7,6 +7,9 @@
     "module": "esnext",
     "moduleResolution": "node",
 
+    "removeComments": true,
+    "incremental": true,
+
     "lib": [
       "esnext",
       "esnext.asynciterable",

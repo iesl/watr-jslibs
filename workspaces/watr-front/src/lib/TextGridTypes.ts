@@ -1,9 +1,3 @@
-// To parse this data:
-//   const grid = Convert.toGrid(json);
-// These functions will throw an error if the JSON doesn't
-// match the expected interface, even if the JSON is valid.
-
-
 import * as coords from "./coord-sys";
 import { BBoxArray } from "./coord-sys";
 

@@ -190,7 +190,7 @@ export interface GeometricRange {
 const GeometricRange = io.type({
   unit: ShapeLabelUnit,
   page: io.number,
-  at: Rect,
+  at: Shape,
 })
 
 export const DocumentRange = io.type({

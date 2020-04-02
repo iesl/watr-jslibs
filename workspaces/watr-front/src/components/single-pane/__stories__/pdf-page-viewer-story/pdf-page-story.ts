@@ -11,42 +11,58 @@ import { initGridData, gridDataToGlyphData } from '~/lib/TextGlyphDataTypes';
 import { Point } from '~/lib/coord-sys';
 import { resolveCorpusUrl, getArtifactData } from '~/lib/axios';
 import { LogEntry } from '~/lib/tracelogs';
+import { useTranscriptionViewer } from '../../transcription-viewer';
+import { Transcription } from '~/lib/transcription';
+import { isRight } from 'fp-ts/lib/Either'
 
 export default {
   setup() {
     const state = initState();
 
-    const mountPoint: Ref<HTMLDivElement|null> = ref(null);
+    const mountPoint: Ref<HTMLDivElement | null> = ref(null);
     const logEntryRef: Ref<LogEntry[]> = ref([]);
 
 
     const entryId = '1503.00580.pdf.d';
 
+    // useTranscriptionViewer({ mountPoint, state })
+    //   .then(transcriptionViewer => {});
+    // const { setText } = transcriptionViewer;
+
     getArtifactData(entryId, 'textgrid')
-      .then(async (grid: GridTypes.Grid) => {
-        const page0 = grid.pages[0]
-        // TODO: why is this margin here? hardcoded?
-        const [l, t, w, h] = page0.pageGeometry;
-        const pageBounds = coords.mk.fromArray([l, t, w, h]);
-        const tmpPageMargin = 10;
-        const origin = new Point(tmpPageMargin, tmpPageMargin, coords.CoordSys.GraphUnits);
-        const gridData = initGridData(page0.textgrid, 0, () => 10, origin, 10);
-        const glyphData = gridDataToGlyphData(gridData.textDataPoints);
+      .then(async (transcriptJson) => {
+        const transEither = Transcription.decode(transcriptJson);
 
-        const pdfPageViewer = await usePdfPageViewer({
-          mountPoint,
-          state,
-          pageNumber: 1,
-          entryId: '',
-          logEntryRef,
-          pageBounds: [l, t, w, h]
-        });
+        if (isRight(transEither)) {
+          const transcript = transEither.right;
 
-        const { superimposedElements  } = pdfPageViewer;
-        const imageUrl = resolveCorpusUrl(entryId, 'image', '1');
-        superimposedElements.setImageSource(imageUrl);
-        pdfPageViewer.setGrid(glyphData, pageBounds);
+          const page0 = transcript.pages[0]
+          // TODO: why is this margin here? hardcoded?
+          const pageBounds = page0.pdfPageBounds;
+          const tmpPageMargin = 10;
+          const origin = new Point(tmpPageMargin, tmpPageMargin, coords.CoordSys.GraphUnits);
+          const gridData = initGridData(page0.textgrid, 0, () => 10, origin, 10);
+          const glyphData = gridDataToGlyphData(gridData.textDataPoints);
+
+          const pdfPageViewer = await usePdfPageViewer({
+            mountPoint,
+            state,
+            pageNumber: 1,
+            entryId: '',
+            logEntryRef,
+            pageBounds: [l, t, w, h]
+          });
+
+          const { superimposedElements } = pdfPageViewer;
+          const imageUrl = resolveCorpusUrl(entryId, 'image', '1');
+          superimposedElements.setImageSource(imageUrl);
+          pdfPageViewer.setGrid(glyphData, pageBounds);
+
+
+
+        }
       });
+
 
     return {
       mountPoint

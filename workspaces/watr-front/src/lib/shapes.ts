@@ -1,9 +1,14 @@
 /**
  * Shape types and serialization functions
  */
-
 import * as io from 'io-ts';
 import { either } from 'fp-ts/lib/Either'
+
+function isKind<T>(k: string): (v: any) => v is T {
+  return function f(a: any): a is T {
+    return a['kind'] === k;
+  }
+}
 
 export interface Point {
   kind: 'point';
@@ -11,11 +16,35 @@ export interface Point {
   y: number;
 }
 
+export const PointRepr = io.tuple([io.number, io.number], "PointRepr");
+export type PointRepr = io.TypeOf<typeof PointRepr>;
+
+export const Point = new io.Type<Point, PointRepr, unknown>(
+  "Point", isKind("point"),
+  (repr: unknown, c: io.Context) => either.chain(
+    PointRepr.validate(repr, c),
+    validRepr => io.success(uPoint(validRepr))
+  ),
+  (a: Point) => [floatToIntRep(a.x), floatToIntRep(a.y)]
+);
+
 export interface Circle {
   kind: 'circle';
   p: Point;
   r: number;
 }
+
+export const CircleRepr = io.tuple([PointRepr, io.number], "CircleRepr");
+export type CircleRepr = io.TypeOf<typeof CircleRepr>;
+
+export const Circle = new io.Type<Circle, CircleRepr, unknown>(
+  "Circle", isKind("circle"),
+  (repr: unknown, c: io.Context) => either.chain(
+    CircleRepr.validate(repr, c),
+    validRepr => io.success(uCircle(validRepr))
+  ),
+  (a: Circle) => [Point.encode(a.p), floatToIntRep(a.r)]
+);
 
 
 export interface Line {
@@ -24,12 +53,37 @@ export interface Line {
   p2: Point;
 }
 
+export const LineRepr = io.tuple([PointRepr, PointRepr], "LineRepr");
+export type LineRepr = io.TypeOf<typeof LineRepr>;
+
+export const Line = new io.Type<Line, LineRepr, unknown>(
+  "Line", isKind("line"),
+  (repr: unknown, c: io.Context) => either.chain(
+    LineRepr.validate(repr, c),
+    validRepr => io.success(uLine(validRepr))
+  ),
+  (a: Line) => [Point.encode(a.p1), Point.encode(a.p2)]
+);
+
+
 export interface Triangle {
   kind: 'triangle';
   p1: Point;
   p2: Point;
   p3: Point;
 }
+
+export const TriangleRepr = io.tuple([PointRepr, PointRepr, PointRepr], "TriangleRepr");
+export type TriangleRepr = io.TypeOf<typeof TriangleRepr>;
+
+export const Triangle = new io.Type<Triangle, TriangleRepr, unknown>(
+  "Triangle", isKind("triangle"),
+  (repr: unknown, c: io.Context) => either.chain(
+    TriangleRepr.validate(repr, c),
+    validRepr => io.success(uTriangle(validRepr))
+  ),
+  (a: Triangle) => [Point.encode(a.p1), Point.encode(a.p2), Point.encode(a.p3)]
+);
 
 export interface Rect {
   kind: 'rect';
@@ -39,68 +93,68 @@ export interface Rect {
   height: number;
 }
 
+// export const RectRepr = io.tuple<io.NumberType, io.NumberType, io.NumberType, io.NumberType>(
+export const RectRepr =
+  io.tuple([io.number, io.number, io.number, io.number], "RectRepr");
+
+export type RectRepr = io.TypeOf<typeof RectRepr>;
+
+export const Rect = new io.Type<Rect, RectRepr, unknown>(
+  "Rect", isKind('rect'),
+  (u: unknown, c: io.Context) => either.chain(
+    RectRepr.validate(u, c),
+    validRepr => io.success(uRect(validRepr))),
+  (a: Rect) => {
+    const { x, y, width, height } = a;
+    return [
+      floatToIntRep(x),
+      floatToIntRep(y),
+      floatToIntRep(width),
+      floatToIntRep(height),
+    ];
+  }
+);
+
 export interface Trapezoid {
   kind: 'trapezoid';
-
   topLeft: Point;
   topWidth: number;
   bottomLeft: Point;
   bottomWidth: number;
 }
 
-export type Shape = Point | Line | Circle | Triangle | Rect | Trapezoid;
+export const TrapezoidRepr = io.tuple(
+  [PointRepr, io.number, PointRepr, io.number],
+  "TrapezoidRepr"
+);
 
+export type TrapezoidRepr = io.TypeOf<typeof TrapezoidRepr>;
+
+export const Trapezoid = new io.Type<Trapezoid, TrapezoidRepr, unknown>(
+  "Trapezoid", isKind("trapezoid"),
+  (repr: unknown, c: io.Context) => either.chain(
+    TrapezoidRepr.validate(repr, c),
+    validRepr => io.success(uTrapezoid(validRepr))
+  ),
+  (a: Trapezoid) => [
+    Point.encode(a.topLeft), floatToIntRep(a.topWidth),
+    Point.encode(a.bottomLeft), floatToIntRep(a.bottomWidth)
+  ]
+);
+
+/**
+   * nb., the order of the shapes in the this Shape union is important.
+   * The deserializer will test the encoded inputs against the
+   * serialized form of the shapes in the order listed. So, e.g.,
+   * a Triangle ([p1, p2, p3]) and a Line ([p1, p2]) must be tested in that
+   * order, or else the Triangle will decode as  a line with some extra info
+   * at the end.
+   */
+export const Shape = io.union([Rect, Point, Triangle, Trapezoid, Line, Circle], "Shape");
+export type Shape = io.TypeOf<typeof Shape>;
 export type ShapeKind = Shape['kind'];
 
-
-// Serialized Shape Representations
-
-export type PointSer = readonly [number, number];
-export type CircleSer = readonly [PointSer, number];
-export type LineSer = readonly [PointSer, PointSer];
-export type TriangleSer = readonly [PointSer, PointSer, PointSer];
-export type RectSer = readonly [number, number, number, number];
-export type QuadSer = readonly [PointSer, PointSer, PointSer, PointSer];
-export type TrapezoidSer = readonly [PointSer, number, PointSer, number];
-
-export type ShapeSer = PointSer | RectSer | LineSer | CircleSer | TriangleSer | TrapezoidSer;
-
-function isPointV(t: number | PointSer): t is PointSer {
-  return !isNumber(t);
-}
-function isNumber(t: number | PointSer): t is number {
-  return typeof t === "number";
-}
-
-function isPointT(s: ShapeSer): s is PointSer {
-  return s.length===2 && isNumber(s[0]);
-}
-
-export function isLineT(s: ShapeSer): s is LineSer {
-  return s.length===2 && isPointV(s[0]) && isPointV(s[1]);
-}
-
-function isCircleT(s: ShapeSer): s is CircleSer {
-  return s.length===2 && isPointV(s[0]) && isNumber(s[1]);
-}
-function isRectT(s: ShapeSer): s is RectSer {
-  return s.length===2 && isPointV(s[0]) && isNumber(s[1]);
-}
-
-function isTriangleT(s: ShapeSer): s is TriangleSer {
-  return s.length===3
-    && isPointV(s[0])
-    && isPointV(s[1])
-    && isPointV(s[2]);
-}
-
-// function isTrapezoidT(s: ShapeSer): s is TrapezoidSer {
-//   return s.length===4
-//     && isPointV(s[0]) && isNumber(s[1])
-//     && isPointV(s[2]) && isNumber(s[3]);
-// }
-
-function intToFloatRep(n: number): number {
+function uFloat(n: number): number {
   return n / 100.0;
 }
 
@@ -108,59 +162,44 @@ function floatToIntRep(n: number): number {
   return Math.round(n * 100.0);
 }
 
-function deserPoint(pointSer: PointSer): Point {
-  const [x, y] = pointSer;
-  return { kind: "point", x: intToFloatRep(x), y: intToFloatRep(y)  };
+function uPoint(repr: PointRepr): Point {
+  const [x, y] = repr;
+  return { kind: "point", x: uFloat(x), y: uFloat(y) };
 }
 
-export function deserRect(ss: RectSer): Rect {
-  return { kind: "rect", x:
-           intToFloatRep(ss[0]), y: intToFloatRep(ss[1]),
-           width: intToFloatRep(ss[2]), height: intToFloatRep(ss[3]) };
+function uCircle(repr: CircleRepr): Circle {
+  const [p, r] = repr;
+  return { kind: "circle", p: uPoint(p), r: uFloat(r) };
 }
 
-export function deserialize(ss: ShapeSer): Shape {
-  if (isPointT(ss)) {
-    return deserPoint(ss);
-  }
-  if (isLineT(ss)) {
-    return { kind: "line", p1: deserPoint(ss[0]), p2: deserPoint(ss[1]) };
-  }
-  if (isCircleT(ss)) {
-    return { kind: "circle", p: deserPoint(ss[0]), r: intToFloatRep(ss[1]) };
-  }
-  if (isTriangleT(ss)) {
-    return { kind: "triangle", p1: deserPoint(ss[0]), p2: deserPoint(ss[1]), p3: deserPoint(ss[2])  };
-  }
-  if (isRectT(ss)) {
-    return deserRect(ss);
-  }
-  return { kind: "trapezoid",
-           topLeft: deserPoint(ss[0]), topWidth: intToFloatRep(ss[1]),
-           bottomLeft: deserPoint(ss[2]), bottomWidth: intToFloatRep(ss[3]) };
+function uTriangle(repr: TriangleRepr): Triangle {
+  const [p1, p2, p3] = repr;
+  return { kind: "triangle", p1: uPoint(p1), p2: uPoint(p2), p3: uPoint(p3),};
 }
 
+function uTrapezoid(repr: TrapezoidRepr): Trapezoid {
+  const [tl, tw, bl, bw] = repr;
+  return {
+    kind: "trapezoid",
+    topLeft: uPoint(tl),
+    topWidth: uFloat(tw),
+    bottomLeft: uPoint(bl),
+    bottomWidth: uFloat(bw)
+  };
+}
 
+function uLine(repr: LineRepr): Line {
+  const [p1, p2] = repr;
+  return { kind: "line", p1: uPoint(p1), p2: uPoint(p2) };
+}
 
-export const RectRepr = io.tuple<io.NumberType, io.NumberType, io.NumberType, io.NumberType>(
-  [io.number, io.number, io.number, io.number], "RectRepr"
-);
-
-export type RectRepr = io.TypeOf<typeof RectRepr>;
-
-export const Rect = new io.Type<Rect, RectRepr, unknown>(
-  "Rect",
-  (a: any): a is Rect => a['kind'] === 'rect',
-  (u: unknown, c: io.Context) => either.chain(
-    RectRepr.validate(u, c),
-    n4 => io.success(deserRect(n4))
-  ),
-  (a: Rect) => {
-    const { x, y, width, height } = a;
-    const xi = floatToIntRep(x);
-    const yi = floatToIntRep(y);
-    const wi = floatToIntRep(width);
-    const hi = floatToIntRep(height);
-    return [xi, yi, wi, hi];
-  }
-);
+export function uRect(repr: RectRepr): Rect {
+  const [x, y, w, h] = repr;
+  return {
+    kind: "rect",
+    x: uFloat(x),
+    y: uFloat(y),
+    width: uFloat(w),
+    height: uFloat(h)
+  };
+}

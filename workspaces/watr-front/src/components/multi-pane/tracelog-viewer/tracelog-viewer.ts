@@ -8,15 +8,16 @@ import {
   SetupContext,
 } from '@vue/composition-api';
 
-
 import { useTracelogPdfPageViewer } from '~/components/single-pane/pdf-page-viewer';
 import { divRef } from '~/lib/vue-composition-lib';
 import { initState, watchOnceFor } from '~/components/basics/component-basics';
 import NarrowingFilter from '~/components/single-pane/narrowing-filter/index.vue';
 import { ProvidedChoices } from '~/components/single-pane/narrowing-filter/narrowing-filter';
 import { getArtifactData } from '~/lib/axios';
-import { groupTracelogsByKey, LogEntryGroup, LogEntry } from '~/lib/tracelogs';
-import * as GridTypes from '~/lib/TextGridTypes';
+import { groupTracelogsByKey, LogEntryGroup, LogEntry, Tracelog } from '~/lib/tracelogs';
+import { isRight } from 'fp-ts/lib/Either'
+import { Transcription } from '~/lib/transcription';
+import { PathReporter } from 'io-ts/lib/PathReporter'
 
 type Dictionary < T > = { [key: string]: T }
 type QObject = Dictionary<string | (string|null)[]>;
@@ -75,35 +76,53 @@ export default defineComponent({
 
       watchOnceFor(pageViewers, (pageViewersDiv) => {
         getArtifactData(entryId, 'textgrid')
-          .then((textgrid: GridTypes.Grid) => {
+          .then((transcriptJson) => {
+            const transEither  = Transcription.decode(transcriptJson);
 
-            _.each(textgrid.pages, (page, pageNumber) => {
-              const mount = document.createElement('div');
-              pageViewersDiv.appendChild(mount);
-              const mountRef = divRef();
-              mountRef.value = mount;
+            if (isRight(transEither)) {
+              const trans = transEither.right;
 
-              const logEntryRef: Ref<LogEntry[]> = ref([]);
-              tracelogRefs[pageNumber] = logEntryRef;
+              _.each(trans.pages, (page, pageNumber) => {
+                const mount = document.createElement('div');
+                pageViewersDiv.appendChild(mount);
+                const mountRef = divRef();
+                mountRef.value = mount;
 
-              useTracelogPdfPageViewer({
-                mountPoint: mountRef,
-                pageNumber,
-                entryId,
-                logEntryRef,
-                pageBounds: page.pageGeometry,
-                state
+                const logEntryRef: Ref<LogEntry[]> = ref([]);
+                tracelogRefs[pageNumber] = logEntryRef;
+
+                useTracelogPdfPageViewer({
+                  mountPoint: mountRef,
+                  pageNumber,
+                  entryId,
+                  logEntryRef,
+                  pageBounds: page.pdfPageBounds,
+                  state
+                });
               });
-            });
+            } else {
+              const report = PathReporter.report(transEither);
+              console.log('error decoding textgrid', report);
+            }
 
           });
       });
 
       getArtifactData(entryId, 'tracelog', 'tracelog')
         .then(tracelogJson => {
-          logEntryGroups = groupTracelogsByKey(tracelogJson);
-          const choices = _.map(logEntryGroups, ({ groupKey }) => groupKey);
-          choicesRef.value = choices;
+          console.log('got tracelog json', tracelogJson);
+          const tracelogEither = Tracelog.decode(tracelogJson);
+          if (isRight(tracelogEither)) {
+            const tracelog = tracelogEither.right;
+            console.log('got tracelog', tracelog);
+            logEntryGroups = groupTracelogsByKey(tracelog);
+            const choices = _.map(logEntryGroups, ({ groupKey }) => groupKey);
+            choicesRef.value = choices;
+          } else {
+            const report = PathReporter.report(tracelogEither);
+            console.log('error decoding tracelog', report);
+          }
+
         });
 
       provide(ProvidedChoices, choicesRef);

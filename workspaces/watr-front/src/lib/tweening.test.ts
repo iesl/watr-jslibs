@@ -2,13 +2,13 @@ import 'chai/register-should';
 import { prettyPrint } from 'commons';
 
 import anime from 'animejs';
-
 import { tweenBBox } from './tweening';
-
 import * as coords from '~/lib/coord-sys';
 
-describe('Tweening support',  () => {
-  it.only('tweens bbox', async () => {
+describe('Tweening support', () => {
+  it.only('all tests disabled', () => undefined);
+
+  it('tweens bbox', async () => {
     const b1 = coords.mk.fromLtwh(10, 10, 100, 200);
     const b2 = coords.mk.fromLtwh(20, 30, 40, 40);
     const p = tweenBBox(b1, b2, (curr) => {
@@ -22,8 +22,8 @@ describe('Tweening support',  () => {
 
   it('smokescreen', async () => {
 
-    const position = {x: 100};
-    const waypoint1 = {x: 150};
+    const position = { x: 100 };
+    const waypoint1 = { x: 150 };
 
     const anim0 = anime({
       targets: position,

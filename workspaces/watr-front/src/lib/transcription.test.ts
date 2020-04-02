@@ -2,38 +2,8 @@ import 'chai/register-should';
 
 import _ from "lodash";
 import { GlyphRepr, Glyph, Transcription, Label, Range } from './transcription';
-import { isRight } from 'fp-ts/lib/Either'
-import * as io from 'io-ts';
 import { Rect, RectRepr } from './shapes';
-
-import { prettyPrint } from 'commons';
-import { PathReporter } from 'io-ts/lib/PathReporter'
-
-const verbose = false;
-
-function isIsomorphic<A, O, I>(ioType: io.Type<A, O, I>, a: I): boolean {
-  const dec = ioType.decode(a);
-  if (isRight(dec)) {
-    const adecoded = dec.right;
-    const aencoded = ioType.encode(adecoded);
-    if (_.isEqual(aencoded, a)) {
-      if (verbose) {
-        prettyPrint({ m: `isIsomorphic(${ioType.name}) === true`, a });
-      }
-      return true;
-    }
-    if (verbose) {
-      prettyPrint({ m: `isIsomorphic(${ioType.name}) === false`, a, adecoded, aencoded });
-    }
-    return false;
-  }
-  const report = PathReporter.report(dec);
-  if (verbose) {
-    prettyPrint({ m: `isIsomorphic(${ioType.name}) === false`, report, a });
-  }
-  return false;
-}
-
+import { isIsomorphic } from '~/lib/utils';
 
 describe('Transcription functions', () => {
 
@@ -46,14 +16,39 @@ describe('Transcription functions', () => {
       [101, 202, 303, 404],
     ];
     _.each(examples, example => {
-      expect(isIsomorphic(RectRepr, example)).toBeTruthy;
-      expect(isIsomorphic(Rect, example)).toBeTruthy;
+      expect(isIsomorphic(RectRepr, example)).toBe(true);
+      expect(isIsomorphic(Rect, example)).toBe(true);
     });
   });
 
+  // Glyph repr types
+  //   one-to-one:  rect-to-char
+  //   expansion: ligature (ffi)
+  //   contraction: word break hyphenation
+  //   grouping: diacritical
+  //   insertion: sup/sub markup
+  //   synthetic: space (has actual computed glyph coords)
   it('ser/deser GlyphReprs, Glyphs', () => {
     const examples: any[] = [
+      // one-to-one
       [1, 2, 3, 4],
+
+      // expansion (text: "ffi")
+      //   bounding boxes are all equal to common glyph
+      [[10, 2, 3, 4], { "g": "ﬃ" }], // index: 1 of 3
+      [[20, 2, 3, 4], { "g": "ﬃ" }], // 2 of 3
+      [[30, 2, 3, 4], { "g": "ﬃ" }], // 3 of 3
+
+
+      // grouping; text: "â", extracted glyphs were: "a^"
+      //   bounding box is union of embedded glyphs
+      [[3, 2, 3, 4], {
+        "gs": [
+          [[1, 2, 3, 4], { "g": "a" }],
+          [[1, 2, 3, 4], { "g": "^" }]
+        ]
+      }],
+
       [[1, 2, 3, 4], { "g": "A" }],
       [[3, 2, 3, 4], {
         "gs": [
@@ -64,8 +59,8 @@ describe('Transcription functions', () => {
     ];
 
     _.each(examples, example => {
-      expect(isIsomorphic(GlyphRepr, example)).toBeTruthy;
-      expect(isIsomorphic(Glyph, example)).toBeTruthy;
+      expect(isIsomorphic(GlyphRepr, example)).toBe(true);
+      expect(isIsomorphic(Glyph, example)).toBe(true);
     });
   });
 
@@ -81,12 +76,18 @@ describe('Transcription functions', () => {
     ];
 
     _.each(examples, example => {
-      expect(isIsomorphic(Range, example)).toBeTruthy;
+      expect(isIsomorphic(Range, example)).toBe(true);
     });
   });
 
   it('ser/deser Labels', () => {
+
     const examples: any[] = [
+      {
+        "name": "CharRunFontBaseline",
+        "id": "113",
+        "range": [{"unit": "shape:line", "page": 0, "at": [[8454, 8483], [52586, 8483]]}]
+      },
       {
         name: "Paragraph",
         id: "0", range: [{ unit: "text:line", page: 2, at: [1, 4] }],
@@ -121,7 +122,7 @@ describe('Transcription functions', () => {
     ];
 
     _.each(examples, example => {
-      expect(isIsomorphic(Label, example)).toBeTruthy;
+      expect(isIsomorphic(Label, example)).toBe(true);
     });
 
   });
@@ -163,7 +164,7 @@ describe('Transcription functions', () => {
     ];
 
     _.each(examples, example => {
-      expect(isIsomorphic(Transcription, example)).toBeTruthy;
+      expect(isIsomorphic(Transcription, example)).toBe(true);
     });
   });
 

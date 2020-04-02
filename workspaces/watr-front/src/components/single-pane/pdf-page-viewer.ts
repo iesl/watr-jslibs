@@ -16,15 +16,16 @@ import { useSnaptoSelection } from '~/components/basics/snapto-selection';
 import { useEventlibSelect } from '~/components/basics/eventlib-select';
 import { resolveCorpusUrl } from '~/lib/axios';
 import { LogEntry } from '~/lib/tracelogs';
-import { fromFigure, LTBoundsArray, mk } from '~/lib/coord-sys';
+import { fromFigure } from '~/lib/coord-sys';
 import * as d3 from "d3-selection";
+import { Rect } from '~/lib/shapes';
 
 type Args = StateArgs & {
   mountPoint: Ref<HTMLDivElement | null>;
   pageNumber: number;
   entryId: string;
   logEntryRef: Ref<LogEntry[]>;
-  pageBounds: LTBoundsArray;
+  pageBounds: Rect;
 };
 
 export interface PdfPageViewer {
@@ -48,8 +49,8 @@ export async function usePdfPageViewer({
   const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
   const { rtreeIndex } = glyphOverlays;
   useSnaptoSelection({ rtreeIndex, eventlibSelect, state });
-  const bounds = mk.fromArray(pageBounds);
-  superimposedElements.setDimensions(bounds.width, bounds.height);
+  // const bounds = mk.fromArray(pageBounds);
+  superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
 
   const setGrid = glyphOverlays.setGrid;
 
@@ -109,8 +110,7 @@ export async function useTracelogPdfPageViewer({
   const setGrid = glyphOverlays.setGrid;
   const svg = superimposedElements.overlayElements.svg!;
 
-  const bounds = mk.fromArray(pageBounds);
-  superimposedElements.setDimensions(bounds.width, bounds.height);
+  superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
   watch(logEntryRef, (logEntries) => {
 
     const geometryLogs = _.filter(logEntries, e => e.logType === "Geometry");
