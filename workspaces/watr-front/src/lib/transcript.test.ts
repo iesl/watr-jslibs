@@ -1,11 +1,11 @@
 import 'chai/register-should';
 
 import _ from "lodash";
-import { GlyphRepr, Glyph, Transcription, Label, Range } from './transcription';
+import { GlyphRepr, Glyph, Transcript, Label, Range } from './transcript';
 import { Rect, RectRepr } from './shapes';
 import { isIsomorphic } from '~/lib/utils';
 
-describe('Transcription functions', () => {
+describe('Transcript functions', () => {
 
   it('ser/deser RectRepr', () => {
 
@@ -127,7 +127,7 @@ describe('Transcription functions', () => {
 
   });
 
-  it('ser/deser Transcription', () => {
+  it('ser/deser Transcript', () => {
     const examples: any[] = [
       {
         description: "desc",
@@ -164,7 +164,7 @@ describe('Transcription functions', () => {
     ];
 
     _.each(examples, example => {
-      expect(isIsomorphic(Transcription, example)).toBe(true);
+      expect(isIsomorphic(Transcript, example)).toBe(true);
     });
   });
 

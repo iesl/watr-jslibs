@@ -13,9 +13,9 @@ import { getArtifactData } from '~/lib/axios';
 import { getQueryString } from '../tracelog-viewer/tracelog-viewer';
 import { LogEntry } from '~/lib/tracelogs';
 import { useTracelogPdfPageViewer } from '~/components/single-pane/pdf-page-viewer';
-import { useTranscriptionViewer } from '~/components/single-pane/transcription-viewer';
+import { useTranscriptViewer } from '~/components/single-pane/transcript-viewer';
 import { isRight } from 'fp-ts/lib/Either'
-import { Transcription } from '~/lib/transcription';
+import { Transcript } from '~/lib/transcript';
 
 export default defineComponent({
 
@@ -34,7 +34,7 @@ export default defineComponent({
 
         getArtifactData(entryId, 'textgrid')
           .then((transcriptJson) => {
-            const transEither  = Transcription.decode(transcriptJson);
+            const transEither  = Transcript.decode(transcriptJson);
 
 
             if (isRight(transEither)) {
@@ -45,7 +45,7 @@ export default defineComponent({
                 pageTextsDiv.appendChild(tmount);
                 const tmountRef = divRef();
                 tmountRef.value = tmount;
-                const transcriptViewer = await useTranscriptionViewer({ mountPoint: tmountRef, state });
+                const transcriptViewer = await useTranscriptViewer({ mountPoint: tmountRef, state });
                 const { setText } = transcriptViewer;
                 setText({ trPage: page, textMarginLeft: 20, textMarginTop: 20 });
 

@@ -8,7 +8,6 @@
     "moduleResolution": "node",
 
     "removeComments": true,
-    "incremental": true,
 
     "lib": [
       "esnext",

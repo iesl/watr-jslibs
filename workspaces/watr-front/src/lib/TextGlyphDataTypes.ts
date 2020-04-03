@@ -10,7 +10,7 @@ import {
     BBox,
     MinMaxBox
 } from '~/lib/coord-sys';
-import { Transcription } from './transcription';
+import { Transcript } from './transcript';
 
 
 export type Width = number;
@@ -48,8 +48,8 @@ export interface GridData {
   totalLineHeight: number;
 }
 
-export function transcriptToPdfImageOverlays(transcript: Transcription) {
-  // TODO assert on Transcription deserialization that line.text and line.glyphs are equal lengths
+export function transcriptToPdfImageOverlays(transcript: Transcript) {
+  // TODO assert on Transcript deserialization that line.text and line.glyphs are equal lengths
   // zip text/glyphs
   const pages = transcript.pages;
   _.map(pages, page => {

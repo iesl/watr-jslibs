@@ -1,9 +1,9 @@
 import { defineComponent } from '@vue/composition-api';
 import { initState } from '~/components/basics/component-basics';
 import { divRef } from '~/lib/vue-composition-lib';
-import { useTranscriptionViewer } from '../../transcription-viewer';
+import { useTranscriptViewer } from '../../transcript-viewer';
 import { getArtifactData } from '~/lib/axios';
-import { Transcription } from '~/lib/transcription';
+import { Transcript } from '~/lib/transcript';
 import { isRight } from 'fp-ts/lib/Either'
 
 export default defineComponent({
@@ -13,7 +13,7 @@ export default defineComponent({
     const state = initState();
     const mountPoint = divRef();
 
-    useTranscriptionViewer({ mountPoint, state })
+    useTranscriptViewer({ mountPoint, state })
       .then(transcriptionViewer => {
 
         const { setText } = transcriptionViewer;
@@ -22,7 +22,7 @@ export default defineComponent({
         // TODO get /transcript
         getArtifactData(entryId, 'textgrid')
           .then((transcriptJson) => {
-            const transEither  = Transcription.decode(transcriptJson);
+            const transEither  = Transcript.decode(transcriptJson);
 
             if (isRight(transEither)) {
               const trans = transEither.right;

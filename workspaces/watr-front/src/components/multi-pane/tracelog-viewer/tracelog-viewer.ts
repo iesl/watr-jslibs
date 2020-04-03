@@ -16,7 +16,7 @@ import { ProvidedChoices } from '~/components/single-pane/narrowing-filter/narro
 import { getArtifactData } from '~/lib/axios';
 import { groupTracelogsByKey, LogEntryGroup, LogEntry, Tracelog } from '~/lib/tracelogs';
 import { isRight } from 'fp-ts/lib/Either'
-import { Transcription } from '~/lib/transcription';
+import { Transcript } from '~/lib/transcript';
 import { PathReporter } from 'io-ts/lib/PathReporter'
 
 type Dictionary < T > = { [key: string]: T }
@@ -77,7 +77,7 @@ export default defineComponent({
       watchOnceFor(pageViewers, (pageViewersDiv) => {
         getArtifactData(entryId, 'textgrid')
           .then((transcriptJson) => {
-            const transEither  = Transcription.decode(transcriptJson);
+            const transEither  = Transcript.decode(transcriptJson);
 
             if (isRight(transEither)) {
               const trans = transEither.right;

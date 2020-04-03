@@ -246,11 +246,11 @@ export const LabelRec = io.type({
 
 export const Label = io.intersection([LabelRec, LabelProps], "Label");
 
-export const Transcription = io.type({
+export const Transcript = io.type({
   description: io.string,
   documentId: io.string,
   pages: io.array(Page),
   labels: io.array(Label),
-}, "Transcription");
+}, "Transcript");
 
-export type Transcription = io.TypeOf<typeof Transcription>;
+export type Transcript = io.TypeOf<typeof Transcript>;

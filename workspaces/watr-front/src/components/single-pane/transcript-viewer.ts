@@ -28,14 +28,14 @@ type Args = StateArgs & {
   mountPoint: Ref<HTMLDivElement|null>;
 };
 
-export interface TranscriptionViewer {
+export interface TranscriptViewer {
   setText: SetText;
 }
 
 
-export async function useTranscriptionViewer({
+export async function useTranscriptViewer({
   mountPoint, state
-}: Args): Promise<TranscriptionViewer> {
+}: Args): Promise<TranscriptViewer> {
 
   const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state } );
   const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Text, ElementTypes.Svg], mountPoint, state });

@@ -6,13 +6,11 @@ import {
 import { initState } from '~/components/basics/component-basics'
 import { usePdfPageViewer } from '~/components/single-pane/pdf-page-viewer';
 import * as coords from '~/lib/coord-sys';
-import * as GridTypes from '~/lib/TextGridTypes';
 import { initGridData, gridDataToGlyphData } from '~/lib/TextGlyphDataTypes';
 import { Point } from '~/lib/coord-sys';
 import { resolveCorpusUrl, getArtifactData } from '~/lib/axios';
 import { LogEntry } from '~/lib/tracelogs';
-import { useTranscriptionViewer } from '../../transcription-viewer';
-import { Transcription } from '~/lib/transcription';
+import { Transcript } from '~/lib/transcript';
 import { isRight } from 'fp-ts/lib/Either'
 
 export default {
@@ -22,16 +20,11 @@ export default {
     const mountPoint: Ref<HTMLDivElement | null> = ref(null);
     const logEntryRef: Ref<LogEntry[]> = ref([]);
 
-
     const entryId = '1503.00580.pdf.d';
-
-    // useTranscriptionViewer({ mountPoint, state })
-    //   .then(transcriptionViewer => {});
-    // const { setText } = transcriptionViewer;
 
     getArtifactData(entryId, 'textgrid')
       .then(async (transcriptJson) => {
-        const transEither = Transcription.decode(transcriptJson);
+        const transEither = Transcript.decode(transcriptJson);
 
         if (isRight(transEither)) {
           const transcript = transEither.right;
@@ -57,12 +50,8 @@ export default {
           const imageUrl = resolveCorpusUrl(entryId, 'image', '1');
           superimposedElements.setImageSource(imageUrl);
           pdfPageViewer.setGrid(glyphData, pageBounds);
-
-
-
         }
       });
-
 
     return {
       mountPoint
