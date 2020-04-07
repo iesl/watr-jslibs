@@ -21,41 +21,19 @@ describe('Transcript functions', () => {
     });
   });
 
-  // Glyph repr types
-  //   one-to-one:  rect-to-char
-  //   expansion: ligature (ffi)
-  //   contraction: word break hyphenation
-  //   grouping: diacritical
-  //   insertion: sup/sub markup
-  //   synthetic: space (has actual computed glyph coords)
   it('ser/deser GlyphReprs, Glyphs', () => {
     const examples: any[] = [
-      // one-to-one
       [1, 2, 3, 4],
+      [[10, 2, 3, 4], { "g": "ﬃ" }],
+      [[10, 2, 3, 4], { "o": 1 }],
+      [[10, 2, 3, 4], { "os": [1, 2] }],
 
-      // expansion (text: "ffi")
-      //   bounding boxes are all equal to common glyph
-      [[10, 2, 3, 4], { "g": "ﬃ" }], // index: 1 of 3
-      [[20, 2, 3, 4], { "g": "ﬃ" }], // 2 of 3
-      [[30, 2, 3, 4], { "g": "ﬃ" }], // 3 of 3
-
-
-      // grouping; text: "â", extracted glyphs were: "a^"
-      //   bounding box is union of embedded glyphs
       [[3, 2, 3, 4], {
         "gs": [
           [[1, 2, 3, 4], { "g": "a" }],
           [[1, 2, 3, 4], { "g": "^" }]
         ]
-      }],
-
-      [[1, 2, 3, 4], { "g": "A" }],
-      [[3, 2, 3, 4], {
-        "gs": [
-          [[1, 2, 3, 4], { "g": "A" }],
-          [[1, 2, 3, 4], { "g": "~" }]
-        ]
-      }],
+      }]
     ];
 
     _.each(examples, example => {
@@ -86,7 +64,7 @@ describe('Transcript functions', () => {
       {
         "name": "CharRunFontBaseline",
         "id": "113",
-        "range": [{"unit": "shape:line", "page": 0, "at": [[8454, 8483], [52586, 8483]]}]
+        "range": [{ "unit": "shape:line", "page": 0, "at": [[8454, 8483], [52586, 8483]] }]
       },
       {
         name: "Paragraph",
@@ -167,5 +145,4 @@ describe('Transcript functions', () => {
       expect(isIsomorphic(Transcript, example)).toBe(true);
     });
   });
-
 });
