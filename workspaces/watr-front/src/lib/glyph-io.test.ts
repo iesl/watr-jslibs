@@ -10,6 +10,7 @@ import { isIsomorphic } from '~/lib/utils';
  * expansion (ligature)
  */
 describe('Glyph IO and representations', () => {
+
   it('Updated version', () => {
     const examples: any[] = [
       { // one-to-one
