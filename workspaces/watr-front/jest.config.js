@@ -1,4 +1,9 @@
 module.exports = {
+  globals: {
+    'ts-jest': {
+      isolatedModules: true
+    }
+  },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^~/(.*)$': '<rootDir>/src/$1',
@@ -10,8 +15,9 @@ module.exports = {
     '^.+\\.ts$': 'ts-jest',
     '.*\\.(vue)$': 'vue-jest'
   },
-  collectCoverage: true,
+  collectCoverage: false,
   collectCoverageFrom: [
+    '<rootDir>/lib/**/*.ts',
     '<rootDir>/components/**/*.vue',
     '<rootDir>/pages/**/*.vue'
   ]

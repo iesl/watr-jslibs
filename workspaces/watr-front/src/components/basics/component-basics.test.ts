@@ -3,12 +3,17 @@ import _ from 'lodash';
 
 import {
   ref,
+  watchEffect,
   watch,
 } from '@vue/composition-api';
 
 import { watchAll, initState, waitFor } from './component-basics';
 
+import Vue from 'vue';
+import VueCompositionApi from '@vue/composition-api';
+
 describe('Component Basics',  () => {
+  Vue.use(VueCompositionApi);
 
   it('testing watch', () => {
 
@@ -39,7 +44,7 @@ describe('Component Basics',  () => {
     dep2.value = 20;
     dep1.value = 10;
 
-    watch(() => {
+    watchEffect(() => {
       const d1 = dep1.value;
       const d2 = dep2.value;
       console.log(`implicit watch triggered! dep1=${d1} dep2=${d2}`)

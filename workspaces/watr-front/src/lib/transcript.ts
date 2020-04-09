@@ -9,10 +9,10 @@ type RectWithPropsRepr = [RectRepr, GlyphPropsRepr];
 type GlyphRepr = RectRepr | RectWithPropsRepr;
 
 export interface GlyphPropsRepr {
+  id?: number;
+  i?: number;
   g?: string;
   gs?: GlyphRepr[];
-  o?: number;
-  os?: number[];
 }
 
 const RectWithPropsRepr: io.Type<RectWithPropsRepr> =
@@ -30,10 +30,10 @@ export const GlyphRepr: io.Type<GlyphRepr> =
 export const GlyphPropsRepr: io.Type<GlyphPropsRepr> =
   io.recursion(
     "GlyphProps", () => io.partial({
+      id: io.number,
+      i: io.number,
       g: io.string,
       gs: io.array(GlyphRepr),
-      o: io.number,
-      os: io.array(io.number),
     })
   );
 
@@ -43,11 +43,12 @@ export interface Glyph {
 }
 
 export interface GlyphProps {
+  i?: number;
+  id?: number;
   g?: string;
   gs?: Glyph[];
-  o?: number;
-  os?: number[];
 }
+
 
 export const GlyphProps = new io.Type<GlyphProps, GlyphPropsRepr, unknown>(
   "GlyphProps",
@@ -56,11 +57,10 @@ export const GlyphProps = new io.Type<GlyphProps, GlyphPropsRepr, unknown>(
     return either.chain(
       GlyphPropsRepr.decode(u),
       (pr) => {
-        const glyphProps: GlyphProps = {};
-
-        if (pr.g) glyphProps.g = pr.g;
-        if (pr.o) glyphProps.o = pr.o;
-        if (pr.os) glyphProps.os = pr.os;
+        const partial: Pick<GlyphPropsRepr, 'g' | 'id' | 'i'> = pr;
+        const glyphProps: GlyphProps = {
+          ...partial
+        };
 
         if (pr.gs) {
           const gs = _.map(pr.gs, gr => {
@@ -77,12 +77,12 @@ export const GlyphProps = new io.Type<GlyphProps, GlyphPropsRepr, unknown>(
     );
   },
   (a: GlyphProps) => {
-    const { g, gs, o, os } = a;
-    const propsRepr = GlyphPropsRepr.encode({ g, o, os });
+    const { g, gs, id, i } = a;
+    const propsRepr = GlyphPropsRepr.encode({ g, id, i });
     if (gs) {
       propsRepr.gs = _.map(gs, Glyph.encode);
     }
-    const definedKVs = _.filter(_.toPairs(propsRepr), ([, v]) => v!==undefined);
+    const definedKVs = _.filter(_.toPairs(propsRepr), ([, v]) => v !== undefined);
     return _.fromPairs(definedKVs);
   }
 );

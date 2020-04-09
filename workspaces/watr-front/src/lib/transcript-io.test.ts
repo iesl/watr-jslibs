@@ -25,8 +25,8 @@ describe('Transcript functions', () => {
     const examples: any[] = [
       [1, 2, 3, 4],
       [[10, 2, 3, 4], { "g": "ﬃ" }],
-      [[10, 2, 3, 4], { "o": 1 }],
-      [[10, 2, 3, 4], { "os": [1, 2] }],
+      [[10, 2, 3, 4], { "i": 1 }],
+      [[10, 2, 3, 4], { "i": 2 }],
 
       [[3, 2, 3, 4], {
         "gs": [
@@ -129,8 +129,8 @@ describe('Transcript functions', () => {
             glyphs: [
               [11, 2, 3, 4],
               [22, 2, 3, 4],
-              [[53, 2, 3, 4], { "os": [-2, -1, 1] }],
-              [[54, 2, 3, 4], { "o": 1 }]
+              [[53, 2, 3, 4], { "i": 0 }],
+              [[54, 2, 3, 4], { "i": 1 }]
             ]
           }]
         }],
@@ -144,5 +144,61 @@ describe('Transcript functions', () => {
     _.each(examples, example => {
       expect(isIsomorphic(Transcript, example)).toBe(true);
     });
+  });
+
+  it('should modify Transcript format', () => {
+    const updatedFormat = {
+      description: "desc",
+      documentId: "doc-25-id",
+      text: [
+        ["I Ã ffi", [10, 11, 12, 13, 14]],
+
+
+
+        "Fe_{3}",
+      ],
+      glyphs: [
+        ["I", 0, [19936, 7194, 985, 1018]],
+        [["I", 0, [19936, 7194, 985, 1018]]],
+        [[1, 2, 3, 4],
+         [[59, 2, 3, 4], {}],
+         [[3, 2, 3, 4], {
+           "gs": [
+             [[1, 2, 3, 4], { "g": "A" }],
+             [[1, 2, 3, 4], { "g": "~" }]
+           ]
+         }]
+        ]
+      ],
+      pages: [{
+        pdfPageBounds: [0, 0, 61200, 79200],
+        lines: [{
+          text: "I Ã ffi",
+          glyphs: [
+            [1, 2, 3, 4],
+            [[59, 2, 3, 4], {}],
+            [[3, 2, 3, 4], {
+              "gs": [
+                [[1, 2, 3, 4], { "g": "A" }],
+                [[1, 2, 3, 4], { "g": "~" }]
+              ]
+            }],
+          ]
+        }, {
+          text: "Fe_{3}",
+          glyphs: [
+            [11, 2, 3, 4],
+            [22, 2, 3, 4],
+            [[53, 2, 3, 4], { "i": 0 }],
+            [[54, 2, 3, 4], { "i": 1 }]
+          ]
+        }]
+      }],
+      labels: [
+        { name: "HasRefs", id: "L#2", range: [{ unit: "page", at: [7, 2] }] },
+        { name: "IsGoldLabled", id: "L#3", range: [{ unit: "document" }] },
+      ]
+    }
+
   });
 });

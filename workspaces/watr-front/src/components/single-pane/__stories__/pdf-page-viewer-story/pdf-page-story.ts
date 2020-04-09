@@ -34,7 +34,7 @@ export default {
           const pageBounds = page0.pdfPageBounds;
           const tmpPageMargin = 10;
           const origin = new Point(tmpPageMargin, tmpPageMargin, coords.CoordSys.GraphUnits);
-          const gridData = initGridData(page0.textgrid, 0, () => 10, origin, 10);
+          const gridData = initGridData(page0.textgrid, () => 10, origin, 10);
           const glyphData = gridDataToGlyphData(gridData.textDataPoints);
 
           const pdfPageViewer = await usePdfPageViewer({
