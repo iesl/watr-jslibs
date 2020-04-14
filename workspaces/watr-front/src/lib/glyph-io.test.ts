@@ -294,10 +294,35 @@ describe('Glyph IO and representations', () => {
         description: "desc",
         documentId: "doc-25-id",
         pages: [{
-          pdfPageBounds: [0, 0, 61200, 79200],
-          lines: [{ text, glyphs }]
+          page: 1,
+          bounds: [0, 0, 61200, 79200],
+          glyphs: [
+            ["a", [19, 94, 9, 10]],
+            [" ", [19, 94, 9, 10], { kind: "ws" }],
+            ["b", [19, 94, 9, 10]],
+            ["    ", [19, 94, 9, 10], { kind: "ws:tab4" }],
+            ["c", [19, 94, 9, 10]],
+          ],
         }],
-        labels: []
+        stanzas: [
+          { kind: "body",
+            id: "az0-vX",
+            lines: [
+              { text: "ffi", glyphIds: [10, 10, 10] },
+            ] },
+          { kind: "table",
+            id: "23",
+            lines: [
+              { text: "ffi", glyphIds: [10, 10, 10] },
+            ] },
+          { kind: "bibliography",
+            id: "33",
+            lines: [
+              { text: "Saunders, A.C., etal, WatrWorks ...", glyphIds: [10, 10, 10] },
+            ] },
+        ],
+        labels: [
+        ]
       }
       expect(isIsomorphic(Transcript, transcriptTemplate)).toBe(true);
     });

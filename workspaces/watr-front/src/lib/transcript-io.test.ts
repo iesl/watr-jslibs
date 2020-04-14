@@ -46,8 +46,9 @@ describe('Transcript functions', () => {
   it('ser/deser Ranges', () => {
     const examples: any[] = [
       { unit: "shape:rect", page: 1, at: [123, 234, 345, 456] },
-      { unit: "text:line", page: 1, at: [1, 2] },
-      { unit: "text:char", page: 1, at: [1, 2] },
+      { unit: "text:stanza", at: "avZ0" },
+      { unit: "text:line", stanza: "avZ0", at: [1, 2] },
+      { unit: "text:char", stanza: "qr3", at: [1, 2] },
       { unit: "document" },
       { unit: "page", at: [0, 4] },
       { unit: "label", at: "Lbl#32" },
@@ -161,13 +162,13 @@ describe('Transcript functions', () => {
         ["I", 0, [19936, 7194, 985, 1018]],
         [["I", 0, [19936, 7194, 985, 1018]]],
         [[1, 2, 3, 4],
-         [[59, 2, 3, 4], {}],
-         [[3, 2, 3, 4], {
-           "gs": [
-             [[1, 2, 3, 4], { "g": "A" }],
-             [[1, 2, 3, 4], { "g": "~" }]
-           ]
-         }]
+        [[59, 2, 3, 4], {}],
+        [[3, 2, 3, 4], {
+          "gs": [
+            [[1, 2, 3, 4], { "g": "A" }],
+            [[1, 2, 3, 4], { "g": "~" }]
+          ]
+        }]
         ]
       ],
       pages: [{
