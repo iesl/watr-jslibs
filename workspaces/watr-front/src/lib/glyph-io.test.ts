@@ -2,35 +2,107 @@ import 'chai/register-should';
 
 
 import _ from "lodash";
-import { Glyph, Transcript } from './transcript';
+import { Transcript } from './transcript';
 import { isIsomorphic } from '~/lib/utils';
+import { prettyPrint } from 'commons/dist';
+import { GlyphRepr, Glyph, GlyphPropsRepr, GlyphProps } from './glyph';
 
 /**
  * one-to-one
  * expansion (ligature)
  */
 describe('Glyph IO and representations', () => {
+  const transcriptTemplate = {
+    description: "desc",
+    documentId: "doc#25",
+    pages: [{
+      page: 1,
+      bounds: [0, 0, 61200, 79200],
+      glyphs: [],
+    }],
+    markup: [],
+    stanzas: [
+      { kind: "body", id: "1", lines: [] }
+    ],
+    labels: []
+  }
+
+  function makeExample(props: any): any {
+    const res = {};
+    _.each(_.toPairs(props), ([path, v]) => {
+      _.set(res, path, v);
+    })
+    return _.merge({}, transcriptTemplate, res);
+  }
+
+
+  it.only('should I/O GlyphReprs, Glyphs', () => {
+    const examples: any[] = [
+      ["a", [100, 200, 300, 400]],
+      // [" ", [1, 2, 3, 4]], // " " char is same as { kind: "ws" }
+      [" ", [1, 2, 3, 4], { kind: " " }],
+      ["  ", [1, 2, 3, 4], { kind: "ws:tab" }],
+      // ["ffi", [10, 2, 3, 4], {
+      //   kind: "rewrite", gs: [
+      //     ["ﬃ", 0, [19, 94, 9, 10]]
+      //   ]
+      // }],
+      // ["â", [19, 94, 9, 10], {
+      //   kind: "rewrite", gs: [
+      //     ["a", 0, [19, 94, 9, 10]],
+      //     ["^", 0, [19, 94, 9, 10]],
+      //   ]
+      // }]
+    ];
+
+    _.each(examples, example => {
+      const [,,propsRepr] = example;
+      if (propsRepr !== undefined) {
+        // expect(isIsomorphic(GlyphPropsRepr, propsRepr, true)).toBe(true);
+        // expect(isIsomorphic(GlyphProps, propsRepr, true)).toBe(true);
+      }
+      // expect(isIsomorphic(GlyphRepr, example, true)).toBe(true);
+      expect(isIsomorphic(Glyph, example, true)).toBe(true);
+    });
+  });
+
+
+  it('one-to-one glyph-to-char', () => {
+    const ex = {
+      "stanzas[0].lines[0].text": "abc",
+      "stanzas[0].lines[0].glyphIds": [0, 1, 2],
+      "pages[0].glyphs": [
+        ["a", [19, 94, 9, 10]],
+        ["b", [19, 94, 9, 10]],
+        ["c", [19, 94, 9, 10]],
+      ]
+    };
+    const fin = makeExample(ex);
+
+    prettyPrint({ fin });
+  });
 
   it('Updated version', () => {
     const examples: any[] = [
-      { // one-to-one
+      { // one-to-one glyph-to-char
         text: "abc",
         glyphIds: [0, 1, 2],
-        glyphDefs: [
-          ["a", 0, [19, 94, 9, 10]],
-          ["b", 1, [19, 94, 9, 10]],
-          ["c", 2, [19, 94, 9, 10]],
+        _c0_: { comment: "glyphs are serialized w/o page #s, which are hydrated upon deserialization" },
+        glyphs: [
+          ["a", [19, 94, 9, 10]],
+          ["b", [19, 94, 9, 10]],
+          ["c", [19, 94, 9, 10]],
         ]
       },
 
       { // expansion (e.g., extracted ligature ﬃ rewritten to "ffi" in "eﬃcient")
         text: "ffi",
         glyphIds: [10, 10, 10],
-        glyphDefs: [
-          // 9 prior entries..
-          ["ffi", 1, [19, 94, 9, 10], {
+        _c0_: { comment: "a 'rewrite' preserves the original glyph bounds" },
+        glyphs: [
+          ["ffi", [19, 94, 9, 10], {
             kind: "rewrite", gs: [
-              ["ﬃ", 0, [19, 94, 9, 10]],
+              ["ﬃ", [19, 94, 9, 10]],
             ]
           }],
         ]
@@ -39,7 +111,9 @@ describe('Glyph IO and representations', () => {
       { // whitespace: space, tab, newline
         text: "a b    c",
         glyphIds: [0, 1, 2, 3, 3, 3, 3, 4],
-        glyphDefs: [
+        _c0_: { comment: "'ws' is normal space (inferred)" },
+        _c1_: { comment: "'ws:tab*' is inferred tab (e.g., column separating space) " },
+        glyphs: [
           ["a", 0, [19, 94, 9, 10]],
           [" ", 0, [19, 94, 9, 10], { kind: "ws" }],
           ["b", 0, [19, 94, 9, 10]],
@@ -50,11 +124,10 @@ describe('Glyph IO and representations', () => {
 
       { // diacritical mark grouping; text: "â",
         text: "â", // extracted glyphs: "a^"
-        glyphIds: [2],
-        glyphDefs: [
-          ["a", 0, [19, 94, 9, 10], {}],
-          ["^", 0, [19, 94, 9, 10], {}],
-          ["â", 0, [19, 94, 9, 10], {
+        glyphIds: [0],
+        _c0_: { comment: "a 'rewrite' preserves the original glyph bounds" },
+        glyphs: [
+          ["â", [19, 94, 9, 10], {
             kind: "rewrite", gs: [
               ["a", 0, [19, 94, 9, 10]],
               ["^", 0, [19, 94, 9, 10]],
@@ -65,40 +138,37 @@ describe('Glyph IO and representations', () => {
 
       { // de-hyphenated text e.g., "in-" "tend" with line break
         text: "intend", // extracted glyphs: "n-", "t"
-        glyphIds: [0, 101, 3, 4, 5, 6],
-        glyphDefs: [
-          ["i", 0, [19, 94, 9, 10]],
-          ["n", 0, [19, 94, 9, 10]],
-          ["-", 0, [19, 94, 9, 10]],
-          ["t", 0, [19, 94, 9, 10]],
-          ["e", 0, [19, 94, 9, 10]],
-          // 100 ...
-          ["n", 0, [19, 94, 9, 10], {
+        glyphIds: [0, 1, 2, 3, 4, 5, 6],
+        glyphs: [
+          ["i", [19, 94, 9, 10]],
+          ["n", [19, 94, 9, 10], {
             kind: "rewrite", gs: [
-              ["n", 0, [19, 94, 9, 10]],
-              ["-", 0, [19, 94, 9, 10]],
+              ["n", [19, 94, 9, 10]],
+              ["-", [19, 94, 9, 10]],
             ]
           }],
+          ["t", [19, 94, 9, 10]],
+          ["e", [19, 94, 9, 10]],
         ]
       },
       { // Super/subscript markup
         text: "H_{2}SO_{4}^{+}", // extracted glyphs: "H2SO4+"
-        glyphIds: [0, 100, 100, 1, 102, 2, 3, 100, 100, 4, 102, 101, 101, 5, 102],
-        glyphDefs: [
+        glyphIds: [0, -1, -1, 1, -3, 2, 3, -1, -1, 4, -3, -2, -2, 5, -3],
+        glyphs: [
           ["H", 0, [19, 94, 9, 10]],
           ["2", 0, [19, 94, 9, 10]],
           ["S", 0, [19, 94, 9, 10]],
           ["O", 0, [19, 94, 9, 10]],
           ["4", 0, [19, 94, 9, 10]],
           ["+", 0, [19, 94, 9, 10]],
-          // ... 99
-          ["_{", 0, [0, 0, 0, 0], { kind: "esc:open:subscript" }],
-          ["^{", 0, [0, 0, 0, 0], { kind: "esc:open:supscript" }],
-          ["%{", 0, [0, 0, 0, 0], { kind: "esc:open:div" }],
-          ["#3x2{", 0, [0, 0, 0, 0], { kind: "esc:open:matrix" }],
-          ["@1,1{", 0, [0, 0, 0, 0], { kind: "esc:open:cell" }],
-          ["}", 0, [0, 0, 0, 0], { kind: "esc:close" }],
-        ]
+        ],
+        markup: [
+          null,
+          ["_{", { kind: "esc:open:subscript" }],
+          ["^{", { kind: "esc:open:supscript" }],
+          ["}", { kind: "esc:close" }],
+        ],
+
       },
 
       // TODO add an 'empty' geometry shape, for things like spaces/markup that appear but don't correspond
@@ -108,8 +178,8 @@ describe('Glyph IO and representations', () => {
         text: "  ", // two vertical spaces
         glyphIds: [0, 1],
         glyphDefs: [
-          [" ", 0, [0, 0, 0, 0], { kind: "ws:crlf" }],
-          [" ", 0, [0, 0, 0, 0], { kind: "ws:crlf" }],
+          [" ", [0, 0, 0, 0], { kind: "ws:crlf" }],
+          [" ", [0, 0, 0, 0], { kind: "ws:crlf" }],
         ]
       },
 
@@ -124,21 +194,48 @@ describe('Glyph IO and representations', () => {
       },
 
       { // Inset math/chemical formulae/matrix etc.
-        text: "&{table:12}", // reference to equation ({{table|fig|eq|etc.}})
-        glyphDefs: [
+        text: "in the equation ${symbols:zbcx}", // reference to equation ({{table|fig|eq|etc.}})
+        glyphIds: [1, 2, 3,],
+        glyphs: [
         ],
-        glyphMap: [
+        insert: [
+          [".", { kind: "any" }],
+          ["${", { kind: "esc:open:ref" }],
+          ["}", { kind: "esc:close" }],
+        ],
+        labels: [
+          {
+            name: "InsertAt", id: "inc#3",
+            range: [
+              { unit: "text:char", at: [12, 5] },
+              { unit: "stanza", at: 32 }
+            ]
+          },
+        ]
+      },
+
+      { // Markup version: Links/refs, e.g., citations and in-body links to citations
+        text: ".. as seen in Table 2", // reference to equation ({{table|fig|eq|etc.}})
+        glyphIds: [],
+        glyphDefs: [
           ["&{", 0, [0, 0, 0, 0], { kind: "esc:open:ref" }],
           ["}", 0, [0, 0, 0, 0], { kind: "esc:close" }],
         ]
       },
 
-      { // Links/refs, e.g., citations and in-body links to citations
-        text: "&21;", // reference to equation ({{table|fig|eq|etc.}})
+      { // Non-markup version: Links/refs, e.g., citations and in-body links to citations
+        text: ".. as seen in Table 2", // reference to equation ({{table|fig|eq|etc.}})
         glyphIds: [],
         glyphDefs: [
-          ["&{", 0, [0, 0, 0, 0], { kind: "esc:open:ref" }],
-          ["}", 0, [0, 0, 0, 0], { kind: "esc:close" }],
+        ],
+        labels: [
+          {
+            name: "ReferenceTo", id: "lt#3",
+            range: [
+              { unit: "text:char", at: [12, 5] },
+              { unit: "stanza", at: 32 }
+            ]
+          },
         ]
       },
     ];
@@ -296,6 +393,7 @@ describe('Glyph IO and representations', () => {
         pages: [{
           page: 1,
           bounds: [0, 0, 61200, 79200],
+          _c0_: { comment: "let's introduce a debugging field for comments, refs, etc" },
           glyphs: [
             ["a", [19, 94, 9, 10]],
             [" ", [19, 94, 9, 10], { kind: "ws" }],
@@ -304,26 +402,54 @@ describe('Glyph IO and representations', () => {
             ["c", [19, 94, 9, 10]],
           ],
         }],
+        markup: [
+          ["_{", { kind: "esc:open:subscript" }],
+          ["^{", { kind: "esc:open:supscript" }],
+          ["}", { kind: "esc:close" }],
+        ],
         stanzas: [
-          { kind: "body",
-            id: "az0-vX",
+          {
+            kind: "body",
+            _c0_: { comment: "A stanza is a block of text lines" },
+            id: "1",
+            _c1_: { comment: "glyphIds within stanzas are 0-indexed from the first page/first char, extending across all pages" },
             lines: [
               { text: "ffi", glyphIds: [10, 10, 10] },
-            ] },
-          { kind: "table",
-            id: "23",
+            ]
+          },
+          {
+            kind: "table",
+            id: "2",
             lines: [
               { text: "ffi", glyphIds: [10, 10, 10] },
-            ] },
-          { kind: "bibliography",
-            id: "33",
+            ]
+          },
+          {
+            kind: "bibliography",
+            id: "3",
             lines: [
               { text: "Saunders, A.C., etal, WatrWorks ...", glyphIds: [10, 10, 10] },
-            ] },
+            ]
+          },
+          {
+            kind: "reference",
+            id: "22",
+            lines: [
+              { text: "Saunders, A.C., etal, WatrWorks ...", glyphIds: [10, 10, 10] },
+            ]
+          },
         ],
         labels: [
+          {
+            _c1_: { comment: "represent a bibliography as a labeled set of reference stanzas" },
+            name: "Bibliography",
+            id: "L#3",
+            range: [
+              { unit: "stanza", at: [22, 23, 24] }
+            ]
+          },
         ]
-      }
+      };
       expect(isIsomorphic(Transcript, transcriptTemplate)).toBe(true);
     });
   });

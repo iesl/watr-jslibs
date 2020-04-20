@@ -1,166 +1,56 @@
 import _ from "lodash";
 
-import { Rect, RectRepr, Shape } from "./shapes";
+import { Rect, Shape } from "./shapes";
 import * as io from 'io-ts';
-import { either, isRight } from 'fp-ts/lib/Either'
+import { NonNegativeInteger, PositiveInteger } from "./io-utils";
+import { Glyph } from "./glyph";
 
 // Define the Repr serialization types for Glyphs / GlyphProps
-type RectWithPropsRepr = [RectRepr, GlyphPropsRepr];
-type GlyphRepr = RectRepr | RectWithPropsRepr;
-
-export interface GlyphPropsRepr {
-  id?: number;
-  i?: number;
-  g?: string;
-  gs?: GlyphRepr[];
-}
-
-const RectWithPropsRepr: io.Type<RectWithPropsRepr> =
-  io.recursion(
-    "RectWithPropsRepr",
-    () => io.tuple([RectRepr, GlyphPropsRepr])
-  );
-
-export const GlyphRepr: io.Type<GlyphRepr> =
-  io.recursion(
-    "GlyphRepr",
-    () => io.union([RectWithPropsRepr, RectRepr], "GlyphRepr")
-  );
-
-export const GlyphPropsRepr: io.Type<GlyphPropsRepr> =
-  io.recursion(
-    "GlyphProps", () => io.partial({
-      id: io.number,
-      i: io.number,
-      g: io.string,
-      gs: io.array(GlyphRepr),
-    })
-  );
-
-export interface Glyph {
-  rect: Rect;
-  props?: GlyphProps;
-}
-
-export interface GlyphProps {
-  i?: number;
-  id?: number;
-  g?: string;
-  gs?: Glyph[];
-}
-
-
-export const GlyphProps = new io.Type<GlyphProps, GlyphPropsRepr, unknown>(
-  "GlyphProps",
-  (a: any): a is GlyphProps => GlyphPropsRepr.is(a),
-  (u: unknown, c: io.Context) => {
-    return either.chain(
-      GlyphPropsRepr.decode(u),
-      (pr) => {
-        const partial: Pick<GlyphPropsRepr, 'g' | 'id' | 'i'> = pr;
-        const glyphProps: GlyphProps = {
-          ...partial
-        };
-
-        if (pr.gs) {
-          const gs = _.map(pr.gs, gr => {
-            const dec = Glyph.validate(gr, c);
-            if (isRight(dec)) {
-              return dec.right;
-            }
-            throw new Error("unreachable");
-          });
-          glyphProps.gs = gs;
-        }
-        return io.success(glyphProps);
-      }
-    );
-  },
-  (a: GlyphProps) => {
-    const { g, gs, id, i } = a;
-    const propsRepr = GlyphPropsRepr.encode({ g, id, i });
-    if (gs) {
-      propsRepr.gs = _.map(gs, Glyph.encode);
-    }
-    const definedKVs = _.filter(_.toPairs(propsRepr), ([, v]) => v !== undefined);
-    return _.fromPairs(definedKVs);
-  }
-);
-
-export const Glyph = new io.Type<Glyph, GlyphRepr, unknown>(
-  "Glyph",
-  (a: any): a is Glyph => Rect.is(a['rect']) && GlyphPropsRepr.is(a['props']),
-  (u: unknown, c: io.Context) => either.chain(
-    GlyphRepr.validate(u, c),
-    glyphRepr => {
-      if (RectRepr.is(glyphRepr)) {
-        return either.map(
-          Rect.decode(glyphRepr), rect => ({ rect })
-        );
-      }
-      const [rectRepr, glyphPropsRepr] = glyphRepr;
-      const rectOrErr = either.chain(
-        RectRepr.decode(rectRepr),
-        Rect.decode
-      );
-      const propsOrErr = either.chain(
-        GlyphPropsRepr.decode(glyphPropsRepr),
-        GlyphProps.decode,
-      );
-      if (isRight(rectOrErr) && isRight(propsOrErr)) {
-        const rect = rectOrErr.right;
-        const props = propsOrErr.right;
-        return io.success({ rect, props });
-      }
-      return io.failure(u, c, `Could not unserialize Glyph from ${glyphRepr}`);
-    }
-  ),
-  (a: Glyph) => a.props ?
-    [Rect.encode(a.rect), GlyphProps.encode(a.props)]
-    : Rect.encode(a.rect)
-);
 
 export const Line = io.type({
   text: io.string,
-  glyphs: io.array(Glyph)
+  glyphs: io.array(io.Integer)
 });
 
 export type Line = io.TypeOf<typeof Line>;
 
 export const Page = io.type({
-  pdfPageBounds: Rect,
-  lines: io.array(Line)
+  page: PositiveInteger,
+  bounds: Rect,
+  glyphs: io.array(Glyph)
 });
 
 export type Page = io.TypeOf<typeof Page>;
 
+export const Markup = io.type({
+  text: io.string,
+  kind: io.string
+});
 
-interface PositiveBrand {
-  readonly Positive: unique symbol;
-}
+export const Stanza = io.type({
+  kind: io.string,
+  id: io.string,
+  lines: io.array(Line)
+});
 
+const Begin = NonNegativeInteger;
+type Begin = io.TypeOf<typeof Begin>;
 
-type Begin = number;
-const Begin = io.number;
-type Length = number;
+const Length = NonNegativeInteger;
+type Length = io.TypeOf<typeof Length>;
 
-const PositiveNumber = io.brand(
-  io.number,
-  (n: number): n is io.Branded<number, PositiveBrand> => n >= 0,
-  "Positive"
-);
+type Span = readonly [Begin, Length];
+const Span = io.tuple([Begin, Length], "Span");
 
-const Length = PositiveNumber;
-type BLSpan = readonly [Begin, Length];
-const BLSpan = io.tuple([Begin, Length], "BLSpan");
+const PageNumber = PositiveInteger;
 
-
-export const TextLabelUnit = io.keyof({
+export const SpanLabelUnit = io.keyof({
   'text:line': null,
   'text:char': null,
 });
 
 export const ShapeLabelUnit = io.keyof({
+  'shape': null,
   'shape:point': null,
   'shape:line': null,
   'shape:rect': null,
@@ -169,40 +59,42 @@ export const ShapeLabelUnit = io.keyof({
   'shape:trapezoid': null,
 });
 
-export interface TextRange {
-  unit: string;
-  page: number;
-  at: BLSpan;
-}
-
 const TextRange = io.type({
-  unit: TextLabelUnit,
-  page: io.number,
-  at: BLSpan,
+  unit: io.keyof({
+    'text:line': null,
+    'text:char': null,
+  }),
+  at: io.type({
+    stanza: NonNegativeInteger,
+    span: Span
+  }),
 }, "TextRange");
-
-export interface GeometricRange {
-  unit: string;
-  page: number;
-  at: Shape;
-}
 
 const GeometricRange = io.type({
   unit: ShapeLabelUnit,
-  page: io.number,
-  at: Shape,
+  at: io.type({
+    page: PositiveInteger,
+    shape: Shape
+  })
 })
 
 export const DocumentRange = io.type({
   unit: io.literal("document")
 });
-export type DocumentRange = io.TypeOf<typeof DocumentRange>;
+
+export const StanzaRange = io.type({
+  unit: io.literal("stanza"),
+  at: io.type({
+    stanza: NonNegativeInteger
+  }),
+});
 
 export const PageRange = io.type({
   unit: io.literal("page"),
-  at: BLSpan,
+  at: io.type({
+    page: PageNumber
+  })
 });
-export type PageRange = io.TypeOf<typeof PageRange>;
 
 interface LabelIDBrand {
   readonly LabelID: unique symbol;
@@ -216,15 +108,21 @@ const LabelID = io.brand(
 
 export const LabelRange = io.type({
   unit: io.literal("label"),
-  at: LabelID
+  at: io.type({
+    label: LabelID
+  })
 });
 export type LabelRange = io.TypeOf<typeof LabelRange>;
 
-type Range = TextRange | GeometricRange | PageRange | DocumentRange | LabelRange;
 
 export const Range = io.union([
-  TextRange, GeometricRange, PageRange, DocumentRange, LabelRange
+  TextRange,
+  GeometricRange,
+  StanzaRange,
+  PageRange, DocumentRange, LabelRange,
 ], "Range");
+
+type Range = io.TypeOf<typeof Range>;
 
 export interface Label {
   name: string;
@@ -247,9 +145,10 @@ export const LabelRec = io.type({
 export const Label = io.intersection([LabelRec, LabelProps], "Label");
 
 export const Transcript = io.type({
-  description: io.string,
   documentId: io.string,
   pages: io.array(Page),
+  markup: io.array(Markup),
+  stanzas: io.array(Stanza),
   labels: io.array(Label),
 }, "Transcript");
 
