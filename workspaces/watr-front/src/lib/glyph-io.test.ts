@@ -38,15 +38,16 @@ describe('Glyph IO and representations', () => {
 
   it.only('should I/O GlyphReprs, Glyphs', () => {
     const examples: any[] = [
-      ["a", [100, 200, 300, 400]],
-      // [" ", [1, 2, 3, 4]], // " " char is same as { kind: "ws" }
-      [" ", [1, 2, 3, 4], { kind: " " }],
-      ["  ", [1, 2, 3, 4], { kind: "ws:tab" }],
-      // ["ffi", [10, 2, 3, 4], {
-      //   kind: "rewrite", gs: [
-      //     ["ﬃ", 0, [19, 94, 9, 10]]
-      //   ]
-      // }],
+      // ["a", [100, 200, 300, 400]],
+      // [" ", [1, 2, 3, 4], { kind: "ws" }],
+      // ["  ", [1, 2, 3, 4], { kind: "ws:tab2" }],
+
+      ["ffi", [10, 2, 3, 4], {
+        kind: "rewrite", gs: [
+          ["ﬃ", [19, 94, 9, 10]]
+        ]
+      }],
+
       // ["â", [19, 94, 9, 10], {
       //   kind: "rewrite", gs: [
       //     ["a", 0, [19, 94, 9, 10]],
@@ -55,14 +56,15 @@ describe('Glyph IO and representations', () => {
       // }]
     ];
 
+    const verbose = false;
     _.each(examples, example => {
       const [,,propsRepr] = example;
       if (propsRepr !== undefined) {
-        // expect(isIsomorphic(GlyphPropsRepr, propsRepr, true)).toBe(true);
-        // expect(isIsomorphic(GlyphProps, propsRepr, true)).toBe(true);
+        expect(isIsomorphic(GlyphPropsRepr, propsRepr, verbose)).toBe(true);
+        expect(isIsomorphic(GlyphProps, propsRepr, verbose)).toBe(true);
       }
-      // expect(isIsomorphic(GlyphRepr, example, true)).toBe(true);
-      expect(isIsomorphic(Glyph, example, true)).toBe(true);
+      expect(isIsomorphic(GlyphRepr, example, verbose)).toBe(true);
+      expect(isIsomorphic(Glyph, example, verbose)).toBe(true);
     });
   });
 
