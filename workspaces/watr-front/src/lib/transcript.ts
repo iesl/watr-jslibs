@@ -14,18 +14,14 @@ export const Line = io.type({
 
 export type Line = io.TypeOf<typeof Line>;
 
-export const Page = io.type({
+export const Page = (pageNum: number) => io.type({
   page: PositiveInteger,
   bounds: Rect,
-  glyphs: io.array(Glyph)
+  // glyphCount: NonNegativeInteger,
+  glyphs: io.array(Glyph(pageNum))
 });
 
-export type Page = io.TypeOf<typeof Page>;
-
-export const Markup = io.type({
-  text: io.string,
-  kind: io.string
-});
+export const PageT = Page(1);
 
 export const Stanza = io.type({
   kind: io.string,
@@ -144,10 +140,10 @@ export const LabelRec = io.type({
 
 export const Label = io.intersection([LabelRec, LabelProps], "Label");
 
+
 export const Transcript = io.type({
   documentId: io.string,
-  pages: io.array(Page),
-  markup: io.array(Markup),
+  pages: io.array(PageT),
   stanzas: io.array(Stanza),
   labels: io.array(Label),
 }, "Transcript");

@@ -6,15 +6,14 @@ import {
   corpusEntryStream,
   expandDirTrans,
   ExpandedDir,
-  sliceStream,
 } from "commons";
 
 
-import {tapStream, progressCount, throughFunc} from "commons";
+import { tapStream, progressCount, throughFunc } from "commons";
 
-import {gatherAbstractFiles} from "~/corpora/bundler";
-import {BufferedLogger} from "commons";
-import {extractAbstractTransform} from "~/extract/field-extract-abstract";
+import { gatherAbstractFiles } from "~/corpora/bundler";
+import { BufferedLogger } from "commons";
+import { extractAbstractTransform } from "~/extract/field-extract-abstract";
 import {
   initLogger,
   resolveLogfileName,
@@ -26,11 +25,11 @@ export function sanityCheckAbstract(log: BufferedLogger, entryDir: ExpandedDir):
   const abstractFiles = gatherAbstractFiles(entryDir);
   const abstractStrs = _(abstractFiles)
     .flatMap(([filename, fields]) => {
-      return _.map(fields, (f, i) => [filename, f.value, i] as const).filter(
-        ([, v]) => v !== undefined,
-      );
+      return _
+        .map(fields, (f, i) => [filename, f.value, i] as const)
+        .filter(([, v]) => v !== undefined);
     })
-    .map(([fn, f, i]) => [fn, f? f.trim() : "", i])
+    .map(([fn, f, i]) => [fn, f ? f.trim() : "", i])
     .value();
 
   if (abstractFiles.length === 0) {
@@ -115,9 +114,9 @@ export async function reviewCorpus({
   filters,
 }: ReviewCorpusArgs) {
   if (phase === "init") {
-    return initReviewCorpus({corpusRoot, logpath});
+    return initReviewCorpus({ corpusRoot, logpath });
   }
-  interactiveReviewCorpus({corpusRoot, logpath, phase, prevPhase, filters});
+  interactiveReviewCorpus({ corpusRoot, logpath, phase, prevPhase, filters });
 }
 
 export async function interactiveReviewCorpus({

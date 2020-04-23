@@ -70,10 +70,6 @@ describe('Transcript IO', () => {
           [" ", [19, 94, 9, 10], { kind: "ws" }],
         ],
       }],
-      markup: [
-        // { text: "_{", kind: "esc:open:subscript" },
-        // { text: "}", kind: "esc:close" },
-      ],
       stanzas: [
         {
           kind: "body",
@@ -81,9 +77,7 @@ describe('Transcript IO', () => {
           lines: [{ text: "a ", glyphs: [0, 1] }]
         },
       ],
-      labels: [
-        // { name: "MyLabel", id: "L#3", range: [{ unit: "stanza", at: { id: 0 } }] },
-      ]
+      labels: []
     };
 
     expect(isIsomorphic(Transcript, example, true)).toBe(true);
@@ -91,39 +85,3 @@ describe('Transcript IO', () => {
   });
 
 });
-
-
-    // const examples: any[] = [
-    //   {
-    //     description: "desc",
-    //     documentId: "doc-25-id",
-    //     pages: [{
-    //       pdfPageBounds: [0, 0, 61200, 79200],
-    //       lines: [{
-    //         text: "I Ã ffi",
-    //         glyphs: [
-    //           [1, 2, 3, 4],
-    //           [[59, 2, 3, 4], {}],
-    //           [[3, 2, 3, 4], {
-    //             "gs": [
-    //               [[1, 2, 3, 4], { "g": "A" }],
-    //               [[1, 2, 3, 4], { "g": "~" }]
-    //             ]
-    //           }],
-    //         ]
-    //       }, {
-    //         text: "Fe_{3}",
-    //         glyphs: [
-    //           [11, 2, 3, 4],
-    //           [22, 2, 3, 4],
-    //           [[53, 2, 3, 4], { "i": 0 }],
-    //           [[54, 2, 3, 4], { "i": 1 }]
-    //         ]
-    //       }]
-    //     }],
-    //     labels: [
-    //       { name: "HasRefs", id: "L#2", range: [{ unit: "page", at: [7, 2] }] },
-    //       { name: "IsGoldLabled", id: "L#3", range: [{ unit: "document" }] },
-    //     ]
-    //   }
-    // ];

@@ -4,11 +4,54 @@
 ** Usage Overview
 *** Spidering/Scraping
 **** Define spidering input records 
-     List of json-formatted lines { "url": "http://xxx", ... }
 *** Abstract Field Extraction
-   
 *** Q/A Workflow
 
 **** Collecting stats
      yarn workspace textworks-aas corpus collect-stats --cwd=../../orc.d --corpus-root=corpus.d --logfile logs.d/qa-write-abstracts.json
+     
+** Subsystems
+   
+*** Spider/Scraper
+    Targeted scraping of explicit URLs
+    Spidering done with either browser (via selenium) or axios
+    
+*** HTML field extractor
+    Current recognized fields: Abstracts (next up: PDF urls)
 
+*** Corpus Management
+    Hierarchical directory structuring with hashed-prefix paths
+**** Corpus Artifacts
+    
+*** Extraction Q/A Editing
+    Review extraction choices and interactively approve or mark errors 
+
+** Pipeline structure
+   
+*** Input: NoteId,url,dbplId 
+    H1ZqgCxO-S,
+    dblp.org/conf/AAAI/2018,
+    https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/view/16391
+   
+   [Order: csv/json w/noteId,url,..] -> Inbox
+   
+*** OpenReview Module:
+**** DB Structure
+     - Orders: [OrderId, Source, orderDate, lastModDate] where Source is the original CSV or JSON
+       Keep track of the original request 
+
+     - OrderPart: [OrderId, OrderPartId, PartRec(Json)]
+       Record the 'actionable' parts of the order, i.e., those that can be operated individually
+       PartRec: { noteId }
+   
+     - OrderPartFulfillment: [OrderPartId, FulfillmentStateRadios, FulfillmentRec(Json)]
+   
+       FulfillmentRec: { fields: [{ name: 'abstract', value: 'Abs... '}]}
+       FulfillmentRec: { $fileTicketId: 'az-Kj' } <- pointer to an artifactId understood by the Corpus
+       FulfillmentRec: { } <-
+       FulfillmentStateRadios: injjjjjjjjjjjjjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+
+
+
+
+   Finale: noteId -> (field:abstract, field:pdfUrl) 
