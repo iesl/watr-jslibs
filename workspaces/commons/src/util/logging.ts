@@ -27,6 +27,29 @@ const uniqIdFormat = logform.format((info) => {
   return info;
 });
 
+export function createFileAndConsoleLogger(logfile: string): Logger {
+  return createLogger({
+    level: "info",
+    format: combine(timestamp(), prettyPrint()),
+    transports: [
+      new transports.File({filename: logfile}),
+      new transports.Console(),
+    ],
+  });
+}
+
+// how do I export functions from commons like fp-ts,
+// e.g., import { either, isRight } from 'fp-ts/lib/Either'
+export function createConsoleLogger(): Logger {
+  return createLogger({
+    level: "info",
+    format: combine(timestamp(), prettyPrint()),
+    transports: [
+      new transports.Console(),
+    ],
+  });
+}
+
 export function progressLogger(logname: string): LeveledLogMethod {
   const logger = createLogger({
     level: "info",

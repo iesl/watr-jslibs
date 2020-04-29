@@ -2,13 +2,25 @@
 * Textworks as a service
    
 ** Usage Overview
+   
+*** Start with list of urls,noteIds (CSV)
+    - create distinct relations for noteId, url, dblpId
+    
+      
+*** Create OpenReview Corpus DB
+    use sqlite
+    record noteId, dblpId, url, etc.
+    url corresponds to a research paper (hopefully)
+    want: abstract, any PDF urls for the paper
+
 *** Spidering/Scraping
-**** Define spidering input records 
+    
 *** Abstract Field Extraction
 *** Q/A Workflow
 
 **** Collecting stats
      yarn workspace textworks-aas corpus collect-stats --cwd=../../orc.d --corpus-root=corpus.d --logfile logs.d/qa-write-abstracts.json
+     
      
 ** Subsystems
    
@@ -49,7 +61,7 @@
        FulfillmentRec: { fields: [{ name: 'abstract', value: 'Abs... '}]}
        FulfillmentRec: { $fileTicketId: 'az-Kj' } <- pointer to an artifactId understood by the Corpus
        FulfillmentRec: { } <-
-       FulfillmentStateRadios: injjjjjjjjjjjjjkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+       FulfillmentStateRadios: in
 
 
 

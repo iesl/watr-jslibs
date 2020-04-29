@@ -11,17 +11,17 @@
     "src": "src"
   },
   "dependencies": {
-    "commander": "^5.0.0",
+    "commander": "^5.1.0",
     "fs-extra": "^9.0.0",
-    "ts-morph": "^7.0.2"
+    "ts-morph": "^7.0.3"
   },
   "devDependencies": {
     "@types/chai": "^4.2.11",
     "@types/fs-extra": "^8.1.0",
     "@types/jest": "^25.2.1",
     "@types/lodash": "^4.14.150",
-    "@typescript-eslint/eslint-plugin": "^2.29.0",
-    "@typescript-eslint/parser": "^2.29.0",
+    "@typescript-eslint/eslint-plugin": "^2.30.0",
+    "@typescript-eslint/parser": "^2.30.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-import-resolver-typescript": "^2.0.0",

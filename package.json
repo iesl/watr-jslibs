@@ -5,7 +5,8 @@
   "scripts": {
     "clean": "lerna clean -y && rm -r node_modules",
     "deps:check": "lerna --concurrency 1 exec --stream -- ncu",
-    "deps:update": "lerna --concurrency 1 exec --stream -- ncu -u"
+    "deps:update": "lerna --concurrency 1 exec --stream -- ncu -u",
+    "tw-cli": "lerna run --scope textworks-aas --stream cli -- -- --cwd ../.."
   },
   "workspaces": {
     "packages": [

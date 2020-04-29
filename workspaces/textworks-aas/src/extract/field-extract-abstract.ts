@@ -1,13 +1,11 @@
 import _ from "lodash";
 import path from "path";
-import {Transform} from "stream";
+import { Transform } from "stream";
 import through from "through2";
-
 import fs from "fs-extra";
-import {Field} from "~/extract/field-extract";
-import {prettyPrint} from "commons";
+import { Field } from "~/extract/field-extract";
 
-import {makeCssTreeNormalFormFromNode} from "./reshape-html";
+import { makeCssTreeNormalFormFromNode } from "./reshape-html";
 
 import {
   readFile,
@@ -18,10 +16,7 @@ import {
   queryContent,
 } from "~/extract/field-extract-utils";
 
-import {ExpandedDir} from "commons";
-
-import {BufferedLogger} from "commons";
-
+import { prettyPrint, BufferedLogger, ExpandedDir } from "commons";
 import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
 
 type PipelineFunction = (lines: string[], content: string) => Field;
@@ -44,7 +39,7 @@ export function findAbstractV2(cssNormLines: string[]): Field {
       const abst = metadataObj["abstract"];
       field.value = abst;
     } catch (e) {
-      prettyPrint({e, lineJson});
+      prettyPrint({ e, lineJson });
     }
   }
   return field;
@@ -151,7 +146,7 @@ function extractAbstract(exDir: ExpandedDir, log: BufferedLogger): void {
 
     if (writeAbstracts) {
       if (abstractFields.length > 0) {
-        console.log(`writing ${abstractFields.length} abstracts to ${extrAbsFilename}`,);
+        console.log(`writing ${abstractFields.length} abstracts to ${extrAbsFilename}`);
         log.append(`field.abstract.extract=true`);
         log.append(`field.abstract.extract.count=${abstractFields.length}`);
         fs.writeJsonSync(extrAbsFilename, abstractFields);

@@ -2,7 +2,6 @@ import _ from "lodash";
 
 // import { Rect, RectRepr, Shape } from "./shapes";
 import * as io from 'io-ts';
-// import { either, isRight } from 'fp-ts/lib/Either'
 import { Label } from "./transcript";
 
 const LogHeaders = io.type({

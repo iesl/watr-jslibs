@@ -8,7 +8,7 @@ const { opt, config } = arglib;
 
 import "./spider-cli";
 import "./corpus-cli";
-import { oneoff } from '~/spider/spidering';
+import { createOrder, initDatabase } from '~/openreview/workflow';
 
 yargs.command(
   "write-norms",
@@ -24,16 +24,30 @@ yargs.command(
 );
 
 yargs.command(
-  "oneoff",
-  "desc.",
+  "openreview-order",
+  "create an order from a CSV file",
   config(
     opt.cwd,
-    opt.existingDir("logpath: directory to put log files"),
-    opt.existingFile("input-csv: ..."),
-    opt.existingFile("input-json: ..."),
+    opt.existingFile("csv: ..."),
+    opt.existingFile("storagePath: ..."),
   ),
   (opts: any) => {
-    oneoff(opts.inputCsv, opts.inputJson, opts.logpath);
+    createOrder({
+      csvFile: opts.csv,
+      storagePath: opts.storagePath,
+    });
+  },
+);
+
+yargs.command(
+  "openreview-initdb",
+  "initialize the openreview database",
+  config(
+    opt.cwd,
+    opt.file('storagePath: sqlite db file'),
+  ),
+  (opts: any) => {
+    initDatabase(opts.storagePath);
   },
 );
 

@@ -2,6 +2,7 @@ import _ from "lodash";
 
 import yargs from "yargs";
 import { arglib } from "commons";
+import {  } from "commons";
 import { createSpider } from '~/spider/spidering';
 
 const { opt, config } = arglib;

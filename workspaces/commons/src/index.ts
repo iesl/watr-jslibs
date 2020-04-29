@@ -18,13 +18,6 @@ import {
   stanzaChunker,
 } from "./util/stream-utils";
 
-import {
-  makeNowTimeString
-} from "./util/utils";
-
-export {
-  makeNowTimeString
-};
 
 export {
   PumpBuilder,
@@ -42,6 +35,14 @@ export {
   progressCount,
   createReadLineStream,
   stanzaChunker,
+};
+
+import {
+  makeNowTimeString
+} from "./util/utils";
+
+export {
+  makeNowTimeString
 };
 
 import {
@@ -72,17 +73,18 @@ export {
   prettyPrint
 };
 
-import {
-  progressLogger,
-  BufferedLogger,
-  initBufferedLogger
-} from "./util/logging";
+// import {
+//   progressLogger,
+//   BufferedLogger,
+//   initBufferedLogger
+// } from "./util/logging";
+// export {
+//   progressLogger,
+//   BufferedLogger,
+//   initBufferedLogger
+// };
 
-export {
-  progressLogger,
-  BufferedLogger,
-  initBufferedLogger
-};
+export * from "./util/logging";
 
 import {
   csvStream

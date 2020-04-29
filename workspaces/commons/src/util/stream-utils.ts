@@ -2,9 +2,9 @@ import _ from "lodash";
 import fs from "fs-extra";
 import through from "through2";
 import pumpify from "pumpify";
-import {Transform, Stream} from "stream";
-import {prettyPrint} from "./pretty-print";
-import es, {MapStream} from "event-stream";
+import { Transform, Stream } from "stream";
+import { prettyPrint } from "./pretty-print";
+import es, { MapStream } from "event-stream";
 
 export interface PumpBuilder<ChunkT> {
   streams: Stream[];
@@ -12,6 +12,7 @@ export interface PumpBuilder<ChunkT> {
   onCloseF?: (err: Error) => void;
   onEndF?: () => void;
 
+  throughF<R>(f: (t: ChunkT) => Promise<R>): PumpBuilder<R>;
   throughF<R>(f: (t: ChunkT) => R): PumpBuilder<R>;
   viaStream<R>(s: Stream): PumpBuilder<R>;
   tap(f: (t: ChunkT, i?: number) => void): PumpBuilder<ChunkT>;
@@ -30,7 +31,7 @@ function appendStream<ChunkT>(
   const newBuilder: PumpBuilder<any> = _.merge(
     {},
     builder,
-    {streams: _.concat(builder.streams, [vstr])},
+    { streams: _.concat(builder.streams, [vstr]) },
   );
 
   return newBuilder;
@@ -67,13 +68,13 @@ export function createPump<ChunkT>(): PumpBuilder<ChunkT> {
   const pb0: PumpBuilder<ChunkT> = {
     streams: [],
     onData(f: (t: ChunkT) => void): PumpBuilder<ChunkT> {
-      return merge(this, {onDataF: f});
+      return merge(this, { onDataF: f });
     },
     onClose(f: (err?: Error) => void): PumpBuilder<ChunkT> {
-      return merge(this, {onCloseF: f});
+      return merge(this, { onCloseF: f });
     },
     onEnd(f: () => void): PumpBuilder<ChunkT> {
-      return merge(this, {onEndF: f});
+      return merge(this, { onEndF: f });
     },
     throughF<R>(f: (t: ChunkT) => R): PumpBuilder<R> {
       return appendStream(this, throughFunc(f));
@@ -92,7 +93,7 @@ export function createPump<ChunkT>(): PumpBuilder<ChunkT> {
       if (this.onEndF) {
         pipe.on("end", this.onEndF);
       }
-      pipe.on("data", this.onDataF ? this.onDataF : () => 0);
+      pipe.on("data", this.onDataF ? this.onDataF : () => undefined);
       return pipe;
     },
   };
@@ -116,7 +117,7 @@ export function throughEnvFunc<T, R, E>(
   f: (t: T, env: E, currTransform: Transform) => R,
 ): Transform {
   return through.obj(
-    function (chunk: [T, E], _enc: string, next: (err: any, v: any) => void) {
+    function(chunk: [T, E], _enc: string, next: (err: any, v: any) => void) {
       const self = this;
       const [tchunk, env] = chunk;
       const res = f(tchunk, env, self);
@@ -132,7 +133,7 @@ export function filterEnvStream<T, E>(f: (t: T, env: E) => boolean): Transform {
       const [tchunk, env] = chunk;
       const res = f(tchunk, env);
       Promise.resolve(res)
-        .then((res) => res? next(null, [tchunk, env]) : next(null, null));
+        .then((res) => res ? next(null, [tchunk, env]) : next(null, null));
     },
   );
 }
@@ -177,7 +178,7 @@ export function filterStream<T>(f: (t: T) => boolean): Transform {
 export function prettyPrintTrans(msg: string): Transform {
   return through.obj(
     (data: any, _enc: string, next: (err: any, v: any) => void) => {
-      prettyPrint({msg, data});
+      prettyPrint({ msg, data });
       return next(null, data);
     },
   );
@@ -268,4 +269,3 @@ export function stanzaChunker(
 
 // TODO const unwind: <T>(arr: T[]): Stream<T> =
 // TODO const collect: <T>(arr: Stream<T>): T[] =
-

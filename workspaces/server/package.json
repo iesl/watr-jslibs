@@ -6,7 +6,7 @@
   "keywords": [
   ],
   "dependencies": {
-    "commander": "^5.0.0",
+    "commander": "^5.1.0",
     "commons": "0.1.0",
     "fs-extra": "^9.0.0",
     "klaw": "^3.0.0",
@@ -34,9 +34,9 @@
     "@types/koa-send": "^4.1.2",
     "@types/lodash": "^4.14.150",
     "@types/through2": "^2.0.34",
-    "@types/node": "^13.13.1",
-    "@typescript-eslint/eslint-plugin": "^2.29.0",
-    "@typescript-eslint/parser": "^2.29.0",
+    "@types/node": "^13.13.4",
+    "@typescript-eslint/eslint-plugin": "^2.30.0",
+    "@typescript-eslint/parser": "^2.30.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-import-resolver-typescript": "^2.0.0",
@@ -45,7 +45,7 @@
     "jest": "^25.4.0",
     "ts-jest": "^25.4.0",
     "tslib": "^1.11.1",
-    "ts-node": "^8.9.0",
+    "ts-node": "^8.9.1",
     "typescript": "^3.8.3"
   },
   "license": "ISC",

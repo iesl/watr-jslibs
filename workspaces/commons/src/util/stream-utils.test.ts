@@ -77,7 +77,7 @@ describe("Stream utils ", () => {
     );
     const pipe = pumpify.obj(
       astr,
-      prettyPrintTrans("line"),
+      // prettyPrintTrans("line"),
       chunker
     );
 

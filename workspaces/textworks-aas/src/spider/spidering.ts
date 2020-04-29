@@ -10,10 +10,9 @@ import { fetchUrl } from "~/spider/axios-scraper";
 import {
   throughFunc,
   csvStream,
-  initEnv, throughEnvFunc, sliceStream, makeCorpusEntryLeadingPath,
+  initEnv, throughEnvFunc, makeCorpusEntryLeadingPath,
   filterEnvStream,
   expandDir,
-  prettyPrint
 } from "commons";
 
 
@@ -91,7 +90,7 @@ export function createSpideringInputStream(csvfile: string): Stream {
     csvStream(csvfile),
     throughFunc((csvRec: string[]) => {
       const [noteId, dblpConfId] = csvRec;
-      const url = csvRec[csvRec.length-1];
+      const url = csvRec[csvRec.length - 1];
       return {
         url,
         noteId,
@@ -159,7 +158,7 @@ const filterUndownloadedUrls = filterEnvStream((rec: SpideringRec, env: Spiderin
     f => f.startsWith("download") && f.endsWith("html")
   );
   if (hasHtml) {
-    env.logger.info({ event: "skipping url: already downloaded"});
+    env.logger.info({ event: "skipping url: already downloaded" });
   }
 
   return !hasHtml;
