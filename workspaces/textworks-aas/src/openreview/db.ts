@@ -1,115 +1,44 @@
-//
+import path from "path";
+import fs from "fs-extra";
+import _ from 'lodash';
+
 import {
-  DataTypes,
-  Model,
   Sequelize,
+  Transaction,
   // BuildOptions,
   // HasManyGetAssociationsMixin,
   // HasManyAddAssociationMixin,
   // HasManyHasAssociationMixin,
-  // Association,
   // HasManyCountAssociationsMixin,
   // HasManyCreateAssociationMixin
 } from 'sequelize';
 
+import { defineTables } from './db-tables';
 
-
-class Url extends Model {
-  public id!: number;
-  public url!: string;
+export function dbStorageFile(dbDataPath: string): string {
+  return path.resolve(dbDataPath, 'openreview-db.sqlite');
 }
 
-class VenueUrl extends Model {
-  public id!: number;
-  public url!: string;
-}
-
-class NoteId extends Model {
-  public id!: number;
-  public noteId!: string;
-}
-
-class Order extends Model {
-  public id!: number;
-}
-
-export class OrderEntry extends Model {
-  public id!: number;
-  public order!: number;
-  public url!: number;
-  public venue!: number;
-  public note!: number;
-  public source!: string; // a record containing the original fields as provided by the openreview team
-}
-
-
-export const Table = {
-  Url,
-  VenueUrl,
-  Order,
-  OrderEntry,
-  NoteId,
-};
-
-export function initTables(sql: Sequelize): void {
-  const opts = {
-    sequelize: sql,
-    timestamps: true,
+export function deleteStorage(storagePath: string): void {
+  if (fs.existsSync(storagePath)) {
+    fs.removeSync(storagePath);
   }
-
-  Url.init({
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    url: { type: DataTypes.STRING, allowNull: false, unique: true },
-  }, opts);
-
-  VenueUrl.init({
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    url: { type: DataTypes.STRING, allowNull: false, unique: true },
-  }, opts);
-
-  NoteId.init({
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    noteId: { type: DataTypes.STRING, allowNull: false, unique: true },
-  }, opts);
-
-  Order.init({
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  }, opts);
-
-  OrderEntry.init({
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    order: { type: DataTypes.INTEGER },
-    url: { type: DataTypes.INTEGER },
-    venue: { type: DataTypes.INTEGER },
-    note: { type: DataTypes.INTEGER },
-    source: { type: DataTypes.JSON },
-  }, opts);
-
-
-  Order.hasMany(OrderEntry, {
-    sourceKey: 'id',
-    foreignKey: 'order',
-    as: 'entries',
-  });
-
-  OrderEntry.belongsTo(Order)
 }
 
-export async function openDB(storagePath: string|undefined): Promise<Sequelize> {
-  const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: storagePath? storagePath : ':memory:',
-    logging: false, // or console.log,
+// storage: storagePath ? storagePath : ':memory:',
 
-    // database: '',
-    // username: '',
-    // password: '',
+export async function initSequelize(): Promise<Sequelize> {
+  const sequelize = new Sequelize({
+    dialect: 'postgres',
+    username: 'watrworker',
+    password: 'watrpass',
+    database: 'textworks_or_onramp',
+    logging: false, // logging: console.log,
   });
 
   return sequelize
     .authenticate()
     .then(() => {
-      console.log('Connection has been established successfully.');
       return sequelize;
     })
     .catch((err: any) => {
@@ -118,32 +47,64 @@ export async function openDB(storagePath: string|undefined): Promise<Sequelize> 
     });
 }
 
-// identifier: { type: Sequelize.STRING, primaryKey: true },
-// incrementMe: { type: Sequelize.INTEGER, autoIncrement: true },
-// class User extends Model {
-//   public id!: number; // Note that the `null assertion` `!` is required in strict mode.
-//   public name!: string;
-//   public preferredName!: string | null; // for nullable fields
+export interface Database {
+  sql: Sequelize;
+  run: <R>(f: (db: Sequelize) => Promise<R>) => Promise<R>;
+  runTransaction: <R>(f: (db: Sequelize, t: Transaction) => Promise<R>) => Promise<R>;
+  unsafeResetDatabase: () => Promise<Database>;
+}
 
-//   // timestamps!
-//   public readonly createdAt!: Date;
-//   public readonly updatedAt!: Date;
+export async function runQuery<R>(sql: Sequelize, f: (sql: Sequelize) => Promise<R>): Promise<R> {
+  return f(sql)
+    .catch((error) => {
+      console.log('runQuery: error:', error);
+      throw error;
+    });
+}
 
-//   // Since TS cannot determine model association at compile time
-//   // we have to declare them here purely virtually
-//   // these will not exist until `Model.init` was called.
+export async function runTransaction<R>(
+  sql: Sequelize,
+  f: (db: Sequelize, t: Transaction) => Promise<R>
+): Promise<R> {
+  return runQuery(sql, async db => {
+    const transaction = await db.transaction();
+    return f(db, transaction)
+      .then(async (r) => {
+        return transaction.commit().then(() => r);
+      })
+      .catch(async (error) => {
+        return transaction.rollback().then(() => {
+          console.log('runTransaction: error:', error);
+          throw error;
+        })
+      })
+  })
+}
 
-//   // public getProjects!: HasManyGetAssociationsMixin<Project>; // Note the null assertions!
-//   // public addProject!: HasManyAddAssociationMixin<Project, number>;
-//   // public hasProject!: HasManyHasAssociationMixin<Project, number>;
-//   // public countProjects!: HasManyCountAssociationsMixin;
-//   // public createProject!: HasManyCreateAssociationMixin<Project>;
+export async function openDatabase(): Promise<Database> {
+  return initSequelize()
+    .then(async sql => {
+      defineTables(sql);
+      // Create tables if they don't exist, else no-op
+      await sql.sync();
 
-//   // You can also pre-declare possible inclusions, these will only be populated if you
-//   // actively include a relation.
-//   // public readonly projects?: Project[]; // Note this is optional since it's only populated when explicitly requested in code
+      const run = _.curry(runQuery)(sql);
+      const runT = _.curry(runTransaction)(sql);
+      const unsafeResetDatabase = async () => {
+        await sql.drop();
+        return sql
+          .sync({ force: true })
+          .then(async () => {
+            await sql.close();
+            return openDatabase();
+          });
+      };
 
-//   // public static associations: {
-//   //   projects: Association<User, Project>;
-//   // };
-// }
+      return {
+        unsafeResetDatabase,
+        sql,
+        run,
+        runTransaction: runT,
+      };
+    });
+}

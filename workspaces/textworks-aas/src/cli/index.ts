@@ -8,7 +8,7 @@ const { opt, config } = arglib;
 
 import "./spider-cli";
 import "./corpus-cli";
-import { createOrder, initDatabase } from '~/openreview/workflow';
+import { createOrder } from '~/openreview/workflow';
 
 yargs.command(
   "write-norms",
@@ -29,27 +29,28 @@ yargs.command(
   config(
     opt.cwd,
     opt.existingFile("csv: ..."),
-    opt.existingFile("storagePath: ..."),
+    opt.existingDir("db-data-path: root path to store sqlite data files"),
   ),
   (opts: any) => {
     createOrder({
       csvFile: opts.csv,
-      storagePath: opts.storagePath,
+      dbDataPath: opts.dbDataPath,
     });
   },
 );
 
-yargs.command(
-  "openreview-initdb",
-  "initialize the openreview database",
-  config(
-    opt.cwd,
-    opt.file('storagePath: sqlite db file'),
-  ),
-  (opts: any) => {
-    initDatabase(opts.storagePath);
-  },
-);
+
+// yargs.command(
+//   "openreview-initdb",
+//   "initialize the openreview database",
+//   config(
+//     opt.cwd,
+//     opt.existingDir("db-data-path: root path to store sqlite data files"),
+//   ),
+//   (opts: any) => {
+//     initDatabase(opts.dbDataPath);
+//   },
+// );
 
 
 

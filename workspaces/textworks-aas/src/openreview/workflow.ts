@@ -1,100 +1,161 @@
-
 import pumpify from "pumpify";
 import { Stream } from "stream";
 
 import {
   throughFunc,
-  csvStream,
   prettyPrint,
   createConsoleLogger,
   createPump,
+  createReadLineStream,
+  filterStream,
 } from "commons";
 
-import { openDB, initTables, Table, OrderEntry } from './db';
+import { openDatabase, Database } from './db';
+import { Order, Url, NoteId, VenueUrl, OrderEntry } from './db-tables';
+
+interface InputRec {
+  noteId: string;
+  dblpConfId: string;
+  url: string;
+  title: string;
+}
+
+export function splitCSVRecord(rec: string): InputRec {
+  // console.log(`splitCSVRecord: ${rec}`);
+
+  const fields = rec.split(',');
+  let [noteId, dblpConfId] = fields;
+  if (noteId===undefined || dblpConfId === undefined) {
+    console.log(`error: splitCSVRecord: ${rec}`);
+    noteId = noteId || "ERR-NOTEID";
+    dblpConfId = dblpConfId || "ERR-DBLP";
+  }
+  let url = fields[fields.length-1];
+  const p0 = noteId.length + dblpConfId.length + 2;
+  const p1 = rec.length - url.length - 1;
+  const title = rec.substring(p0, p1);
+  noteId = noteId.trim();
+  dblpConfId = dblpConfId.trim();
+  url = url.trim();
+
+  return {
+    noteId, dblpConfId, url, title
+  };
+}
 
 export function readOrderCsv(csvfile: string): Stream {
+  const inputStream = createReadLineStream(csvfile);
   return pumpify.obj(
-    csvStream(csvfile),
-    throughFunc((csvRec: string[]) => {
-      const [noteId, dblpConfId] = csvRec;
-      const url = csvRec[csvRec.length - 1];
-      return {
-        url,
-        noteId,
-        dblpConfId
-      }
-    })
+    inputStream,
+    filterStream((r: string) => r.trim().length > 0),
+    throughFunc(splitCSVRecord),
   );
 }
 
 export interface COptions {
   // corpusRoot: string;
   // logpath: string;
-  storagePath: string;
+  dbDataPath: string;
   csvFile: string;
 }
 
-interface InputRec {
-  noteId: string;
-  dblpConfId: string;
-  url: string;
-}
+
+const addOrderEntry: (db: Database, order: Order) => (r: InputRec) => Promise<OrderEntry> =
+  (db, order) => async (rec) => {
+    const { noteId, url, dblpConfId } = rec;
+
+    return db.run(async () => {
+    // return db.runTransaction(async (_sql, transaction) => {
+      // const [urlEntry,] = await Url.findOrCreate({
+      //   where: { url },
+      //   defaults: { url },
+      //   transaction
+      // });
+
+      // const [noteEntry,] = await NoteId.findOrCreate({
+      //   where: { noteId },
+      //   defaults: { noteId },
+      //   transaction
+      // });
+
+      // const [venueEntry,] = await VenueUrl.findOrCreate({
+      //   where: { url: dblpConfId },
+      //   defaults: { url: dblpConfId },
+      //   transaction
+      // });
+      const urlP = Url.findCreateFind({
+        where: { url },
+        defaults: { url },
+        // transaction
+      });
+
+      const noteP = NoteId.findCreateFind({
+        where: { noteId },
+        defaults: { noteId },
+        //transaction
+      });
+
+      const venueP = VenueUrl.findCreateFind({
+        where: { url: dblpConfId },
+        defaults: { url: dblpConfId },
+        // transaction
+      });
+
+      return Promise
+        .all([urlP, noteP, venueP])
+        .then(([urlA, noteA, venueA]) => {
+          const [urlEntry] = urlA;
+          const [noteEntry] = noteA;
+          const [venueEntry] = venueA;
+
+          return OrderEntry.create({
+            order: order.id,
+            note: noteEntry.id,
+            url: urlEntry.id,
+            venue: venueEntry.id,
+            // source: rec,
+          });
+        });
+    })
+  };
 
 export async function createOrder(opts: COptions) {
   const logger = createConsoleLogger();
   logger.info({ event: "initializing order", config: opts });
   const inputStream = readOrderCsv(opts.csvFile);
-  // const env = { orderId: ... };
-  // create order
-  const db = await openDB(opts.storagePath);
-  const newOrder = await Table.Order.create({});
-  const orderId = newOrder.id;
+
+  console.log('!!!!dropping/recreating db!!!')
+  const db = await openDatabase()
+    .then(db => db.unsafeResetDatabase());
 
 
-  const addOrderEntry: (r: InputRec) => Promise<OrderEntry> = async r => {
-    const { noteId, url, dblpConfId } = r;
+  console.log('about to create order...')
+  const newOrder = await db.run(async () => {
+    return Order.create()
+      .catch(error => {
+        prettyPrint({ error });
+      });
+  });
 
-    const [urlEntry,] = await Table.Url.findOrCreate({
-      where: { url },
-      defaults: { url }
-    });
+  if (!newOrder) return;
 
-    const [noteEntry,] = await Table.NoteId.findOrCreate({
-      where: { noteId },
-      defaults: { noteId }
-    });
+  const addEntry = addOrderEntry(db, newOrder);
 
-    const [venueEntry,] = await Table.VenueUrl.findOrCreate({
-      where: { url: dblpConfId },
-      defaults: { url: dblpConfId }
-    });
-
-    return Table.OrderEntry.create({
-      order: orderId,
-      note: noteEntry.id,
-      url: urlEntry.id,
-      venue: venueEntry.id,
-      source: r,
-    });
-  }
-
+  let i = 0;
   const pumpBuilder = createPump()
     .viaStream<InputRec>(inputStream)
-    .tap(d => prettyPrint({ d }))
-    .throughF(addOrderEntry)
-    .tap(orderEntry => {
-      const entry = orderEntry.get({ plain: true });
-      prettyPrint({ entry });
+    .throughF(addEntry)
+    .tap(() => {
+      if (i % 100 === 0) {
+        console.log(`processed ${i} records`);
+      }
+      i += 1;
     })
-    .onEnd(() => {
+    .onEnd(async () => {
       logger.info({ event: "done" });
+      await db.sql.close();
+      logger.info({ event: "db closed" });
     });
 
   pumpBuilder.start();
-}
-
-export async function initDatabase(storagePath: string) {
-  const db = await openDB(storagePath);
-  initTables(db)
-  await db.sync();
 }

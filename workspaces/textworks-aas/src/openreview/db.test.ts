@@ -1,6 +1,7 @@
 import 'chai/register-should';
 import { prettyPrint } from 'commons';
-import { openDB, initTables, Table } from './db';
+import { openDatabase, Database } from './db';
+import { Url } from './db-tables';
 
 describe('OpenReview Database', () => {
 
@@ -8,38 +9,61 @@ describe('OpenReview Database', () => {
   // afterEach(() => {})
   // afterAll(() => {})
 
-  beforeEach(async () => {
-    const sql = await openDB(undefined);
-    initTables(sql);
-    await sql.sync();
-  });
+
+  async function createEmptyDB(): Promise<Database> {
+    const db = await openDatabase('db.tmp.sqlite');
+    await db.unsafeResetDatabase();
+    return db;
+  }
 
 
-  it('smokescreen', async (done) => {
-    const newEntry = await Table.Url.create({
-      url: 'blah:/blah/blah'
+  it.only('smokescreen', async (done) => {
+    const db = await createEmptyDB();
+    await db.runTransaction(async (db, transaction) => {
+      const newEntry = await Url.create({
+        url: 'blah:/blah/blah'
+      }, { transaction });
+      const theUrl = newEntry.url;
+
+      prettyPrint({ theUrl });
     });
 
-    const theUrl = newEntry.url;
-    prettyPrint({ theUrl });
+
+    await db.run(async () => {
+      return Url.findAll()
+        .then((urls) => {
+          const plainUrls = urls.map(a => a.get({ plain: true }));
+          prettyPrint({ plainUrls });
+        });
+    });
+
 
     done();
   });
 
 
-  it.only('should create a request order with entries', async (done) => {
+  it('create an order with initial order-items', async (done) => {
     // shouldn't create an orderentry without an order
-    await Table.OrderEntry.create()
-      .then(orderEntry => {
-        return orderEntry;
-      }) ;
+    // await withDBTransaction(async (db, transaction) => {
+    //   const opts = { transaction };
 
-    await Table.OrderEntry.findAll()
-      .then(all => {
-        const asObj = all.map(a => a.get({ plain: true }));
-        prettyPrint({ asObj });
-      })
-      .then(done)
+    //   await .OrderEntry.create(opts)
+    //     .then(orderEntry => {
+    //       return orderEntry;
+    //     }) ;
+
+    //   await Table.OrderEntry.findAll()
+    //     .then(all => {
+    //       const asObj = all.map(a => a.get({ plain: true }));
+    //       prettyPrint({ asObj });
+    //     })
+    //     .then(done)
+    // })
   });
+
+  // it('reset database', async (done) => {});
+  // it('create an empty order', async (done) => {});
+  // it('update an order with a new item', async (done) => {});
+  // it('track whether an order is complete', async (done) => {});
 
 });

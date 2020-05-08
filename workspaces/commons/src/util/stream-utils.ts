@@ -14,6 +14,7 @@ export interface PumpBuilder<ChunkT> {
 
   throughF<R>(f: (t: ChunkT) => Promise<R>): PumpBuilder<R>;
   throughF<R>(f: (t: ChunkT) => R): PumpBuilder<R>;
+  // TODO throughTransform<R>(t: Transform): PumpBuilder<R>;
   viaStream<R>(s: Stream): PumpBuilder<R>;
   tap(f: (t: ChunkT, i?: number) => void): PumpBuilder<ChunkT>;
   onData(f: (t: ChunkT) => void): PumpBuilder<ChunkT>;

@@ -39,7 +39,6 @@ describe("Arglib tests", () => {
       opt.cwd,
       opt.existingDir("corpus-root: root directory for corpus files"),
     ).catch(caughtErr => {
-
       prettyPrint({ caughtErr });
     });
 
