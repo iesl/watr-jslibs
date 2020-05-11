@@ -11,7 +11,7 @@ describe('OpenReview Database', () => {
 
 
   async function createEmptyDB(): Promise<Database> {
-    const db = await openDatabase('db.tmp.sqlite');
+    const db = await openDatabase();
     await db.unsafeResetDatabase();
     return db;
   }

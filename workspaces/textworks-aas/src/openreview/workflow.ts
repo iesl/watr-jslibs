@@ -65,40 +65,19 @@ const addOrderEntry: (db: Database, order: Order) => (r: InputRec) => Promise<Or
     const { noteId, url, dblpConfId } = rec;
 
     return db.run(async () => {
-    // return db.runTransaction(async (_sql, transaction) => {
-      // const [urlEntry,] = await Url.findOrCreate({
-      //   where: { url },
-      //   defaults: { url },
-      //   transaction
-      // });
-
-      // const [noteEntry,] = await NoteId.findOrCreate({
-      //   where: { noteId },
-      //   defaults: { noteId },
-      //   transaction
-      // });
-
-      // const [venueEntry,] = await VenueUrl.findOrCreate({
-      //   where: { url: dblpConfId },
-      //   defaults: { url: dblpConfId },
-      //   transaction
-      // });
       const urlP = Url.findCreateFind({
         where: { url },
         defaults: { url },
-        // transaction
       });
 
       const noteP = NoteId.findCreateFind({
         where: { noteId },
         defaults: { noteId },
-        //transaction
       });
 
       const venueP = VenueUrl.findCreateFind({
         where: { url: dblpConfId },
         defaults: { url: dblpConfId },
-        // transaction
       });
 
       return Promise
@@ -113,7 +92,6 @@ const addOrderEntry: (db: Database, order: Order) => (r: InputRec) => Promise<Or
             note: noteEntry.id,
             url: urlEntry.id,
             venue: venueEntry.id,
-            // source: rec,
           });
         });
     })
@@ -125,8 +103,8 @@ export async function createOrder(opts: COptions) {
   const inputStream = readOrderCsv(opts.csvFile);
 
   console.log('!!!!dropping/recreating db!!!')
-  const db = await openDatabase()
-    .then(db => db.unsafeResetDatabase());
+  const db = await openDatabase();
+  // .then(db => db.unsafeResetDatabase());
 
 
   console.log('about to create order...')

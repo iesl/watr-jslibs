@@ -1,5 +1,3 @@
-import path from "path";
-import fs from "fs-extra";
 import _ from 'lodash';
 
 import {
@@ -14,18 +12,6 @@ import {
 } from 'sequelize';
 
 import { defineTables } from './db-tables';
-
-export function dbStorageFile(dbDataPath: string): string {
-  return path.resolve(dbDataPath, 'openreview-db.sqlite');
-}
-
-export function deleteStorage(storagePath: string): void {
-  if (fs.existsSync(storagePath)) {
-    fs.removeSync(storagePath);
-  }
-}
-
-// storage: storagePath ? storagePath : ':memory:',
 
 export async function initSequelize(): Promise<Sequelize> {
   const sequelize = new Sequelize({

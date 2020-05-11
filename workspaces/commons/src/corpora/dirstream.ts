@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import path from "path";
-import fs, {} from 'fs-extra';
-import stream, { Readable, Transform }  from 'stream';
+import fs, { } from 'fs-extra';
+import stream, { Readable, Transform } from 'stream';
 import through from 'through2';
 import { prettyPrint } from '~/util/pretty-print';
 
@@ -18,9 +18,9 @@ export function dirstream(root: string, includeFiles?: boolean): Readable {
 
   function expand(): DirStackEntry | undefined {
     let top = _.last(stack)
-    while ( top && !top.expanded ) {
+    while (top && !top.expanded) {
       const topPath = top.fullpath;
-      const dirEntries = fs.readdirSync(top.fullpath, {withFileTypes: true});
+      const dirEntries = fs.readdirSync(top.fullpath, { withFileTypes: true });
       let fileNames: string[] = [];
       if (incFiles) {
         fileNames = _(dirEntries)
@@ -29,7 +29,6 @@ export function dirstream(root: string, includeFiles?: boolean): Readable {
           .sort()
           .map(e => path.join(topPath, e))
           .value();
-
       }
 
       const dirNames = _(dirEntries)
@@ -74,7 +73,7 @@ export function dirstream(root: string, includeFiles?: boolean): Readable {
 
 export function stringStreamFilter(test: (p: string) => boolean): Transform {
   return through.obj(
-    (chunk: string, _enc: string, next: (err: any, v: string|null) => void) => {
+    (chunk: string, _enc: string, next: (err: any, v: string | null) => void) => {
       if (test(chunk)) {
         return next(null, chunk);
       }
