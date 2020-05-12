@@ -13,7 +13,6 @@ import {
   createRadix,
   radUpsert,
   Radix,
-  // radTraverseValues,
 } from "commons";
 
 import { createFilteredLogStream } from './qa-logging';
@@ -46,42 +45,6 @@ export function collectAbstractExtractionStats(
     fs.writeJsonSync('abstracts-25k.json', data);
 
   });
-
-  // pipef.on("data", (radStats: Radix<CorpusStats>) => {
-  //   // prettyPrint({summary});
-  //   console.log("accumulating stats");
-
-  //   const accumStats = createRadix<CorpusStats>();
-
-  //   radTraverseValues(radStats, (path, stats) => {
-  //     // path.pop();
-  //     while (path.length > 0) {
-  //       radUpsert(accumStats, path, accStats => {
-  //         if (accStats) {
-  //           return {
-  //             urlCount: stats.urlCount + accStats.urlCount,
-  //             absCount: stats.absCount + accStats.absCount,
-  //             missingAbs: stats.missingAbs + accStats.missingAbs,
-  //           };
-  //         }
-  //         return stats;
-  //       });
-  //       path.pop();
-  //     }
-  //   });
-
-  //   const allStats: string[] = [];
-  //   radTraverseValues(accumStats, (path, stats) => {
-  //     const {urlCount, absCount, missingAbs} = stats;
-  //     const venue = _.join(path, " / ").padEnd(24);
-  //     allStats.push(
-  //       `${venue} urls: ${urlCount}; abs# ${absCount}; missing# ${missingAbs}`,
-  //     );
-  //   });
-  //   const sorted = _.sortBy(allStats);
-
-  //   console.log(_.join(sorted, "\n"));
-  // });
 }
 
 export function getLogEntry(key: string, entries: string[]): string | undefined {

@@ -15,7 +15,6 @@ import {
   makeCorpusEntryLeadingPath,
   filterEnvStream,
   expandDir,
-  // throughFuncPar,
 } from "commons";
 
 
@@ -32,8 +31,6 @@ type TimestampFilename = (fn: string) => string;
 export interface SpideringEnv {
   logger: Logger;
   takeScreenshot: boolean;
-  // parNum: number;
-  // fetchFunctions: FetchUrlFn[];
   fetchFunction: FetchUrlFn;
   promptFunction: (url: string) => Promise<UserAction[]>;
   urlToCorpusPath: UrlToCorpusPath;
@@ -61,9 +58,6 @@ export const defaultSpideringOptions: SpideringOptions = {
 interface SpideringRec {
   url: string;
   noteId: string;
-  // outpath?: string;
-  // path?: string;
-  // dlpath: () => string;
 }
 
 function initLogger(logpath: string): Logger {
@@ -100,7 +94,6 @@ async function processOneSpiderRec(rec: SpideringRec, env: SpideringEnv, currStr
 
   let fetched: string | undefined;
 
-  // const fetchFunc = env.fetchFunctions[env.parNum];
   const fetchFunc = env.fetchFunction;
 
   async function _loop(actions: UserAction[]): Promise<void> {
@@ -144,10 +137,6 @@ async function processOneSpiderRec(rec: SpideringRec, env: SpideringEnv, currStr
 
 const filterUndownloadedUrls = filterEnvStream((rec: SpideringRec, env: SpideringEnv) => {
   const url = rec.url;
-
-  // Temporary: skip arxiv.org links
-  const isArxivLink = (/arxiv.org/).test(url);
-  if (isArxivLink) return false;
 
   const isNoUrl = (/no_url/).test(url);
   if (isNoUrl) return false;
@@ -197,39 +186,23 @@ export async function createSpider(opts: SpideringOptions) {
 
   const prompt = opts.interactive ? promptForAction : alwaysDownload;
   const fetchfn = opts.useBrowser ? fetchViaFirefox : fetchViaAxios;
-  // const parFactor = 4;
-
-  // const allFetchers = await Promise.all(
-  //   _.map(_.range(parFactor), async () => {
-  //     const [fetcher, closeFetcher] = await fetchfn();
-  //     return {
-  //       fetcher,
-  //       closeFetcher
-  //     };
-  //   })
-  // )
-  // const fs = _.map(allFetchers, f => f.fetcher);
 
   const [fetcher, closeFetcher] = await fetchfn();
 
   const env: SpideringEnv = {
     logger,
     takeScreenshot: false,
-    // fetchFunctions: fs,
     fetchFunction: fetcher,
     promptFunction: prompt,
     timestampFilename,
     urlToCorpusPath,
-    // parNum: 0,
   };
 
-  // const inputStream = createSpideringInputStream(input);
   const inputStream = readOrderCsv(input);
   const str = pumpify.obj(
     inputStream,
     initEnv(() => env),
     filterUndownloadedUrls,
-    // throughFuncPar(parFactor, processOneSpiderRec),
     throughEnvFunc(processOneSpiderRec),
   );
 
@@ -237,11 +210,14 @@ export async function createSpider(opts: SpideringOptions) {
 
   str.on("data", () => undefined);
 
-  str.on("end", () => {
-    logger.info({ event: "shutting down spider" });
-    closeFetcher();
+  return new Promise((resolve) => {
+    str.on("end", async () => {
+      logger.info({ event: "shutting down spider" });
+      await closeFetcher();
+      logger.info({ event: "fetcher closed" });
+      return resolve();
+    });
   });
-
 }
 
 async function fetchViaAxios(): Promise<[FetchUrlFn, ShutdownFn]> {

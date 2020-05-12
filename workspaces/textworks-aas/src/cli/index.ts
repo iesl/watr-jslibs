@@ -40,19 +40,6 @@ yargs.command(
 );
 
 
-// yargs.command(
-//   "openreview-initdb",
-//   "initialize the openreview database",
-//   config(
-//     opt.cwd,
-//     opt.existingDir("db-data-path: root path to store sqlite data files"),
-//   ),
-//   (opts: any) => {
-//     initDatabase(opts.dbDataPath);
-//   },
-// );
-
-
 
 yargs
   .demandCommand(1, "You need at least one command before moving on")
