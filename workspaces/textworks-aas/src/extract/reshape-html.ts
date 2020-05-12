@@ -180,7 +180,7 @@ function mapHtmlTree(
   _inner(rootElem, 0, 0, 1);
 }
 
-async function writeNormalizedHtml(htmlFile: string) {
+export function writeNormalizedHtml(htmlFile: string) {
   const cssNormFilename = `${htmlFile}.norm.txt`;
   if (fs.existsSync(cssNormFilename)) {
     console.log(`css.norm.txt already exists`);

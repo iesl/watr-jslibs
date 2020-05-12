@@ -5,7 +5,7 @@ import through from "through2";
 import fs from "fs-extra";
 import { Field } from "~/extract/field-extract";
 
-import { makeCssTreeNormalFormFromNode } from "./reshape-html";
+import { makeCssTreeNormalFormFromNode, writeNormalizedHtml } from "./reshape-html";
 
 import {
   readFile,
@@ -120,6 +120,8 @@ function extractAbstract(exDir: ExpandedDir, log: BufferedLogger): void {
     const fileBase = path.basename(htmlFile);
     log.append(`field.abstract.extract.file=${fileBase}`);
     console.log(`extracting abstract from ${htmlFile}`);
+
+    writeNormalizedHtml(htmlFile);
 
     const cssNormFile = `${htmlFile}.norm.txt`;
 

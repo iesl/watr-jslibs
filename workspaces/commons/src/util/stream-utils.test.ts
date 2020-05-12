@@ -6,10 +6,12 @@ import {
   prettyPrintTrans,
   createPump,
   throughFunc,
+  throughFuncPar,
 } from "./stream-utils";
 
 import es from "event-stream";
 import pumpify from "pumpify";
+import { initEnv } from '..';
 
 
 describe("Stream utils ", () => {
@@ -17,24 +19,53 @@ describe("Stream utils ", () => {
 
   async function doAsyncStuff(s: string): Promise<string> {
     return delay(300).then(() => {
-      return Promise.resolve(s+"_"+s);
+      return Promise.resolve(`${s}_${s}`);
     })
   }
 
-  it("should merge a pipeline stream", async done => {
+  it("process async throughput in order", async done => {
     const astr = es.readArray("abc".split(""));
     const pipe = pumpify.obj(
       astr,
-      // prettyPrintTrans("pre"),
       throughFunc(doAsyncStuff),
-      // prettyPrintTrans("post"),
     );
 
+    const output: string[] = [];
+
     pipe.on("data", (data: string) => {
-      prettyPrint({data});
+      output.push(data);
     });
 
     pipe.on("end", () => {
+      expect(output).toEqual(["a_a", "b_b", "c_c"]);
+      done();
+    });
+  });
+
+
+  it.only("should do parallel work on streams", async done => {
+    async function doAsync(s: string): Promise<string> {
+      return delay(200).then(() => {
+        prettyPrint({ s });
+        return Promise.resolve(`${s}_${s}`);
+      })
+    }
+    const astr = es.readArray("abcdefgh".split(""));
+    const pipe = pumpify.obj(
+      astr,
+      initEnv((t) => ({ msg: `env ${t}`})),
+      throughFuncPar(3, doAsync),
+    );
+
+    const output: string[] = [];
+
+    pipe.on("data", (data: string) => {
+      prettyPrint({ data });
+      output.push(data);
+    });
+
+    pipe.on("end", () => {
+      prettyPrint({ output });
       done();
     });
   });

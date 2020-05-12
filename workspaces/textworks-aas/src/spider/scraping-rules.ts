@@ -1,8 +1,6 @@
 import { SpideringEnv } from './spidering';
 
 import {  WebDriver, By, until } from 'selenium-webdriver';
-//
-
 
 export interface SpideringRule {
   urlre: RegExp;
@@ -18,11 +16,15 @@ export const SpideringRules: SpideringRule[] = [
       waitForDocReady(env, wd, newUrl);
       await wd.wait(until.elementLocated(By.id('abstract')), 5000);
       const pageSource = await wd.getPageSource();
-      if (env.takeScreenshot) {
-        // const screenshot = await wd.takeScreenshot()
-        // env.takeScreenshot = false;
-        // fs.writeFileSync()
-      }
+      return pageSource;
+    }},
+  { urlre: new RegExp('arxiv.org'),
+    rule: async (env, wd: WebDriver, url: string) => {
+      // re-write the url
+      const newUrl = url.replace('/arxiv.org/', '/export.arxiv.org/');
+      waitForDocReady(env, wd, newUrl);
+      await wd.wait(until.elementLocated(By.id('abstract')), 5000);
+      const pageSource = await wd.getPageSource();
       return pageSource;
     }},
   { urlre: new RegExp('//doi.org/.*'),

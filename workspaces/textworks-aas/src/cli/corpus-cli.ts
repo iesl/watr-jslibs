@@ -3,7 +3,7 @@ import _ from "lodash";
 import path from "path";
 import yargs from "yargs";
 import { arglib } from "commons";
-import { reviewCorpus, runAbstractFinder } from "~/qa-editing/qa-review";
+import { runAbstractFinderOnCorpus, runAbstractFinderUsingLogStream } from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import { reviewAbstractQuality } from '~/qa-editing/qa-edits';
 
@@ -26,7 +26,7 @@ yargs.command(
 
 
 yargs.command(
-  "find-abstracts",
+  "find-abstracts-in-corpus",
   "run the abstract finder over htmls in corpus",
   config(
     opt.cwd,
@@ -34,12 +34,12 @@ yargs.command(
     opt.existingDir("corpus-root: root directory for corpus files"),
   ),
   (args: any) => {
-    runAbstractFinder(args);
+    runAbstractFinderOnCorpus(args);
   },
 );
 
 yargs.command(
-  "qa-review",
+  "find-abstracts-via-logstream",
   "Review and edit corpus spidering, extraction, data cleaning",
   config(
     opt.cwd,
@@ -67,12 +67,13 @@ yargs.command(
     const corpusRoot = path.resolve(args.cwd, args.corpusRoot);
     const logpath = path.resolve(args.cwd, args.logpath);
     const filters = args.regex;
-    reviewCorpus({ corpusRoot, logpath, phase, prevPhase, filters });
+    runAbstractFinderUsingLogStream({ corpusRoot, logpath, phase, prevPhase, filters });
   },
 );
 
+
 yargs.command(
-  "qa-interactive",
+  "sanity-check-abstracts",
   "",
   config(
     opt.cwd,

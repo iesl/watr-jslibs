@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "clean": "lerna clean -y && rm -r node_modules",
+    "reboot": "npm run clean && lerna bootstrap",
     "deps:check": "lerna --concurrency 1 exec --stream -- ncu",
     "deps:update": "lerna --concurrency 1 exec --stream -- ncu -u",
     "tw-cli": "lerna run --scope textworks-aas --stream cli -- -- --cwd ../.."
@@ -12,5 +13,8 @@
     "packages": [
       "workspaces/*"
     ]
+  },
+  "devDependencies": {
+    "typescript": "^3.8.3"
   }
 }

@@ -50,6 +50,52 @@ export function throughFunc<T, R>(
   );
 }
 
+export function throughFuncPar<T, R, E>(
+  parallelFactor: number,
+  f: (t: T, env: E, currTransform: Transform) => R,
+): Transform {
+
+  let buffer: R[] = [];
+  let envs: E[] = [];
+
+  const chunker = through.obj(
+    function(chunk: [T, E], _enc: string, next: (err: any, v: any) => void) {
+      const self = this;
+      const [data, env] = chunk;
+      const localEnv: any = _.clone(env);
+      localEnv['parNum'] = buffer.length;
+
+      const res = f(data, localEnv, self);
+      buffer.push(res);
+      envs.push(localEnv);
+
+      if (buffer.length < parallelFactor) {
+        return next(null, null);
+      }
+
+      const buf0 = buffer;
+      const envs0 = envs;
+      buffer = [];
+      envs = [];
+
+      Promise.all(buf0.map(t => Promise.resolve(t)))
+        .then(res => {
+          _.each(res, (r: R, i: number) => this.push([r, envs0[i]]));
+          next(null, null);
+        });
+    },
+    function flush(cb) {
+      Promise.all(buffer.map(t => Promise.resolve(t)))
+        .then(res => {
+          _.each(res, (r: R, i: number) => this.push([r, envs[i]]));
+        })
+        .then(() => cb())
+      ;
+    },
+  );
+  return chunker;
+}
+
 export function tapStream<T>(f: (t: T, i?: number) => void): Transform {
   let currIndex = -1;
 
@@ -262,6 +308,30 @@ export function stanzaChunker(
     },
     function flush(cb) {
       // TODO handle error if buffer has leftovers w/o seeing end marker
+      cb();
+    },
+  );
+  return chunker;
+}
+
+export function chunkStream<T>(
+  chunkSize: number
+): Transform {
+  let buffer: T[] = [];
+
+  const chunker = through.obj(
+    function(data: T, _enc: string, next: (err: any, v: any) => void) {
+      if (buffer.length === chunkSize) {
+        const r = buffer;
+        buffer = [];
+        return next(null, r);
+      }
+
+      buffer.push(data);
+      return next(null, null);
+    },
+    function flush(cb) {
+      this.push(buffer);
       cb();
     },
   );

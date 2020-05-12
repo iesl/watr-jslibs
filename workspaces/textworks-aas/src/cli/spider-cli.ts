@@ -1,7 +1,7 @@
 import _ from "lodash";
 
 import yargs from "yargs";
-import { arglib } from "commons";
+import { arglib, prettyPrint } from "commons";
 import {  } from "commons";
 import { createSpider } from '~/spider/spidering';
 
@@ -20,6 +20,7 @@ yargs.command(
   ),
 
   (spiderOpts: any) => {
+    prettyPrint({ spiderOpts });
     createSpider(spiderOpts);
   }
 );
