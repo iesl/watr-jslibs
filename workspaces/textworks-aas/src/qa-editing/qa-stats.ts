@@ -13,7 +13,7 @@ import {
   createRadix,
   radUpsert,
   Radix,
-  radTraverseValues,
+  // radTraverseValues,
 } from "commons";
 
 import { createFilteredLogStream } from './qa-logging';
@@ -84,7 +84,7 @@ export function collectAbstractExtractionStats(
   // });
 }
 
-function getLogEntry(key: string, entries: string[]): string | undefined {
+export function getLogEntry(key: string, entries: string[]): string | undefined {
   const fs = entries
     .filter(e => e.includes(key))
     .map(e => e.split("="))

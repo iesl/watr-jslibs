@@ -1,25 +1,21 @@
 import _ from "lodash";
 import pumpify from "pumpify";
 import fs from "fs-extra";
-import path from "path";
+// import path from "path";
 
 import {
   ExpandedDir,
   expandDir,
-  makeCorpusEntryLeadingPath,
+  // makeCorpusEntryLeadingPath,
 } from "commons";
 
 import { writeDefaultEntryLogs, createFilteredLogStream } from "./qa-logging";
-import { initEnv, throughEnvFunc, throughFunc, filterEnvStream } from "commons";
+import { initEnv, throughEnvFunc, filterEnvStream } from "commons";
 import { BufferedLogger, initBufferedLogger } from "commons";
 import { gatherAbstractFiles } from "~/corpora/bundler";
 import { Field } from "~/extract/field-extract";
 import { runInteractive } from './qa-interactive';
-import {
-  createRadix,
-  Radix,
-  radInsert,
-} from "commons";
+// import { getLogEntry } from './qa-stats';
 
 interface ReviewArgs {
   corpusRoot: string;
@@ -34,86 +30,54 @@ interface ReviewEnv {
   interactive: boolean;
 }
 
-function entryPathToRadPath(entry: string): string[] {
-  const base = path.basename(entry);
-  const [baseroot] = base.split('.');
-  const radpath = baseroot.split('');
-  return radpath;
-}
-
-async function createResumeFilter(logfile: string): Promise<Radix<boolean>> {
-  if (!fs.existsSync(logfile)) return createRadix();
-
-  return new Promise((resolve) => {
-    const radFilter = createRadix<boolean>();
-    const pipef = pumpify.obj(
-      createFilteredLogStream(logfile, []),
-      throughFunc((log: any) => {
-        const entryPath = log.message.entry;
-        const radpath = entryPathToRadPath(entryPath);
-        radInsert(radFilter, radpath, true);
-      })
-    );
-
-    pipef.on("data", () => true);
-    pipef.on("end", () => resolve(radFilter));
-  });
-}
-
-export async function reviewAbstractQuality({
+export async function cleanAbstracts({
   outputlog,
   inputlog,
   filters,
-  corpusRoot
+  // corpusRoot
 }: ReviewArgs) {
-
-  // // outputlog exists, start from where it left off...
-  // const radFilter = await createResumeFilter(outputlog);
-  // const shouldSkip = (entryPath: string) => {
-  //   const radpath = entryPathToRadPath(entryPath);
-  //   const isInFilter = radGet(radFilter, radpath) !== undefined;
-  //   if (isInFilter) {
-  //     console.log(`Skipping filtered ${entryPath}`)
-  //   }
-  //   return !isInFilter;
-  // };
 
   const filterREs: RegExp[] =
     filters !== undefined ? filters.map(f => new RegExp(f)) : [];
+
+  const didExtract = /field.abstract.extract=true/;
+  filterREs.push(didExtract);
 
   const pipef = pumpify.obj(
     createFilteredLogStream(inputlog, filterREs),
     initEnv<any, ReviewEnv>(() => ({ logger: initBufferedLogger(outputlog), interactive: false })),
     throughEnvFunc((log: any) => {
-      const { url, noteId } = log.message;
-      const leading = makeCorpusEntryLeadingPath(url);
-      const entryPath = path.resolve(corpusRoot, leading, `${noteId}.d`)
+      // const { url, noteId, logBuffer } = log.message;
+      const { entry  } = log.message;
 
-      const propfile = path.join(entryPath, "entry-props.json");
+      // const corpusEntryId = getLogEntry("field.abstract.extract.entry", logBuffer);
+      // const leading = makeCorpusEntryLeadingPath(url);
+      // const entryPath = path.resolve(corpusRoot, leading, `${noteId}.d`)
 
-      const entryExists = fs.existsSync(entryPath);
-      const propfileExists = fs.existsSync(propfile);
+      // const propfile = path.join(entry, "entry-props.json");
+      // const entryExists = fs.existsSync(entry);
+      // const propfileExists = fs.existsSync(propfile);
 
-      if (entryExists && !propfileExists) {
-        fs.writeJsonSync(propfile, log.message);
-      }
-      return entryPath;
+      // if (entryExists && !propfileExists) {
+      //   fs.writeJsonSync(propfile, log.message);
+      // }
+      return entry;
     }),
     filterEnvStream((path: string) => fs.existsSync(path)),
     throughEnvFunc(expandDir),
-    throughEnvFunc(reviewEntry),
+    throughEnvFunc(cleanExtractedAbstract),
   );
 
   pipef.on("data", () => true);
 }
 
-async function reviewEntry(entryDir: ExpandedDir, env: ReviewEnv) {
+async function cleanExtractedAbstract(entryDir: ExpandedDir, env: ReviewEnv) {
   const { logger } = env;
   writeDefaultEntryLogs(logger, entryDir);
   if (env.interactive) {
-    await reviewInteractive(logger, entryDir);
+    await cleanAbstractInteractive(logger, entryDir);
   } else {
-    await reviewNonInteractive(logger, entryDir);
+    await cleanAbstractNonInteractive(logger, entryDir);
   }
   logger.commitAndClose();
 }
@@ -281,7 +245,7 @@ const CleaningRules: CleaningRule[] = [
 
 type TupleSSN = readonly [string, string, number];
 
-async function reviewInteractive(logger: BufferedLogger, entryDir: ExpandedDir): Promise<void> {
+async function cleanAbstractInteractive(logger: BufferedLogger, entryDir: ExpandedDir): Promise<void> {
   const abstractFilesWithFields: Array<[string, Field[]]> =
     gatherAbstractFiles(entryDir);
 
@@ -300,7 +264,7 @@ async function reviewInteractive(logger: BufferedLogger, entryDir: ExpandedDir):
   }
 }
 
-async function reviewNonInteractive(logger: BufferedLogger, entryDir: ExpandedDir): Promise<void> {
+async function cleanAbstractNonInteractive(logger: BufferedLogger, entryDir: ExpandedDir): Promise<void> {
   const abstractFilesWithFields: Array<[string, Field[]]> =
     gatherAbstractFiles(entryDir);
 

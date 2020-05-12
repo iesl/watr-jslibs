@@ -5,7 +5,7 @@ import yargs from "yargs";
 import { arglib } from "commons";
 import { runAbstractFinderOnCorpus, runAbstractFinderUsingLogStream } from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
-import { reviewAbstractQuality } from '~/qa-editing/qa-edits';
+import { cleanAbstracts } from '~/qa-editing/qa-edits';
 
 const { opt, config } = arglib;
 
@@ -73,7 +73,7 @@ yargs.command(
 
 
 yargs.command(
-  "sanity-check-abstracts",
+  "clean-abstracts",
   "",
   config(
     opt.cwd,
@@ -99,6 +99,6 @@ yargs.command(
     const inputlog = path.resolve(logpath, args.inputlog);
     const outputlog = path.resolve(logpath, args.outputlog);
     const filters = args.regex;
-    reviewAbstractQuality({ corpusRoot, logpath, inputlog, outputlog, filters });
+    cleanAbstracts({ corpusRoot, logpath, inputlog, outputlog, filters });
   },
 );

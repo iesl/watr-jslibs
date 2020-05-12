@@ -22,18 +22,8 @@ export function jsonifyCSV(fields: AccumKey[], row: string[]): Partial<Accum> {
   return acc;
 }
 
-
 const matchingFiles = (re: RegExp) => (fs: string[]) =>
   fs.filter(f => re.test(f));
-
-
-export function gatherAbstractRecs(expDir: ExpandedDir): Field[][] {
-  const afs = matchingFiles(/ex.abs.json$/)(expDir.files);
-  return afs.map(af => {
-    const fields: Field[] = fs.readJsonSync(path.join(expDir.dir, af));
-    return fields;
-  });
-}
 
 export function gatherAbstractFiles(expDir: ExpandedDir): Array<[string, Field[]]> {
   const afs = matchingFiles(/ex.abs.json$/)(expDir.files);

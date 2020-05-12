@@ -15,7 +15,7 @@ import {
   makeCorpusEntryLeadingPath,
   filterEnvStream,
   expandDir,
-  throughFuncPar,
+  // throughFuncPar,
 } from "commons";
 
 
