@@ -25,12 +25,12 @@ export function splitCSVRecord(rec: string): InputRec {
 
   const fields = rec.split(',');
   let [noteId, dblpConfId] = fields;
-  if (noteId===undefined || dblpConfId === undefined) {
+  if (noteId === undefined || dblpConfId === undefined) {
     console.log(`error: splitCSVRecord: ${rec}`);
     noteId = noteId || "ERR-NOTEID";
     dblpConfId = dblpConfId || "ERR-DBLP";
   }
-  let url = fields[fields.length-1];
+  let url = fields[fields.length - 1];
   const p0 = noteId.length + dblpConfId.length + 2;
   const p1 = rec.length - url.length - 1;
   const title = rec.substring(p0, p1);
@@ -44,7 +44,9 @@ export function splitCSVRecord(rec: string): InputRec {
 }
 
 export function readOrderCsv(csvfile: string): Stream {
-  const inputStream = createReadLineStream(csvfile);
+  const inputStream = createReadLineStream(csvfile)
+
+
   return pumpify.obj(
     inputStream,
     filterStream((r: string) => r.trim().length > 0),

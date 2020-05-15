@@ -60,6 +60,10 @@ export function createFilteredLogStream(
   logfile: string,
   filters: RegExp[],
 ): Stream {
+  const logExists = fs.existsSync(logfile);
+  if (!logExists) {
+    console.log(`ERROR: no log ${logfile}`);
+  }
   const logReader: fs.ReadStream = fs.createReadStream(logfile);
 
   return pumpify.obj(

@@ -140,7 +140,7 @@ export function prettyPrint(vsobj: object, options: Partial<InspectOptions> = {}
     return p + ': ' + ins;
   }), '\n');
 
-  const output = callerContext + fmt + '\n';
-
+  const output = callerContext + fmt;
+  // util.log(output);
   console.log(output);
 }

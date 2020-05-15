@@ -18,10 +18,10 @@
   "devDependencies": {
     "@types/chai": "^4.2.11",
     "@types/fs-extra": "^8.1.0",
-    "@types/jest": "^25.2.1",
+    "@types/jest": "^25.2.2",
     "@types/lodash": "^4.14.150",
-    "@typescript-eslint/eslint-plugin": "^2.32.0",
-    "@typescript-eslint/parser": "^2.32.0",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
     "chai": "^4.2.0",
     "eslint": "^7.0.0",
     "eslint-import-resolver-typescript": "^2.0.0",
@@ -29,7 +29,7 @@
     "eslint-plugin-import": "^2.20.2",
     "jest": "^26.0.1",
     "lodash": "^4.17.15",
-    "typescript": "^3.8.3"
+    "typescript": "^3.9.2"
   },
   "scripts": {
     "build": "tsc",

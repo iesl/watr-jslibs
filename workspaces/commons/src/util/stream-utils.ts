@@ -2,7 +2,7 @@ import _ from "lodash";
 import fs from "fs-extra";
 import through from "through2";
 import pumpify from "pumpify";
-import { Transform, Stream } from "stream";
+import { Transform, Stream, Readable } from "stream";
 import { prettyPrint } from "./pretty-print";
 import es, { MapStream } from "event-stream";
 
@@ -338,5 +338,29 @@ export function chunkStream<T>(
   return chunker;
 }
 
-// TODO const unwind: <T>(arr: T[]): Stream<T> =
-// TODO const collect: <T>(arr: Stream<T>): T[] =
+
+/**
+ * Create a Readable stream of chars by splitting string
+ */
+export function charStream(str: string): Readable {
+  async function* genstr(s: string) {
+    yield* s;
+  }
+  return Readable.from(genstr(str))
+}
+
+export function arrayStream(arr: any[]): Readable {
+  async function* genstr(a: any[]) {
+    yield* a;
+  }
+  return Readable.from(genstr(arr))
+}
+
+export async function promisifyReadableEnd(readStream: Readable): Promise<void> {
+  return new Promise((resolve) => {
+    readStream.on('end', function () {
+      resolve();
+    });
+  });
+}
+

@@ -38,3 +38,14 @@ export function makeNowTimeString(): string {
   return timestamp;
 }
 
+
+export const delay = (t: number) => new Promise(resolve => setTimeout(resolve, t));
+
+export function newIdGenerator() {
+  let currId = -1;
+  const nextId = () => {
+    currId += 1;
+    return currId;
+  };
+  return nextId;
+}

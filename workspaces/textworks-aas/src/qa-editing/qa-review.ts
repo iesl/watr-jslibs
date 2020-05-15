@@ -6,13 +6,15 @@ import {
   corpusEntryStream,
   expandDirTrans,
   ExpandedDir,
+  tapStream,
+  progressCount,
+  throughFunc,
+  BufferedLogger
 } from "commons";
 
-import { tapStream, progressCount, throughFunc } from "commons";
-
 import { gatherAbstractFiles } from "~/corpora/bundler";
-import { BufferedLogger } from "commons";
 import { extractAbstractTransform } from "~/extract/field-extract-abstract";
+
 import {
   initLogger,
   resolveLogfileName,
@@ -129,11 +131,11 @@ export async function runAbstractFinderUsingLogStream({
   pipef.on("data", () => true);
 }
 
-
-export function runAbstractFinderOnCorpus({
+export async function runAbstractFinderOnCorpus({
   corpusRoot,
   logpath,
 }: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">) {
+
   const entryStream = corpusEntryStream(corpusRoot);
   const logger = initLogger(logpath, "abstract-finder");
   const pipe = pumpify.obj(
@@ -143,7 +145,17 @@ export function runAbstractFinderOnCorpus({
     extractAbstractTransform(logger),
   );
 
-  pipe.on("data", () => undefined);
+  console.log('starting runAbstractFinderOnCorpus');
+
+  return new Promise((resolve) => {
+    pipe.on("end", () => {
+      console.log('finished runAbstractFinderOnCorpus');
+      logger.commitAndClose()
+        .then(() => resolve());
+    });
+
+    pipe.on("data", () => undefined);
+  });
 }
 
 export function sanityCheckCorpusAbstracts({

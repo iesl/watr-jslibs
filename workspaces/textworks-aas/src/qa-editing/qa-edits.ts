@@ -15,7 +15,8 @@ import { BufferedLogger, initBufferedLogger } from "commons";
 import { gatherAbstractFiles } from "~/corpora/bundler";
 import { Field } from "~/extract/field-extract";
 import { runInteractive } from './qa-interactive';
-// import { getLogEntry } from './qa-stats';
+import { streamUtils } from 'commons';
+const  { promisifyReadableEnd } = streamUtils;
 
 interface ReviewArgs {
   corpusRoot: string;
@@ -42,9 +43,11 @@ export async function cleanAbstracts({
 
   const didExtract = /field.abstract.extract=true/;
   filterREs.push(didExtract);
+  console.log('cleanAbstracts: creating log input stream', inputlog);
+  const instream = createFilteredLogStream(inputlog, filterREs);
 
   const pipef = pumpify.obj(
-    createFilteredLogStream(inputlog, filterREs),
+    instream,
     initEnv<any, ReviewEnv>(() => ({ logger: initBufferedLogger(outputlog), interactive: false })),
     throughEnvFunc((log: any) => {
       // const { url, noteId, logBuffer } = log.message;
@@ -68,7 +71,9 @@ export async function cleanAbstracts({
     throughEnvFunc(cleanExtractedAbstract),
   );
 
-  pipef.on("data", () => true);
+  console.log('cleanAbstracts: starting...');
+  pipef.on("data", () => undefined);
+  return promisifyReadableEnd(pipef);
 }
 
 async function cleanExtractedAbstract(entryDir: ExpandedDir, env: ReviewEnv) {

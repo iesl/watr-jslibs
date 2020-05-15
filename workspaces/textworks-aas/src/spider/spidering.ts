@@ -15,6 +15,7 @@ import {
   makeCorpusEntryLeadingPath,
   filterEnvStream,
   expandDir,
+  promisifyLoggerClose,
 } from "commons";
 
 
@@ -213,9 +214,11 @@ export async function createSpider(opts: SpideringOptions) {
   return new Promise((resolve) => {
     str.on("end", async () => {
       logger.info({ event: "shutting down spider" });
+
       await closeFetcher();
       logger.info({ event: "fetcher closed" });
-      return resolve();
+      await promisifyLoggerClose(logger)
+      resolve();
     });
   });
 }

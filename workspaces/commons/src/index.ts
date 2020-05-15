@@ -40,63 +40,6 @@ export {
 };
 
 import {
-  makeNowTimeString
-} from "./util/utils";
-
-export {
-  makeNowTimeString
-};
-
-import {
-  Radix,
-  RadixPath,
-  createRadix,
-  radInsert,
-  radUpsert,
-  radGet,
-  radTraverseValues
-} from "./util/radix-tree";
-
-export {
-  Radix,
-  RadixPath,
-  createRadix,
-  radInsert,
-  radUpsert,
-  radGet,
-  radTraverseValues
-};
-
-import {
-  prettyPrint,
-} from "./util/pretty-print";
-
-export {
-  prettyPrint
-};
-
-// import {
-//   progressLogger,
-//   BufferedLogger,
-//   initBufferedLogger
-// } from "./util/logging";
-// export {
-//   progressLogger,
-//   BufferedLogger,
-//   initBufferedLogger
-// };
-
-export * from "./util/logging";
-
-import {
-  csvStream
-} from "./util/parse-csv";
-
-export {
-  csvStream
-};
-
-import {
   matchAll,
   highlightRegions,
   clipParagraph
@@ -108,16 +51,13 @@ export {
   clipParagraph
 };
 
-export * as arglib from "./cli/arglib"
+export * from "./util/utils";
+export * from "./util/pretty-print";
+export * from "./util/logging";
+export * from "./util/parse-csv";
 export * from "./corpora"
 export * from "./corpora/dirstream"
+export * as streamUtils from "./util/stream-utils"
 
-// import {
-//   dirstream,
-//   stringStreamFilter
-// } from "./corpora/dirstream";
-
-// export {
-//   dirstream,
-//   stringStreamFilter
-// }
+export * as radix from "./util/radix-tree";
+export * as arglib from "./cli/arglib"

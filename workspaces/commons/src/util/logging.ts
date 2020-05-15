@@ -4,21 +4,12 @@ import {
   createLogger,
   format,
   transports,
-  LeveledLogMethod,
   Logger,
 } from "winston";
 
-const {combine, timestamp, prettyPrint} = format;
+const { combine, timestamp, prettyPrint } = format;
 import logform from "logform";
-
-export function newIdGenerator() {
-  let currId = -1;
-  const nextId = () => {
-    currId += 1;
-    return currId;
-  };
-  return nextId;
-}
+import { newIdGenerator } from './utils';
 
 const nextId = newIdGenerator();
 
@@ -32,14 +23,12 @@ export function createFileAndConsoleLogger(logfile: string): Logger {
     level: "info",
     format: combine(timestamp(), prettyPrint()),
     transports: [
-      new transports.File({filename: logfile}),
+      new transports.File({ filename: logfile }),
       new transports.Console(),
     ],
   });
 }
 
-// how do I export functions from commons like fp-ts,
-// e.g., import { either, isRight } from 'fp-ts/lib/Either'
 export function createConsoleLogger(): Logger {
   return createLogger({
     level: "info",
@@ -48,19 +37,6 @@ export function createConsoleLogger(): Logger {
       new transports.Console(),
     ],
   });
-}
-
-export function progressLogger(logname: string): LeveledLogMethod {
-  const logger = createLogger({
-    level: "info",
-    format: combine(timestamp(), prettyPrint()),
-    transports: [
-      new transports.File({filename: logname}),
-      new transports.Console(),
-    ],
-  });
-
-  return logger.info;
 }
 
 function initLogger(logname: string): Logger {
@@ -82,8 +58,12 @@ function initLogger(logname: string): Logger {
   return logger;
 }
 
-
 type Loggable = string | object;
+
+/**
+ * Maintains logs and headers so that they can be written all together,
+ *   as a single Json record
+ */
 export interface BufferedLogger {
   logger: Logger;
   logBuffer: Loggable[];
@@ -91,7 +71,7 @@ export interface BufferedLogger {
   append(obj: Loggable): void;
   setHeader(key: string, value: string): void;
   commitLogs(): void;
-  commitAndClose(): void;
+  commitAndClose(): Promise<void>;
 }
 
 export function initBufferedLogger(logname: string): BufferedLogger {
@@ -102,7 +82,7 @@ export function initBufferedLogger(logname: string): BufferedLogger {
     append: function(o: Loggable) {
       this.logBuffer.push(o);
     },
-    setHeader: function (key: string, value: string) {
+    setHeader: function(key: string, value: string) {
       this.headers.push([key, value]);
     },
     commitLogs: function() {
@@ -110,15 +90,35 @@ export function initBufferedLogger(logname: string): BufferedLogger {
       const hdrs = _.fromPairs(this.headers);
       const logData = {
         ...hdrs,
-        logBuffer: [ ...logBuffer ],
+        logBuffer: [...logBuffer],
       }
       this.logger.info(logData);
       _.remove(logBuffer, () => true);
       _.remove(this.headers, () => true);
     },
     commitAndClose: function() {
-      this.commitLogs();
-      this.logger.close();
+      const self = this;
+      self.commitLogs();
+      return promisifyLoggerClose(self.logger);
     },
   };
 }
+
+export async function promisifyLoggerClose(logger: Logger): Promise<void> {
+  return new Promise((resolve) => {
+    logger.on('close', function () {
+      // console.log('promisifyLoggerClose: close');
+      resolve();
+    });
+    logger.on('end', function () {
+      // console.log('promisifyLoggerClose: end');
+    });
+    logger.on('finish', function () {
+      // console.log('promisifyLoggerClose: finish');
+      logger.close();
+    });
+    logger.end();
+  });
+}
+
+

@@ -11,6 +11,7 @@ import jsonServer from 'json-server';
 
 import path from "path";
 import fs from "fs-extra";
+import { prettyPrint, delay } from 'commons/dist';
 
 describe("Workflows", () => {
 
@@ -45,8 +46,9 @@ describe("Workflows", () => {
     fs.mkdirpSync(corpusPath);
     const spiderInputCSV = path.join(scratchDir, 'input-recs.csv');
     fs.writeFileSync(spiderInputCSV, `
-YdSqf18935,dblp.org/journals/LOGCOM/2012,Title: Adv. in Cognitive Science.,http://localhost:9000/htmls/download.html
-YdSqf18935,dblp.org/journals/LOGCOM/2012,Title: Some Other Title,http://localhost:9000/htmls/download.html
+Y15,dblp.org/journals/LOGCOM/2012,Title: Adv. in Cognitive Science.,http://localhost:9000/htmls/page0.html
+Y35,dblp.org/journals/LOGCOM/2014,Title: Some Third Title,http://localhost:9000/htmls/page1.html
+Y25,dblp.org/journals/LOGCOM/2013,Title: Some Other Title,http://localhost:9000/htmls/page2.html
 `);
 
     // start fake server
@@ -69,7 +71,7 @@ YdSqf18935,dblp.org/journals/LOGCOM/2012,Title: Some Other Title,http://localhos
 
     const spideringOptions = {
       interactive: false,
-      useBrowser: true,
+      useBrowser: false,
       cwd: scratchDir,
       corpusRoot,
       logpath: scratchDir,
@@ -77,11 +79,45 @@ YdSqf18935,dblp.org/journals/LOGCOM/2012,Title: Some Other Title,http://localhos
     };
     await createSpider(spideringOptions);
 
-    // runAbstractFinderOnCorpus(args);
+    const logpath = scratchDir;
+
+    /**
+     * └── scratch.d
+     *     ├── corpus-root.d
+     *     │  └── d
+     *     │      └── 4
+     *     │          └── Y15.d
+     *     │              ├── download.html-08.23.43.html                <- produced by spider
+     *     │              ├── download.html-08.23.43.html.ex.abs.json    <- produced by runAbstractFinderOnCorpus
+     *     │              └── download.html-08.23.43.html.norm.txt       <- produced by runAbstractFinderOnCorpus
+     *     ├── input-recs.csv                                            <- initial input records
+     *     ├── qa-review-abstract-finder-log.json                        <- log produced by runAbstractFinderOnCorpus
+     *     ├── qa-review-abstract-finder-log.json.pretty.txt             <- prettified log produced by runAbstractFinderOnCorpus
+     *     └── spider-log.json                                           <- log produced by spider
+     */
+    await runAbstractFinderOnCorpus({
+      corpusRoot: corpusPath,
+      logpath
+    });
+
+    await delay(200);
+
+    // Version that uses log produced by spider?? to run
     // runAbstractFinderUsingLogStream({ corpusRoot, logpath, phase, prevPhase, filters });
+
+    // This is run by abstract finder, not needed
     // normalizeHtmls(corpusRoot);
-    // cleanAbstracts({ corpusRoot, logpath, inputlog, outputlog, filters });
-    // collectAbstractExtractionStats(fromLog, [])
+
+    const inputlog = path.resolve(path.join(scratchDir, 'qa-review-abstract-finder-log.json'));
+    const outputlog = path.resolve( path.join(scratchDir, 'clean-abstracts.json'));
+    const outputAbstractsFile = path.resolve( path.join(scratchDir, 'collected-abstracts.json'));
+    const filters: string[] = [];
+    prettyPrint({ inputlog, outputlog });
+
+    await cleanAbstracts({ corpusRoot, logpath, inputlog, outputlog, filters });
+
+    await collectAbstractExtractionStats(outputlog, outputAbstractsFile, [])
+
     app.close(() => {
       console.log('we are done');
       done();

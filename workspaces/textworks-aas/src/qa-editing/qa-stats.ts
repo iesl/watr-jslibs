@@ -6,16 +6,11 @@ import fs from "fs-extra";
 import {
   throughFunc,
   throughAccum,
-  progressCount,
-} from "commons";
-
-import {
-  createRadix,
-  radUpsert,
-  Radix,
 } from "commons";
 
 import { createFilteredLogStream } from './qa-logging';
+import { streamUtils } from 'commons';
+const  { promisifyReadableEnd } = streamUtils;
 
 interface CorpusStats {
   urlCount: number;
@@ -23,8 +18,9 @@ interface CorpusStats {
   missingAbs: number;
 }
 
-export function collectAbstractExtractionStats(
+export async function collectAbstractExtractionStats(
   fromLog: string,
+  tofile: string,
   filters?: string[],
 ) {
   const filterREs: RegExp[] =
@@ -33,18 +29,15 @@ export function collectAbstractExtractionStats(
   const pipef = pumpify.obj(
     createFilteredLogStream(fromLog, filterREs),
     throughFunc((log: any) => log.message),
-    progressCount(1000),
-    // sliceStream(0, 10),
-    // cstats,
     writeAbstracts
   );
 
   pipef.on("data", (data: any[]) => {
     // prettyPrint({summary});
-    console.log("write abstracts");
-    fs.writeJsonSync('abstracts-25k.json', data);
-
+    console.log(`write abstracts to ${tofile}`);
+    fs.writeJsonSync(tofile, data);
   });
+  return promisifyReadableEnd(pipef);
 }
 
 export function getLogEntry(key: string, entries: string[]): string | undefined {
@@ -56,48 +49,7 @@ export function getLogEntry(key: string, entries: string[]): string | undefined 
   return fs.length > 0 ? fs[0] : undefined;
 }
 
-
-const cstats = throughAccum<any, Radix<CorpusStats>>(
-  (radix: Radix<CorpusStats>, t: any) => {
-    const logBuffer: string[] = t.logBuffer;
-    // const entryPath: string = t.entry;
-    const host = getLogEntry("entry.url.host", logBuffer);
-    const venue = getLogEntry("entry.venue", logBuffer);
-    if (!host || !venue) {
-      return radix;
-    }
-
-    // const numAbstracts = getLogEntry("abstract.instance.count", logBuffer);
-    const abstractValue = getLogEntry("field.abstract.value", logBuffer);
-    // const hasAbsFiles = getLogEntry("abstract.files=false", logBuffer);
-
-    const absCount = abstractValue === undefined ? 0 : 1;
-    const missingAbs = absCount === 1 ? 0 : 1;
-
-    // prettyPrint({ logBuffer, numAbstracts, hasAbsFiles });
-    const hostpath = host.split(".").reverse();
-    const radpaths = [hostpath, [venue], "00-CORPUS_TOTALS"];
-    _.each(radpaths, p => {
-      radUpsert(radix, p, (stats?: CorpusStats) => {
-        if (stats) {
-          return {
-            urlCount: stats.urlCount + 1,
-            absCount: stats.absCount + absCount,
-            missingAbs: stats.missingAbs + missingAbs,
-          };
-        }
-        return {urlCount: 1, absCount, missingAbs};
-      });
-    });
-
-    return radix;
-  },
-  createRadix(),
-);
-
-type ZZ = any[];
-
-const writeAbstracts = throughAccum<any, ZZ>(
+const writeAbstracts = throughAccum<any, any[]>(
   (accum: any[], t: any) => {
     const logBuffer: string[] = t.logBuffer;
     const entryPath: string = t.entry;

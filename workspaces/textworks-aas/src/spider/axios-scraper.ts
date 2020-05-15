@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import stream from 'stream';
 import { SpideringEnv } from '~/spider/spidering';
+import { prettyPrint } from 'commons/dist';
 
 export async function fetchUrl(_env: SpideringEnv, url: string): Promise<string> {
   const userAgents = [
@@ -20,17 +21,24 @@ export async function fetchUrl(_env: SpideringEnv, url: string): Promise<string>
       'User-Agent': userAgents[0],
       'Upgrade-Insecure-Requests': '1',
     }
-  }).then((response: AxiosResponse<stream.Readable>) => {
+  }).then((response: AxiosResponse<any>) => {
     return new Promise((resolve) => {
       const buf: string[] = [];
-      const resp = response.data;
-      resp.on('data', (d: string) => {
-        buf.push(d);
-      });
-      resp.on('end', () => {
+      const { data, headers } = response;
+      const contentType: string = headers['content-type'];
+
+      if (contentType.includes('text/html')) {
+        return resolve(data);
+      }
+
+      // Assume stream response
+      data.on('end', () => {
         resolve(buf.join());
       })
-      resp.on('close', () => undefined)
+      data.on('close', () => undefined)
+      data.on('data', (d: string) => {
+        buf.push(d);
+      });
     })
   });
 }
