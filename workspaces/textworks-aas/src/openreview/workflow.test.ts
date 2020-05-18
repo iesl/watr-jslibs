@@ -77,6 +77,7 @@ Y25,dblp.org/journals/LOGCOM/2013,Title: Some Other Title,http://localhost:9000/
       logpath: scratchDir,
       input: spiderInputCSV,
     };
+
     await createSpider(spideringOptions);
 
     const logpath = scratchDir;
