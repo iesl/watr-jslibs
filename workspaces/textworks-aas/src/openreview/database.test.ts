@@ -1,7 +1,8 @@
 import 'chai/register-should';
 import { prettyPrint } from 'commons';
-import { openDatabase, Database } from './db';
-import { Url } from './db-tables';
+import { openDatabase, Database } from './database';
+import { Url } from './database-tables';
+import { createEmptyDB } from './test-utils';
 
 describe('OpenReview Database', () => {
 
@@ -9,12 +10,6 @@ describe('OpenReview Database', () => {
   // afterEach(() => {})
   // afterAll(() => {})
 
-
-  async function createEmptyDB(): Promise<Database> {
-    const db = await openDatabase();
-    await db.unsafeResetDatabase();
-    return db;
-  }
 
 
   it.only('smokescreen', async (done) => {
@@ -38,6 +33,7 @@ describe('OpenReview Database', () => {
     });
 
 
+    await db.close();
     done();
   });
 
@@ -59,6 +55,7 @@ describe('OpenReview Database', () => {
     //     })
     //     .then(done)
     // })
+    done();
   });
 
   // it('reset database', async (done) => {});

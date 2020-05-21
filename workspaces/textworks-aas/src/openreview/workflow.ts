@@ -5,13 +5,13 @@ import {
   throughFunc,
   prettyPrint,
   createConsoleLogger,
-  createPump,
   createReadLineStream,
   filterStream,
 } from "commons";
 
-import { openDatabase, Database } from './db';
-import { Order, Url, NoteId, VenueUrl, OrderEntry } from './db-tables';
+import { openDatabase, Database } from './database';
+import { Order, Url, NoteId, VenueUrl, OrderEntry } from './database-tables';
+import { streamPump } from 'commons';
 
 interface InputRec {
   noteId: string;
@@ -21,8 +21,6 @@ interface InputRec {
 }
 
 export function splitCSVRecord(rec: string): InputRec {
-  // console.log(`splitCSVRecord: ${rec}`);
-
   const fields = rec.split(',');
   let [noteId, dblpConfId] = fields;
   if (noteId === undefined || dblpConfId === undefined) {
@@ -55,12 +53,8 @@ export function readOrderCsv(csvfile: string): Stream {
 }
 
 export interface COptions {
-  // corpusRoot: string;
-  // logpath: string;
-  dbDataPath: string;
   csvFile: string;
 }
-
 
 const addOrderEntry: (db: Database, order: Order) => (r: InputRec) => Promise<OrderEntry> =
   (db, order) => async (rec) => {
@@ -104,12 +98,8 @@ export async function createOrder(opts: COptions) {
   logger.info({ event: "initializing order", config: opts });
   const inputStream = readOrderCsv(opts.csvFile);
 
-  console.log('!!!!dropping/recreating db!!!')
   const db = await openDatabase();
-  // .then(db => db.unsafeResetDatabase());
 
-
-  console.log('about to create order...')
   const newOrder = await db.run(async () => {
     return Order.create()
       .catch(error => {
@@ -122,7 +112,7 @@ export async function createOrder(opts: COptions) {
   const addEntry = addOrderEntry(db, newOrder);
 
   let i = 0;
-  const pumpBuilder = createPump()
+  const pumpBuilder = streamPump.createPump()
     .viaStream<InputRec>(inputStream)
     .throughF(addEntry)
     .tap(() => {
@@ -137,5 +127,6 @@ export async function createOrder(opts: COptions) {
       logger.info({ event: "db closed" });
     });
 
-  pumpBuilder.start();
+  return pumpBuilder.toPromise();
+
 }

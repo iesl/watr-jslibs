@@ -11,7 +11,7 @@ import {
   // HasManyCreateAssociationMixin
 } from 'sequelize';
 
-import { defineTables } from './db-tables';
+import { defineTables } from './database-tables';
 
 export async function initSequelize(): Promise<Sequelize> {
   const sequelize = new Sequelize({
@@ -38,6 +38,7 @@ export interface Database {
   run: <R>(f: (db: Sequelize) => Promise<R>) => Promise<R>;
   runTransaction: <R>(f: (db: Sequelize, t: Transaction) => Promise<R>) => Promise<R>;
   unsafeResetDatabase: () => Promise<Database>;
+  close(): Promise<void>;
 }
 
 export async function runQuery<R>(sql: Sequelize, f: (sql: Sequelize) => Promise<R>): Promise<R> {
@@ -85,12 +86,16 @@ export async function openDatabase(): Promise<Database> {
             return openDatabase();
           });
       };
+      const close = async () => {
+        await sql.close();
+      };
 
       return {
         unsafeResetDatabase,
         sql,
         run,
         runTransaction: runT,
+        close,
       };
     });
 }

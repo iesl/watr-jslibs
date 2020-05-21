@@ -2,6 +2,7 @@
 import path from "path";
 import fs from "fs-extra";
 import jsonServer from 'json-server';
+import { Database, openDatabase } from './database';
 
 export function initTestCorpusDirs(scratchDir: string) {
   if (fs.existsSync(scratchDir)) {
@@ -46,3 +47,9 @@ export async function startTestHTTPServer(staticFilesRoot: string) {
   return app;
 }
 
+
+export async function createEmptyDB(): Promise<Database> {
+  const db = await openDatabase();
+  const freshDB = await db.unsafeResetDatabase();
+  return freshDB;
+}

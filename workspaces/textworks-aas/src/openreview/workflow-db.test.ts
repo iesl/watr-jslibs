@@ -8,14 +8,35 @@ import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import path from "path";
 import { prettyPrint, delay } from 'commons/dist';
 
-import { initTestCorpusDirs, startTestHTTPServer } from './test-utils';
+import { initTestCorpusDirs, startTestHTTPServer, createEmptyDB } from './test-utils';
 describe("DB-Driven Workflows", () => {
+
 
   it("should run end-to-end, from db init to spider to bundled abstracts/pdf-links/etc", async (done) => {
     const serverFiles = "./test/resources";
     const scratchDir = path.join(".", "scratch.d");
     const { corpusRoot, corpusPath, spiderInputCSV } = initTestCorpusDirs(scratchDir);
-    // populate db
+    const db = await createEmptyDB();
+
+
+    /**
+
+       - [ ] populate database with input csv records
+       [noteId, paperUrl, venueUrl] (pdf? pdfUrl?)
+       artifactType: field/abstract, field/title html/pdf-link
+       ArtifactRequest: [noteTuple, artifactType, requestTransactionId]
+       RequestTransaction: [requestId, parentRequestId, status(open, success, failure)]
+       TransactionLog: [requestId, messageKey, message]
+
+       - [ ] query database/logs to see the state of un/spidered/extracted records
+       - [ ] Scrape/crawl any unspidered records
+       - [ ] Extract
+
+
+     */
+
+
+
 
     // const app = await startTestHTTPServer(serverFiles);
 
@@ -53,6 +74,8 @@ describe("DB-Driven Workflows", () => {
     //   console.log('we are done');
     //   done();
     // });
+
+    await db.close();
 
     done();
   });
