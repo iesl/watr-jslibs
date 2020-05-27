@@ -4,26 +4,9 @@ import path from "path";
 import yargs from "yargs";
 import { arglib } from "commons";
 import { runAbstractFinderOnCorpus, runAbstractFinderUsingLogStream } from "~/qa-editing/qa-review";
-import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import { cleanAbstracts } from '~/qa-editing/qa-edits';
 
 const { opt, config } = arglib;
-
-
-yargs.command(
-  "collect-stats",
-  "collect some coverage stats regarding abstract extraction",
-  config(
-    opt.cwd,
-    opt.existingFile("logfile: logfile on which to base the stats"),
-    opt.existingDir("corpus-root: root directory for corpus files"),
-  ),
-  (args: any) => {
-    const fromLog = path.resolve(args.cwd, args.logfile);
-    collectAbstractExtractionStats(fromLog, [])
-  },
-);
-
 
 yargs.command(
   "find-abstracts-in-corpus",

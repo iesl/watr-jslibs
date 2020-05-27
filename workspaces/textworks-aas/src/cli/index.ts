@@ -6,7 +6,6 @@ import { normalizeHtmls } from "~/extract/reshape-html";
 
 const { opt, config } = arglib;
 
-import "./spider-cli";
 import "./corpus-cli";
 import { createOrder } from '~/openreview/workflow';
 

@@ -3,8 +3,10 @@ import path from "path";
 import fs from "fs-extra";
 import jsonServer from 'json-server';
 import { Database, openDatabase } from './database';
+import { Application } from 'express';
 
-export function initTestCorpusDirs(scratchDir: string) {
+
+export function initTestCorpusDirs(scratchDir: string): any {
   if (fs.existsSync(scratchDir)) {
     fs.removeSync(scratchDir);
   }
@@ -22,11 +24,13 @@ Y25,dblp.org/journals/LOGCOM/2013,Title: Some Other Title,http://localhost:9000/
   return {
     corpusRoot,
     corpusPath,
-    spiderInputCSV
   };
 }
 
-export async function startTestHTTPServer(staticFilesRoot: string) {
+type CloseableCB = { close(cb: () => void): void };
+type CloseableApplication = Application & CloseableCB;
+
+export async function startTestHTTPServer(staticFilesRoot: string): Promise<CloseableApplication> {
   // start fake server
   const server = jsonServer.create();
   const middlewares = jsonServer.defaults({

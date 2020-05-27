@@ -1,16 +1,18 @@
 import "chai/register-should";
 
 import _ from "lodash";
-import { createSpider } from '~/spider/spidering';
 import { runAbstractFinderOnCorpus } from '~/qa-editing/qa-review';
 import { cleanAbstracts } from '~/qa-editing/qa-edits';
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import path from "path";
 import { prettyPrint, delay } from 'commons/dist';
 
-import { initTestCorpusDirs, startTestHTTPServer, createEmptyDB } from './test-utils';
+import { initTestCorpusDirs, createEmptyDB } from './test-utils';
 describe("DB-Driven Workflows", () => {
 
+  it("should parse scrapy spider logs and commit them to database", async (done) => {
+
+  });
 
   it("should run end-to-end, from db init to spider to bundled abstracts/pdf-links/etc", async (done) => {
     const serverFiles = "./test/resources";
@@ -20,20 +22,20 @@ describe("DB-Driven Workflows", () => {
 
 
     /**
-
-       - [ ] populate database with input csv records
-       [noteId, paperUrl, venueUrl] (pdf? pdfUrl?)
-       artifactType: field/abstract, field/title html/pdf-link
-       ArtifactRequest: [noteTuple, artifactType, requestTransactionId]
-       RequestTransaction: [requestId, parentRequestId, status(open, success, failure)]
-       TransactionLog: [requestId, messageKey, message]
-
-       - [ ] query database/logs to see the state of un/spidered/extracted records
-       - [ ] Scrape/crawl any unspidered records
-       - [ ] Extract
-
-
-     */
+     *
+     *  - [ ] populate database with input csv records
+     *  [noteId, paperUrl, venueUrl] (pdf? pdfUrl?)
+     *  artifactType: field/abstract, field/title html/pdf-link
+     *  ArtifactRequest: [noteTuple, artifactType, requestTransactionId]
+     *  RequestTransaction: [requestId, parentRequestId, status(open, success, failure)]
+     *  TransactionLog: [requestId, messageKey, message]
+     *
+     *  - [ ] query database/logs to see the state of un/spidered/extracted records
+     *  - [ ] Scrape/crawl any unspidered records
+     *  - [ ] Extract
+     *
+     *
+     **/
 
 
 

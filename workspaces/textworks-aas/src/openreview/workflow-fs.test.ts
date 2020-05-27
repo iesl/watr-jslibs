@@ -2,7 +2,6 @@ import "chai/register-should";
 
 import _ from "lodash";
 import { splitCSVRecord } from './workflow';
-import { createSpider } from '~/spider/spidering';
 import { runAbstractFinderOnCorpus } from '~/qa-editing/qa-review';
 import { cleanAbstracts } from '~/qa-editing/qa-edits';
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
@@ -36,21 +35,9 @@ describe("Workflows", () => {
     const serverFiles = "./test/resources";
     const scratchDir = path.join(".", "scratch.d");
 
-    const { corpusRoot, corpusPath, spiderInputCSV } = initTestCorpusDirs(scratchDir);
+    const { corpusRoot, corpusPath } = initTestCorpusDirs(scratchDir);
 
     const app = await startTestHTTPServer(serverFiles);
-
-
-    const spideringOptions = {
-      interactive: false,
-      useBrowser: false,
-      cwd: scratchDir,
-      corpusRoot,
-      logpath: scratchDir,
-      input: spiderInputCSV,
-    };
-
-    await createSpider(spideringOptions);
 
     const logpath = scratchDir;
 
