@@ -9,11 +9,17 @@ import {
   tapStream,
   progressCount,
   throughFunc,
-  BufferedLogger
+  BufferedLogger,
+  dirstream,
+  stringStreamFilter,
+  sliceStream,
+  prettyPrint
 } from "commons";
 
 import { gatherAbstractFiles } from "~/corpora/bundler";
-import { extractAbstractTransform } from "~/extract/field-extract-abstract";
+import { extractAbstractTransform, extractAbstractTransformFromScrapy } from "~/extract/field-extract-abstract";
+
+import { Readable } from "stream";
 
 import {
   initLogger,
@@ -21,6 +27,7 @@ import {
   createFilteredLogStream,
   writeDefaultEntryLogs,
 } from "./qa-logging";
+import { readScrapyLogs } from '~/openreview/workflow';
 
 export function sanityCheckAbstract(log: BufferedLogger, entryDir: ExpandedDir): void {
   const abstractFiles = gatherAbstractFiles(entryDir);
@@ -131,10 +138,11 @@ export async function runAbstractFinderUsingLogStream({
   pipef.on("data", () => true);
 }
 
+
 export async function runAbstractFinderOnCorpus({
   corpusRoot,
   logpath,
-}: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">) {
+}: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">): Promise<void> {
 
   const entryStream = corpusEntryStream(corpusRoot);
   const logger = initLogger(logpath, "abstract-finder");
@@ -158,10 +166,56 @@ export async function runAbstractFinderOnCorpus({
   });
 }
 
+function scrapyCacheDirs(corpusRoot: string): Readable {
+  const corpusDirStream = dirstream(corpusRoot);
+
+  const entryDirFilter = stringStreamFilter((dir: string) => {
+    const shaHexRE = /[\dabcdefABCDEF]{40}/;
+    return shaHexRE.test(dir);
+  });
+
+  return corpusDirStream.pipe(entryDirFilter);
+}
+
+
+export async function runAbstractFinderOnScrapyCache (
+  cacheRoot: string,
+  logpath: string,
+  scrapyLog: string,
+): Promise<void> {
+  // const urlGraph = await readScrapyLogs(scrapyLog);
+
+  console.log('constructed url graph');
+
+  const entryStream = scrapyCacheDirs(cacheRoot);
+  const logger = initLogger(logpath, "abstract-finder");
+  const pipe = pumpify.obj(
+    entryStream,
+    sliceStream(0, 4),
+    expandDirTrans,
+    tapStream((tapData) => {
+      prettyPrint({ tapData })
+    }),
+    extractAbstractTransformFromScrapy(logger),
+  );
+
+  console.log('starting runAbstractFinderOnScrapyCache');
+
+  return new Promise((resolve) => {
+    pipe.on("end", () => {
+      console.log('finished runAbstractFinderOnScrapyCache');
+      logger.commitAndClose()
+        .then(() => resolve());
+    });
+
+    pipe.on("data", () => undefined);
+  });
+}
+
 export function sanityCheckCorpusAbstracts({
   corpusRoot,
   logpath,
-}: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">) {
+}: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">): Promise<void> {
   const entryStream = corpusEntryStream(corpusRoot);
   const logger = initLogger(logpath, "init");
   const reviewFunc = _.curry(reviewEntry)(logger);
@@ -173,5 +227,13 @@ export function sanityCheckCorpusAbstracts({
     tapStream(reviewFunc),
   );
 
-  pipe.on("data", () => undefined);
+  return new Promise((resolve) => {
+    pipe.on("end", () => {
+      console.log('finished sanityCheckCorpusAbstracts');
+      logger.commitAndClose()
+        .then(() => resolve());
+    });
+
+    pipe.on("data", () => undefined);
+  });
 }

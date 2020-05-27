@@ -217,7 +217,8 @@ export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): 
 
         if (url !== 'no_url') {
           stats.uncrawled += 1;
-          fs.appendFileSync(fd, url + "\n");
+          const outrec = `,,,${url}\n`;
+          fs.appendFileSync(fd, outrec);
         } else {
           stats.no_url += 1;
         }

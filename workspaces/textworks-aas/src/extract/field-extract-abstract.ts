@@ -16,7 +16,7 @@ import {
   queryContent,
 } from "~/extract/field-extract-utils";
 
-import { prettyPrint, BufferedLogger, ExpandedDir } from "commons";
+import { prettyPrint, BufferedLogger, ExpandedDir, expandDir } from "commons";
 import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
 
 type PipelineFunction = (lines: string[], content: string) => Field;
@@ -94,12 +94,15 @@ export const AbstractPipeline: PipelineFunction[] = [
   findAbstractV8,
 
   findByQuery("div#body > div#main > div#content > div#abstract"),
+  findByQuery("div#content-inner > div#abs > blockquote"),
   findByQuery("div#Abs1-content > p"),
   findByLineMatch(["h3", "ABSTRACT", "p"], 2),
   findByQuery("div.article__body > div.hlFld-Abstract > div > p"),
 ];
 
-function extractAbstract(exDir: ExpandedDir, log: BufferedLogger): void {
+function extractAbstract(exDirInit: ExpandedDir, log: BufferedLogger): void {
+  // Re-expand the directory
+  const exDir = expandDir(exDirInit.dir);
   const entryBasename = path.basename(exDir.dir);
   log.append(`field.abstract.extract.entry=${entryBasename}`);
 
@@ -161,6 +164,21 @@ function extractAbstract(exDir: ExpandedDir, log: BufferedLogger): void {
 }
 
 export function extractAbstractTransform(log: BufferedLogger): Transform {
+  return through.obj(
+    (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
+      try {
+        writeDefaultEntryLogs(log, exDir);
+        extractAbstract(exDir, log);
+      } catch (err) {
+        console.log(`err ${err}`);
+      }
+      log.commitLogs();
+      return next(null, exDir);
+    },
+  );
+}
+
+export function extractAbstractTransformFromScrapy(log: BufferedLogger): Transform {
   return through.obj(
     (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
       try {

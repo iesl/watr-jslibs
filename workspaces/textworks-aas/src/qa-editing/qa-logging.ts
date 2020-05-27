@@ -35,8 +35,52 @@ export function writeDefaultEntryLogs(
   entryDir: ExpandedDir,
 ): void {
   const propfile = path.join(entryDir.dir, "entry-props.json");
+  const metafile = path.join(entryDir.dir, "meta");
 
   log.setHeader("entry", entryDir.dir);
+
+  if (fs.existsSync(metafile)) {
+    const metaPropsBuf = fs.readFileSync(metafile);
+    const metaPropsStr = metaPropsBuf.toString();
+    // console.log('metaPropsBuf', metaPropsBuf);
+    console.log('metaPropsStr', metaPropsStr);
+    const fixed = _.replace(metaPropsStr, /'/g, '"');
+    console.log('metaProps fixed', fixed);
+    const metaProps = JSON.parse(fixed);
+    const { url, response_url } = metaProps;
+    const urlp = urlparse(url);
+    log.append(`entry.url=${url}`);
+    log.append(`entry.url.host=${urlp.host}`);
+    log.append(`entry.response_url=${response_url}`);
+
+    // TODO: HACK! REMOVE!
+    const responseBodyFile = path.join(entryDir.dir, "response_body");
+    const responseBodyHtml = path.join(entryDir.dir, "download.html");
+    const responseHeadersFile = path.join(entryDir.dir, "response_headers");
+
+    const responseHeadersBuf = fs.readFileSync(responseHeadersFile).toString();
+
+    const maybeContentType = responseHeadersBuf
+      .split("\n")
+      .filter(l => l.startsWith('Content-Type'))
+      .map(l => l.split(":"))
+      .map(la => la[1])[0];
+
+    console.log('content type', maybeContentType);
+
+    if (maybeContentType.includes('html')) {
+      log.append(`entry.contentType=html`);
+      console.log('download.html exists');
+      if (! fs.existsSync(responseBodyHtml)) {
+        console.log('copying response_body to download.html');
+        fs.copyFileSync(responseBodyFile, responseBodyHtml);
+      }
+    } else {
+      log.append(`entry.contentType=unknown`);
+    }
+
+    return;
+  }
 
   if (!fs.existsSync(propfile)) return;
 
