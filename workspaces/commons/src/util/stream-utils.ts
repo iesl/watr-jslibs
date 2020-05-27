@@ -195,7 +195,6 @@ export function progressCount(everyN?: number): Transform {
 
 export function createReadLineStream(filename: string): MapStream {
   const str: es.MapStream = fs.createReadStream(filename).pipe(es.split());
-
   return str;
 }
 

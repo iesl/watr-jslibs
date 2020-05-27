@@ -12,6 +12,7 @@ import {
 import { openDatabase, Database } from './database';
 import { Order, Url, NoteId, VenueUrl, OrderEntry } from './database-tables';
 import { streamPump } from 'commons';
+import { Dictionary } from 'lodash';
 
 interface InputRec {
   noteId: string;
@@ -93,7 +94,7 @@ const addOrderEntry: (db: Database, order: Order) => (r: InputRec) => Promise<Or
     })
   };
 
-export async function createOrder(opts: COptions) {
+export async function createOrder(opts: COptions): Promise<void> {
   const logger = createConsoleLogger();
   logger.info({ event: "initializing order", config: opts });
   const inputStream = readOrderCsv(opts.csvFile);
@@ -128,5 +129,104 @@ export async function createOrder(opts: COptions) {
     });
 
   return pumpBuilder.toPromise();
+}
 
+export interface UrlGraph {
+  isUrlCrawled(url: string): boolean;
+}
+
+function trimGetClause(str: string): string {
+  const li = str.lastIndexOf('>');
+  return str.substring(5, li);
+}
+
+export async function readScrapyLogs(logfile: string): Promise<UrlGraph> {
+  const inputStream = createReadLineStream(logfile)
+  const redirectGraph: Dictionary<string> = {};
+  const crawled = new Set<string>();
+
+  const pumpBuilder = streamPump.createPump()
+    .viaStream<string>(inputStream)
+    .throughF((line: string) => {
+      const isCrawled = /DEBUG: Crawled/.test(line);
+      const isRedirect301 = /DEBUG: Redirecting \(301\)/.test(line);
+      const isRedirect302 = /DEBUG: Redirecting \(302\)/.test(line);
+      const isRedirectRefresh = /DEBUG: Redirecting \(meta refresh\)/.test(line);
+      // const isForbidden = /DEBUG: Forbidden/.test(line);
+      const isCached = /\['cached'\]/.test(line);
+      const getUrlRE = new RegExp('<GET ([^>]*)>([ ]|$)', 'g');
+      const urls1 = line.match(getUrlRE);
+
+      const isRedirect = isRedirect302 || isRedirect301 || isRedirectRefresh;
+
+      if (isRedirect && urls1) {
+        const [toUrl, fromUrl] = urls1;
+        const t = trimGetClause(toUrl);
+        const f = trimGetClause(fromUrl);
+        redirectGraph[f] = t;
+      }
+      if (isCrawled && urls1) {
+        const [crawlUrl] = urls1;
+        const t = trimGetClause(crawlUrl);
+        crawled.add(t);
+      }
+      return line;
+    });
+
+  return pumpBuilder.toPromise()
+    .then(() => {
+      const redirects = redirectGraph;
+      const crawls = crawled;
+      return {
+        isUrlCrawled(url: string): boolean {
+          let url0 = url;
+          let urlNext = redirects[url0];
+          while (urlNext !== undefined) {
+            url0 = urlNext;
+            urlNext = redirects[url0];
+          }
+          return crawls.has(url0);
+        }
+      }
+    });
+}
+
+import fs, { } from 'fs-extra';
+export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): Promise<void> {
+  const urlGraph = await readScrapyLogs(scrapyLogs);
+  const inputStream = readOrderCsv(csvFile);
+
+  console.log('created Url Graph');
+  const stats = {
+    crawled: 0,
+    uncrawled: 0,
+    no_url: 0
+  }
+
+  const fd = fs.openSync(`${csvFile}.pruned.csv`, fs.constants.O_CREAT | fs.constants.O_WRONLY);
+
+  const pumpBuilder = streamPump.createPump()
+    .viaStream<InputRec>(inputStream)
+    .tap((inputRec) => {
+      const { url } = inputRec;
+      const isCrawled = urlGraph.isUrlCrawled(url);
+      if (isCrawled) {
+        stats.crawled += 1;
+        // console.log(`+ ${url}`);
+      } else {
+
+        if (url !== 'no_url') {
+          stats.uncrawled += 1;
+          fs.appendFileSync(fd, url + "\n");
+        } else {
+          stats.no_url += 1;
+        }
+      }
+    });
+
+  await pumpBuilder.toPromise();
+
+  fs.closeSync(fd);
+
+  prettyPrint({ stats });
 }

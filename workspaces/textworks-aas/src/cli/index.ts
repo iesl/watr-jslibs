@@ -7,7 +7,7 @@ import { normalizeHtmls } from "~/extract/reshape-html";
 const { opt, config } = arglib;
 
 import "./corpus-cli";
-import { createOrder } from '~/openreview/workflow';
+import { createOrder, pruneCrawledFromCSV } from '~/openreview/workflow';
 
 yargs.command(
   "write-norms",
@@ -22,19 +22,37 @@ yargs.command(
   },
 );
 
+// yargs.command(
+//   "openreview-order",
+//   "create an order from a CSV file",
+//   config(
+//     opt.cwd,
+//     opt.existingFile("csv: ..."),
+//     opt.existingDir("db-data-path: root path to store sqlite data files"),
+//   ),
+//   (opts: any) => {
+//     createOrder({
+//       csvFile: opts.csv,
+//       dbDataPath: opts.dbDataPath,
+//     });
+//   },
+// );
+
 yargs.command(
-  "openreview-order",
+  "openreview-prune-csv",
   "create an order from a CSV file",
   config(
     opt.cwd,
+    opt.existingFile("scrapyLog: ..."),
     opt.existingFile("csv: ..."),
-    opt.existingDir("db-data-path: root path to store sqlite data files"),
   ),
   (opts: any) => {
-    createOrder({
-      csvFile: opts.csv,
-      dbDataPath: opts.dbDataPath,
-    });
+    const { scrapyLog, csv } = opts;
+    Promise.all([
+      pruneCrawledFromCSV(scrapyLog, csv)
+    ]).then(() => {
+      console.log('done');
+    })
   },
 );
 
