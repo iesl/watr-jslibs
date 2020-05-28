@@ -218,15 +218,14 @@ export async function runAbstractFinderOnScrapyCache(
 
   const csvLookup = await createCSVOrderLookup(csvFile);
   console.log('constructed csv lookup');
-  // _.map(_.toPairs(csvLookup), ([]))
 
   const entryStream = scrapyCacheDirs(cacheRoot);
   const logger = initLogger(logpath, "abstract-finder", true);
+  const logger2 = initLogger(logpath, "abstract-cleaner", true);
   // const loggerClean = initLogger(logpath, "abstract-cleaner", true);
 
   const pipe = pumpify.obj(
     entryStream,
-    // sliceStream(0, 100),
     expandDirTrans,
     extractAbstractTransformFromScrapy(logger, {
       logger,
@@ -238,7 +237,7 @@ export async function runAbstractFinderOnScrapyCache(
       prettyPrint({ msg: 'cleanExtractedAbstract...' });
       const reExp = expandDir(expDir.dir);
       return cleanExtractedAbstract(reExp, {
-        logger,
+        logger: logger2,
         interactive: false,
         urlGraph,
         csvLookup
@@ -257,7 +256,11 @@ export async function runAbstractFinderOnScrapyCache(
 
     pipe.on("data", () => undefined);
   }).then(() => {
-    // return logger.commitAndClose();
+    logger.commitAndClose()
+      .then(() => logger2.commitAndClose())
+      .then(() => {
+        console.log('done');
+      })
   });
 }
 

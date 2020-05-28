@@ -34,7 +34,7 @@ yargs.command(
   (args: any) => {
 
     const { corpusRoot } = args;
-    const fromLogFile = 'qa-review-abstract-finder-log.json';
+    const fromLogFile = 'qa-review-abstract-cleaner-log.json';
     const fromLog = path.resolve(corpusRoot, fromLogFile);
     const toFile = path.resolve(corpusRoot, 'all-abstracts.json');
     const filters: string[] = [];
