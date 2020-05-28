@@ -1,5 +1,6 @@
 import pumpify from "pumpify";
 import { Stream } from "stream";
+import _ from "lodash";
 
 import {
   throughFunc,
@@ -14,7 +15,7 @@ import { Order, Url, NoteId, VenueUrl, OrderEntry } from './database-tables';
 import { streamPump } from 'commons';
 import { Dictionary } from 'lodash';
 
-interface InputRec {
+export interface InputRec {
   noteId: string;
   dblpConfId: string;
   url: string;
@@ -131,8 +132,10 @@ export async function createOrder(opts: COptions): Promise<void> {
   return pumpBuilder.toPromise();
 }
 
+// type UrlAndCode = [string, number];
 export interface UrlGraph {
-  isUrlCrawled(url: string): boolean;
+  isUrlCrawled(url: string, verbose?: boolean): boolean;
+  getUrlFetchChain(url: string): string[];
 }
 
 function trimGetClause(str: string): string {
@@ -142,7 +145,8 @@ function trimGetClause(str: string): string {
 
 export async function readScrapyLogs(logfile: string): Promise<UrlGraph> {
   const inputStream = createReadLineStream(logfile)
-  const redirectGraph: Dictionary<string> = {};
+  const redirectFromGraph: Dictionary<string> = {};
+  const redirectToGraph: Dictionary<string> = {};
   const crawled = new Set<string>();
 
   const pumpBuilder = streamPump.createPump()
@@ -163,7 +167,8 @@ export async function readScrapyLogs(logfile: string): Promise<UrlGraph> {
         const [toUrl, fromUrl] = urls1;
         const t = trimGetClause(toUrl);
         const f = trimGetClause(fromUrl);
-        redirectGraph[f] = t;
+        redirectFromGraph[f] = t;
+        redirectToGraph[t] = f;
       }
       if (isCrawled && urls1) {
         const [crawlUrl] = urls1;
@@ -175,23 +180,45 @@ export async function readScrapyLogs(logfile: string): Promise<UrlGraph> {
 
   return pumpBuilder.toPromise()
     .then(() => {
-      const redirects = redirectGraph;
+      const redirectFrom = redirectFromGraph;
+      const redirectTo = redirectToGraph;
       const crawls = crawled;
+      const getChain = (url: string) => {
+        const loopGuard = new Set<string>();
+        loopGuard.add(url);
+        let url0 = url;
+        let urlNext = redirectFrom[url0];
+        while (urlNext !== undefined && !loopGuard.has(urlNext)) {
+          loopGuard.add(urlNext);
+          url0 = urlNext;
+          urlNext = redirectFrom[url0];
+        }
+
+        url0 = url;
+        let urlPrev = redirectTo[url0];
+        while (urlPrev !== undefined && !loopGuard.has(urlPrev)) {
+          loopGuard.add(urlPrev);
+          url0 = urlPrev;
+          urlPrev = redirectTo[url0];
+        }
+        return [ ...loopGuard ];
+      };
       return {
-        isUrlCrawled(url: string): boolean {
-          let url0 = url;
-          let urlNext = redirects[url0];
-          while (urlNext !== undefined) {
-            url0 = urlNext;
-            urlNext = redirects[url0];
-          }
-          return crawls.has(url0);
+        isUrlCrawled(url: string, verbose?: boolean): boolean {
+          const chain = getChain(url);
+          const filtered = chain.filter(churl => crawls.has(churl));
+          return filtered.length > 0;
+        },
+
+        getUrlFetchChain(url: string): string[] {
+          return getChain(url);
         }
       }
     });
 }
 
 import fs, { } from 'fs-extra';
+
 export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): Promise<void> {
   const urlGraph = await readScrapyLogs(scrapyLogs);
   const inputStream = readOrderCsv(csvFile);
@@ -202,32 +229,49 @@ export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): 
     uncrawled: 0,
     no_url: 0
   }
+  let i = 0;
 
   const fd = fs.openSync(`${csvFile}.pruned.csv`, fs.constants.O_CREAT | fs.constants.O_WRONLY);
 
   const pumpBuilder = streamPump.createPump()
     .viaStream<InputRec>(inputStream)
     .tap((inputRec) => {
+      if (i % 100 === 0) {
+        console.log(`processed ${i} records`);
+      }
+      i += 1;
+
+      const verbose = i > 99;
+
+      if (i > 99) {
+        prettyPrint({ inputRec, i });
+      }
       const { url } = inputRec;
-      const isCrawled = urlGraph.isUrlCrawled(url);
+      const isCrawled = urlGraph.isUrlCrawled(url, verbose);
       if (isCrawled) {
         stats.crawled += 1;
         // console.log(`+ ${url}`);
+        console.log(`(skip) crawled`);
       } else {
+        if (i > 99) {
+          console.log(`+ uncrawled`);
+        }
 
         if (url !== 'no_url') {
           stats.uncrawled += 1;
           const outrec = `,,,${url}\n`;
           fs.appendFileSync(fd, outrec);
         } else {
+          console.log(`  (skip) no_url`);
           stats.no_url += 1;
         }
       }
-    });
+    }).throughF(d => d);
 
-  await pumpBuilder.toPromise();
+  await pumpBuilder.toPromise().then(() => {
+    fs.closeSync(fd);
+  });
 
-  fs.closeSync(fd);
 
   prettyPrint({ stats });
 }

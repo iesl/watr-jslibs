@@ -12,19 +12,15 @@ import { createFilteredLogStream } from './qa-logging';
 import { streamUtils } from 'commons';
 const  { promisifyReadableEnd } = streamUtils;
 
-interface CorpusStats {
-  urlCount: number;
-  absCount: number;
-  missingAbs: number;
-}
-
 export async function collectAbstractExtractionStats(
   fromLog: string,
   tofile: string,
   filters?: string[],
-) {
+): Promise<void> {
   const filterREs: RegExp[] =
     filters !== undefined ? filters.map(f => new RegExp(f)) : [];
+
+  filterREs.push(/field.abstract.value=/);
 
   const pipef = pumpify.obj(
     createFilteredLogStream(fromLog, filterREs),
@@ -33,7 +29,6 @@ export async function collectAbstractExtractionStats(
   );
 
   pipef.on("data", (data: any[]) => {
-    // prettyPrint({summary});
     console.log(`write abstracts to ${tofile}`);
     fs.writeJsonSync(tofile, data);
   });
@@ -52,25 +47,19 @@ export function getLogEntry(key: string, entries: string[]): string | undefined 
 const writeAbstracts = throughAccum<any, any[]>(
   (accum: any[], t: any) => {
     const logBuffer: string[] = t.logBuffer;
-    const entryPath: string = t.entry;
-    const lpart = _.last(entryPath.split('/'));
-    if (lpart) {
-      const noteId = lpart.slice(0, lpart.length-2);
+    const noteId = getLogEntry("entry.noteId", logBuffer);
+    const abstractValue = getLogEntry("field.abstract.value", logBuffer);
+    const res = {
+      noteId,
+      fields: [
+        {
+          name: "abstract",
+          value: abstractValue
+        }
+      ]
+    };
 
-      const abstractValue = getLogEntry("field.abstract.value", logBuffer);
-      const res = {
-        noteId,
-        fields: [
-          {
-            name: "abstract",
-            value: abstractValue
-          }
-        ]
-      };
-
-      return _.concat(accum, res);
-    }
-    return accum;
+    return _.concat(accum, res);
   },
   []
 );

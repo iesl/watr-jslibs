@@ -6,9 +6,10 @@ import pumpify from "pumpify";
 import es from "event-stream";
 import urlparse from "url-parse";
 
-import { initBufferedLogger, BufferedLogger } from "commons";
+import { initBufferedLogger, BufferedLogger, prettyPrint } from "commons";
 import { filterStream } from "commons";
 import { ExpandedDir } from "commons";
+import { ReviewEnv } from './qa-edits';
 
 export function resolveLogfileName(logpath: string, phase: string): string {
   return path.resolve(logpath, logfileName(phase));
@@ -33,6 +34,7 @@ export function initLogger(logpath: string, phase: string, append = false): Buff
 export function writeDefaultEntryLogs(
   log: BufferedLogger,
   entryDir: ExpandedDir,
+  env: ReviewEnv,
 ): void {
   const propfile = path.join(entryDir.dir, "entry-props.json");
   const metafile = path.join(entryDir.dir, "meta");
@@ -42,21 +44,36 @@ export function writeDefaultEntryLogs(
   if (fs.existsSync(metafile)) {
     const metaPropsBuf = fs.readFileSync(metafile);
     const metaPropsStr = metaPropsBuf.toString();
-    // console.log('metaPropsBuf', metaPropsBuf);
-    console.log('metaPropsStr', metaPropsStr);
     const fixed = _.replace(metaPropsStr, /'/g, '"');
-    console.log('metaProps fixed', fixed);
     const metaProps = JSON.parse(fixed);
     const { url, response_url } = metaProps;
     const urlp = urlparse(url);
     log.append(`entry.url=${url}`);
     log.append(`entry.url.host=${urlp.host}`);
     log.append(`entry.response_url=${response_url}`);
+    // get the original url from the meta/csv
+
+    const fetchChain = env.urlGraph.getUrlFetchChain(url);
+    const maybeOriginalUrl = _.map(fetchChain, furl => env.csvLookup[furl])
+      .filter(d => d !== undefined);
+
+    // prettyPrint({ maybeOriginalUrl });
+
+    if (maybeOriginalUrl.length>0) {
+      const originalRec = maybeOriginalUrl[0];
+      const { noteId  } = originalRec;
+      log.append(`entry.noteId=${noteId}`);
+      log.append(`entry.url.original=${originalRec.url}`);
+      // log.append(`entry.venue.original=${originalRec.url}`);
+    }
+
 
     // TODO: HACK! REMOVE!
     const responseBodyFile = path.join(entryDir.dir, "response_body");
     const responseBodyHtml = path.join(entryDir.dir, "download.html");
     const responseHeadersFile = path.join(entryDir.dir, "response_headers");
+
+    if (fs.existsSync(responseBodyHtml)) return;
 
     const responseHeadersBuf = fs.readFileSync(responseHeadersFile).toString();
 
@@ -66,11 +83,8 @@ export function writeDefaultEntryLogs(
       .map(l => l.split(":"))
       .map(la => la[1])[0];
 
-    console.log('content type', maybeContentType);
-
     if (maybeContentType.includes('html')) {
       log.append(`entry.contentType=html`);
-      console.log('download.html exists');
       if (! fs.existsSync(responseBodyHtml)) {
         console.log('copying response_body to download.html');
         fs.copyFileSync(responseBodyFile, responseBodyHtml);

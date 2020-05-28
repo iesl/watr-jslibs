@@ -58,7 +58,7 @@ function initLogger(logname: string): Logger {
   return logger;
 }
 
-type Loggable = string | object;
+type Loggable = string | any;
 
 /**
  * Maintains logs and headers so that they can be written all together,
@@ -79,24 +79,27 @@ export function initBufferedLogger(logname: string): BufferedLogger {
     logger: initLogger(logname),
     logBuffer: [],
     headers: [],
-    append: function(o: Loggable) {
+    append: function(o: Loggable): void {
       this.logBuffer.push(o);
     },
-    setHeader: function(key: string, value: string) {
+    setHeader: function(key: string, value: string): void {
       this.headers.push([key, value]);
     },
-    commitLogs: function() {
-      const logBuffer = this.logBuffer;
-      const hdrs = _.fromPairs(this.headers);
+    commitLogs: function(): void {
+      const logBuffer = [...this.logBuffer];
+      const headers = [...this.headers];
+      _.remove(this.logBuffer, () => true);
+      _.remove(this.headers, () => true);
+
+      const hdrs = _.fromPairs(headers);
+
       const logData = {
         ...hdrs,
         logBuffer: [...logBuffer],
       }
       this.logger.info(logData);
-      _.remove(logBuffer, () => true);
-      _.remove(this.headers, () => true);
     },
-    commitAndClose: function() {
+    commitAndClose: function(): Promise<void> {
       const self = this;
       self.commitLogs();
       return promisifyLoggerClose(self.logger);
@@ -106,14 +109,14 @@ export function initBufferedLogger(logname: string): BufferedLogger {
 
 export async function promisifyLoggerClose(logger: Logger): Promise<void> {
   return new Promise((resolve) => {
-    logger.on('close', function () {
+    logger.on('close', function() {
       // console.log('promisifyLoggerClose: close');
       resolve();
     });
-    logger.on('end', function () {
+    logger.on('end', function() {
       // console.log('promisifyLoggerClose: end');
     });
-    logger.on('finish', function () {
+    logger.on('finish', function() {
       // console.log('promisifyLoggerClose: finish');
       logger.close();
     });
