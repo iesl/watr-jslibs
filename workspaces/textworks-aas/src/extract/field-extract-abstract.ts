@@ -19,7 +19,7 @@ import {
 
 import { prettyPrint, BufferedLogger, ExpandedDir, expandDir } from "commons";
 import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
-import { ReviewEnv } from '~/qa-editing/qa-edits';
+import { ReviewEnv } from './qa-review-abstracts';
 
 type PipelineFunction = (lines: string[], content: string) => Field;
 
@@ -164,21 +164,6 @@ function extractAbstract(exDirInit: ExpandedDir, log: BufferedLogger): void {
     return;
   });
 }
-
-// export function extractAbstractTransform(log: BufferedLogger): Transform {
-//   return through.obj(
-//     (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
-//       try {
-//         writeDefaultEntryLogs(log, exDir);
-//         extractAbstract(exDir, log);
-//       } catch (err) {
-//         console.log(`err ${err}`);
-//       }
-//       log.commitLogs();
-//       return next(null, exDir);
-//     },
-//   );
-// }
 
 export function extractAbstractTransformFromScrapy(log: BufferedLogger, env: ReviewEnv): Transform {
   return through.obj(

@@ -3,16 +3,12 @@ import _, { Dictionary } from "lodash";
 import pumpify from "pumpify";
 
 import {
-  corpusEntryStream,
   expandDirTrans,
   ExpandedDir,
-  // tapStream,
-  progressCount,
   throughFunc,
   BufferedLogger,
   dirstream,
   stringStreamFilter,
-  sliceStream,
   prettyPrint,
   expandDir
 } from "commons";
@@ -25,12 +21,9 @@ import { Readable } from "stream";
 
 import {
   initLogger,
-  // writeDefaultEntryLogs,
 } from "./qa-logging";
 
-import { cleanExtractedAbstract } from './qa-edits';
 import { readScrapyLogs, readOrderCsv, InputRec } from '~/openreview/workflow';
-
 
 export function sanityCheckAbstract(log: BufferedLogger, entryDir0: ExpandedDir): void {
   const entryDir = expandDir(entryDir0.dir)
@@ -99,77 +92,6 @@ export function sanityCheckAbstract(log: BufferedLogger, entryDir0: ExpandedDir)
   }
 }
 
-// function reviewEntry(log: BufferedLogger, entryDir: ExpandedDir) {
-//   try {
-//     writeDefaultEntryLogs(log, entryDir);
-//     sanityCheckAbstract(log, entryDir);
-//   } catch (e) {
-//     console.log(`Error: `, e);
-//   }
-
-//   log.commitLogs();
-// }
-
-interface ReviewCorpusArgs {
-  corpusRoot: string;
-  logpath: string;
-  phase: string;
-  prevPhase: string;
-  filters?: string[];
-}
-
-// export async function runAbstractFinderUsingLogStream({
-//   // corpusRoot,
-//   logpath,
-//   phase,
-//   prevPhase,
-//   filters,
-// }: ReviewCorpusArgs) {
-//   const logger = initLogger(logpath, phase);
-
-//   const filterREs: RegExp[] =
-//     filters !== undefined ? filters.map(f => new RegExp(f)) : [];
-
-//   const logfile = resolveLogfileName(logpath, prevPhase);
-
-//   const pipef = pumpify.obj(
-//     createFilteredLogStream(logfile, filterREs),
-//     throughFunc((log: any) => log.message.entry),
-//     expandDirTrans,
-//     extractAbstractTransform(logger),
-//   );
-
-//   pipef.on("data", () => true);
-// }
-
-
-// export async function runAbstractFinderOnCorpus({
-//   corpusRoot,
-//   logpath,
-// }: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">): Promise<void> {
-
-//   const entryStream = corpusEntryStream(corpusRoot);
-//   const logger = initLogger(logpath, "abstract-finder");
-//   const pipe = pumpify.obj(
-//     entryStream,
-//     progressCount(500),
-//     expandDirTrans,
-//     extractAbstractTransform(logger),
-//   );
-
-//   console.log('starting runAbstractFinderOnCorpus');
-
-//   return new Promise((resolve) => {
-//     pipe.on("end", () => {
-//       console.log('finished runAbstractFinderOnCorpus');
-//       logger.commitAndClose()
-//         .then(() => resolve());
-//     });
-
-//     pipe.on("data", () => undefined);
-//   });
-// }
-
 function scrapyCacheDirs(corpusRoot: string): Readable {
   const corpusDirStream = dirstream(corpusRoot);
 
@@ -182,6 +104,7 @@ function scrapyCacheDirs(corpusRoot: string): Readable {
 }
 
 import { streamPump } from 'commons';
+import { cleanExtractedAbstract } from '~/extract/qa-review-abstracts';
 
 
 export async function createCSVOrderLookup(csvFile: string): Promise<Dictionary<InputRec>> {

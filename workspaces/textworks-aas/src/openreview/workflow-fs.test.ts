@@ -2,12 +2,10 @@ import "chai/register-should";
 
 import _ from "lodash";
 import { splitCSVRecord } from './workflow';
-import { runAbstractFinderOnCorpus } from '~/qa-editing/qa-review';
-import { cleanAbstracts } from '~/qa-editing/qa-edits';
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 
 import path from "path";
-import { prettyPrint, delay } from 'commons/dist';
+import { delay } from 'commons';
 import { initTestCorpusDirs, startTestHTTPServer } from './test-utils';
 
 
@@ -55,10 +53,10 @@ describe("Workflows", () => {
      *     ├── qa-review-abstract-finder-log.json.pretty.txt             <- prettified log produced by runAbstractFinderOnCorpus
      *     └── spider-log.json                                           <- log produced by spider
      */
-    await runAbstractFinderOnCorpus({
-      corpusRoot: corpusPath,
-      logpath
-    });
+    // await runAbstractFinderOnCorpus({
+    //   corpusRoot: corpusPath,
+    //   logpath
+    // });
 
     await delay(200);
 
@@ -68,19 +66,19 @@ describe("Workflows", () => {
     // This is run by abstract finder, not needed
     // normalizeHtmls(corpusRoot);
 
-    const inputlog = path.resolve(path.join(scratchDir, 'qa-review-abstract-finder-log.json'));
-    const outputlog = path.resolve(path.join(scratchDir, 'clean-abstracts.json'));
-    const outputAbstractsFile = path.resolve(path.join(scratchDir, 'collected-abstracts.json'));
-    const filters: string[] = [];
-    prettyPrint({ inputlog, outputlog });
+    // const inputlog = path.resolve(path.join(scratchDir, 'qa-review-abstract-finder-log.json'));
+    // const outputlog = path.resolve(path.join(scratchDir, 'clean-abstracts.json'));
+    // const outputAbstractsFile = path.resolve(path.join(scratchDir, 'collected-abstracts.json'));
+    // const filters: string[] = [];
+    // prettyPrint({ inputlog, outputlog });
 
-    await cleanAbstracts({ corpusRoot, logpath, inputlog, outputlog, filters });
+    // await cleanAbstracts({ corpusRoot, logpath, inputlog, outputlog, filters });
 
-    await collectAbstractExtractionStats(outputlog, outputAbstractsFile, [])
+    // await collectAbstractExtractionStats(outputlog, outputAbstractsFile, [])
 
-    app.close(() => {
-      console.log('we are done');
-      done();
-    });
+    // app.close(() => {
+    //   console.log('we are done');
+    //   done();
+    // });
   });
 });

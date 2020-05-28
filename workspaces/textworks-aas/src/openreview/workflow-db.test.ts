@@ -1,14 +1,10 @@
 import "chai/register-should";
 
 import _, { Dictionary } from "lodash";
-import { runAbstractFinderOnCorpus } from '~/qa-editing/qa-review';
-import { cleanAbstracts } from '~/qa-editing/qa-edits';
-import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import path from "path";
-import { prettyPrint, delay } from 'commons/dist';
+import { prettyPrint } from 'commons';
 
 import { initTestCorpusDirs, createEmptyDB } from './test-utils';
-import { readScrapyLogs } from './workflow';
 describe("DB-Driven Workflows", () => {
 
   it.only("should parse scrapy spider logs and commit them to database", () => {

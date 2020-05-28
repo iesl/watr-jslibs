@@ -1,6 +1,5 @@
 import 'chai/register-should';
 import { prettyPrint } from 'commons';
-import { openDatabase, Database } from './database';
 import { Url } from './database-tables';
 import { createEmptyDB } from './test-utils';
 

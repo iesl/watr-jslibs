@@ -9,9 +9,6 @@ import {Transform} from "stream";
 import _ from "lodash";
 import * as cheerio from "cheerio";
 
-// TODO use npm lib surgeon to extract fields
-// TODO peruse: https://github.com/lorien/awesome-web-scraping/blob/master/javascript.md
-
 import {prettyPrint} from "commons";
 
 import {
@@ -20,9 +17,6 @@ import {
   ExpandedDir,
 } from "commons";
 
-
-import {prettyPrintTrans} from "commons";
-// import { sliceStream } from 'commons';
 
 type Attrs = {[k: string]: string};
 

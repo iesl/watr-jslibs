@@ -4,14 +4,14 @@ import React, {useState} from "react";
 import {Text, Box, Color, useInput, useApp} from "ink";
 import * as ink from "ink";
 export type KeyDef = [string, () => void];
-import MultiSelect, { ListedItem } from "ink-multi-select";
-import { CleaningRule } from './qa-edits';
+import { ListedItem } from "ink-multi-select";
 import { BufferedLogger } from "commons";
 import ansiEscapes from 'ansi-escapes';
 
 //@ts-ignore
 import Divider from 'ink-divider';
 import { clipParagraph } from 'commons';
+import { CleaningRule } from '~/extract/qa-review-abstracts';
 
 interface CleaningRulesArgs {
   abstractStr: string;

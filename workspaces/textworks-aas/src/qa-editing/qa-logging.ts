@@ -6,10 +6,10 @@ import pumpify from "pumpify";
 import es from "event-stream";
 import urlparse from "url-parse";
 
-import { initBufferedLogger, BufferedLogger, prettyPrint } from "commons";
+import { initBufferedLogger, BufferedLogger } from "commons";
 import { filterStream } from "commons";
 import { ExpandedDir } from "commons";
-import { ReviewEnv } from './qa-edits';
+import { ReviewEnv } from '~/extract/qa-review-abstracts';
 
 export function resolveLogfileName(logpath: string, phase: string): string {
   return path.resolve(logpath, logfileName(phase));

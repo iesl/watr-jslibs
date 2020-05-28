@@ -7,7 +7,7 @@ import * as Ap from 'fp-ts/lib/Apply';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { NonNegativeInteger } from "./io-utils";
-import { prettyPrint } from "commons/dist";
+import { prettyPrint } from "commons";
 
 /**
  * Glyphs are represented in JSON as tuples, as defined by GlyphRepr* and GlyphPropsRepr*

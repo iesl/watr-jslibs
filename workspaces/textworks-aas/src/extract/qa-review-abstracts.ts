@@ -4,12 +4,12 @@ import {
   ExpandedDir,
 } from "commons";
 
-import { writeDefaultEntryLogs, } from "./qa-logging";
 import { BufferedLogger, } from "commons";
 import { gatherAbstractFiles } from "~/corpora/bundler";
 import { Field } from "~/extract/field-extract";
-import { runInteractive } from './qa-interactive';
 import { UrlGraph, InputRec } from '~/openreview/workflow';
+import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
+import { runInteractive } from '~/qa-editing/qa-interactive';
 
 export interface ReviewEnv {
   logger: BufferedLogger;
