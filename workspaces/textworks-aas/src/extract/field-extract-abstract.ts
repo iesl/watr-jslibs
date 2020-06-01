@@ -11,7 +11,6 @@ import { makeCssTreeNormalFormFromNode, writeNormalizedHtml } from "./reshape-ht
 import {
   readFile,
   findByLineMatch,
-  findByLineMatchEnd,
   getSubtextOrUndef,
   findByQuery,
   queryContent,
@@ -21,14 +20,13 @@ import { prettyPrint, BufferedLogger, ExpandedDir, expandDir } from "commons";
 import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
 import { ReviewEnv } from './qa-review-abstracts';
 
+
 type PipelineFunction = (lines: string[], content: string) => Field;
 
+// export function extractMetaContent(cssNormLines: string[]): Field {}
+
 export function findAbstractV2(cssNormLines: string[]): Field {
-  const field = findByLineMatch(
-    ["global.document.metadata"],
-    0,
-    cssNormLines,
-  );
+  const field = findByLineMatch(["global.document.metadata"], { lineOffset: -1, lineCount: 1 })(cssNormLines);
 
   const line = field.value;
   field.value = undefined;
@@ -79,27 +77,89 @@ export function findAbstractV8(
 }
 
 export const AbstractPipeline: PipelineFunction[] = [
-  findByLineMatch(["div #abstract"], 0),
+  findByQuery("div.hlFld-Abstract div.abstractInFull"),
+  findByLineMatch(["div #abstract"]),
   findAbstractV2,
 
-  findByLineMatch(["section.*.Abstract", "h2.*.Heading", "Abstract"], 0),
-  findByLineMatch([".hlFld-Abstract", "div"], 0),
-  findByLineMatch(["div", "h3.*.label", "Abstract"], 0),
+  findByLineMatch(["section.*.Abstract", "h2.*.Heading", "Abstract"]),
 
-  findByLineMatchEnd(
+  findByLineMatch(["div .hlFld-Abstract", "div", "div", "h2"], { lineOffset: 2 }),
+
+  findByLineMatch(["div", "h3.*.label", "Abstract"]),
+
+  findByLineMatch(
     ["div.*#abstract", "h4", "Abstract"],
-    ["div.*#paperSubject", "h4", "Keywords"],
-    0,
+    { evidenceEnd: ["div.*#paperSubject", "h4", "Keywords"] }
   ),
 
   findAbstractV7,
   findAbstractV8,
 
   findByQuery("div#body > div#main > div#content > div#abstract"),
-  findByQuery("div#content-inner > div#abs > blockquote"),
+
+  findByQuery("div#content-inner > div#abs > blockquote"), //
+
   findByQuery("div#Abs1-content > p"),
-  findByLineMatch(["h3", "ABSTRACT", "p"], 2),
-  findByQuery("div.article__body > div.hlFld-Abstract > div > p"),
+  findByQuery("div.main-container > div > p.abstract"),
+
+  findByQuery("div > div > div.w3-container > p"),
+
+  findByLineMatch(["div.itemprop='about'"]),
+  findByLineMatch(["div", "div", "h5", "Abstract", "div"]),
+  findByLineMatch(["h3", "ABSTRACT", "p"], { lineOffset: 2 }),
+
+  findByLineMatch(["span.+ContentPlaceHolder.+LabelAbstractPopUp"]),
+
+  findByLineMatch(["div", "article", "section", "h2", "^ +| Abstract", "div", "p"]),
+
+  findByLineMatch(["p #contentAbstract_full", "article", "section", "h2", "^ +| Abstract", "div", "p"]),
+  findByLineMatch(['.field-name-field-paper-description']),
+  findByLineMatch(["| Abstract", "td itemprop='description'"]),
+
+  // Maybe superceded by the one after
+  // findByLineMatch(["Abstract", "section .abstract", "p .chapter-para", "strong", "Summary:"]),
+  // findByLineMatch([
+  //   "h2.+abstract-title",
+  //   "^ +| Abstract",
+  //   "section .abstract",
+  //   "p .chapter-para"
+  // ]),
+
+  findByLineMatch([
+    "div .abstract itemprop='description'",
+  ]),
+
+  findByLineMatch([
+    "section .abstract",
+  ]),
+
+  findByLineMatch([
+    "div .abstractSection",
+    "p"
+  ]),
+  findByQuery("div.metadata  div.abstract"),
+  findByLineMatch([".cPageSubtitle", "| Abstract"], {
+    evidenceEnd: [".cPageSubtitle", "| \\w"],
+  }),
+
+  // Maybe superceded by the one after
+  // findByLineMatch(["^ +p", "^ +b", "^ +| Abstract:"], {
+  //   indentOffset: -2,
+  //   lineCount: 1,
+  // }),
+
+  findByLineMatch(["^ +p", "^ +b", "^ +| Abstract:"], {
+    indentOffset: -2,
+    evidenceEnd: ["^ +p", "^ +b"],
+  }),
+
+  findByLineMatch(["^ +i", "^ +b", "^ +| Abstract:"], {
+    indentOffset: -4,
+    evidenceEnd: ["^ +p"],
+  }),
+
+  findByLineMatch(["p", "span .subAbstract"]),
+
 ];
 
 function extractAbstract(exDirInit: ExpandedDir, log: BufferedLogger): void {

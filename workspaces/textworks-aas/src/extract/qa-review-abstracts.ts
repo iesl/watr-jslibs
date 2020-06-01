@@ -245,6 +245,9 @@ export async function cleanAbstractNonInteractive(logger: BufferedLogger, entryD
   if (abstractStrs.length > 0) {
     const abs = abstractStrs[0][1];
     logger.append(`field.abstract.value=${abs}`);
+  } else {
+    logger.append(`field.abstract.skipped=true`);
+    console.log(`abstract skipped: ${entryDir.dir}`);
   }
 }
 

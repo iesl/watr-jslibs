@@ -22,6 +22,7 @@ type Attrs = {[k: string]: string};
 
 function parseAttrs(attrs: Attrs): string[][] {
   const keys = _.keys(attrs);
+
   const kvs: string[][] = [];
   const stdKeys = [
     ["id", "#"],
@@ -37,10 +38,12 @@ function parseAttrs(attrs: Attrs): string[][] {
         const words = v
           .split(" ")
           .map(_.trim)
-          .filter(_.isEmpty);
+          .filter(_.negate(_.isEmpty));
+
         _.each(words, w => {
           kvs.push([k, w, abbr]);
         });
+
       } else if (_.isArray(v)) {
         _.each(v, v0 => {
           kvs.push([k, v0, abbr]);
@@ -69,7 +72,6 @@ function indentStrings(strs: string[], lpad: string | number): string[] {
   }
   return _.map(strs, str => p + str);
 }
-
 export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
   const finalTree: string[] = [];
 
@@ -84,7 +86,17 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
       const attrs = node.attribs;
       let attrsStr = "";
       if (attrs) {
+        // let verbose = false;
+        // if (depth > 8 && depth < 12 ) {
+        //   verbose = true;
+        //   prettyPrint({ tn, tp, attrs, depth });
+        // }
         const attrPairs = parseAttrs(attrs);
+
+        // if (depth > 8 && depth < 12 ) {
+        //   prettyPrint({ attrPairs });
+        // }
+
         const attrstr0 = _.map(attrPairs, ([_k, v, abbr]) => {
           if (abbr.length === 1) {
             return `${abbr}${v}`;
@@ -174,7 +186,7 @@ function mapHtmlTree(
   _inner(rootElem, 0, 0, 1);
 }
 
-export function writeNormalizedHtml(htmlFile: string) {
+export function writeNormalizedHtml(htmlFile: string): void {
   const cssNormFilename = `${htmlFile}.norm.txt`;
   if (fs.existsSync(cssNormFilename)) {
     console.log(`css.norm.txt already exists`);
@@ -212,17 +224,17 @@ export function htmlToCssNormTransform(): Transform {
   );
 }
 
-export async function normalizeHtmls(corpusRoot: string) {
-  const entryStream = corpusEntryStream(corpusRoot);
+// export async function normalizeHtmls(corpusRoot: string): Promise<void> {
+//   const entryStream = corpusEntryStream(corpusRoot);
 
-  const pipef = pumpify.obj(
-    entryStream,
-    expandDirTrans,
-    htmlToCssNormTransform()
-  );
+//   const pipef = pumpify.obj(
+//     entryStream,
+//     expandDirTrans,
+//     htmlToCssNormTransform()
+//   );
 
-  pipef.on("data", () => undefined);
-}
+//   pipef.on("data", () => undefined);
+// }
 
 function readFile(leading: string, ...more: string[]): string | undefined {
   const filepath = path.join(leading, ...more);

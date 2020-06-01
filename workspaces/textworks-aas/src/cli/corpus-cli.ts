@@ -4,9 +4,9 @@ import path from "path";
 import yargs from "yargs";
 import { arglib } from "commons";
 
-import { runAbstractFinderOnScrapyCache } from "~/qa-editing/qa-review";
+import { runAbstractFinderOnScrapyCache, runAbstractCleanerOnScrapyCache } from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
-import { pruneCrawledFromCSV } from '~/openreview/workflow';
+import { pruneCrawledFromCSV, verifyCrawledRecords } from '~/openreview/workflow';
 
 const { opt, config } = arglib;
 
@@ -22,6 +22,24 @@ yargs.command(
     const { scrapyLog, csv } = opts;
     Promise.all([
       pruneCrawledFromCSV(scrapyLog, csv)
+    ]).then(() => {
+      console.log('done');
+    })
+  },
+);
+
+yargs.command(
+  "openreview-verify-crawled",
+  "verify the logs/csv/extracted abstracts",
+  config(
+    opt.cwd,
+    opt.existingFile("scrapyLog: ..."),
+    opt.existingFile("csv: ..."),
+  ),
+  (opts: any) => {
+    const { scrapyLog, csv } = opts;
+    Promise.all([
+      verifyCrawledRecords(scrapyLog, csv)
     ]).then(() => {
       console.log('done');
     })
@@ -67,6 +85,31 @@ yargs.command(
     const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
 
     runAbstractFinderOnScrapyCache(
+      corpusRoot,
+      logpath,
+      scrapyLog,
+      csvFile,
+    ).then(() => {
+      console.log('done');
+    });
+  },
+);
+
+yargs.command(
+  "clean-abstracts-in-cache",
+  "run the abstract field cleaner over corpus",
+  config(
+    opt.cwd,
+    opt.existingDir("corpus-root: root directory for corpus files"),
+  ),
+  (args: any) => {
+
+    const { corpusRoot } = args;
+    const scrapyLog = path.resolve(corpusRoot, 'crawler.log');
+    const logpath = corpusRoot;
+    const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
+
+    runAbstractCleanerOnScrapyCache(
       corpusRoot,
       logpath,
       scrapyLog,

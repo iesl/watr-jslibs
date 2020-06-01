@@ -10,7 +10,8 @@ import {
   dirstream,
   stringStreamFilter,
   prettyPrint,
-  expandDir
+  expandDir,
+  sliceStream
 } from "commons";
 
 
@@ -149,6 +150,7 @@ export async function runAbstractFinderOnScrapyCache(
 
   const pipe = pumpify.obj(
     entryStream,
+    // sliceStream(2000, 500),
     expandDirTrans,
     extractAbstractTransformFromScrapy(logger, {
       logger,
@@ -181,6 +183,55 @@ export async function runAbstractFinderOnScrapyCache(
   }).then(() => {
     logger.commitAndClose()
       .then(() => logger2.commitAndClose())
+      .then(() => {
+        console.log('done');
+      })
+  });
+}
+
+export async function runAbstractCleanerOnScrapyCache(
+  cacheRoot: string,
+  logpath: string,
+  scrapyLog: string,
+  csvFile: string,
+): Promise<void> {
+  const urlGraph = await readScrapyLogs(scrapyLog);
+  // url graph tells us the original url from which a downloaded html comes from
+  console.log('constructed url graph');
+
+  const csvLookup = await createCSVOrderLookup(csvFile);
+  console.log('constructed csv lookup');
+
+  const entryStream = scrapyCacheDirs(cacheRoot);
+  const logger = initLogger(logpath, "abstract-cleaner-b", true);
+
+  const pipe = pumpify.obj(
+    entryStream,
+    // sliceStream(0, 20),
+    expandDirTrans,
+    throughFunc((expDir: ExpandedDir) => {
+      prettyPrint({ msg: 'cleanExtractedAbstract...' });
+      return cleanExtractedAbstract(expDir, {
+        logger: logger,
+        interactive: false,
+        urlGraph,
+        csvLookup
+      });
+    }),
+  );
+
+  console.log('starting runAbstractFinderOnScrapyCache');
+
+  return new Promise((resolve) => {
+    pipe.on("end", () => {
+      console.log('finished runAbstractFinderOnScrapyCache');
+      // logger.commitLogs();
+      resolve();
+    });
+
+    pipe.on("data", () => undefined);
+  }).then(() => {
+    logger.commitAndClose()
       .then(() => {
         console.log('done');
       })

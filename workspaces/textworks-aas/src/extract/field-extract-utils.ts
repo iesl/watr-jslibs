@@ -2,9 +2,10 @@ import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
 import * as cheerio from "cheerio";
-import {Field} from "./field-extract";
+import { Field } from "./field-extract";
 
-import {makeCssTreeNormalFormFromNode} from "./reshape-html";
+import { makeCssTreeNormalFormFromNode } from "./reshape-html";
+import { prettyPrint } from 'commons/dist';
 
 export function readFile(
   leading: string,
@@ -67,12 +68,20 @@ export function findIndexForLines(
 
 export function findSubContentAtIndex(
   fileLines: string[],
-  index: number,
+  startIndex: number,
+  endIndex: number,
+  indentOffset: number
 ): string[] {
-  const l0 = fileLines[index];
-  const i0 = indentLevel(l0);
-  const ls = fileLines.slice(index);
-  const sub = _.takeWhile(ls, lN => i0 <= indentLevel(lN));
+  const line0 = fileLines[startIndex];
+  const indent0 = indentLevel(line0) + indentOffset;
+  const ls = fileLines.slice(startIndex, endIndex);
+  // prettyPrint({ msg: 'findSubContentAtIndex', line0, indent0 })
+
+  const sub = _.takeWhile(ls, lineN => {
+    const indentN = indentLevel(lineN);
+    // prettyPrint({ msg: '    findSub', lineN, indentN })
+    return indent0 <= indentN;
+  });
 
   return sub;
 }
@@ -96,42 +105,59 @@ function _findByQuery(
 ): Field {
   const [field, maybeAbstract] = queryContent(query, fileContent);
   const cssNormal = makeCssTreeNormalFormFromNode(maybeAbstract);
+  // prettyPrint({ msg: '_findByQuery', field, cssNormal });
   field.value = getSubtextOrUndef(cssNormal);
   return field;
 }
 
-function _byLineMatch(
-  evidence: string[],
-  evidenceOffset: number,
-  cssNormLines: string[],
-): Field {
-  return _byLineMatchEnd(evidence, [], evidenceOffset, cssNormLines);
+export interface LineMatchOptions {
+  lineOffset: number;
+  lineCount: number;
+  indentOffset: number;
+  evidenceEnd: string[];
 }
 
-function _byLineMatchEnd(
+export const defaultLineMatchOptions: LineMatchOptions = {
+  lineOffset: 0,
+  lineCount: 0,
+  indentOffset: 0,
+  evidenceEnd: [],
+};
+
+function _byLineMatch(
   evidence: string[],
-  evidenceEnd: string[],
-  evidenceOffset: number,
+  options: LineMatchOptions,
   cssNormLines: string[],
 ): Field {
+  const { lineOffset, lineCount, indentOffset, evidenceEnd } = options;
+  const evType = _.join(_.map(evidence, (e) => `/${e}/`), "; ");
+
   const field: Field = {
     name: "abstract",
-    evidence: _.join(evidence, " > "),
+    evidence: `line-match: ${evType}`
   };
-  const index = findIndexForLines(cssNormLines, evidence);
-  if (index > -1) {
-    let searchWindow = cssNormLines;
-    let startIndex = index;
+
+  const evidenceStartIndex = findIndexForLines(cssNormLines, evidence);
+
+  // prettyPrint({ msg: '_byLineMatch', evidenceStartIndex });
+
+  if (evidenceStartIndex > -1) {
+    const fromIndex = evidenceStartIndex + evidence.length + lineOffset;
+
+    let toIndex = lineCount > 0 ? fromIndex + lineCount : cssNormLines.length;
+
     if (evidenceEnd.length > 0) {
-      const endIndex = findIndexForLines(cssNormLines, evidenceEnd, index);
-      searchWindow = cssNormLines.slice(index, endIndex);
-      startIndex = 0;
+      toIndex = findIndexForLines(cssNormLines, evidenceEnd, fromIndex);
     }
-    const offset = evidenceOffset ? evidenceOffset : 0;
+
+    const searchWindow = cssNormLines.slice(fromIndex, toIndex);
+    // prettyPrint({ msg: '_byLineMatch', fromIndex, toIndex, searchWindow });
 
     const sub = findSubContentAtIndex(
-      searchWindow,
-      startIndex + offset,
+      cssNormLines,
+      fromIndex,
+      toIndex,
+      indentOffset
     );
 
     field.value = getSubtextOrUndef(sub);
@@ -139,8 +165,14 @@ function _byLineMatchEnd(
   return field;
 }
 
-export const findByLineMatch = _.curry(_byLineMatch);
-export const findByLineMatchEnd = _.curry(_byLineMatchEnd);
+export function findByLineMatch(
+  evidence: string[],
+  options?: Partial<LineMatchOptions>,
+): (str: string[]) => Field {
+  const opts = _.assign({}, defaultLineMatchOptions, options);
+  return _.curry(_byLineMatch)(evidence)(opts);
+}
+
 export const findByQuery = _.curry(_findByQuery);
 
 export function getSubtextOrUndef(strs: string[]): string | undefined {
@@ -152,3 +184,49 @@ export function getSubtextOrUndef(strs: string[]): string | undefined {
   }
   return undefined;
 }
+
+
+
+
+
+// function _byLineMatchZZ(
+
+//   evidence: string[],
+//   options: LineMatchOptions,
+//   cssNormLines: string[],
+// ): Field {
+//   const { lineOffset, lineCount, indentOffset, evidenceEnd } = options;
+
+//   const field: Field = {
+//     name: "abstract",
+//     evidence: _.join(evidence, " > "),
+//   };
+//   const index = findIndexForLines(cssNormLines, evidence);
+
+//   prettyPrint({ msg: '_byLineMatchEnd', index });
+
+//   if (index > -1) {
+//     let searchWindow = cssNormLines;
+//     let startIndex = index;
+//     let endIndex = lineCount > 0? startIndex + lineCount : cssNormLines.length;
+
+//     if (evidenceEnd.length > 0) {
+//       endIndex = findIndexForLines(cssNormLines, evidenceEnd, index+1);
+//     }
+//     searchWindow = cssNormLines.slice(startIndex, endIndex);
+//     prettyPrint({ msg: '_byLineMatchEnd', startIndex, endIndex });
+
+//     startIndex = 0;
+
+
+//     const sub = findSubContentAtIndex(
+//       searchWindow,
+//       startIndex + lineOffset,
+//       endIndex,
+//       indentOffset
+//     );
+
+//     field.value = getSubtextOrUndef(sub);
+//   }
+//   return field;
+// }

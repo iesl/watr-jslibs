@@ -143,25 +143,38 @@ function trimGetClause(str: string): string {
   return str.substring(5, li);
 }
 
+// These are the log entries we care about from scrapy
+// cat crawler.log | egrep -v '\[protego\]' | egrep -v '\[scrapy\.(down|ext|core|utils|crawler|spidermiddle)'
 export async function readScrapyLogs(logfile: string): Promise<UrlGraph> {
   const inputStream = createReadLineStream(logfile)
   const redirectFromGraph: Dictionary<string> = {};
   const redirectToGraph: Dictionary<string> = {};
-  const crawled = new Set<string>();
+  const crawled200 = new Set<string>();
+  const crawledErr = new Set<string>();
+  const getUrlRE = new RegExp('<GET ([^>]*)>([ ]|$)', 'g');
 
   const pumpBuilder = streamPump.createPump()
     .viaStream<string>(inputStream)
     .throughF((line: string) => {
       const isCrawled = /DEBUG: Crawled/.test(line);
-      const isRedirect301 = /DEBUG: Redirecting \(301\)/.test(line);
-      const isRedirect302 = /DEBUG: Redirecting \(302\)/.test(line);
-      const isRedirectRefresh = /DEBUG: Redirecting \(meta refresh\)/.test(line);
+      const isCrawled200 = isCrawled && /\(200\)/.test(line);
+      const isRedirect = /DEBUG: Redirecting \((30|meta)/.test(line);
       // const isForbidden = /DEBUG: Forbidden/.test(line);
-      const isCached = /\['cached'\]/.test(line);
-      const getUrlRE = new RegExp('<GET ([^>]*)>([ ]|$)', 'g');
+      // const isCached = /\['cached'\]/.test(line);
+
+      const isDEBUGLine = /S0097539792224838/.test(line);
+
       const urls1 = line.match(getUrlRE);
 
-      const isRedirect = isRedirect302 || isRedirect301 || isRedirectRefresh;
+      if (isDEBUGLine) {
+        prettyPrint({
+          msg: 'log line',
+          line,
+          urls1,
+          isCrawled,
+          isRedirect,
+        });
+      }
 
       if (isRedirect && urls1) {
         const [toUrl, fromUrl] = urls1;
@@ -169,11 +182,29 @@ export async function readScrapyLogs(logfile: string): Promise<UrlGraph> {
         const f = trimGetClause(fromUrl);
         redirectFromGraph[f] = t;
         redirectToGraph[t] = f;
+        if (isDEBUGLine) {
+          prettyPrint({
+            msg: '(redirect)',
+            toUrl, t,
+            fromUrl, f,
+          });
+        }
       }
       if (isCrawled && urls1) {
         const [crawlUrl] = urls1;
         const t = trimGetClause(crawlUrl);
-        crawled.add(t);
+        if (isCrawled200) {
+          crawled200.add(t);
+        } else {
+          crawledErr.add(t);
+        }
+        if (isDEBUGLine) {
+          prettyPrint({
+            msg: '(crawled)',
+            crawlUrl, t,
+            isCrawled200
+          });
+        }
       }
       return line;
     });
@@ -182,31 +213,61 @@ export async function readScrapyLogs(logfile: string): Promise<UrlGraph> {
     .then(() => {
       const redirectFrom = redirectFromGraph;
       const redirectTo = redirectToGraph;
-      const crawls = crawled;
+      const crawledOk = crawled200;
+      const crawledNotOk = crawledErr;
       const getChain = (url: string) => {
-        const loopGuard = new Set<string>();
-        loopGuard.add(url);
-        let url0 = url;
-        let urlNext = redirectFrom[url0];
-        while (urlNext !== undefined && !loopGuard.has(urlNext)) {
-          loopGuard.add(urlNext);
-          url0 = urlNext;
-          urlNext = redirectFrom[url0];
+        const isDEBUGLine = /S0097539792224838/.test(url);
+        const redirects: string[] = [url];
+        let urlNext = redirectFrom[redirects[0]];
+        if (isDEBUGLine) {
+          prettyPrint({
+            msg: 'getChain()',
+            redirects, urlNext
+          });
         }
-
-        url0 = url;
-        let urlPrev = redirectTo[url0];
-        while (urlPrev !== undefined && !loopGuard.has(urlPrev)) {
-          loopGuard.add(urlPrev);
-          url0 = urlPrev;
-          urlPrev = redirectTo[url0];
+        while (urlNext !== undefined && !redirects.includes(urlNext)) {
+        // while (urlNext !== undefined) {
+          redirects.unshift(urlNext);
+          urlNext = redirectFrom[redirects[0]];
+          if (isDEBUGLine) {
+            prettyPrint({
+              msg: 'while: from',
+              redirects, urlNext
+            });
+          }
         }
-        return [ ...loopGuard ];
+        if (isDEBUGLine) {
+          prettyPrint({
+            msg: 'midway (pre)',
+            redirects, urlNext
+          });
+        }
+        redirects.reverse();
+        urlNext = redirectTo[redirects[0]];
+        if (isDEBUGLine) {
+          prettyPrint({
+            msg: 'midway (reversed)',
+            redirects, urlNext
+          });
+        }
+        while (urlNext !== undefined && !redirects.includes(urlNext)) {
+        // while (urlNext !== undefined) {
+          redirects.unshift(urlNext);
+          urlNext = redirectTo[redirects[0]];
+          if (isDEBUGLine) {
+            prettyPrint({
+              msg: 'while: to',
+              redirects, urlNext
+            });
+          }
+        }
+        return redirects;
       };
+
       return {
-        isUrlCrawled(url: string, verbose?: boolean): boolean {
+        isUrlCrawled(url: string): boolean {
           const chain = getChain(url);
-          const filtered = chain.filter(churl => crawls.has(churl));
+          const filtered = chain.filter(churl => crawledOk.has(churl) || crawledNotOk.has(churl));
           return filtered.length > 0;
         },
 
@@ -221,14 +282,16 @@ import fs, { } from 'fs-extra';
 
 export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): Promise<void> {
   const urlGraph = await readScrapyLogs(scrapyLogs);
+  console.log('created Url Graph');
+
   const inputStream = readOrderCsv(csvFile);
 
-  console.log('created Url Graph');
   const stats = {
     crawled: 0,
     uncrawled: 0,
     no_url: 0
   }
+
   let i = 0;
 
   const fd = fs.openSync(`${csvFile}.pruned.csv`, fs.constants.O_CREAT | fs.constants.O_WRONLY);
@@ -241,28 +304,17 @@ export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): 
       }
       i += 1;
 
-      const verbose = i > 99;
-
-      if (i > 99) {
-        prettyPrint({ inputRec, i });
-      }
       const { url } = inputRec;
-      const isCrawled = urlGraph.isUrlCrawled(url, verbose);
+      const isCrawled = urlGraph.isUrlCrawled(url);
       if (isCrawled) {
         stats.crawled += 1;
-        // console.log(`+ ${url}`);
-        console.log(`(skip) crawled`);
       } else {
-        if (i > 99) {
-          console.log(`+ uncrawled`);
-        }
 
         if (url !== 'no_url') {
           stats.uncrawled += 1;
           const outrec = `,,,${url}\n`;
           fs.appendFileSync(fd, outrec);
         } else {
-          console.log(`  (skip) no_url`);
           stats.no_url += 1;
         }
       }
@@ -275,3 +327,114 @@ export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): 
 
   prettyPrint({ stats });
 }
+
+
+export async function verifyCrawledRecords(scrapyLogs: string, csvFile: string): Promise<void> {
+  const urlGraph = await readScrapyLogs(scrapyLogs);
+
+  const inputStream = readOrderCsv(csvFile);
+
+  const stats = {
+    crawled: 0,
+    uncrawled: 0,
+    no_url: 0
+  }
+
+
+  const pumpBuilder = streamPump.createPump()
+    .viaStream<InputRec>(inputStream)
+    .tap((inputRec) => {
+
+      const { url } = inputRec;
+      const fetchChain = urlGraph.getUrlFetchChain(url);
+      const isCrawled = urlGraph.isUrlCrawled(url);
+
+      if (fetchChain.length > 1) {
+        prettyPrint({ url, fetchChain, isCrawled });
+        _.each(fetchChain, chainUrl => {
+          const fetchChainX = urlGraph.getUrlFetchChain(chainUrl);
+          const areEqual = _.isEqual(fetchChainX, fetchChain);
+          if (!areEqual) {
+            prettyPrint({
+              msg: "NOT EQUAL",
+              fetchChain,
+              chainUrl,
+              fetchChainX
+            });
+          }
+
+        })
+      }
+
+      if (isCrawled) {
+        stats.crawled += 1;
+      } else {
+        if (url !== 'no_url') {
+          stats.uncrawled += 1;
+        } else {
+          stats.no_url += 1;
+        }
+      }
+    });
+
+  await pumpBuilder.toPromise();
+
+
+  prettyPrint({ stats });
+}
+// textworks-aas: url: 'https://doi.org/10.1109/SPAWC.2015.7227116'
+// textworks-aas: fetchChain: [
+// textworks-aas:   'https://doi.org/10.1109/SPAWC.2015.7227116',
+// textworks-aas:   'http://ieeexplore.ieee.org/document/7227116/',
+// textworks-aas:   [length]: 2
+// textworks-aas: ]
+
+// 2020-05-29 14:00:08 [scrapy.core.engine] INFO: Closing spider (finished)
+// 2020-05-29 14:00:08 [scrapy.statscollectors] INFO: Dumping Scrapy stats:
+// {'downloader/exception_count': 180,
+//  'downloader/exception_type_count/scrapy.exceptions.IgnoreRequest': 173,
+//  'downloader/exception_type_count/twisted.internet.error.ConnectError': 1,
+//  'downloader/exception_type_count/twisted.internet.error.DNSLookupError': 2,
+//  'downloader/exception_type_count/twisted.internet.error.TimeoutError': 4,
+//  'downloader/request_bytes': 2993372,
+//  'downloader/request_count': 5484,
+//  'downloader/request_method_count/GET': 5484,
+//  'downloader/response_bytes': 83423841,
+//  'downloader/response_count': 5593,
+//  'downloader/response_status_count/200': 2723,
+//  'downloader/response_status_count/301': 1348,
+//  'downloader/response_status_count/302': 1404,
+//  'downloader/response_status_count/303': 7,
+//  'downloader/response_status_count/307': 4,
+//  'downloader/response_status_count/404': 104,
+//  'downloader/response_status_count/500': 3,
+//  'elapsed_time_seconds': 7395.622929,
+//  'finish_reason': 'finished',
+//  'finish_time': datetime.datetime(2020, 5, 29, 18, 0, 8, 918104),
+//  'httpcache/firsthand': 2558,
+//  'httpcache/hit': 116,
+//  'httpcache/miss': 5484,
+//  'httpcache/store': 2558,
+//  'httperror/response_ignored_count': 83,
+//  'httperror/response_ignored_status_count/404': 81,
+//  'httperror/response_ignored_status_count/500': 2,
+//  'log_count/DEBUG': 6493,
+//  'log_count/ERROR': 7,
+//  'log_count/INFO': 215,
+//  'log_count/WARNING': 51,
+//  'memusage/max': 99655680,
+//  'memusage/startup': 46215168,
+//  'response_received_count': 2674,
+//  "robotstxt/exception_count/<class 'twisted.internet.error.DNSLookupError'>": 1,
+//  'robotstxt/forbidden': 173,
+//  'robotstxt/request_count': 121,
+//  'robotstxt/response_count': 120,
+//  'robotstxt/response_status_count/200': 96,
+//  'robotstxt/response_status_count/404': 23,
+//  'robotstxt/response_status_count/500': 1,
+//  'scheduler/dequeued': 5613,
+//  'scheduler/dequeued/memory': 5613,
+//  'scheduler/enqueued': 5613,
+//  'scheduler/enqueued/memory': 5613,
+//  'start_time': datetime.datetime(2020, 5, 29, 15, 56, 53, 295175)}
+

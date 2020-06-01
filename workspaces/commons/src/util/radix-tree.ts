@@ -1,11 +1,11 @@
 import _ from "lodash";
 
-export type Radix<T> = {[s: string]: Radix<T> | T};
+export type Radix<T> = { [s: string]: Radix<T> | T };
 export type RadixPath = string[];
 
 const RadixValKey = "_$";
 
-export const createRadix = <T>() => ({} as Radix<T>);
+export const createRadix = <T>(): Radix<T> => ({} as Radix<T>);
 
 function cleanPath(p: string | string[]): string[] {
   let pathParts: string[];
@@ -28,7 +28,7 @@ export const radUpsert = <T>(
   radix: Radix<T>,
   path: string | string[],
   f: (t?: T) => T,
-) => {
+): void => {
   const valpath = [...cleanPath(path), RadixValKey];
   const prior = _.get(radix, valpath);
   const upVal = f(prior);
@@ -36,22 +36,22 @@ export const radUpsert = <T>(
 };
 
 
-export const radInsert = <T>(radix: Radix<T>, path: string | string[], t: T) =>
+export const radInsert = <T>(radix: Radix<T>, path: string | string[], t: T): void =>
   radUpsert(radix, path, () => t);
 
 export const radGet = <T>(
   radix: Radix<T>,
   path: string | string[],
-) => {
+): T | undefined => {
   const valpath = [...cleanPath(path), RadixValKey];
-  const v: T|undefined =  _.get(radix, valpath);
+  const v: T | undefined = _.get(radix, valpath);
   return v;
 };
 
 export const radTraverseValues = <T>(
   radix: Radix<T>,
   f: (path: RadixPath, t: T) => void,
-) => {
+): void => {
   function _loop(rad: Radix<T>, lpath: string[]) {
     const kvs = _.toPairs(rad);
     _(kvs).each(([k, v]) => {

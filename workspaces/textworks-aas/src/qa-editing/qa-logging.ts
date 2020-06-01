@@ -83,7 +83,11 @@ export function writeDefaultEntryLogs(
       .map(l => l.split(":"))
       .map(la => la[1])[0];
 
-    if (maybeContentType.includes('html')) {
+    if (maybeContentType === undefined) {
+      log.append(`entry.contentType=error`);
+    }
+
+    if (maybeContentType && maybeContentType.includes('html')) {
       log.append(`entry.contentType=html`);
       if (! fs.existsSync(responseBodyHtml)) {
         console.log('copying response_body to download.html');
@@ -137,3 +141,31 @@ export function createFilteredLogStream(
     }),
   );
 }
+
+// div.main-container > div > p.abstract
+
+//     div .main-container
+//       div
+//         h2 .subtitle
+//           | Icebreaker: Element-wise Efficient Information Acquisition with a Bayesian Deep Latent Gaussian Model
+//
+//         a href='/paper/9621-icebreaker-element-wise-efficient-information-acquisition-with-a-bayesian-deep-latent-gaussian-model.pdf'
+//           | [PDF]
+//         a href='/paper/9621-icebreaker-element-wise-efficient-information-acquisition-with-a-bayesian-deep-latent-gaussian-model/bibtex'
+//           | [BibTeX]
+//         h3
+//           | Authors
+//         ul .authors
+//           li .author
+//             a href='/author/wenbo-gong-14924'
+//               | Wenbo Gong
+//           li .author
+//             a href='/author/sebastian-tschiatschek-7386'
+//               | Sebastian Tschiatschek
+//         h3
+//           | Abstract
+//         p .abstract
+//           | In this paper, we address the ice-start problem, i.e., the challenge of deploying machine learning models when only a little or no training data is initially available, and acquiring each feature element of data is asso
+
+
+
