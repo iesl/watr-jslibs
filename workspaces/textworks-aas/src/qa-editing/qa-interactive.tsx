@@ -1,7 +1,7 @@
 //
 import _ from "lodash";
-import React, {useState} from "react";
-import {Text, Box, Color, useInput, useApp} from "ink";
+import React, { useState } from "react";
+import { Text, Box, Color, useInput, useApp } from "ink";
 import * as ink from "ink";
 export type KeyDef = [string, () => void];
 import { ListedItem } from "ink-multi-select";
@@ -30,7 +30,7 @@ interface RuleSelection extends ListedItem {
 
 const CleaningRules: React.FC<CleaningRulesArgs> = ({ cleaningRules, abstractStr }: CleaningRulesArgs) => {
 
-  const items  = _.map(cleaningRules, (rule, i) => {
+  const items = _.map(cleaningRules, (rule, i) => {
     const ruleDidMatch = rule.precondition(abstractStr);
     const label = `${rule.name} matches=${ruleDidMatch}`
     let rgb: [number, number, number] = [255, 255, 255];
@@ -46,7 +46,7 @@ const CleaningRules: React.FC<CleaningRulesArgs> = ({ cleaningRules, abstractStr
   });
 
   return (
-    <Box flexDirection="column"> { items } </Box>
+    <Box flexDirection="column"> {items} </Box>
   );
 };
 
@@ -57,8 +57,34 @@ interface RunInteractive {
   logger: BufferedLogger;
 }
 
+/* import * as React from 'react'; */
+/* import { StdinContext } from 'ink'; */
+
+/* export const useStdin = (handleInput: (input: string) => void) => {
+ *   const { stdin, setRawMode } = React.useContext(StdinContext);
+ *
+ *   React.useEffect(() => {
+ *     setRawMode(true);
+ *     stdin.on('data', handleInput);
+ *
+ *     return () => {
+ *       stdin.removeListener('data', handleInput);
+ *       setRawMode(false);
+ *     };
+ *   });
+ * };
+ *  */
 const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: RunInteractive) => {
-  const {exit} = useApp();
+  /* const { setRawMode } = useStdin(); */
+
+  /* useEffect(() => {
+   *   setRawMode(true);
+   *   return () => {
+   *     setRawMode(false);
+   *   };
+   * });
+   */
+  const { exit } = useApp();
 
   const okAndNext = () => {
     logger.append('field.abstract.clean=true');
@@ -101,6 +127,7 @@ const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: R
       whichKey[1]();
     }
   });
+
   const viewWidth = 200;
   const rawAbsViewHeight = 15;
   const cleanAbsViewHeight = 10;
@@ -123,7 +150,7 @@ const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: R
 
       <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={cleanAbsViewHeight} >
         <Color bold blue>
-          <Text>{ clippedCleanAbs }</Text>
+          <Text>{clippedCleanAbs}</Text>
         </Color>
       </Box>
 
@@ -131,7 +158,7 @@ const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: R
 
       <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={rawAbsViewHeight} >
         <Color bold blue>
-          <Text>{ clippedAbs }</Text>
+          <Text>{clippedAbs}</Text>
         </Color>
       </Box>
 
@@ -149,13 +176,12 @@ const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: R
   );
 };
 
+import readline from 'readline';
 
 export function runInteractive({ abstractStr, cleaningRules, logger }: RunInteractive): Promise<void> {
   process.stdout.write(ansiEscapes.clearTerminal);
   process.stdout.write(ansiEscapes.clearScreen);
   process.stdout.write(ansiEscapes.cursorDown(1));
-  /* prettyPrint({ abstractStr, cleaningRules, }); */
-
 
   const app = ink.render(
     <App

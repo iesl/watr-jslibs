@@ -210,10 +210,10 @@ export async function runAbstractCleanerOnScrapyCache(
     // sliceStream(0, 20),
     expandDirTrans,
     throughFunc((expDir: ExpandedDir) => {
-      prettyPrint({ msg: 'cleanExtractedAbstract...' });
+      // prettyPrint({ msg: 'cleanExtractedAbstract...' });
       return cleanExtractedAbstract(expDir, {
         logger: logger,
-        interactive: false,
+        interactive: true,
         urlGraph,
         csvLookup
       });
