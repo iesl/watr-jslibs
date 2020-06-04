@@ -31,7 +31,6 @@ export async function cleanExtractedAbstract(entryDir: ExpandedDir, env: ReviewE
   return;
 }
 
-
 export interface CleaningRule {
   name: string;
   precondition(str: string): boolean;
@@ -78,44 +77,6 @@ const CleaningRules: CleaningRule[] = [
       return strim.replace(regex, "");
     }
   },
-  {
-    name: "clip @ 'Full Text: PDF'",
-    precondition: (str) => {
-      const regex = /(Full Text:).*$/;
-      const strim = str.trim();
-      return regex.test(strim);
-    },
-    run: (str) => {
-      const regex = /(Full Text:).*$/;
-      const strim = str.trim();
-      return strim.replace(regex, "");
-    }
-  },
-  {
-    name: "clip @ 'Related Material'",
-    precondition: (str) => {
-      const regex = /Related Material/;
-      const strim = str.trim();
-      return regex.test(strim);
-    },
-    run: (str) => {
-      const regex = /Related Material.*$/;
-      const strim = str.trim();
-      return strim.replace(regex, "");
-    }
-  },
-
-  {
-    name: "No Abstract Available",
-    precondition: (str) => {
-      const regex = /no abstract available/i;
-      const strim = str.trim();
-      return regex.test(strim);
-    },
-    run: () => {
-      return '';
-    }
-  },
 
   {
     name: "starts w/non-word",
@@ -126,6 +87,20 @@ const CleaningRules: CleaningRule[] = [
     run: (str) => {
       const strim = str.trim();
       return strim.replace(/^\W+/i, "");
+    }
+  },
+
+  {
+    name: "clip @ Cite This Paper",
+    precondition: (str) => {
+      const regex = /Cite This Paper Abstract/i;
+      return regex.test(str);
+    },
+    run: (str) => {
+      const regex = /Cite This Paper Abstract/i;
+      let [, post] = str.split(regex);
+      post = post? post.trim() : '';
+      return post;
     }
   },
 
@@ -190,16 +165,88 @@ const CleaningRules: CleaningRule[] = [
       return str.split('\n').join(' ');
     }
   },
+ 
   {
     name: "abstract too short",
     precondition: (str) => {
-      return str.length < 120;
+      return str.length < 200;
+    },
+    run: () => ''
+  },
+
+  {
+    name: "clip @ 'Full Text: PDF'",
+    precondition: (str) => {
+      const regex = /(Full Text:).*$/;
+      const strim = str.trim();
+      return regex.test(strim);
     },
     run: (str) => {
-      if (str.length < 120) {
-        return '';
-      }
-      return str;
+      const regex = /(Full Text:).*$/;
+      const strim = str.trim();
+      return strim.replace(regex, "");
+    }
+  },
+  {
+    name: "clip @ 'Related Material'",
+    precondition: (str) => {
+      const regex = /Related Material/;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: (str) => {
+      const regex = /Related Material.*$/;
+      const strim = str.trim();
+      return strim.replace(regex, "");
+    }
+  },
+
+  {
+    name: "clip before /Graphical abstract Download/",
+    precondition: (str) => {
+      const regex = /Graphical abstract Download/i;
+      return regex.test(str);
+    },
+    run: (str) => {
+      const regex = /Graphical abstract Download/i;
+      let [pre,] = str.split(regex);
+      pre = pre? pre.trim() : '';
+      return pre;
+    }
+  },
+
+  {
+    name: "Catch-alls: e.g., /^Home Page Papers|^Complexity/..",
+    precondition: (str) => {
+      const regexes = [
+        /Home Page Papers/i,
+        /Complexity . Journal Menu/,
+        /no abstract available/i,
+        /^Download.Article/i,
+        /Open Access Article/i,
+        /For authors For reviewers/,
+        /Banner art adapted from/i,
+        /a collection of accepted abstracts/i,
+      ];
+      const strim = str.trim();
+      return regexes.some(re => re.test(strim));
+    },
+    run: () => {
+      return '';
+    }
+  },
+  {
+    name: "/Home Archives/ >> maybe /Abstract.*/",
+    precondition: (str) => {
+      const regex = /^Home Archives/;
+      const strim = str.trim();
+      return regex.test(strim);
+    },
+    run: (str) => {
+      const regex = /Abstract/;
+      let [, post] = str.split(regex);
+      post = post? post.trim() : '';
+      return post;
     }
   },
 ];
@@ -232,10 +279,12 @@ export async function cleanAbstractNonInteractive(logger: BufferedLogger, entryD
   const abstractStrs: Array<TupleSSN> =
     _(abstractFilesWithFields)
       .flatMap(([filename, fields]) => {
+        // console.log('cleanAbstractNonInteractive', entryDir.dir, fields);
         return _.map(fields, (f, i) => [filename, f.value, i] as TupleSSN)
           .filter(([, v]) => v !== undefined);
       })
       .map(([fn, f, i]) => {
+        // console.log('cleanAbstractNonInteractive(2)', fn, f);
         const cleaned = applyCleaningRules(f ? f.trim() : "");
         return [fn, cleaned, i] as TupleSSN;
       })

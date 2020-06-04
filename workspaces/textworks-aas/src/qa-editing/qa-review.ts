@@ -11,20 +11,16 @@ import {
   stringStreamFilter,
   prettyPrint,
   expandDir,
+  streamPump,
   sliceStream
 } from "commons";
 
-
 import { gatherAbstractFiles } from "~/corpora/bundler";
 import { extractAbstractTransformFromScrapy } from "~/extract/field-extract-abstract";
-
 import { Readable } from "stream";
-
-import {
-  initLogger,
-} from "./qa-logging";
-
+import { initLogger, } from "./qa-logging";
 import { readScrapyLogs, readOrderCsv, InputRec } from '~/openreview/workflow';
+import { cleanExtractedAbstract } from '~/extract/qa-review-abstracts';
 
 export function sanityCheckAbstract(log: BufferedLogger, entryDir0: ExpandedDir): void {
   const entryDir = expandDir(entryDir0.dir)
@@ -104,8 +100,6 @@ function scrapyCacheDirs(corpusRoot: string): Readable {
   return corpusDirStream.pipe(entryDirFilter);
 }
 
-import { streamPump } from 'commons';
-import { cleanExtractedAbstract } from '~/extract/qa-review-abstracts';
 
 
 export async function createCSVOrderLookup(csvFile: string): Promise<Dictionary<InputRec>> {
@@ -189,6 +183,7 @@ export async function runAbstractFinderOnScrapyCache(
   });
 }
 
+
 export async function runAbstractCleanerOnScrapyCache(
   cacheRoot: string,
   logpath: string,
@@ -200,20 +195,20 @@ export async function runAbstractCleanerOnScrapyCache(
   console.log('constructed url graph');
 
   const csvLookup = await createCSVOrderLookup(csvFile);
-  console.log('constructed csv lookup');
+  const keylen = _.keys(csvLookup).length;
+  const sample = _.toPairs(csvLookup).slice(0, 100);
+  console.log('constructed csv lookup, len=', keylen, sample);
 
   const entryStream = scrapyCacheDirs(cacheRoot);
   const logger = initLogger(logpath, "abstract-cleaner-b", true);
 
   const pipe = pumpify.obj(
     entryStream,
-    // sliceStream(0, 20),
     expandDirTrans,
     throughFunc((expDir: ExpandedDir) => {
-      // prettyPrint({ msg: 'cleanExtractedAbstract...' });
       return cleanExtractedAbstract(expDir, {
         logger: logger,
-        interactive: true,
+        interactive: false,
         urlGraph,
         csvLookup
       });
@@ -237,29 +232,3 @@ export async function runAbstractCleanerOnScrapyCache(
       })
   });
 }
-
-// export function sanityCheckCorpusAbstracts({
-//   corpusRoot,
-//   logpath,
-// }: Pick<ReviewCorpusArgs, "corpusRoot" | "logpath">): Promise<void> {
-//   const entryStream = corpusEntryStream(corpusRoot);
-//   const logger = initLogger(logpath, "init");
-//   const reviewFunc = _.curry(reviewEntry)(logger);
-//   const pipe = pumpify.obj(
-//     entryStream,
-//     // sliceStream(0, 100),
-//     progressCount(500),
-//     expandDirTrans,
-//     tapStream(reviewFunc),
-//   );
-
-//   return new Promise((resolve) => {
-//     pipe.on("end", () => {
-//       console.log('finished sanityCheckCorpusAbstracts');
-//       logger.commitAndClose()
-//         .then(() => resolve());
-//     });
-
-//     pipe.on("data", () => undefined);
-//   });
-// }

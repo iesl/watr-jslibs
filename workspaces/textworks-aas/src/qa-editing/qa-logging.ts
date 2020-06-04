@@ -6,7 +6,7 @@ import pumpify from "pumpify";
 import es from "event-stream";
 import urlparse from "url-parse";
 
-import { initBufferedLogger, BufferedLogger } from "commons";
+import { initBufferedLogger, BufferedLogger, newFileStreamTransport, prettyPrint } from "commons";
 import { filterStream } from "commons";
 import { ExpandedDir } from "commons";
 import { ReviewEnv } from '~/extract/qa-review-abstracts';
@@ -28,7 +28,29 @@ export function initLogger(logpath: string, phase: string, append = false): Buff
       );
     }
   }
-  return initBufferedLogger(logname);
+  const fst = () => newFileStreamTransport(logpath)
+  return initBufferedLogger(logname, [fst]);
+}
+
+interface MetaFile {
+  url: string;
+  responseUrl: string;
+  status: number;
+}
+
+export function readMetaFile(metafile: string): MetaFile | undefined {
+  if (! fs.existsSync(metafile)) return;
+
+  const metaPropsBuf = fs.readFileSync(metafile);
+  const metaPropsStr = metaPropsBuf.toString();
+  const fixed = _.replace(metaPropsStr, /'/g, '"');
+  const metaProps = JSON.parse(fixed);
+  const { url, response_url, status } = metaProps;
+  return {
+    url,
+    status,
+    responseUrl: response_url,
+  };
 }
 
 export function writeDefaultEntryLogs(
@@ -39,25 +61,26 @@ export function writeDefaultEntryLogs(
   const propfile = path.join(entryDir.dir, "entry-props.json");
   const metafile = path.join(entryDir.dir, "meta");
 
-  log.setHeader("entry", entryDir.dir);
+  log.append(`entry.dir=${entryDir.dir}`);
+  const metaProps = readMetaFile(metafile);
 
-  if (fs.existsSync(metafile)) {
-    const metaPropsBuf = fs.readFileSync(metafile);
-    const metaPropsStr = metaPropsBuf.toString();
-    const fixed = _.replace(metaPropsStr, /'/g, '"');
-    const metaProps = JSON.parse(fixed);
-    const { url, response_url } = metaProps;
+  if (metaProps) {
+    const { url, responseUrl } = metaProps;
     const urlp = urlparse(url);
     log.append(`entry.url=${url}`);
     log.append(`entry.url.host=${urlp.host}`);
-    log.append(`entry.response_url=${response_url}`);
+    log.append(`entry.response_url=${responseUrl}`);
     // get the original url from the meta/csv
+    const fallbackUrl = env.csvLookup[url];
+    let maybeOriginalUrl = [fallbackUrl];
 
     const fetchChain = env.urlGraph.getUrlFetchChain(url);
-    const maybeOriginalUrl = _.map(fetchChain, furl => env.csvLookup[furl])
-      .filter(d => d !== undefined);
+    if (!fallbackUrl) {
+      maybeOriginalUrl = _.map(fetchChain, furl => env.csvLookup[furl])
+        .filter(d => d !== undefined);
+    }
 
-    // prettyPrint({ maybeOriginalUrl });
+    // prettyPrint({ metaProps, fallbackUrl, maybeOriginalUrl, fetchChain });
 
     if (maybeOriginalUrl.length>0) {
       const originalRec = maybeOriginalUrl[0];
@@ -141,31 +164,3 @@ export function createFilteredLogStream(
     }),
   );
 }
-
-// div.main-container > div > p.abstract
-
-//     div .main-container
-//       div
-//         h2 .subtitle
-//           | Icebreaker: Element-wise Efficient Information Acquisition with a Bayesian Deep Latent Gaussian Model
-//
-//         a href='/paper/9621-icebreaker-element-wise-efficient-information-acquisition-with-a-bayesian-deep-latent-gaussian-model.pdf'
-//           | [PDF]
-//         a href='/paper/9621-icebreaker-element-wise-efficient-information-acquisition-with-a-bayesian-deep-latent-gaussian-model/bibtex'
-//           | [BibTeX]
-//         h3
-//           | Authors
-//         ul .authors
-//           li .author
-//             a href='/author/wenbo-gong-14924'
-//               | Wenbo Gong
-//           li .author
-//             a href='/author/sebastian-tschiatschek-7386'
-//               | Sebastian Tschiatschek
-//         h3
-//           | Abstract
-//         p .abstract
-//           | In this paper, we address the ice-start problem, i.e., the challenge of deploying machine learning models when only a little or no training data is initially available, and acquiring each feature element of data is asso
-
-
-

@@ -46,9 +46,12 @@ export async function collectAbstractExtractionStats(
 
 export function getLogEntry(key: string, entries: string[]): string | undefined {
   const fs = entries
-    .filter(e => e.includes(key))
-    .map(e => e.split("="))
-    .map(([, v]) => v);
+    .filter(e => e.includes(`${key}=`))
+    .map(e => {
+      const i = e.indexOf("=");
+      const v = e.slice(i+1);
+      return v;
+    });
 
   return fs.length > 0 ? fs[0] : undefined;
 }

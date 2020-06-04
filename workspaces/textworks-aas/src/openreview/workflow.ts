@@ -8,6 +8,7 @@ import {
   createConsoleLogger,
   createReadLineStream,
   filterStream,
+  csvStream,
 } from "commons";
 
 import { openDatabase, Database } from './database';
@@ -44,13 +45,18 @@ export function splitCSVRecord(rec: string): InputRec {
 }
 
 export function readOrderCsv(csvfile: string): Stream {
-  const inputStream = createReadLineStream(csvfile)
-
+  const inputStream = csvStream(csvfile);
 
   return pumpify.obj(
     inputStream,
-    filterStream((r: string) => r.trim().length > 0),
-    throughFunc(splitCSVRecord),
+    // filterStream((r: string) => r.trim().length > 0),
+    // throughFunc(splitCSVRecord),
+    throughFunc((csvRec: string[]) => {
+      const [noteId, dblpConfId, title, url, authorId] = csvRec;
+      return {
+        noteId, dblpConfId, url, title
+      };
+    }),
   );
 }
 

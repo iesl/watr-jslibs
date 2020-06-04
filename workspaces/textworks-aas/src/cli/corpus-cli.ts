@@ -2,7 +2,7 @@ import _ from "lodash";
 
 import path from "path";
 import yargs from "yargs";
-import { arglib } from "commons";
+import { arglib, prettyPrint } from "commons";
 
 import { runAbstractFinderOnScrapyCache, runAbstractCleanerOnScrapyCache } from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
@@ -53,14 +53,15 @@ yargs.command(
   config(
     opt.cwd,
     opt.existingDir("corpus-root: root directory for corpus files"),
+    opt.existingFile("from-log: ..."),
   ),
   (args: any) => {
 
-    const { corpusRoot } = args;
-    const fromLogFile = 'qa-review-abstract-cleaner-log.json';
-    const fromLog = path.resolve(corpusRoot, fromLogFile);
+    const { corpusRoot, fromLog } = args;
+    // const fromLogFile = 'qa-review-abstract-cleaner-log.json';
     const toFile = path.resolve(corpusRoot, 'all-abstracts.json');
     const filters: string[] = [];
+    prettyPrint({ fromLog, toFile });
 
     collectAbstractExtractionStats(
       fromLog, toFile, filters

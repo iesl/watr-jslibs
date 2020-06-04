@@ -29,7 +29,7 @@ describe("Stream utils ", () => {
   }
 
 
-  it.only("process async throughput in order", async done => {
+  it("process async throughput in order", async done => {
     const astr = charStream("abc");
 
     const output: string[] = [];

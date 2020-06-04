@@ -1,24 +1,21 @@
 //
 import fs from "fs-extra";
 import path from "path";
-import pumpify from "pumpify";
 import through from "through2";
 
-import {Transform} from "stream";
+import { Transform } from "stream";
 
 import _ from "lodash";
-import * as cheerio from "cheerio";
 
-import {prettyPrint} from "commons";
+import { prettyPrint } from "commons";
 
 import {
-  corpusEntryStream,
-  expandDirTrans,
   ExpandedDir,
 } from "commons";
 
+import { cheerioLoad } from './field-extract-utils';
 
-type Attrs = {[k: string]: string};
+type Attrs = { [k: string]: string };
 
 function parseAttrs(attrs: Attrs): string[][] {
   const keys = _.keys(attrs);
@@ -72,6 +69,8 @@ function indentStrings(strs: string[], lpad: string | number): string[] {
   }
   return _.map(strs, str => p + str);
 }
+
+
 export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
   const finalTree: string[] = [];
 
@@ -106,6 +105,8 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
         attrsStr = _.join(attrstr0, " ");
       }
 
+      // prettyPrint({ depth, tn, tp, attrs });
+
       switch (tp) {
         case "tag": {
           const line = `${lpad}${tn} ${attrsStr}`;
@@ -114,7 +115,7 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
         }
 
         case "text": {
-          const d = node.data? node.data.trim() : undefined;
+          const d = node.data ? node.data.trim() : undefined;
           if (d && d.length > 0) {
             const lines = d.split("\n");
             const indentedLines = indentStrings(
@@ -129,7 +130,7 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
         case "comment": {
           const line = `${lpad}comment`;
           finalTree.push(line);
-          const d = node.data? node.data.trim() : undefined;
+          const d = node.data ? node.data.trim() : undefined;
           if (d && d.length > 0) {
             const lines = d.split("\n");
             const indentedLines = indentStrings(
@@ -153,7 +154,7 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
 }
 
 export function makeCssTreeNormalForm(htmlFile: string): string[] {
-  const $ = cheerio.load(htmlFile);
+  const $ = cheerioLoad(htmlFile);
   const root: Cheerio = $(":root");
   return makeCssTreeNormalFormFromNode(root);
 }
@@ -175,6 +176,18 @@ function mapHtmlTree(
   ) {
     f(elem, dpt, idx, sibs);
     const childs = elem.children;
+    // // dbg
+    // const tn = elem.tagName;
+    // const tp = elem["type"];
+    // const ccs = _.map(childs, c => {
+    //   const tn = c.tagName;
+    //   const tp = c["type"];
+    //   return `${tn}::${tp}`;
+    // });
+    // const ccsstr = _.join(ccs, " ; ");
+    // const xxxstr = `${dpt}. ${tn}:${tp}  >>  ${ccsstr}`;
+    // console.log('mapHtmlTree', xxxstr);
+
     if (childs) {
       const chsibs = childs.length;
       const chdpt = dpt + 1;
@@ -195,12 +208,12 @@ export function writeNormalizedHtml(htmlFile: string): void {
 
   const fileContent = readFile(htmlFile);
   if (!fileContent) {
-    prettyPrint({msg: "file could not be read"});
+    prettyPrint({ msg: "file could not be read" });
     return;
   }
 
   if (fileContent.length === 0) {
-    prettyPrint({msg: "file is empty"});
+    prettyPrint({ msg: "file is empty" });
     return;
   }
 

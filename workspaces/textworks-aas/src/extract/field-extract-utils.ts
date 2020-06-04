@@ -5,7 +5,7 @@ import * as cheerio from "cheerio";
 import { Field } from "./field-extract";
 
 import { makeCssTreeNormalFormFromNode } from "./reshape-html";
-import { prettyPrint } from 'commons/dist';
+import { prettyPrint } from 'commons';
 
 export function readFile(
   leading: string,
@@ -86,6 +86,19 @@ export function findSubContentAtIndex(
   return sub;
 }
 
+export function cheerioLoad(
+  fileContent: string,
+): CheerioStatic {
+  const $ = cheerio.load(fileContent, {
+    _useHtmlParser2: true,
+    recognizeSelfClosing: true,
+    normalizeWhitespace: false,
+    xmlMode: true,
+    decodeEntities: true
+  });
+  return $;
+}
+
 export function queryContent(
   query: string,
   fileContent: string,
@@ -94,7 +107,7 @@ export function queryContent(
     name: "abstract",
     evidence: `query=${query}`,
   };
-  const $ = cheerio.load(fileContent);
+  const $ = cheerioLoad(fileContent);
   return [field, $(query), $]
 }
 
@@ -124,22 +137,14 @@ export const defaultLineMatchOptions: LineMatchOptions = {
   evidenceEnd: [],
 };
 
-function _byLineMatch(
+export function getMatchingLines(
   evidence: string[],
   options: LineMatchOptions,
   cssNormLines: string[],
-): Field {
-  const { lineOffset, lineCount, indentOffset, evidenceEnd } = options;
-  const evType = _.join(_.map(evidence, (e) => `/${e}/`), "; ");
-
-  const field: Field = {
-    name: "abstract",
-    evidence: `line-match: ${evType}`
-  };
+): string[] {
+  const { lineOffset, lineCount, evidenceEnd } = options;
 
   const evidenceStartIndex = findIndexForLines(cssNormLines, evidence);
-
-  // prettyPrint({ msg: '_byLineMatch', evidenceStartIndex });
 
   if (evidenceStartIndex > -1) {
     const fromIndex = evidenceStartIndex + evidence.length + lineOffset;
@@ -150,19 +155,105 @@ function _byLineMatch(
       toIndex = findIndexForLines(cssNormLines, evidenceEnd, fromIndex);
     }
 
-    const searchWindow = cssNormLines.slice(fromIndex, toIndex);
-    // prettyPrint({ msg: '_byLineMatch', fromIndex, toIndex, searchWindow });
+    return cssNormLines.slice(fromIndex, toIndex);
+  }
+  return [];
+}
 
-    const sub = findSubContentAtIndex(
-      cssNormLines,
-      fromIndex,
-      toIndex,
-      indentOffset
+export function _byLineMatch(
+  evidence: string[],
+  options: LineMatchOptions,
+  cssNormLines: string[],
+): Field {
+  const { indentOffset } = options;
+  const evType = _.join(_.map(evidence, (e) => `/${e}/`), "; ");
+
+  const field: Field = {
+    name: "abstract",
+    evidence: `line-match: ${evType}`
+  };
+
+  const matchingLines = getMatchingLines(evidence, options, cssNormLines);
+  if (matchingLines.length === 0) return field;
+
+  const sub = findSubContentAtIndex(
+    matchingLines,
+    0,
+    matchingLines.length,
+    indentOffset
+  );
+
+  field.value = getSubtextOrUndef(sub);
+  return field;
+}
+
+type ExtractorFunction = (cssNormLines: string[], htmlContent: string, url?: string, responseCode?: number) => Partial<Field>;
+
+export function urlGuard(
+  urlTests: string[],
+  exf: ExtractorFunction
+): ExtractorFunction {
+  const utests = _.map(urlTests, t => new RegExp(t));
+  const haveUrlTests = utests.length > 0;
+
+  return (cssNormLines: string[], htmlContent: string, url?: string, responseCode?: number): Partial<Field> => {
+    const urlMatch = (
+      url === undefined
+      || !haveUrlTests
+      || _.some(utests, t => url && t.test(url))
     );
 
-    field.value = getSubtextOrUndef(sub);
+    if (responseCode !== 200) {
+      return {
+        error: `status code != 200 (was ${responseCode})`
+      };
+    }
+    if (urlMatch) {
+      const innerResult = exf(cssNormLines, htmlContent);
+      if (haveUrlTests) {
+        const testStr = _.join(_.map(urlTests, t => `/${t}/`), " ; ");
+        let expandedEvidence = `url [${testStr}]`;
+        expandedEvidence += innerResult.evidence ? innerResult.evidence + " ++ " : '';
+        innerResult.evidence = expandedEvidence;
+      }
+      return innerResult;
+    }
+    return {
+      complete: false
+    };
+  };
+}
+
+export function findInMeta(
+  evidence: string,
+): (str: string[]) => Field {
+
+  const opts = {
+    lineOffset: -1,
+    lineCount: 1,
+    indentOffset: 0,
+    evidenceEnd: [],
+  };
+  const ev = `^ *meta.+${evidence}`;
+
+  const field: Field = {
+    name: "abstract",
+    evidence: `meta field: ${evidence}`,
+  };
+
+  return (ss: string[]): Field => {
+    const res = getMatchingLines([ev], opts, ss);
+    const value = res[0];
+
+    if (value) {
+      const i = value.indexOf("='");
+      const ilast = value.lastIndexOf("'")
+      const justAbstract = value.slice(i + 2, ilast);
+
+      field.value = justAbstract;
+    }
+    return field;
   }
-  return field;
 }
 
 export function findByLineMatch(
@@ -184,49 +275,3 @@ export function getSubtextOrUndef(strs: string[]): string | undefined {
   }
   return undefined;
 }
-
-
-
-
-
-// function _byLineMatchZZ(
-
-//   evidence: string[],
-//   options: LineMatchOptions,
-//   cssNormLines: string[],
-// ): Field {
-//   const { lineOffset, lineCount, indentOffset, evidenceEnd } = options;
-
-//   const field: Field = {
-//     name: "abstract",
-//     evidence: _.join(evidence, " > "),
-//   };
-//   const index = findIndexForLines(cssNormLines, evidence);
-
-//   prettyPrint({ msg: '_byLineMatchEnd', index });
-
-//   if (index > -1) {
-//     let searchWindow = cssNormLines;
-//     let startIndex = index;
-//     let endIndex = lineCount > 0? startIndex + lineCount : cssNormLines.length;
-
-//     if (evidenceEnd.length > 0) {
-//       endIndex = findIndexForLines(cssNormLines, evidenceEnd, index+1);
-//     }
-//     searchWindow = cssNormLines.slice(startIndex, endIndex);
-//     prettyPrint({ msg: '_byLineMatchEnd', startIndex, endIndex });
-
-//     startIndex = 0;
-
-
-//     const sub = findSubContentAtIndex(
-//       searchWindow,
-//       startIndex + lineOffset,
-//       endIndex,
-//       indentOffset
-//     );
-
-//     field.value = getSubtextOrUndef(sub);
-//   }
-//   return field;
-// }

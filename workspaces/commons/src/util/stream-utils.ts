@@ -6,7 +6,6 @@ import { prettyPrint } from "./pretty-print";
 import es, { MapStream } from "event-stream";
 
 
-
 export function throughFunc<T, R>(
   f: (t: T, onerr?: (e: any) => void) => R,
 ): Transform {

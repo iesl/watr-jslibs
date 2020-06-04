@@ -57,33 +57,7 @@ interface RunInteractive {
   logger: BufferedLogger;
 }
 
-/* import * as React from 'react'; */
-/* import { StdinContext } from 'ink'; */
-
-/* export const useStdin = (handleInput: (input: string) => void) => {
- *   const { stdin, setRawMode } = React.useContext(StdinContext);
- *
- *   React.useEffect(() => {
- *     setRawMode(true);
- *     stdin.on('data', handleInput);
- *
- *     return () => {
- *       stdin.removeListener('data', handleInput);
- *       setRawMode(false);
- *     };
- *   });
- * };
- *  */
 const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: RunInteractive) => {
-  /* const { setRawMode } = useStdin(); */
-
-  /* useEffect(() => {
-   *   setRawMode(true);
-   *   return () => {
-   *     setRawMode(false);
-   *   };
-   * });
-   */
   const { exit } = useApp();
 
   const okAndNext = () => {
@@ -175,8 +149,6 @@ const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: R
     </Box>
   );
 };
-
-import readline from 'readline';
 
 export function runInteractive({ abstractStr, cleaningRules, logger }: RunInteractive): Promise<void> {
   process.stdout.write(ansiEscapes.clearTerminal);

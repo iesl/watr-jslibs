@@ -5,7 +5,6 @@ import through from "through2";
 import fs from "fs-extra";
 import { Field } from "~/extract/field-extract";
 
-
 import { makeCssTreeNormalFormFromNode, writeNormalizedHtml } from "./reshape-html";
 
 import {
@@ -14,16 +13,15 @@ import {
   getSubtextOrUndef,
   findByQuery,
   queryContent,
+  urlGuard,
+  findInMeta,
 } from "~/extract/field-extract-utils";
 
 import { prettyPrint, BufferedLogger, ExpandedDir, expandDir } from "commons";
-import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
+import { writeDefaultEntryLogs, readMetaFile } from '~/qa-editing/qa-logging';
 import { ReviewEnv } from './qa-review-abstracts';
 
-
-type PipelineFunction = (lines: string[], content: string) => Field;
-
-// export function extractMetaContent(cssNormLines: string[]): Field {}
+type PipelineFunction = (lines: string[], content: string, url?: string, httpStatus?: number) => Partial<Field>;
 
 export function findAbstractV2(cssNormLines: string[]): Field {
   const field = findByLineMatch(["global.document.metadata"], { lineOffset: -1, lineCount: 1 })(cssNormLines);
@@ -76,7 +74,29 @@ export function findAbstractV8(
   return field;
 }
 
+// "http://www.bmva.org/bmvc/2014/papers/paper025/index.html"
+
 export const AbstractPipeline: PipelineFunction[] = [
+  urlGuard(
+    ["oxfordscholarship.com"],
+    findInMeta('description content')
+  ),
+
+  urlGuard(
+    ["easychair.org"],
+    findByLineMatch(
+      ["h3", "| Abstract", "|"],
+      { lineOffset: -1 }
+    ),
+  ),
+  urlGuard(
+    ["www.igi-global.com"],
+    findByLineMatch(
+      ['span', 'h2', '| Abstract', '|'],
+      { lineOffset: -3 }
+    ),
+  ),
+
   findByQuery("div.hlFld-Abstract div.abstractInFull"),
   findByLineMatch(["div #abstract"]),
   findAbstractV2,
@@ -174,6 +194,7 @@ function extractAbstract(exDirInit: ExpandedDir, log: BufferedLogger): void {
 
   _.each(htmlFiles, htmlFile => {
     const extrAbsFilename = `${htmlFile}.ex.abs.json`;
+    const metafile = path.resolve(exDir.dir, 'meta');
 
     if (fs.existsSync(extrAbsFilename)) {
       console.log(
@@ -182,6 +203,14 @@ function extractAbstract(exDirInit: ExpandedDir, log: BufferedLogger): void {
       return;
     }
 
+    const metaProps = readMetaFile(metafile);
+
+    if (!metaProps) {
+      log.append(`error=NoMetaFileFound`);
+      return;
+    }
+
+    const { responseUrl, status } = metaProps;
     const fileBase = path.basename(htmlFile);
     log.append(`field.abstract.extract.file=${fileBase}`);
     console.log(`extracting abstract from ${htmlFile}`);
@@ -199,27 +228,25 @@ function extractAbstract(exDirInit: ExpandedDir, log: BufferedLogger): void {
     }
 
     const cssNormalForm = normFileContent.split("\n");
-    const fields = _.map(AbstractPipeline, (pf, pfNum) => {
-      const res = pf(cssNormalForm, htmlContent);
+
+    let resultField: Partial<Field> = {};
+
+    _.each(AbstractPipeline, (pf, pfNum) => {
+      const { value, complete } = resultField;
+      if (complete || value) return;
+
+      const res: Partial<Field> = pf(cssNormalForm, htmlContent, responseUrl, status);
       if (res.value !== undefined) {
+        resultField = res;
         log.append(`field.abstract.extract.method=${pfNum + 1}`);
       }
-      return res;
     });
 
-    const abstractFields: Field[] = fields.filter(f => f.value);
-
-    const writeAbstracts = true;
-
-    if (writeAbstracts) {
-      if (abstractFields.length > 0) {
-        console.log(`writing ${abstractFields.length} abstracts to ${extrAbsFilename}`);
-        log.append(`field.abstract.extract=true`);
-        log.append(`field.abstract.extract.count=${abstractFields.length}`);
-        fs.writeJsonSync(extrAbsFilename, abstractFields);
-      } else {
-        log.append(`field.abstract.extract=false`);
-      }
+    if (resultField.value !== undefined) {
+      log.append(`field.abstract.extract=true`);
+      fs.writeJsonSync(extrAbsFilename, [resultField]);
+    } else {
+      log.append(`field.abstract.extract=false`);
     }
     return;
   });

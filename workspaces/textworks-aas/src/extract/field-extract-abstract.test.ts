@@ -9,10 +9,37 @@ import fs from "fs-extra";
 import path from "path";
 
 import { prettyPrint } from "commons";
-import { stripMargin } from "./field-extract-utils";
+import { stripMargin, _byLineMatch, getMatchingLines } from "./field-extract-utils";
 
 describe("Abstract Field Extraction", () => {
   const testDirPath = './test/resources/htmls';
+
+  it.only("byLineMatch", () => {
+    const block = `
+html
+  head prefix='og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#'
+    link href='/assets/fec5338686fb0ac9089648624f85525a9c6ed51a/css/default.css' rel='stylesheet' type='text/css'
+    meta @citation_author content='Pascal Massart'
+    meta @citation_inbook_title content='Concentration Inequalities'
+    comment
+      ## End Google Scholar Citation
+    meta @description content='This monograph presents a mathematical theory of concentration inequalities ..'
+    meta content='Concentration Inequalities' property='http://purl.org/dc/terms/title' typeof='http://schema.org/Book'
+`;
+    const lines = block.split("\n");
+    const opts = {
+      lineOffset: -1,
+      lineCount: 1,
+      indentOffset: 0,
+      evidenceEnd: [],
+    };
+
+    const evidence = 'description content';
+    const ev = `^ *meta.+${evidence}`;
+    const res = getMatchingLines([ev], opts, lines);
+    prettyPrint({ res });
+
+  });
 
   it("should use jquery-like queries to pick out abstracts", () => {
     const htmlFiles = [
