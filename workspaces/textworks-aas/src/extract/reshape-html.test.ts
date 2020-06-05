@@ -25,7 +25,7 @@ describe("Normalize htmls", () => {
     prettyPrint({ htmlFile, lines });
   });
 
-  it.only("reshape.test.html", () => {
+  it("reshape.test.html", () => {
     const htmlFile = path.resolve(testDirPath, 'reshape.test.html');
     const htmlFileContent = fs.readFileSync(htmlFile);
 
@@ -38,5 +38,14 @@ describe("Normalize htmls", () => {
     // prettyPrint({ htmlFile, lines });
     console.log(lines);
   });
+
+  it("should handle self-closing tags", () => {
+    //
+  });
+
+  it("should handle script tags", () => {
+    //
+  });
+
 
 });

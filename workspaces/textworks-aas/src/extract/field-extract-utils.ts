@@ -106,7 +106,7 @@ export function queryContent(
 ): [Field, Cheerio, CheerioStatic] {
   const field: Field = {
     name: "abstract",
-    evidence: `query=${query}`,
+    evidence: `jquery:[${query}]`,
   };
   const $ = cheerioLoad(fileContent);
   return [field, $(query), $]
@@ -167,11 +167,11 @@ export function _byLineMatch(
   cssNormLines: string[],
 ): Field {
   const { indentOffset } = options;
-  const evType = _.join(_.map(evidence, (e) => `/${e}/`), "; ");
+  const evType = _.join(_.map(evidence, (e) => `/${e}/`), " _ ");
 
   const field: Field = {
     name: "abstract",
-    evidence: `line-match: ${evType}`
+    evidence: `lines:[${evType}]`
   };
 
   const matchingLines = getMatchingLines(evidence, options, cssNormLines);
@@ -212,9 +212,9 @@ export function urlGuard(
     if (urlMatch) {
       const innerResult = exf(cssNormLines, htmlContent);
       if (haveUrlTests) {
-        const testStr = _.join(_.map(urlTests, t => `/${t}/`), " ; ");
-        let expandedEvidence = `url [${testStr}]`;
-        expandedEvidence += innerResult.evidence ? innerResult.evidence + " ++ " : '';
+        const testStr = _.join(_.map(urlTests, t => `/${t}/`), " || ");
+        const priorEvidence = innerResult.evidence ? ` && ${innerResult.evidence}` : '';
+        const expandedEvidence = `url:[${testStr}]${priorEvidence}`;
         innerResult.evidence = expandedEvidence;
       }
       return innerResult;
@@ -239,7 +239,7 @@ export function findInMeta(
 
   const field: Field = {
     name: "abstract",
-    evidence: `meta field: ${evidence}`,
+    evidence: `meta:[${evidence}]`,
   };
 
   return (ss: string[]): Field => {

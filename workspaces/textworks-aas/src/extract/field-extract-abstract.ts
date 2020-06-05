@@ -72,11 +72,20 @@ export function findAbstractV7(
   return field;
 }
 
-// TODO: track how often a rule 'fires'
-// TODO: use titles to help find abstracts
+// TODO: track how often a rule 'fires' (use log entry which tracks evidence (as a string), and index#)
 // TODO: figure out how to review abstract finding filtered by rule/url/author/year/venue/etc
+//       : rule    filter=[(/evidence=/) && /meta/ && /@DCTerms/]
+//       : url
+//       : author
+//       : year
+//       : venue
+// TODO: use titles to help find abstracts
 // TODO: expand spidering to crawl sub-frames
 // TODO: extract titles, pdf links, author names
+// TODO: create REST API for openreview based on html extraction
+// TODO: handle multi-line findInMeta examples
+// TODO: maybe expand filtered log handling to automatically comb logs in reverse-creation order, and add a 'compact' function to trim and delete old entries
+// TODO: figure out if there is a better html parser for handling both self-closing and script tags properly
 
 
 export function findAbstractV8(
@@ -315,7 +324,7 @@ function extractAbstract(exDirInit: ExpandedDir, log: BufferedLogger): void {
       if (res.value !== undefined) {
         resultField = res;
         log.append(`field.abstract.extract.method=${pfNum + 1}`);
-        log.append(`field.abstract.extract.evidence=${res.evidence || 'none'}`);
+        log.append(`field.abstract.extract.evidence=${res.evidence || 'undefined'}`);
       }
     });
 
