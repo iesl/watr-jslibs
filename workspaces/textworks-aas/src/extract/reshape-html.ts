@@ -153,8 +153,8 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
   return finalTree;
 }
 
-export function makeCssTreeNormalForm(htmlFile: string): string[] {
-  const $ = cheerioLoad(htmlFile);
+export function makeCssTreeNormalForm(htmlFile: string, useXmlMode: boolean=true): string[] {
+  const $ = cheerioLoad(htmlFile, useXmlMode);
   const root: Cheerio = $(":root");
   return makeCssTreeNormalFormFromNode(root);
 }

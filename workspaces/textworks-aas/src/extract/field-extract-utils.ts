@@ -88,12 +88,13 @@ export function findSubContentAtIndex(
 
 export function cheerioLoad(
   fileContent: string,
+  useXmlMode: boolean = true
 ): CheerioStatic {
   const $ = cheerio.load(fileContent, {
     _useHtmlParser2: true,
     recognizeSelfClosing: true,
     normalizeWhitespace: false,
-    xmlMode: true,
+    xmlMode: useXmlMode,
     decodeEntities: true
   });
   return $;

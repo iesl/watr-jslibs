@@ -5,7 +5,7 @@ import through from "through2";
 import fs from "fs-extra";
 import { Field } from "~/extract/field-extract";
 
-import { makeCssTreeNormalFormFromNode, writeNormalizedHtml } from "./reshape-html";
+import { makeCssTreeNormalFormFromNode, writeNormalizedHtml, makeCssTreeNormalForm } from "./reshape-html";
 
 import {
   readFile,
@@ -15,6 +15,8 @@ import {
   queryContent,
   urlGuard,
   findInMeta,
+  cheerioLoad,
+  getMatchingLines,
 } from "~/extract/field-extract-utils";
 
 import { prettyPrint, BufferedLogger, ExpandedDir, expandDir } from "commons";
@@ -23,11 +25,23 @@ import { ReviewEnv } from './qa-review-abstracts';
 
 type PipelineFunction = (lines: string[], content: string, url?: string, httpStatus?: number) => Partial<Field>;
 
-export function findAbstractV2(cssNormLines: string[]): Field {
-  const field = findByLineMatch(["global.document.metadata"], { lineOffset: -1, lineCount: 1 })(cssNormLines);
+export function findAbstractV2(_cssNormLines: string[], htmlContent: string): Field {
+  const cssNormalForm = makeCssTreeNormalForm(htmlContent, /* useXmlMode= */ false)
+  // const field = findByLineMatch(["global.document.metadata"], { lineOffset: -1, lineCount: 1 })(cssNormLines);
+  const evidence = "global.document.metadata";
+  const opts = {
+    lineOffset: -1,
+    lineCount: 1,
+    indentOffset: 0,
+    evidenceEnd: [],
+  };
+  const res = getMatchingLines([evidence], opts, cssNormalForm);
+  const line = res[0];
+  const field: Field = {
+    name: "abstract",
+    evidence,
+  };
 
-  const line = field.value;
-  field.value = undefined;
   if (line) {
     const jsonStart = line.indexOf("{");
     const jsonEnd = line.lastIndexOf("}");
@@ -58,6 +72,13 @@ export function findAbstractV7(
   return field;
 }
 
+// TODO: track how often a rule 'fires'
+// TODO: use titles to help find abstracts
+// TODO: figure out how to review abstract finding filtered by rule/url/author/year/venue/etc
+// TODO: expand spidering to crawl sub-frames
+// TODO: extract titles, pdf links, author names
+
+
 export function findAbstractV8(
   _normLines: string[],
   fileContent: string,
@@ -77,9 +98,23 @@ export function findAbstractV8(
 // "http://www.bmva.org/bmvc/2014/papers/paper025/index.html"
 
 export const AbstractPipeline: PipelineFunction[] = [
+  //  oxfordscholarship.com
+  findInMeta('@description content'),
+
+  // teses.usp.br
+  findInMeta('@DCTERMS.abstract content'),
+
+  // spiedigitallibrary.org
+  findInMeta('@citation_abstract content'),
+
+  findInMeta('@DC.description content'),
+
   urlGuard(
-    ["oxfordscholarship.com"],
-    findInMeta('description content')
+    ["bmva.rog"],
+    findByLineMatch(
+      ["p", "h2", "| Abstract"],
+      { lineOffset: -2 }
+    ),
   ),
 
   urlGuard(
@@ -90,12 +125,50 @@ export const AbstractPipeline: PipelineFunction[] = [
     ),
   ),
   urlGuard(
-    ["www.igi-global.com"],
+    ["igi-global.com"],
     findByLineMatch(
-      ['span', 'h2', '| Abstract', '|'],
-      { lineOffset: -3 }
+      ['span', 'h2', '| Abstract'],
+      { lineOffset: 0, evidenceEnd: ['footer'] }
     ),
   ),
+
+  urlGuard(
+    ["ijcai.org/Abstract"],
+    findByLineMatch(
+      ['|', 'p', '|'],
+      { lineOffset: -1, lineCount: 1 }
+    ),
+  ),
+
+  urlGuard(
+    ["etheses.whiterose.ac.uk"],
+    findByLineMatch(
+      ['h2', '| Abstract'],
+      { lineOffset: -1 }
+    ),
+  ),
+
+  urlGuard(
+    ["ndss-symposium.org/ndss-paper"],
+    findByLineMatch(
+      [' +|', ' +p', ' +p', ' +|'],
+      { lineOffset: 1 }
+    ),
+  ),
+
+  urlGuard(
+    ["openreview.net"],
+    findByLineMatch(
+      ['.note-content-field', '| Abstract', '.note-content-value'],
+      { lineOffset: 2 }
+    ),
+  ),
+
+  // www.lrec-conf.org/
+  findByLineMatch(['tr', 'td', '| Abstract', 'td']),
+
+  // eccc.weizmann.ac.il/report
+  findByLineMatch(['b', '| Abstract', 'br', 'p', '|'], { lineOffset: 3 }),
 
   findByQuery("div.hlFld-Abstract div.abstractInFull"),
   findByLineMatch(["div #abstract"]),
@@ -107,9 +180,18 @@ export const AbstractPipeline: PipelineFunction[] = [
 
   findByLineMatch(["div", "h3.*.label", "Abstract"]),
 
+  findByLineMatch(["div", "strong", "| Abstract"]),
+
+  findByLineMatch(["section .full-abstract", "h2",  "| Abstract"]),
+
   findByLineMatch(
     ["div.*#abstract", "h4", "Abstract"],
     { evidenceEnd: ["div.*#paperSubject", "h4", "Keywords"] }
+  ),
+
+  findByLineMatch(
+    ['div', 'h4', '| Abstract', 'p'],
+    { evidenceEnd: ['div'] }
   ),
 
   findAbstractV7,
@@ -161,12 +243,6 @@ export const AbstractPipeline: PipelineFunction[] = [
   findByLineMatch([".cPageSubtitle", "| Abstract"], {
     evidenceEnd: [".cPageSubtitle", "| \\w"],
   }),
-
-  // Maybe superceded by the one after
-  // findByLineMatch(["^ +p", "^ +b", "^ +| Abstract:"], {
-  //   indentOffset: -2,
-  //   lineCount: 1,
-  // }),
 
   findByLineMatch(["^ +p", "^ +b", "^ +| Abstract:"], {
     indentOffset: -2,
@@ -239,6 +315,7 @@ function extractAbstract(exDirInit: ExpandedDir, log: BufferedLogger): void {
       if (res.value !== undefined) {
         resultField = res;
         log.append(`field.abstract.extract.method=${pfNum + 1}`);
+        log.append(`field.abstract.extract.evidence=${res.evidence || 'none'}`);
       }
     });
 

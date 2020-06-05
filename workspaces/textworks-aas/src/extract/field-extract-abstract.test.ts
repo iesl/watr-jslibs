@@ -9,12 +9,12 @@ import fs from "fs-extra";
 import path from "path";
 
 import { prettyPrint } from "commons";
-import { stripMargin, _byLineMatch, getMatchingLines } from "./field-extract-utils";
+import { stripMargin, _byLineMatch, getMatchingLines, findByLineMatch } from "./field-extract-utils";
 
 describe("Abstract Field Extraction", () => {
   const testDirPath = './test/resources/htmls';
 
-  it.only("byLineMatch", () => {
+  it("byLineMatch", () => {
     const block = `
 html
   head prefix='og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# article: http://ogp.me/ns/article#'
@@ -34,7 +34,7 @@ html
       evidenceEnd: [],
     };
 
-    const evidence = 'description content';
+    const evidence = '@description content';
     const ev = `^ *meta.+${evidence}`;
     const res = getMatchingLines([ev], opts, lines);
     prettyPrint({ res });
@@ -86,16 +86,18 @@ html
 }`;
     const meta = _.join(_.split(metadata, "\n"), "");
     const block = `
-| html lang='en-US'
-|   body
-|     script[script] type='text/javascript'
-|       | var global = {};
-|       |   global.document.metadata=${meta}
-|       |
-|       |   global.document.userLoggedIn=true;
+<html>
+<body>
+<script>
+var global = {};
+  global.document.metadata=${meta}
+  global.document.userLoggedIn=true;
+</script>
+</body>
+</html>
 `;
-    const lines = stripMargin(block.split("\n"));
-    const fields = findAbstractV2(lines);
+    // const lines = stripMargin(block.split("\n"));
+    const fields = findAbstractV2([], block);
     expect(fields.value).toBeDefined;
     expect(fields.value).toMatch(/^TrueAbstract/);
   });
@@ -275,39 +277,37 @@ html .pb-page data-request-id='3b7bbeb3-cd25-4eda-93e0-82cfd9aae72d' lang='en'
 
   });
 
+  it("should pick out abstracts #5", () => {
+    const block = `
+html lang='en-US' xml:lang='en-US' xmlns='http://www.w3.org/1999/xhtml'
+  body bgcolor='white'
+    div .col-xs-12
+      span #ctl00_ctl00_cphMain_cphSection_lblAbstract .margin-bottom-10
+        h2 .margin-top-15
+          | Abstract
+        | TrueAbstract In text-based communication, which lacks nonverbal cues, various techniques..
+        div #sample .xml-reader-bookstore
+          div .preview-footer
+            a href='#title-recommendation-form'
+              | Request access from your librarian to read this article's full text.
+      div #divPreview .inline-block-100 .margin-bottom-30
+      div #loading-preview .text-align-center
+        div .loading-icon-lg
+`;
+
+    const lines = block.split("\n");
+
+    const extractFn = findByLineMatch(
+      ['span', 'h2', '| Abstract'],
+      { lineOffset: 0, evidenceEnd: ['footer'] }
+    );
+    const field = extractFn(lines)
+
+    // prettyPrint({ res });
+    // expect(fields.length).toBe(1);
+    // const field = fields[0];
+    expect(field.value).toBeDefined;
+    expect(field.value).toMatch(/^TrueAbstract/);
+  });
 });
 
-//     // |   div .article__body
-//     // |     comment
-//     // |       ## abstract content
-//     // |     div .hlFld-Abstract
-//     // |       div
-//     // |         div .colored-block__title
-//     // |           h2 #d2985811e1
-//     // |             | ABSTRACT
-//     // |         div .left-side-image
-//     // |           img .key-image src='/cms/attachment/fea4e252-79b2-46c7-bb85-01fec3e28750/3375627.3375832.key.jpg'
-//     // |         div
-//     // |           p
-//     // |             | TrueAbstract The ethical concept of fairness has recently been applied in machine learning (ML) settings to describe a wide range of constraints and objectives. When considering the relevance of ethical concepts to
-//     const block = `
-// | html lang='en-US'
-// |   head
-// |   body
-// |     div .article__body
-// |       comment
-// |         ## abstract content
-// |       div .hlFld-Abstract
-// |         div
-// |           div .colored-block__title
-// |             h2 #d1375649e1
-// |               | ABSTRACT
-// |           p
-// |             | TrueAbstract: Service descriptions allow designers to document, understand, and use services, creating new useful and complex services with aggregated business value. Unlike RPC-based services, REST characteristics require a different approach to service description. W
-// |             i
-// |               | Resource Linking Language (ReLL)
-// |             | that introduces the concepts of media types, resource types, and link types as first class citizens for a service description. A proof of concept, a crawler called
-// |             i
-// |               | RESTler
-// |             | that crawls RESTful services based on ReLL descriptions, is also presented.
-// `;
