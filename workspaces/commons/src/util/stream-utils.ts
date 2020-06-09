@@ -3,19 +3,18 @@ import fs from "fs-extra";
 import through from "through2";
 import { Transform, Readable } from "stream";
 import { prettyPrint } from "./pretty-print";
-import es, { MapStream } from "event-stream";
+import split from 'split';
 
+export interface WithEnv<T, E> {
+  kind: 'WithEnv';
+  t: T;
+  env: E
+}
 
-export function throughFunc<T, R>(
-  f: (t: T, onerr?: (e: any) => void) => R,
-): Transform {
-  return through.obj(
-    (chunk: T, _enc: string, next: (err: any, v: any) => void) => {
-      const res = f(chunk, (err: any) => next(err, null));
-      Promise.resolve(res)
-        .then((res) => next(null, res));
-    },
-  );
+// eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
+export function isWithEnv(a: any): a is WithEnv<any, any> {
+  const isObject = typeof a === 'object';
+  return isObject && 'kind' in a && a['kind'] === 'WithEnv';
 }
 
 export function throughFuncPar<T, R, E>(
@@ -58,24 +57,21 @@ export function throughFuncPar<T, R, E>(
           _.each(res, (r: R, i: number) => this.push([r, envs[i]]));
         })
         .then(() => cb())
-      ;
+        ;
     },
   );
   return chunker;
 }
 
-export function tapStream<T>(f: (t: T, i?: number) => void): Transform {
-  let currIndex = -1;
-
+export function tapStream<T, Env>(f: (t: T, env: Env) => void): Transform {
   return through.obj(
-    (data: T, _enc: string, next: (err: any, v: any) => void) => {
-      currIndex++;
-      f(data, currIndex);
-      return next(null, data);
-    },
+    (chunk: T | WithEnv<T, Env>, _enc: string, next: (err: any, v: any) => void) => {
+      const [t, env] = unEnv(chunk);
+      f(t, env);
+      return next(null, chunk);
+    }
   );
 }
-
 
 export function initEnv<T, E>(
   f: (t: T) => E,
@@ -84,35 +80,31 @@ export function initEnv<T, E>(
     (chunk: T, _enc: string, next: (err: any, v: any) => void) => {
       const initEnv = f(chunk);
       Promise.resolve(initEnv)
-        .then((env) => next(null, [chunk, env]));
-    },
+        .then((env) => next(null, { kind: 'WithEnv', env, t: chunk }));
+    }
   );
 }
 
-export function throughEnvFunc<T, R, E>(
-  f: (t: T, env: E, currTransform: Transform) => R,
+export function throughFunc<T, R, E>(
+  f: (t: T, env: E) => R,
 ): Transform {
   return through.obj(
-    function(chunk: [T, E], _enc: string, next: (err: any, v: any) => void) {
-      const self = this;
-      const [tchunk, env] = chunk;
-      const res = f(tchunk, env, self);
-      Promise.resolve(res)
-        .then((res) => next(null, [res, env]));
-    },
+    function(chunk: T | WithEnv<T, E>, _enc: string, next: (err: any, v: any) => void) {
+      if (isWithEnv(chunk)) {
+        const { t, env } = chunk;
+        const res = f(t, env);
+        Promise.resolve(res)
+          .then((res) => next(null, { kind: 'WithEnv', env, t: res }));
+
+        return;
+      }
+      const z: E = null as any as E;
+      Promise.resolve(f(chunk, z))
+        .then((res) => next(null, res));
+    }
   );
 }
 
-export function filterEnvStream<T, E>(f: (t: T, env: E) => boolean): Transform {
-  return through.obj(
-    (chunk: [T, E], _enc: string, next: (err: any, v: any) => void) => {
-      const [tchunk, env] = chunk;
-      const res = f(tchunk, env);
-      Promise.resolve(res)
-        .then((res) => res ? next(null, [tchunk, env]) : next(null, null));
-    },
-  );
-}
 
 export function throughAccum<T, Acc>(
   f: (acc: Acc, t: T, onerr?: (e: any) => void) => Acc,
@@ -139,17 +131,43 @@ export function handlePumpError(error: Error): void {
   }
 }
 
-export function filterStream<T>(f: (t: T) => boolean): Transform {
-  return through.obj(
-    (data: T, _enc: string, next: (err: any, v: any) => void) => {
-      if (f(data)) {
-        return next(null, data);
-      }
-      return next(null, null);
-    },
-  );
+export function unEnv<T, Env>(tdata: T | WithEnv<T, Env>): [T, Env] {
+  let t: T;
+  let env: Env;
+  if (isWithEnv(tdata)) {
+    t = tdata.t;
+    env = tdata.env;
+  } else {
+    t = tdata;
+    env = null as any as Env;
+  }
+
+  return [t, env];
 }
 
+export function filterStream<T, Env>(f: (t: T, env: Env) => boolean): Transform {
+  return through.obj(
+    function(chunk: T | WithEnv<T, Env>, _enc: string, next: (err: any, v: any) => void) {
+      let chunkData: T;
+      let z: Env;
+      if (isWithEnv(chunk)) {
+        chunkData = chunk.t;
+        z = chunk.env;
+      } else {
+        chunkData = chunk;
+        z = null as any as Env;
+      }
+
+      const res = f(chunkData, z);
+      if (res) {
+        next(null, chunk);
+        return;
+      }
+      next(null, null);
+    }
+  );
+
+}
 
 export function prettyPrintTrans(msg: string): Transform {
   return through.obj(
@@ -192,9 +210,9 @@ export function progressCount(everyN?: number): Transform {
   );
 }
 
-export function createReadLineStream(filename: string): MapStream {
-  const str: es.MapStream = fs.createReadStream(filename).pipe(es.split());
-  return str;
+export function createReadLineStream(filename: string): Readable {
+  return fs.createReadStream(filename)
+    .pipe(split());
 }
 
 /**
@@ -286,8 +304,17 @@ export function arrayStream(arr: any[]): Readable {
 
 export async function promisifyReadableEnd(readStream: Readable): Promise<void> {
   return new Promise((resolve) => {
-    readStream.on('end', function () {
+    readStream.on('end', function() {
       resolve();
+    });
+    readStream.on("data", () => undefined);
+  });
+}
+
+export async function promisifyOn<T>(ev: string, readStream: Readable): Promise<T> {
+  return new Promise((resolve) => {
+    readStream.on(ev, function(d: T) {
+      resolve(d);
     });
   });
 }

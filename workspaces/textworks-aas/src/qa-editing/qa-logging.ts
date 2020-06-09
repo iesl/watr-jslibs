@@ -3,8 +3,8 @@ import path from "path";
 import fs from "fs-extra";
 import { Stream } from "stream";
 import pumpify from "pumpify";
-import es from "event-stream";
 import urlparse from "url-parse";
+import split from 'split';
 
 import { initBufferedLogger, BufferedLogger, newFileStreamTransport, prettyPrint } from "commons";
 import { filterStream } from "commons";
@@ -32,7 +32,7 @@ export function initLogger(logpath: string, phase: string, append = false): Buff
   return initBufferedLogger(logname, [fst]);
 }
 
-interface MetaFile {
+export interface MetaFile {
   url: string;
   responseUrl: string;
   status: number;
@@ -87,7 +87,6 @@ export function writeDefaultEntryLogs(
       const { noteId  } = originalRec;
       log.append(`entry.noteId=${noteId}`);
       log.append(`entry.url.original=${originalRec.url}`);
-      // log.append(`entry.venue.original=${originalRec.url}`);
     }
 
 
@@ -153,8 +152,7 @@ export function createFilteredLogStream(
 
   return pumpify.obj(
     logReader,
-    es.split(),
-    es.parse(),
+    split(JSON.parse),
 
     filterStream((chunk: any) => {
       if (filters.length === 0) return true;

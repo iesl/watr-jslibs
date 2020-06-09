@@ -15,7 +15,6 @@ import {
   queryContent,
   urlGuard,
   findInMeta,
-  cheerioLoad,
   getMatchingLines,
 } from "~/extract/field-extract-utils";
 
@@ -104,9 +103,9 @@ export function findAbstractV8(
   return field;
 }
 
-// "http://www.bmva.org/bmvc/2014/papers/paper025/index.html"
 
 export const AbstractPipeline: PipelineFunction[] = [
+
   //  oxfordscholarship.com
   findInMeta('@description content'),
 
@@ -267,9 +266,23 @@ export const AbstractPipeline: PipelineFunction[] = [
 
 ];
 
-function extractAbstract(exDirInit: ExpandedDir, log: BufferedLogger): void {
-  // Re-expand the directory
-  const exDir = expandDir(exDirInit.dir);
+// export function runAbstractFinders(exDir: ExpandedDir, log: BufferedLogger): void {
+//   let resultField: Partial<Field> = {};
+
+//   _.each(AbstractPipeline, (pf, pfNum) => {
+//     const { value, complete } = resultField;
+//     if (complete || value) return;
+
+//     const res: Partial<Field> = pf(cssNormalForm, htmlContent, responseUrl, status);
+//     if (res.value !== undefined) {
+//       resultField = res;
+//       log.append(`field.abstract.extract.method=${pfNum + 1}`);
+//       log.append(`field.abstract.extract.evidence=${res.evidence || 'undefined'}`);
+//     }
+//   });
+// }
+
+function extractAbstract(exDir: ExpandedDir, log: BufferedLogger): void {
   const entryBasename = path.basename(exDir.dir);
   log.append(`field.abstract.extract.entry=${entryBasename}`);
 

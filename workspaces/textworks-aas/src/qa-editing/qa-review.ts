@@ -21,6 +21,7 @@ import { Readable } from "stream";
 import { initLogger, } from "./qa-logging";
 import { readScrapyLogs, readOrderCsv, InputRec } from '~/openreview/workflow';
 import { cleanExtractedAbstract } from '~/extract/qa-review-abstracts';
+import { promisifyReadableEnd } from 'commons';
 
 export function sanityCheckAbstract(log: BufferedLogger, entryDir0: ExpandedDir): void {
   const entryDir = expandDir(entryDir0.dir)
@@ -130,6 +131,8 @@ export async function runAbstractFinderOnScrapyCache(
   scrapyLog: string,
   csvFile: string,
 ): Promise<void> {
+
+  // TODO: scrapy logging -> url db should be part of the spidering process
   const urlGraph = await readScrapyLogs(scrapyLog);
   // url graph tells us the original url from which a downloaded html comes from
   console.log('constructed url graph');
@@ -137,50 +140,25 @@ export async function runAbstractFinderOnScrapyCache(
   const csvLookup = await createCSVOrderLookup(csvFile);
   console.log('constructed csv lookup');
 
-  const entryStream = scrapyCacheDirs(cacheRoot);
+  const dirEntryStream = scrapyCacheDirs(cacheRoot);
   const logger = initLogger(logpath, "abstract-finder", true);
-  const logger2 = initLogger(logpath, "abstract-cleaner", true);
-  // const loggerClean = initLogger(logpath, "abstract-cleaner", true);
 
   const pipe = pumpify.obj(
-    entryStream,
-    // sliceStream(2000, 500),
+    dirEntryStream,
     expandDirTrans,
     extractAbstractTransformFromScrapy(logger, {
       logger,
       interactive: false,
       urlGraph,
       csvLookup
-    }),
-    throughFunc((expDir: ExpandedDir) => {
-      prettyPrint({ msg: 'cleanExtractedAbstract...' });
-      const reExp = expandDir(expDir.dir);
-      return cleanExtractedAbstract(reExp, {
-        logger: logger2,
-        interactive: false,
-        urlGraph,
-        csvLookup
-      });
-    }),
+    })
   );
 
   console.log('starting runAbstractFinderOnScrapyCache');
-
-  return new Promise((resolve) => {
-    pipe.on("end", () => {
+  return promisifyReadableEnd(pipe)
+    .then(() => {
       console.log('finished runAbstractFinderOnScrapyCache');
-      // logger.commitLogs();
-      resolve();
     });
-
-    pipe.on("data", () => undefined);
-  }).then(() => {
-    logger.commitAndClose()
-      .then(() => logger2.commitAndClose())
-      .then(() => {
-        console.log('done');
-      })
-  });
 }
 
 

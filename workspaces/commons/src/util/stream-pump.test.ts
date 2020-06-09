@@ -1,7 +1,12 @@
 import "chai";
 
+import _ from "lodash";
+
 import { createPump } from "./stream-pump";
 import { arrayStream } from './stream-utils';
+import { Readable } from "stream";
+import { prettyPrint } from './pretty-print';
+// import { prettyPrint } from './pretty-print';
 
 describe("Pump Builder", () => {
 
@@ -13,11 +18,8 @@ describe("Pump Builder", () => {
       .throughF((d) => parseInt(d))
       .onData((d) => {
         const n = expected.shift();
-        // prettyPrint({ msg: `data ${typeof d}: ${d} `, n });
         expect(d).toBe(n);
-      })
-      // .onEnd(() => prettyPrint({ msg: `done!` }))
-      ;
+      });
 
     const p = pumpBuilder.toPromise();
 
@@ -47,4 +49,102 @@ describe("Pump Builder", () => {
     pumpBuilder.start();
   });
 
+  const numberStream = (start: number, end: number): Readable => {
+    return arrayStream(_.range(start, end));
+  }
+
+  it("should filter a stream", async done => {
+    const astr = numberStream(1, 10);
+    const expected = [2, 4, 6, 8];
+
+    const pumpBuilder = createPump()
+      .viaStream<number>(astr)
+      .filter(n => n % 2 === 0)
+      .gather()
+      .onData((d) => {
+        expect(d).toEqual(expected);
+      });
+
+    pumpBuilder.toPromise().then(() => done());
+  });
+
+  it("should include an Env", async done => {
+    const astr = numberStream(1, 10);
+    // const expected = [2, 4, 6, 8];
+
+    interface MyEnv {
+      accum: number;
+      msgs: string[];
+    }
+
+    const pumpBuilder = createPump()
+      .viaStream<number>(astr)
+      .initEnv<MyEnv>(() => ({ accum: 0, msgs:[] }))
+      .filter((n: number) => n % 2 === 0)
+      .throughF((n: number) =>  n + 1)
+      .throughF((n: number, env: MyEnv) => {
+        const msgs = env.msgs;
+        msgs.push(`iteration ${n}`);
+        return n;
+      })
+      .throughF((n: number) =>  n * 10)
+      .tap((n: number, env: MyEnv) => {
+        env.msgs.push(`iteration ${n}`);
+      })
+      .tap((n: number, env: MyEnv) => {
+        env.accum += n;
+      })
+      .onData((d) => {
+        // prettyPrint({ d });
+      });
+
+    pumpBuilder.toPromise().then(() => done());
+  });
+
+  it("should gather with or without an Env", async done => {
+    const astr = numberStream(1, 10);
+
+    interface MyEnv {
+      accum: number;
+    }
+
+    const pumpBuilder = createPump()
+      .viaStream<number>(astr)
+      .initEnv<MyEnv>(() => ({ accum: 0 }))
+      .filter((n: number) => n % 2 === 0)
+      .throughF((n: number) =>  n + 1)
+      .tap((n: number, env: MyEnv) => {
+        env.accum += n;
+      })
+      .gather()
+      .onData((d) => {
+        prettyPrint({ d });
+      });
+
+    pumpBuilder.toPromise().then(() => done());
+  });
+
+  it.only("should convert to promise that yield data", async done => {
+    const astr = numberStream(1, 10);
+
+    interface MyEnv {
+      accum: number;
+    }
+    const pumpBuilder = createPump()
+      .viaStream<number>(astr)
+      .initEnv<MyEnv>(() => ({ accum: 0 }))
+      .filter((n: number) => n % 2 === 0)
+      .throughF((n: number) =>  n + 1)
+      .tap((n: number, env: MyEnv) => {
+        env.accum += n;
+      })
+      .gather()
+    ;
+
+    const prom = pumpBuilder.toPromise();
+    prom.then((numbers: number[][]) => {
+      // prettyPrint({ numbers });
+      done();
+    })
+  });
 });

@@ -28,7 +28,6 @@ describe("Stream utils ", () => {
     })
   }
 
-
   it("process async throughput in order", async done => {
     const astr = charStream("abc");
 

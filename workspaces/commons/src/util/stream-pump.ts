@@ -1,37 +1,47 @@
 import _ from "lodash";
 import pumpify from "pumpify";
 import { Stream } from "stream";
-import { throughFunc, tapStream } from './stream-utils';
+import { throughFunc, tapStream, filterStream, throughAccum, initEnv, WithEnv, unEnv } from './stream-utils';
 
 /**
  * Convenience builder for stream processes
  */
-export interface PumpBuilder<ChunkT> {
+export interface PumpBuilder<ChunkT, Env> {
   streams: Stream[];
   onDataF?: (t: ChunkT) => void;
   onCloseF?: (err: Error) => void;
   onEndF?: () => void;
 
-  throughF<R>(f: (t: ChunkT) => Promise<R>): PumpBuilder<R>;
-  throughF<R>(f: (t: ChunkT) => R): PumpBuilder<R>;
-  // TODO throughTransform<R>(t: Transform): PumpBuilder<R>;
-  // TODO rename mergeStrea
-  viaStream<R>(s: Stream): PumpBuilder<R>;
-  tap(f: (t: ChunkT, i?: number) => void): PumpBuilder<ChunkT>;
-  onData(f: (t: ChunkT) => void): PumpBuilder<ChunkT>;
-  onClose(f: (err?: Error) => void): PumpBuilder<ChunkT>;
-  onEnd(f: () => void): PumpBuilder<ChunkT>;
+  initEnv<E0>(f: (t?: ChunkT) => E0): PumpBuilder<ChunkT, E0>;
+
+  viaStream<R>(s: Stream): PumpBuilder<R, Env>;
+
+  throughF<R>(f: (t: ChunkT, env: Env) => Promise<R>): PumpBuilder<R, Env>;
+  throughF<R>(f: (t: ChunkT, env: Env) => R): PumpBuilder<R, Env>;
+
+  filter(f: (t: ChunkT, env: Env) => boolean): PumpBuilder<ChunkT, Env>;
+
+  gather(): PumpBuilder<ChunkT[], Env>;
+
+  tap(f: (t: ChunkT, env: Env) => void): PumpBuilder<ChunkT, Env>;
+
+  // appendPump<ChT0, Env0>(pb: PumpBuilder<ChT0, Env0>) : PumpBuilder<ChunkT, Env>;
+
+  onData(f: (t: ChunkT) => void): PumpBuilder<ChunkT, Env>;
+  onClose(f: (err?: Error) => void): PumpBuilder<ChunkT, Env>;
+  onEnd(f: () => void): PumpBuilder<ChunkT, Env>;
   start(): Stream;
-  toPromise(): Promise<void>;
+  toStream(): Stream;
+  toPromise(): Promise<ChunkT[]>;
 }
 
-type PartialPB<T> = Partial<PumpBuilder<T>>;
+type PartialPB<T, Env> = Partial<PumpBuilder<T, Env>>;
 
-function appendStream<ChunkT>(
-  builder: PumpBuilder<ChunkT>,
+function appendStream<ChunkT, Env>(
+  builder: PumpBuilder<ChunkT, Env>,
   vstr: Stream,
-): PumpBuilder<any> {
-  const newBuilder: PumpBuilder<any> = _.merge(
+): PumpBuilder<any, any> {
+  const newBuilder: PumpBuilder<any, any> = _.merge(
     {},
     builder,
     { streams: _.concat(builder.streams, [vstr]) },
@@ -40,31 +50,63 @@ function appendStream<ChunkT>(
   return newBuilder;
 }
 
-export function createPump<ChunkT>(): PumpBuilder<ChunkT> {
-  const merge = (builder: PumpBuilder<ChunkT>, part: PartialPB<ChunkT>) =>
+function bufferChunks<ChunkT, Env>(pb: PumpBuilder<ChunkT, Env>) {
+  const init: ChunkT[] = [];
+  return appendStream(pb, throughAccum(
+    (acc: ChunkT[],
+      chunk: ChunkT | WithEnv<ChunkT, Env>,
+      _onerr?: (e: any) => void
+    ) => {
+      const [t,] = unEnv(chunk);
+      acc.push(t);
+      return acc;
+    },
+    init
+  ));
+
+}
+
+export function createPump<ChunkT, Env>(): PumpBuilder<ChunkT, Env> {
+  const merge = (builder: PumpBuilder<ChunkT, Env>, part: PartialPB<ChunkT, Env>) =>
     _.merge({}, builder, part);
 
-  const pb0: PumpBuilder<ChunkT> = {
+  const pb0: PumpBuilder<ChunkT, Env> = {
     streams: [],
-    onData(f: (t: ChunkT) => void): PumpBuilder<ChunkT> {
+    onData(f: (t: ChunkT) => void): PumpBuilder<ChunkT, Env> {
       return merge(this, { onDataF: f });
     },
-    onClose(f: (err?: Error) => void): PumpBuilder<ChunkT> {
+    onClose(f: (err?: Error) => void): PumpBuilder<ChunkT, Env> {
       return merge(this, { onCloseF: f });
     },
-    onEnd(f: () => void): PumpBuilder<ChunkT> {
+    onEnd(f: () => void): PumpBuilder<ChunkT, Env> {
       return merge(this, { onEndF: f });
     },
-    throughF<R>(f: (t: ChunkT) => R): PumpBuilder<R> {
-      return appendStream(this, throughFunc(f));
+    throughF<R>(f: (t: ChunkT, env: Env) => R): PumpBuilder<R, Env> {
+      return appendStream(this, throughFunc<ChunkT, R, Env>(f));
     },
-    viaStream<R>(s: Stream): PumpBuilder<R> {
+    filter(f: (t: ChunkT, env: Env) => boolean): PumpBuilder<ChunkT, Env> {
+      return appendStream(this, filterStream(f));
+    },
+    gather(): PumpBuilder<ChunkT[], Env> {
+      return bufferChunks(this);
+    },
+    initEnv<Env0>(f: (t?: ChunkT) => Env0): PumpBuilder<ChunkT, Env0> {
+      return appendStream(this, initEnv(f));
+    },
+    viaStream<R>(s: Stream): PumpBuilder<R, Env> {
       return appendStream(this, s);
     },
-    tap(f: (t: ChunkT, i?: number) => void): PumpBuilder<ChunkT> {
+    tap(f: (t: ChunkT, env: Env) => void): PumpBuilder<ChunkT, Env> {
       return appendStream(this, tapStream(f));
     },
     start(): Stream {
+      const strm = this.toStream();
+      if (!this.onDataF) {
+        strm.on("data", () => undefined);
+      }
+      return strm;
+    },
+    toStream(): Stream {
       const pipe = pumpify.obj(this.streams);
       if (this.onCloseF) {
         pipe.on("close", this.onCloseF);
@@ -72,20 +114,20 @@ export function createPump<ChunkT>(): PumpBuilder<ChunkT> {
       if (this.onEndF) {
         pipe.on("end", this.onEndF);
       }
-      pipe.on("data", this.onDataF ? this.onDataF : () => undefined);
+      if (this.onDataF) {
+        pipe.on("data", this.onDataF);
+      }
       return pipe;
     },
 
-    toPromise(): Promise<void> {
+    toPromise(): Promise<ChunkT[]> {
       const self = this;
 
       return new Promise((resolve) => {
-        const onEndF = self.onEndF;
-        const str = self.start();
-        str.on('end', () => {
-          Promise.resolve(onEndF)
-            .then(() => resolve());
-        });
+        const bufferedStream = bufferChunks(self);
+        bufferedStream
+          .onData((d: ChunkT[]) => resolve(d))
+          .start();
       });
 
     }
