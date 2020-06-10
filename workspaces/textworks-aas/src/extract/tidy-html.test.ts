@@ -42,7 +42,7 @@ describe("use Html5 Tidy to re-write htmls", () => {
     done();
   });
 
-  it.only("should handle process err output", async (done) => {
+  it("should handle process err output", async (done) => {
     const htmlFile = path.resolve(testDirPath, 'nospace.html');
 
     const [err, out, exitCode] = await transformViaTidyBuffered(configFile, htmlFile);

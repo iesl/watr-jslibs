@@ -3,7 +3,7 @@ import path from "path";
 import { Transform } from "stream";
 import through from "through2";
 import fs from "fs-extra";
-import { Field } from "~/extract/field-extract";
+import { Field, ExtractionFunction, readMetaProps, filterUrl, runFileVerification, runHtmlTidy, initialEnv, ExtractionEnv, bindTasks } from "~/extract/field-extract";
 
 import { makeCssTreeNormalFormFromNode, writeNormalizedHtml, makeCssTreeNormalForm } from "./reshape-html";
 
@@ -16,13 +16,16 @@ import {
   urlGuard,
   findInMeta,
   getMatchingLines,
+  findByLineMatchTE,
+  findInMetaTE,
 } from "~/extract/field-extract-utils";
 
-import { prettyPrint, BufferedLogger, ExpandedDir, expandDir } from "commons";
+import { prettyPrint, BufferedLogger, ExpandedDir } from "commons";
 import { writeDefaultEntryLogs, readMetaFile } from '~/qa-editing/qa-logging';
 import { ReviewEnv } from './qa-review-abstracts';
 
 type PipelineFunction = (lines: string[], content: string, url?: string, httpStatus?: number) => Partial<Field>;
+
 
 export function findAbstractV2(_cssNormLines: string[], htmlContent: string): Field {
   const cssNormalForm = makeCssTreeNormalForm(htmlContent, /* useXmlMode= */ false)
@@ -35,16 +38,16 @@ export function findAbstractV2(_cssNormLines: string[], htmlContent: string): Fi
     evidenceEnd: [],
   };
   const res = getMatchingLines([evidence], opts, cssNormalForm);
-  const line = res[0];
+  const metadataLine = res[0];
   const field: Field = {
     name: "abstract",
     evidence,
   };
 
-  if (line) {
-    const jsonStart = line.indexOf("{");
-    const jsonEnd = line.lastIndexOf("}");
-    const lineJson = line.slice(jsonStart, jsonEnd + 1);
+  if (metadataLine) {
+    const jsonStart = metadataLine.indexOf("{");
+    const jsonEnd = metadataLine.lastIndexOf("}");
+    const lineJson = metadataLine.slice(jsonStart, jsonEnd + 1);
     try {
       const metadataObj = JSON.parse(lineJson);
       const abst = metadataObj["abstract"];
@@ -82,7 +85,7 @@ export function findAbstractV7(
 // TODO: expand spidering to crawl sub-frames
 // TODO: extract titles, pdf links, author names
 // TODO: create REST API for openreview based on html extraction
-// TODO: handle multi-line findInMeta examples
+// TODO: handle multi-metadataLine findInMeta examples
 // TODO: maybe expand filtered log handling to automatically comb logs in reverse-creation order, and add a 'compact' function to trim and delete old entries
 // TODO: figure out if there is a better html parser for handling both self-closing and script tags properly
 
@@ -190,7 +193,7 @@ export const AbstractPipeline: PipelineFunction[] = [
 
   findByLineMatch(["div", "strong", "| Abstract"]),
 
-  findByLineMatch(["section .full-abstract", "h2",  "| Abstract"]),
+  findByLineMatch(["section .full-abstract", "h2", "| Abstract"]),
 
   findByLineMatch(
     ["div.*#abstract", "h4", "Abstract"],
@@ -266,21 +269,6 @@ export const AbstractPipeline: PipelineFunction[] = [
 
 ];
 
-// export function runAbstractFinders(exDir: ExpandedDir, log: BufferedLogger): void {
-//   let resultField: Partial<Field> = {};
-
-//   _.each(AbstractPipeline, (pf, pfNum) => {
-//     const { value, complete } = resultField;
-//     if (complete || value) return;
-
-//     const res: Partial<Field> = pf(cssNormalForm, htmlContent, responseUrl, status);
-//     if (res.value !== undefined) {
-//       resultField = res;
-//       log.append(`field.abstract.extract.method=${pfNum + 1}`);
-//       log.append(`field.abstract.extract.evidence=${res.evidence || 'undefined'}`);
-//     }
-//   });
-// }
 
 function extractAbstract(exDir: ExpandedDir, log: BufferedLogger): void {
   const entryBasename = path.basename(exDir.dir);
@@ -365,4 +353,173 @@ export function extractAbstractTransformFromScrapy(log: BufferedLogger, env: Rev
       return next(null, exDir);
     },
   );
+}
+
+
+// export type ExtractionFunction = (env: ExtractionEnv) => TE.TaskEither<string, ExtractionEnv>;
+export const AbstractPipelineUpdate: ExtractionFunction[][] = [
+
+  [
+    filterUrl(/ieee.org/),
+    runHtmlTidy,
+    findInGlobalDocumentMetadata,
+  ],
+  [
+    filterUrl(/ndss-symposium.org\/ndss-paper/),
+    runHtmlTidy,
+    findByLineMatchTE(
+      [' +|', ' +p', ' +p', ' +|'],
+      { lineOffset: 1 }
+    )
+  ],
+
+  [
+
+    //  oxfordscholarship.com
+    findInMetaTE('@description content'),
+  ]
+
+  // // teses.usp.br
+  // findInMeta('@DCTERMS.abstract content'),
+
+  // // spiedigitallibrary.org
+  // findInMeta('@citation_abstract content'),
+
+  // findInMeta('@DC.description content'),
+
+  // urlGuard(
+  //   ["bmva.rog"],
+  //   findByLineMatch(
+  //     ["p", "h2", "| Abstract"],
+  //     { lineOffset: -2 }
+  //   ),
+  // ),
+
+  // urlGuard(
+  //   ["easychair.org"],
+  //   findByLineMatch(
+  //     ["h3", "| Abstract", "|"],
+  //     { lineOffset: -1 }
+  //   ),
+  // ),
+  // urlGuard(
+  //   ["igi-global.com"],
+  //   findByLineMatch(
+  //     ['span', 'h2', '| Abstract'],
+  //     { lineOffset: 0, evidenceEnd: ['footer'] }
+  //   ),
+  // ),
+
+  // urlGuard(
+  //   ["ijcai.org/Abstract"],
+  //   findByLineMatch(
+  //     ['|', 'p', '|'],
+  //     { lineOffset: -1, lineCount: 1 }
+  //   ),
+  // ),
+
+  // urlGuard(
+  //   ["etheses.whiterose.ac.uk"],
+  //   findByLineMatch(
+  //     ['h2', '| Abstract'],
+  //     { lineOffset: -1 }
+  //   ),
+  // ),
+
+  // urlGuard(
+  //   ["ndss-symposium.org/ndss-paper"],
+  //   findByLineMatch(
+  //     [' +|', ' +p', ' +p', ' +|'],
+  //     { lineOffset: 1 }
+  //   ),
+  // ),
+
+  // urlGuard(
+  //   ["openreview.net"],
+  //   findByLineMatch(
+  //     ['.note-content-field', '| Abstract', '.note-content-value'],
+  //     { lineOffset: 2 }
+  //   ),
+  // ),
+
+];
+
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as Arr from 'fp-ts/lib/Array';
+import * as TE from 'fp-ts/lib/TaskEither';
+// import * as E from 'fp-ts/lib/Either';
+// import { fold } from "fp-ts/lib/Monoid";
+
+export interface FieldFinderEnv {
+  failures: string[];
+  successes: ExtractionEnv[];
+}
+
+export function findInGlobalDocumentMetadata(env: ExtractionEnv): TE.TaskEither<string, ExtractionEnv> {
+  const { fileContentBuffer } = env;
+
+  const metadataLine = _.filter(
+    fileContentBuffer,
+    metadataLine => /global.document.metadata/.test(metadataLine)
+  )[0];
+
+  const field: Field = {
+    name: "abstract",
+    evidence: "<todo>",
+  };
+
+  if (!metadataLine) {
+    return TE.left(`findInGlobalDocumentMetadata: metadata line not found`);
+  }
+
+
+  const jsonStart = metadataLine.indexOf("{");
+  const jsonEnd = metadataLine.lastIndexOf("}");
+  const lineJson = metadataLine.slice(jsonStart, jsonEnd + 1);
+  try {
+    const metadataObj = JSON.parse(lineJson);
+    const abst = metadataObj["abstract"];
+    field.value = abst;
+    env.fields.push(field);
+    return TE.right(env);
+  } catch (e) {
+    return TE.left(e.toString());
+  }
+}
+
+
+import { isRight } from 'fp-ts/lib/Either'
+
+export const tapWith: (f: (env: ExtractionEnv) => void) => ExtractionFunction =
+  f => env => {
+    const originalEnv = _.merge({}, env);
+    f(env);
+    return TE.right(originalEnv);
+  };
+export async function runAbstractFinders(extractionPipeline: ExtractionFunction[][], entryPath: string): Promise<void> {
+
+  const extractionAttempts: TE.TaskEither<ExtractionEnv, string>[] =
+    Arr.array.mapWithIndex(
+      extractionPipeline,
+      (index: number, exFns: ExtractionFunction[]) => {
+        const init: ExtractionEnv = { ...initialEnv, entryPath };
+        const introFns = [
+          tapWith(() => console.log(`Running attempt-chain ${index}`)),
+          runFileVerification(/html/i),
+          readMetaProps,
+        ];
+        const allFns = _.concat(introFns, exFns);
+        const inner = bindTasks(init, allFns);
+        return pipe(inner, TE.swap);
+      });
+
+  const sequenceT = Arr.array.sequence(TE.taskEitherSeq);
+  const sadf = await sequenceT(extractionAttempts)();
+  if (isRight(sadf)) {
+    const errors = sadf.right;
+    prettyPrint({ errors });
+  } else {
+    const { fields } = sadf.left;
+    prettyPrint({ fields });
+  }
 }

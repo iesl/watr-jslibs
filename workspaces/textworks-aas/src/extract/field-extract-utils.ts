@@ -2,10 +2,12 @@ import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
 import * as cheerio from "cheerio";
-import { Field } from "./field-extract";
+import { Field, ExtractionEnv, ExtractionFunction } from "./field-extract";
 
 import { makeCssTreeNormalFormFromNode } from "./reshape-html";
 import { prettyPrint } from 'commons';
+
+import * as TE from 'fp-ts/lib/TaskEither';
 
 export function readFile(
   leading: string,
@@ -31,7 +33,8 @@ export function indentLevel(s: string): number {
 }
 
 export function stripMargin(lines: string[]): string[] {
-  return _.map(lines, l => {
+  return _
+    .map(lines, l => {
     const ltrim = l.trimLeft();
     if (ltrim.startsWith("|")) {
       return ltrim.slice(1);
@@ -41,7 +44,8 @@ export function stripMargin(lines: string[]): string[] {
 }
 
 export function filterText(lines: string[]): string[] {
-  return _.map(lines, _.trim)
+  return _
+    .map(lines, _.trim)
     .filter(l => l.startsWith("|"))
     .map(l => l.substr(1));
 }
@@ -75,11 +79,9 @@ export function findSubContentAtIndex(
   const line0 = fileLines[startIndex];
   const indent0 = indentLevel(line0) + indentOffset;
   const ls = fileLines.slice(startIndex, endIndex);
-  // prettyPrint({ msg: 'findSubContentAtIndex', line0, indent0 })
 
   const sub = _.takeWhile(ls, lineN => {
     const indentN = indentLevel(lineN);
-    // prettyPrint({ msg: '    findSub', lineN, indentN })
     return indent0 <= indentN;
   });
 
@@ -119,7 +121,6 @@ function _findByQuery(
 ): Field {
   const [field, maybeAbstract] = queryContent(query, fileContent);
   const cssNormal = makeCssTreeNormalFormFromNode(maybeAbstract);
-  // prettyPrint({ msg: '_findByQuery', field, cssNormal });
   field.value = getSubtextOrUndef(cssNormal);
   return field;
 }
@@ -225,6 +226,33 @@ export function urlGuard(
   };
 }
 
+export const findInMetaTE: (key: string) => ExtractionFunction =
+  (key: string) => (env: ExtractionEnv) => {
+    const { fileContentBuffer } = env;
+    const regExp = new RegExp(`^ *meta.+${key}`);
+    const metadataLines = _.filter(
+      fileContentBuffer,
+      metadataLine => regExp.test(metadataLine)
+    );
+    const keyValueLine = metadataLines[0];
+
+    if (keyValueLine) {
+      const i = keyValueLine.indexOf("='");
+      const ilast = keyValueLine.lastIndexOf("'")
+      const justValue = keyValueLine.slice(i + 2, ilast);
+
+      const field: Field = {
+        name: "abstract",
+        evidence: `meta:[${key}]`,
+        value: justValue
+      };
+      env.fields.push(field);
+      return TE.right(env);
+    }
+    return TE.left('findInMetaTE');
+  };
+
+
 export function findInMeta(
   evidence: string,
 ): (str: string[]) => Field {
@@ -263,6 +291,21 @@ export function findByLineMatch(
 ): (str: string[]) => Field {
   const opts = _.assign({}, defaultLineMatchOptions, options);
   return _.curry(_byLineMatch)(evidence)(opts);
+}
+
+export function findByLineMatchTE(
+  evidence: string[],
+  options?: Partial<LineMatchOptions>,
+): ExtractionFunction {
+  const opts = _.assign({}, defaultLineMatchOptions, options);
+  return (env: ExtractionEnv) => {
+    const field = _byLineMatch(evidence, opts, env.fileContentBuffer)
+    if (field.value) {
+      const newEnv = { ...env, field };
+      return TE.right(newEnv);
+    }
+    return TE.left('findByLineMatchTE');
+  }
 }
 
 export const findByQuery = _.curry(_findByQuery);
