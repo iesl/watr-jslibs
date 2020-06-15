@@ -120,3 +120,28 @@ yargs.command(
     });
   },
 );
+
+yargs.command(
+  "review-extraction",
+  "review the extraction process",
+  config(
+    opt.cwd,
+    opt.existingDir("corpus-root: root directory for corpus files"),
+  ),
+  (args: any) => {
+
+    const { corpusRoot } = args;
+    const scrapyLog = path.resolve(corpusRoot, 'crawler.log');
+    const logpath = corpusRoot;
+    const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
+
+    runAbstractCleanerOnScrapyCache(
+      corpusRoot,
+      logpath,
+      scrapyLog,
+      csvFile,
+    ).then(() => {
+      console.log('done');
+    });
+  },
+);

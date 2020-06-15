@@ -11,7 +11,7 @@ import {
 import * as TE from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { ExtractionEnv, readMetaProps, filterUrl, runFileVerification, runHtmlTidy, initialEnv, doPipeline, ExtractionFunction } from './field-extract';
-import { runAbstractFinders, findInGlobalDocumentMetadata } from './field-extract-abstract';
+import { runAbstractFinders, findInGlobalDocumentMetadata, AbstractPipelineUpdate } from './field-extract-abstract';
 import { findByLineMatchTE } from './field-extract-utils';
 
 describe("Field Extraction Pipeline", () => {
@@ -71,7 +71,9 @@ describe("Field Extraction Pipeline", () => {
       ]
     ];
 
-    await runAbstractFinders(finderFunctions, testEntryPath)
+    await runAbstractFinders(AbstractPipelineUpdate, testEntryPath)
+    // await runAbstractFinders(finderFunctions, testEntryPath)
+
     done();
 
     // const res = pipe(

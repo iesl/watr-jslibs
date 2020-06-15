@@ -5,9 +5,9 @@ import * as cheerio from "cheerio";
 import { Field, ExtractionEnv, ExtractionFunction } from "./field-extract";
 
 import { makeCssTreeNormalFormFromNode } from "./reshape-html";
-import { prettyPrint } from 'commons';
 
 import * as TE from 'fp-ts/lib/TaskEither';
+import { prettyPrint } from 'commons/dist';
 
 export function readFile(
   leading: string,
@@ -53,17 +53,20 @@ export function filterText(lines: string[]): string[] {
 export function findIndexForLines(
   fileLines: string[],
   matchLines: string[],
-  startIndex = 0,
+  startIndex: number = 0,
 ): number {
   if (matchLines.length === 0) {
     return -1;
   }
+  const ms = _.map(matchLines, m => new RegExp(m));
   const index = fileLines.findIndex((_line, lineNum) => {
     if (lineNum < startIndex) return false;
 
-    return _.every(matchLines, (matchLine, matchNum) => {
+    return _.every(ms, (regex, matchNum) => {
       const currLine = fileLines[lineNum + matchNum];
-      return currLine && currLine.match(matchLine);
+      const haveMatch = regex.test(currLine); //  currLine.match(matchLine);
+      // prettyPrint({ msg: 'findIndexForLines', currLine, re: regex.source, haveMatch });
+      return currLine && haveMatch;
     });
   });
 
@@ -168,14 +171,16 @@ export function _byLineMatch(
   cssNormLines: string[],
 ): Field {
   const { indentOffset } = options;
-  const evType = _.join(_.map(evidence, (e) => `/${e}/`), " _ ");
+  const anchoredEvidence = _.map(evidence, ev => `^ +${_.escapeRegExp(ev)}`)
+  const evType = _.join(_.map(anchoredEvidence, (e) => `/${e}/`), " _ ");
 
   const field: Field = {
     name: "abstract",
     evidence: `lines:[${evType}]`
   };
 
-  const matchingLines = getMatchingLines(evidence, options, cssNormLines);
+  const matchingLines = getMatchingLines(anchoredEvidence, options, cssNormLines);
+  // prettyPrint({ matchingLines });
   if (matchingLines.length === 0) return field;
 
   const sub = findSubContentAtIndex(
@@ -228,18 +233,25 @@ export function urlGuard(
 
 export const findInMetaTE: (key: string) => ExtractionFunction =
   (key: string) => (env: ExtractionEnv) => {
-    const { fileContentBuffer } = env;
+    const { fileContentMap } = env;
+
+    const fileContent = fileContentMap['css-normal'];
+    if (!fileContent) {
+      return TE.left('findInMetaTE');
+    }
+    const fileContentLines = fileContent.lines;
     const regExp = new RegExp(`^ *meta.+${key}`);
     const metadataLines = _.filter(
-      fileContentBuffer,
+      fileContentLines,
       metadataLine => regExp.test(metadataLine)
     );
     const keyValueLine = metadataLines[0];
 
     if (keyValueLine) {
-      const i = keyValueLine.indexOf("='");
+      const start = "content='";
+      const i = keyValueLine.indexOf(start);
       const ilast = keyValueLine.lastIndexOf("'")
-      const justValue = keyValueLine.slice(i + 2, ilast);
+      const justValue = keyValueLine.slice(i + start.length, ilast);
 
       const field: Field = {
         name: "abstract",
@@ -253,56 +265,23 @@ export const findInMetaTE: (key: string) => ExtractionFunction =
   };
 
 
-export function findInMeta(
-  evidence: string,
-): (str: string[]) => Field {
-
-  const opts = {
-    lineOffset: -1,
-    lineCount: 1,
-    indentOffset: 0,
-    evidenceEnd: [],
-  };
-  const ev = `^ *meta.+${evidence}`;
-
-  const field: Field = {
-    name: "abstract",
-    evidence: `meta:[${evidence}]`,
-  };
-
-  return (ss: string[]): Field => {
-    const res = getMatchingLines([ev], opts, ss);
-    const value = res[0];
-
-    if (value) {
-      const i = value.indexOf("='");
-      const ilast = value.lastIndexOf("'")
-      const justAbstract = value.slice(i + 2, ilast);
-
-      field.value = justAbstract;
-    }
-    return field;
-  }
-}
-
-export function findByLineMatch(
-  evidence: string[],
-  options?: Partial<LineMatchOptions>,
-): (str: string[]) => Field {
-  const opts = _.assign({}, defaultLineMatchOptions, options);
-  return _.curry(_byLineMatch)(evidence)(opts);
-}
-
 export function findByLineMatchTE(
   evidence: string[],
   options?: Partial<LineMatchOptions>,
 ): ExtractionFunction {
   const opts = _.assign({}, defaultLineMatchOptions, options);
+
   return (env: ExtractionEnv) => {
-    const field = _byLineMatch(evidence, opts, env.fileContentBuffer)
+    const { fileContentMap } = env;
+    const fileContent = fileContentMap['css-normal'];
+    if (!fileContent) {
+      return TE.left('findByLineMatchTE: no css-normal-form available');
+    }
+    const fileContentLines = fileContent.lines;
+    const field = _byLineMatch(evidence, opts, fileContentLines)
     if (field.value) {
-      const newEnv = { ...env, field };
-      return TE.right(newEnv);
+      env.fields.push(field)
+      return TE.right(env);
     }
     return TE.left('findByLineMatchTE');
   }

@@ -311,3 +311,166 @@ html lang='en-US' xml:lang='en-US' xmlns='http://www.w3.org/1999/xhtml'
   });
 });
 
+
+// type PipelineFunction = (lines: string[], content: string, url?: string, httpStatus?: number) => Partial<Field>;
+// export const AbstractPipeline: PipelineFunction[] = [
+
+//   //  oxfordscholarship.com
+//   findInMeta('@description content'),
+
+//   // teses.usp.br
+//   findInMeta('@DCTERMS.abstract content'),
+
+//   // spiedigitallibrary.org
+//   findInMeta('@citation_abstract content'),
+
+//   findInMeta('@DC.description content'),
+
+//   urlGuard(
+//     ["bmva.rog"],
+//     findByLineMatch(
+//       ["p", "h2", "| Abstract"],
+//       { lineOffset: -2 }
+//     ),
+//   ),
+
+//   urlGuard(
+//     ["easychair.org"],
+//     findByLineMatch(
+//       ["h3", "| Abstract", "|"],
+//       { lineOffset: -1 }
+//     ),
+//   ),
+//   urlGuard(
+//     ["igi-global.com"],
+//     findByLineMatch(
+//       ['span', 'h2', '| Abstract'],
+//       { lineOffset: 0, evidenceEnd: ['footer'] }
+//     ),
+//   ),
+
+//   urlGuard(
+//     ["ijcai.org/Abstract"],
+//     findByLineMatch(
+//       ['|', 'p', '|'],
+//       { lineOffset: -1, lineCount: 1 }
+//     ),
+//   ),
+
+//   urlGuard(
+//     ["etheses.whiterose.ac.uk"],
+//     findByLineMatch(
+//       ['h2', '| Abstract'],
+//       { lineOffset: -1 }
+//     ),
+//   ),
+
+//   urlGuard(
+//     ["ndss-symposium.org/ndss-paper"],
+//     findByLineMatch(
+//       [' +|', ' +p', ' +p', ' +|'],
+//       { lineOffset: 1 }
+//     ),
+//   ),
+
+//   urlGuard(
+//     ["openreview.net"],
+//     findByLineMatch(
+//       ['.note-content-field', '| Abstract', '.note-content-value'],
+//       { lineOffset: 2 }
+//     ),
+//   ),
+
+//   // www.lrec-conf.org/
+//   findByLineMatch(['tr', 'td', '| Abstract', 'td']),
+
+//   // eccc.weizmann.ac.il/report
+//   findByLineMatch(['b', '| Abstract', 'br', 'p', '|'], { lineOffset: 3 }),
+
+//   findByQuery("div.hlFld-Abstract div.abstractInFull"),
+//   findByLineMatch(["div #abstract"]),
+//   // findAbstractV2,
+
+//   findByLineMatch(["section.*.Abstract", "h2.*.Heading", "Abstract"]),
+
+//   findByLineMatch(["div .hlFld-Abstract", "div", "div", "h2"], { lineOffset: 2 }),
+
+//   findByLineMatch(["div", "h3.*.label", "Abstract"]),
+
+//   findByLineMatch(["div", "strong", "| Abstract"]),
+
+//   findByLineMatch(["section .full-abstract", "h2", "| Abstract"]),
+
+//   findByLineMatch(
+//     ["div.*#abstract", "h4", "Abstract"],
+//     { evidenceEnd: ["div.*#paperSubject", "h4", "Keywords"] }
+//   ),
+
+//   findByLineMatch(
+//     ['div', 'h4', '| Abstract', 'p'],
+//     { evidenceEnd: ['div'] }
+//   ),
+
+//   findAbstractV7,
+//   findAbstractV8,
+
+//   findByQuery("div#body > div#main > div#content > div#abstract"),
+
+//   findByQuery("div#content-inner > div#abs > blockquote"), //
+
+//   findByQuery("div#Abs1-content > p"),
+//   findByQuery("div.main-container > div > p.abstract"),
+
+//   findByQuery("div > div > div.w3-container > p"),
+
+//   findByLineMatch(["div.itemprop='about'"]),
+//   findByLineMatch(["div", "div", "h5", "Abstract", "div"]),
+//   findByLineMatch(["h3", "ABSTRACT", "p"], { lineOffset: 2 }),
+
+//   findByLineMatch(["span.+ContentPlaceHolder.+LabelAbstractPopUp"]),
+
+//   findByLineMatch(["div", "article", "section", "h2", "^ +| Abstract", "div", "p"]),
+
+//   findByLineMatch(["p #contentAbstract_full", "article", "section", "h2", "^ +| Abstract", "div", "p"]),
+//   findByLineMatch(['.field-name-field-paper-description']),
+//   findByLineMatch(["| Abstract", "td itemprop='description'"]),
+
+//   // Maybe superceded by the one after
+//   // findByLineMatch(["Abstract", "section .abstract", "p .chapter-para", "strong", "Summary:"]),
+//   // findByLineMatch([
+//   //   "h2.+abstract-title",
+//   //   "^ +| Abstract",
+//   //   "section .abstract",
+//   //   "p .chapter-para"
+//   // ]),
+
+//   findByLineMatch([
+//     "div .abstract itemprop='description'",
+//   ]),
+
+//   findByLineMatch([
+//     "section .abstract",
+//   ]),
+
+//   findByLineMatch([
+//     "div .abstractSection",
+//     "p"
+//   ]),
+//   findByQuery("div.metadata  div.abstract"),
+//   findByLineMatch([".cPageSubtitle", "| Abstract"], {
+//     evidenceEnd: [".cPageSubtitle", "| \\w"],
+//   }),
+
+//   findByLineMatch(["^ +p", "^ +b", "^ +| Abstract:"], {
+//     indentOffset: -2,
+//     evidenceEnd: ["^ +p", "^ +b"],
+//   }),
+
+//   findByLineMatch(["^ +i", "^ +b", "^ +| Abstract:"], {
+//     indentOffset: -4,
+//     evidenceEnd: ["^ +p"],
+//   }),
+
+//   findByLineMatch(["p", "span .subAbstract"]),
+
+// ];

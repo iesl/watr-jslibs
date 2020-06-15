@@ -1,19 +1,10 @@
 //
-import fs from "fs-extra";
+import fs, { PathLike } from "fs-extra";
 import path from "path";
-import through from "through2";
-
-import { Transform } from "stream";
-
 import _ from "lodash";
-
 import { prettyPrint } from "commons";
-
-import {
-  ExpandedDir,
-} from "commons";
-
 import { cheerioLoad } from './field-extract-utils';
+import { promisify } from 'bluebird';
 
 type Attrs = { [k: string]: string };
 
@@ -27,6 +18,9 @@ function parseAttrs(attrs: Attrs): string[][] {
     ["href", "href"],
     ["src", "src"],
     ["name", "@"],
+    ["lang", "lang"],
+    ["xml:lang", "xml:lang"],
+    ["property", "prop"],
   ];
   _.each(stdKeys, ([k, abbr]) => {
     const v = attrs[k];
@@ -153,7 +147,7 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
   return finalTree;
 }
 
-export function makeCssTreeNormalForm(htmlFile: string, useXmlMode: boolean=true): string[] {
+export function makeCssTreeNormalForm(htmlFile: string, useXmlMode: boolean = true): string[] {
   const $ = cheerioLoad(htmlFile, useXmlMode);
   const root: Cheerio = $(":root");
   return makeCssTreeNormalFormFromNode(root);
@@ -199,6 +193,25 @@ function mapHtmlTree(
   _inner(rootElem, 0, 0, 1);
 }
 
+
+export async function withCachedFile(
+  cacheDirectory: string,
+  cacheFilename: string,
+  fn: () => Promise<string>
+): Promise<string> {
+
+  const maybeCached = await readResolveFileAsync(cacheDirectory, cacheFilename);
+  if (maybeCached) {
+    return maybeCached;
+  }
+
+  const content = await fn();
+
+  const cachedPath = path.join(cacheDirectory, cacheFilename);
+  await fs.writeFile(cachedPath, content, {});
+  return content;
+}
+
 export function writeNormalizedHtml(htmlFile: string): void {
   const cssNormFilename = `${htmlFile}.norm.txt`;
   if (fs.existsSync(cssNormFilename)) {
@@ -206,7 +219,8 @@ export function writeNormalizedHtml(htmlFile: string): void {
     return;
   }
 
-  const fileContent = readFile(htmlFile);
+  const fileContent = readResolveFile(htmlFile);
+
   if (!fileContent) {
     prettyPrint({ msg: "file could not be read" });
     return;
@@ -222,34 +236,21 @@ export function writeNormalizedHtml(htmlFile: string): void {
   fs.writeFileSync(`${htmlFile}.norm.txt`, cssNormal);
 }
 
-export function htmlToCssNormTransform(): Transform {
-  return through.obj(
-    (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
-      _(exDir.files)
-        .filter(f => f.endsWith(".html"))
-        .map(f => path.join(exDir.dir, f))
-        .each(htmlFile => {
-          writeNormalizedHtml(htmlFile);
-        });
+const readFileAsync = promisify<Buffer, string>(fs.readFile)
 
-      next(null, exDir);
-    },
-  );
+export async function readResolveFileAsync(leading: string, ...more: string[]): Promise<string | undefined> {
+  const filepath = path.join(leading, ...more);
+
+  const exists = fs.existsSync(filepath);
+
+  if (exists) {
+    return readFileAsync(filepath)
+      .then(content => content.toString());
+  }
+  return undefined;
 }
 
-// export async function normalizeHtmls(corpusRoot: string): Promise<void> {
-//   const entryStream = corpusEntryStream(corpusRoot);
-
-//   const pipef = pumpify.obj(
-//     entryStream,
-//     expandDirTrans,
-//     htmlToCssNormTransform()
-//   );
-
-//   pipef.on("data", () => undefined);
-// }
-
-function readFile(leading: string, ...more: string[]): string | undefined {
+export function readResolveFile(leading: string, ...more: string[]): string | undefined {
   const filepath = path.join(leading, ...more);
   const exists = fs.existsSync(filepath);
   if (exists) {

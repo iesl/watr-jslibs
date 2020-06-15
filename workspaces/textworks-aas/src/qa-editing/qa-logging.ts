@@ -6,7 +6,7 @@ import pumpify from "pumpify";
 import urlparse from "url-parse";
 import split from 'split';
 
-import { initBufferedLogger, BufferedLogger, newFileStreamTransport, prettyPrint } from "commons";
+import { initBufferedLogger, BufferedLogger, newFileStreamTransport } from "commons";
 import { filterStream } from "commons";
 import { ExpandedDir } from "commons";
 import { ReviewEnv } from '~/extract/qa-review-abstracts';
@@ -58,87 +58,35 @@ export function writeDefaultEntryLogs(
   entryDir: ExpandedDir,
   env: ReviewEnv,
 ): void {
-  const propfile = path.join(entryDir.dir, "entry-props.json");
   const metafile = path.join(entryDir.dir, "meta");
 
   log.append(`entry.dir=${entryDir.dir}`);
   const metaProps = readMetaFile(metafile);
 
-  if (metaProps) {
-    const { url, responseUrl } = metaProps;
-    const urlp = urlparse(url);
-    log.append(`entry.url=${url}`);
-    log.append(`entry.url.host=${urlp.host}`);
-    log.append(`entry.response_url=${responseUrl}`);
-    // get the original url from the meta/csv
-    const fallbackUrl = env.csvLookup[url];
-    let maybeOriginalUrl = [fallbackUrl];
+  if (!metaProps) return;
 
-    const fetchChain = env.urlGraph.getUrlFetchChain(url);
-    if (!fallbackUrl) {
-      maybeOriginalUrl = _.map(fetchChain, furl => env.csvLookup[furl])
-        .filter(d => d !== undefined);
-    }
-
-    // prettyPrint({ metaProps, fallbackUrl, maybeOriginalUrl, fetchChain });
-
-    if (maybeOriginalUrl.length>0) {
-      const originalRec = maybeOriginalUrl[0];
-      const { noteId  } = originalRec;
-      log.append(`entry.noteId=${noteId}`);
-      log.append(`entry.url.original=${originalRec.url}`);
-    }
-
-
-    // TODO: HACK! REMOVE!
-    const responseBodyFile = path.join(entryDir.dir, "response_body");
-    const responseBodyHtml = path.join(entryDir.dir, "download.html");
-    const responseHeadersFile = path.join(entryDir.dir, "response_headers");
-
-    if (fs.existsSync(responseBodyHtml)) return;
-
-    const responseHeadersBuf = fs.readFileSync(responseHeadersFile).toString();
-
-    const maybeContentType = responseHeadersBuf
-      .split("\n")
-      .filter(l => l.startsWith('Content-Type'))
-      .map(l => l.split(":"))
-      .map(la => la[1])[0];
-
-    if (maybeContentType === undefined) {
-      log.append(`entry.contentType=error`);
-    }
-
-    if (maybeContentType && maybeContentType.includes('html')) {
-      log.append(`entry.contentType=html`);
-      if (! fs.existsSync(responseBodyHtml)) {
-        console.log('copying response_body to download.html');
-        fs.copyFileSync(responseBodyFile, responseBodyHtml);
-      }
-    } else {
-      log.append(`entry.contentType=unknown`);
-    }
-
-    return;
-  }
-
-  if (!fs.existsSync(propfile)) return;
-
-  const entryProps = fs.readJsonSync(
-    path.join(entryDir.dir, "entry-props.json"),
-  );
-
-  const dblpId: string = entryProps.dblpConfId;
-  const [, , venue, year] = dblpId.split("/");
-  const url: string = entryProps.url;
+  const { url, responseUrl } = metaProps;
   const urlp = urlparse(url);
-
   log.append(`entry.url=${url}`);
   log.append(`entry.url.host=${urlp.host}`);
-  log.append(`entry.venue=${venue}`);
-  log.append(`entry.venue.year=${year}`);
-}
+  log.append(`entry.response_url=${responseUrl}`);
+  // get the original url from the meta/csv
+  const fallbackUrl = env.csvLookup[url];
+  let maybeOriginalUrl = [fallbackUrl];
 
+  const fetchChain = env.urlGraph.getUrlFetchChain(url);
+  if (!fallbackUrl) {
+    maybeOriginalUrl = _.map(fetchChain, furl => env.csvLookup[furl])
+      .filter(d => d !== undefined);
+  }
+
+  if (maybeOriginalUrl.length>0) {
+    const originalRec = maybeOriginalUrl[0];
+    const { noteId  } = originalRec;
+    log.append(`entry.noteId=${noteId}`);
+    log.append(`entry.url.original=${originalRec.url}`);
+  }
+}
 
 export function createFilteredLogStream(
   logfile: string,

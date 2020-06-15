@@ -7,7 +7,7 @@ import {
   prettyPrint,
   createConsoleLogger,
   createReadLineStream,
-  filterStream,
+  // filterStream,
   csvStream,
 } from "commons";
 
@@ -52,7 +52,7 @@ export function readOrderCsv(csvfile: string): Stream {
     // filterStream((r: string) => r.trim().length > 0),
     // throughFunc(splitCSVRecord),
     throughFunc((csvRec: string[]) => {
-      const [noteId, dblpConfId, title, url, authorId] = csvRec;
+      const [noteId, dblpConfId, title, url, ] = csvRec;
       return {
         noteId, dblpConfId, url, title
       };
@@ -101,7 +101,7 @@ const addOrderEntry: (db: Database, order: Order) => (r: InputRec) => Promise<Or
     })
   };
 
-export async function createOrder(opts: COptions): Promise<void> {
+export async function createOrder(opts: COptions): Promise<OrderEntry[]> {
   const logger = createConsoleLogger();
   logger.info({ event: "initializing order", config: opts });
   const inputStream = readOrderCsv(opts.csvFile);
@@ -115,7 +115,7 @@ export async function createOrder(opts: COptions): Promise<void> {
       });
   });
 
-  if (!newOrder) return;
+  if (!newOrder) return [];
 
   const addEntry = addOrderEntry(db, newOrder);
 

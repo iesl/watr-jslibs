@@ -12,7 +12,8 @@ import {
   prettyPrint,
   expandDir,
   streamPump,
-  sliceStream
+  sliceStream,
+  filterStream
 } from "commons";
 
 import { gatherAbstractFiles } from "~/corpora/bundler";
@@ -143,22 +144,33 @@ export async function runAbstractFinderOnScrapyCache(
   const dirEntryStream = scrapyCacheDirs(cacheRoot);
   const logger = initLogger(logpath, "abstract-finder", true);
 
-  const pipe = pumpify.obj(
-    dirEntryStream,
-    expandDirTrans,
-    extractAbstractTransformFromScrapy(logger, {
-      logger,
-      interactive: false,
-      urlGraph,
-      csvLookup
-    })
-  );
+  try {
+    const pipe = pumpify.obj(
+      dirEntryStream,
+      sliceStream(0, 10),
+      // filterStream((path: string) => /011b8/.test(path)),
+      expandDirTrans,
+      extractAbstractTransformFromScrapy(logger, {
+        logger,
+        interactive: false,
+        urlGraph,
+        csvLookup
+      })
+    );
 
-  console.log('starting runAbstractFinderOnScrapyCache');
-  return promisifyReadableEnd(pipe)
-    .then(() => {
-      console.log('finished runAbstractFinderOnScrapyCache');
-    });
+    console.log('starting runAbstractFinderOnScrapyCache');
+    return promisifyReadableEnd(pipe)
+      .then(() => {
+        console.log('finished runAbstractFinderOnScrapyCache');
+      })
+      .catch(error => {
+        console.log('Error: runAbstractFinderOnScrapyCache', error);
+      })
+    ;
+
+  } catch (error) {
+    console.log('runAbstractFinderOnScrapyCache', error);
+  }
 }
 
 
@@ -198,7 +210,6 @@ export async function runAbstractCleanerOnScrapyCache(
   return new Promise((resolve) => {
     pipe.on("end", () => {
       console.log('finished runAbstractFinderOnScrapyCache');
-      // logger.commitLogs();
       resolve();
     });
 

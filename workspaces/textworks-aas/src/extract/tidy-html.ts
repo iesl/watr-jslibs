@@ -49,7 +49,7 @@ export async function getFileType(
   infile: string
 ): Promise<string> {
 
-  const proc = spawn('file', ['-b', '--no-buffer', infile]);
+  const proc = spawn('file', ['-b', '-i', '--no-buffer', infile]);
 
   const { outStream, completePromise } = streamifyProcess(proc);
   const onDataPromise =  promisifyOn<string>('data', outStream);

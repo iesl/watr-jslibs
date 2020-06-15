@@ -21,6 +21,7 @@ export interface ReviewEnv {
 export async function cleanExtractedAbstract(entryDir: ExpandedDir, env: ReviewEnv): Promise<void> {
   const { logger } = env;
   logger.append(`action=cleanExtractedAbstract`);
+
   writeDefaultEntryLogs(logger, entryDir, env);
   if (env.interactive) {
     await cleanAbstractInteractive(logger, entryDir);
@@ -300,7 +301,7 @@ export async function cleanAbstractNonInteractive(logger: BufferedLogger, entryD
   }
 }
 
-function applyCleaningRules(abstractStr: string): string {
+export function applyCleaningRules(abstractStr: string): string {
   let cleanedAbs = abstractStr;
   _.each(CleaningRules, (rule) => {
     if (rule.precondition(cleanedAbs)) {
