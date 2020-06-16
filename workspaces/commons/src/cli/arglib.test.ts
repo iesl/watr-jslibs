@@ -12,7 +12,7 @@ describe("Arglib tests", () => {
   })
 
 
-  async function runCmd(args: string, ...fs: ArgvApp[]): Promise<object> {
+  async function runCmd(args: string, ...fs: ArgvApp[]): Promise<Record<string, unknown>> {
     return new Promise((resolve, reject) => {
       yargs.command(
         "testcmd", "desc",
@@ -32,6 +32,11 @@ describe("Arglib tests", () => {
         }).parse(allargs);
     });
   }
+
+  it("should propery print out argument errors", async (done) => {
+    done();
+  });
+
 
   it("should resolve file/directory args", async (done) => {
     const result = await runCmd(

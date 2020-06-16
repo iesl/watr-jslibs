@@ -15,6 +15,7 @@ export interface Field {
   name: string;
   evidence: string;
   value?: string;
+  cleaning?: CleaningRuleResult[];
   error?: string;
   complete?: boolean;
 }
@@ -237,6 +238,7 @@ export const readCachedFile: (cacheKey: NormalForm) => ExtractionFunction =
 
 
 import fs from "fs-extra";
+import { CleaningRuleResult } from './qa-review-abstracts';
 export const runHtmlTidy: ExtractionFunction =
   (env: ExtractionEnv) => {
 

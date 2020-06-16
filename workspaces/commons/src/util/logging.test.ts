@@ -3,8 +3,6 @@ import "chai";
 import _ from 'lodash';
 import path from "path";
 import fs from "fs-extra";
-import util from 'util';
-import stream from 'stream';
 
 import { initBufferedLogger, newFileStreamTransport, flushAndReopen } from './logging';
 
@@ -16,7 +14,7 @@ import {
 } from "winston";
 
 import { prettyPrint } from './pretty-print';
-import { arrayStream, throughFunc } from './stream-utils';
+import { arrayStream  } from './stream-utils';
 import { createPump } from './stream-pump';
 import { delay } from './utils';
 
@@ -177,14 +175,14 @@ describe("Logging", () => {
   it.only("should create buffered loggers", async (done) => {
     expect(statFileSize(logpath)).toBe(-1);
 
-    const fst = () => newFileStreamTransport(logpath)
+    // const fst = () => newFileStreamTransport(logpath)
 
-    const log = initBufferedLogger(logpath, [fst]);
+    const log = initBufferedLogger(logpath);
     console.log(dbgFileInfo(logpath));
     // expect(statFileSize(logpath))toBe(true);
 
     _.each(_.range(4), async (n) => {
-      log.append(`entry.number=${n}`);
+      log.append('entry.number', n);
       if (n % 2 === 0) {
         await log.commitLogs();
       }

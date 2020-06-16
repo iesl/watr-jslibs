@@ -1,35 +1,22 @@
 import _, { Dictionary } from "lodash";
 
 import {
-  ExpandedDir,
+  ExpandedDir, expandDirTrans, throughFunc, promisifyReadableEnd,
 } from "commons";
 
 import { BufferedLogger, } from "commons";
 import { gatherAbstractFiles } from "~/corpora/bundler";
 import { Field } from "~/extract/field-extract";
-import { UrlGraph, InputRec } from '~/openreview/workflow';
-import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
-import { runInteractive } from '~/qa-editing/qa-interactive';
+import { UrlGraph, InputRec, readScrapyLogs } from '~/openreview/workflow';
+import { runInteractiveReviewUI } from '~/qa-editing/qa-interactive';
+import { createCSVOrderLookup, scrapyCacheDirs } from '~/qa-editing/qa-review';
+import { initLogger } from '~/qa-editing/qa-logging';
 
 export interface ReviewEnv {
   logger: BufferedLogger;
-  interactive: boolean;
+  overwrite: boolean;
   urlGraph: UrlGraph;
   csvLookup: Dictionary<InputRec>;
-}
-
-export async function cleanExtractedAbstract(entryDir: ExpandedDir, env: ReviewEnv): Promise<void> {
-  const { logger } = env;
-  logger.append(`action=cleanExtractedAbstract`);
-
-  writeDefaultEntryLogs(logger, entryDir, env);
-  if (env.interactive) {
-    await cleanAbstractInteractive(logger, entryDir);
-  } else {
-    await cleanAbstractNonInteractive(logger, entryDir, env);
-  }
-  logger.commitLogs();
-  return;
 }
 
 export interface CleaningRule {
@@ -166,7 +153,7 @@ const CleaningRules: CleaningRule[] = [
       return str.split('\n').join(' ');
     }
   },
- 
+
   {
     name: "abstract too short",
     precondition: (str) => {
@@ -252,61 +239,70 @@ const CleaningRules: CleaningRule[] = [
   },
 ];
 
-type TupleSSN = readonly [string, string, number];
 
-async function cleanAbstractInteractive(logger: BufferedLogger, entryDir: ExpandedDir): Promise<void> {
-  const abstractFilesWithFields: Array<[string, Field[]]> =
-    gatherAbstractFiles(entryDir);
+async function reviewAbstractExtraction(logger: BufferedLogger, entryDir: ExpandedDir): Promise<void> {
+  await runInteractiveReviewUI({ entryPath: entryDir, logger });
+}
 
-  const abstractStrs: Array<TupleSSN> =
-    _(abstractFilesWithFields)
-      .flatMap(([filename, fields]) => {
-        return _.map(fields, (f, i) => [filename, f.value, i] as TupleSSN)
-          .filter(([, v]) => v !== undefined);
+import pumpify from "pumpify";
+
+export async function runInteractiveFieldReview(
+  cacheRoot: string,
+  logpath: string,
+  // scrapyLog: string,
+  // csvFile: string,
+): Promise<void> {
+
+  const dirEntryStream = scrapyCacheDirs(cacheRoot);
+  const logger = initLogger(logpath, "interactive-review", true);
+
+  try {
+    const pipe = pumpify.obj(
+      dirEntryStream,
+      // sliceStream(0, 20),
+      // filterStream((path: string) => /011b8/.test(path)),
+      expandDirTrans,
+      throughFunc((exDir: ExpandedDir) => {
+        return reviewAbstractExtraction(logger, exDir);
+      }),
+    );
+
+    console.log('starting runAbstractFinderOnScrapyCache');
+    return promisifyReadableEnd(pipe)
+      .then(() => {
+        console.log('finished runAbstractFinderOnScrapyCache');
       })
-      .map(([fn, f, i]) => [fn, f ? f.trim() : "", i] as TupleSSN)
-      .value();
+      .catch(error => {
+        console.log('Error: runAbstractFinderOnScrapyCache', error);
+      })
+    ;
 
-  if (abstractStrs.length > 0) {
-    const [, abs] = abstractStrs[0];
-    return runInteractive({ abstractStr: abs, cleaningRules: CleaningRules, logger });
+  } catch (error) {
+    console.log('runAbstractFinderOnScrapyCache', error);
   }
 }
 
-export async function cleanAbstractNonInteractive(logger: BufferedLogger, entryDir: ExpandedDir, env: ReviewEnv): Promise<void> {
-  const abstractFilesWithFields: Array<[string, Field[]]> =
-    gatherAbstractFiles(entryDir);
-
-  const abstractStrs: Array<TupleSSN> =
-    _(abstractFilesWithFields)
-      .flatMap(([filename, fields]) => {
-        // console.log('cleanAbstractNonInteractive', entryDir.dir, fields);
-        return _.map(fields, (f, i) => [filename, f.value, i] as TupleSSN)
-          .filter(([, v]) => v !== undefined);
-      })
-      .map(([fn, f, i]) => {
-        // console.log('cleanAbstractNonInteractive(2)', fn, f);
-        const cleaned = applyCleaningRules(f ? f.trim() : "");
-        return [fn, cleaned, i] as TupleSSN;
-      })
-      .filter(([, f,]) => f !== undefined && f.length > 0)
-      .value();
-
-  if (abstractStrs.length > 0) {
-    const abs = abstractStrs[0][1];
-    logger.append(`field.abstract.value=${abs}`);
-  } else {
-    logger.append(`field.abstract.skipped=true`);
-    console.log(`abstract skipped: ${entryDir.dir}`);
-  }
+export interface CleaningRuleResult {
+  input: string;
+  output: string;
+  rule: string;
 }
 
-export function applyCleaningRules(abstractStr: string): string {
-  let cleanedAbs = abstractStr;
+export function applyCleaningRules(abstractStr: string): [string, CleaningRuleResult[]] {
+  let currentAbstract = abstractStr;
+  const cleaningResults: CleaningRuleResult[] = [];
   _.each(CleaningRules, (rule) => {
-    if (rule.precondition(cleanedAbs)) {
-      cleanedAbs = rule.run(cleanedAbs);
+    if (rule.precondition(currentAbstract)) {
+      const cleaned = rule.run(currentAbstract);
+      if (cleaned !== currentAbstract) {
+        cleaningResults.push({
+          input: currentAbstract,
+          output: cleaned,
+          rule: rule.name
+        });
+      }
+      currentAbstract = cleaned;
     }
   });
-  return cleanedAbs.trim();
+  return [currentAbstract, cleaningResults];
 }

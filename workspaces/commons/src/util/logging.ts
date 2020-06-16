@@ -8,6 +8,7 @@ import {
   transports,
   Logger,
 } from "winston";
+import * as LogTransport from 'winston-transport';
 
 const { combine, timestamp, prettyPrint } = format;
 import logform from "logform";
@@ -125,22 +126,24 @@ type Loggable = string | any;
 export interface BufferedLogger {
   logger: Logger;
   logBuffer: Loggable[];
-  append(obj: Loggable): void;
+  // append(obj: string): void;
+  append(key: string, value: Loggable): void;
   commitLogs(): Promise<void>;
   commitAndClose(): Promise<void>;
 }
 
-import * as LogTransport from 'winston-transport';
 
-export function initBufferedLogger(
-  logname: string,
-  transportFs: MakeTransport[]
-): BufferedLogger {
+export function initBufferedLogger(logname: string,): BufferedLogger {
   return {
     logger: initLogger(logname),
     logBuffer: [],
-    append: function(o: Loggable): void {
-      this.logBuffer.push(o);
+    // append: function(o: Loggable): void {
+    //   this.logBuffer.push(o);
+    // },
+    append: function(key: string, value: Loggable): void {
+      const kv: any = {};
+      kv[key] = value;
+      this.logBuffer.push(kv);
     },
     commitLogs: function(): Promise<void> {
       const logBuffer = [...this.logBuffer];

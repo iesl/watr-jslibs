@@ -20,7 +20,6 @@ import {
   readCachedFile,
   verifyHttpResponseCode,
   verifyFileNotExists,
-  sanityCheckAbstracts
 } from "~/extract/field-extract";
 
 // import { makeCssTreeNormalFormFromNode } from "./reshape-html";
@@ -38,7 +37,7 @@ import {
   findInMetaTE,
 } from "~/extract/field-extract-utils";
 
-import { prettyPrint, BufferedLogger, ExpandedDir } from "commons";
+import { BufferedLogger, ExpandedDir } from "commons";
 import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
 import { ReviewEnv, applyCleaningRules } from './qa-review-abstracts';
 
@@ -98,12 +97,40 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
 
 
 
+
+export function loadExtractionLog(entryPath: string): Array<Record<string, any>> {
+  const extractionArtifacts = path.resolve(entryPath, 'extraction-artifacts');
+  const extractionLog = path.resolve(extractionArtifacts, 'extraction-log.json');
+  const log = fs.readJsonSync(extractionLog);
+  return log;
+}
 export function extractAbstractTransformFromScrapy(log: BufferedLogger, env: ReviewEnv): Transform {
   return through.obj(
     async (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
-      log.append(`action=extractAbstractTransformFromScrapy`);
+      log.append('action', 'extractAbstractTransformFromScrapy');
       writeDefaultEntryLogs(log, exDir, env);
+
+      const extractionArtifacts = path.resolve(exDir.dir, 'extraction-artifacts');
+      const artifactDirExists = fs.existsSync(extractionArtifacts);
+      if (env.overwrite && artifactDirExists) {
+        fs.emptyDirSync(extractionArtifacts);
+      }
+      if (!artifactDirExists) {
+        fs.mkdirSync(extractionArtifacts);
+      }
+      const extractionContent = fs.readdirSync(extractionArtifacts);
+      if (extractionContent.length>0) {
+        console.log(`skipping already-processed`);
+        log.append('skip.processed', true);
+        return log.commitLogs()
+          .then(() => next(null, exDir));
+      }
       return runAbstractFinders(AbstractPipelineUpdate, exDir.dir, log)
+        .then(() => {
+          const logBuffer = log.logBuffer;
+          const extractionLog = path.resolve(extractionArtifacts, 'extraction-log.json');
+          fs.writeJsonSync(extractionLog, logBuffer);
+        })
         .then(() => log.commitLogs())
         .then(() => next(null, exDir));
     },
@@ -253,7 +280,6 @@ export async function runAbstractFinders(
         const init: ExtractionEnv = _.merge({}, initialEnv, { entryPath });
         const introFns = [
           resetEnvForAttemptChain,
-          verifyFileNotExists('extracted-fields.json'),
           readMetaProps,
           runFileVerification(/(html|xml)/i),
           verifyHttpResponseCode,
@@ -264,7 +290,6 @@ export async function runAbstractFinders(
           runCssNormalize,
         ];
         const outroFns = [
-          sanityCheckAbstracts,
           modEnv(env => {
             env.fileContentMap = {};
             let evidence = env.extractionEvidence.join(" ++ ");
@@ -278,9 +303,6 @@ export async function runAbstractFinders(
             return env;
           }),
           tapWith((env) => console.log(`Completed attempt-chain #${index} for entry ${entryName}; ${env.metaProps.responseUrl}`)),
-          tapWith(() => {
-            log.append(`field.abstract.extract.attempt=${index}`);
-          }),
         ];
         const allFns = _.concat(introFns, exFns, outroFns);
         const inner = bindTasks(init, allFns);
@@ -298,131 +320,30 @@ export async function runAbstractFinders(
     if (fatalErrors.length > 0) {
       const uniqFatal = _.uniq(fatalErrors);
       const loggableErrors = uniqFatal.join("; ");
-      log.append(`field.abstract.extract.errors=${loggableErrors}`);
+      log.append('field.abstract.extract.errors', loggableErrors);
+    } else {
+      log.append('field.abstract.extract', false);
     }
-    log.append(`field.abstract.extract=false`);
     console.log(`No extracted abstract for ${entryName}`)
   } else {
-    const { fields, entryPath } = allAttempts.left;
+    const { fields } = allAttempts.left;
     const cleanedFields = _.map(fields, field => {
       const abs = field.value;
       let cleaned: string | undefined = undefined;
       if (abs) {
-        cleaned = applyCleaningRules(abs);
+        const [cleaned0, cleaningRuleResults] = applyCleaningRules(abs);
+        cleaned = cleaned0;
+        if (cleaningRuleResults.length > 0) {
+          field.cleaning = cleaningRuleResults;
+        }
       }
       if (cleaned && cleaned.length > 0) {
-        log.append(`field.abstract.extract.value=${abs}`);
-        log.append(`field.abstract.extract.value.clean=${cleaned}`);
-        log.append(`field.abstract.extract.count=${fields.length}`);
         field.value = cleaned;
       } else {
         field.value = undefined;
       }
       return field;
     });
-    const cleanedFields1 = _.filter(cleanedFields, f => f.value !== undefined);
-
-    const extractionResultsFile = path.resolve(entryPath, 'extracted-fields.json');
-    fs.writeJsonSync(extractionResultsFile, cleanedFields1);
+    log.append('fields', cleanedFields);
   }
 }
-
-
-// function extractAbstract(exDir: ExpandedDir, log: BufferedLogger): void {
-//   const entryBasename = path.basename(exDir.dir);
-//   log.append(`field.abstract.extract.entry=${entryBasename}`);
-//   runAbstractFinders(AbstractPipelineUpdate, exDir.dir);
-
-//   // const htmlFiles = exDir.files
-//   //   .filter(f => f.endsWith(".html"))
-//   //   .map(f => path.resolve(exDir.dir, f));
-
-//   // _.each(htmlFiles, htmlFile => {
-//   // const extrAbsFilename = `${htmlFile}.ex.abs.json`;
-//   // const metafile = path.resolve(exDir.dir, 'meta');
-
-//   // if (fs.existsSync(extrAbsFilename)) {
-//   //   console.log(
-//   //     `skipping: abstracts file already exists: ${extrAbsFilename}`,
-//   //   );
-//   //   return;
-//   // }
-
-//   // const metaProps = readMetaFile(metafile);
-
-//   // if (!metaProps) {
-//   //   log.append(`error=NoMetaFileFound`);
-//   //   return;
-//   // }
-
-//   // const { responseUrl, status } = metaProps;
-//   // const fileBase = path.basename(htmlFile);
-//   // log.append(`field.abstract.extract.file=${fileBase}`);
-//   // console.log(`extracting abstract from ${htmlFile}`);
-
-
-//   // writeNormalizedHtml(htmlFile);
-//   // const cssNormFile = `${htmlFile}.norm.txt`;
-//   // const htmlContent = readFile(htmlFile);
-//   // const normFileContent = readFile(cssNormFile);
-//   // if (!(htmlContent && normFileContent)) {
-//   //   console.log(`.html and .norm.txt did not exist in ${exDir}`);
-//   //   return;
-//   // }
-//   // const cssNormalForm = normFileContent.split("\n");
-
-//   // let resultField: Partial<Field> = {};
-
-//   // _.each(AbstractPipeline, (pf, pfNum) => {
-//   //   const { value, complete } = resultField;
-//   //   if (complete || value) return;
-
-//   //   const res: Partial<Field> = pf(cssNormalForm, htmlContent, responseUrl, status);
-//   //   if (res.value !== undefined) {
-//   //     resultField = res;
-//   //     log.append(`field.abstract.extract.method=${pfNum + 1}`);
-//   //     log.append(`field.abstract.extract.evidence=${res.evidence || 'undefined'}`);
-//   //   }
-//   // });
-
-//   // if (resultField.value !== undefined) {
-//   //   log.append(`field.abstract.extract=true`);
-//   //   fs.writeJsonSync(extrAbsFilename, [resultField]);
-//   // } else {
-//   //   log.append(`field.abstract.extract=false`);
-//   // }
-
-//   //   return;
-//   // });
-// }
-
-// export function findAbstractV7(
-//   _cssNormLines: string[],
-//   fileContent: string,
-// ): Field {
-
-//   const query = "section#main .card-title";
-//   const [field, maybeAbstract, $] = queryContent(query, fileContent);
-//   const abstrParent = maybeAbstract.parents()[0];
-
-//   const cssNormalParent = makeCssTreeNormalFormFromNode($(abstrParent));
-//   field.value = getSubtextOrUndef(cssNormalParent);
-
-//   return field;
-// }
-
-// export function findAbstractV8(
-//   _normLines: string[],
-//   fileContent: string,
-// ): Field {
-//   const query = "div.content > div > div.row > div.col-md-12";
-//   const [field, maybeAbstract] = queryContent(query, fileContent);
-//   const cssNormal = makeCssTreeNormalFormFromNode(maybeAbstract);
-//   const maybeAbstr = _.takeWhile(
-//     cssNormal.slice(1),
-//     l => !l.includes("col-md-12"),
-//   );
-//   field.value = getSubtextOrUndef(maybeAbstr);
-
-//   return field;
-// }

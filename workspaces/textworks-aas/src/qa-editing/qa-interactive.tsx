@@ -1,165 +1,161 @@
 //
 import _ from "lodash";
 import React, { useState } from "react";
-import { Text, Box, Color, useInput, useApp } from "ink";
+import { Text, Box, Color, useApp } from "ink";
 import * as ink from "ink";
-export type KeyDef = [string, () => void];
-import { ListedItem } from "ink-multi-select";
-import { BufferedLogger } from "commons";
+import { BufferedLogger, ExpandedDir } from "commons";
 import ansiEscapes from 'ansi-escapes';
+import path from "path";
 
 //@ts-ignore
 import Divider from 'ink-divider';
-import { clipParagraph } from 'commons';
-import { CleaningRule } from '~/extract/qa-review-abstracts';
+/* import { CleaningRule } from '~/extract/qa-review-abstracts'; */
+import { KeyDef, useKeymap, Keymap, keymapEntry, KeymapEntry } from './qa-interactive-utils';
+import { loadExtractionLog } from '~/extract/field-extract-abstract';
+import { getLogEntries } from './qa-logging';
+import { openFileWithLess, openFileWithBrowser } from '~/extract/tidy-html';
 
-interface CleaningRulesArgs {
-  abstractStr: string;
-  setAbstract: (s: string) => void;
-  cleaningRules: CleaningRule[];
-  logger: BufferedLogger;
+interface KeymapUIArgs {
+  keymap: Keymap;
 }
-
-interface RuleSelection extends ListedItem {
-  rule: CleaningRule;
-  ruleDidMatch: boolean;
-  label: string;
-  value: string;
-}
-
-
-const CleaningRules: React.FC<CleaningRulesArgs> = ({ cleaningRules, abstractStr }: CleaningRulesArgs) => {
-
-  const items = _.map(cleaningRules, (rule, i) => {
-    const ruleDidMatch = rule.precondition(abstractStr);
-    const label = `${rule.name} matches=${ruleDidMatch}`
-    let rgb: [number, number, number] = [255, 255, 255];
-    if (ruleDidMatch) {
-      rgb = [255, 0, 0];
-    }
-
-    return (
-      <Color key={i} rgb={rgb}>
-        <Text >{label}</Text>
+const KeymapUI: React.FC<KeymapUIArgs> = ({ keymap }) => {
+  const display = _.map(keymap.keymapEntries, (entry) => {
+    <Box>
+      <Color bold white>
+        <Text>{entry.desc}</Text>
+        <Text>{entry.keys}</Text>
       </Color>
-    );
+    </Box>
   });
 
   return (
-    <Box flexDirection="column"> {items} </Box>
+    <Box flexDirection="column">
+      {display}
+    </Box>
+  );
+}
+
+interface TitledBoxArgs {
+  title: string;
+  body: string;
+}
+const TitledBox: React.FC<TitledBoxArgs> = ({ title, body }) => {
+  return (
+    <Box flexDirection="column">
+      <Divider title={title} />
+
+      <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={15} >
+        <Color bold blue>
+          <Text>{body}</Text>
+        </Color>
+      </Box>
+
+    </Box>
   );
 };
 
 
-interface RunInteractive {
-  abstractStr: string;
-  cleaningRules: CleaningRule[];
+interface AppArgs {
+  entryPath: ExpandedDir;
   logger: BufferedLogger;
 }
 
-const App: React.FC<RunInteractive> = ({ abstractStr, cleaningRules, logger }: RunInteractive) => {
+const App: React.FC<AppArgs> = ({ entryPath, logger }) => {
   const { exit } = useApp();
 
   const okAndNext = () => {
-    logger.append('field.abstract.clean=true');
     exit();
+  };
+  const [, setRedraws] = useState<number>(0);
+
+  const openWithLess = (filename: string) => () => {
+    openFileWithLess(filename).then(() => {
+      setRedraws(i => i + 1);
+    });
+  };
+  const openWithBrowser = (filename: string) => () => {
+    openFileWithBrowser(filename).then(() => {
+      setRedraws(i => i + 1);
+    });
   };
 
-  const notOkAndNext = () => {
-    logger.append('field.abstract.clean=false');
-    exit();
-  };
-  const previousNotOkAndNext = () => {
-    logger.append('field.abstract.prev.clean=false');
-    exit();
-  };
+  const keymapEntries: KeymapEntry[] = [];
 
   const keymap: KeyDef[] = [
     ["n", okAndNext],
-    ["x", notOkAndNext],
-    ["p", previousNotOkAndNext],
-    ["(", () => { process.exit(); }],
+    ["q", () => { process.exit(); }],
   ];
 
-  const [currAbstract, setAbstract] = useState(abstractStr);
+  const [extractionLog,] = useState(loadExtractionLog(entryPath.dir));
 
-  const [cleanedAbstract] = useState(() => {
-    let cleanedAbs = abstractStr;
+  const getEntry = _.curry(getLogEntries)(extractionLog);
+  const entryDisplay = getEntry('entry.dir')
+    .map((dir: string) => (<TitledBox title="Entry" body={dir} />));
 
-    _.map(cleaningRules, rule => {
-      if (rule.precondition(cleanedAbs)) {
-        cleanedAbs = rule.run(cleanedAbs);
-      }
+  getEntry('entry.dir')
+    .forEach((dir: string) => {
+      const cssNormPath = path.resolve(dir, 'normalized-css-normal');
+      const htmlTidyPath = path.resolve(dir, 'normalized-html-tidy');
+      const responseBodyPath = path.resolve(dir, 'response_body');
+      keymapEntries.push(
+        keymapEntry("vc", "(v)iew (c)ss-norms", openWithLess(cssNormPath)),
+        keymapEntry("vh", "(v)iew (h)tml-tidy", openWithLess(htmlTidyPath)),
+        keymapEntry("vb", "(v)iew in (b)rowser", openWithLess(htmlTidyPath))
+      );
+      keymap.push(["1", openWithLess(cssNormPath)])
+      keymap.push(["2", openWithLess(htmlTidyPath)])
+      keymap.push(["3", openWithBrowser(responseBodyPath)])
     });
 
-    return cleanedAbs;
-  });
 
-  useInput((input, _key) => {
-    const whichKey = _.find(keymap, ([k]) => k === input);
-    if (whichKey) {
-      whichKey[1]();
-    }
-  });
+  // getValue('field.abstract.extract.errors')
+  //    .map(value => appendShowBox(value))
+  //    .map(() => appendUserAction('v', assertGoldValue))
 
-  const viewWidth = 200;
+  // getValue('fields')
+  //    .map(value => appendShowBox(value))
+  //    .map(() => appendUserAction('v', assertGoldValue))
+
+
+
+
+  useKeymap(keymap);
+
+  /* const viewWidth = 200; */
   const rawAbsViewHeight = 15;
-  const cleanAbsViewHeight = 10;
-
-  let clippedAbs = clipParagraph(viewWidth, rawAbsViewHeight, currAbstract);
-  clippedAbs = clippedAbs.length === 0 ? "<empty>" : clippedAbs;
-
-  let clippedCleanAbs = clipParagraph(viewWidth, cleanAbsViewHeight, cleanedAbstract);
-  clippedCleanAbs = clippedCleanAbs.length === 0 ? "<empty>" : clippedCleanAbs;
+  /* const cleanAbsViewHeight = 10; */
 
   let title = "Abstract (cleaned)";
 
-  if (currAbstract === cleanedAbstract) {
-    title = "Abstract (cleaned == raw)";
-  }
+  const textLog = JSON.stringify(extractionLog);
 
   return (
     <Box flexDirection="column">
       <Divider title={title} />
 
-      <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={cleanAbsViewHeight} >
-        <Color bold blue>
-          <Text>{clippedCleanAbs}</Text>
-        </Color>
-      </Box>
-
-      <Divider title={'Abstract (raw)'} />
-
       <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={rawAbsViewHeight} >
         <Color bold blue>
-          <Text>{clippedAbs}</Text>
+          <Text>{textLog}</Text>
         </Color>
       </Box>
+      {[entryDisplay]}
 
-      <Divider title={'Rule Selection'} />
 
-      <Box padding={3}>
-        <CleaningRules
-          abstractStr={currAbstract}
-          setAbstract={setAbstract}
-          cleaningRules={cleaningRules}
-          logger={logger}
-        />
-      </Box>
+      <KeymapUI keymap={({ keymapEntries })} />
+
     </Box>
   );
 };
 
-export function runInteractive({ abstractStr, cleaningRules, logger }: RunInteractive): Promise<void> {
+export function runInteractiveReviewUI({ entryPath, logger }: AppArgs): Promise<void> {
   process.stdout.write(ansiEscapes.clearTerminal);
   process.stdout.write(ansiEscapes.clearScreen);
   process.stdout.write(ansiEscapes.cursorDown(1));
 
   const app = ink.render(
     <App
-      abstractStr={abstractStr}
-      cleaningRules={cleaningRules}
       logger={logger}
+      entryPath={entryPath}
     />
   );
   return app.waitUntilExit();

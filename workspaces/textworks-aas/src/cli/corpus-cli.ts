@@ -4,9 +4,10 @@ import path from "path";
 import yargs from "yargs";
 import { arglib, prettyPrint } from "commons";
 
-import { runAbstractFinderOnScrapyCache, runAbstractCleanerOnScrapyCache } from "~/qa-editing/qa-review";
+import { runAbstractFinderOnScrapyCache } from "~/qa-editing/qa-review";
 import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import { pruneCrawledFromCSV, verifyCrawledRecords } from '~/openreview/workflow';
+import { runInteractiveFieldReview } from '~/extract/qa-review-abstracts';
 
 const { opt, config } = arglib;
 
@@ -77,10 +78,11 @@ yargs.command(
   config(
     opt.cwd,
     opt.existingDir("corpus-root: root directory for corpus files"),
+    opt.ion('overwrite: force overwrite of existing files', { boolean: true })
   ),
   (args: any) => {
 
-    const { corpusRoot } = args;
+    const { corpusRoot, overwrite } = args;
     const scrapyLog = path.resolve(corpusRoot, 'crawler.log');
     const logpath = corpusRoot;
     const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
@@ -90,31 +92,7 @@ yargs.command(
       logpath,
       scrapyLog,
       csvFile,
-    ).then(() => {
-      console.log('done');
-    });
-  },
-);
-
-yargs.command(
-  "clean-abstracts-in-cache",
-  "run the abstract field cleaner over corpus",
-  config(
-    opt.cwd,
-    opt.existingDir("corpus-root: root directory for corpus files"),
-  ),
-  (args: any) => {
-
-    const { corpusRoot } = args;
-    const scrapyLog = path.resolve(corpusRoot, 'crawler.log');
-    const logpath = corpusRoot;
-    const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
-
-    runAbstractCleanerOnScrapyCache(
-      corpusRoot,
-      logpath,
-      scrapyLog,
-      csvFile,
+      overwrite,
     ).then(() => {
       console.log('done');
     });
@@ -131,17 +109,13 @@ yargs.command(
   (args: any) => {
 
     const { corpusRoot } = args;
-    const scrapyLog = path.resolve(corpusRoot, 'crawler.log');
+    // const scrapyLog = path.resolve(corpusRoot, 'crawler.log');
     const logpath = corpusRoot;
-    const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
+    // const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
 
-    runAbstractCleanerOnScrapyCache(
+    runInteractiveFieldReview(
       corpusRoot,
       logpath,
-      scrapyLog,
-      csvFile,
-    ).then(() => {
-      console.log('done');
-    });
+    );
   },
 );

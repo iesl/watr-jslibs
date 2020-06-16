@@ -6,7 +6,7 @@ import pumpify from "pumpify";
 import urlparse from "url-parse";
 import split from 'split';
 
-import { initBufferedLogger, BufferedLogger, newFileStreamTransport } from "commons";
+import { initBufferedLogger, BufferedLogger } from "commons";
 import { filterStream } from "commons";
 import { ExpandedDir } from "commons";
 import { ReviewEnv } from '~/extract/qa-review-abstracts';
@@ -28,8 +28,8 @@ export function initLogger(logpath: string, phase: string, append = false): Buff
       );
     }
   }
-  const fst = () => newFileStreamTransport(logpath)
-  return initBufferedLogger(logname, [fst]);
+  // const fst = () => newFileStreamTransport(logpath)
+  return initBufferedLogger(logname);
 }
 
 export interface MetaFile {
@@ -39,7 +39,7 @@ export interface MetaFile {
 }
 
 export function readMetaFile(metafile: string): MetaFile | undefined {
-  if (! fs.existsSync(metafile)) return;
+  if (!fs.existsSync(metafile)) return;
 
   const metaPropsBuf = fs.readFileSync(metafile);
   const metaPropsStr = metaPropsBuf.toString();
@@ -60,16 +60,16 @@ export function writeDefaultEntryLogs(
 ): void {
   const metafile = path.join(entryDir.dir, "meta");
 
-  log.append(`entry.dir=${entryDir.dir}`);
+  log.append('entry.dir', entryDir.dir);
   const metaProps = readMetaFile(metafile);
 
   if (!metaProps) return;
 
   const { url, responseUrl } = metaProps;
   const urlp = urlparse(url);
-  log.append(`entry.url=${url}`);
-  log.append(`entry.url.host=${urlp.host}`);
-  log.append(`entry.response_url=${responseUrl}`);
+  log.append('entry.url', url);
+  log.append('entry.url.host', urlp.host);
+  log.append('entry.response_url', responseUrl);
   // get the original url from the meta/csv
   const fallbackUrl = env.csvLookup[url];
   let maybeOriginalUrl = [fallbackUrl];
@@ -80,11 +80,11 @@ export function writeDefaultEntryLogs(
       .filter(d => d !== undefined);
   }
 
-  if (maybeOriginalUrl.length>0) {
+  if (maybeOriginalUrl.length > 0) {
     const originalRec = maybeOriginalUrl[0];
-    const { noteId  } = originalRec;
-    log.append(`entry.noteId=${noteId}`);
-    log.append(`entry.url.original=${originalRec.url}`);
+    const { noteId } = originalRec;
+    log.append('entry.noteId', noteId);
+    log.append('entry.url.original', originalRec.url);
   }
 }
 
@@ -109,4 +109,10 @@ export function createFilteredLogStream(
       return _.every(filters, f => _.some(statusLogs, l => f.test(l)));
     }),
   );
+}
+
+export function getLogEntries(entries: Array<Record<string, any>>, key: string): any[] {
+  return entries
+    .map(e => e[key])
+    .filter(v => v !== undefined);
 }
