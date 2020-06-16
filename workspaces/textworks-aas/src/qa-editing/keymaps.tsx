@@ -2,11 +2,12 @@
 import _ from 'lodash';
 import { Text, Box, Color, useInput } from "ink";
 import React, { useState, useEffect } from "react";
-import { radix, prettyPrint } from 'commons';
+import { radix } from 'commons';
 
 export interface KeymapPath {
   descriptions: string[];
 }
+
 export interface KeymapEntry {
   keys: string;
   desc: string;
@@ -35,16 +36,28 @@ const KeymapElem: React.FC<KeymapElemArgs> = ({ currKeys, currDescs }) => {
     <Box flexDirection="column">
       <Box>
         <Color bold blue>
-          <Text>{'Input: '}</Text>
+          <Text>{'Current Input: '}</Text>
           <Text>{currKeys}</Text>
         </Color>
       </Box>
-      <Box flexDirection="column">
+      <Box marginLeft={2} flexDirection="column">
         {currDescs}
       </Box>
     </Box>
   );
 };
+
+export function useMnemonicKeydefs(
+  f: (k: KeymapEntry) => void
+): (mkeydef: string, action: () => void) => void {
+  return (mkeydef, action) => {
+    const re = /\([\w]\)/g;
+    const keyMatches = mkeydef.match(re);
+    const keyList = _.map(keyMatches, m => m.substring(1, m.length-1));
+    const keys = keyList.join('');
+    f({ keys, desc: mkeydef, action });
+  };
+}
 
 export function useKeymap2(): [(k: KeymapEntry) => void, JSX.Element] {
 
@@ -60,12 +73,10 @@ export function useKeymap2(): [(k: KeymapEntry) => void, JSX.Element] {
   useEffect(() => {
     // Update the keymap radix whenever a new keymapping is added
     const radTree = radix.createRadix<KeymapRadixNode>();
-    /* console.log('Updating Radix Tree'); */
 
     _.each(currKeymapEntries, entry => {
       const keys = entry.keys.split('');
       const leadingKeyPath = keys.slice(0, keys.length - 1);
-      /* prettyPrint({ keys, leadingKeyPath }); */
       _.each(_.range(leadingKeyPath.length+1), (n: number) => {
         const path = leadingKeyPath.slice(0, n);
         radix.radUpsert(radTree, path, (prev) => {
@@ -77,11 +88,9 @@ export function useKeymap2(): [(k: KeymapEntry) => void, JSX.Element] {
           }
           return prev;
         });
-        /* prettyPrint({ msg: '_.each(leading)', path, radTree }); */
       })
       radix.radInsert(radTree, keys, entry);
     });
-    /* prettyPrint({ radTree }); */
     setKeymapRadix(radTree);
   }, [currKeymapEntries]);
 
@@ -139,7 +148,7 @@ export function useKeymap2(): [(k: KeymapEntry) => void, JSX.Element] {
 
   const addKeymapEntry = (entry: KeymapEntry) => {
     setKeymapEntries(prev => _.concat(prev, [entry]));
+  };
 
-  }
   return [addKeymapEntry, currKeymapElem];
 }

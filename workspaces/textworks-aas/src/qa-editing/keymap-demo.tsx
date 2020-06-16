@@ -23,7 +23,7 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     addKeymapping({keys: "vac", desc: "(v)iew a c", action: () => { exit(); }});
     addKeymapping({keys: "vba", desc: "(v)iew b a", action: () => { exit(); }});
     addKeymapping({keys: "vbb", desc: "(v)iew b b", action: () => { exit(); }});
-    
+
     addKeymapping({keys: "o1", desc: "(o)pen 1", action: () => { exit(); }});
     addKeymapping({keys: "o2", desc: "(o)pen 2", action: () => { exit(); }});
 
