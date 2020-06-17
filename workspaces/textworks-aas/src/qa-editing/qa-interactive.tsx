@@ -1,7 +1,7 @@
 //
 import _ from "lodash";
 import React, { useState, useEffect } from "react";
-import { Text, Box, Color, useApp } from "ink";
+import { Box, useApp } from "ink";
 import * as ink from "ink";
 import { BufferedLogger, ExpandedDir } from "commons";
 import ansiEscapes from 'ansi-escapes';
@@ -10,42 +10,13 @@ import path from "path";
 //@ts-ignore
 import Divider from 'ink-divider';
 import { loadExtractionLog } from '~/extract/field-extract-abstract';
-import { getLogEntries } from './qa-logging';
+/* import { getLogEntries } from './qa-logging'; */
 import { openFileWithLess, openFileWithBrowser } from '~/extract/tidy-html';
 import { useKeymap2, useMnemonicKeydefs } from './keymaps';
 import { Field } from '~/extract/field-extract';
 import { CleaningRuleResult } from '~/extract/qa-review-abstracts';
+import { RenderRec } from './qa-widgets';
 
-interface TitledBoxArgs {
-  title: string;
-  body: string;
-}
-const TitledBox: React.FC<TitledBoxArgs> = ({ title, body }) => {
-  return (
-    <Box flexDirection="column">
-      <Divider title={title} />
-
-      <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={15} >
-        <Color bold blue>
-          <Text>{body}</Text>
-        </Color>
-      </Box>
-
-    </Box>
-  );
-};
-interface KeyValBoxArgs {
-  keyname: string;
-  val?: string;
-}
-const KeyValBox: React.FC<KeyValBoxArgs> = ({ keyname, val }) => {
-  return (
-    <Box marginLeft={2} marginBottom={0} width="80%" height={1} >
-      <Color bold red> <Text>{keyname}: </Text> </Color>
-      <Color bold blue> <Text>{val ? val : '<none>'}</Text> </Color>
-    </Box>
-  );
-};
 
 
 interface AppArgs {
@@ -53,24 +24,27 @@ interface AppArgs {
   logger: BufferedLogger;
 }
 
-const App: React.FC<AppArgs> = ({ entryPath, logger }) => {
+const App: React.FC<AppArgs> = ({ entryPath }) => {
   const { exit } = useApp();
 
   const [, setRedraws] = useState<number>(0);
 
   const openWithLess = (filename: string) => () => {
-    openFileWithLess(filename).then(() => {
-      setRedraws(i => i + 1);
-    });
+    openFileWithLess(filename)
+      .then(() => setRedraws(i => i + 1));
   };
   const openWithBrowser = (filename: string) => () => {
-    openFileWithBrowser(filename).then(() => {
-      setRedraws(i => i + 1);
-    });
+    openFileWithBrowser(filename)
+      .then(() => setRedraws(i => i + 1));
   };
 
   const [extractionLog,] = useState(loadExtractionLog(entryPath.dir));
-  const getEntry = _.curry(getLogEntries)(extractionLog);
+
+  const getEntry = (k: string) => {
+    const value = extractionLog[k];
+    if (!value) return [];
+    return [value];
+  };
 
   const [addKeymapping, keymapElem] = useKeymap2();
   const addKeys = useMnemonicKeydefs(addKeymapping);
@@ -87,21 +61,21 @@ const App: React.FC<AppArgs> = ({ entryPath, logger }) => {
         addKeys("(v)iew (c)ss-norms", openWithLess(cssNormPath));
         addKeys("(v)iew (h)tml-tidy", openWithLess(htmlTidyPath));
         addKeys("(v)iew in (b)rowser", openWithBrowser(responseBodyPath));
-        addKeys("(l)abel (g)olden", () => undefined);
-        addKeys("(l)abel (w)rong", () => undefined);
+
+        addKeys("(m)ark (c)orrect", () => undefined);
+        addKeys("(m)ark (i)ncorrect", () => undefined);
+
         addKeys("(l)abel (i)nvestigate later", () => undefined);
 
       });
 
-    /* _.each(getEntry('field.abstract.extract'), (errors: string) => {
-     *   addKeys("(l)abel (e)xtraction (r)esult (w)rong", () => undefined);
-     * });
-     */
-    _.each(getEntry('field.abstract.extract.errors'), (errors: string) => {
+    // addLabelOption({ key='field',  })
+
+    _.each(getEntry('field.extract.errors'), (errors: string) => {
       addKeys("(l)abel (e)xtraction (e)rror (w)rong", () => undefined);
     });
 
-    _.each(getEntry('field'), (fields: Field[]) => {
+    _.each(getEntry('field.list'), (fields: Field[]) => {
       _.each(fields, (field, fieldNum) => {
         const { name, evidence, value, cleaning, error } = field;
         if (value) {
@@ -118,90 +92,18 @@ const App: React.FC<AppArgs> = ({ entryPath, logger }) => {
   }, []);
 
 
-  const entryDisplay = getEntry('entry.dir')
-    .map((dir: string, index: number) => {
-      const basename = path.basename(dir);
-      return <KeyValBox key={`entry.dir.${index}`} keyname={'Path'} val={basename} />
-    });
-
-  const extractResult = getEntry('field.abstract.extract')
-    .map((res: boolean, index: number) => {
-      return <KeyValBox key={`field.abstract.extract.${index}`} keyname={'Found Abstract'} val={`${res}`} />
-    });
-
-  const extractErrors = getEntry('field.abstract.extract.errors')
-    .map((error: string, index: number) => {
-      return <KeyValBox key={`field.abstract.extract.error.${index}`} keyname={'Extraction Error'} val={error} />
-    });
-
-  const fieldView = getEntry('fields')
-    .flatMap((fields: Field[]) => {
-      return _.map(fields, field => {
-        const { name, evidence, value, cleaning, error } = field;
-        const fieldValue = value ? value : '';
-        const fieldDisplayHeight = Math.round(fieldValue.length / 140) + 2;
-
-
-        let cleaningDisplay: JSX.Element[] = [];
-
-        if (cleaning) {
-          cleaningDisplay = _.map(cleaning, (cleaningResult: CleaningRuleResult, index: number) => {
-            const { input, output, rule } = cleaningResult;
-            return (
-              <Box marginBottom={1} flexDirection="column" key={`cleaning.rule.${index}`} >
-                <KeyValBox keyname={'Cleaning Rule'} val={`#${index}`} />
-                <Box marginLeft={2} flexDirection="column">
-                  <KeyValBox key={`cleaning.rule.i.${index}`} keyname={'Input'} val={input} />
-                  <KeyValBox key={`cleaning.rule.o.${index}`} keyname={'Output'} val={output} />
-                  <KeyValBox key={`cleaning.rule.r.${index}`} keyname={'Rule'} val={rule} />
-                </Box>
-              </Box>
-            );
-          });
-        }
-
-        return (
-          <Box key="fields" flexDirection="column">
-            <Divider title={name} />
-
-            <KeyValBox keyname={'Evidence'} val={evidence} />
-            <KeyValBox keyname={'Error'} val={error} />
-            {cleaningDisplay}
-
-            <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={fieldDisplayHeight} >
-              <Color bold blue>
-                <Text>{fieldValue}</Text>
-              </Color>
-            </Box>
-          </Box>
-        );
-      })
-    });
-
-
-  const textLog = JSON.stringify(extractionLog);
-
   return (
     <Box flexDirection="column">
+      <Box flexDirection="column" marginBottom={2} >
+        <Divider title={'Entry'} />
+        <RenderRec rec={extractionLog} />
+      </Box>
 
-    <Divider title={'Entry'} />
+      <Box flexDirection="column" marginLeft={4} marginBottom={1} marginTop={2} >
+        <Divider title={'Menu'} />
+        {keymapElem}
+      </Box>
 
-    {entryDisplay}
-    {extractResult}
-    {extractErrors}
-    {fieldView}
-
-    <Divider title={'Keymap'} />
-
-    {keymapElem}
-
-    <Divider title={'Log Entry'} />
-
-    <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={15} >
-      <Color bold blue>
-        <Text>{textLog}</Text>
-      </Color>
-    </Box>
     </Box>
   );
 };

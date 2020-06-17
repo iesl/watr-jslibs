@@ -7,6 +7,7 @@ import ansiEscapes from 'ansi-escapes';
 //@ts-ignore
 import Divider from 'ink-divider';
 import { useKeymap2 } from './keymaps';
+import { RenderRec } from './qa-widgets';
 
 const KeymapDemo: React.FC<{}> = ({ }) => {
   const { exit } = useApp();
@@ -19,26 +20,51 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
       desc: "quit",
       action: () => { process.exit(); }
     });
-    addKeymapping({keys: "vab", desc: "(v)iew a b", action: () => { exit(); }});
-    addKeymapping({keys: "vac", desc: "(v)iew a c", action: () => { exit(); }});
-    addKeymapping({keys: "vba", desc: "(v)iew b a", action: () => { exit(); }});
-    addKeymapping({keys: "vbb", desc: "(v)iew b b", action: () => { exit(); }});
+    addKeymapping({ keys: "vab", desc: "(v)iew a b", action: () => { exit(); } });
+    addKeymapping({ keys: "vac", desc: "(v)iew a c", action: () => { exit(); } });
+    addKeymapping({ keys: "vba", desc: "(v)iew b a", action: () => { exit(); } });
+    addKeymapping({ keys: "vbb", desc: "(v)iew b b", action: () => { exit(); } });
 
-    addKeymapping({keys: "o1", desc: "(o)pen 1", action: () => { exit(); }});
-    addKeymapping({keys: "o2", desc: "(o)pen 2", action: () => { exit(); }});
+    addKeymapping({ keys: "o1", desc: "(o)pen 1", action: () => { exit(); } });
+    addKeymapping({ keys: "o2", desc: "(o)pen 2", action: () => { exit(); } });
 
-    addKeymapping({keys: "c1", desc: "(c)lose 1", action: () => { exit(); }});
-    addKeymapping({keys: "c2", desc: "(c)lose 2", action: () => { exit(); }});
+    addKeymapping({ keys: "c1", desc: "(c)lose 1", action: () => { exit(); } });
+    addKeymapping({ keys: "c2", desc: "(c)lose 2", action: () => { exit(); } });
   }, []);
 
+  const sampleRec: Record<string, any> = {
+    foo: "some foo value",
+    'quux': [
+      {
+        alpha: 'alpha',
+        beta: 'beta',
+        gamma: 'gamma',
+        baz: [
+          {
+            alpha: 'alpha',
+            beta: 'beta',
+          },
+          'alpha',
+          'beta',
+          'gamma',
+        ],
+        delta: 'delta',
+      }
+    ],
+    bar: "some bar value",
+  };
   return (
-    <Box flexDirection="column">
-      <Color bold red>
-        <Text>{'TODO'}</Text>
-      </Color>
+    <Box flexDirection="column" marginLeft={1} >
 
-      <Divider title={'Keymap'} />
-      {keymapElem}
+      <Box flexDirection="column" marginLeft={1} marginBottom={1} width="80%" >
+        <Divider title={'Record Display'} />
+        <RenderRec rec={sampleRec} />
+      </Box>
+
+      <Box flexDirection="column" marginLeft={1} marginBottom={1} width="80%" >
+        <Divider title={'Keymap'} />
+        {keymapElem}
+      </Box>
     </Box>
   );
 

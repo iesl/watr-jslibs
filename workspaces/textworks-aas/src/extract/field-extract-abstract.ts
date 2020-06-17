@@ -19,7 +19,6 @@ import {
   modEnv,
   readCachedFile,
   verifyHttpResponseCode,
-  verifyFileNotExists,
 } from "~/extract/field-extract";
 
 // import { makeCssTreeNormalFormFromNode } from "./reshape-html";
@@ -38,7 +37,7 @@ import {
 } from "~/extract/field-extract-utils";
 
 import { BufferedLogger, ExpandedDir } from "commons";
-import { writeDefaultEntryLogs } from '~/qa-editing/qa-logging';
+import { writeDefaultEntryLogs, ExtractionLog } from '~/qa-editing/qa-logging';
 import { ReviewEnv, applyCleaningRules } from './qa-review-abstracts';
 
 export const findInGlobalDocumentMetadata: ExtractionFunction =
@@ -98,16 +97,17 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
 
 
 
-export function loadExtractionLog(entryPath: string): Array<Record<string, any>> {
+export function loadExtractionLog(entryPath: string): ExtractionLog {
   const extractionArtifacts = path.resolve(entryPath, 'extraction-artifacts');
-  const extractionLog = path.resolve(extractionArtifacts, 'extraction-log.json');
+  const extractionLog = path.resolve(extractionArtifacts, 'extract-abstract-log.json');
   const log = fs.readJsonSync(extractionLog);
   return log;
 }
+
 export function extractAbstractTransformFromScrapy(log: BufferedLogger, env: ReviewEnv): Transform {
   return through.obj(
     async (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
-      log.append('action', 'extractAbstractTransformFromScrapy');
+      log.append('action', 'extract-abstract');
       writeDefaultEntryLogs(log, exDir, env);
 
       const extractionArtifacts = path.resolve(exDir.dir, 'extraction-artifacts');
@@ -119,16 +119,15 @@ export function extractAbstractTransformFromScrapy(log: BufferedLogger, env: Rev
         fs.mkdirSync(extractionArtifacts);
       }
       const extractionContent = fs.readdirSync(extractionArtifacts);
-      if (extractionContent.length>0) {
+      if (extractionContent.length > 0) {
         console.log(`skipping already-processed`);
-        log.append('skip.processed', true);
         return log.commitLogs()
           .then(() => next(null, exDir));
       }
       return runAbstractFinders(AbstractPipelineUpdate, exDir.dir, log)
         .then(() => {
           const logBuffer = log.logBuffer;
-          const extractionLog = path.resolve(extractionArtifacts, 'extraction-log.json');
+          const extractionLog = path.resolve(extractionArtifacts, 'extract-abstract-log.json');
           fs.writeJsonSync(extractionLog, logBuffer);
         })
         .then(() => log.commitLogs())
@@ -293,7 +292,7 @@ export async function runAbstractFinders(
           modEnv(env => {
             env.fileContentMap = {};
             let evidence = env.extractionEvidence.join(" ++ ");
-            evidence = evidence? `${evidence} ++ ` : '';
+            evidence = evidence ? `${evidence} ++ ` : '';
             const fieldsWithEvidence = env.fields.map(f => {
               const allEvidence = `${evidence}${f.evidence}`
               f.evidence = allEvidence;
@@ -320,9 +319,9 @@ export async function runAbstractFinders(
     if (fatalErrors.length > 0) {
       const uniqFatal = _.uniq(fatalErrors);
       const loggableErrors = uniqFatal.join("; ");
-      log.append('field.abstract.extract.errors', loggableErrors);
+      log.append('field.extract.errors', loggableErrors);
     } else {
-      log.append('field.abstract.extract', false);
+      log.append('field.found', false);
     }
     console.log(`No extracted abstract for ${entryName}`)
   } else {
@@ -344,6 +343,6 @@ export async function runAbstractFinders(
       }
       return field;
     });
-    log.append('fields', cleanedFields);
+    log.append('field.list', cleanedFields);
   }
 }

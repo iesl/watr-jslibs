@@ -125,7 +125,7 @@ type Loggable = string | any;
  */
 export interface BufferedLogger {
   logger: Logger;
-  logBuffer: Loggable[];
+  logBuffer: Record<string, any>;
   // append(obj: string): void;
   append(key: string, value: Loggable): void;
   commitLogs(): Promise<void>;
@@ -136,26 +136,17 @@ export interface BufferedLogger {
 export function initBufferedLogger(logname: string,): BufferedLogger {
   return {
     logger: initLogger(logname),
-    logBuffer: [],
-    // append: function(o: Loggable): void {
-    //   this.logBuffer.push(o);
-    // },
+    logBuffer: {},
     append: function(key: string, value: Loggable): void {
-      const kv: any = {};
-      kv[key] = value;
-      this.logBuffer.push(kv);
+      this.logBuffer[key] = value;
     },
     commitLogs: function(): Promise<void> {
-      const logBuffer = [...this.logBuffer];
-      _.remove(this.logBuffer, () => true);
+      const logBuffer = _.merge({}, this.logBuffer);
+      this.logBuffer = {};
 
-      const logData = {
-        logBuffer: [...logBuffer],
-      }
-      this.logger.info(logData);
+      this.logger.info(logBuffer);
 
       return Promise.resolve();
-      // return flushAndReopen(this.logger, transportFs);
     },
     commitAndClose: function(): Promise<void> {
       this.commitLogs();
