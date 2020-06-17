@@ -34,11 +34,15 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
 
   const sampleRec: Record<string, any> = {
     foo: "some foo value",
-    'quux': [
+    quux: [
       {
         alpha: 'alpha',
         beta: 'beta',
-        gamma: 'gamma',
+        gamma: {
+          romeo: 'capulet',
+          juliet: 'montague',
+          priest: 'roman',
+        },
         baz: [
           {
             alpha: 'alpha',
