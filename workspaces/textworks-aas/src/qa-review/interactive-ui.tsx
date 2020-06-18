@@ -11,10 +11,9 @@ import path from "path";
 import Divider from 'ink-divider';
 import { useKeymap2, useMnemonicKeydefs } from './keymaps';
 import { loadExtractionLog } from '~/extract/abstracts/extract-abstracts';
-import { Field } from '~/extract/core/field-extract';
-import { CleaningRuleResult } from '~/extract/abstracts/data-clean-abstracts';
 import { RenderRec } from './ink-widgets';
 import { openFileWithLess, openFileWithBrowser } from './view-files';
+import { CleaningRuleResult, Field } from '~/extract/core/extraction-process';
 
 
 interface AppArgs {
@@ -69,18 +68,18 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
 
     // addLabelOption({ key='field',  })
 
-    _.each(getEntry('field.extract.errors'), (errors: string) => {
+    _.each(getEntry('field.extract.errors'), () => {
       addKeys("(l)abel (e)xtraction (e)rror (w)rong", () => undefined);
     });
 
     _.each(getEntry('field.list'), (fields: Field[]) => {
-      _.each(fields, (field, fieldNum) => {
-        const { name, evidence, value, cleaning, error } = field;
+      _.each(fields, (field) => {
+        const { value, cleaning } = field;
         if (value) {
           addKeys("(l)abel (f)ield (v)alue, (w)rong", () => undefined);
         }
         if (cleaning) {
-          _.each(cleaning, (cleaningResult: CleaningRuleResult, index: number) => {
+          _.each(cleaning, (_cleaningResult: CleaningRuleResult, index: number) => {
             addKeys(`(l)abel (c)leaning rule (${index}) (w)rong`, () => undefined);
           });
         }

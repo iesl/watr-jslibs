@@ -1,14 +1,20 @@
 import _ from "lodash";
 import pumpify from "pumpify";
 import { Stream } from "stream";
-import { throughFunc, tapStream, filterStream, throughAccum, initEnv, WithEnv, unEnv } from './stream-utils';
+import { throughFunc, tapStream, filterStream, throughAccum, initEnv, WithEnv, unEnv, isWithEnv } from './stream-utils';
+
+export type WithoutEnvCallback<ChunkT, R = void> = (data: ChunkT) => R;
+export type JustEnvCB<Env> = (env: Env) => void;
+export type WithEnvCB<ChunkT, Env, R = void> = (data: ChunkT, env: Env) => R;
+export type WithEnvCBAdapted<ChunkT, Env, R = void> = (data: ChunkT | WithEnv<ChunkT, Env>) => R;
 
 /**
  * Convenience builder for stream processes
  */
 export interface PumpBuilder<ChunkT, Env> {
   streams: Stream[];
-  onDataF?: (t: ChunkT) => void;
+  onDataF?: WithEnvCB<ChunkT, Env>;
+
   onCloseF?: (err: Error) => void;
   onEndF?: () => void;
 
@@ -16,23 +22,21 @@ export interface PumpBuilder<ChunkT, Env> {
 
   viaStream<R>(s: Stream): PumpBuilder<R, Env>;
 
-  throughF<R>(f: (t: ChunkT, env: Env) => Promise<R>): PumpBuilder<R, Env>;
-  throughF<R>(f: (t: ChunkT, env: Env) => R): PumpBuilder<R, Env>;
+  throughF<R>(f: WithEnvCB<ChunkT, Env, Promise<R>>): PumpBuilder<R, Env>;
+  throughF<R>(f: WithEnvCB<ChunkT, Env, R>): PumpBuilder<R, Env>;
 
   filter(f: (t: ChunkT, env: Env) => boolean): PumpBuilder<ChunkT, Env>;
 
   gather(): PumpBuilder<ChunkT[], Env>;
 
-  tap(f: (t: ChunkT, env: Env) => void): PumpBuilder<ChunkT, Env>;
+  tap(f: WithEnvCB<ChunkT, Env>): PumpBuilder<ChunkT, Env>;
 
-  // appendPump<ChT0, Env0>(pb: PumpBuilder<ChT0, Env0>) : PumpBuilder<ChunkT, Env>;
-
-  onData(f: (t: ChunkT) => void): PumpBuilder<ChunkT, Env>;
+  onData(f: WithEnvCB<ChunkT, Env>): PumpBuilder<ChunkT, Env>;
   onClose(f: (err?: Error) => void): PumpBuilder<ChunkT, Env>;
   onEnd(f: () => void): PumpBuilder<ChunkT, Env>;
   start(): Stream;
   toStream(): Stream;
-  toPromise(): Promise<ChunkT[]>;
+  toPromise(): Promise<ChunkT | undefined>;
 }
 
 type PartialPB<T, Env> = Partial<PumpBuilder<T, Env>>;
@@ -66,18 +70,33 @@ function bufferChunks<ChunkT, Env>(pb: PumpBuilder<ChunkT, Env>) {
 
 }
 
-export function createPump<ChunkT, Env>(): PumpBuilder<ChunkT, Env> {
+
+
+function adaptOnDataFn<ChunkT, Env>(f: WithEnvCB<ChunkT, Env>): WithEnvCBAdapted<ChunkT, Env> {
+  return (data: ChunkT | WithEnv<ChunkT, Env>) => {
+    if (isWithEnv(data)) {
+      f(data.t, data.env);
+      return;
+    }
+    const env: Env = undefined as any as Env;
+    f(data, env);
+  };
+}
+
+export function createPump<ChunkT, Env = undefined>(): PumpBuilder<ChunkT, Env> {
   const merge = (builder: PumpBuilder<ChunkT, Env>, part: PartialPB<ChunkT, Env>) =>
     _.merge({}, builder, part);
 
   const pb0: PumpBuilder<ChunkT, Env> = {
     streams: [],
-    onData(f: (t: ChunkT) => void): PumpBuilder<ChunkT, Env> {
-      return merge(this, { onDataF: f });
+
+    onData(f: WithEnvCB<ChunkT, Env>): PumpBuilder<ChunkT, Env> {
+      return merge(this, { onDataF: adaptOnDataFn(f) });
     },
     onClose(f: (err?: Error) => void): PumpBuilder<ChunkT, Env> {
       return merge(this, { onCloseF: f });
     },
+
     onEnd(f: () => void): PumpBuilder<ChunkT, Env> {
       return merge(this, { onEndF: f });
     },
@@ -120,14 +139,18 @@ export function createPump<ChunkT, Env>(): PumpBuilder<ChunkT, Env> {
       return pipe;
     },
 
-    toPromise(): Promise<ChunkT[]> {
+    toPromise(): Promise<ChunkT | undefined> {
       const self = this;
 
       return new Promise((resolve) => {
-        const bufferedStream = bufferChunks(self);
-        bufferedStream
-          .onData((d: ChunkT[]) => resolve(d))
-          .start();
+        const selfStream = self.toStream();
+        let lastChunk: ChunkT | undefined;
+        selfStream.on('end', () => {
+          resolve(lastChunk);
+        });
+        selfStream.on('data', (data) => {
+          lastChunk = data;
+        });
       });
 
     }

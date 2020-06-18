@@ -12,6 +12,7 @@ import { runInteractiveReviewUI } from '~/qa-review/interactive-ui';
 import { scrapyCacheDirs } from './cli-main';
 import { initLogger } from '../logging/logging';
 import { AlphaRecord } from '../core/extraction-records';
+import { CleaningRule } from '../core/extraction-process';
 
 export interface ReviewEnv {
   logger: BufferedLogger;
@@ -20,13 +21,7 @@ export interface ReviewEnv {
   csvLookup: Dictionary<AlphaRecord>;
 }
 
-export interface CleaningRule {
-  name: string;
-  precondition(str: string): boolean;
-  run(str: string): string;
-
-}
-const CleaningRules: CleaningRule[] = [
+export const AbstractCleaningRules: CleaningRule[] = [
   {
     name: "starts w/'abstract'",
     precondition: (str) => {
@@ -271,27 +266,3 @@ export async function runInteractiveFieldReview(
   }
 }
 
-export interface CleaningRuleResult {
-  input: string;
-  output: string;
-  rule: string;
-}
-
-export function applyCleaningRules(abstractStr: string): [string, CleaningRuleResult[]] {
-  let currentAbstract = abstractStr;
-  const cleaningResults: CleaningRuleResult[] = [];
-  _.each(CleaningRules, (rule) => {
-    if (rule.precondition(currentAbstract)) {
-      const cleaned = rule.run(currentAbstract);
-      if (cleaned !== currentAbstract) {
-        cleaningResults.push({
-          input: currentAbstract,
-          output: cleaned,
-          rule: rule.name
-        });
-      }
-      currentAbstract = cleaned;
-    }
-  });
-  return [currentAbstract, cleaningResults];
-}

@@ -1,48 +1,17 @@
 import _ from "lodash";
 import path from "path";
 
-import * as Arr from 'fp-ts/lib/Array';
 import * as TE from 'fp-ts/lib/TaskEither';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import fs from "fs-extra";
-import { CleaningRuleResult } from '../abstracts/data-clean-abstracts';
-import { MetaFile, readMetaFile } from '../logging/logging';
 import { readResolveFile, readResolveFileAsync } from '~/utils/file-utils';
 import { runFileCmd } from '~/utils/run-cmd-file';
 import { makeCssTreeNormalForm } from './html-to-css-normal';
 import { runTidyCmdBuffered } from '~/utils/run-cmd-tidy-html';
-
-export interface Field {
-  name: string;
-  evidence: string;
-  value?: string;
-  cleaning?: CleaningRuleResult[];
-  error?: string;
-  complete?: boolean;
-}
-
-interface NormalForms {
-  'css-normal': null;
-  'response-body': null;
-  'html-tidy': null
-}
-
-export type NormalForm = keyof NormalForms;
-
-interface FileContentValue {
-  lines: string[];
-  content: string;
-}
-export interface ExtractionEnv {
-  entryPath: string;
-  metaProps: MetaFile;
-  responseMimeType: string;
-  fileContentMap: { [k in keyof NormalForms]?: FileContentValue };
-  fields: Field[];
-  extractionEvidence: string[];
-}
+import { ExtractionEnv, ExtractionFunction, NormalForm, extractionSuccess, fatalFailure, nonFatalFailure } from './extraction-process';
+import { readMetaFile } from '../logging/logging';
 
 export const initialEnv: ExtractionEnv = {
   entryPath: 'empty',
@@ -57,27 +26,6 @@ export const initialEnv: ExtractionEnv = {
   extractionEvidence: [],
 };
 
-export type ExtractionResult = TE.TaskEither<string, ExtractionEnv>;
-export type ExtractionFunction = (env: ExtractionEnv) => ExtractionResult;
-
-export const tapWith: (f: (env: ExtractionEnv) => void) => ExtractionFunction =
-  f => env => {
-    const originalEnv = _.merge({}, env);
-    f(env);
-    return TE.right(originalEnv);
-  };
-
-export const modEnv: (f: (env: ExtractionEnv) => ExtractionEnv) => ExtractionFunction =
-  f => env => {
-    const newEnv = f(env);
-    return TE.right(newEnv);
-  };
-
-export const resetEnvForAttemptChain: ExtractionFunction =
-  env => {
-    env.extractionEvidence = [];
-    return TE.right(env);
-  };
 
 export const filterUrl: (urlTest: RegExp) => ExtractionFunction =
   (urlTest: RegExp) => (env: ExtractionEnv) => {
@@ -206,16 +154,6 @@ export const runCssNormalize: ExtractionFunction =
   };
 
 
-export function extractionSuccess(result: ExtractionEnv): ExtractionResult {
-  return TE.right<string, ExtractionEnv>(result);
-}
-
-export function fatalFailure(result: string): ExtractionResult {
-  return TE.left<string, ExtractionEnv>(`FATAL: ${result}`);
-}
-export function nonFatalFailure(result: string): ExtractionResult {
-  return TE.left<string, ExtractionEnv>(`WARN: ${result}`);
-}
 
 export const readCachedFile: (cacheKey: NormalForm) => ExtractionFunction =
   (cacheKey: NormalForm) => (env: ExtractionEnv) => {
@@ -291,37 +229,3 @@ export const readMetaProps: ExtractionFunction =
   };
 
 
-export type BindFunction<E, A> = (env: A) => TE.TaskEither<E, A>;
-
-export function bindTasksEA<E = unknown, A = unknown>(
-  init: A,
-  fs: BindFunction<E, A>[]
-): TE.TaskEither<E, A> {
-
-  const f1 = fs[0];
-  const frest = fs.slice(1);
-  const r1 = f1(init);
-
-  const result = Arr.array.reduce(frest, r1, (
-    acc: TE.TaskEither<E, A>,
-    el: BindFunction<E, A>
-  ) => {
-    return pipe(acc, TE.chain(el));
-  });
-
-  return result;
-}
-
-export function bindTasks(
-  init: ExtractionEnv,
-  fs: ExtractionFunction[]
-): TE.TaskEither<string, ExtractionEnv> {
-  return bindTasksEA<string, ExtractionEnv>(init, fs);
-}
-
-export function doPipeline(
-  init: ExtractionEnv,
-  fs: ExtractionFunction[]
-): Promise<E.Either<string, ExtractionEnv>> {
-  return bindTasks(init, fs)();
-}

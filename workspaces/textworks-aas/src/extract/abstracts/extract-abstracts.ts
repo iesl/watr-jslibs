@@ -1,27 +1,18 @@
 import _ from "lodash";
 import path from "path";
 import { Transform } from "stream";
-import through from "through2";
 import {
-  Field,
-  ExtractionFunction,
   readMetaProps,
   filterUrl,
   runFileVerification,
   runHtmlTidy,
   initialEnv,
-  ExtractionEnv,
-  bindTasks,
   runCssNormalize,
   runLoadResponseBody,
-  resetEnvForAttemptChain,
-  tapWith,
-  modEnv,
   readCachedFile,
   verifyHttpResponseCode,
 } from "~/extract/core/field-extract";
 
-// import { makeCssTreeNormalFormFromNode } from "./reshape-html";
 import fs from "fs-extra";
 
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -30,16 +21,14 @@ import * as TE from 'fp-ts/lib/TaskEither';
 import { isRight } from 'fp-ts/lib/Either'
 
 import {
-  // getSubtextOrUndef,
-  // queryContent,
   findByLineMatchTE,
   findInMetaTE,
 } from "~/extract/core/field-extract-utils";
 
-import { BufferedLogger, ExpandedDir } from "commons";
+import { BufferedLogger, tapStream, filterStream } from "commons";
 import { ExtractionLog } from '../core/extraction-records';
-import { ReviewEnv, applyCleaningRules } from './data-clean-abstracts';
-import { writeDefaultEntryLogs } from '../logging/logging';
+import { ReviewEnv, AbstractCleaningRules } from './data-clean-abstracts';
+import { ExtractionFunction, Field, ExtractionEnv, resetEnvForAttemptChain, modEnv, tapWith, bindTasks, applyCleaningRules } from '../core/extraction-process';
 
 export const findInGlobalDocumentMetadata: ExtractionFunction =
   env => {
@@ -95,45 +84,57 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
 // TODO: maybe expand filtered log handling to automatically comb logs in reverse-creation order, and add a 'compact' function to trim and delete old entries
 // TODO: figure out if there is a better html parser for handling both self-closing and script tags properly
 
+export function artifactsPath(entryPath: string): string {
+  return path.resolve(entryPath, 'extraction-artifacts');
+}
+
+export function artifactFilePath(entryPath: string, artifactFileName: string): string {
+  const extractionArtifacts = artifactsPath(entryPath);
+  return path.resolve(extractionArtifacts, artifactFileName);
+}
+
+export const extractionLogName = 'extract-abstract-log.json';
+
+export function extractionLog(entryPath: string): string {
+  return artifactFilePath(entryPath, extractionLogName);
+}
 
 export function loadExtractionLog(entryPath: string): ExtractionLog {
-  const extractionArtifacts = path.resolve(entryPath, 'extraction-artifacts');
-  const extractionLog = path.resolve(extractionArtifacts, 'extract-abstract-log.json');
-  const log = fs.readJsonSync(extractionLog);
-  return log;
+  return fs.readJsonSync(extractionLog(entryPath));
+}
+export function writeExtractionLog(entryPath: string, logBuffer: ExtractionLog): void {
+  const logfile = extractionLog(entryPath);
+  fs.writeJsonSync(logfile, logBuffer);
 }
 
-export function extractAbstractTransformFromScrapy(log: BufferedLogger, env: ReviewEnv): Transform {
-  return through.obj(
-    async (exDir: ExpandedDir, _enc: string, next: (err: any, v: any) => void) => {
-      log.append('action', 'extract-abstract');
-      writeDefaultEntryLogs(log, exDir, env);
+export const ensureArtifactsDir = (entryPath: string, env: ReviewEnv): void => {
+  const artifactPath = artifactsPath(entryPath);
 
-      const extractionArtifacts = path.resolve(exDir.dir, 'extraction-artifacts');
-      const artifactDirExists = fs.existsSync(extractionArtifacts);
-      if (env.overwrite && artifactDirExists) {
-        fs.emptyDirSync(extractionArtifacts);
-      }
-      if (!artifactDirExists) {
-        fs.mkdirSync(extractionArtifacts);
-      }
-      const extractionContent = fs.readdirSync(extractionArtifacts);
-      if (extractionContent.length > 0) {
-        console.log(`skipping already-processed`);
-        return log.commitLogs()
-          .then(() => next(null, exDir));
-      }
-      return runAbstractFinders(AbstractPipelineUpdate, exDir.dir, log)
-        .then(() => {
-          const logBuffer = log.logBuffer;
-          const extractionLog = path.resolve(extractionArtifacts, 'extract-abstract-log.json');
-          fs.writeJsonSync(extractionLog, logBuffer);
-        })
-        .then(() => log.commitLogs())
-        .then(() => next(null, exDir));
-    },
-  );
-}
+  const artifactDirExists = fs.existsSync(artifactPath);
+  if (env.overwrite && artifactDirExists) {
+    fs.emptyDirSync(artifactPath);
+  }
+  if (!artifactDirExists) {
+    fs.mkdirSync(artifactPath);
+  }
+};
+
+export const skipIfArtifactExisits = (artifactFileName: string) => (entryPath: string): boolean => {
+  const exists = fs.existsSync(artifactFilePath(entryPath, artifactFileName));
+  if (exists) {
+    console.log(`skipping: file ${artifactFileName} already exists`);
+  }
+  return !exists;
+};
+
+export const extractAbstractTransform =
+  async (entryPath: string, env: ReviewEnv): Promise<void> => {
+    const log = env.logger;
+    log.append('action', 'extract-abstract');
+    return runAbstractFinders(AbstractPipelineUpdate, entryPath, log)
+      .then(() => writeExtractionLog(entryPath, log.logBuffer))
+      .then(() => log.commitLogs());
+  };
 
 export const AbstractPipelineUpdate: ExtractionFunction[][] = [
 
@@ -329,7 +330,7 @@ export async function runAbstractFinders(
       const abs = field.value;
       let cleaned: string | undefined = undefined;
       if (abs) {
-        const [cleaned0, cleaningRuleResults] = applyCleaningRules(abs);
+        const [cleaned0, cleaningRuleResults] = applyCleaningRules(AbstractCleaningRules, abs);
         cleaned = cleaned0;
         if (cleaningRuleResults.length > 0) {
           field.cleaning = cleaningRuleResults;

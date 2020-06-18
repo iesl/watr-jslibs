@@ -5,14 +5,12 @@ import {
   stanzaChunker,
   prettyPrintTrans,
   throughFunc,
-  throughFuncPar,
   charStream,
   arrayStream,
   tapStream,
 } from "./stream-utils";
 
 import pumpify from "pumpify";
-import { initEnv } from '..';
 
 import util from 'util';
 import stream from 'stream';
@@ -46,32 +44,32 @@ describe("Stream utils ", () => {
   });
 
 
-  it("should do parallel work on streams", async done => {
-    async function doAsync(s: string): Promise<string> {
-      return delay(200).then(() => {
-        prettyPrint({ s });
-        return Promise.resolve(`${s}_${s}`);
-      })
-    }
-    const astr = charStream("abcdefgh");
-    const pipe = pumpify.obj(
-      astr,
-      initEnv((t) => ({ msg: `env ${t}` })),
-      throughFuncPar(3, doAsync),
-    );
+  // it("should do parallel work on streams", async done => {
+  //   async function doAsync(s: string): Promise<string> {
+  //     return delay(200).then(() => {
+  //       prettyPrint({ s });
+  //       return Promise.resolve(`${s}_${s}`);
+  //     })
+  //   }
+  //   const astr = charStream("abcdefgh");
+  //   const pipe = pumpify.obj(
+  //     astr,
+  //     initEnv((t) => ({ msg: `env ${t}` })),
+  //     throughFuncPar(3, doAsync),
+  //   );
 
-    const output: string[] = [];
+  //   const output: string[] = [];
 
-    pipe.on("data", (data: string) => {
-      prettyPrint({ data });
-      output.push(data);
-    });
+  //   pipe.on("data", (data: string) => {
+  //     prettyPrint({ data });
+  //     output.push(data);
+  //   });
 
-    pipe.on("end", () => {
-      prettyPrint({ output });
-      done();
-    });
-  });
+  //   pipe.on("end", () => {
+  //     prettyPrint({ output });
+  //     done();
+  //   });
+  // });
 
   it("should properly catch pipeline errors", async done => {
     const astr = charStream("abcde");

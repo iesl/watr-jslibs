@@ -5,7 +5,8 @@ import _ from "lodash";
 import { prettyPrint } from "commons";
 import * as TE from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { ExtractionEnv, readMetaProps, filterUrl, runFileVerification, runHtmlTidy, initialEnv, doPipeline } from './field-extract';
+import { readMetaProps, filterUrl, runFileVerification, runHtmlTidy, initialEnv } from './field-extract';
+import { doPipeline, ExtractionEnv } from './extraction-process';
 
 describe("Field Extraction Pipeline", () => {
 

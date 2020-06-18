@@ -13,12 +13,15 @@ export interface WithEnv<T, E> {
   env: E
 }
 
-// eslint-disable-next-line  @typescript-eslint/explicit-module-boundary-types
-export function isWithEnv(a: any): a is WithEnv<any, any> {
+export function isWithEnv(a: WithEnv<any, any> | any): a is WithEnv<any, any> {
   const isObject = typeof a === 'object';
-  return isObject && 'kind' in a && a['kind'] === 'WithEnv';
+  return isObject &&
+    'kind' in a && a['kind'] === 'WithEnv'
+    && 't' in a
+    && 'env' in a ;
 }
 
+// TODO Parallel stream processing not yet working
 export function throughFuncPar<T, R, E>(
   parallelFactor: number,
   f: (t: T, env: E, currTransform: Transform) => R,

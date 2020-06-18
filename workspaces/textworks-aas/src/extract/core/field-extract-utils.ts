@@ -2,7 +2,7 @@ import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
 import * as cheerio from "cheerio";
-import { Field, ExtractionEnv, ExtractionFunction } from "./field-extract";
+import { Field, ExtractionEnv, ExtractionFunction } from "./extraction-process";
 
 import * as TE from 'fp-ts/lib/TaskEither';
 import { makeCssTreeNormalFormFromNode } from './html-to-css-normal';

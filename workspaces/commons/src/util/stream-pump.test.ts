@@ -94,8 +94,9 @@ describe("Pump Builder", () => {
       .tap((n: number, env: MyEnv) => {
         env.accum += n;
       })
-      .onData((d) => {
-        // prettyPrint({ d });
+      .onData((d, env) => {
+        expect(d).toEqual(env.accum);
+        expect(typeof d).toEqual('number');
       });
 
     pumpBuilder.toPromise().then(() => done());
@@ -124,7 +125,7 @@ describe("Pump Builder", () => {
     pumpBuilder.toPromise().then(() => done());
   });
 
-  it.only("should convert to promise that yield data", async done => {
+  it("should convert to promise that yield data", async done => {
     const astr = numberStream(1, 10);
 
     interface MyEnv {
@@ -141,10 +142,9 @@ describe("Pump Builder", () => {
       .gather()
     ;
 
-    const prom = pumpBuilder.toPromise();
-    prom.then((numbers: number[][]) => {
-      // prettyPrint({ numbers });
-      done();
-    })
+    const result = await pumpBuilder.toPromise();
+    expect(result).toEqual([3, 5, 7, 9])
+
+    done();
   });
 });
