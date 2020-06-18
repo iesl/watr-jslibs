@@ -10,7 +10,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { getFileType, transformViaTidyBuffered } from './tidy-html';
 import { readResolveFile, makeCssTreeNormalForm, readResolveFileAsync } from './reshape-html';
 
-
 export interface Field {
   name: string;
   evidence: string;

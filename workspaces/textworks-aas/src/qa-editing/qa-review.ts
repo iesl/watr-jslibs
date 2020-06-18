@@ -74,6 +74,9 @@ export async function runAbstractFinderOnScrapyCache(
       dirEntryStream,
       // sliceStream(0, 20),
       // filterStream((path: string) => /011b8/.test(path)),
+      // TODO write AlphaRecord if not exists
+      // TODO write UrlChain if not exists
+      // TODO delete artifacts if --overwrite specified
       expandDirTrans,
       extractAbstractTransformFromScrapy(logger, {
         logger,

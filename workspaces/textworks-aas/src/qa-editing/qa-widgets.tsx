@@ -1,6 +1,6 @@
 import _ from "lodash";
 import React from "react";
-import { Text, Box, Color } from "ink";
+import { Text, Box, Color, ColorProps, BoxProps } from "ink";
 
 //@ts-ignore
 import Divider from 'ink-divider';
@@ -10,21 +10,44 @@ interface TitledBoxArgs {
   body: string;
 }
 
+
+export type ModJSX = (fc: JSX.Element) => JSX.Element;
+export type StringToJSX = (s: string) => JSX.Element;
+
+export const dim: ModJSX = e => <Color dim>{e}</Color>;
+export const dimGray: ModJSX = e => <Color dim gray>{e}</Color>;
+export const gray: ModJSX = e => <Color gray>{e}</Color>;
+export const bold: ModJSX = e => <Color bold>{e}</Color>;
+export const red: ModJSX = e => <Color red>{e}</Color>;
+export const blue: ModJSX = e => <Color blue>{e}</Color>;
+export const boldBlue: ModJSX = e => <Color bold blue>{e}</Color>;
+
+export function text(s: string): JSX.Element {
+  return <Text>{s}</Text>;
+}
+
+const objKeyColor: StringToJSX = (key: string) => red(text(key));
+const kvSepColor: StringToJSX = (key: string) => dimGray(text(key));
+
+export const Row: React.FC<BoxProps> = (bps) => {
+  return <Box {...bps} />;
+};
+export const Col: React.FC<BoxProps> = (bps) => {
+  return <Box flexDirection="column" {...bps} />;
+};
+
 export const TitledBox: React.FC<TitledBoxArgs> = ({ title, body }) => {
   return (
-    <Box flexDirection="column">
+    <Col>
       <Divider title={title} />
 
       <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={15} >
-        <Color bold blue>
-          <Text>{body}</Text>
-        </Color>
+        {bold(blue(text(body)))}
       </Box>
 
-    </Box>
+    </Col>
   );
 };
-
 
 interface KeyValBoxArgs {
   keyname: string;
@@ -50,18 +73,18 @@ export const RenderAny: React.FC<RenderAnyArgs> = ({ item, depth }) => {
   const isPrimitive = _.isString(item) || _.isNumber(item) || _.isBoolean(item);
 
   if (isPrimitive) {
-    return (<Color bold blue> <Text>{`${item}`}</Text> </Color>);
+    return boldBlue(text(`${item}`));
   }
 
   if (_.isNull(item)) {
-    return (<Color bold blue><Text>null</Text> </Color>);
+    return boldBlue(text('null'));
   }
 
   if (_.isArray(item)) {
     const ritems = _.map(item, (item0, i) => {
       return (
         <Box key={`r-item-${i}`} >
-          <Color dim gray><Text>{i}.</Text></Color>
+          {dim(gray(text(`${i}.`)))}
           <RenderAny item={item0} depth={depth + 1} />
         </Box>
       )
@@ -101,15 +124,15 @@ const RenderRecImpl: React.FC<RenderRecImplArgs> = ({ rec, depth }) => {
   const asPairs = _.toPairs(rec);
   const longestKeyLen = _.max(_.map(asPairs, ([key]) => key.length));
   const padRight = longestKeyLen || 1;
-  /* const padKeyRight = (k: string) => k.padEnd(d) */
 
   const allBoxes = _.map(asPairs, ([key, val], i) => {
     const prefixChar = asPairs.length == 1 ? sole :
-                       i === 0 ? fst :
-                       i === asPairs.length - 1 ? lst : mid;
+      i === 0 ? fst :
+        i === asPairs.length - 1 ? lst : mid;
 
     const itemBox = <RenderAny item={val} depth={depth + 1} />;
-    const prefix = <Color grey> <Text>{prefixChar} </Text></Color>;
+
+    const prefix = gray(text(prefixChar));
 
     const capCaseKey = capitalizeDottedString(key)
       .padEnd(padRight);
@@ -118,12 +141,12 @@ const RenderRecImpl: React.FC<RenderRecImplArgs> = ({ rec, depth }) => {
       return (
         <Box key={`render.rec.${i}`}>
           {prefix}
-          <Box flexDirection="column">
-            <Color red><Text>{capCaseKey}</Text></Color>
+          <Col>
+            {objKeyColor(capCaseKey)}
             <Box marginLeft={2}>
               {itemBox}
             </Box>
-          </Box>
+          </Col>
         </Box>
       );
     }
@@ -131,17 +154,17 @@ const RenderRecImpl: React.FC<RenderRecImplArgs> = ({ rec, depth }) => {
     return (
       <Box key={`render.rec.${i}`} >
         {prefix}
-        <Color red><Text>{capCaseKey}</Text></Color>
-        <Color dim gray><Text>{' ─> '}</Text></Color>
+        {objKeyColor(capCaseKey)}
+        {kvSepColor(' ─> ')}
         {itemBox}
       </Box>
     );
   });
 
   return (
-    <Box marginLeft={0} marginBottom={0} width="80%" flexDirection="column">
+    <Col width="80%">
       {allBoxes}
-    </Box>
+    </Col>
   );
 };
 
