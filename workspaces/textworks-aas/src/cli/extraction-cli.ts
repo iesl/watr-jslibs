@@ -5,8 +5,9 @@ import yargs from "yargs";
 import { arglib } from "commons";
 
 import { pruneCrawledFromCSV, verifyCrawledRecords } from '~/openreview/workflow';
-import { runAbstractFinderOnScrapyCache } from '~/extract/abstracts/cli-main';
+
 import { runInteractiveFieldReview } from '~/extract/abstracts/data-clean-abstracts';
+import { runMainExtractAbstracts } from '~/extract/abstracts/cli-main';
 
 const { opt, config } = arglib;
 
@@ -47,7 +48,7 @@ yargs.command(
 );
 
 yargs.command(
-  "find-abstracts-in-cache",
+  "extract-abstracts",
   "run the abstract field extractors over htmls in corpus",
   config(
     opt.cwd,
@@ -61,7 +62,7 @@ yargs.command(
     const logpath = corpusRoot;
     const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
 
-    runAbstractFinderOnScrapyCache(
+    runMainExtractAbstracts(
       corpusRoot,
       logpath,
       scrapyLog,
@@ -75,7 +76,7 @@ yargs.command(
 
 yargs.command(
   "review-extraction",
-  "review the extraction process",
+  "interactively review the extraction process",
   config(
     opt.cwd,
     opt.existingDir("corpus-root: root directory for corpus files"),
@@ -83,9 +84,7 @@ yargs.command(
   (args: any) => {
 
     const { corpusRoot } = args;
-    // const scrapyLog = path.resolve(corpusRoot, 'crawler.log');
     const logpath = corpusRoot;
-    // const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
 
     runInteractiveFieldReview(
       corpusRoot,

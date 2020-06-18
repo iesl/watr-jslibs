@@ -5,17 +5,19 @@ import {
 } from "commons";
 
 import { BufferedLogger, } from "commons";
-import { UrlGraph, InputRec } from '~/openreview/workflow';
+
+import { UrlGraph } from '~/openreview/workflow';
 import pumpify from "pumpify";
 import { runInteractiveReviewUI } from '~/qa-review/interactive-ui';
 import { scrapyCacheDirs } from './cli-main';
 import { initLogger } from '../logging/logging';
+import { AlphaRecord } from '../core/extraction-records';
 
 export interface ReviewEnv {
   logger: BufferedLogger;
   overwrite: boolean;
   urlGraph: UrlGraph;
-  csvLookup: Dictionary<InputRec>;
+  csvLookup: Dictionary<AlphaRecord>;
 }
 
 export interface CleaningRule {
@@ -247,8 +249,6 @@ async function reviewAbstractExtraction(logger: BufferedLogger, entryDir: Expand
 export async function runInteractiveFieldReview(
   cacheRoot: string,
   logpath: string,
-  // scrapyLog: string,
-  // csvFile: string,
 ): Promise<void> {
 
   const dirEntryStream = scrapyCacheDirs(cacheRoot);
@@ -257,26 +257,17 @@ export async function runInteractiveFieldReview(
   try {
     const pipe = pumpify.obj(
       dirEntryStream,
-      // sliceStream(0, 20),
-      // filterStream((path: string) => /011b8/.test(path)),
       expandDirTrans,
       throughFunc((exDir: ExpandedDir) => {
         return reviewAbstractExtraction(logger, exDir);
       }),
     );
 
-    console.log('starting runAbstractFinderOnScrapyCache');
     return promisifyReadableEnd(pipe)
-      .then(() => {
-        console.log('finished runAbstractFinderOnScrapyCache');
-      })
-      .catch(error => {
-        console.log('Error: runAbstractFinderOnScrapyCache', error);
-      })
-    ;
+      .catch(error => console.log(error)) ;
 
   } catch (error) {
-    console.log('runAbstractFinderOnScrapyCache', error);
+    console.log(error);
   }
 }
 

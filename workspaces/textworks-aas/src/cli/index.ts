@@ -1,10 +1,9 @@
 import yargs from "yargs";
 
 import { prettyPrint } from "commons";
-import "./corpus-cli";
+import "./extraction-cli";
 
 try {
-
   const argParse = yargs
     .demandCommand(1, "You need at least one command before moving on")
     .strict()

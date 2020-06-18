@@ -16,41 +16,11 @@ import { Order, Url, NoteId, VenueUrl, OrderEntry } from './database-tables';
 import { streamPump } from 'commons';
 import { Dictionary } from 'lodash';
 
-export interface InputRec {
-  noteId: string;
-  dblpConfId: string;
-  url: string;
-  title: string;
-}
-
-export function splitCSVRecord(rec: string): InputRec {
-  const fields = rec.split(',');
-  let [noteId, dblpConfId] = fields;
-  if (noteId === undefined || dblpConfId === undefined) {
-    console.log(`error: splitCSVRecord: ${rec}`);
-    noteId = noteId || "ERR-NOTEID";
-    dblpConfId = dblpConfId || "ERR-DBLP";
-  }
-  let url = fields[fields.length - 1];
-  const p0 = noteId.length + dblpConfId.length + 2;
-  const p1 = rec.length - url.length - 1;
-  const title = rec.substring(p0, p1);
-  noteId = noteId.trim();
-  dblpConfId = dblpConfId.trim();
-  url = url.trim();
-
-  return {
-    noteId, dblpConfId, url, title
-  };
-}
-
 export function readOrderCsv(csvfile: string): Stream {
   const inputStream = csvStream(csvfile);
 
   return pumpify.obj(
     inputStream,
-    // filterStream((r: string) => r.trim().length > 0),
-    // throughFunc(splitCSVRecord),
     throughFunc((csvRec: string[]) => {
       const [noteId, dblpConfId, title, url, ] = csvRec;
       return {
@@ -64,7 +34,7 @@ export interface COptions {
   csvFile: string;
 }
 
-const addOrderEntry: (db: Database, order: Order) => (r: InputRec) => Promise<OrderEntry> =
+const addOrderEntry: (db: Database, order: Order) => (r: AlphaRecord) => Promise<OrderEntry> =
   (db, order) => async (rec) => {
     const { noteId, url, dblpConfId } = rec;
 
@@ -121,7 +91,7 @@ export async function createOrder(opts: COptions): Promise<OrderEntry[]> {
 
   let i = 0;
   const pumpBuilder = streamPump.createPump()
-    .viaStream<InputRec>(inputStream)
+    .viaStream<AlphaRecord>(inputStream)
     .throughF(addEntry)
     .tap(() => {
       if (i % 100 === 0) {
@@ -285,6 +255,7 @@ export async function readScrapyLogs(logfile: string): Promise<UrlGraph> {
 }
 
 import fs, { } from 'fs-extra';
+import { AlphaRecord } from '~/extract/core/extraction-records';
 
 export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): Promise<void> {
   const urlGraph = await readScrapyLogs(scrapyLogs);
@@ -303,7 +274,7 @@ export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): 
   const fd = fs.openSync(`${csvFile}.pruned.csv`, fs.constants.O_CREAT | fs.constants.O_WRONLY);
 
   const pumpBuilder = streamPump.createPump()
-    .viaStream<InputRec>(inputStream)
+    .viaStream<AlphaRecord>(inputStream)
     .tap((inputRec) => {
       if (i % 100 === 0) {
         console.log(`processed ${i} records`);
@@ -348,7 +319,7 @@ export async function verifyCrawledRecords(scrapyLogs: string, csvFile: string):
 
 
   const pumpBuilder = streamPump.createPump()
-    .viaStream<InputRec>(inputStream)
+    .viaStream<AlphaRecord>(inputStream)
     .tap((inputRec) => {
 
       const { url } = inputRec;

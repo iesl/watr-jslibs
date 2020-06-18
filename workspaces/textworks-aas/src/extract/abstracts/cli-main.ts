@@ -10,10 +10,11 @@ import {
 } from "commons";
 
 import { Readable } from "stream";
-import { readScrapyLogs, readOrderCsv, InputRec } from '~/openreview/workflow';
+import { readScrapyLogs, readOrderCsv } from '~/openreview/workflow';
 import { promisifyReadableEnd } from 'commons';
 import { initLogger } from '../logging/logging';
 import { extractAbstractTransformFromScrapy } from './extract-abstracts';
+import { AlphaRecord } from '../core/extraction-records';
 
 
 export function scrapyCacheDirs(corpusRoot: string): Readable {
@@ -27,13 +28,13 @@ export function scrapyCacheDirs(corpusRoot: string): Readable {
   return corpusDirStream.pipe(entryDirFilter);
 }
 
-export async function createCSVOrderLookup(csvFile: string): Promise<Dictionary<InputRec>> {
+export async function createCSVOrderLookup(csvFile: string): Promise<Dictionary<AlphaRecord>> {
   const inputStream = readOrderCsv(csvFile);
-  const urlDict: Dictionary<InputRec> = {};
+  const urlDict: Dictionary<AlphaRecord> = {};
 
   const pumpBuilder = streamPump.createPump()
-    .viaStream<InputRec>(inputStream)
-    .throughF((inputRec: InputRec) => {
+    .viaStream<AlphaRecord>(inputStream)
+    .throughF((inputRec: AlphaRecord) => {
       const { url, noteId } = inputRec;
       urlDict[url] = inputRec;
       urlDict[noteId] = inputRec;
@@ -49,7 +50,7 @@ export async function createCSVOrderLookup(csvFile: string): Promise<Dictionary<
 }
 
 
-export async function runAbstractFinderOnScrapyCache(
+export async function runMainExtractAbstracts(
   cacheRoot: string,
   logpath: string,
   scrapyLog: string,
@@ -85,18 +86,11 @@ export async function runAbstractFinderOnScrapyCache(
       })
     );
 
-    console.log('starting runAbstractFinderOnScrapyCache');
     return promisifyReadableEnd(pipe)
-      .then(() => {
-        console.log('finished runAbstractFinderOnScrapyCache');
-      })
-      .catch(error => {
-        console.log('Error: runAbstractFinderOnScrapyCache', error);
-      })
-    ;
+      .catch(error => console.log(error));
 
   } catch (error) {
-    console.log('runAbstractFinderOnScrapyCache', error);
+    console.log(error);
   }
 }
 

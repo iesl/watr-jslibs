@@ -11,9 +11,9 @@ export type ExtractionLog = Record<string, any>;
 export interface AlphaRecord {
   noteId: string;
   dblpConfId: string;
-  title: string;
-  authorId: string;
-  url?: string;
+  title?: string;
+  authorId?: string;
+  url: string;
 }
 
 type StatusCodes = {
