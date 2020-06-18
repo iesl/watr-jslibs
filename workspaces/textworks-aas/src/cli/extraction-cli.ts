@@ -92,3 +92,5 @@ yargs.command(
     );
   },
 );
+
+// TODO run html-tidy, css-normalize, reset all (delete norm-directories)

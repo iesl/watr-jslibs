@@ -1,7 +1,6 @@
 import _ from "lodash";
 import path from "path";
 
-
 import * as Arr from 'fp-ts/lib/Array';
 import * as TE from 'fp-ts/lib/TaskEither';
 import * as E from 'fp-ts/lib/Either';
@@ -10,8 +9,10 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import fs from "fs-extra";
 import { CleaningRuleResult } from '../abstracts/data-clean-abstracts';
 import { MetaFile, readMetaFile } from '../logging/logging';
-import { getFileType, transformViaTidyBuffered } from './tidy-html';
-import { readResolveFile, makeCssTreeNormalForm, readResolveFileAsync } from './reshape-html';
+import { readResolveFile, readResolveFileAsync } from '~/utils/file-utils';
+import { runFileCmd } from '~/utils/run-cmd-file';
+import { makeCssTreeNormalForm } from './html-to-css-normal';
+import { runTidyCmdBuffered } from '~/utils/run-cmd-tidy-html';
 
 export interface Field {
   name: string;
@@ -121,7 +122,7 @@ export const runFileVerification: (urlTest: RegExp) => ExtractionFunction =
     const file = path.resolve(entryPath, 'response_body');
 
     const fileTypeTask: TE.TaskEither<string, string> =
-      TE.rightTask(() => getFileType(file));
+      TE.rightTask(() => runFileCmd(file));
 
     return pipe(
       fileTypeTask,
@@ -252,7 +253,7 @@ export const runHtmlTidy: ExtractionFunction =
 
     const file = path.resolve(entryPath, 'response_body');
 
-    const tidyOutput = transformViaTidyBuffered('./conf/tidy.cfg', file)
+    const tidyOutput = runTidyCmdBuffered('./conf/tidy.cfg', file)
       .then(([stderr, stdout, exitCode]) => {
         if (exitCode > 0) {
           fs.writeFileSync(path.resolve(entryPath, `normalized-${normType}`), stdout.join("\n"));

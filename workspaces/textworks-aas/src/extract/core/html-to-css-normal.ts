@@ -1,9 +1,5 @@
 //
-import fs from "fs-extra";
-import path from "path";
 import _ from "lodash";
-import { prettyPrint } from "commons";
-import { promisify } from 'bluebird';
 import { cheerioLoad } from './field-extract-utils';
 
 type Attrs = { [k: string]: string };
@@ -79,16 +75,7 @@ export function makeCssTreeNormalFormFromNode(root: Cheerio): string[] {
       const attrs = node.attribs;
       let attrsStr = "";
       if (attrs) {
-        // let verbose = false;
-        // if (depth > 8 && depth < 12 ) {
-        //   verbose = true;
-        //   prettyPrint({ tn, tp, attrs, depth });
-        // }
         const attrPairs = parseAttrs(attrs);
-
-        // if (depth > 8 && depth < 12 ) {
-        //   prettyPrint({ attrPairs });
-        // }
 
         const attrstr0 = _.map(attrPairs, ([_k, v, abbr]) => {
           if (abbr.length === 1) {
@@ -191,72 +178,4 @@ function mapHtmlTree(
     }
   }
   _inner(rootElem, 0, 0, 1);
-}
-
-
-export async function withCachedFile(
-  cacheDirectory: string,
-  cacheFilename: string,
-  fn: () => Promise<string>
-): Promise<string> {
-
-  const maybeCached = await readResolveFileAsync(cacheDirectory, cacheFilename);
-  if (maybeCached) {
-    return maybeCached;
-  }
-
-  const content = await fn();
-
-  const cachedPath = path.join(cacheDirectory, cacheFilename);
-  await fs.writeFile(cachedPath, content, {});
-  return content;
-}
-
-export function writeNormalizedHtml(htmlFile: string): void {
-  const cssNormFilename = `${htmlFile}.norm.txt`;
-  if (fs.existsSync(cssNormFilename)) {
-    console.log(`css.norm.txt already exists`);
-    return;
-  }
-
-  const fileContent = readResolveFile(htmlFile);
-
-  if (!fileContent) {
-    prettyPrint({ msg: "file could not be read" });
-    return;
-  }
-
-  if (fileContent.length === 0) {
-    prettyPrint({ msg: "file is empty" });
-    return;
-  }
-
-  const cssNormalForm = makeCssTreeNormalForm(fileContent);
-  const cssNormal = _.join(cssNormalForm, "\n");
-  fs.writeFileSync(`${htmlFile}.norm.txt`, cssNormal);
-}
-
-const readFileAsync = promisify<Buffer, string>(fs.readFile)
-
-export async function readResolveFileAsync(leading: string, ...more: string[]): Promise<string | undefined> {
-  const filepath = path.join(leading, ...more);
-
-  const exists = fs.existsSync(filepath);
-
-  if (exists) {
-    return readFileAsync(filepath)
-      .then(content => content.toString());
-  }
-  return undefined;
-}
-
-export function readResolveFile(leading: string, ...more: string[]): string | undefined {
-  const filepath = path.join(leading, ...more);
-  const exists = fs.existsSync(filepath);
-  if (exists) {
-    const buf = fs.readFileSync(filepath);
-    const fileContent = buf.toString().trim();
-    return fileContent;
-  }
-  return undefined;
 }

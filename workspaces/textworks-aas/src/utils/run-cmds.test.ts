@@ -1,21 +1,21 @@
 import "chai/register-should";
 
 import _ from "lodash";
-import fs from "fs-extra";
 import path from "path";
 
-import { prettyPrint, throughFunc, streamPump } from "commons";
-import { transformViaTidy, getFileType, transformViaTidyBuffered } from './tidy-html';
+import { prettyPrint, throughFunc,  } from "commons";
+import { runTidyCmd, runTidyCmdBuffered } from './run-cmd-tidy-html';
+import { runFileCmd } from './run-cmd-file';
 
-describe("use Html5 Tidy to re-write htmls", () => {
+describe("run command-line utils ", () => {
   const testDirPath = './test/resources/htmls';
   const configFile = './conf/tidy.cfg';
 
-  it("smokescreen", async (done) => {
+  it("should run Html5 Tidy to re-write htmls", async (done) => {
     const htmlFile = path.resolve(testDirPath, 'nospace.html');
 
     const { outStream, completePromise } =
-      transformViaTidy(configFile, htmlFile);
+      runTidyCmd(configFile, htmlFile);
 
     const lines: string[] = [];
 
@@ -34,10 +34,11 @@ describe("use Html5 Tidy to re-write htmls", () => {
     done();
 
   });
-  it("should get file types using linux file cmd", async (done) => {
+
+  it("should get file types using file cmd", async (done) => {
     const htmlFile = path.resolve(testDirPath, 'nospace.html');
 
-    const fileType = await getFileType(htmlFile);
+    const fileType = await runFileCmd(htmlFile);
     prettyPrint({ fileType });
     done();
   });
@@ -45,7 +46,7 @@ describe("use Html5 Tidy to re-write htmls", () => {
   it("should handle process err output", async (done) => {
     const htmlFile = path.resolve(testDirPath, 'nospace.html');
 
-    const [err, out, exitCode] = await transformViaTidyBuffered(configFile, htmlFile);
+    const [err, out, exitCode] = await runTidyCmdBuffered(configFile, htmlFile);
     const err4 = err.slice(0, 4);
     const out4 = out.slice(0, 4);
 

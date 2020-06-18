@@ -6,10 +6,10 @@ import fs from "fs-extra";
 import path from "path";
 
 import { prettyPrint } from "commons";
-import { makeCssTreeNormalFormFromNode } from './reshape-html';
 import { cheerioLoad } from './field-extract-utils';
+import { makeCssTreeNormalFormFromNode } from './html-to-css-normal';
 
-describe("Normalize htmls", () => {
+describe("Normalize htmls to css-normal form", () => {
   const testDirPath = './test/resources/htmls';
 
   it("smokescreen", () => {

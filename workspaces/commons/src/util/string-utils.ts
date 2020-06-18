@@ -39,16 +39,6 @@ export function highlightRegions(input: string, matches: Array<[number, number]>
 
   return res;
 }
-/**
- * splitEnv:
- *   strEnv = [ ['abcde', {env}] ]
- *   split(strEnv, 2, 4) => [ sliceIndex=1
- *                            [ ['ab', {env}], ['cd', {env}], ['e', {env}] ]
- *                         ]
- *   split(strEnv, 1, 3) => [ sliceIndex=[2, 3]
- *                            [ ['a', {env}], ['b', {env}], ['c', {env}], ['d', {env}], ['e', {env}] ]
- */
-
 
 export function clipParagraph(width: number, height: number, para: string): string {
 

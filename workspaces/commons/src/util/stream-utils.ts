@@ -4,6 +4,8 @@ import through from "through2";
 import { Transform, Readable } from "stream";
 import { prettyPrint } from "./pretty-print";
 import split from 'split';
+import { ChildProcessWithoutNullStreams } from 'child_process';
+import stream from 'stream';
 
 export interface WithEnv<T, E> {
   kind: 'WithEnv';
@@ -317,4 +319,58 @@ export async function promisifyOn<T>(ev: string, readStream: Readable): Promise<
       resolve(d);
     });
   });
+}
+
+export interface TransformProcess {
+  outStream: Readable;
+  errStream: Readable;
+  completePromise: Promise<number>;
+}
+export function streamifyProcess(
+  proc: ChildProcessWithoutNullStreams
+): TransformProcess {
+
+  const outStreamR = new stream.Readable({
+    read() { /* noop */ }
+  });
+
+  const errStreamR = new stream.Readable({
+    read() { /* noop */ }
+  });
+
+  proc.stdout.on('data', (data) => {
+    outStreamR.push(data);
+  });
+
+  proc.stderr.on('data', (data) => {
+    errStreamR.push(data);
+  });
+
+
+  const procClose = new Promise<number>((resolve) => {
+    proc.on('close', (code: number) => {
+      outStreamR.push(null);
+      errStreamR.push(null);
+      resolve(code);
+    });
+  });
+
+  const outStream = outStreamR
+    .pipe(split())
+    .pipe(throughFunc((t: string) => {
+      return t;
+    }))
+  ;
+  const errStream = errStreamR
+    .pipe(split())
+    .pipe(throughFunc((t: string) => {
+      return t;
+    }))
+  ;
+
+  return {
+    completePromise: procClose,
+    outStream,
+    errStream,
+  };
 }
