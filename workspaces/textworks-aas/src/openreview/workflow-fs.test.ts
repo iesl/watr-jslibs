@@ -2,7 +2,6 @@ import "chai/register-should";
 
 import _ from "lodash";
 import { splitCSVRecord } from './workflow';
-import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 
 import path from "path";
 import { delay } from 'commons';

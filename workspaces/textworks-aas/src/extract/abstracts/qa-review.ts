@@ -7,14 +7,13 @@ import {
   dirstream,
   stringStreamFilter,
   streamPump,
-  sliceStream,
 } from "commons";
 
-import { extractAbstractTransformFromScrapy } from "~/extract/field-extract-abstract";
 import { Readable } from "stream";
-import { initLogger, } from "./qa-logging";
 import { readScrapyLogs, readOrderCsv, InputRec } from '~/openreview/workflow';
 import { promisifyReadableEnd } from 'commons';
+import { initLogger } from '~/qa-review/qa-logging';
+import { extractAbstractTransformFromScrapy } from './field-extract-abstract';
 
 
 export function scrapyCacheDirs(corpusRoot: string): Readable {

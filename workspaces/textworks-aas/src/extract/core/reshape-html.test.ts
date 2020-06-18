@@ -4,11 +4,10 @@ import "chai/register-should";
 import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
-import * as cheerio from "cheerio";
 
 import { prettyPrint } from "commons";
 import { makeCssTreeNormalFormFromNode } from './reshape-html';
-import { cheerioLoad } from './field-extract-utils';
+import { cheerioLoad } from '../field-extract-utils';
 
 describe("Normalize htmls", () => {
   const testDirPath = './test/resources/htmls';

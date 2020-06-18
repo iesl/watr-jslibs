@@ -1,10 +1,10 @@
 //
-import fs, { PathLike } from "fs-extra";
+import fs from "fs-extra";
 import path from "path";
 import _ from "lodash";
 import { prettyPrint } from "commons";
-import { cheerioLoad } from './field-extract-utils';
 import { promisify } from 'bluebird';
+import { cheerioLoad } from '../field-extract-utils';
 
 type Attrs = { [k: string]: string };
 

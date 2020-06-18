@@ -1,13 +1,13 @@
 
 import _ from "lodash";
-import React, { useState, useEffect } from "react";
-import { Text, Box, Color, useApp } from "ink";
+import React, { useEffect } from "react";
+import { Box, useApp } from "ink";
 import * as ink from "ink";
 import ansiEscapes from 'ansi-escapes';
 //@ts-ignore
 import Divider from 'ink-divider';
-import { useKeymap2 } from './keymaps';
-import { RenderRec } from './qa-widgets';
+import { useKeymap2 } from '~/qa-review/keymaps';
+import { RenderRec } from '~/qa-review/qa-widgets';
 
 const KeymapDemo: React.FC<{}> = ({ }) => {
   const { exit } = useApp();

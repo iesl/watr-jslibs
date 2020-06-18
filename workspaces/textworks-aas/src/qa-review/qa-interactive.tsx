@@ -9,13 +9,12 @@ import path from "path";
 
 //@ts-ignore
 import Divider from 'ink-divider';
-import { loadExtractionLog } from '~/extract/field-extract-abstract';
-/* import { getLogEntries } from './qa-logging'; */
-import { openFileWithLess, openFileWithBrowser } from '~/extract/tidy-html';
 import { useKeymap2, useMnemonicKeydefs } from './keymaps';
 import { Field } from '~/extract/field-extract';
-import { CleaningRuleResult } from '~/extract/qa-review-abstracts';
 import { RenderRec } from './qa-widgets';
+import { openFileWithLess, openFileWithBrowser } from '~/extract/core/tidy-html';
+import { loadExtractionLog } from '~/extract/abstracts/field-extract-abstract';
+import { CleaningRuleResult } from '~/extract/abstracts/qa-review-abstracts';
 
 
 

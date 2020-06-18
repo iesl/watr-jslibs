@@ -4,10 +4,10 @@ import path from "path";
 import yargs from "yargs";
 import { arglib, prettyPrint } from "commons";
 
-import { runAbstractFinderOnScrapyCache } from "~/qa-editing/qa-review";
-import { collectAbstractExtractionStats } from '~/qa-editing/qa-stats';
 import { pruneCrawledFromCSV, verifyCrawledRecords } from '~/openreview/workflow';
-import { runInteractiveFieldReview } from '~/extract/qa-review-abstracts';
+import { collectAbstractExtractionStats } from '~/qa-review/qa-stats';
+import { runAbstractFinderOnScrapyCache } from '~/extract/abstracts/qa-review';
+import { runInteractiveFieldReview } from '~/extract/abstracts/qa-review-abstracts';
 
 const { opt, config } = arglib;
 

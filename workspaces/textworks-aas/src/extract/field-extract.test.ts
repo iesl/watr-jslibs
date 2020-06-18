@@ -6,8 +6,7 @@ import { prettyPrint } from "commons";
 import * as TE from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { ExtractionEnv, readMetaProps, filterUrl, runFileVerification, runHtmlTidy, initialEnv, doPipeline, ExtractionFunction } from './field-extract';
-import { runAbstractFinders, findInGlobalDocumentMetadata, AbstractPipelineUpdate } from './field-extract-abstract';
-import { findByLineMatchTE } from './field-extract-utils';
+import { runAbstractFinders } from './abstracts/field-extract-abstract';
 
 describe("Field Extraction Pipeline", () => {
 
@@ -52,21 +51,21 @@ describe("Field Extraction Pipeline", () => {
   });
 
   it.only("should extract from embedded json rec global.document.metadata", async (done) => {
-    const finderFunctions: ExtractionFunction[][] = [
-      [
-        readMetaProps,
-        filterUrl(/ieee.org/),
-        runFileVerification(/html/i),
-        runHtmlTidy,
-        findInGlobalDocumentMetadata,
-        // findByLineMatchTE(
-        //   [' +|', ' +p', ' +p', ' +|'],
-        //   { lineOffset: 1 }
-        // )
-      ]
-    ];
+    // const finderFunctions: ExtractionFunction[][] = [
+    //   [
+    //     readMetaProps,
+    //     filterUrl(/ieee.org/),
+    //     runFileVerification(/html/i),
+    //     runHtmlTidy,
+    //     findInGlobalDocumentMetadata,
+    //     // findByLineMatchTE(
+    //     //   [' +|', ' +p', ' +p', ' +|'],
+    //     //   { lineOffset: 1 }
+    //     // )
+    //   ]
+    // ];
 
-    await runAbstractFinders(AbstractPipelineUpdate, testEntryPath)
+    // await runAbstractFinders(AbstractPipelineUpdate, testEntryPath)
     // await runAbstractFinders(finderFunctions, testEntryPath)
 
     done();

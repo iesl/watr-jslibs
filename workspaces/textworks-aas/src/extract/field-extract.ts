@@ -1,14 +1,17 @@
 import _ from "lodash";
 import path from "path";
 
-import { MetaFile, readMetaFile } from '~/qa-editing/qa-logging';
 
 import * as Arr from 'fp-ts/lib/Array';
 import * as TE from 'fp-ts/lib/TaskEither';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { getFileType, transformViaTidyBuffered } from './tidy-html';
-import { readResolveFile, makeCssTreeNormalForm, readResolveFileAsync } from './reshape-html';
+
+import fs from "fs-extra";
+import { getFileType, transformViaTidyBuffered } from './core/tidy-html';
+import { readResolveFile, makeCssTreeNormalForm, readResolveFileAsync } from './core/reshape-html';
+import { readMetaFile, MetaFile } from '~/qa-review/qa-logging';
+import { CleaningRuleResult } from './abstracts/qa-review-abstracts';
 
 export interface Field {
   name: string;
@@ -236,8 +239,6 @@ export const readCachedFile: (cacheKey: NormalForm) => ExtractionFunction =
   };
 
 
-import fs from "fs-extra";
-import { CleaningRuleResult } from './qa-review-abstracts';
 export const runHtmlTidy: ExtractionFunction =
   (env: ExtractionEnv) => {
 

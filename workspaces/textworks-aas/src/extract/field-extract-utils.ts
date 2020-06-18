@@ -4,10 +4,8 @@ import path from "path";
 import * as cheerio from "cheerio";
 import { Field, ExtractionEnv, ExtractionFunction } from "./field-extract";
 
-import { makeCssTreeNormalFormFromNode } from "./reshape-html";
-
 import * as TE from 'fp-ts/lib/TaskEither';
-import { prettyPrint } from 'commons/dist';
+import { makeCssTreeNormalFormFromNode } from './core/reshape-html';
 
 export function readFile(
   leading: string,

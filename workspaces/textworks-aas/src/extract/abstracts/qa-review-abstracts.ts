@@ -5,12 +5,11 @@ import {
 } from "commons";
 
 import { BufferedLogger, } from "commons";
-import { gatherAbstractFiles } from "~/corpora/bundler";
-import { Field } from "~/extract/field-extract";
-import { UrlGraph, InputRec, readScrapyLogs } from '~/openreview/workflow';
-import { runInteractiveReviewUI } from '~/qa-editing/qa-interactive';
-import { createCSVOrderLookup, scrapyCacheDirs } from '~/qa-editing/qa-review';
-import { initLogger } from '~/qa-editing/qa-logging';
+import { UrlGraph, InputRec } from '~/openreview/workflow';
+import pumpify from "pumpify";
+import { runInteractiveReviewUI } from '~/qa-review/qa-interactive';
+import { scrapyCacheDirs } from './qa-review';
+import { initLogger } from '~/qa-review/qa-logging';
 
 export interface ReviewEnv {
   logger: BufferedLogger;
@@ -244,7 +243,6 @@ async function reviewAbstractExtraction(logger: BufferedLogger, entryDir: Expand
   await runInteractiveReviewUI({ entryPath: entryDir, logger });
 }
 
-import pumpify from "pumpify";
 
 export async function runInteractiveFieldReview(
   cacheRoot: string,

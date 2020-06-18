@@ -1,7 +1,7 @@
 
 import _ from "lodash";
 import fs from "fs-extra";
-import { ExtractionLog } from './qa-logging';
+import { ExtractionLog } from './extraction-records';
 
 export interface GroundTruthLog {
   original: ExtractionLog;

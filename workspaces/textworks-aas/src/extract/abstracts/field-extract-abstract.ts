@@ -37,8 +37,9 @@ import {
 } from "~/extract/field-extract-utils";
 
 import { BufferedLogger, ExpandedDir } from "commons";
-import { writeDefaultEntryLogs, ExtractionLog } from '~/qa-editing/qa-logging';
 import { ReviewEnv, applyCleaningRules } from './qa-review-abstracts';
+import { ExtractionLog } from '../core/extraction-records';
+import { writeDefaultEntryLogs } from '~/qa-review/qa-logging';
 
 export const findInGlobalDocumentMetadata: ExtractionFunction =
   env => {
@@ -93,8 +94,6 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
 // TODO: handle multi-metadataLine findInMeta examples
 // TODO: maybe expand filtered log handling to automatically comb logs in reverse-creation order, and add a 'compact' function to trim and delete old entries
 // TODO: figure out if there is a better html parser for handling both self-closing and script tags properly
-
-
 
 
 export function loadExtractionLog(entryPath: string): ExtractionLog {

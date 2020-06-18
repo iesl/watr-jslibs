@@ -1,15 +1,12 @@
 import "chai/register-should";
 
 import _ from "lodash";
-import {
-  AbstractPipeline,
-  findAbstractV2,
-} from "~/extract/field-extract-abstract";
 import fs from "fs-extra";
 import path from "path";
 
 import { prettyPrint } from "commons";
-import { stripMargin, _byLineMatch, getMatchingLines, findByLineMatch } from "./field-extract-utils";
+import { stripMargin, _byLineMatch, getMatchingLines  } from "~/extract/field-extract-utils";
+import { AbstractPipelineUpdate } from './field-extract-abstract';
 
 describe("Abstract Field Extraction", () => {
   const testDirPath = './test/resources/htmls';
@@ -49,7 +46,7 @@ html
     _.each(htmlFiles, f => {
       const htmlFile = path.resolve(testDirPath, f);
       const htmlFileContent = fs.readFileSync(htmlFile).toString();
-      const fields = _.map(AbstractPipeline, pf => {
+      const fields = _.map(AbstractPipelineUpdate, pf => {
         return pf([], htmlFileContent);
       }).filter(f => f.value);
 
@@ -65,7 +62,7 @@ html
   it("should pick out .hlFld coded abstracts", () => {
     const htmlFile = path.resolve(testDirPath, 'nospace.html');
     const htmlFileContent = fs.readFileSync(htmlFile).toString();
-    const fields = _.map(AbstractPipeline, pf => {
+    const fields = _.map(AbstractPipelineUpdate, pf => {
       return pf([], htmlFileContent);
     }).filter(f => f.value);
 
