@@ -4,10 +4,6 @@ import "chai/register-should";
 import _ from "lodash";
 import { ExtractionLog } from '~/extract/core/extraction-records';
 import { initGroundTruthLog, labelGroundTruth } from '~/extract/core/ground-truth-logs';
-// import fs from "fs-extra";
-// import path from "path";
-
-// import { prettyPrint, } from "commons";
 
 describe("Q/A Logging tests", () => {
 
