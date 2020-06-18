@@ -9,7 +9,8 @@ import split from 'split';
 import { initBufferedLogger, BufferedLogger } from "commons";
 import { filterStream } from "commons";
 import { ExpandedDir } from "commons";
-import { ReviewEnv } from '~/extract/abstracts/qa-review-abstracts';
+import { ReviewEnv } from '~/extract/abstracts/data-clean-abstracts';
+// import { ReviewEnv } from '~/extract/abstracts/qa-review-abstracts';
 
 
 export function resolveLogfileName(logpath: string, phase: string): string {

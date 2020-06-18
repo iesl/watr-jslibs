@@ -7,7 +7,7 @@ import path from "path";
 
 import { prettyPrint } from "commons";
 import { makeCssTreeNormalFormFromNode } from './reshape-html';
-import { cheerioLoad } from '../field-extract-utils';
+import { cheerioLoad } from './field-extract-utils';
 
 describe("Normalize htmls", () => {
   const testDirPath = './test/resources/htmls';

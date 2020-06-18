@@ -7,7 +7,7 @@ import ansiEscapes from 'ansi-escapes';
 //@ts-ignore
 import Divider from 'ink-divider';
 import { useKeymap2 } from '~/qa-review/keymaps';
-import { RenderRec } from '~/qa-review/qa-widgets';
+import { RenderRec } from '~/qa-review/ink-widgets';
 
 const KeymapDemo: React.FC<{}> = ({ }) => {
   const { exit } = useApp();

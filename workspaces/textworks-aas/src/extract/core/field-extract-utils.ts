@@ -5,7 +5,7 @@ import * as cheerio from "cheerio";
 import { Field, ExtractionEnv, ExtractionFunction } from "./field-extract";
 
 import * as TE from 'fp-ts/lib/TaskEither';
-import { makeCssTreeNormalFormFromNode } from './core/reshape-html';
+import { makeCssTreeNormalFormFromNode } from './reshape-html';
 
 export function readFile(
   leading: string,

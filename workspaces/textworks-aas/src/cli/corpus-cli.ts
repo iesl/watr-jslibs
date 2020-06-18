@@ -2,12 +2,11 @@ import _ from "lodash";
 
 import path from "path";
 import yargs from "yargs";
-import { arglib, prettyPrint } from "commons";
+import { arglib } from "commons";
 
 import { pruneCrawledFromCSV, verifyCrawledRecords } from '~/openreview/workflow';
-import { collectAbstractExtractionStats } from '~/qa-review/qa-stats';
-import { runAbstractFinderOnScrapyCache } from '~/extract/abstracts/qa-review';
-import { runInteractiveFieldReview } from '~/extract/abstracts/qa-review-abstracts';
+import { runAbstractFinderOnScrapyCache } from '~/extract/abstracts/cli-main';
+import { runInteractiveFieldReview } from '~/extract/abstracts/data-clean-abstracts';
 
 const { opt, config } = arglib;
 
@@ -44,31 +43,6 @@ yargs.command(
     ]).then(() => {
       console.log('done');
     })
-  },
-);
-
-
-yargs.command(
-  "write-abstracts-to-file",
-  "gather all of the abstracts that have been extracted and write them to a single json file",
-  config(
-    opt.cwd,
-    opt.existingDir("corpus-root: root directory for corpus files"),
-    opt.existingFile("from-log: ..."),
-  ),
-  (args: any) => {
-
-    const { corpusRoot, fromLog } = args;
-    // const fromLogFile = 'qa-review-abstract-cleaner-log.json';
-    const toFile = path.resolve(corpusRoot, 'all-abstracts.json');
-    const filters: string[] = [];
-    prettyPrint({ fromLog, toFile });
-
-    collectAbstractExtractionStats(
-      fromLog, toFile, filters
-    ).then(() => {
-      console.log('done');
-    });
   },
 );
 

@@ -7,9 +7,9 @@ import {
 import { BufferedLogger, } from "commons";
 import { UrlGraph, InputRec } from '~/openreview/workflow';
 import pumpify from "pumpify";
-import { runInteractiveReviewUI } from '~/qa-review/qa-interactive';
-import { scrapyCacheDirs } from './qa-review';
-import { initLogger } from '~/qa-review/qa-logging';
+import { runInteractiveReviewUI } from '~/qa-review/interactive-ui';
+import { scrapyCacheDirs } from './cli-main';
+import { initLogger } from '../logging/logging';
 
 export interface ReviewEnv {
   logger: BufferedLogger;

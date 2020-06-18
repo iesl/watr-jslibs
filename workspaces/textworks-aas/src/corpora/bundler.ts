@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs-extra";
 
 import { ExpandedDir } from "commons";
-import { Field } from '~/extract/field-extract';
+import { Field } from '~/extract/core/field-extract';
 
 interface Accum {
   noteId: string;

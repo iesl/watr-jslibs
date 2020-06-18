@@ -10,12 +10,11 @@ import path from "path";
 //@ts-ignore
 import Divider from 'ink-divider';
 import { useKeymap2, useMnemonicKeydefs } from './keymaps';
-import { Field } from '~/extract/field-extract';
-import { RenderRec } from './qa-widgets';
 import { openFileWithLess, openFileWithBrowser } from '~/extract/core/tidy-html';
-import { loadExtractionLog } from '~/extract/abstracts/field-extract-abstract';
-import { CleaningRuleResult } from '~/extract/abstracts/qa-review-abstracts';
-
+import { loadExtractionLog } from '~/extract/abstracts/extract-abstracts';
+import { Field } from '~/extract/core/field-extract';
+import { CleaningRuleResult } from '~/extract/abstracts/data-clean-abstracts';
+import { RenderRec } from './ink-widgets';
 
 
 interface AppArgs {

@@ -8,10 +8,10 @@ import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import fs from "fs-extra";
-import { getFileType, transformViaTidyBuffered } from './core/tidy-html';
-import { readResolveFile, makeCssTreeNormalForm, readResolveFileAsync } from './core/reshape-html';
-import { readMetaFile, MetaFile } from '~/qa-review/qa-logging';
-import { CleaningRuleResult } from './abstracts/qa-review-abstracts';
+import { CleaningRuleResult } from '../abstracts/data-clean-abstracts';
+import { MetaFile, readMetaFile } from '../logging/logging';
+import { getFileType, transformViaTidyBuffered } from './tidy-html';
+import { readResolveFile, makeCssTreeNormalForm, readResolveFileAsync } from './reshape-html';
 
 export interface Field {
   name: string;

@@ -4,7 +4,7 @@ import path from "path";
 import _ from "lodash";
 import { prettyPrint } from "commons";
 import { promisify } from 'bluebird';
-import { cheerioLoad } from '../field-extract-utils';
+import { cheerioLoad } from './field-extract-utils';
 
 type Attrs = { [k: string]: string };
 

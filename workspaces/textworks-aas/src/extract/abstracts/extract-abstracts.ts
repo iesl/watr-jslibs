@@ -19,7 +19,7 @@ import {
   modEnv,
   readCachedFile,
   verifyHttpResponseCode,
-} from "~/extract/field-extract";
+} from "~/extract/core/field-extract";
 
 // import { makeCssTreeNormalFormFromNode } from "./reshape-html";
 import fs from "fs-extra";
@@ -34,12 +34,12 @@ import {
   // queryContent,
   findByLineMatchTE,
   findInMetaTE,
-} from "~/extract/field-extract-utils";
+} from "~/extract/core/field-extract-utils";
 
 import { BufferedLogger, ExpandedDir } from "commons";
-import { ReviewEnv, applyCleaningRules } from './qa-review-abstracts';
 import { ExtractionLog } from '../core/extraction-records';
-import { writeDefaultEntryLogs } from '~/qa-review/qa-logging';
+import { ReviewEnv, applyCleaningRules } from './data-clean-abstracts';
+import { writeDefaultEntryLogs } from '../logging/logging';
 
 export const findInGlobalDocumentMetadata: ExtractionFunction =
   env => {

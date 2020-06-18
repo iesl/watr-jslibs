@@ -12,8 +12,8 @@ import {
 import { Readable } from "stream";
 import { readScrapyLogs, readOrderCsv, InputRec } from '~/openreview/workflow';
 import { promisifyReadableEnd } from 'commons';
-import { initLogger } from '~/qa-review/qa-logging';
-import { extractAbstractTransformFromScrapy } from './field-extract-abstract';
+import { initLogger } from '../logging/logging';
+import { extractAbstractTransformFromScrapy } from './extract-abstracts';
 
 
 export function scrapyCacheDirs(corpusRoot: string): Readable {
