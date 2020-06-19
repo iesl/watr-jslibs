@@ -25,12 +25,16 @@ export function runTidyCmdBuffered(
   const tidyOutput = streamPump
     .createPump()
     .viaStream<string>(outStream)
+    .gather()
     .toPromise()
+    .then(ss => ss || []);
 
   const tidyErrs = streamPump
     .createPump()
     .viaStream<string>(errStream)
-    .toPromise();
+    .gather()
+    .toPromise()
+    .then(ss => ss || []);
 
   return Promise.all([tidyErrs, tidyOutput, completePromise]);
 }

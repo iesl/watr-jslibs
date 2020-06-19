@@ -86,8 +86,6 @@ yargs.command(
     runMainExtractAbstracts(
       corpusRoot,
       logpath,
-      scrapyLog,
-      csvFile,
       overwrite,
     ).then(() => {
       console.log('done');

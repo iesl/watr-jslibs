@@ -1,14 +1,16 @@
 import _, { Dictionary } from "lodash";
 
+import path from "path";
 import {
-  streamPump,
+  streamPump, prettyPrint,
 } from "commons";
 
-import { readScrapyLogs, readOrderCsv } from '~/openreview/workflow';
-import { initLogger } from '../logging/logging';
+import { readOrderCsv } from '~/openreview/workflow';
+import { initLogger, readMetaFile } from '../logging/logging';
 import { ensureArtifactsDir, skipIfArtifactExisits, extractionLogName, extractAbstractTransform, ExtractionAppContext } from './extract-abstracts';
 import { AlphaRecord } from '../core/extraction-records';
 import { walkScrapyCacheCorpus } from '~/corpora/corpus-file-walkers';
+import { readUrlFetchChainsFromScrapyLogs } from '../urls/url-fetch-chains';
 
 
 
@@ -40,12 +42,28 @@ export async function runMainWriteAlphaRecords(
 ): Promise<void> {
 
   // TODO: scrapy logging -> url db should be part of the spidering process
-  const urlGraph = await readScrapyLogs(scrapyLog);
+  const urlGraph = await readUrlFetchChainsFromScrapyLogs(scrapyLog);
   const csvLookup = await createCSVOrderLookup(csvFile);
   const dirEntryStream = walkScrapyCacheCorpus(corpusRoot);
   // const logger = initLogger(logpath, "abstract-finder", true);
   const pumpBuilder = streamPump.createPump()
     .viaStream<string>(dirEntryStream)
+    .tap((entryPath: string) => {
+      const metaFilePath = path.resolve(entryPath, 'meta');
+      const metaProps = readMetaFile(metaFilePath);
+      if (!metaProps) return;
+
+      const { url, responseUrl } = metaProps;
+      const urlFetchChain = urlGraph.getUrlFetchChain(url);
+      const responseUrlFetchChain = urlGraph.getUrlFetchChain(responseUrl);
+
+      prettyPrint({
+        metaProps,
+        urlFetchChain,
+        responseUrlFetchChain
+      });
+
+    });
 
   return pumpBuilder.toPromise()
     .then(() => undefined);

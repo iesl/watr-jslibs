@@ -8,9 +8,9 @@ import { BufferedLogger, } from "commons";
 
 import pumpify from "pumpify";
 import { runInteractiveReviewUI } from '~/qa-review/interactive-ui';
-import { scrapyCacheDirs } from './cli-main';
 import { initLogger } from '../logging/logging';
 import { CleaningRule } from '../core/extraction-process';
+import { walkScrapyCacheCorpus } from '~/corpora/corpus-file-walkers';
 
 /* eslint-disable  @typescript-eslint/explicit-module-boundary-types */
 export const AbstractCleaningRules: CleaningRule[] = [
@@ -238,7 +238,7 @@ export async function runInteractiveFieldReview(
   logpath: string,
 ): Promise<void> {
 
-  const dirEntryStream = scrapyCacheDirs(cacheRoot);
+  const dirEntryStream = walkScrapyCacheCorpus(cacheRoot);
   const logger = initLogger(logpath, "interactive-review", true);
 
   try {

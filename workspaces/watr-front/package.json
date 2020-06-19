@@ -28,7 +28,7 @@
     "io-ts": "^2.2.6",
     "io-ts-types": "^0.5.7",
     "lodash": "^4.17.15",
-    "nuxt": "^2.12.2",
+    "nuxt": "^2.13.0",
     "rbush": "^3.0.1"
   },
   "devDependencies": {

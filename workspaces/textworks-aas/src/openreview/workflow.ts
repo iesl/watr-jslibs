@@ -1,20 +1,21 @@
+
+import _ from "lodash";
 import pumpify from "pumpify";
 import { Stream } from "stream";
-import _ from "lodash";
+import fs, { } from 'fs-extra';
+import { AlphaRecord } from '~/extract/core/extraction-records';
+import { readUrlFetchChainsFromScrapyLogs } from '~/extract/urls/url-fetch-chains';
 
 import {
   throughFunc,
   prettyPrint,
   createConsoleLogger,
-  createReadLineStream,
-  // filterStream,
   csvStream,
 } from "commons";
 
 import { openDatabase, Database } from './database';
 import { Order, Url, NoteId, VenueUrl, OrderEntry } from './database-tables';
 import { streamPump } from 'commons';
-import { Dictionary } from 'lodash';
 
 export function readOrderCsv(csvfile: string): Stream {
   const inputStream = csvStream(csvfile);
@@ -22,7 +23,7 @@ export function readOrderCsv(csvfile: string): Stream {
   return pumpify.obj(
     inputStream,
     throughFunc((csvRec: string[]) => {
-      const [noteId, dblpConfId, title, url, ] = csvRec;
+      const [noteId, dblpConfId, title, url,] = csvRec;
       return {
         noteId, dblpConfId, url, title
       };
@@ -99,166 +100,20 @@ export async function createOrder(opts: COptions): Promise<OrderEntry[]> {
       }
       i += 1;
     })
+    .gather()
     .onEnd(async () => {
       logger.info({ event: "done" });
       await db.sql.close();
       logger.info({ event: "db closed" });
     });
 
-  return pumpBuilder.toPromise();
-}
-
-// type UrlAndCode = [string, number];
-export interface UrlGraph {
-  isUrlCrawled(url: string, verbose?: boolean): boolean;
-  getUrlFetchChain(url: string): string[];
-}
-
-function trimGetClause(str: string): string {
-  const li = str.lastIndexOf('>');
-  return str.substring(5, li);
-}
-
-// These are the log entries we care about from scrapy
-// cat crawler.log | egrep -v '\[protego\]' | egrep -v '\[scrapy\.(down|ext|core|utils|crawler|spidermiddle)'
-export async function readScrapyLogs(logfile: string): Promise<UrlGraph> {
-  const inputStream = createReadLineStream(logfile)
-  const redirectFromGraph: Dictionary<string> = {};
-  const redirectToGraph: Dictionary<string> = {};
-  const crawled200 = new Set<string>();
-  const crawledErr = new Set<string>();
-  const getUrlRE = new RegExp('<GET ([^>]*)>([ ]|$)', 'g');
-
-  const pumpBuilder = streamPump.createPump()
-    .viaStream<string>(inputStream)
-    .throughF((line: string) => {
-      const isCrawled = /DEBUG: Crawled/.test(line);
-      const isCrawled200 = isCrawled && /\(200\)/.test(line);
-      const isRedirect = /DEBUG: Redirecting \((30|meta)/.test(line);
-      // const isForbidden = /DEBUG: Forbidden/.test(line);
-      // const isCached = /\['cached'\]/.test(line);
-
-      const isDEBUGLine = /S0097539792224838/.test(line);
-
-      const urls1 = line.match(getUrlRE);
-
-      if (isDEBUGLine) {
-        prettyPrint({
-          msg: 'log line',
-          line,
-          urls1,
-          isCrawled,
-          isRedirect,
-        });
-      }
-
-      if (isRedirect && urls1) {
-        const [toUrl, fromUrl] = urls1;
-        const t = trimGetClause(toUrl);
-        const f = trimGetClause(fromUrl);
-        redirectFromGraph[f] = t;
-        redirectToGraph[t] = f;
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: '(redirect)',
-            toUrl, t,
-            fromUrl, f,
-          });
-        }
-      }
-      if (isCrawled && urls1) {
-        const [crawlUrl] = urls1;
-        const t = trimGetClause(crawlUrl);
-        if (isCrawled200) {
-          crawled200.add(t);
-        } else {
-          crawledErr.add(t);
-        }
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: '(crawled)',
-            crawlUrl, t,
-            isCrawled200
-          });
-        }
-      }
-      return line;
-    });
-
   return pumpBuilder.toPromise()
-    .then(() => {
-      const redirectFrom = redirectFromGraph;
-      const redirectTo = redirectToGraph;
-      const crawledOk = crawled200;
-      const crawledNotOk = crawledErr;
-      const getChain = (url: string) => {
-        const isDEBUGLine = /S0097539792224838/.test(url);
-        const redirects: string[] = [url];
-        let urlNext = redirectFrom[redirects[0]];
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: 'getChain()',
-            redirects, urlNext
-          });
-        }
-        while (urlNext !== undefined && !redirects.includes(urlNext)) {
-        // while (urlNext !== undefined) {
-          redirects.unshift(urlNext);
-          urlNext = redirectFrom[redirects[0]];
-          if (isDEBUGLine) {
-            prettyPrint({
-              msg: 'while: from',
-              redirects, urlNext
-            });
-          }
-        }
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: 'midway (pre)',
-            redirects, urlNext
-          });
-        }
-        redirects.reverse();
-        urlNext = redirectTo[redirects[0]];
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: 'midway (reversed)',
-            redirects, urlNext
-          });
-        }
-        while (urlNext !== undefined && !redirects.includes(urlNext)) {
-        // while (urlNext !== undefined) {
-          redirects.unshift(urlNext);
-          urlNext = redirectTo[redirects[0]];
-          if (isDEBUGLine) {
-            prettyPrint({
-              msg: 'while: to',
-              redirects, urlNext
-            });
-          }
-        }
-        return redirects;
-      };
-
-      return {
-        isUrlCrawled(url: string): boolean {
-          const chain = getChain(url);
-          const filtered = chain.filter(churl => crawledOk.has(churl) || crawledNotOk.has(churl));
-          return filtered.length > 0;
-        },
-
-        getUrlFetchChain(url: string): string[] {
-          return getChain(url);
-        }
-      }
-    });
+    .then((recs) => recs || []);
 }
 
-import fs, { } from 'fs-extra';
-import { AlphaRecord } from '~/extract/core/extraction-records';
 
 export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): Promise<void> {
-  const urlGraph = await readScrapyLogs(scrapyLogs);
+  const urlGraph = await readUrlFetchChainsFromScrapyLogs(scrapyLogs);
   console.log('created Url Graph');
 
   const inputStream = readOrderCsv(csvFile);
@@ -307,7 +162,7 @@ export async function pruneCrawledFromCSV(scrapyLogs: string, csvFile: string): 
 
 
 export async function verifyCrawledRecords(scrapyLogs: string, csvFile: string): Promise<void> {
-  const urlGraph = await readScrapyLogs(scrapyLogs);
+  const urlGraph = await readUrlFetchChainsFromScrapyLogs(scrapyLogs);
 
   const inputStream = readOrderCsv(csvFile);
 
