@@ -12,6 +12,7 @@ interface DirStackEntry {
   files: string[];
 }
 
+// TODO rename dirstream to e.g., directoryWalkerStream
 export function dirstream(root: string, includeFiles?: boolean): Readable {
   const incFiles = includeFiles || false;
   const stack: DirStackEntry[] = [{ fullpath: root, expanded: false, files: [] }];

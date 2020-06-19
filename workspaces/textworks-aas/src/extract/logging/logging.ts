@@ -3,13 +3,10 @@ import path from "path";
 import fs from "fs-extra";
 import { Stream } from "stream";
 import pumpify from "pumpify";
-import urlparse from "url-parse";
 import split from 'split';
 
 import { initBufferedLogger, BufferedLogger } from "commons";
 import { filterStream } from "commons";
-import { ExpandedDir } from "commons";
-import { ReviewEnv } from '~/extract/abstracts/data-clean-abstracts';
 
 export function resolveLogfileName(logpath: string, phase: string): string {
   return path.resolve(logpath, logfileName(phase));
@@ -53,40 +50,40 @@ export function readMetaFile(metafile: string): MetaFile | undefined {
   };
 }
 
-export function writeDefaultEntryLogs(
-  log: BufferedLogger,
-  entryDir: ExpandedDir,
-  env: ReviewEnv,
-): void {
-  const metafile = path.join(entryDir.dir, "meta");
+// export function writeDefaultEntryLogs(
+//   log: BufferedLogger,
+//   entryDir: ExpandedDir,
+//   env: ReviewEnv,
+// ): void {
+//   const metafile = path.join(entryDir.dir, "meta");
 
-  log.append('entry.dir', entryDir.dir);
-  const metaProps = readMetaFile(metafile);
+//   log.append('entry.dir', entryDir.dir);
+//   const metaProps = readMetaFile(metafile);
 
-  if (!metaProps) return;
+//   if (!metaProps) return;
 
-  const { url, responseUrl } = metaProps;
-  const urlp = urlparse(url);
-  log.append('entry.url', url);
-  log.append('entry.url.host', urlp.host);
-  log.append('entry.response_url', responseUrl);
-  // get the original url from the meta/csv
-  const fallbackUrl = env.csvLookup[url];
-  let maybeOriginalUrl = [fallbackUrl];
+//   const { url, responseUrl } = metaProps;
+//   const urlp = urlparse(url);
+//   log.append('entry.url', url);
+//   log.append('entry.url.host', urlp.host);
+//   log.append('entry.response_url', responseUrl);
+//   // get the original url from the meta/csv
+//   const fallbackUrl = env.csvLookup[url];
+//   let maybeOriginalUrl = [fallbackUrl];
 
-  const fetchChain = env.urlGraph.getUrlFetchChain(url);
-  if (!fallbackUrl) {
-    maybeOriginalUrl = _.map(fetchChain, furl => env.csvLookup[furl])
-      .filter(d => d !== undefined);
-  }
+//   const fetchChain = env.urlGraph.getUrlFetchChain(url);
+//   if (!fallbackUrl) {
+//     maybeOriginalUrl = _.map(fetchChain, furl => env.csvLookup[furl])
+//       .filter(d => d !== undefined);
+//   }
 
-  if (maybeOriginalUrl.length > 0) {
-    const originalRec = maybeOriginalUrl[0];
-    const { noteId } = originalRec;
-    log.append('entry.noteId', noteId);
-    log.append('entry.url.original', originalRec.url);
-  }
-}
+//   if (maybeOriginalUrl.length > 0) {
+//     const originalRec = maybeOriginalUrl[0];
+//     const { noteId } = originalRec;
+//     log.append('entry.noteId', noteId);
+//     log.append('entry.url.original', originalRec.url);
+//   }
+// }
 
 export function createFilteredLogStream(
   logfile: string,

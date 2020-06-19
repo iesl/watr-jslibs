@@ -4,7 +4,7 @@ import 'chai/register-should';
 import _ from "lodash";
 import { Transcript } from './transcript';
 import { isIsomorphic } from '~/lib/utils';
-// import { prettyPrint } from 'commons/dist';
+// import { prettyPrint } from 'commons';
 import { GlyphRepr, Glyph, GlyphPropsRepr, GlyphProps } from './glyph';
 
 /**

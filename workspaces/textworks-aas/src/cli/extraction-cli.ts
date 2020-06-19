@@ -7,7 +7,7 @@ import { arglib } from "commons";
 import { pruneCrawledFromCSV, verifyCrawledRecords } from '~/openreview/workflow';
 
 import { runInteractiveFieldReview } from '~/extract/abstracts/data-clean-abstracts';
-import { runMainExtractAbstracts } from '~/extract/abstracts/cli-main';
+import { runMainExtractAbstracts, runMainWriteAlphaRecords } from '~/extract/abstracts/cli-main';
 
 const { opt, config } = arglib;
 
@@ -47,6 +47,27 @@ yargs.command(
   },
 );
 
+yargs.command(
+  "write-alpha-records",
+  "write out alpha-recs, ",
+  config(
+    opt.cwd,
+    opt.existingDir("corpus-root: root directory for corpus files"),
+  ),
+  (args: any) => {
+    const { corpusRoot } = args;
+    const scrapyLog = path.resolve(corpusRoot, 'crawler.log');
+    const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
+
+    runMainWriteAlphaRecords(
+      corpusRoot,
+      scrapyLog,
+      csvFile,
+    ).then(() => {
+      console.log('done');
+    });
+  },
+);
 yargs.command(
   "extract-abstracts",
   "run the abstract field extractors over htmls in corpus",

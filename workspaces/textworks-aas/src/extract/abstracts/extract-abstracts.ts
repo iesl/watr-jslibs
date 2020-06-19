@@ -1,6 +1,5 @@
 import _ from "lodash";
 import path from "path";
-import { Transform } from "stream";
 import {
   readMetaProps,
   filterUrl,
@@ -25,9 +24,9 @@ import {
   findInMetaTE,
 } from "~/extract/core/field-extract-utils";
 
-import { BufferedLogger, tapStream, filterStream } from "commons";
+import { BufferedLogger } from "commons";
 import { ExtractionLog } from '../core/extraction-records';
-import { ReviewEnv, AbstractCleaningRules } from './data-clean-abstracts';
+import {  AbstractCleaningRules } from './data-clean-abstracts';
 import { ExtractionFunction, Field, ExtractionEnv, resetEnvForAttemptChain, modEnv, tapWith, bindTasks, applyCleaningRules } from '../core/extraction-process';
 
 export const findInGlobalDocumentMetadata: ExtractionFunction =
@@ -107,11 +106,11 @@ export function writeExtractionLog(entryPath: string, logBuffer: ExtractionLog):
   fs.writeJsonSync(logfile, logBuffer);
 }
 
-export const ensureArtifactsDir = (entryPath: string, env: ReviewEnv): void => {
+export const ensureArtifactsDir = (overwrite: boolean) => (entryPath: string): void => {
   const artifactPath = artifactsPath(entryPath);
 
   const artifactDirExists = fs.existsSync(artifactPath);
-  if (env.overwrite && artifactDirExists) {
+  if (overwrite && artifactDirExists) {
     fs.emptyDirSync(artifactPath);
   }
   if (!artifactDirExists) {
@@ -127,9 +126,13 @@ export const skipIfArtifactExisits = (artifactFileName: string) => (entryPath: s
   return !exists;
 };
 
+export interface ExtractionAppContext {
+  log: BufferedLogger;
+}
+
 export const extractAbstractTransform =
-  async (entryPath: string, env: ReviewEnv): Promise<void> => {
-    const log = env.logger;
+  async (entryPath: string, ctx: ExtractionAppContext): Promise<void> => {
+    const { log } = ctx;
     log.append('action', 'extract-abstract');
     return runAbstractFinders(AbstractPipelineUpdate, entryPath, log)
       .then(() => writeExtractionLog(entryPath, log.logBuffer))

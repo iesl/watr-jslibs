@@ -1,4 +1,4 @@
-import _, { Dictionary } from "lodash";
+import _ from "lodash";
 
 import {
   ExpandedDir, expandDirTrans, throughFunc, promisifyReadableEnd,
@@ -6,21 +6,13 @@ import {
 
 import { BufferedLogger, } from "commons";
 
-import { UrlGraph } from '~/openreview/workflow';
 import pumpify from "pumpify";
 import { runInteractiveReviewUI } from '~/qa-review/interactive-ui';
 import { scrapyCacheDirs } from './cli-main';
 import { initLogger } from '../logging/logging';
-import { AlphaRecord } from '../core/extraction-records';
 import { CleaningRule } from '../core/extraction-process';
 
-export interface ReviewEnv {
-  logger: BufferedLogger;
-  overwrite: boolean;
-  urlGraph: UrlGraph;
-  csvLookup: Dictionary<AlphaRecord>;
-}
-
+/* eslint-disable  @typescript-eslint/explicit-module-boundary-types */
 export const AbstractCleaningRules: CleaningRule[] = [
   {
     name: "starts w/'abstract'",
