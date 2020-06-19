@@ -14,7 +14,7 @@ import { readUrlFetchChainsFromScrapyLogs } from '../urls/url-fetch-chains';
 
 
 
-export async function createCSVOrderLookup(csvFile: string): Promise<Dictionary<AlphaRecord>> {
+async function createAlphaRecordDict(csvFile: string): Promise<Dictionary<AlphaRecord>> {
   const inputStream = readOrderCsv(csvFile);
   const urlDict: Dictionary<AlphaRecord> = {};
 
@@ -43,7 +43,7 @@ export async function runMainWriteAlphaRecords(
 
   // TODO: scrapy logging -> url db should be part of the spidering process
   const urlGraph = await readUrlFetchChainsFromScrapyLogs(scrapyLog);
-  const csvLookup = await createCSVOrderLookup(csvFile);
+  const csvLookup = await createAlphaRecordDict(csvFile);
   const dirEntryStream = walkScrapyCacheCorpus(corpusRoot);
   // const logger = initLogger(logpath, "abstract-finder", true);
   const pumpBuilder = streamPump.createPump()

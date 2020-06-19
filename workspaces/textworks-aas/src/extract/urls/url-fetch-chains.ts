@@ -8,33 +8,35 @@ import {
 } from "commons";
 
 
-type StatusCodes = {
-  "200": null,
-  "301": null,
-  "302": null,
-  "404": null,
-  "500": null,
-  // Just in case above doesn't cover it:
-  "20x": null,
-  "30x": null,
-  "40x": null,
-  "50x": null,
+// type StatusCodes = {
+//   "200": "200",
+//   "301": "301",
+//   "302": "302",
+//   "404": "404",
+//   "500": "500",
+//   "20x": "20x",
+//   "30x": "30x",
+//   "40x": "40x",
+//   "50x": "50x",
 
-  // Manually scraped url from html
-  //  (e.g., returned html has frames, and non-frame  links must be scraped and spidered)
-  "scraped": null,
-};
+//   // Robots.txt
+//   "Forbidden": null,
 
-// TODO: Make this Url fetch record its own log
-export type StatusCode = keyof StatusCodes;
+//   // Manually scraped url from html
+//   //  (e.g., returned html has frames, and non-frame  links must be scraped and spidered)
+//   "scraped": null,
+// };
+
+// // TODO: Make this Url fetch record its own log
+// export type StatusCode = keyof StatusCodes;
 /**
  * {req: http://doi.org/o1, res: http://ieee.org/paper/o1, code: 301 }
  */
 export interface UrlChainLink {
   requestUrl: string;
   responseUrl?: string;
-  status: StatusCode;
-  timestamp: number;
+  status: string;
+  timestamp: string;
 }
 
 export interface InboundUrlChain {
@@ -52,6 +54,76 @@ function trimGetClause(str: string): string {
   return str.substring(5, li);
 }
 
+const getUrlRE = new RegExp('<GET ([^>]*)>([ ]|$)', 'g');
+
+export function parseLogLine(logline: string): UrlChainLink | string | undefined {
+  // const isCrawled = /DEBUG: Crawled/.test(logline);
+  // const isCrawled200 = isCrawled && /\(200\)/.test(logline);
+  // const isRedirect = /DEBUG: Redirecting \((30|meta)/.test(logline);
+  // const isForbidden = /DEBUG: Forbidden/.test(logline);
+
+  const httpCodeRE = /DEBUG: (\w+) [(](\d{3})[)]/;
+  const httpForbiddenByRobotsRE = /DEBUG: Forbidden by robots.txt/;
+  const timestampRE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/;
+
+
+  const timestampMatch = logline.match(timestampRE);
+  // All lines we care about start with a timestamp, parse and validate:
+  if (timestampMatch == null) return;
+  const dateAsString = timestampMatch[0];
+  const dateAsNum = Date.parse(dateAsString);
+  if (isNaN(dateAsNum)) return;
+
+
+  const httpCodeMatches = logline.match(httpCodeRE);
+  const isForbiddenByRobotsTxt = httpForbiddenByRobotsRE.test(logline);
+
+  // prettyPrint({ httpCodeMatches });
+
+  const urlMatches = logline.match(getUrlRE);
+  let [firstUrl, secondUrl] = urlMatches ? urlMatches : [undefined, undefined];
+  firstUrl = firstUrl ? trimGetClause(firstUrl) : undefined;
+  secondUrl = secondUrl ? trimGetClause(secondUrl) : undefined;
+
+  if (isForbiddenByRobotsTxt) {
+    if (!firstUrl) return 'Error: could not parse single url in ${logline}';
+    const chainLink: UrlChainLink = {
+      requestUrl: firstUrl,
+      status: "Forbidden",
+      timestamp: dateAsString
+    };
+    return chainLink;
+  }
+
+  const [, httpAction, httpStatus] = httpCodeMatches? httpCodeMatches : [undefined, undefined, undefined];
+
+  if (httpAction === 'Redirecting') {
+    if (!firstUrl || !secondUrl) return 'Error: could not parse two urls in ${logline}';
+    if (!httpStatus) return 'Error: could not parse status in ${logline}';
+    const chainLink: UrlChainLink = {
+      requestUrl: secondUrl,
+      responseUrl: firstUrl,
+      status: httpStatus,
+      timestamp: dateAsString
+    };
+    return chainLink;
+
+  }
+
+  if (httpAction === 'Crawled') {
+    if (!firstUrl) return 'Error: could not parse single url in ${logline}';
+    if (!httpStatus) return 'Error: could not parse status in ${logline}';
+    const chainLink: UrlChainLink = {
+      requestUrl: firstUrl,
+      status: httpStatus,
+      timestamp: dateAsString
+    };
+    return chainLink;
+  }
+
+  return;
+}
+
 // These are the log entries we care about from scrapy
 // cat crawler.log | egrep -v '\[protego\]' | egrep -v '\[scrapy\.(down|ext|core|utils|crawler|spidermiddle)'
 export async function readUrlFetchChainsFromScrapyLogs(logfile: string): Promise<UrlGraph> {
@@ -64,40 +136,39 @@ export async function readUrlFetchChainsFromScrapyLogs(logfile: string): Promise
 
   const pumpBuilder = streamPump.createPump()
     .viaStream<string>(inputStream)
-    .throughF((line: string) => {
+    .tap((line: string) => {
       const isCrawled = /DEBUG: Crawled/.test(line);
       const isCrawled200 = isCrawled && /\(200\)/.test(line);
       const isRedirect = /DEBUG: Redirecting \((30|meta)/.test(line);
-      // const isForbidden = /DEBUG: Forbidden/.test(line);
-      // const isCached = /\['cached'\]/.test(line);
+      const isForbidden = /DEBUG: Forbidden/.test(line);
 
-      const isDEBUGLine = /S0097539792224838/.test(line);
+      const isRelevantLine = isCrawled || isRedirect || isForbidden;
+
+      const timestampRE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/;
+      const timestampMatch = line.match(timestampRE);
+
+      if (!isRelevantLine) return;
+      if (timestampMatch == null) return;
+      const httpCodeRE = /DEBUG: (\w+): ([(]\d{3}[)]) /;
+
+      const dateAsString = timestampMatch[0];
+      const dateAsNum = Date.parse(dateAsString);
+      if (isNaN(dateAsNum)) return;
 
       const urls1 = line.match(getUrlRE);
 
-      if (isDEBUGLine) {
-        prettyPrint({
-          msg: 'log line',
-          line,
-          urls1,
-          isCrawled,
-          isRedirect,
-        });
-      }
-
       if (isRedirect && urls1) {
         const [toUrl, fromUrl] = urls1;
-        const t = trimGetClause(toUrl);
-        const f = trimGetClause(fromUrl);
-        redirectFromGraph[f] = t;
-        redirectToGraph[t] = f;
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: '(redirect)',
-            toUrl, t,
-            fromUrl, f,
-          });
-        }
+        const responseUrl = trimGetClause(toUrl);
+        const requestUrl = trimGetClause(fromUrl);
+        redirectFromGraph[requestUrl] = responseUrl;
+        redirectToGraph[responseUrl] = requestUrl;
+        const chainLink: UrlChainLink = {
+          requestUrl,
+          responseUrl,
+          status: "30x",
+          timestamp: dateAsString
+        };
       }
       if (isCrawled && urls1) {
         const [crawlUrl] = urls1;
@@ -107,15 +178,7 @@ export async function readUrlFetchChainsFromScrapyLogs(logfile: string): Promise
         } else {
           crawledErr.add(t);
         }
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: '(crawled)',
-            crawlUrl, t,
-            isCrawled200
-          });
-        }
       }
-      return line;
     });
 
   return pumpBuilder.toPromise()
@@ -125,50 +188,17 @@ export async function readUrlFetchChainsFromScrapyLogs(logfile: string): Promise
       const crawledOk = crawled200;
       const crawledNotOk = crawledErr;
       const getChain = (url: string) => {
-        const isDEBUGLine = /S0097539792224838/.test(url);
         const redirects: string[] = [url];
         let urlNext = redirectFrom[redirects[0]];
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: 'getChain()',
-            redirects, urlNext
-          });
-        }
         while (urlNext !== undefined && !redirects.includes(urlNext)) {
-        // while (urlNext !== undefined) {
           redirects.unshift(urlNext);
           urlNext = redirectFrom[redirects[0]];
-          if (isDEBUGLine) {
-            prettyPrint({
-              msg: 'while: from',
-              redirects, urlNext
-            });
-          }
-        }
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: 'midway (pre)',
-            redirects, urlNext
-          });
         }
         redirects.reverse();
         urlNext = redirectTo[redirects[0]];
-        if (isDEBUGLine) {
-          prettyPrint({
-            msg: 'midway (reversed)',
-            redirects, urlNext
-          });
-        }
         while (urlNext !== undefined && !redirects.includes(urlNext)) {
-        // while (urlNext !== undefined) {
           redirects.unshift(urlNext);
           urlNext = redirectTo[redirects[0]];
-          if (isDEBUGLine) {
-            prettyPrint({
-              msg: 'while: to',
-              redirects, urlNext
-            });
-          }
         }
         return redirects;
       };
