@@ -91,7 +91,7 @@ export interface InspectOptions {
 }
 
 const inspectOptionDefaults = {
-  showHidden: true,
+  showHidden: false,
   depth: 8,
   customInspect: true,
   showProxy: true,

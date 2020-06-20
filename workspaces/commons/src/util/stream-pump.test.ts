@@ -3,10 +3,9 @@ import "chai";
 import _ from "lodash";
 
 import { createPump } from "./stream-pump";
-import { arrayStream } from './stream-utils';
+import { arrayStream, isDefined } from './stream-utils';
 import { Readable } from "stream";
 import { prettyPrint } from './pretty-print';
-// import { prettyPrint } from './pretty-print';
 
 describe("Pump Builder", () => {
 
@@ -63,6 +62,26 @@ describe("Pump Builder", () => {
       .gather()
       .onData((d) => {
         expect(d).toEqual(expected);
+      });
+
+    pumpBuilder.toPromise().then(() => done());
+  });
+
+
+  it("should narrow types when filtering", async done => {
+    const astr = numberStream(1, 10);
+
+    const pumpBuilder = createPump()
+      .viaStream<number>(astr)
+      .throughF((n) => {
+        if (n %2 === 0) {
+          return n;
+        }
+        return undefined;
+      })
+      .guard(isDefined)
+      .onData((data) => {
+        prettyPrint({ data })
       });
 
     pumpBuilder.toPromise().then(() => done());

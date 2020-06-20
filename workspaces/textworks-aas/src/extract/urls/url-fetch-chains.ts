@@ -1,43 +1,22 @@
-
 import _ from "lodash";
 
 import {
-  prettyPrint,
   createReadLineStream,
   streamPump,
+  isDefined,
+  prettyPrint,
+  makeTreeFromPairs,
+  Edges,
 } from "commons";
 
-
-// type StatusCodes = {
-//   "200": "200",
-//   "301": "301",
-//   "302": "302",
-//   "404": "404",
-//   "500": "500",
-//   "20x": "20x",
-//   "30x": "30x",
-//   "40x": "40x",
-//   "50x": "50x",
-
-//   // Robots.txt
-//   "Forbidden": null,
-
-//   // Manually scraped url from html
-//   //  (e.g., returned html has frames, and non-frame  links must be scraped and spidered)
-//   "scraped": null,
-// };
-
-// // TODO: Make this Url fetch record its own log
-// export type StatusCode = keyof StatusCodes;
-/**
- * {req: http://doi.org/o1, res: http://ieee.org/paper/o1, code: 301 }
- */
 export interface UrlChainLink {
   requestUrl: string;
   responseUrl?: string;
   status: string;
   timestamp: string;
 }
+import * as Tree from 'fp-ts/lib/Tree';
+import { all } from 'bluebird';
 
 export interface InboundUrlChain {
   chains: UrlChainLink[];
@@ -56,12 +35,9 @@ function trimGetClause(str: string): string {
 
 const getUrlRE = new RegExp('<GET ([^>]*)>([ ]|$)', 'g');
 
+// These are the log entries we care about from scrapy
+// cat crawler.log | egrep -v '\[protego\]' | egrep -v '\[scrapy\.(down|ext|core|utils|crawler|spidermiddle)'
 export function parseLogLine(logline: string): UrlChainLink | string | undefined {
-  // const isCrawled = /DEBUG: Crawled/.test(logline);
-  // const isCrawled200 = isCrawled && /\(200\)/.test(logline);
-  // const isRedirect = /DEBUG: Redirecting \((30|meta)/.test(logline);
-  // const isForbidden = /DEBUG: Forbidden/.test(logline);
-
   const httpCodeRE = /DEBUG: (\w+) [(](\d{3})[)]/;
   const httpForbiddenByRobotsRE = /DEBUG: Forbidden by robots.txt/;
   const timestampRE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/;
@@ -78,8 +54,6 @@ export function parseLogLine(logline: string): UrlChainLink | string | undefined
   const httpCodeMatches = logline.match(httpCodeRE);
   const isForbiddenByRobotsTxt = httpForbiddenByRobotsRE.test(logline);
 
-  // prettyPrint({ httpCodeMatches });
-
   const urlMatches = logline.match(getUrlRE);
   let [firstUrl, secondUrl] = urlMatches ? urlMatches : [undefined, undefined];
   firstUrl = firstUrl ? trimGetClause(firstUrl) : undefined;
@@ -95,7 +69,7 @@ export function parseLogLine(logline: string): UrlChainLink | string | undefined
     return chainLink;
   }
 
-  const [, httpAction, httpStatus] = httpCodeMatches? httpCodeMatches : [undefined, undefined, undefined];
+  const [, httpAction, httpStatus] = httpCodeMatches ? httpCodeMatches : [undefined, undefined, undefined];
 
   if (httpAction === 'Redirecting') {
     if (!firstUrl || !secondUrl) return 'Error: could not parse two urls in ${logline}';
@@ -107,7 +81,6 @@ export function parseLogLine(logline: string): UrlChainLink | string | undefined
       timestamp: dateAsString
     };
     return chainLink;
-
   }
 
   if (httpAction === 'Crawled') {
@@ -124,95 +97,188 @@ export function parseLogLine(logline: string): UrlChainLink | string | undefined
   return;
 }
 
-// These are the log entries we care about from scrapy
-// cat crawler.log | egrep -v '\[protego\]' | egrep -v '\[scrapy\.(down|ext|core|utils|crawler|spidermiddle)'
+// type UrlChain = UrlChainLink[];
+// type UrlChains = UrlChain[];
+
 export async function readUrlFetchChainsFromScrapyLogs(logfile: string): Promise<UrlGraph> {
   const inputStream = createReadLineStream(logfile)
-  const redirectFromGraph: _.Dictionary<string> = {};
-  const redirectToGraph: _.Dictionary<string> = {};
-  const crawled200 = new Set<string>();
-  const crawledErr = new Set<string>();
-  const getUrlRE = new RegExp('<GET ([^>]*)>([ ]|$)', 'g');
+
+  // const urlChains =  radix.createRadix<UrlChainLink>();
 
   const pumpBuilder = streamPump.createPump()
     .viaStream<string>(inputStream)
-    .tap((line: string) => {
-      const isCrawled = /DEBUG: Crawled/.test(line);
-      const isCrawled200 = isCrawled && /\(200\)/.test(line);
-      const isRedirect = /DEBUG: Redirecting \((30|meta)/.test(line);
-      const isForbidden = /DEBUG: Forbidden/.test(line);
-
-      const isRelevantLine = isCrawled || isRedirect || isForbidden;
-
-      const timestampRE = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/;
-      const timestampMatch = line.match(timestampRE);
-
-      if (!isRelevantLine) return;
-      if (timestampMatch == null) return;
-      const httpCodeRE = /DEBUG: (\w+): ([(]\d{3}[)]) /;
-
-      const dateAsString = timestampMatch[0];
-      const dateAsNum = Date.parse(dateAsString);
-      if (isNaN(dateAsNum)) return;
-
-      const urls1 = line.match(getUrlRE);
-
-      if (isRedirect && urls1) {
-        const [toUrl, fromUrl] = urls1;
-        const responseUrl = trimGetClause(toUrl);
-        const requestUrl = trimGetClause(fromUrl);
-        redirectFromGraph[requestUrl] = responseUrl;
-        redirectToGraph[responseUrl] = requestUrl;
-        const chainLink: UrlChainLink = {
-          requestUrl,
-          responseUrl,
-          status: "30x",
-          timestamp: dateAsString
-        };
+    .throughF((line: string) => {
+      const parsed = parseLogLine(line);
+      if (_.isString(parsed)) {
+        console.log('error parsing logfile line', parsed);
+        return;
       }
-      if (isCrawled && urls1) {
-        const [crawlUrl] = urls1;
-        const t = trimGetClause(crawlUrl);
-        if (isCrawled200) {
-          crawled200.add(t);
-        } else {
-          crawledErr.add(t);
-        }
-      }
-    });
+      return parsed;
+    })
+    .guard(isDefined)
+    .gather();
 
   return pumpBuilder.toPromise()
-    .then(() => {
-      const redirectFrom = redirectFromGraph;
-      const redirectTo = redirectToGraph;
-      const crawledOk = crawled200;
-      const crawledNotOk = crawledErr;
-      const getChain = (url: string) => {
-        const redirects: string[] = [url];
-        let urlNext = redirectFrom[redirects[0]];
-        while (urlNext !== undefined && !redirects.includes(urlNext)) {
-          redirects.unshift(urlNext);
-          urlNext = redirectFrom[redirects[0]];
-        }
-        redirects.reverse();
-        urlNext = redirectTo[redirects[0]];
-        while (urlNext !== undefined && !redirects.includes(urlNext)) {
-          redirects.unshift(urlNext);
-          urlNext = redirectTo[redirects[0]];
-        }
-        return redirects;
-      };
-
-      return {
-        isUrlCrawled(url: string): boolean {
-          const chain = getChain(url);
-          const filtered = chain.filter(churl => crawledOk.has(churl) || crawledNotOk.has(churl));
-          return filtered.length > 0;
-        },
-
-        getUrlFetchChain(url: string): string[] {
-          return getChain(url);
-        }
+    .then((allLinks) => {
+      if (!allLinks) {
+        const emptyGraph: UrlGraph = {
+          isUrlCrawled(_url: string, _verbose?: boolean): boolean {
+            return true;
+          },
+          getUrlFetchChain(_url: string): string[] {
+            return [];
+          }
+        };
+        return emptyGraph;
       }
+
+      const reqLinkNums = new Map<string, number[]>();
+      // const respLinkNums = new Map<string, number[]>();
+
+      _.each(allLinks, (link, linkNum) => {
+        const { requestUrl } = link;
+        const prevs0 = reqLinkNums.get(requestUrl) || [];
+        prevs0.push(linkNum);
+        reqLinkNums.set(requestUrl, prevs0);
+
+        // if (!responseUrl) return;
+
+        // const prevs1 = respLinkNums.get(responseUrl) || [];
+        // prevs1.push(linkNum);
+        // respLinkNums.set(responseUrl, prevs1);
+      });
+
+      const allParentChildPairs: Edges<number> = _.flatMap(allLinks, (link, linkNum) => {
+        const { responseUrl } = link;
+        if (!responseUrl) return [];
+        const maybeNextLinks = reqLinkNums.get(responseUrl) || [];
+
+        const downstreamLinkNums = _.filter(maybeNextLinks, n => n > linkNum);
+        const downstreamParentChildPairs = _.map(downstreamLinkNums, n => [linkNum, n] as [number, number]);
+        return downstreamParentChildPairs;
+      });
+
+      const chainTrees = makeTreeFromPairs(allParentChildPairs);
+
+      _.each(chainTrees, (chainTree) => {
+        const chainTreeStr = Tree.map((n: number) => {
+          const linkN = allLinks[n];
+          const { requestUrl, responseUrl , status } = linkN;
+          return `${requestUrl} -(${status})-> ${responseUrl? responseUrl : '.'}`;
+        })(chainTree);
+        const asString = Tree.drawTree(chainTreeStr);
+        console.log('=========\n\n');
+        console.log(asString);
+        console.log('\n');
+      });
+
+      const urlGraph: UrlGraph = {
+        isUrlCrawled(_url: string, _verbose?: boolean): boolean {
+          return true;
+        },
+        getUrlFetchChain(_url: string): string[] {
+          return [];
+        }
+      };
+      return urlGraph;
     });
 }
+
+
+// const chains: _.NumericDictionary<UrlChains> = {};
+// _.each(allLinks, (link, linkNum) => {
+//   const { requestUrl, responseUrl } = link;
+
+//   _.update(
+//     chains, linkNum,
+//     (prevChains: UrlChains | undefined) => {
+
+//     });
+
+// });
+
+
+
+
+
+
+// _.each(allLinks, (link, linkNum) => {
+//   const { requestUrl, responseUrl } = link;
+//   if (!responseUrl) return;
+//   const maybeNextLinks = reqUrlLinkIndexes[responseUrl] || [];
+//   _(maybeNextLinks)
+//     .filter(n => n > linkNum)
+//     .map(n => [link, allLinks[n]])
+//   const laterLinks = _.filter(maybeNextLinks, n => n > linkNum);
+// });
+
+  // return pumpBuilder.toPromise()
+  //   .then((allLinks) => {
+  //     if (!allLinks) {
+  //       const emptyGraph: UrlGraph = {
+  //         isUrlCrawled(_url: string, _verbose?: boolean): boolean {
+  //           return true;
+  //         },
+  //         getUrlFetchChain(_url: string): string[] {
+  //           return [];
+  //         }
+  //       };
+  //       return emptyGraph;
+  //     }
+
+  //     const reqUrlLinkIndexes: _.Dictionary<number[]> = {};
+  //     const respUrlLinkIndexes: _.Dictionary<number[]> = {};
+
+  //     _.each(allLinks, (link, linkNum) => {
+  //       const { requestUrl, responseUrl } = link;
+  //       let prev = reqUrlLinkIndexes[requestUrl];
+  //       if (prev) {
+  //         prev.push(linkNum);
+  //       } else {
+  //         reqUrlLinkIndexes[requestUrl] = [linkNum];
+  //       }
+
+  //       if (!responseUrl) return;
+  //       prev = respUrlLinkIndexes[responseUrl];
+  //       if (prev) {
+  //         prev.push(linkNum);
+  //       } else {
+  //         respUrlLinkIndexes[responseUrl] = [linkNum];
+  //       }
+  //     });
+
+  //     const chains: _.NumericDictionary<UrlChains> = {};
+  //     _.each(allLinks, (link, linkNum) => {
+  //       const { requestUrl, responseUrl } = link;
+
+  //       if (!responseUrl) return;
+
+  //       const currDSChain = chains[linkNum] || [];
+
+  //       const maybeNextLinks = reqUrlLinkIndexes[responseUrl] || [];
+
+  //       const downstreamLinkNums = _.filter(maybeNextLinks, n => n > linkNum);
+  //       const downstreamLinks = _.map(downstreamLinkNums, n => allLinks[n]);
+  //       const linkChain = [link, ...downstreamLinks];
+
+  //       _.each(downstreamLinkNums, dsLinkNum => {
+  //         const dsChain = chains[dsLinkNum] || [];
+  //         dsChain.push(linkChain)
+  //         // chains[dsLinkNum] = [ linkChain ];
+  //       });
+  //       // prettyPrint({ reqUrlLinkIndexes, respUrlLinkIndexes });
+  //     });
+
+  //     prettyPrint({ chains });
+
+
+  //     const urlGraph: UrlGraph = {
+  //       isUrlCrawled(_url: string, _verbose?: boolean): boolean {
+  //         return true;
+  //       },
+  //       getUrlFetchChain(_url: string): string[] {
+  //         return [];
+  //       }
+  //     };
+  //     return urlGraph;
+  //   });

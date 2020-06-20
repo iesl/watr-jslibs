@@ -59,3 +59,20 @@ export function clipParagraph(width: number, height: number, para: string): stri
 
   return clipped;
 }
+
+export function stripMargin(block: string): string {
+  const lines = block.split("\n");
+  const stripped = stripMargins(lines);
+  return stripped.join("\n");
+}
+
+export function stripMargins(lines: string[]): string[] {
+  return _
+    .map(lines, l => {
+      const ltrim = l.trimLeft();
+      if (ltrim.startsWith("|")) {
+        return ltrim.slice(1);
+      }
+      return l;
+    });
+}

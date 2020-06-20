@@ -25,6 +25,7 @@ export interface PumpBuilder<ChunkT, Env> {
   throughF<R>(f: WithEnvCB<ChunkT, Env, Promise<R>>): PumpBuilder<R, Env>;
   throughF<R>(f: WithEnvCB<ChunkT, Env, R>): PumpBuilder<R, Env>;
 
+  guard<T extends ChunkT>(f: (t: ChunkT, env: Env) => t is T): PumpBuilder<T, Env>;
   filter(f: (t: ChunkT, env: Env) => boolean): PumpBuilder<ChunkT, Env>;
 
   gather(): PumpBuilder<ChunkT[], Env>;
@@ -102,6 +103,9 @@ export function createPump<ChunkT, Env = undefined>(): PumpBuilder<ChunkT, Env> 
     },
     throughF<R>(f: (t: ChunkT, env: Env) => R): PumpBuilder<R, Env> {
       return appendStream(this, throughFunc<ChunkT, R, Env>(f));
+    },
+    guard<T extends ChunkT>(f: (t: ChunkT, env: Env) => t is T): PumpBuilder<T, Env> {
+      return appendStream(this, filterStream(f));
     },
     filter(f: (t: ChunkT, env: Env) => boolean): PumpBuilder<ChunkT, Env> {
       return appendStream(this, filterStream(f));

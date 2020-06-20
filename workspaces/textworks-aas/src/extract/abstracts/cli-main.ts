@@ -57,11 +57,11 @@ export async function runMainWriteAlphaRecords(
       const urlFetchChain = urlGraph.getUrlFetchChain(url);
       const responseUrlFetchChain = urlGraph.getUrlFetchChain(responseUrl);
 
-      prettyPrint({
-        metaProps,
-        urlFetchChain,
-        responseUrlFetchChain
-      });
+      // prettyPrint({
+      //   metaProps,
+      //   urlFetchChain,
+      //   responseUrlFetchChain
+      // });
 
     });
 

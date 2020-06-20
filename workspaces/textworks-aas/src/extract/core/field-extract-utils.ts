@@ -30,17 +30,6 @@ export function indentLevel(s: string): number {
   return i;
 }
 
-export function stripMargin(lines: string[]): string[] {
-  return _
-    .map(lines, l => {
-    const ltrim = l.trimLeft();
-    if (ltrim.startsWith("|")) {
-      return ltrim.slice(1);
-    }
-    return l;
-  });
-}
-
 export function filterText(lines: string[]): string[] {
   return _
     .map(lines, _.trim)

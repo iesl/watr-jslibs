@@ -4,10 +4,12 @@ import "chai/register-should";
 import _  from "lodash";
 import { prettyPrint } from 'commons';
 import { parseLogLine } from './url-fetch-chains';
+import * as Tree from 'fp-ts/lib/Tree';
+import * as Arr from 'fp-ts/lib/Array';
 
 describe("Url Parsing from scrapy spidering logs", () => {
 
-  it.only("should parse url fetch/response from scrapy spider logs", () => {
+  it("should parse url fetch/response from scrapy spider logs", () => {
     const examples = [
       ["2020-05-26 16:40:32 [protego] DEBUG: Rule at line 84 without any user agent to enforce it on.", "TODO"],
       ["2020-05-26 16:40:32 [scrapy.core.engine] DEBUG: Crawled (200) <GET http://proceedings.mlr.press/v97/li19i.html> (referer: None) ['cached']", "TODO"],
@@ -26,8 +28,6 @@ describe("Url Parsing from scrapy spidering logs", () => {
       const parsedLines = parseLogLine(logLine);
       prettyPrint({ logLine, parsedLines });
     });
-
-
-
   });
+
 });

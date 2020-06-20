@@ -324,11 +324,16 @@ export async function promisifyOn<T>(ev: string, readStream: Readable): Promise<
   });
 }
 
+export function isDefined<T>(t: T | undefined | null): t is T {
+  return !_.isNil(t);
+}
+
 export interface TransformProcess {
   outStream: Readable;
   errStream: Readable;
   completePromise: Promise<number>;
 }
+
 export function streamifyProcess(
   proc: ChildProcessWithoutNullStreams
 ): TransformProcess {

@@ -26,6 +26,7 @@
     "fast-csv": "^4.3.0",
     "from2": "^2.3.0",
     "fs-extra": "^9.0.1",
+    "fp-ts": "^2.6.6",
     "logform": "^2.1.2",
     "object-hash": "^2.0.3",
     "pumpify": "^2.0.1",
