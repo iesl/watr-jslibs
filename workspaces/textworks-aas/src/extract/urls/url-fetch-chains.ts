@@ -4,9 +4,9 @@ import {
   createReadLineStream,
   streamPump,
   isDefined,
-  prettyPrint,
   makeTreeFromPairs,
   Edges,
+  prettyPrint,
 } from "commons";
 
 export interface UrlChainLink {
@@ -16,16 +16,13 @@ export interface UrlChainLink {
   timestamp: string;
 }
 import * as Tree from 'fp-ts/lib/Tree';
-import { all } from 'bluebird';
 
-export interface InboundUrlChain {
-  chains: UrlChainLink[];
-}
+export type UrlChain = UrlChainLink[];
+export type UrlChains = UrlChain[];
 
-// type UrlAndCode = [string, number];
-export interface UrlGraph {
-  isUrlCrawled(url: string, verbose?: boolean): boolean;
-  getUrlFetchChain(url: string): string[];
+export interface UrlChainGraph {
+  isUrlCrawled(url: string): boolean;
+  getUrlFetchChain(url: string): UrlChain;
 }
 
 function trimGetClause(str: string): string {
@@ -97,18 +94,131 @@ export function parseLogLine(logline: string): UrlChainLink | string | undefined
   return;
 }
 
-// type UrlChain = UrlChainLink[];
-// type UrlChains = UrlChain[];
 
-export async function readUrlFetchChainsFromScrapyLogs(logfile: string): Promise<UrlGraph> {
+import StaticDisjointSet from 'mnemonist/static-disjoint-set'
+
+export function getUniqRequestUrls(allLinks: UrlChain): string[] {
+  return _.uniq(_.map(allLinks, l => l.requestUrl));
+}
+
+export function buildFetchChainDisjointSets(allLinks: UrlChain): UrlChains {
+  const DBG_RE = /mas00234/;
+
+  const DBG_LINKNUM: number[] = [];
+  // Build a map from Urls -> indexes at which it appears as a request
+  const reqLinkNums = new Map<string, number[]>();
+
+  _.each(allLinks, (link, linkNum) => {
+    const { requestUrl, responseUrl } = link;
+    const prevs0 = reqLinkNums.get(requestUrl) || [];
+    prevs0.push(linkNum);
+    if (DBG_RE.test(requestUrl) || (responseUrl && DBG_RE.test(responseUrl))) {
+      prettyPrint({ msg: "buildFetchChainDisjointSets: mas00234 (init)", link, linkNum, prevs0 });
+      DBG_LINKNUM.push(linkNum);
+    }
+    reqLinkNums.set(requestUrl, prevs0);
+  });
+
+  // const disjointChains = new StaticDisjointSet(reqLinkNums.size);
+  const disjointChains = new StaticDisjointSet(allLinks.length);
+  _.each(allLinks, (link, linkNum) => {
+    const { requestUrl, responseUrl } = link;
+    if (!responseUrl) return;
+
+    const maybeNextLinks = reqLinkNums.get(responseUrl) || [];
+
+    if (linkNum === 1578) {
+      prettyPrint({ msg: "buildFetchChainDisjointSets: union(): linkNum", link, linkNum });
+    }
+    if (DBG_RE.test(requestUrl) || DBG_RE.test(responseUrl)) {
+      prettyPrint({ msg: "buildFetchChainDisjointSets: requestUrl/resp", link, linkNum, maybeNextLinks });
+    }
+    if (DBG_LINKNUM.includes(linkNum)) {
+      prettyPrint({ msg: "buildFetchChainDisjointSets(union()): mas00234", maybeNextLinks });
+    }
+
+    const downstreamLinkNums = _.filter(maybeNextLinks, n => n > linkNum);
+    _.each(downstreamLinkNums, dsLinkNum => {
+      if (DBG_RE.test(requestUrl) || DBG_RE.test(responseUrl)) {
+        prettyPrint({ msg: "buildFetchChainDisjointSets: union", linkNum, to: '->', dsLinkNum });
+      }
+      disjointChains.union(linkNum, dsLinkNum);
+    });
+  });
+  const setsAsIndexes = disjointChains.compile();
+  _.each(setsAsIndexes, (setOfIndexes) => {
+    if (setOfIndexes.includes(1515) || setOfIndexes.includes(1578)) {
+      console.log('setOfIndexes', setOfIndexes.join(","))
+    }
+  });
+  const setsAsChainLinks = _.map(setsAsIndexes, (linkNums) => {
+    return _.map(linkNums, l => allLinks[l]);
+  });
+
+  const uniqChains = _.map(setsAsChainLinks, chains => {
+    const uniqChain = _.uniqBy(chains, link => {
+      const { requestUrl, responseUrl, status } = link;
+      return `${requestUrl}_${status}_${responseUrl ? responseUrl : '.'}`;
+    });
+    return uniqChain;
+  });
+
+  console.log('Finished buildFetchChainDisjointSets');
+  return uniqChains;
+}
+
+export function buildFetchChainTree(_allLinks: UrlChain): void {
+  const allLinks = _.uniqBy(_allLinks, link => {
+    const { requestUrl, responseUrl, status } = link;
+    return `${requestUrl}_${status}_${responseUrl ? responseUrl : '.'}`;
+  });
+
+  const reqLinkNums = new Map<string, number[]>();
+
+  _.each(allLinks, (link, linkNum) => {
+    const { requestUrl } = link;
+    const prevs0 = reqLinkNums.get(requestUrl) || [];
+    prevs0.push(linkNum);
+    reqLinkNums.set(requestUrl, prevs0);
+  });
+
+  const allParentChildPairs: Edges<number> = _.flatMap(allLinks, (link, linkNum) => {
+    const { responseUrl } = link;
+    if (!responseUrl) return [];
+    const maybeNextLinks = reqLinkNums.get(responseUrl) || [];
+
+    const downstreamLinkNums = _.filter(maybeNextLinks, n => n > linkNum);
+    const downstreamParentChildPairs = _.map(downstreamLinkNums, n => [linkNum, n] as [number, number]);
+    return downstreamParentChildPairs;
+  });
+
+  const chainTrees = makeTreeFromPairs(allParentChildPairs);
+
+  _.each(chainTrees, (chainTree) => {
+    const chainTreeStr = Tree.map((n: number) => {
+      const linkN = allLinks[n];
+      const { requestUrl, responseUrl, status, timestamp } = linkN;
+      return `${requestUrl} -(${status})-> ${responseUrl ? responseUrl : '.'}  ${timestamp}`;
+    })(chainTree);
+    const asString = Tree.drawTree(chainTreeStr);
+    console.log('=========\n\n');
+    console.log(asString);
+    console.log('\n');
+  });
+
+}
+
+export async function readUrlFetchChainsFromScrapyLogs(logfile: string): Promise<UrlChainGraph> {
   const inputStream = createReadLineStream(logfile)
 
-  // const urlChains =  radix.createRadix<UrlChainLink>();
-
+  const DBG_RE = /mas00234/;
   const pumpBuilder = streamPump.createPump()
     .viaStream<string>(inputStream)
     .throughF((line: string) => {
       const parsed = parseLogLine(line);
+      if (DBG_RE.test(line)) {
+        prettyPrint({ msg: "readUrlFetchChain: mas00234", line, parsed });
+      }
       if (_.isString(parsed)) {
         console.log('error parsing logfile line', parsed);
         return;
@@ -121,164 +231,35 @@ export async function readUrlFetchChainsFromScrapyLogs(logfile: string): Promise
   return pumpBuilder.toPromise()
     .then((allLinks) => {
       if (!allLinks) {
-        const emptyGraph: UrlGraph = {
-          isUrlCrawled(_url: string, _verbose?: boolean): boolean {
-            return true;
+        const emptyGraph: UrlChainGraph = {
+          isUrlCrawled(): boolean {
+            return false;
           },
-          getUrlFetchChain(_url: string): string[] {
+          getUrlFetchChain(): UrlChain {
             return [];
           }
         };
         return emptyGraph;
       }
 
-      const reqLinkNums = new Map<string, number[]>();
-      // const respLinkNums = new Map<string, number[]>();
+      const fetchChainSets = buildFetchChainDisjointSets(allLinks);
 
-      _.each(allLinks, (link, linkNum) => {
-        const { requestUrl } = link;
-        const prevs0 = reqLinkNums.get(requestUrl) || [];
-        prevs0.push(linkNum);
-        reqLinkNums.set(requestUrl, prevs0);
-
-        // if (!responseUrl) return;
-
-        // const prevs1 = respLinkNums.get(responseUrl) || [];
-        // prevs1.push(linkNum);
-        // respLinkNums.set(responseUrl, prevs1);
+      const urlToChain = new Map<string, UrlChain>();
+      _.each(fetchChainSets, chainLinks => {
+        const reqUrls = _.uniq(_.map(chainLinks, link => link.requestUrl));
+        _.each(reqUrls, url => urlToChain.set(url, chainLinks));
       });
 
-      const allParentChildPairs: Edges<number> = _.flatMap(allLinks, (link, linkNum) => {
-        const { responseUrl } = link;
-        if (!responseUrl) return [];
-        const maybeNextLinks = reqLinkNums.get(responseUrl) || [];
 
-        const downstreamLinkNums = _.filter(maybeNextLinks, n => n > linkNum);
-        const downstreamParentChildPairs = _.map(downstreamLinkNums, n => [linkNum, n] as [number, number]);
-        return downstreamParentChildPairs;
-      });
 
-      const chainTrees = makeTreeFromPairs(allParentChildPairs);
-
-      _.each(chainTrees, (chainTree) => {
-        const chainTreeStr = Tree.map((n: number) => {
-          const linkN = allLinks[n];
-          const { requestUrl, responseUrl , status } = linkN;
-          return `${requestUrl} -(${status})-> ${responseUrl? responseUrl : '.'}`;
-        })(chainTree);
-        const asString = Tree.drawTree(chainTreeStr);
-        console.log('=========\n\n');
-        console.log(asString);
-        console.log('\n');
-      });
-
-      const urlGraph: UrlGraph = {
-        isUrlCrawled(_url: string, _verbose?: boolean): boolean {
-          return true;
+      const urlGraph: UrlChainGraph = {
+        isUrlCrawled(url: string, _verbose?: boolean): boolean {
+          return urlToChain.has(url);
         },
-        getUrlFetchChain(_url: string): string[] {
-          return [];
+        getUrlFetchChain(url: string): UrlChain {
+          return urlToChain.get(url) || [];
         }
       };
       return urlGraph;
     });
 }
-
-
-// const chains: _.NumericDictionary<UrlChains> = {};
-// _.each(allLinks, (link, linkNum) => {
-//   const { requestUrl, responseUrl } = link;
-
-//   _.update(
-//     chains, linkNum,
-//     (prevChains: UrlChains | undefined) => {
-
-//     });
-
-// });
-
-
-
-
-
-
-// _.each(allLinks, (link, linkNum) => {
-//   const { requestUrl, responseUrl } = link;
-//   if (!responseUrl) return;
-//   const maybeNextLinks = reqUrlLinkIndexes[responseUrl] || [];
-//   _(maybeNextLinks)
-//     .filter(n => n > linkNum)
-//     .map(n => [link, allLinks[n]])
-//   const laterLinks = _.filter(maybeNextLinks, n => n > linkNum);
-// });
-
-  // return pumpBuilder.toPromise()
-  //   .then((allLinks) => {
-  //     if (!allLinks) {
-  //       const emptyGraph: UrlGraph = {
-  //         isUrlCrawled(_url: string, _verbose?: boolean): boolean {
-  //           return true;
-  //         },
-  //         getUrlFetchChain(_url: string): string[] {
-  //           return [];
-  //         }
-  //       };
-  //       return emptyGraph;
-  //     }
-
-  //     const reqUrlLinkIndexes: _.Dictionary<number[]> = {};
-  //     const respUrlLinkIndexes: _.Dictionary<number[]> = {};
-
-  //     _.each(allLinks, (link, linkNum) => {
-  //       const { requestUrl, responseUrl } = link;
-  //       let prev = reqUrlLinkIndexes[requestUrl];
-  //       if (prev) {
-  //         prev.push(linkNum);
-  //       } else {
-  //         reqUrlLinkIndexes[requestUrl] = [linkNum];
-  //       }
-
-  //       if (!responseUrl) return;
-  //       prev = respUrlLinkIndexes[responseUrl];
-  //       if (prev) {
-  //         prev.push(linkNum);
-  //       } else {
-  //         respUrlLinkIndexes[responseUrl] = [linkNum];
-  //       }
-  //     });
-
-  //     const chains: _.NumericDictionary<UrlChains> = {};
-  //     _.each(allLinks, (link, linkNum) => {
-  //       const { requestUrl, responseUrl } = link;
-
-  //       if (!responseUrl) return;
-
-  //       const currDSChain = chains[linkNum] || [];
-
-  //       const maybeNextLinks = reqUrlLinkIndexes[responseUrl] || [];
-
-  //       const downstreamLinkNums = _.filter(maybeNextLinks, n => n > linkNum);
-  //       const downstreamLinks = _.map(downstreamLinkNums, n => allLinks[n]);
-  //       const linkChain = [link, ...downstreamLinks];
-
-  //       _.each(downstreamLinkNums, dsLinkNum => {
-  //         const dsChain = chains[dsLinkNum] || [];
-  //         dsChain.push(linkChain)
-  //         // chains[dsLinkNum] = [ linkChain ];
-  //       });
-  //       // prettyPrint({ reqUrlLinkIndexes, respUrlLinkIndexes });
-  //     });
-
-  //     prettyPrint({ chains });
-
-
-  //     const urlGraph: UrlGraph = {
-  //       isUrlCrawled(_url: string, _verbose?: boolean): boolean {
-  //         return true;
-  //       },
-  //       getUrlFetchChain(_url: string): string[] {
-  //         return [];
-  //       }
-  //     };
-  //     return urlGraph;
-  //   });

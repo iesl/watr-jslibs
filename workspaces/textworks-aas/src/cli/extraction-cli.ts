@@ -4,7 +4,7 @@ import path from "path";
 import yargs from "yargs";
 import { arglib } from "commons";
 
-import { pruneCrawledFromCSV, verifyCrawledRecords } from '~/openreview/workflow';
+import { pruneCrawledFromCSV } from '~/openreview/workflow';
 
 import { runInteractiveFieldReview } from '~/extract/abstracts/data-clean-abstracts';
 import { runMainExtractAbstracts, runMainWriteAlphaRecords } from '~/extract/abstracts/cli-main';
@@ -29,23 +29,6 @@ yargs.command(
   },
 );
 
-yargs.command(
-  "openreview-verify-crawled",
-  "verify the logs/csv/extracted abstracts",
-  config(
-    opt.cwd,
-    opt.existingFile("scrapyLog: ..."),
-    opt.existingFile("csv: ..."),
-  ),
-  (opts: any) => {
-    const { scrapyLog, csv } = opts;
-    Promise.all([
-      verifyCrawledRecords(scrapyLog, csv)
-    ]).then(() => {
-      console.log('done');
-    })
-  },
-);
 
 yargs.command(
   "write-alpha-records",

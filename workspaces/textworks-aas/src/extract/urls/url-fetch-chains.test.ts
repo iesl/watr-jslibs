@@ -30,4 +30,11 @@ describe("Url Parsing from scrapy spidering logs", () => {
     });
   });
 
+
+  it("should make a tree-based fetch chain", () => {
+    //
+
+
+  });
+
 });
