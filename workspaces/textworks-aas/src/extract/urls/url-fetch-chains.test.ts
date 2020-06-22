@@ -1,11 +1,13 @@
 
 import "chai/register-should";
 
-import _  from "lodash";
+import _ from "lodash";
 import { prettyPrint } from 'commons';
 import { parseLogLine } from './url-fetch-chains';
-import * as Tree from 'fp-ts/lib/Tree';
-import * as Arr from 'fp-ts/lib/Array';
+// import * as Tree from 'fp-ts/lib/Tree';
+// import * as Arr from 'fp-ts/lib/Array';
+import { AlphaRecord } from '../core/extraction-records';
+import { diff } from 'deep-diff';
 
 describe("Url Parsing from scrapy spidering logs", () => {
 
@@ -33,8 +35,26 @@ describe("Url Parsing from scrapy spidering logs", () => {
 
   it("should make a tree-based fetch chain", () => {
     //
+  });
 
+  it("should uniq/diff AlphaRecords", () => {
+    const recs: AlphaRecord[] = _.map(_.range(4), (n) => {
+      const n0 = n % 2 === 0 ? 10 : 20;
+      return ({
+        noteId: `note-${n0}`,
+        dblpConfId: `dblp-${n0}`,
+        title: `titl-${n0}`,
+        authorId: `auth-${n0}`,
+        url: `url-${n0}`,
+      })
+    })
 
+    const uniqAlphaRecs = _.uniqWith(recs, (reca, recb) => {
+      const recDiffs = diff(reca, recb);
+      return !recDiffs;
+    });
+
+    // prettyPrint({ recs, uniqAlphaRecs });
   });
 
 });

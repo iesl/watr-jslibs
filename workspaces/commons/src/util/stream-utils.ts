@@ -70,10 +70,10 @@ export function throughFuncPar<T, R, E>(
 
 export function tapStream<T, Env>(f: (t: T, env: Env) => void): Transform {
   return through.obj(
-    (chunk: T | WithEnv<T, Env>, _enc: string, next: (err: any, v: any) => void) => {
+    async (chunk: T | WithEnv<T, Env>, _enc: string, next: (err: any, v: any) => void) => {
       const [t, env] = unEnv(chunk);
-      f(t, env);
-      return next(null, chunk);
+      return Promise.resolve(f(t, env))
+        .then(() => next(null, chunk))
     }
   );
 }

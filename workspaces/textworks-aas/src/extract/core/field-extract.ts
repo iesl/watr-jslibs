@@ -6,12 +6,13 @@ import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import fs from "fs-extra";
-import { readResolveFile, readResolveFileAsync } from '~/utils/file-utils';
+import { readResolveFile } from '~/utils/file-utils';
 import { runFileCmd } from '~/utils/run-cmd-file';
 import { makeCssTreeNormalForm } from './html-to-css-normal';
 import { runTidyCmdBuffered } from '~/utils/run-cmd-tidy-html';
 import { ExtractionEnv, ExtractionFunction, NormalForm, extractionSuccess, fatalFailure, nonFatalFailure } from './extraction-process';
 import { readMetaFile } from '../logging/logging';
+import { readCorpusFileAsync, writeCorpusFile, resolveCorpusFile } from '~/corpora/corpus-file-walkers';
 
 export const initialEnv: ExtractionEnv = {
   entryPath: 'empty',
@@ -23,7 +24,8 @@ export const initialEnv: ExtractionEnv = {
   responseMimeType: '',
   fileContentMap: {},
   fields: [],
-  extractionEvidence: [],
+  // extractionEvidence: [],
+  verbose: false
 };
 
 
@@ -39,6 +41,11 @@ export const filterUrl: (urlTest: RegExp) => ExtractionFunction =
 export const verifyHttpResponseCode: ExtractionFunction =
   (env: ExtractionEnv) => {
     const { metaProps: { status } } = env;
+
+    if (env.verbose) {
+      console.log('verifyHttpResponseCode');
+    }
+
     if (status === 200) {
       return extractionSuccess(env);
     }
@@ -67,6 +74,10 @@ export const verifyFileNotExists: (filename: string) => ExtractionFunction =
 export const runFileVerification: (urlTest: RegExp) => ExtractionFunction =
   (typeTest: RegExp) => (env: ExtractionEnv) => {
     const { entryPath } = env;
+
+    if (env.verbose) {
+      console.log('runFileVerification');
+    }
     const file = path.resolve(entryPath, 'response_body');
 
     const fileTypeTask: TE.TaskEither<string, string> =
@@ -108,6 +119,9 @@ export const runLoadResponseBody: ExtractionFunction =
   (env: ExtractionEnv) => {
     const { fileContentMap, entryPath } = env;
 
+    if (env.verbose) {
+      console.log('runLoadResponseBody');
+    }
     const normType = 'response-body';
 
     if (normType in fileContentMap) {
@@ -144,7 +158,7 @@ export const runCssNormalize: ExtractionFunction =
     const cssNormalFormLines = makeCssTreeNormalForm(content, /* useXmlMode= */ useXmlProcessing)
     const cssNormalForm = cssNormalFormLines.join("\n");
 
-    fs.writeFileSync(path.resolve(entryPath, `normalized-${normType}`), cssNormalForm);
+    writeCachedNormalFile(entryPath, normType, cssNormalForm);
 
     fileContentMap['css-normal'] = {
       lines: cssNormalFormLines,
@@ -153,14 +167,23 @@ export const runCssNormalize: ExtractionFunction =
     return TE.right(env);
   };
 
+export function resolveCachedNormalFile(entryPath: string, cacheKey: NormalForm): string {
+  return resolveCorpusFile(entryPath, 'cache', `${cacheKey}.norm`);
+}
 
+function writeCachedNormalFile(entryPath: string, cacheKey: NormalForm, content: string) {
+  writeCorpusFile(entryPath, 'cache', `${cacheKey}.norm`, content);
+}
 
-export const readCachedFile: (cacheKey: NormalForm) => ExtractionFunction =
+export const readCachedNormalFile: (cacheKey: NormalForm) => ExtractionFunction =
   (cacheKey: NormalForm) => (env: ExtractionEnv) => {
     const { fileContentMap, entryPath } = env;
-    const cachedFilePath = path.resolve(entryPath, `normalized-${cacheKey}`);
+    if (env.verbose) {
+      console.log('readCachedNormalFile', cacheKey);
+    }
+
     const maybeContent = () =>
-      readResolveFileAsync(cachedFilePath)
+      readCorpusFileAsync<string>(entryPath, 'cache', `${cacheKey}.norm`)
         .then((content) => content ? E.right(content) : E.left(`cache miss ${cacheKey}`));
 
     return pipe(
@@ -180,9 +203,7 @@ export const readCachedFile: (cacheKey: NormalForm) => ExtractionFunction =
 
 export const runHtmlTidy: ExtractionFunction =
   (env: ExtractionEnv) => {
-
     const { fileContentMap, entryPath } = env;
-
     const normType = 'html-tidy';
 
     if (normType in fileContentMap) {
@@ -194,7 +215,8 @@ export const runHtmlTidy: ExtractionFunction =
     const tidyOutput = runTidyCmdBuffered('./conf/tidy.cfg', file)
       .then(([stderr, stdout, exitCode]) => {
         if (exitCode > 0) {
-          fs.writeFileSync(path.resolve(entryPath, `normalized-${normType}`), stdout.join("\n"));
+          const tidiedContent = stdout.join('\n');
+          writeCachedNormalFile(entryPath, normType, tidiedContent);
           return E.right<string, string[]>(stdout);
         }
         const errString = _.filter(stderr, l => l.trim().length > 0)[0];
@@ -221,11 +243,12 @@ export const readMetaProps: ExtractionFunction =
     const { entryPath } = env;
     const file = path.resolve(entryPath, 'meta');
     const metaProps = readMetaFile(file)
+    if (env.verbose) {
+      console.log('readMetaProps');
+    }
     if (!metaProps) {
       return TE.left(`meta file not found in ${entryPath}`);
     }
     env.metaProps = metaProps;
     return TE.right(env);
   };
-
-

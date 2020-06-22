@@ -1,6 +1,5 @@
 
 import _ from "lodash";
-import fs from "fs-extra";
 import { ExtractionLog } from './extraction-records';
 
 export interface GroundTruthLog {
@@ -11,19 +10,21 @@ export interface GroundTruthLog {
   notes: string[];
 }
 
-export function loadGroundTruthLog(path: string): GroundTruthLog | undefined {
-  if (!fs.existsSync(path)) {
-    return;
-  }
-  return fs.readJsonSync(path);
-}
+// export function loadGroundTruthLog(logName: string): GroundTruthLog | undefined {
+//   readGroundTruthFile(logName)
+//   if (!fs.existsSync(path)) {
+//     return;
+//   }
+//   return fs.readJsonSync(path);
+// }
 
-export function saveGroundTruthLog(path: string, log: GroundTruthLog): void {
-  if (fs.existsSync(path)) {
-    fs.removeSync(path);
-  }
-  fs.writeJsonSync(path, log);
-}
+// export function saveGroundTruthLog(path: string, log: GroundTruthLog): void {
+//   if (fs.existsSync(path)) {
+//     fs.removeSync(path);
+//   }
+//   fs.writeJsonSync(path, log);
+// }
+
 export function initGroundTruthLog(extractionLog: ExtractionLog): GroundTruthLog {
   return {
     original: extractionLog,

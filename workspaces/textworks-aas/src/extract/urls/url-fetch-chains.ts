@@ -102,55 +102,30 @@ export function getUniqRequestUrls(allLinks: UrlChain): string[] {
 }
 
 export function buildFetchChainDisjointSets(allLinks: UrlChain): UrlChains {
-  const DBG_RE = /mas00234/;
-
-  const DBG_LINKNUM: number[] = [];
   // Build a map from Urls -> indexes at which it appears as a request
   const reqLinkNums = new Map<string, number[]>();
 
   _.each(allLinks, (link, linkNum) => {
-    const { requestUrl, responseUrl } = link;
+    const { requestUrl } = link;
     const prevs0 = reqLinkNums.get(requestUrl) || [];
     prevs0.push(linkNum);
-    if (DBG_RE.test(requestUrl) || (responseUrl && DBG_RE.test(responseUrl))) {
-      prettyPrint({ msg: "buildFetchChainDisjointSets: mas00234 (init)", link, linkNum, prevs0 });
-      DBG_LINKNUM.push(linkNum);
-    }
     reqLinkNums.set(requestUrl, prevs0);
   });
 
   // const disjointChains = new StaticDisjointSet(reqLinkNums.size);
   const disjointChains = new StaticDisjointSet(allLinks.length);
   _.each(allLinks, (link, linkNum) => {
-    const { requestUrl, responseUrl } = link;
+    const { responseUrl } = link;
     if (!responseUrl) return;
 
     const maybeNextLinks = reqLinkNums.get(responseUrl) || [];
 
-    if (linkNum === 1578) {
-      prettyPrint({ msg: "buildFetchChainDisjointSets: union(): linkNum", link, linkNum });
-    }
-    if (DBG_RE.test(requestUrl) || DBG_RE.test(responseUrl)) {
-      prettyPrint({ msg: "buildFetchChainDisjointSets: requestUrl/resp", link, linkNum, maybeNextLinks });
-    }
-    if (DBG_LINKNUM.includes(linkNum)) {
-      prettyPrint({ msg: "buildFetchChainDisjointSets(union()): mas00234", maybeNextLinks });
-    }
-
     const downstreamLinkNums = _.filter(maybeNextLinks, n => n > linkNum);
     _.each(downstreamLinkNums, dsLinkNum => {
-      if (DBG_RE.test(requestUrl) || DBG_RE.test(responseUrl)) {
-        prettyPrint({ msg: "buildFetchChainDisjointSets: union", linkNum, to: '->', dsLinkNum });
-      }
       disjointChains.union(linkNum, dsLinkNum);
     });
   });
   const setsAsIndexes = disjointChains.compile();
-  _.each(setsAsIndexes, (setOfIndexes) => {
-    if (setOfIndexes.includes(1515) || setOfIndexes.includes(1578)) {
-      console.log('setOfIndexes', setOfIndexes.join(","))
-    }
-  });
   const setsAsChainLinks = _.map(setsAsIndexes, (linkNums) => {
     return _.map(linkNums, l => allLinks[l]);
   });
@@ -211,14 +186,10 @@ export function buildFetchChainTree(_allLinks: UrlChain): void {
 export async function readUrlFetchChainsFromScrapyLogs(logfile: string): Promise<UrlChainGraph> {
   const inputStream = createReadLineStream(logfile)
 
-  const DBG_RE = /mas00234/;
   const pumpBuilder = streamPump.createPump()
     .viaStream<string>(inputStream)
     .throughF((line: string) => {
       const parsed = parseLogLine(line);
-      if (DBG_RE.test(line)) {
-        prettyPrint({ msg: "readUrlFetchChain: mas00234", line, parsed });
-      }
       if (_.isString(parsed)) {
         console.log('error parsing logfile line', parsed);
         return;

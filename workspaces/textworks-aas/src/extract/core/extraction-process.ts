@@ -65,8 +65,11 @@ export interface ExtractionEnv {
   responseMimeType: string;
   fileContentMap: { [k in keyof NormalForms]?: FileContentValue };
   fields: Field[];
-  extractionEvidence: string[];
+  attemptError?: string;
+  // extractionEvidence: string[];
+  verbose: boolean;
 }
+
 export type ExtractionResult = TE.TaskEither<string, ExtractionEnv>;
 export type ExtractionFunction = (env: ExtractionEnv) => ExtractionResult;
 
@@ -85,7 +88,10 @@ export const modEnv: (f: (env: ExtractionEnv) => ExtractionEnv) => ExtractionFun
 
 export const resetEnvForAttemptChain: ExtractionFunction =
   env => {
-    env.extractionEvidence = [];
+    // env.extractionEvidence = [];
+    if (env.verbose) {
+      console.log('resetEnvForAttemptChain');
+    }
     return TE.right(env);
   };
 
@@ -116,6 +122,26 @@ export function bindTasksEA<E = unknown, A = unknown>(
     el: BindFunction<E, A>
   ) => {
     return pipe(acc, TE.chain(el));
+  });
+
+  return result;
+}
+
+export function bindTasksEAF<E = unknown, A = unknown>(
+  fs: BindFunction<E, A>[]
+): BindFunction<E, A> {
+
+  const zero: BindFunction<E, A> = (env) => TE.right(env)
+
+  const result = Arr.array.reduce(fs, zero, (
+    acc: BindFunction<E, A>,
+    el: BindFunction<E, A>
+  ) => {
+    return (env0: A) => pipe(
+      TE.right(env0),
+      TE.chain(env => acc(env)),
+      TE.chain(env => el(env))
+    );
   });
 
   return result;

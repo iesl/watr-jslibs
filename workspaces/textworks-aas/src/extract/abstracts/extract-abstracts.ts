@@ -8,30 +8,32 @@ import {
   initialEnv,
   runCssNormalize,
   runLoadResponseBody,
-  readCachedFile,
+  // readCachedFile,
   verifyHttpResponseCode,
+  readCachedNormalFile,
 } from "~/extract/core/field-extract";
-
-import fs from "fs-extra";
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as Arr from 'fp-ts/lib/Array';
 import * as TE from 'fp-ts/lib/TaskEither';
-import { isRight } from 'fp-ts/lib/Either'
+import * as Task from 'fp-ts/lib/Task';
+import { isRight, isLeft } from 'fp-ts/lib/Either'
 
 import {
   findByLineMatchTE,
   findInMetaTE,
 } from "~/extract/core/field-extract-utils";
 
-import { BufferedLogger } from "commons";
+import { BufferedLogger, prettyPrint } from "commons";
+import { AbstractCleaningRules } from './data-clean-abstracts';
+import { ExtractionFunction, Field, ExtractionEnv, resetEnvForAttemptChain, tapWith, bindTasks, applyCleaningRules, bindTasksEAF } from '../core/extraction-process';
+import { hasCorpusFile, writeCorpusFile, readCorpusFile } from '~/corpora/corpus-file-walkers';
 import { ExtractionLog } from '../core/extraction-records';
-import {  AbstractCleaningRules } from './data-clean-abstracts';
-import { ExtractionFunction, Field, ExtractionEnv, resetEnvForAttemptChain, modEnv, tapWith, bindTasks, applyCleaningRules } from '../core/extraction-process';
 
 export const findInGlobalDocumentMetadata: ExtractionFunction =
   env => {
-    const { fileContentMap, extractionEvidence } = env;
+    // const { fileContentMap, extractionEvidence } = env;
+    const { fileContentMap } = env;
     const fileContent = fileContentMap['html-tidy'];
     if (!fileContent) {
       return TE.left('findInMetaTE');
@@ -59,8 +61,8 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
       const abst = metadataObj["abstract"];
       field.value = abst;
       env.fields.push(field);
-      extractionEvidence.push('html-tidy');
-      extractionEvidence.push('global.document.metadata["abstract"]');
+      // extractionEvidence.push('html-tidy');
+      // extractionEvidence.push('global.document.metadata["abstract"]');
       return TE.right(env);
     } catch (e) {
       return TE.left(e.toString());
@@ -83,45 +85,25 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
 // TODO: maybe expand filtered log handling to automatically comb logs in reverse-creation order, and add a 'compact' function to trim and delete old entries
 // TODO: figure out if there is a better html parser for handling both self-closing and script tags properly
 
-export function artifactsPath(entryPath: string): string {
-  return path.resolve(entryPath, 'extraction-artifacts');
-}
-
-export function artifactFilePath(entryPath: string, artifactFileName: string): string {
-  const extractionArtifacts = artifactsPath(entryPath);
-  return path.resolve(extractionArtifacts, artifactFileName);
-}
 
 export const extractionLogName = 'extract-abstract-log.json';
 
-export function extractionLog(entryPath: string): string {
-  return artifactFilePath(entryPath, extractionLogName);
+function extractionLogExists(entryPath: string): boolean {
+  return hasCorpusFile(entryPath, 'extracted-fields', extractionLogName)
 }
 
-export function loadExtractionLog(entryPath: string): ExtractionLog {
-  return fs.readJsonSync(extractionLog(entryPath));
-}
-export function writeExtractionLog(entryPath: string, logBuffer: ExtractionLog): void {
-  const logfile = extractionLog(entryPath);
-  fs.writeJsonSync(logfile, logBuffer);
+export function readExtractionLog(entryPath: string): ExtractionLog | undefined {
+  return readCorpusFile(entryPath, 'extracted-fields', extractionLogName)
 }
 
-export const ensureArtifactsDir = (overwrite: boolean) => (entryPath: string): void => {
-  const artifactPath = artifactsPath(entryPath);
+function writeExtractionLog(entryPath: string, content: any): boolean {
+  return writeCorpusFile(entryPath, 'extracted-fields', extractionLogName, content);
+}
 
-  const artifactDirExists = fs.existsSync(artifactPath);
-  if (overwrite && artifactDirExists) {
-    fs.emptyDirSync(artifactPath);
-  }
-  if (!artifactDirExists) {
-    fs.mkdirSync(artifactPath);
-  }
-};
-
-export const skipIfArtifactExisits = (artifactFileName: string) => (entryPath: string): boolean => {
-  const exists = fs.existsSync(artifactFilePath(entryPath, artifactFileName));
+export const skipIfAbstractLogExisits = (entryPath: string): boolean => {
+  const exists = extractionLogExists(entryPath);
   if (exists) {
-    console.log(`skipping: file ${artifactFileName} already exists`);
+    console.log(`skipping: file ${extractionLogName} already exists`);
   }
   return !exists;
 };
@@ -134,8 +116,11 @@ export const extractAbstractTransform =
   async (entryPath: string, ctx: ExtractionAppContext): Promise<void> => {
     const { log } = ctx;
     log.append('action', 'extract-abstract');
+    console.log(`starting extraction on ${entryPath}`);
+
     return runAbstractFinders(AbstractPipelineUpdate, entryPath, log)
       .then(() => writeExtractionLog(entryPath, log.logBuffer))
+      .then(() => console.log(`extracted ${entryPath}`))
       .then(() => log.commitLogs());
   };
 
@@ -268,7 +253,123 @@ export const AbstractPipelineUpdate: ExtractionFunction[][] = [
   [findByLineMatchTE(["p", "span .subAbstract"])],
 ];
 
+
+// Run once before any inidiviual rules/attempts
+const PipelineLeadingFunctions = [
+  // resetEnvForAttemptChain,
+  readMetaProps,
+  runFileVerification(/(html|xml)/i),
+  verifyHttpResponseCode,
+  runLoadResponseBody,
+  readCachedNormalFile('html-tidy'),
+  runHtmlTidy,
+  readCachedNormalFile('css-normal'),
+  runCssNormalize,
+];
+
+// const sequenceArrOfTE = Arr.array.sequence(TE.taskEither);
+const sequenceArrOfTask = Arr.array.sequence(Task.task);
+
 export async function runAbstractFinders(
+  extractionPipeline: ExtractionFunction[][],
+  entryPath: string,
+  log: BufferedLogger
+): Promise<void> {
+
+  const init: ExtractionEnv = _.merge({}, initialEnv, { entryPath, verbose: false });
+  const leadingPipeline = bindTasksEAF(PipelineLeadingFunctions);
+  const maybeEnv = await leadingPipeline(init)();
+
+  if (isLeft(maybeEnv)) {
+    prettyPrint({ maybeEnv });
+    return;
+  }
+  const leadingEnv = maybeEnv.right;
+
+  const attemptTask = _.map(extractionPipeline, (ep) => {
+    const attemptEnv: ExtractionEnv = _.merge({}, leadingEnv);
+    const attemptPipeline = bindTasksEAF(ep);
+    const foldedEitherToRight = pipe(
+      attemptEnv,
+      attemptPipeline,
+      TE.fold<string, ExtractionEnv, ExtractionEnv>(
+        (err: string) => {
+          attemptEnv.attemptError = err;
+          return () => Promise.resolve(attemptEnv);
+        },
+        (succ: ExtractionEnv) => () => Promise.resolve(succ)
+      )
+    );
+    return foldedEitherToRight;
+  });
+
+  const attemptedTasks = await sequenceArrOfTask(attemptTask)();
+
+  _.each(attemptedTasks, (attempt) => {
+    const { fields } = attempt;
+    if (fields.length > 0) {
+      // prettyPrint({ fields });
+      const cleanedFields = _.map(fields, field => {
+        const fieldValue = field.value;
+        let cleaned: string | undefined = undefined;
+        if (fieldValue) {
+          const [cleaned0, cleaningRuleResults] = applyCleaningRules(AbstractCleaningRules, fieldValue);
+          cleaned = cleaned0;
+          if (cleaningRuleResults.length > 0) {
+            field.cleaning = cleaningRuleResults;
+          }
+        }
+        if (cleaned && cleaned.length > 0) {
+          field.value = cleaned;
+        } else {
+          field.value = undefined;
+        }
+        return field;
+      });
+      log.append('field.list', cleanedFields);
+    }
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+export async function runAbstractFindersOldVer(
   extractionPipeline: ExtractionFunction[][],
   entryPath: string,
   log: BufferedLogger
@@ -279,37 +380,42 @@ export async function runAbstractFinders(
     Arr.array.mapWithIndex(
       extractionPipeline,
       (index: number, exFns: ExtractionFunction[]) => {
-        const init: ExtractionEnv = _.merge({}, initialEnv, { entryPath });
+
+        const init: ExtractionEnv = _.merge({}, initialEnv, { entryPath, verbose: true });
         const introFns = [
           resetEnvForAttemptChain,
           readMetaProps,
           runFileVerification(/(html|xml)/i),
           verifyHttpResponseCode,
           runLoadResponseBody,
-          readCachedFile('html-tidy'),
+          readCachedNormalFile('html-tidy'),
           runHtmlTidy,
-          readCachedFile('css-normal'),
+          readCachedNormalFile('css-normal'),
           runCssNormalize,
         ];
         const outroFns = [
-          modEnv(env => {
-            env.fileContentMap = {};
-            let evidence = env.extractionEvidence.join(" ++ ");
-            evidence = evidence ? `${evidence} ++ ` : '';
-            const fieldsWithEvidence = env.fields.map(f => {
-              const allEvidence = `${evidence}${f.evidence}`
-              f.evidence = allEvidence;
-              return f;
-            });
-            env.fields = fieldsWithEvidence;
-            return env;
-          }),
+          // modEnv(env => {
+          //   env.fileContentMap = {};
+          //   let evidence = env.extractionEvidence.join(" ++ ");
+          //   evidence = evidence ? `${evidence} ++ ` : '';
+          //   const fieldsWithEvidence = env.fields.map(f => {
+          //     const allEvidence = `${evidence}${f.evidence}`
+          //     f.evidence = allEvidence;
+          //     return f;
+          //   });
+          //   env.fields = fieldsWithEvidence;
+          //   return env;
+          // }),
           tapWith((env) => console.log(`Completed attempt-chain #${index} for entry ${entryName}; ${env.metaProps.responseUrl}`)),
         ];
         const allFns = _.concat(introFns, exFns, outroFns);
         const inner = bindTasks(init, allFns);
         return pipe(
           inner,
+          TE.mapLeft(s => {
+            console.log(`Error:`, s);
+            return s;
+          }),
           TE.swap,
         );
       });

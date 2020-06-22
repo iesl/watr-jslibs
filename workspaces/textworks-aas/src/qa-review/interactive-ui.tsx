@@ -10,10 +10,11 @@ import path from "path";
 //@ts-ignore
 import Divider from 'ink-divider';
 import { useKeymap2, useMnemonicKeydefs } from './keymaps';
-import { loadExtractionLog } from '~/extract/abstracts/extract-abstracts';
 import { RenderRec } from './ink-widgets';
 import { openFileWithLess, openFileWithBrowser } from './view-files';
 import { CleaningRuleResult, Field } from '~/extract/core/extraction-process';
+import { readExtractionLog } from '~/extract/abstracts/extract-abstracts';
+import { resolveCachedNormalFile } from '~/extract/core/field-extract';
 
 
 interface AppArgs {
@@ -35,7 +36,15 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
       .then(() => setRedraws(i => i + 1));
   };
 
-  const [extractionLog,] = useState(loadExtractionLog(entryPath.dir));
+  const [extractionLog,] = useState(() => {
+    const maybeLog = readExtractionLog(entryPath.dir);
+    if (!maybeLog) {
+      return {
+        'Error': 'No extraction log found'
+      };
+    }
+    return maybeLog;
+  });
 
   const getEntry = (k: string) => {
     const value = extractionLog[k];
@@ -51,8 +60,8 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
     addKeys("(n)ext", () => exit());
     getEntry('entry.dir')
       .forEach((dir: string) => {
-        const cssNormPath = path.resolve(dir, 'normalized-css-normal');
-        const htmlTidyPath = path.resolve(dir, 'normalized-html-tidy');
+        const cssNormPath = resolveCachedNormalFile(dir, 'css-normal');
+        const htmlTidyPath = resolveCachedNormalFile(dir, 'html-tidy');
         const responseBodyPath = path.resolve(dir, 'response_body');
 
         addKeys("(v)iew (c)ss-norms", openWithLess(cssNormPath));

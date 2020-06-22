@@ -57,19 +57,16 @@ yargs.command(
   config(
     opt.cwd,
     opt.existingDir("corpus-root: root directory for corpus files"),
-    opt.ion('overwrite: force overwrite of existing files', { boolean: true })
+    // opt.ion('overwrite: force overwrite of existing files', { boolean: false })
   ),
   (args: any) => {
 
-    const { corpusRoot, overwrite } = args;
-    const scrapyLog = path.resolve(corpusRoot, 'crawler.log');
+    const { corpusRoot } = args;
     const logpath = corpusRoot;
-    const csvFile = path.resolve(corpusRoot, 'dblp_urls.csv');
 
     runMainExtractAbstracts(
       corpusRoot,
       logpath,
-      overwrite,
     ).then(() => {
       console.log('done');
     });
