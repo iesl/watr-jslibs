@@ -33,9 +33,6 @@ describe("Url Parsing from scrapy spidering logs", () => {
   });
 
 
-  it("should make a tree-based fetch chain", () => {
-    //
-  });
 
   it("should uniq/diff AlphaRecords", () => {
     const recs: AlphaRecord[] = _.map(_.range(4), (n) => {

@@ -44,26 +44,40 @@ export function ensureArtifactDir(entryPath: string, artifactDir: ArtifactSubdir
   fs.mkdirSync(artifactDirPath);
 }
 
-export function readCorpusFile<T>(entryPath: string, artifactDir: ArtifactSubdir, corpusFilename: string): T | undefined {
-  const filePath = path.resolve(entryPath, artifactDir, corpusFilename);
-  return readJsonOrUndef(filePath);
-}
-export function readCorpusFileAsync<T>(entryPath: string, artifactDir: ArtifactSubdir, corpusFilename: string): Promise<T | undefined> {
-  const filePath = path.resolve(entryPath, artifactDir, corpusFilename);
-  return readJsonOrUndefAsync(filePath);
-}
-
 export function hasCorpusFile(entryPath: string, artifactDir: ArtifactSubdir, corpusFilename: string): boolean {
   const filePath = path.resolve(entryPath, artifactDir, corpusFilename);
   return fs.existsSync(filePath);
 }
 
-export function writeCorpusFile<T>(entryPath: string, artifactDir: ArtifactSubdir, filename: string, content: T): boolean {
+export function readCorpusJsonFile<T>(entryPath: string, artifactDir: ArtifactSubdir, corpusFilename: string): T | undefined {
+  const filePath = path.resolve(entryPath, artifactDir, corpusFilename);
+  return readJsonOrUndef(filePath);
+}
+
+export function readCorpusJsonFileAsync<T>(entryPath: string, artifactDir: ArtifactSubdir, corpusFilename: string): Promise<T | undefined> {
+  const filePath = path.resolve(entryPath, artifactDir, corpusFilename);
+  return readJsonOrUndefAsync(filePath);
+}
+
+export function readCorpusTextFile(entryPath: string, artifactDir: ArtifactSubdir, corpusFilename: string): string | undefined {
+  const filePath = path.resolve(entryPath, artifactDir, corpusFilename);
+  return readTextOrUndef(filePath);
+}
+export function readCorpusTextFileAsync(entryPath: string, artifactDir: ArtifactSubdir, corpusFilename: string): Promise<string | undefined> {
+  const filePath = path.resolve(entryPath, artifactDir, corpusFilename);
+  return readTextOrUndefAsync(filePath);
+}
+
+export function writeCorpusJsonFile<T>(entryPath: string, artifactDir: ArtifactSubdir, filename: string, content: T): boolean {
   ensureArtifactDir(entryPath, artifactDir);
   const filePath = resolveCorpusFile(entryPath, artifactDir, filename);
   return writeJson(filePath, content);
 }
-
+export function writeCorpusTextFile(entryPath: string, artifactDir: ArtifactSubdir, filename: string, content: string): boolean {
+  ensureArtifactDir(entryPath, artifactDir);
+  const filePath = resolveCorpusFile(entryPath, artifactDir, filename);
+  return writeText(filePath, content);
+}
 
 function readJsonOrUndef<T>(filePath: string): T | undefined {
   if (!fs.existsSync(filePath)) return;
@@ -77,6 +91,22 @@ async function readJsonOrUndefAsync<T>(filePath: string): Promise<T | undefined>
 export function writeJson<T>(filePath: string, obj: T): boolean {
   if (fs.existsSync(filePath)) return false;
   fs.writeJsonSync(filePath, obj);
+  return true;
+}
+
+function readTextOrUndef(filePath: string): string | undefined {
+  if (!fs.existsSync(filePath)) return;
+  return fs.readFileSync(filePath).toString();
+}
+
+async function readTextOrUndefAsync(filePath: string): Promise<string | undefined> {
+  if (!fs.existsSync(filePath)) return;
+  return fs.readFile(filePath).then(b => b.toString())
+}
+
+function writeText(filePath: string, content: string): boolean {
+  if (fs.existsSync(filePath)) return false;
+  fs.writeFileSync(filePath, content);
   return true;
 }
 

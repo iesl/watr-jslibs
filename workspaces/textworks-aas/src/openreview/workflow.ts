@@ -23,9 +23,9 @@ export function readOrderCsv(csvfile: string): Stream {
   return pumpify.obj(
     inputStream,
     throughFunc((csvRec: string[]) => {
-      const [noteId, dblpConfId, title, url,] = csvRec;
+      const [noteId, dblpConfId, title, url, authorId] = csvRec;
       return {
-        noteId, dblpConfId, url, title
+        noteId, dblpConfId, url, title, authorId
       };
     }),
   );

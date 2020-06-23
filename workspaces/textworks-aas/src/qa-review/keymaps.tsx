@@ -59,7 +59,7 @@ export function useMnemonicKeydefs(
   };
 }
 
-export function useKeymap2(): [(k: KeymapEntry) => void, JSX.Element] {
+export function useKeymap(): [(k: KeymapEntry) => void, JSX.Element] {
 
   // Current list of keymappings
   const [currKeymapEntries, setKeymapEntries] =

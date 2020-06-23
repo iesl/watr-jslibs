@@ -1,6 +1,6 @@
 import _ from "lodash";
 import React from "react";
-import { Text, Box, Color, ColorProps, BoxProps } from "ink";
+import { Text, Box, Color, BoxProps } from "ink";
 
 //@ts-ignore
 import Divider from 'ink-divider';
@@ -65,10 +65,31 @@ export const KeyValBox: React.FC<KeyValBoxArgs> = ({ keyname, val }) => {
 
 interface RenderAnyArgs {
   item: any;
+  renderOverrides?: RenderOverride[];
   depth: number;
 }
 
-export const RenderAny: React.FC<RenderAnyArgs> = ({ item, depth }) => {
+export type RenderAnyType = React.FC<RenderAnyArgs>;
+
+export const RenderAnyTruncated: RenderAnyType = ({ item, renderOverrides, depth }) => {
+  if (_.isString(item)) {
+    let itemstr = item;
+    if (item.length > 10) {
+      itemstr = item.slice(0, 10) + '...';
+    }
+    return boldBlue(text(`${itemstr}`));
+  }
+  if (_.isArray(item)) {
+    return (
+      <Row>
+        {dim(gray(text(`[ len: ${item.length} ]`)))}
+      </Row>
+    );
+  }
+  return <RenderAny item={item} depth={depth} renderOverrides={renderOverrides} />;
+}
+
+export const RenderAny: React.FC<RenderAnyArgs> = ({ item, renderOverrides, depth }) => {
 
   const isPrimitive = _.isString(item) || _.isNumber(item) || _.isBoolean(item);
 
@@ -85,7 +106,7 @@ export const RenderAny: React.FC<RenderAnyArgs> = ({ item, depth }) => {
       return (
         <Box key={`r-item-${i}`} >
           {dim(gray(text(`${i}.`)))}
-          <RenderAny item={item0} depth={depth + 1} />
+          <RenderAny item={item0} renderOverrides={renderOverrides} depth={depth + 1} />
         </Box>
       )
     });
@@ -97,7 +118,7 @@ export const RenderAny: React.FC<RenderAnyArgs> = ({ item, depth }) => {
   }
   if (_.isObject(item)) {
     return (
-      <RenderRec rec={item} />
+      <RenderRecImpl rec={item} depth={depth} renderOverrides={renderOverrides} />
     );
   }
 
@@ -110,17 +131,17 @@ export const RenderAny: React.FC<RenderAnyArgs> = ({ item, depth }) => {
 
 interface RenderRecImplArgs {
   rec: Record<string, any>;
+  renderOverrides?: RenderOverride[];
   depth: number;
 }
 
-/* const [fst, lst, mid, sole] = "┏┗┃═".split(''); */
-const [fst, lst, mid, sole] = "╭╰│═".split('');
+const [fst, lst, mid, sole] = "╭╰│═".split(''); /*  "┏┗┃═" */
 
 const capitalizeDottedString = (s: string) => {
   return _.map(s.split('.'), k => _.capitalize(k)).join(" ");
 };
 
-const RenderRecImpl: React.FC<RenderRecImplArgs> = ({ rec, depth }) => {
+const RenderRecImpl: React.FC<RenderRecImplArgs> = ({ rec, renderOverrides, depth }) => {
   const asPairs = _.toPairs(rec);
   const longestKeyLen = _.max(_.map(asPairs, ([key]) => key.length));
   const padRight = longestKeyLen || 1;
@@ -130,7 +151,15 @@ const RenderRecImpl: React.FC<RenderRecImplArgs> = ({ rec, depth }) => {
       i === 0 ? fst :
         i === asPairs.length - 1 ? lst : mid;
 
-    const itemBox = <RenderAny item={val} depth={depth + 1} />;
+    const overrides = renderOverrides || [];
+
+    const override = overrides.filter(([k,]) => k === key)[0];
+
+    const itemBox = override ?
+      override[1]({ item: val, depth: depth + 1 })
+      : <RenderAny item={val} depth={depth + 1} renderOverrides={renderOverrides} />;
+
+    /* console.log('RenderRecImpl', key, override, overrides); */
 
     const prefix = gray(text(prefixChar));
 
@@ -168,10 +197,13 @@ const RenderRecImpl: React.FC<RenderRecImplArgs> = ({ rec, depth }) => {
   );
 };
 
+export type RenderOverride = [string, RenderAnyType];
+
 interface RenderRecArgs {
   rec: Record<string, any>;
+  renderOverrides?: RenderOverride[];
 }
 
-export const RenderRec: React.FC<RenderRecArgs> = ({ rec }) => {
-  return <RenderRecImpl rec={rec} depth={0} />
+export const RenderRec: React.FC<RenderRecArgs> = ({ rec, renderOverrides }) => {
+  return <RenderRecImpl rec={rec} depth={0} renderOverrides={renderOverrides} />
 }

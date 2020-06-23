@@ -9,7 +9,7 @@ import path from "path";
 
 //@ts-ignore
 import Divider from 'ink-divider';
-import { useKeymap2, useMnemonicKeydefs } from './keymaps';
+import { useMnemonicKeydefs, useKeymap } from './keymaps';
 import { RenderRec } from './ink-widgets';
 import { openFileWithLess, openFileWithBrowser } from './view-files';
 import { CleaningRuleResult, Field } from '~/extract/core/extraction-process';
@@ -46,36 +46,37 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
     return maybeLog;
   });
 
+  const [trimmedExtractionLog,] = useState(() => {
+    return extractionLog;
+  });
+
   const getEntry = (k: string) => {
     const value = extractionLog[k];
     if (!value) return [];
     return [value];
   };
 
-  const [addKeymapping, keymapElem] = useKeymap2();
+  const [addKeymapping, keymapElem] = useKeymap();
   const addKeys = useMnemonicKeydefs(addKeymapping);
 
   useEffect(() => {
     // Add keymappings
     addKeys("(n)ext", () => exit());
-    getEntry('entry.dir')
-      .forEach((dir: string) => {
-        const cssNormPath = resolveCachedNormalFile(dir, 'css-normal');
-        const htmlTidyPath = resolveCachedNormalFile(dir, 'html-tidy');
-        const responseBodyPath = path.resolve(dir, 'response_body');
+    const { dir } = entryPath;
 
-        addKeys("(v)iew (c)ss-norms", openWithLess(cssNormPath));
-        addKeys("(v)iew (h)tml-tidy", openWithLess(htmlTidyPath));
-        addKeys("(v)iew in (b)rowser", openWithBrowser(responseBodyPath));
+    const cssNormPath = resolveCachedNormalFile(dir, 'css-normal');
+    const htmlTidyPath = resolveCachedNormalFile(dir, 'html-tidy');
+    const responseBodyPath = path.resolve(dir, 'response_body');
 
-        addKeys("(m)ark (c)orrect", () => undefined);
-        addKeys("(m)ark (i)ncorrect", () => undefined);
+    addKeys("(v)iew (c)ss-norms", openWithLess(cssNormPath));
+    addKeys("(v)iew (h)tml-tidy", openWithLess(htmlTidyPath));
+    addKeys("(v)iew in (b)rowser", openWithBrowser(responseBodyPath));
 
-        addKeys("(l)abel (i)nvestigate later", () => undefined);
+    addKeys("(m)ark (c)orrect", () => undefined);
+    addKeys("(m)ark (i)ncorrect", () => undefined);
 
-      });
+    addKeys("(l)abel (i)nvestigate later", () => undefined);
 
-    // addLabelOption({ key='field',  })
 
     _.each(getEntry('field.extract.errors'), () => {
       addKeys("(l)abel (e)xtraction (e)rror (w)rong", () => undefined);
@@ -102,7 +103,10 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
     <Box flexDirection="column">
       <Box flexDirection="column" marginBottom={2} >
         <Divider title={'Entry'} />
-        <RenderRec rec={extractionLog} />
+        <RenderRec
+          rec={extractionLog}
+          renderOverrides={[]}
+        />
       </Box>
 
       <Box flexDirection="column" marginLeft={4} marginBottom={1} marginTop={2} >

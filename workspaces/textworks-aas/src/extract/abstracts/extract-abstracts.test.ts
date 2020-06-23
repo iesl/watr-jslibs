@@ -1,12 +1,9 @@
 import "chai/register-should";
 
 import _ from "lodash";
-import fs from "fs-extra";
-import path from "path";
 
 import { prettyPrint } from "commons";
 import { getMatchingLines } from '../core/field-extract-utils';
-// import { AbstractPipelineUpdate } from './extract-abstracts';
 
 describe("Abstract Field Extraction", () => {
   const testDirPath = './test/resources/htmls';

@@ -27,7 +27,7 @@ import {
 import { BufferedLogger, prettyPrint } from "commons";
 import { AbstractCleaningRules } from './data-clean-abstracts';
 import { ExtractionFunction, Field, ExtractionEnv, resetEnvForAttemptChain, tapWith, bindTasks, applyCleaningRules, bindTasksEAF } from '../core/extraction-process';
-import { hasCorpusFile, writeCorpusFile, readCorpusFile } from '~/corpora/corpus-file-walkers';
+import { hasCorpusFile, writeCorpusJsonFile, readCorpusJsonFile } from '~/corpora/corpus-file-walkers';
 import { ExtractionLog } from '../core/extraction-records';
 
 export const findInGlobalDocumentMetadata: ExtractionFunction =
@@ -93,11 +93,11 @@ function extractionLogExists(entryPath: string): boolean {
 }
 
 export function readExtractionLog(entryPath: string): ExtractionLog | undefined {
-  return readCorpusFile(entryPath, 'extracted-fields', extractionLogName)
+  return readCorpusJsonFile(entryPath, 'extracted-fields', extractionLogName)
 }
 
 function writeExtractionLog(entryPath: string, content: any): boolean {
-  return writeCorpusFile(entryPath, 'extracted-fields', extractionLogName, content);
+  return writeCorpusJsonFile(entryPath, 'extracted-fields', extractionLogName, content);
 }
 
 export const skipIfAbstractLogExisits = (entryPath: string): boolean => {
@@ -256,7 +256,6 @@ export const AbstractPipelineUpdate: ExtractionFunction[][] = [
 
 // Run once before any inidiviual rules/attempts
 const PipelineLeadingFunctions = [
-  // resetEnvForAttemptChain,
   readMetaProps,
   runFileVerification(/(html|xml)/i),
   verifyHttpResponseCode,
@@ -267,7 +266,6 @@ const PipelineLeadingFunctions = [
   runCssNormalize,
 ];
 
-// const sequenceArrOfTE = Arr.array.sequence(TE.taskEither);
 const sequenceArrOfTask = Arr.array.sequence(Task.task);
 
 export async function runAbstractFinders(
@@ -281,7 +279,8 @@ export async function runAbstractFinders(
   const maybeEnv = await leadingPipeline(init)();
 
   if (isLeft(maybeEnv)) {
-    prettyPrint({ maybeEnv });
+    const errors = maybeEnv.left;
+    log.append('field.extract.errors', errors);
     return;
   }
   const leadingEnv = maybeEnv.right;
@@ -289,7 +288,7 @@ export async function runAbstractFinders(
   const attemptTask = _.map(extractionPipeline, (ep) => {
     const attemptEnv: ExtractionEnv = _.merge({}, leadingEnv);
     const attemptPipeline = bindTasksEAF(ep);
-    const foldedEitherToRight = pipe(
+    return pipe(
       attemptEnv,
       attemptPipeline,
       TE.fold<string, ExtractionEnv, ExtractionEnv>(
@@ -300,7 +299,6 @@ export async function runAbstractFinders(
         (succ: ExtractionEnv) => () => Promise.resolve(succ)
       )
     );
-    return foldedEitherToRight;
   });
 
   const attemptedTasks = await sequenceArrOfTask(attemptTask)();
@@ -308,7 +306,6 @@ export async function runAbstractFinders(
   _.each(attemptedTasks, (attempt) => {
     const { fields } = attempt;
     if (fields.length > 0) {
-      // prettyPrint({ fields });
       const cleanedFields = _.map(fields, field => {
         const fieldValue = field.value;
         let cleaned: string | undefined = undefined;

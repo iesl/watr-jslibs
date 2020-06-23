@@ -12,7 +12,7 @@ import { makeCssTreeNormalForm } from './html-to-css-normal';
 import { runTidyCmdBuffered } from '~/utils/run-cmd-tidy-html';
 import { ExtractionEnv, ExtractionFunction, NormalForm, extractionSuccess, fatalFailure, nonFatalFailure } from './extraction-process';
 import { readMetaFile } from '../logging/logging';
-import { readCorpusFileAsync, writeCorpusFile, resolveCorpusFile } from '~/corpora/corpus-file-walkers';
+import { readCorpusTextFileAsync, resolveCorpusFile, writeCorpusTextFile } from '~/corpora/corpus-file-walkers';
 
 export const initialEnv: ExtractionEnv = {
   entryPath: 'empty',
@@ -172,7 +172,7 @@ export function resolveCachedNormalFile(entryPath: string, cacheKey: NormalForm)
 }
 
 function writeCachedNormalFile(entryPath: string, cacheKey: NormalForm, content: string) {
-  writeCorpusFile(entryPath, 'cache', `${cacheKey}.norm`, content);
+  writeCorpusTextFile(entryPath, 'cache', `${cacheKey}.norm`, content);
 }
 
 export const readCachedNormalFile: (cacheKey: NormalForm) => ExtractionFunction =
@@ -183,7 +183,7 @@ export const readCachedNormalFile: (cacheKey: NormalForm) => ExtractionFunction 
     }
 
     const maybeContent = () =>
-      readCorpusFileAsync<string>(entryPath, 'cache', `${cacheKey}.norm`)
+      readCorpusTextFileAsync(entryPath, 'cache', `${cacheKey}.norm`)
         .then((content) => content ? E.right(content) : E.left(`cache miss ${cacheKey}`));
 
     return pipe(

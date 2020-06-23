@@ -3,8 +3,7 @@ import _ from "lodash";
 import path from "path";
 import { arglib } from "commons";
 import { pruneCrawledFromCSV } from '~/openreview/workflow';
-import { runInteractiveFieldReview } from '~/extract/abstracts/data-clean-abstracts';
-import { runMainExtractAbstracts, runMainWriteAlphaRecords } from '~/extract/abstracts/cli-main';
+import { runMainExtractAbstracts, runMainWriteAlphaRecords, runMainInteractiveFieldReview } from '~/extract/abstracts/cli-main';
 
 const { opt, config, registerCmd } = arglib;
 
@@ -80,7 +79,7 @@ registerCmd(
   const { corpusRoot } = args;
   const logpath = corpusRoot;
 
-  runInteractiveFieldReview(
+  runMainInteractiveFieldReview(
     corpusRoot,
     logpath,
   );

@@ -1,18 +1,19 @@
 import _ from "lodash";
 
 import path from "path";
-import {
-  streamPump,
-} from "commons";
 
+import {
+  streamPump, expandDir,
+} from "commons";
 
 import { readOrderCsv } from '~/openreview/workflow';
 import { initLogger, readMetaFile } from '../logging/logging';
 import { extractAbstractTransform, ExtractionAppContext, skipIfAbstractLogExisits } from './extract-abstracts';
 import { AlphaRecord } from '../core/extraction-records';
-import { walkScrapyCacheCorpus, ensureArtifactDirectories, writeCorpusFile } from '~/corpora/corpus-file-walkers';
+import { walkScrapyCacheCorpus, ensureArtifactDirectories, writeCorpusJsonFile } from '~/corpora/corpus-file-walkers';
 import { readUrlFetchChainsFromScrapyLogs } from '../urls/url-fetch-chains';
 import { diff } from 'deep-diff';
+import { runInteractiveReviewUI } from '~/qa-review/interactive-ui';
 
 async function createAlphaRecordDict(csvFile: string): Promise<Map<string, AlphaRecord>> {
   const inputStream = readOrderCsv(csvFile);
@@ -66,8 +67,8 @@ export async function runMainWriteAlphaRecords(
         return !recDiffs;
       });
 
-      writeCorpusFile(entryPath, 'spidering-logs', 'url-fetch-chain.json', urlFetchChain);
-      writeCorpusFile(entryPath, 'spidering-logs', 'alpha-records.json', uniqAlphaRecs);
+      writeCorpusJsonFile(entryPath, 'spidering-logs', 'url-fetch-chain.json', urlFetchChain);
+      writeCorpusJsonFile(entryPath, 'spidering-logs', 'alpha-records.json', uniqAlphaRecs);
     });
 
   return pumpBuilder.toPromise()
@@ -93,5 +94,26 @@ export async function runMainExtractAbstracts(
 
   return pumpBuilder.toPromise()
     .then(() => undefined);
+
+}
+
+
+export async function runMainInteractiveFieldReview(
+  cacheRoot: string,
+  logpath: string,
+): Promise<void> {
+
+  const dirEntryStream = walkScrapyCacheCorpus(cacheRoot);
+  const logger = initLogger(logpath, "interactive-review", true);
+  const pumpBuilder = streamPump.createPump()
+    .viaStream<string>(dirEntryStream)
+    .throughF(expandDir)
+    .tap((entryPath) => {
+      return runInteractiveReviewUI({ entryPath, logger });
+    })
+
+  return pumpBuilder.toPromise()
+    .then(() => undefined);
+
 
 }

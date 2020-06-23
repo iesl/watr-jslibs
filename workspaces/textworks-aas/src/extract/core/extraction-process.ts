@@ -5,6 +5,7 @@ import * as Arr from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/pipeable';
 import _ from "lodash";
 import { MetaFile } from '../logging/logging';
+import { diffByChars, Change } from 'commons';
 
 export interface Field {
   name: string;
@@ -23,34 +24,38 @@ interface NormalForms {
 
 export interface CleaningRule {
   name: string;
-  precondition(str: string): boolean;
-  run(str: string): string;
-
+  guards: RegExp[];
+  run(str: string, guards: RegExp[]): string | undefined;
 }
 
 export interface CleaningRuleResult {
-  input: string;
-  output: string;
   rule: string;
+  changes: Change[]
 }
 
-export function applyCleaningRules(rules: CleaningRule[], abstractStr: string): [string, CleaningRuleResult[]] {
-  let currentAbstract = abstractStr;
+export function applyCleaningRules(rules: CleaningRule[], initialString: string): [string, CleaningRuleResult[]] {
+  let currentString = initialString;
   const cleaningResults: CleaningRuleResult[] = [];
   _.each(rules, (rule) => {
-    if (rule.precondition(currentAbstract)) {
-      const cleaned = rule.run(currentAbstract);
-      if (cleaned !== currentAbstract) {
-        cleaningResults.push({
-          input: currentAbstract,
-          output: cleaned,
-          rule: rule.name
-        });
-      }
-      currentAbstract = cleaned;
+    const someGuardMatches = (
+      rule.guards.length === 0
+      || rule.guards.some(re => re.test(currentString))
+    );
+
+    if (!someGuardMatches) return;
+
+    const cleaned = rule.run(currentString, rule.guards);
+    if (cleaned === undefined) return;
+    if (cleaned !== currentString) {
+      const changes = diffByChars(currentString, cleaned, { brief: true });
+      cleaningResults.push({
+        rule: rule.name,
+        changes,
+      });
+      currentString = cleaned;
     }
   });
-  return [currentAbstract, cleaningResults];
+  return [currentString, cleaningResults];
 }
 export type NormalForm = keyof NormalForms;
 

@@ -6,13 +6,13 @@ import * as ink from "ink";
 import ansiEscapes from 'ansi-escapes';
 //@ts-ignore
 import Divider from 'ink-divider';
-import { useKeymap2 } from '~/qa-review/keymaps';
-import { RenderRec } from '~/qa-review/ink-widgets';
+import { useKeymap } from '~/qa-review/keymaps';
+import { RenderRec, RenderAnyTruncated } from '~/qa-review/ink-widgets';
 
 const KeymapDemo: React.FC<{}> = ({ }) => {
   const { exit } = useApp();
 
-  const [addKeymapping, keymapElem] = useKeymap2();
+  const [addKeymapping, keymapElem] = useKeymap();
 
   useEffect(() => {
     addKeymapping({
@@ -41,13 +41,20 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
         gamma: {
           romeo: 'capulet',
           juliet: 'montague',
-          priest: 'roman',
+          priest: 'roman, but really not, I do not think',
         },
         baz: [
           {
             alpha: 'alpha',
             beta: 'beta',
           },
+          'alpha',
+          'beta',
+          'gamma',
+        ],
+        overlong: [
+          'alpha',
+          'alpha',
           'alpha',
           'beta',
           'gamma',
@@ -62,7 +69,13 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
 
       <Box flexDirection="column" marginLeft={1} marginBottom={1} width="80%" >
         <Divider title={'Record Display'} />
-        <RenderRec rec={sampleRec} />
+        <RenderRec
+          rec={sampleRec}
+          renderOverrides={[
+            ['overlong', RenderAnyTruncated],
+            ['priest', RenderAnyTruncated],
+          ]}
+        />
       </Box>
 
       <Box flexDirection="column" marginLeft={1} marginBottom={1} width="80%" >
