@@ -3,9 +3,12 @@ import _ from "lodash";
 import fs from "fs-extra";
 import path from "path";
 
-import { Argv, Arguments, Options } from "yargs";
+import yargs, { Argv, Arguments, Options } from "yargs";
+import { prettyPrint } from '~/util/pretty-print';
 
 export type ArgvApp = (ya: Argv) => Argv;
+
+export const YArgs = yargs;
 
 export function config(...fs: ArgvApp[]): ArgvApp {
   return ya => _.reduce(fs, (acc, f) => f(acc), ya);
@@ -35,7 +38,7 @@ function resolveArgPath(argv: Arguments, pathkey: string): string | undefined {
   return pathvalue;
 }
 
-export const setCwd = (ya: Argv) =>
+export const setCwd = (ya: Argv): Argv =>
   ya.option("cwd", {
     describe: "set working directory",
     normalize: true,
@@ -43,7 +46,7 @@ export const setCwd = (ya: Argv) =>
     requiresArg: true,
   });
 
-const optAndDesc = (optAndDesc: string, ext?: Options) => (ya: Argv) => {
+const optAndDesc = (optAndDesc: string, ext?: Options) => (ya: Argv): Argv => {
   const [optname, desc] = optAndDesc.includes(":")
     ? optAndDesc.split(":").map(o => o.trim())
     : [optAndDesc, ""];
@@ -74,7 +77,7 @@ const existingPath = (pathAndDesc: string) => (ya: Argv) => {
     if (p && fs.existsSync(p)) {
       return argv;
     }
-    _.update(argv, ['errors'], (prev: string[]|undefined|null) => {
+    _.update(argv, ['errors'], (prev: string[] | undefined | null) => {
       const newval = prev || [];
       return _.concat(newval, [`--${pathname}: ${p} doesn't exist`]);
     });
@@ -84,15 +87,15 @@ const existingPath = (pathAndDesc: string) => (ya: Argv) => {
   return ya;
 };
 
-export const existingDir = (dirAndDesc: string) => {
+export const existingDir = (dirAndDesc: string): (ya: Argv) => Argv => {
   return existingPath(dirAndDesc);
 };
 
-export const existingFile = (fileAndDesc: string) => {
+export const existingFile = (fileAndDesc: string): (ya: Argv) => Argv => {
   return existingPath(fileAndDesc);
 };
 
-export const configFile = (ya: Argv) => {
+export const configFile = (ya: Argv): Argv => {
   ya.option("config", {
     describe: "optional path to configuration file",
     type: "string",
@@ -123,9 +126,31 @@ export const configFile = (ya: Argv) => {
   return ya;
 };
 
+
 export const setOpt = (ya: Argv) => {
   return ya.option;
 };
+
+export function registerCmd(
+  name: string,
+  description: string,
+  ...fs: ArgvApp[]
+): (cb: (parsedArgs: any) => void) => void {
+  return (cb: (parsedArgs: any) => void) => {
+    yargs.command(
+      name, description,
+      config(...fs),
+      (argv: any) => {
+        if (_.isArray(argv.errors)) {
+          const fullArgs = _.merge({}, argv);
+          prettyPrint({ errors: argv.errors, fullArgs });
+          return;
+        }
+        cb(argv);
+      }
+    );
+  }
+}
 
 // opt.dir.(exists|parentExists|ancestorExists)
 export const opt = {

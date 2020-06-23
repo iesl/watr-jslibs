@@ -2,7 +2,7 @@
 import "chai";
 
 import _ from "lodash";
-import { config, opt, ArgvApp } from "~/cli/arglib";
+import { config, opt, ArgvApp, registerCmd, YArgs } from "~/cli/arglib";
 import yargs from "yargs";
 import { prettyPrint } from '~/util/pretty-print';
 
@@ -27,7 +27,7 @@ describe("Arglib tests", () => {
         .demandCommand(1, "You need at least one command before moving on")
         .fail(function(msg, err, _yargs) {
           const errmsg = err ? `${err.name}: ${err.message}` : "";
-          prettyPrint({msg, errmsg});
+          prettyPrint({ msg, errmsg });
           reject(msg);
         }).parse(allargs);
     });
@@ -35,6 +35,41 @@ describe("Arglib tests", () => {
 
   it("should propery print out argument errors", async (done) => {
     done();
+  });
+
+  it.only("should register multiple commands", () => {
+
+    registerCmd(
+      "extract-abstracts",
+      "run the abstract field extractors over htmls in corpus",
+      config(
+        opt.cwd,
+        opt.existingDir("corpus-root: root directory for corpus files"),
+        opt.ion('overwrite: force overwrite of existing files', { boolean: false })
+      )
+    )((args: any) => {
+      prettyPrint({ msg: 'success!', args });
+    }, true);
+
+    const args1 = 'extract-abstracts --cwd . --corpus-root a/b/c --overwrite'.split(' ');
+    const args1b = 'extract-abstracts --cwd . --corpus-root . --overwrite'.split(' ');
+
+    registerCmd(
+      "c1",
+      "run c1",
+      opt.existingDir("dir: dir 0"),
+    )((args: any) => {
+      prettyPrint({ 'running cmd': args })
+    }, true)
+    const args2 = "c1 --dir non-existent".split(" ")
+
+    YArgs
+      .demandCommand(1, "You need at least one command before moving on")
+      .fail(function(msg, err, _yargs) {
+        const errmsg = err ? `${err.name}: ${err.message}` : "";
+        prettyPrint({ msg, errmsg });
+      }).parse( args1 );
+
   });
 
 

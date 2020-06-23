@@ -1,21 +1,21 @@
-import yargs from "yargs";
 
-import { prettyPrint } from "commons";
 import "./extraction-cli";
+import { arglib, prettyPrint } from "commons";
 
-try {
-  const argParse = yargs
-    .demandCommand(1, "You need at least one command before moving on")
-    .strict()
-    .help()
-    .fail(function(msg, err, _yargs) {
-      const errmsg = err ? `${err.name}: ${err.message}` : "";
-      prettyPrint({ msg, errmsg });
-      process.exit(1);
-    }).argv;
+arglib.YArgs
+  .demandCommand(1, "You need at least one command before moving on")
+  .strict()
+  .help()
+  .fail(function(msg, err) {
+    // const errmsg = err ? `${err.name}: ${err.message}` : "";
+    // prettyPrint({ msg, err, errmsg });
+  })
+  .argv;
 
-  prettyPrint({ argParse });
 
-} catch (error) {
-  prettyPrint({ error });
-}
+// try {
+//   prettyPrint({ argParse });
+
+// } catch (error) {
+//   prettyPrint({ error });
+// }
