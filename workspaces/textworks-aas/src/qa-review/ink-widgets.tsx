@@ -159,8 +159,6 @@ const RenderRecImpl: React.FC<RenderRecImplArgs> = ({ rec, renderOverrides, dept
       override[1]({ item: val, depth: depth + 1 })
       : <RenderAny item={val} depth={depth + 1} renderOverrides={renderOverrides} />;
 
-    /* console.log('RenderRecImpl', key, override, overrides); */
-
     const prefix = gray(text(prefixChar));
 
     const capCaseKey = capitalizeDottedString(key)

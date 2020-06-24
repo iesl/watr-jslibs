@@ -10,9 +10,8 @@ import path from "path";
 //@ts-ignore
 import Divider from 'ink-divider';
 import { useMnemonicKeydefs, useKeymap } from './keymaps';
-import { RenderRec } from './ink-widgets';
+import { RenderRec, RenderAnyTruncated, text, blue, bold, Row, red, Col } from './ink-widgets';
 import { openFileWithLess, openFileWithBrowser } from './view-files';
-import { CleaningRuleResult, Field } from '~/extract/core/extraction-process';
 import { readExtractionLog } from '~/extract/abstracts/extract-abstracts';
 import { resolveCachedNormalFile } from '~/extract/core/field-extract';
 
@@ -46,16 +45,6 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
     return maybeLog;
   });
 
-  const [trimmedExtractionLog,] = useState(() => {
-    return extractionLog;
-  });
-
-  const getEntry = (k: string) => {
-    const value = extractionLog[k];
-    if (!value) return [];
-    return [value];
-  };
-
   const [addKeymapping, keymapElem] = useKeymap();
   const addKeys = useMnemonicKeydefs(addKeymapping);
 
@@ -74,47 +63,32 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
 
     addKeys("(m)ark (c)orrect", () => undefined);
     addKeys("(m)ark (i)ncorrect", () => undefined);
-
-    addKeys("(l)abel (i)nvestigate later", () => undefined);
-
-
-    _.each(getEntry('field.extract.errors'), () => {
-      addKeys("(l)abel (e)xtraction (e)rror (w)rong", () => undefined);
-    });
-
-    _.each(getEntry('field.list'), (fields: Field[]) => {
-      _.each(fields, (field) => {
-        const { value, cleaning } = field;
-        if (value) {
-          addKeys("(l)abel (f)ield (v)alue, (w)rong", () => undefined);
-        }
-        if (cleaning) {
-          _.each(cleaning, (_cleaningResult: CleaningRuleResult, index: number) => {
-            addKeys(`(l)abel (c)leaning rule (${index}) (w)rong`, () => undefined);
-          });
-        }
-      });
-    });
-
+    addKeys("(u)n (m)ark", () => undefined);
   }, []);
 
 
   return (
-    <Box flexDirection="column">
-      <Box flexDirection="column" marginBottom={2} >
+    <Col>
+      <Col marginBottom={2} >
         <Divider title={'Entry'} />
+        <Row margin={1} >
+          {bold(red(text('Path: ')))}
+          {bold(blue(text(path.basename(entryPath.dir))))}
+        </Row>
         <RenderRec
           rec={extractionLog}
-          renderOverrides={[]}
+          renderOverrides={[
+            ['changes', RenderAnyTruncated]
+          ]}
         />
-      </Box>
+      </Col>
 
-      <Box flexDirection="column" marginLeft={4} marginBottom={1} marginTop={2} >
+      <Col marginLeft={4} marginBottom={1} marginTop={2} >
         <Divider title={'Menu'} />
         {keymapElem}
-      </Box>
+      </Col>
 
-    </Box>
+    </Col>
   );
 };
 

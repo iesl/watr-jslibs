@@ -79,6 +79,24 @@ export function writeCorpusTextFile(entryPath: string, artifactDir: ArtifactSubd
   return writeText(filePath, content);
 }
 
+export function updateCorpusJsonFile<T>(
+  entryPath: string,
+  artifactDir: ArtifactSubdir,
+  filename: string,
+  modf: (prev?: T) => T
+): void {
+  const artifactPath = resolveCorpusFile(entryPath, artifactDir, filename);
+  const maybePrev = readJsonOrUndef<T>(artifactPath);
+  const update = modf(maybePrev);
+  const changed = !_.isEqual(maybePrev, update);
+  if (changed) {
+    if (maybePrev !== undefined) {
+      fs.unlinkSync(artifactPath);
+    }
+    writeJson(artifactPath, changed);
+  }
+}
+
 function readJsonOrUndef<T>(filePath: string): T | undefined {
   if (!fs.existsSync(filePath)) return;
   return fs.readJsonSync(filePath);
