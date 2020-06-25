@@ -98,7 +98,8 @@ export function queryContent(
 ): [Field, Cheerio, CheerioStatic] {
   const field: Field = {
     name: "abstract",
-    evidence: `jquery:[${query}]`,
+    evidence: [`jquery:[${query}]`],
+    cleaning: []
   };
   const $ = cheerioLoad(fileContent);
   return [field, $(query), $]
@@ -163,7 +164,8 @@ export function _byLineMatch(
 
   const field: Field = {
     name: "abstract",
-    evidence: `lines:[${evType}]`
+    evidence: [`lines:[${evType}]`],
+    cleaning: []
   };
 
   const matchingLines = getMatchingLines(anchoredEvidence, options, cssNormLines);
@@ -179,43 +181,6 @@ export function _byLineMatch(
 
   field.value = getSubtextOrUndef(sub);
   return field;
-}
-
-type ExtractorFunction = (cssNormLines: string[], htmlContent: string, url?: string, responseCode?: number) => Partial<Field>;
-
-export function urlGuard(
-  urlTests: string[],
-  exf: ExtractorFunction
-): ExtractorFunction {
-  const utests = _.map(urlTests, t => new RegExp(t));
-  const haveUrlTests = utests.length > 0;
-
-  return (cssNormLines: string[], htmlContent: string, url?: string, responseCode?: number): Partial<Field> => {
-    const urlMatch = (
-      url === undefined
-      || !haveUrlTests
-      || _.some(utests, t => url && t.test(url))
-    );
-
-    if (responseCode !== 200) {
-      return {
-        error: `status code != 200 (was ${responseCode})`
-      };
-    }
-    if (urlMatch) {
-      const innerResult = exf(cssNormLines, htmlContent);
-      if (haveUrlTests) {
-        const testStr = _.join(_.map(urlTests, t => `/${t}/`), " || ");
-        const priorEvidence = innerResult.evidence ? ` && ${innerResult.evidence}` : '';
-        const expandedEvidence = `url:[${testStr}]${priorEvidence}`;
-        innerResult.evidence = expandedEvidence;
-      }
-      return innerResult;
-    }
-    return {
-      complete: false
-    };
-  };
 }
 
 export const findInMetaTE: (key: string) => ExtractionFunction =
@@ -242,8 +207,9 @@ export const findInMetaTE: (key: string) => ExtractionFunction =
 
       const field: Field = {
         name: "abstract",
-        evidence: `meta:[${key}]`,
-        value: justValue
+        evidence: [`use-input:html-tidy`, `meta:[${key}]`],
+        value: justValue,
+        cleaning: []
       };
       env.fields.push(field);
       return TE.right(env);
@@ -268,6 +234,7 @@ export function findByLineMatchTE(
     const field = _byLineMatch(evidence, opts, fileContentLines)
     if (field.value) {
       env.fields.push(field)
+      env.evidence.push(`use-input:css-norm`)
       return TE.right(env);
     }
     return TE.left('findByLineMatchTE');

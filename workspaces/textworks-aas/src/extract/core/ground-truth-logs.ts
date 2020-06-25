@@ -1,51 +1,31 @@
-
 import _ from "lodash";
 import { ExtractionLog } from './extraction-records';
 
-export interface GroundTruthLog {
-  original: ExtractionLog;
-  correct: ExtractionLog;
-  incorrect: ExtractionLog;
-  added: ExtractionLog;
+export interface GroundTruthEntry {
+  extractionLog: ExtractionLog;
   notes: string[];
 }
 
-// export function loadGroundTruthLog(logName: string): GroundTruthLog | undefined {
-//   readGroundTruthFile(logName)
-//   if (!fs.existsSync(path)) {
-//     return;
-//   }
-//   return fs.readJsonSync(path);
-// }
+export interface GroundTruthLog {
+  entries: GroundTruthEntry[];
+  notes: string[];
+}
 
-// export function saveGroundTruthLog(path: string, log: GroundTruthLog): void {
-//   if (fs.existsSync(path)) {
-//     fs.removeSync(path);
-//   }
-//   fs.writeJsonSync(path, log);
-// }
 
-export function initGroundTruthLog(extractionLog: ExtractionLog): GroundTruthLog {
+export function initGroundTruthEntry(extractionLog: ExtractionLog, ...notes: string[]): GroundTruthEntry {
   return {
-    original: extractionLog,
-    correct: {},
-    incorrect: {},
-    added: {},
-    notes: [],
+    extractionLog,
+    notes: [...notes],
   };
 }
 
-export function labelGroundTruth(log: GroundTruthLog, entryRE: RegExp, asTrue: boolean): GroundTruthLog {
-  const keyValPairs = _.toPairs(log.original);
-  const labeled = _.filter(keyValPairs, ([key]) => {
-    return entryRE.test(key);
-  });
-  const labeledRec = _.fromPairs(labeled);
-  const toMerge = asTrue ? { correct: labeledRec } : { incorrect: labeledRec };
-  const updated = _.merge({}, log, toMerge)
-  return updated;
+export function initGroundTruthLog(...notes: string[]): GroundTruthLog {
+  return {
+    entries: [],
+    notes: [...notes]
+  }
 }
 
-export function addGroundTruthRec(log: GroundTruthLog, rec: ExtractionLog): GroundTruthLog {
-  return _.merge({}, log, { added: rec })
+export function addGroundTruthEntry(log: GroundTruthLog, entry: GroundTruthEntry): void {
+  log.entries.push(entry);
 }

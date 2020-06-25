@@ -1,10 +1,11 @@
 import _ from "lodash";
 import { Readable } from "stream";
-import { dirstream, stringStreamFilter } from 'commons';
+import { dirstream, stringStreamFilter, ExpandedDir, expandDir } from 'commons';
 import path from "path";
 import fs from "fs-extra";
 
 
+// TODO many of the spidering-corpus functions can be pushed into the commons lib
 export function walkScrapyCacheCorpus(corpusRoot: string): Readable {
   const corpusDirStream = dirstream(corpusRoot);
 
@@ -17,6 +18,7 @@ export function walkScrapyCacheCorpus(corpusRoot: string): Readable {
 }
 
 const artifactSubdirO = {
+  '.': null,
   'spidering-logs': null,
   'cache': null,
   'ground-truth': null,
@@ -27,6 +29,7 @@ type artifactSubdirT = typeof artifactSubdirO;
 export type ArtifactSubdir = keyof artifactSubdirT;
 
 const artifactSubdirs: ArtifactSubdir[] = [
+  '.',
   'spidering-logs',
   'cache',
   'ground-truth',
@@ -47,6 +50,11 @@ export function ensureArtifactDir(entryPath: string, artifactDir: ArtifactSubdir
 export function hasCorpusFile(entryPath: string, artifactDir: ArtifactSubdir, corpusFilename: string): boolean {
   const filePath = path.resolve(entryPath, artifactDir, corpusFilename);
   return fs.existsSync(filePath);
+}
+
+export function listCorpusArtifacts(entryPath: string, artifactDir: ArtifactSubdir): ExpandedDir {
+  const p = path.resolve(entryPath, artifactDir);
+  return expandDir(p);
 }
 
 export function readCorpusJsonFile<T>(entryPath: string, artifactDir: ArtifactSubdir, corpusFilename: string): T | undefined {
@@ -79,12 +87,13 @@ export function writeCorpusTextFile(entryPath: string, artifactDir: ArtifactSubd
   return writeText(filePath, content);
 }
 
-export function updateCorpusJsonFile<T>(
+export function updateCorpusJsonFile<T=never>(
   entryPath: string,
   artifactDir: ArtifactSubdir,
   filename: string,
   modf: (prev?: T) => T
 ): void {
+  ensureArtifactDir(entryPath, artifactDir);
   const artifactPath = resolveCorpusFile(entryPath, artifactDir, filename);
   const maybePrev = readJsonOrUndef<T>(artifactPath);
   const update = modf(maybePrev);
@@ -93,7 +102,7 @@ export function updateCorpusJsonFile<T>(
     if (maybePrev !== undefined) {
       fs.unlinkSync(artifactPath);
     }
-    writeJson(artifactPath, changed);
+    writeJson(artifactPath, update);
   }
 }
 

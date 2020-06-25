@@ -9,11 +9,9 @@ import { diffByChars, Change } from 'commons';
 
 export interface Field {
   name: string;
-  evidence: string;
+  evidence: string[];
   value?: string;
-  cleaning?: CleaningRuleResult[];
-  error?: string;
-  complete?: boolean;
+  cleaning: CleaningRuleResult[];
 }
 
 interface NormalForms {
@@ -70,8 +68,8 @@ export interface ExtractionEnv {
   responseMimeType: string;
   fileContentMap: { [k in keyof NormalForms]?: FileContentValue };
   fields: Field[];
+  evidence: string[];
   attemptError?: string;
-  // extractionEvidence: string[];
   verbose: boolean;
 }
 

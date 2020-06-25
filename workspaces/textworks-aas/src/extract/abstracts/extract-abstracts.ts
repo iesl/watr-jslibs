@@ -1,5 +1,4 @@
 import _ from "lodash";
-import path from "path";
 import {
   readMetaProps,
   filterUrl,
@@ -8,7 +7,6 @@ import {
   initialEnv,
   runCssNormalize,
   runLoadResponseBody,
-  // readCachedFile,
   verifyHttpResponseCode,
   readCachedNormalFile,
 } from "~/extract/core/field-extract";
@@ -17,16 +15,16 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import * as Arr from 'fp-ts/lib/Array';
 import * as TE from 'fp-ts/lib/TaskEither';
 import * as Task from 'fp-ts/lib/Task';
-import { isRight, isLeft } from 'fp-ts/lib/Either'
+import { isLeft } from 'fp-ts/lib/Either'
 
 import {
   findByLineMatchTE,
   findInMetaTE,
 } from "~/extract/core/field-extract-utils";
 
-import { BufferedLogger, prettyPrint } from "commons";
+import { BufferedLogger } from "commons";
 import { AbstractCleaningRules } from './data-clean-abstracts';
-import { ExtractionFunction, Field, ExtractionEnv, resetEnvForAttemptChain, tapWith, bindTasks, applyCleaningRules, bindTasksEAF } from '../core/extraction-process';
+import { ExtractionFunction, Field, ExtractionEnv, applyCleaningRules, bindTasksEAF } from '../core/extraction-process';
 import { hasCorpusFile, writeCorpusJsonFile, readCorpusJsonFile } from '~/corpora/corpus-file-walkers';
 import { ExtractionLog } from '../core/extraction-records';
 
@@ -55,14 +53,13 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
     try {
       const field: Field = {
         name: "abstract",
-        evidence: "",
+        evidence: [`use-input:html-tidy`, `global.document.metadata:['abstract']`],
+        cleaning: []
       };
       const metadataObj = JSON.parse(lineJson);
       const abst = metadataObj["abstract"];
       field.value = abst;
       env.fields.push(field);
-      // extractionEvidence.push('html-tidy');
-      // extractionEvidence.push('global.document.metadata["abstract"]');
       return TE.right(env);
     } catch (e) {
       return TE.left(e.toString());
@@ -84,6 +81,7 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
 // TODO: handle multi-metadataLine findInMeta examples
 // TODO: maybe expand filtered log handling to automatically comb logs in reverse-creation order, and add a 'compact' function to trim and delete old entries
 // TODO: figure out if there is a better html parser for handling both self-closing and script tags properly
+// TODO: what is the correct behavior when only a partial abstract field is found? Use it? mark it 'partial'?
 
 
 export const extractionLogName = 'extract-abstract-log.json';
@@ -281,6 +279,7 @@ export async function runAbstractFinders(
   if (isLeft(maybeEnv)) {
     const errors = maybeEnv.left;
     log.append('field.extract.errors', errors);
+    log.append('field.available:abstract', false);
     return;
   }
   const leadingEnv = maybeEnv.right;
@@ -303,11 +302,12 @@ export async function runAbstractFinders(
 
   const attemptedTasks = await sequenceArrOfTask(attemptTask)();
 
-  _.each(attemptedTasks, (attempt) => {
-    const { fields } = attempt;
+  const availableFields = _.flatMap(attemptedTasks, (attempt) => {
+    const { fields, evidence } = attempt;
     if (fields.length > 0) {
       const cleanedFields = _.map(fields, field => {
         const fieldValue = field.value;
+        field.evidence = _.concat(evidence, field.evidence);
         let cleaned: string | undefined = undefined;
         if (fieldValue) {
           const [cleaned0, cleaningRuleResults] = applyCleaningRules(AbstractCleaningRules, fieldValue);
@@ -323,132 +323,13 @@ export async function runAbstractFinders(
         }
         return field;
       });
-      log.append('field.list', cleanedFields);
+      return cleanedFields;
     }
+    return [];
   });
-}
 
+  const successfulExtractions = _.some(availableFields, f => f.value !== undefined);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export async function runAbstractFindersOldVer(
-  extractionPipeline: ExtractionFunction[][],
-  entryPath: string,
-  log: BufferedLogger
-): Promise<void> {
-  const entryName = path.basename(entryPath);
-
-  const extractionAttempts: TE.TaskEither<ExtractionEnv, string>[] =
-    Arr.array.mapWithIndex(
-      extractionPipeline,
-      (index: number, exFns: ExtractionFunction[]) => {
-
-        const init: ExtractionEnv = _.merge({}, initialEnv, { entryPath, verbose: true });
-        const introFns = [
-          resetEnvForAttemptChain,
-          readMetaProps,
-          runFileVerification(/(html|xml)/i),
-          verifyHttpResponseCode,
-          runLoadResponseBody,
-          readCachedNormalFile('html-tidy'),
-          runHtmlTidy,
-          readCachedNormalFile('css-normal'),
-          runCssNormalize,
-        ];
-        const outroFns = [
-          // modEnv(env => {
-          //   env.fileContentMap = {};
-          //   let evidence = env.extractionEvidence.join(" ++ ");
-          //   evidence = evidence ? `${evidence} ++ ` : '';
-          //   const fieldsWithEvidence = env.fields.map(f => {
-          //     const allEvidence = `${evidence}${f.evidence}`
-          //     f.evidence = allEvidence;
-          //     return f;
-          //   });
-          //   env.fields = fieldsWithEvidence;
-          //   return env;
-          // }),
-          tapWith((env) => console.log(`Completed attempt-chain #${index} for entry ${entryName}; ${env.metaProps.responseUrl}`)),
-        ];
-        const allFns = _.concat(introFns, exFns, outroFns);
-        const inner = bindTasks(init, allFns);
-        return pipe(
-          inner,
-          TE.mapLeft(s => {
-            console.log(`Error:`, s);
-            return s;
-          }),
-          TE.swap,
-        );
-      });
-
-  const sequenceT = Arr.array.sequence(TE.taskEither);
-  const allAttempts = await sequenceT(extractionAttempts)();
-  if (isRight(allAttempts)) {
-    const errors = allAttempts.right;
-    const fatalErrors = _.filter(errors, err => /^FATAL/.test(err));
-    if (fatalErrors.length > 0) {
-      const uniqFatal = _.uniq(fatalErrors);
-      const loggableErrors = uniqFatal.join("; ");
-      log.append('field.extract.errors', loggableErrors);
-    } else {
-      log.append('field.found', false);
-    }
-    console.log(`No extracted abstract for ${entryName}`)
-  } else {
-    const { fields } = allAttempts.left;
-    const cleanedFields = _.map(fields, field => {
-      const abs = field.value;
-      let cleaned: string | undefined = undefined;
-      if (abs) {
-        const [cleaned0, cleaningRuleResults] = applyCleaningRules(AbstractCleaningRules, abs);
-        cleaned = cleaned0;
-        if (cleaningRuleResults.length > 0) {
-          field.cleaning = cleaningRuleResults;
-        }
-      }
-      if (cleaned && cleaned.length > 0) {
-        field.value = cleaned;
-      } else {
-        field.value = undefined;
-      }
-      return field;
-    });
-    log.append('field.list', cleanedFields);
-  }
+  log.append('field.available:abstract', successfulExtractions);
+  log.append('field.list', availableFields);
 }

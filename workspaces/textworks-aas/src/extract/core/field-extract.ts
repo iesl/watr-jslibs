@@ -6,13 +6,13 @@ import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import fs from "fs-extra";
-import { readResolveFile } from '~/utils/file-utils';
 import { runFileCmd } from '~/utils/run-cmd-file';
 import { makeCssTreeNormalForm } from './html-to-css-normal';
 import { runTidyCmdBuffered } from '~/utils/run-cmd-tidy-html';
 import { ExtractionEnv, ExtractionFunction, NormalForm, extractionSuccess, fatalFailure, nonFatalFailure } from './extraction-process';
 import { readMetaFile } from '../logging/logging';
-import { readCorpusTextFileAsync, resolveCorpusFile, writeCorpusTextFile } from '~/corpora/corpus-file-walkers';
+import { readCorpusTextFileAsync, resolveCorpusFile, writeCorpusTextFile, readCorpusTextFile } from '~/corpora/corpus-file-walkers';
+
 
 export const initialEnv: ExtractionEnv = {
   entryPath: 'empty',
@@ -24,15 +24,15 @@ export const initialEnv: ExtractionEnv = {
   responseMimeType: '',
   fileContentMap: {},
   fields: [],
-  // extractionEvidence: [],
+  evidence: [],
   verbose: false
 };
-
 
 export const filterUrl: (urlTest: RegExp) => ExtractionFunction =
   (urlTest: RegExp) => (env: ExtractionEnv) => {
     const { metaProps: { responseUrl } } = env;
     if (urlTest.test(responseUrl)) {
+      env.evidence.push(`url~=/${urlTest.source}/`)
       return TE.right(env);
     }
     return TE.left(`url [${responseUrl}] failed test /${urlTest.source}/`)
@@ -128,7 +128,7 @@ export const runLoadResponseBody: ExtractionFunction =
       return TE.right(env);
     }
 
-    const fileContent = readResolveFile(entryPath, 'response_body');
+    const fileContent = readCorpusTextFile(entryPath, '.', 'response_body')
     if (!fileContent) {
       return TE.left(`Could not read file response_body`);
     }

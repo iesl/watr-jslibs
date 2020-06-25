@@ -6,7 +6,7 @@ import { Database, openDatabase } from './database';
 import { Application } from 'express';
 
 
-export function initTestCorpusDirs(scratchDir: string): any {
+export function initTestCorpusDirs(scratchDir: string): { corpusRoot: string, corpusPath: string } {
   if (fs.existsSync(scratchDir)) {
     fs.removeSync(scratchDir);
   }

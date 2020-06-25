@@ -5,7 +5,6 @@ import { readCorpusEntries } from "./corpusRoutes";
 import fs from "fs-extra";
 
 const scratchDir = path.join(".", "scratch.d");
-
 const corpusRoot = path.join(scratchDir, 'corpus-root.d')
 
 

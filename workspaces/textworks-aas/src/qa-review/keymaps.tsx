@@ -31,6 +31,7 @@ interface KeymapElemArgs {
   currKeys: string;
   currDescs: JSX.Element[];
 }
+
 const KeymapElem: React.FC<KeymapElemArgs> = ({ currKeys, currDescs }) => {
   return (
     <Box flexDirection="column">
