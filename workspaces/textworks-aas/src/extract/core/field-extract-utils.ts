@@ -99,7 +99,6 @@ export function queryContent(
   const field: Field = {
     name: "abstract",
     evidence: [`jquery:[${query}]`],
-    cleaning: []
   };
   const $ = cheerioLoad(fileContent);
   return [field, $(query), $]
@@ -165,7 +164,6 @@ export function _byLineMatch(
   const field: Field = {
     name: "abstract",
     evidence: [`lines:[${evType}]`],
-    cleaning: []
   };
 
   const matchingLines = getMatchingLines(anchoredEvidence, options, cssNormLines);
@@ -209,7 +207,6 @@ export const findInMetaTE: (key: string) => ExtractionFunction =
         name: "abstract",
         evidence: [`use-input:html-tidy`, `meta:[${key}]`],
         value: justValue,
-        cleaning: []
       };
       env.fields.push(field);
       return TE.right(env);

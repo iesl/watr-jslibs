@@ -1,6 +1,6 @@
 import _ from "lodash";
 import React from "react";
-import { Text, Box, Color, BoxProps } from "ink";
+import { Text, Box, BoxProps } from "ink";
 
 //@ts-ignore
 import Divider from 'ink-divider';
@@ -10,17 +10,17 @@ interface TitledBoxArgs {
   body: string;
 }
 
-
 export type ModJSX = (fc: JSX.Element) => JSX.Element;
 export type StringToJSX = (s: string) => JSX.Element;
 
-export const dim: ModJSX = e => <Color dim>{e}</Color>;
-export const dimGray: ModJSX = e => <Color dim gray>{e}</Color>;
-export const gray: ModJSX = e => <Color gray>{e}</Color>;
-export const bold: ModJSX = e => <Color bold>{e}</Color>;
-export const red: ModJSX = e => <Color red>{e}</Color>;
-export const blue: ModJSX = e => <Color blue>{e}</Color>;
-export const boldBlue: ModJSX = e => <Color bold blue>{e}</Color>;
+// TODO splice the JSX attributes together rather than nesting them
+export const dim: ModJSX = e => <Text dimColor>{e}</Text>;
+export const dimGray: ModJSX = e => <Text dimColor color="gray">{e}</Text>;
+export const gray: ModJSX = e => <Text color="gray">{e}</Text>;
+export const bold: ModJSX = e => <Text bold>{e}</Text>;
+export const red: ModJSX = e => <Text color="red">{e}</Text>;
+export const blue: ModJSX = e => <Text color="blue">{e}</Text>;
+export const boldBlue: ModJSX = e => <Text bold color="blue">{e}</Text>;
 
 export function text(s: string): JSX.Element {
   return <Text>{s}</Text>;
@@ -41,7 +41,7 @@ export const TitledBox: React.FC<TitledBoxArgs> = ({ title, body }) => {
     <Col>
       <Divider title={title} />
 
-      <Box textWrap="wrap" marginLeft={4} marginBottom={1} width="80%" height={15} >
+      <Box marginLeft={4} marginBottom={1} width="80%" height={15} >
         {bold(blue(text(body)))}
       </Box>
 
@@ -56,9 +56,9 @@ interface KeyValBoxArgs {
 
 export const KeyValBox: React.FC<KeyValBoxArgs> = ({ keyname, val }) => {
   return (
-    <Box marginLeft={2} marginBottom={0} width="80%" height={1} >
-      <Color bold red> <Text>{keyname}: </Text> </Color>
-      <Color bold blue> <Text>{val ? val : '<none>'}</Text> </Color>
+    <Box marginLeft={2} width="80%" height={1} >
+      {bold(red(text(keyname)))}
+      {bold(blue(text(val ? val : '<none>')))}
     </Box>
   );
 };
@@ -124,7 +124,7 @@ export const RenderAny: React.FC<RenderAnyArgs> = ({ item, renderOverrides, dept
 
   return (
     <Box marginLeft={2} marginBottom={0} width="80%" >
-      <Color bold red> <Text>{'UNIMPLEMENTED'} </Text> </Color>
+      { bold(red(text('UNIMPLEMENTED')))}
     </Box>
   );
 };

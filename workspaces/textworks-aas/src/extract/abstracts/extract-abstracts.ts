@@ -54,7 +54,6 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
       const field: Field = {
         name: "abstract",
         evidence: [`use-input:html-tidy`, `global.document.metadata:['abstract']`],
-        cleaning: []
       };
       const metadataObj = JSON.parse(lineJson);
       const abst = metadataObj["abstract"];
@@ -79,8 +78,6 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
 // TODO: extract titles, pdf links, author names
 // TODO: create REST API for openreview based on html extraction
 // TODO: handle multi-metadataLine findInMeta examples
-// TODO: maybe expand filtered log handling to automatically comb logs in reverse-creation order, and add a 'compact' function to trim and delete old entries
-// TODO: figure out if there is a better html parser for handling both self-closing and script tags properly
 // TODO: what is the correct behavior when only a partial abstract field is found? Use it? mark it 'partial'?
 
 
@@ -113,7 +110,7 @@ export interface ExtractionAppContext {
 export const extractAbstractTransform =
   async (entryPath: string, ctx: ExtractionAppContext): Promise<void> => {
     const { log } = ctx;
-    log.append('action', 'extract-abstract');
+    log.append('action', 'extract-field:abstract');
     console.log(`starting extraction on ${entryPath}`);
 
     return runAbstractFinders(AbstractPipelineUpdate, entryPath, log)
@@ -279,7 +276,7 @@ export async function runAbstractFinders(
   if (isLeft(maybeEnv)) {
     const errors = maybeEnv.left;
     log.append('field.extract.errors', errors);
-    log.append('field.available:abstract', false);
+    log.append('fields.available', { 'abstract': false });
     return;
   }
   const leadingEnv = maybeEnv.right;
@@ -308,13 +305,18 @@ export async function runAbstractFinders(
       const cleanedFields = _.map(fields, field => {
         const fieldValue = field.value;
         field.evidence = _.concat(evidence, field.evidence);
-        let cleaned: string | undefined = undefined;
+        let cleaned: string | undefined;
         if (fieldValue) {
           const [cleaned0, cleaningRuleResults] = applyCleaningRules(AbstractCleaningRules, fieldValue);
+          const ruleNames = _.map(cleaningRuleResults, r => {
+            return `clean: ${r.rule}`;
+          })
           cleaned = cleaned0;
-          if (cleaningRuleResults.length > 0) {
-            field.cleaning = cleaningRuleResults;
-          }
+          field.evidence.push(...ruleNames);
+          // TODO only output these with a --verbose flag
+          // if (cleaningRuleResults.length > 0) {
+          //   field.cleaning = cleaningRuleResults;
+          // }
         }
         if (cleaned && cleaned.length > 0) {
           field.value = cleaned;
@@ -330,6 +332,6 @@ export async function runAbstractFinders(
 
   const successfulExtractions = _.some(availableFields, f => f.value !== undefined);
 
-  log.append('field.available:abstract', successfulExtractions);
-  log.append('field.list', availableFields);
+  log.append('fields.available', { 'abstract': successfulExtractions });
+  log.append('fields', availableFields);
 }

@@ -98,6 +98,9 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
 
   }, []);
 
+
+  // create a callback for each path in the rendered rec that creates a checkbox for it
+
   return (
     <Col>
       <Col marginBottom={2} >

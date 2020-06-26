@@ -1,8 +1,9 @@
 //
 import _ from 'lodash';
-import { Text, Box, Color, useInput } from "ink";
+import { Text, Box, useInput } from "ink";
 import React, { useState, useEffect } from "react";
 import { radix } from 'commons';
+import { bold, blue, text } from './ink-widgets';
 
 export interface KeymapPath {
   descriptions: string[];
@@ -36,10 +37,7 @@ const KeymapElem: React.FC<KeymapElemArgs> = ({ currKeys, currDescs }) => {
   return (
     <Box flexDirection="column">
       <Box>
-        <Color bold blue>
-          <Text>{'Current Input: '}</Text>
-          <Text>{currKeys}</Text>
-        </Color>
+        {bold(blue(text(`Current Input: ${currKeys}`)))}
       </Box>
       <Box marginLeft={2} flexDirection="column">
         {currDescs}
@@ -54,7 +52,7 @@ export function useMnemonicKeydefs(
   return (mkeydef, action) => {
     const re = /\([\w]\)/g;
     const keyMatches = mkeydef.match(re);
-    const keyList = _.map(keyMatches, m => m.substring(1, m.length-1));
+    const keyList = _.map(keyMatches, m => m.substring(1, m.length - 1));
     const keys = keyList.join('');
     f({ keys, desc: mkeydef, action });
   };
@@ -78,7 +76,7 @@ export function useKeymap(): [(k: KeymapEntry) => void, JSX.Element] {
     _.each(currKeymapEntries, entry => {
       const keys = entry.keys.split('');
       const leadingKeyPath = keys.slice(0, keys.length - 1);
-      _.each(_.range(leadingKeyPath.length+1), (n: number) => {
+      _.each(_.range(leadingKeyPath.length + 1), (n: number) => {
         const path = leadingKeyPath.slice(0, n);
         radix.radUpsert(radTree, path, (prev) => {
           if (prev === undefined) {

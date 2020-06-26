@@ -1,18 +1,18 @@
 
 import _ from "lodash";
-import React, { useEffect } from "react";
-import { Box, useApp } from "ink";
+import React, { useEffect, useState } from "react";
+import { useApp, useFocusManager, Text, Newline } from "ink";
 import * as ink from "ink";
 import ansiEscapes from 'ansi-escapes';
-//@ts-ignore
-import Divider from 'ink-divider';
 import { useKeymap } from '~/qa-review/keymaps';
-import { RenderRec, RenderAnyTruncated } from '~/qa-review/ink-widgets';
+import { RenderRec, RenderAnyTruncated, text, Col } from '~/qa-review/ink-widgets';
+import { CheckBox, defaultStateIndicators } from '~/qa-review/ink-checkbox';
 
 const KeymapDemo: React.FC<{}> = ({ }) => {
   const { exit } = useApp();
 
   const [addKeymapping, keymapElem] = useKeymap();
+  const focusManager = useFocusManager();
 
   useEffect(() => {
     addKeymapping({
@@ -20,6 +20,10 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
       desc: "quit",
       action: () => { process.exit(); }
     });
+
+    addKeymapping({ keys: "j", desc: "focus next", action: () => { focusManager.focusNext(); } });
+    addKeymapping({ keys: "k", desc: "focus prev", action: () => { focusManager.focusPrevious(); } });
+
     addKeymapping({ keys: "vab", desc: "(v)iew a b", action: () => { exit(); } });
     addKeymapping({ keys: "vac", desc: "(v)iew a c", action: () => { exit(); } });
     addKeymapping({ keys: "vba", desc: "(v)iew b a", action: () => { exit(); } });
@@ -64,11 +68,31 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     ],
     bar: "some bar value",
   };
-  return (
-    <Box flexDirection="column" marginLeft={1} >
+  const [cbInfo, setCBInfo] = useState<[number, number]>([0, 0])
 
-      <Box flexDirection="column" marginLeft={1} marginBottom={1} width="80%" >
-        <Divider title={'Record Display'} />
+  const cbStateCallback = (cbIndex: number) => (cbState: number) => {
+    setCBInfo([cbIndex, cbState]);
+  };
+
+  useEffect(() => {
+
+  }, [cbInfo]);
+
+  const focusables = _.map(_.range(4), index => {
+    return <CheckBox
+      label={`key#${index}`}
+      initialState={0}
+      stateCallback={cbStateCallback(index)}
+      stateIndicators={defaultStateIndicators(3)}
+    />
+  });
+  return (
+    <Col marginLeft={1} >
+
+      <Col marginLeft={1} marginBottom={1} width="80%" >
+        {text('Record Display')}
+        <Newline />
+
         <RenderRec
           rec={sampleRec}
           renderOverrides={[
@@ -76,13 +100,18 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
             ['priest', RenderAnyTruncated],
           ]}
         />
-      </Box>
+      </Col>
+      <Col>
+        {focusables}
+      </Col>
+      <Text>CheckBox #{cbInfo[0]} updated to {cbInfo[1]}</Text>
 
-      <Box flexDirection="column" marginLeft={1} marginBottom={1} width="80%" >
-        <Divider title={'Keymap'} />
+      <Col marginLeft={1} marginBottom={1} width="80%" >
+        {text('KeyMap')}
         {keymapElem}
-      </Box>
-    </Box>
+      </Col>
+
+    </Col>
   );
 
 };

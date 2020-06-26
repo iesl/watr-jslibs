@@ -11,7 +11,6 @@ export interface Field {
   name: string;
   evidence: string[];
   value?: string;
-  cleaning: CleaningRuleResult[];
 }
 
 interface NormalForms {

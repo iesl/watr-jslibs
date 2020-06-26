@@ -1,9 +1,8 @@
-//
 import "chai/register-should";
 
 import _ from "lodash";
 import { ExtractionLog } from '~/extract/core/extraction-records';
-import { initGroundTruthLog, labelGroundTruth } from '~/extract/core/ground-truth-logs';
+import { initGroundTruthLog,  } from '~/extract/core/ground-truth-logs';
 
 describe("Q/A Logging tests", () => {
 
