@@ -23,8 +23,8 @@ export const initialEnv: ExtractionEnv = {
   },
   responseMimeType: '',
   fileContentMap: {},
-  fields: [],
   evidence: [],
+  extractionRecord: { kind: "fields", fields: {} },
   verbose: false
 };
 
@@ -93,27 +93,6 @@ export const runFileVerification: (urlTest: RegExp) => ExtractionFunction =
       })
     );
   };
-
-export const sanityCheckAbstracts: ExtractionFunction =
-  (env: ExtractionEnv) => {
-    const { fields } = env;
-
-    const filtered = _.filter(fields, field => {
-      const maybeAbstract = field.value;
-      if (!maybeAbstract) return false;
-
-      if (maybeAbstract.length < 180) return false;
-
-      return true;
-    });
-
-    if (filtered.length > 0) {
-      env.fields = filtered;
-      return extractionSuccess(env);
-    }
-    return nonFatalFailure(`sanityCheckAbstracts failed`);
-  };
-
 
 export const runLoadResponseBody: ExtractionFunction =
   (env: ExtractionEnv) => {

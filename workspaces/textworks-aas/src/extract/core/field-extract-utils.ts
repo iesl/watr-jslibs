@@ -6,6 +6,7 @@ import { Field, ExtractionEnv, ExtractionFunction } from "./extraction-process";
 
 import * as TE from 'fp-ts/lib/TaskEither';
 import { makeCssTreeNormalFormFromNode } from './html-to-css-normal';
+import { addFieldInstance } from './extraction-records';
 
 export function readFile(
   leading: string,
@@ -208,7 +209,7 @@ export const findInMetaTE: (key: string) => ExtractionFunction =
         evidence: [`use-input:html-tidy`, `meta:[${key}]`],
         value: justValue,
       };
-      env.fields.push(field);
+      addFieldInstance(env.extractionRecord, field);
       return TE.right(env);
     }
     return TE.left('findInMetaTE');
@@ -230,8 +231,8 @@ export function findByLineMatchTE(
     const fileContentLines = fileContent.lines;
     const field = _byLineMatch(evidence, opts, fileContentLines)
     if (field.value) {
-      env.fields.push(field)
-      env.evidence.push(`use-input:css-norm`)
+      field.evidence.unshift(`use-input:css-norm`)
+      addFieldInstance(env.extractionRecord, field);
       return TE.right(env);
     }
     return TE.left('findByLineMatchTE');

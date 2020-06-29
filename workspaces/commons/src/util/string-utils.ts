@@ -70,9 +70,8 @@ export function stripMargin(block: string): string {
 export function stripMargins(lines: string[]): string[] {
   return _
     .map(lines, l => {
-      const ltrim = l.trimLeft();
-      if (ltrim.startsWith("|")) {
-        return ltrim.slice(1);
+      if (/^[ ]*[|]/.test(l)) {
+        return l.slice(l.indexOf('|')+1)
       }
       return l;
     });

@@ -1,7 +1,7 @@
 //
 import _ from "lodash";
 import React, { useState, useEffect } from "react";
-import { Box, useApp } from "ink";
+import { useApp } from "ink";
 import * as ink from "ink";
 import { BufferedLogger, ExpandedDir } from "commons";
 import ansiEscapes from 'ansi-escapes';
@@ -12,11 +12,10 @@ import Divider from 'ink-divider';
 import { useMnemonicKeydefs, useKeymap } from './keymaps';
 import { RenderRec, RenderAnyTruncated, text, blue, bold, Row, red, Col } from './ink-widgets';
 import { openFileWithLess, openFileWithBrowser } from './view-files';
-import { readExtractionLog } from '~/extract/abstracts/extract-abstracts';
+import { readExtractionRecord } from '~/extract/abstracts/extract-abstracts';
 import { resolveCachedNormalFile } from '~/extract/core/field-extract';
 import { updateCorpusJsonFile, readCorpusJsonFile, listCorpusArtifacts } from '~/corpora/corpus-file-walkers';
-import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extract/core/ground-truth-logs';
-import { ExtractionLog } from '~/extract/core/extraction-records';
+import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extract/core/ground-truth-records';
 
 
 interface AppArgs {
@@ -49,26 +48,18 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
     return _.filter(allLogs, a => !_.isNil(a));
   });
 
-  const MissingLogRec = ({ NoExtractionLog: true });
-
-  const [extractionLog,] = useState(() => {
-    const log = readExtractionLog(entryPath.dir);
-    if (!log) {
-      return MissingLogRec;
-    }
-    return log;
+  const [extractionRecord,] = useState(() => {
+    return readExtractionRecord(entryPath.dir);
   });
 
-  const haveExtractionLog = () => !_.isEqual(extractionLog, MissingLogRec);;
-
   const labelGroundTruth = (tag: string) => () => {
-    if (haveExtractionLog()) {
+    if (extractionRecord) {
       updateCorpusJsonFile<GroundTruthLog>(
         entryPath.dir, 'ground-truth',
         abstractGroundTruthFilename,
         (prevGrTruth) => {
           const gtLog = prevGrTruth || initGroundTruthLog();
-          const entry = initGroundTruthEntry(extractionLog, tag)
+          const entry = initGroundTruthEntry(extractionRecord, tag)
           gtLog.entries.push(entry)
           return gtLog;
         }
@@ -110,7 +101,7 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
           {bold(blue(text(path.basename(entryPath.dir))))}
         </Row>
         <RenderRec
-          rec={extractionLog}
+          rec={extractionRecord}
           renderOverrides={[
             ['changes', RenderAnyTruncated]
           ]}

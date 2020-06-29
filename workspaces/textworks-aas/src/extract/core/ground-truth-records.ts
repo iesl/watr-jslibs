@@ -1,8 +1,8 @@
 import _ from "lodash";
-import { ExtractionLog } from './extraction-records';
+import { ExtractionRecord } from './extraction-records';
 
 export interface GroundTruthEntry {
-  extractionLog: ExtractionLog;
+  extractionRecord: ExtractionRecord;
   notes: string[];
 }
 
@@ -12,9 +12,9 @@ export interface GroundTruthLog {
 }
 
 
-export function initGroundTruthEntry(extractionLog: ExtractionLog, ...notes: string[]): GroundTruthEntry {
+export function initGroundTruthEntry(extractionRecord: ExtractionRecord, ...notes: string[]): GroundTruthEntry {
   return {
-    extractionLog,
+    extractionRecord,
     notes: [...notes],
   };
 }

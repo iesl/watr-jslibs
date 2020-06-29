@@ -24,13 +24,12 @@ import {
 
 import { BufferedLogger } from "commons";
 import { AbstractCleaningRules } from './data-clean-abstracts';
-import { ExtractionFunction, Field, ExtractionEnv, applyCleaningRules, bindTasksEAF } from '../core/extraction-process';
+import { ExtractionFunction, Field, ExtractionEnv, applyCleaningRules, flatMapTasksEA } from '../core/extraction-process';
 import { hasCorpusFile, writeCorpusJsonFile, readCorpusJsonFile } from '~/corpora/corpus-file-walkers';
-import { ExtractionLog } from '../core/extraction-records';
+import { ExtractionRecord, ExtractionErrors, foldExtractionRec, ExtractedFields, FieldInstances, addFieldInstance } from '../core/extraction-records';
 
 export const findInGlobalDocumentMetadata: ExtractionFunction =
   env => {
-    // const { fileContentMap, extractionEvidence } = env;
     const { fileContentMap } = env;
     const fileContent = fileContentMap['html-tidy'];
     if (!fileContent) {
@@ -58,7 +57,7 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
       const metadataObj = JSON.parse(lineJson);
       const abst = metadataObj["abstract"];
       field.value = abst;
-      env.fields.push(field);
+      addFieldInstance(env.extractionRecord, field);
       return TE.right(env);
     } catch (e) {
       return TE.left(e.toString());
@@ -81,24 +80,24 @@ export const findInGlobalDocumentMetadata: ExtractionFunction =
 // TODO: what is the correct behavior when only a partial abstract field is found? Use it? mark it 'partial'?
 
 
-export const extractionLogName = 'extract-abstract-log.json';
+export const extractionRecordFileName = 'extraction-records.json';
 
 function extractionLogExists(entryPath: string): boolean {
-  return hasCorpusFile(entryPath, 'extracted-fields', extractionLogName)
+  return hasCorpusFile(entryPath, 'extracted-fields', extractionRecordFileName)
 }
 
-export function readExtractionLog(entryPath: string): ExtractionLog | undefined {
-  return readCorpusJsonFile(entryPath, 'extracted-fields', extractionLogName)
+export function readExtractionRecord(entryPath: string): ExtractionRecord | undefined {
+  return readCorpusJsonFile(entryPath, 'extracted-fields', extractionRecordFileName)
 }
 
-function writeExtractionLog(entryPath: string, content: any): boolean {
-  return writeCorpusJsonFile(entryPath, 'extracted-fields', extractionLogName, content);
+function writeExtractionRecord(entryPath: string, content: any): boolean {
+  return writeCorpusJsonFile(entryPath, 'extracted-fields', extractionRecordFileName, content);
 }
 
 export const skipIfAbstractLogExisits = (entryPath: string): boolean => {
   const exists = extractionLogExists(entryPath);
   if (exists) {
-    console.log(`skipping: file ${extractionLogName} already exists`);
+    console.log(`skipping: file ${extractionRecordFileName} already exists`);
   }
   return !exists;
 };
@@ -107,19 +106,60 @@ export interface ExtractionAppContext {
   log: BufferedLogger;
 }
 
-export const extractAbstractTransform =
-  async (entryPath: string, ctx: ExtractionAppContext): Promise<void> => {
-    const { log } = ctx;
-    log.append('action', 'extract-field:abstract');
-    console.log(`starting extraction on ${entryPath}`);
+const cleaningRuleExtractionFunction: ExtractionFunction = (env: ExtractionEnv) => {
+  const rec = env.extractionRecord;
+  foldExtractionRec(rec, {
+    onFields: (fieldRec: ExtractedFields) => {
+      const abstractFieldInstances = fieldRec.fields['abstract'];
+      const fields = abstractFieldInstances.instances;
+      let validFieldInstances = 0;
 
-    return runAbstractFinders(AbstractPipelineUpdate, entryPath, log)
-      .then(() => writeExtractionLog(entryPath, log.logBuffer))
+      _.each(fields, field => {
+        const fieldValue = field.value;
+        // field.evidence = _.concat(evidence, field.evidence);
+        let cleaned: string | undefined;
+        if (fieldValue) {
+          const [cleaned0, cleaningRuleResults] = applyCleaningRules(AbstractCleaningRules, fieldValue);
+          const ruleNames = _.map(cleaningRuleResults, r => {
+            return `clean: ${r.rule}`;
+          })
+          cleaned = cleaned0;
+          field.evidence.push(...ruleNames);
+          // TODO only output these with a --verbose flag
+          // if (cleaningRuleResults.length > 0) {
+          //   field.cleaning = cleaningRuleResults;
+          // }
+        }
+        if (cleaned && cleaned.length > 0) {
+          field.value = cleaned;
+          validFieldInstances += 1;
+        } else {
+          field.value = undefined;
+        }
+      });
+      abstractFieldInstances.count = validFieldInstances;
+      abstractFieldInstances.exists = validFieldInstances > 0;
+    }
+  });
+
+  return TE.right(env);
+};
+
+export const extractAbstractTransform =
+  async (entryPath: string, _ctx: ExtractionAppContext): Promise<void> => {
+    // const { log } = ctx;
+    // log.append('action', 'extract-field:abstract');
+    console.log(`starting extraction on ${entryPath}`);
+    // Append Cleaning rules to AbstractPipeline
+
+    return runAbstractFinders(AbstractPipeline, entryPath)
+      .then((extrFields) => writeExtractionRecord(entryPath, extrFields))
       .then(() => console.log(`extracted ${entryPath}`))
-      .then(() => log.commitLogs());
+    ;
+      // .then(() => log.commitLogs());
   };
 
-export const AbstractPipelineUpdate: ExtractionFunction[][] = [
+export const AbstractPipeline: ExtractionFunction[][] = [
 
   [findInMetaTE('@description content')],
   [findInMetaTE('@DCTERMS.abstract content')],
@@ -265,32 +305,43 @@ const sequenceArrOfTask = Arr.array.sequence(Task.task);
 
 export async function runAbstractFinders(
   extractionPipeline: ExtractionFunction[][],
-  entryPath: string,
-  log: BufferedLogger
-): Promise<void> {
+  entryPath: string
+): Promise<ExtractionRecord> {
 
   const init: ExtractionEnv = _.merge({}, initialEnv, { entryPath, verbose: false });
-  const leadingPipeline = bindTasksEAF(PipelineLeadingFunctions);
+  const leadingPipeline = flatMapTasksEA(PipelineLeadingFunctions);
   const maybeEnv = await leadingPipeline(init)();
 
   if (isLeft(maybeEnv)) {
     const errors = maybeEnv.left;
-    log.append('field.extract.errors', errors);
-    log.append('fields.available', { 'abstract': false });
-    return;
+    const extractErrors: ExtractionErrors = {
+      kind: 'errors',
+      errors: [
+        errors
+      ]
+    };
+
+    return extractErrors;
   }
   const leadingEnv = maybeEnv.right;
 
+
   const attemptTask = _.map(extractionPipeline, (ep) => {
-    const attemptEnv: ExtractionEnv = _.merge({}, leadingEnv);
-    const attemptPipeline = bindTasksEAF(ep);
+    const initAttemptEnv: ExtractionEnv = _.merge({}, leadingEnv);
+    const attemptFuncs = _.concat(ep, cleaningRuleExtractionFunction)
+    const attemptPipeline = flatMapTasksEA(attemptFuncs);
     return pipe(
-      attemptEnv,
+      initAttemptEnv,
       attemptPipeline,
       TE.fold<string, ExtractionEnv, ExtractionEnv>(
-        (err: string) => {
-          attemptEnv.attemptError = err;
-          return () => Promise.resolve(attemptEnv);
+        (error: string) => {
+          // TODO the error state should return something more than a string
+          const extractErrors: ExtractionErrors = {
+            kind: 'errors',
+            errors: [error]
+          };
+          initAttemptEnv.extractionRecord = extractErrors;
+          return () => Promise.resolve(initAttemptEnv)
         },
         (succ: ExtractionEnv) => () => Promise.resolve(succ)
       )
@@ -298,40 +349,37 @@ export async function runAbstractFinders(
   });
 
   const attemptedTasks = await sequenceArrOfTask(attemptTask)();
+  const initRec: FieldInstances = {
+    exists: false,
+    count: 0,
+    instances: []
+  };
 
-  const availableFields = _.flatMap(attemptedTasks, (attempt) => {
-    const { fields, evidence } = attempt;
-    if (fields.length > 0) {
-      const cleanedFields = _.map(fields, field => {
-        const fieldValue = field.value;
-        field.evidence = _.concat(evidence, field.evidence);
-        let cleaned: string | undefined;
-        if (fieldValue) {
-          const [cleaned0, cleaningRuleResults] = applyCleaningRules(AbstractCleaningRules, fieldValue);
-          const ruleNames = _.map(cleaningRuleResults, r => {
-            return `clean: ${r.rule}`;
-          })
-          cleaned = cleaned0;
-          field.evidence.push(...ruleNames);
-          // TODO only output these with a --verbose flag
-          // if (cleaningRuleResults.length > 0) {
-          //   field.cleaning = cleaningRuleResults;
-          // }
+  const combinedInstances = _.reduce<ExtractionEnv, FieldInstances>(
+    attemptedTasks,
+    (acc, e) => {
+      const newAcc = foldExtractionRec(
+        e.extractionRecord, {
+        onFields: (extractedFields) => {
+          const abstractInstances = extractedFields.fields['abstract'];
+          const { exists, count, instances } = abstractInstances;
+          return {
+            exists: exists || acc.exists,
+            count: count + acc.count,
+            instances: _.concat(acc.instances, instances)
+          };
         }
-        if (cleaned && cleaned.length > 0) {
-          field.value = cleaned;
-        } else {
-          field.value = undefined;
-        }
-        return field;
       });
-      return cleanedFields;
-    }
-    return [];
-  });
+      if (newAcc) return newAcc;
+      return acc;
+    },
+    initRec
+  );
 
-  const successfulExtractions = _.some(availableFields, f => f.value !== undefined);
+  const combinedFields: ExtractedFields = {
+    kind: "fields",
+    fields: { "abstract": combinedInstances }
+  }
 
-  log.append('fields.available', { 'abstract': successfulExtractions });
-  log.append('fields', availableFields);
+  return combinedFields;
 }

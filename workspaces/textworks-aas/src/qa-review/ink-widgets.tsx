@@ -198,7 +198,7 @@ const RenderRecImpl: React.FC<RenderRecImplArgs> = ({ rec, renderOverrides, dept
 export type RenderOverride = [string, RenderAnyType];
 
 interface RenderRecArgs {
-  rec: Record<string, any>;
+  rec: any;
   renderOverrides?: RenderOverride[];
 }
 

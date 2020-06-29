@@ -1,11 +1,10 @@
-//
 import * as TE from 'fp-ts/lib/TaskEither';
-import * as E from 'fp-ts/lib/Either';
 import * as Arr from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/pipeable';
 import _ from "lodash";
 import { MetaFile } from '../logging/logging';
 import { diffByChars, Change } from 'commons';
+import { ExtractionRecord } from './extraction-records';
 
 export interface Field {
   name: string;
@@ -66,9 +65,8 @@ export interface ExtractionEnv {
   metaProps: MetaFile;
   responseMimeType: string;
   fileContentMap: { [k in keyof NormalForms]?: FileContentValue };
-  fields: Field[];
+  extractionRecord: ExtractionRecord;
   evidence: string[];
-  attemptError?: string;
   verbose: boolean;
 }
 
@@ -110,26 +108,7 @@ export function nonFatalFailure(result: string): ExtractionResult {
 
 export type BindFunction<E, A> = (env: A) => TE.TaskEither<E, A>;
 
-export function bindTasksEA<E = unknown, A = unknown>(
-  init: A,
-  fs: BindFunction<E, A>[]
-): TE.TaskEither<E, A> {
-
-  const f1 = fs[0];
-  const frest = fs.slice(1);
-  const r1 = f1(init);
-
-  const result = Arr.array.reduce(frest, r1, (
-    acc: TE.TaskEither<E, A>,
-    el: BindFunction<E, A>
-  ) => {
-    return pipe(acc, TE.chain(el));
-  });
-
-  return result;
-}
-
-export function bindTasksEAF<E = unknown, A = unknown>(
+export function flatMapTasksEA<E = unknown, A = unknown>(
   fs: BindFunction<E, A>[]
 ): BindFunction<E, A> {
 
@@ -147,18 +126,4 @@ export function bindTasksEAF<E = unknown, A = unknown>(
   });
 
   return result;
-}
-
-export function bindTasks(
-  init: ExtractionEnv,
-  fs: ExtractionFunction[]
-): TE.TaskEither<string, ExtractionEnv> {
-  return bindTasksEA<string, ExtractionEnv>(init, fs);
-}
-
-export function doPipeline(
-  init: ExtractionEnv,
-  fs: ExtractionFunction[]
-): Promise<E.Either<string, ExtractionEnv>> {
-  return bindTasks(init, fs)();
 }
