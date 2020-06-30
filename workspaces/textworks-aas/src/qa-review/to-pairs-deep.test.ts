@@ -1,7 +1,7 @@
 import "chai";
 import _ from "lodash";
-import { toPairsDeep } from './view-files';
-import { prettyPrint } from 'commons/dist';
+// import { prettyPrint } from 'commons';
+import { toQualifiedPaths, toObjectPath } from './to-pairs-deep';
 
 describe("toPairsDeep implementation", () => {
 
@@ -31,39 +31,34 @@ describe("toPairsDeep implementation", () => {
     bar: "some bar value",
   };
 
-  it.only("should create a list of all paths/values in object", () => {
-    const deepPairs = toPairsDeep(sampleRec);
-    _.each(deepPairs, (pathAndValue) => {
-      if (pathAndValue.length === 3) {
-        const [path, valueType, value] = pathAndValue;
-        const recValue = _.get(sampleRec, path);
-        expect(recValue).toBe(value);
-      }
-    });
-    prettyPrint({ deepPairs });
-  });
 
   it("should create a list of all paths/values in object", () => {
     const examples = [
-      [],
-      {},
-      ['a', 1],
-      { a: 1 },
-      { l: [] },
-      { m: {} },
+      sampleRec,
+      {
+        a0: {
+          b0: ['c0', 'c1'],
+          b1: ['c2', 'c3'],
+        },
+        a1: {
+          b0: 42,
+          b1: 'Forty Two',
+        },
+      },
     ];
 
     _.each(examples, example => {
-      const deepPairs = toPairsDeep(example);
-      _.each(deepPairs, (pathAndValue) => {
-        if (pathAndValue.length === 3) {
-          const [path, valueType, value] = pathAndValue;
-          const recValue = _.get(example, path);
+      const pathPairs = toQualifiedPaths(example);
+      _.each(pathPairs, (qualPath) => {
+        const [, value] = qualPath;
+        const opath = toObjectPath(qualPath);
+        if (value) {
+          const recValue = _.get(example, opath);
           expect(recValue).toBe(value);
         }
       });
-      // prettyPrint({ example, deepPairs });
 
+      // prettyPrint({ example, pathPairs });
     });
   });
 })
