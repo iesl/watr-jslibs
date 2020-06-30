@@ -5,8 +5,10 @@ import { useApp, useFocusManager, Text, Newline } from "ink";
 import * as ink from "ink";
 import ansiEscapes from 'ansi-escapes';
 import { useKeymap } from '~/qa-review/keymaps';
-import { RenderRec, RenderAnyTruncated, text, Col } from '~/qa-review/ink-widgets';
+import { text, Col, Row } from '~/qa-review/ink-widgets';
 import { CheckBox, defaultStateIndicators } from '~/qa-review/ink-checkbox';
+import { toPairsDeep } from '~/qa-review/view-files';
+import { RenderRecPaths, RenderRec, RenderAnyTruncated } from '~/qa-review/ink-records';
 
 const KeymapDemo: React.FC<{}> = ({ }) => {
   const { exit } = useApp();
@@ -68,6 +70,8 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     ],
     bar: "some bar value",
   };
+  // Render Record w/left margin controls
+
   const [cbInfo, setCBInfo] = useState<[number, number]>([0, 0])
 
   const cbStateCallback = (cbIndex: number) => (cbState: number) => {
@@ -75,7 +79,6 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
   };
 
   useEffect(() => {
-
   }, [cbInfo]);
 
   const focusables = _.map(_.range(4), index => {
@@ -86,21 +89,35 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
       stateIndicators={defaultStateIndicators(3)}
     />
   });
+
+  const sampleRecPathPairs = toPairsDeep(sampleRec);
+
   return (
     <Col marginLeft={1} >
 
-      <Col marginLeft={1} marginBottom={1} width="80%" >
-        {text('Record Display')}
-        <Newline />
+      <Row marginLeft={1} marginRight={3} width="80%" >
 
-        <RenderRec
-          rec={sampleRec}
-          renderOverrides={[
-            ['overlong', RenderAnyTruncated],
-            ['priest', RenderAnyTruncated],
-          ]}
-        />
-      </Col>
+        <Col>
+          {text('Record Display')}
+          <Newline />
+
+          <RenderRec
+            rec={sampleRec}
+            renderOverrides={[
+              ['overlong', RenderAnyTruncated],
+              ['priest', RenderAnyTruncated],
+            ]}
+          />
+
+        </Col>
+
+        <Col>
+          {text('Updated Ver.')}
+          <Newline />
+          <RenderRecPaths recPaths={sampleRecPathPairs} />
+        </Col>
+
+      </Row>
       <Col>
         {focusables}
       </Col>

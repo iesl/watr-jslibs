@@ -1,14 +1,13 @@
 //
 import _ from "lodash";
 import React, { useState, useEffect } from "react";
-import { useApp } from "ink";
+import { useApp, Text } from "ink";
 import * as ink from "ink";
-import { BufferedLogger, ExpandedDir } from "commons";
+import { ExpandedDir } from "commons";
 import ansiEscapes from 'ansi-escapes';
 import path from "path";
 
 //@ts-ignore
-import Divider from 'ink-divider';
 import { useMnemonicKeydefs, useKeymap } from './keymaps';
 import { RenderRec, RenderAnyTruncated, text, blue, bold, Row, red, Col } from './ink-widgets';
 import { openFileWithLess, openFileWithBrowser } from './view-files';
@@ -20,7 +19,6 @@ import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extr
 
 interface AppArgs {
   entryPath: ExpandedDir;
-  logger: BufferedLogger;
 }
 
 const abstractGroundTruthFilename = 'abstracts-ground-truth.json';
@@ -87,6 +85,12 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
     addKeys("(m)ark (i)ncorrect", () => labelGroundTruth('incorrect'));
     addKeys("(u)n (m)ark", () => undefined);
 
+    // add q/a controls
+    // const controlOverrides = [];
+    //  ['exists', CheckBox]
+    //  ['count', CheckBox && EditNumber]
+    //  ['value', CheckBox && EditString]
+
   }, []);
 
 
@@ -94,8 +98,8 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
 
   return (
     <Col>
-      <Col marginBottom={2} >
-        <Divider title={'Entry'} />
+      <Col width="75%" marginBottom={2} >
+        <Text>---- Entry ------</Text>
         <Row margin={1} >
           {bold(red(text('Path: ')))}
           {bold(blue(text(path.basename(entryPath.dir))))}
@@ -103,13 +107,13 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
         <RenderRec
           rec={extractionRecord}
           renderOverrides={[
-            ['changes', RenderAnyTruncated]
+            // ['changes', RenderAnyTruncated]
           ]}
         />
       </Col>
 
       <Col marginLeft={4} marginBottom={1} marginTop={2} >
-        <Divider title={'Menu'} />
+        <Text>--- Menu -----</Text>
         {keymapElem}
       </Col>
 
@@ -117,14 +121,13 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
   );
 };
 
-export function runInteractiveReviewUI({ entryPath, logger }: AppArgs): Promise<void> {
+export function runInteractiveReviewUI({ entryPath }: AppArgs): Promise<void> {
   process.stdout.write(ansiEscapes.clearTerminal);
   process.stdout.write(ansiEscapes.clearScreen);
   process.stdout.write(ansiEscapes.cursorDown(1));
 
   const app = ink.render(
     <App
-      logger={logger}
       entryPath={entryPath}
     />
   );

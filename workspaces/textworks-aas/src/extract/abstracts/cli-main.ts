@@ -99,17 +99,15 @@ export async function runMainExtractAbstracts(
 
 
 export async function runMainInteractiveFieldReview(
-  cacheRoot: string,
-  logpath: string,
+  corpusRoot: string
 ): Promise<void> {
 
-  const dirEntryStream = walkScrapyCacheCorpus(cacheRoot);
-  const logger = initLogger(logpath, "interactive-review", true);
+  const dirEntryStream = walkScrapyCacheCorpus(corpusRoot);
   const pumpBuilder = streamPump.createPump()
     .viaStream<string>(dirEntryStream)
     .throughF(expandDir)
     .tap((entryPath) => {
-      return runInteractiveReviewUI({ entryPath, logger });
+      return runInteractiveReviewUI({ entryPath });
     })
 
   return pumpBuilder.toPromise()

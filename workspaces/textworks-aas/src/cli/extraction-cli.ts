@@ -77,10 +77,8 @@ registerCmd(
 )((args: any) => {
 
   const { corpusRoot } = args;
-  const logpath = corpusRoot;
 
   runMainInteractiveFieldReview(
-    corpusRoot,
-    logpath,
+    corpusRoot
   );
 });
