@@ -1,6 +1,5 @@
 import _ from "lodash";
 
-type ToPairsDeepArg = Array<any> | _.AnyKindOfDictionary;
 type ObjectPath = string[];
 type ObjectPathAndPrimitive = Readonly<[ObjectPath, string, any]>;
 type ObjectPathOnly = Readonly<[ObjectPath, string]>;
@@ -12,24 +11,28 @@ export interface PathPart {
   n: number;
   sibs: number;
   pathType: string;
-  value?: any;
 }
 
-type PathParts = PathPart[];
-type QualifiedPath = Readonly<[PathParts]>;
-type QualifiedValue = Readonly<[PathParts, any]>;
-type QualifiedPathValue = QualifiedPath | QualifiedValue;
+export type PathParts = PathPart[];
+export type QualifiedKey = Readonly<[PathParts]>;
+export type QualifiedKeyValue = Readonly<[PathParts, any]>;
+export type QualifiedPath = QualifiedKey | QualifiedKeyValue;
 
-export function toObjectPath(qp: QualifiedPathValue): string[] {
+export function toObjectPath(qp: QualifiedPath): string[] {
   return _.map(qp[0], p => p.key);
 }
 
-export function toQualifiedPaths(obj: ToPairsDeepArg): QualifiedPathValue[] {
+type ArgType = Array<any> | _.AnyKindOfDictionary;
+
+/**
+ * Recursively gather all paths and values in an object
+ */
+export function toQualifiedPaths(obj: ArgType): QualifiedPath[] {
 
   function _loop(
     subobj: any,
     parentPath: PathParts
-  ): QualifiedPathValue[] {
+  ): QualifiedPath[] {
 
     if (_.isArray(subobj)) {
       const subPaths = _.flatMap(subobj, (entry, i) => {

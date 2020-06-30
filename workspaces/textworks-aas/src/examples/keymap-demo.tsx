@@ -7,8 +7,8 @@ import ansiEscapes from 'ansi-escapes';
 import { useKeymap } from '~/qa-review/keymaps';
 import { text, Col, Row } from '~/qa-review/ink-widgets';
 import { CheckBox, defaultStateIndicators } from '~/qa-review/ink-checkbox';
-import { toPairsDeep } from '~/qa-review/view-files';
-import { RenderRecPaths, RenderRec, RenderAnyTruncated } from '~/qa-review/ink-records';
+import { RenderRec, RenderAnyTruncated, RenderQualifiedPath } from '~/qa-review/ink-records';
+import { toQualifiedPaths, toObjectPath } from '~/qa-review/to-pairs-deep';
 
 const KeymapDemo: React.FC<{}> = ({ }) => {
   const { exit } = useApp();
@@ -38,7 +38,7 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     addKeymapping({ keys: "c2", desc: "(c)lose 2", action: () => { exit(); } });
   }, []);
 
-  const sampleRec: Record<string, any> = {
+  const sampleRec1: Record<string, any> = {
     foo: "some foo value",
     quux: [
       {
@@ -70,6 +70,30 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     ],
     bar: "some bar value",
   };
+  const sampleRec2: Record<string, any> = {
+    quux: [
+      {
+        alpha: {
+          omega: 1
+        },
+        crux: null,
+        crax: undefined,
+        gamma: {
+          romeo: 'capulet',
+          houses: 2,
+        },
+        baz: [
+          {
+            alpha: 'alpha',
+            beta: 33,
+          },
+          'alpha',
+          false,
+        ]
+      }
+    ],
+    bar: "some bar value",
+  };
   // Render Record w/left margin controls
 
   const [cbInfo, setCBInfo] = useState<[number, number]>([0, 0])
@@ -90,7 +114,13 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     />
   });
 
-  const sampleRecPathPairs = toPairsDeep(sampleRec);
+  const qualifiedPaths = toQualifiedPaths(sampleRec2);
+
+  const qpathRenders = _.map(qualifiedPaths, qpath => {
+    const opath = toObjectPath(qpath);
+    const [kpath, value] = qpath;
+    return <RenderQualifiedPath qpath={qpath}></RenderQualifiedPath>;
+  });
 
   return (
     <Col marginLeft={1} >
@@ -102,22 +132,22 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
           <Newline />
 
           <RenderRec
-            rec={sampleRec}
+            rec={sampleRec2}
             renderOverrides={[
               ['overlong', RenderAnyTruncated],
               ['priest', RenderAnyTruncated],
             ]}
           />
-
         </Col>
 
         <Col>
           {text('Updated Ver.')}
           <Newline />
-          <RenderRecPaths recPaths={sampleRecPathPairs} />
+          {qpathRenders}
         </Col>
 
       </Row>
+
       <Col>
         {focusables}
       </Col>

@@ -3,8 +3,8 @@ import _ from "lodash";
 import React from "react";
 import { Text, Box } from "ink";
 
-import { ObjectPathWithValue } from './view-files';
 import { text, boldBlue, Row, dim, gray, Col, bold, red, objKeyColor, kvSepColor, blue } from './ink-widgets';
+import { QualifiedPath, toObjectPath } from './to-pairs-deep';
 
 interface RenderAnyArgs {
   item: any;
@@ -37,16 +37,15 @@ export const RenderAny: React.FC<RenderAnyArgs> = ({ item, renderOverrides, dept
   const isPrimitive = _.isString(item) || _.isNumber(item) || _.isBoolean(item);
 
   if (isPrimitive) {
-    bold(blue(`${item}`))
-    return (
-      <Row>
-        <Text bold color="blue">{`${item}`}</Text>
-      </Row>
-    );
+    return bold(blue(`${item}`));
   }
 
   if (_.isNull(item)) {
     return boldBlue(text('null'));
+  }
+
+  if (_.isUndefined(item)) {
+    return boldBlue(text('undef'));
   }
 
   if (_.isArray(item)) {
@@ -155,67 +154,100 @@ export const RenderRec: React.FC<RenderRecArgs> = ({ rec, renderOverrides }) => 
 }
 
 
-
-interface RenderRecPathsArgs {
-  recPaths: ObjectPathWithValue[];
+interface RenderQualifiedPathArgs {
+  qpath: QualifiedPath;
 }
 
-interface RenderRecPathsImplArgs {
-  recPaths: ObjectPathWithValue[];
-}
 
-const RenderRecPathsImpl: React.FC<RenderRecPathsImplArgs> = ({ recPaths  }) => {
+export const RenderQualifiedPath: React.FC<RenderQualifiedPathArgs> = ({ qpath }) => {
+  const [kpath, value] = qpath;
+  const hasValue = qpath.length === 2;
 
-  const recSlices = _.map(recPaths, (pathAndValue, i) => {
-    const isJustPath = pathAndValue.length === 2;
-    const [path, valueType, value] = pathAndValue;
+  const parentPath = kpath.slice(0, kpath.length - 1);
 
-    const valueRender = isJustPath ?
-      (<Text>{valueType}</Text>) :
-      (<RenderAny item={value} depth={0} />);
+  const indentIndicators = _.map(parentPath, (pathPart, partIndex) => {
+    const { key, n, sibs, pathType } = pathPart;
 
-    const pathLeading = path.slice(0, path.length - 1);
-    const pathLast = path[path.length - 1] || 'root';
-    const lastIsNumeric = /\d+/.test(pathLast);
+    const localKeyPrefix = kpath.slice(0, partIndex).map(p => p.key).join(".");
+    const localKey = `${localKeyPrefix}.${key}`;
 
-    const capCaseKey = capitalizeDottedString(pathLast);
+    const isFirst = n === 0;
+    const isLast = n === sibs - 1;
+    const isSolo = sibs === 1;
+    const isNotEnd = !(isLast || isSolo);
 
-    if (isJustPath) {
-      if (valueType === 'array') {
 
-      }
+    const isArrayIndex = /^\d+$/.test(key);
+
+    if (isArrayIndex) {
+      return (
+        <Box key={localKey} >
+          {text(' ')}
+        </Box>
+      );
     }
+    const prefix = isNotEnd? mid : '';
 
-    const pathLastRender = lastIsNumeric ?
-      <Text>{`-${capCaseKey}   `}</Text> :
-      <Text>{`:${capCaseKey} ->`}</Text>;
-
-    const pathRender = _.map(pathLeading, (pathPart) => {
-      const isNumeric = /\d+/.test(pathPart);
-      if (isNumeric) {
-        return <Text>{'|    '}</Text>
-      }
-      return <Text>{'{    '}</Text>
-    });
-
-    const recSlice = (
-      <Row key={`k#${i}`}>
-        {pathRender}
-        {pathLastRender}
-        {valueRender}
-      </Row>
+    return (
+      <Box key={localKey} marginRight={4}>
+        {dim(gray(prefix))}
+      </Box>
     );
-
-    return recSlice;
   });
 
+  let itemBox = <Text></Text>;
+
+  if (hasValue) {
+    itemBox = <RenderAny item={value} depth={0} renderOverrides={[]} />;
+  }
+
+  const keyPath = _.last(kpath);
+  if (keyPath) {
+    const { key, n, sibs, pathType } = keyPath;
+    const isFirst = n === 0;
+    const isLast = n === sibs - 1;
+    const isSolo = sibs === 1;
+
+    const opath = toObjectPath(qpath);
+    const opathKey = opath.join('.');
+
+    if (pathType === 'array') {
+      if (!hasValue) return null;
+
+      return (
+        <Box key={`${opathKey}:${key}`}>
+          {indentIndicators}
+          {dim(gray(`${n}.`))}
+          <Box marginLeft={2}>
+            {itemBox}
+          </Box>
+        </Box>
+      );
+    }
+
+    const prefixChar = isSolo ? sole
+      : isFirst ? fst
+        : isLast ? lst
+          : mid;
+
+    const padRight = 2;
+    const capCaseKey = capitalizeDottedString(key)
+      .padEnd(padRight);
+
+    return (
+      <Box key={`${opathKey}:${key}`}>
+        {indentIndicators}
+        {dim(gray(prefixChar))}
+        {objKeyColor(capCaseKey)}
+        {kvSepColor(' ─> ')}
+        <Box marginLeft={2}>
+          {itemBox}
+        </Box>
+      </Box>
+    );
+  }
+
   return (
-    <Col>
-      {recSlices}
-    </Col>
+    <Row>{indentIndicators}</Row>
   );
 };
-
-export const RenderRecPaths: React.FC<RenderRecPathsArgs> = ({ recPaths }) => {
-  return <RenderRecPathsImpl recPaths={recPaths} />
-}

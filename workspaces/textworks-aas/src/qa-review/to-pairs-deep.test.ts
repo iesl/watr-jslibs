@@ -1,21 +1,21 @@
 import "chai";
 import _ from "lodash";
-// import { prettyPrint } from 'commons';
+import { prettyPrint } from 'commons';
 import { toQualifiedPaths, toObjectPath } from './to-pairs-deep';
 
 describe("toPairsDeep implementation", () => {
 
   const sampleRec: Record<string, any> = {
-    foo: "some foo value",
     quux: [
       {
-        alpha: 'alpha',
+        alpha: {
+          omega: 1
+        },
         crux: null,
         crax: undefined,
         gamma: {
           romeo: 'capulet',
           houses: 2,
-          priest: 'roman, but really not, I do not think',
         },
         baz: [
           {
@@ -24,7 +24,6 @@ describe("toPairsDeep implementation", () => {
           },
           'alpha',
           false,
-          'gamma',
         ]
       }
     ],
@@ -35,16 +34,16 @@ describe("toPairsDeep implementation", () => {
   it("should create a list of all paths/values in object", () => {
     const examples = [
       sampleRec,
-      {
-        a0: {
-          b0: ['c0', 'c1'],
-          b1: ['c2', 'c3'],
-        },
-        a1: {
-          b0: 42,
-          b1: 'Forty Two',
-        },
-      },
+      // {
+      //   a0: {
+      //     b0: ['c0', 'c1'],
+      //     b1: ['c2', 'c3'],
+      //   },
+      //   a1: {
+      //     b0: 42,
+      //     b1: 'Forty Two',
+      //   },
+      // },
     ];
 
     _.each(examples, example => {
@@ -58,7 +57,7 @@ describe("toPairsDeep implementation", () => {
         }
       });
 
-      // prettyPrint({ example, pathPairs });
+      prettyPrint({ example, pathPairs });
     });
   });
 })
