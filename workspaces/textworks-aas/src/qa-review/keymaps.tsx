@@ -126,7 +126,8 @@ export function useKeymap(): [(k: KeymapEntry) => void, JSX.Element] {
 
   useInput((input, mods) => {
 
-    if (input === 'q') {
+    const isCtrlC = (input.toLowerCase() === 'c' && mods.ctrl);
+    if (isCtrlC) {
       process.exit();
     }
 

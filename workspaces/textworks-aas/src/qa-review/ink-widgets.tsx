@@ -10,6 +10,7 @@ export const dim: ModJSX = e => <Text dimColor>{e}</Text>;
 export const dimGray: ModJSX = e => <Text dimColor color="gray">{e}</Text>;
 export const gray: ModJSX = e => <Text color="gray">{e}</Text>;
 export const bold: ModJSX = e => <Text bold>{e}</Text>;
+export const wrap: ModJSX = e => <Text wrap="wrap">{e}</Text>;
 export const red: ModJSX = e => <Text color="red">{e}</Text>;
 export const blue: ModJSX = e => <Text color="blue">{e}</Text>;
 export const boldBlue: ModJSX = e => <Text bold color="blue">{e}</Text>;

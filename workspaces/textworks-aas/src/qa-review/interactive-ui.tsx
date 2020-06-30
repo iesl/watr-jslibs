@@ -1,7 +1,7 @@
 //
 import _ from "lodash";
 import React, { useState, useEffect } from "react";
-import { useApp, Text } from "ink";
+import { useApp, Text, useFocusManager } from "ink";
 import * as ink from "ink";
 import { ExpandedDir } from "commons";
 import ansiEscapes from 'ansi-escapes';
@@ -9,12 +9,15 @@ import path from "path";
 
 //@ts-ignore
 import { useMnemonicKeydefs, useKeymap } from './keymaps';
-import { RenderRec, RenderAnyTruncated, text, blue, bold, Row, red, Col } from './ink-widgets';
+import { text, blue, bold, Row, red, Col } from './ink-widgets';
 import { openFileWithLess, openFileWithBrowser } from './view-files';
 import { readExtractionRecord } from '~/extract/abstracts/extract-abstracts';
 import { resolveCachedNormalFile } from '~/extract/core/field-extract';
 import { updateCorpusJsonFile, readCorpusJsonFile, listCorpusArtifacts } from '~/corpora/corpus-file-walkers';
 import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extract/core/ground-truth-records';
+import { toQualifiedPaths, toObjectPath } from './to-pairs-deep';
+import { CheckBox, defaultStateIndicators } from './ink-checkbox';
+import { RenderQualifiedPath } from './ink-records';
 
 
 interface AppArgs {
@@ -65,12 +68,58 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
     }
   };
 
+  const [cbInfo, setCBInfo] = useState<[number, number]>([0, 0])
+
+  const cbStateCallback = (cbIndex: number) => (cbState: number) => {
+    setCBInfo([cbIndex, cbState]);
+  };
+
+  const extractionRecordRows = toQualifiedPaths(extractionRecord);
+
+  const extractionRecordStrata = _.map(extractionRecordRows, (qpath, index) => {
+    const [kpath] = qpath;
+    const localKey = kpath.slice(0, index).map(p => p.key).join(".");
+
+    let leftMarginControls = (<Row></Row>);
+
+    const shouldHaveCheckbox = /(value|count|exists)/.test(localKey);
+
+    if (shouldHaveCheckbox) {
+      const checkbox = (
+        <CheckBox
+          key={`cb.${localKey}#${index}`}
+          label={`${index} -`}
+          initialState={0}
+          stateCallback={cbStateCallback(index)}
+          stateIndicators={defaultStateIndicators(3)}
+        />);
+
+      leftMarginControls = checkbox;
+    }
+
+    const qpathRender = <RenderQualifiedPath key={`rqp.${localKey}#${index}`} qpath={qpath}></RenderQualifiedPath>;
+
+    return (
+      <Row key={`row.${localKey}#${index}`}>
+        <Row width={10}>
+          {leftMarginControls}
+        </Row>
+        <Row>
+          {qpathRender}
+        </Row>
+      </Row>
+    );
+  });
+
+
   const [addKeymapping, keymapElem] = useKeymap();
+  const focusManager = useFocusManager();
   const addKeys = useMnemonicKeydefs(addKeymapping);
 
   useEffect(() => {
     // Add keymappings
     addKeys("(n)ext", () => exit());
+    addKeys("(q)uit", () => process.exit());
     const { dir } = entryPath;
 
     const cssNormPath = resolveCachedNormalFile(dir, 'css-normal');
@@ -85,11 +134,8 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
     addKeys("(m)ark (i)ncorrect", () => labelGroundTruth('incorrect'));
     addKeys("(u)n (m)ark", () => undefined);
 
-    // add q/a controls
-    // const controlOverrides = [];
-    //  ['exists', CheckBox]
-    //  ['count', CheckBox && EditNumber]
-    //  ['value', CheckBox && EditString]
+    addKeymapping({ keys: "j", desc: "focus next", action: () => { focusManager.focusNext(); } });
+    addKeymapping({ keys: "k", desc: "focus prev", action: () => { focusManager.focusPrevious(); } });
 
   }, []);
 
@@ -104,13 +150,11 @@ const App: React.FC<AppArgs> = ({ entryPath }) => {
           {bold(red(text('Path: ')))}
           {bold(blue(text(path.basename(entryPath.dir))))}
         </Row>
-        <RenderRec
-          rec={extractionRecord}
-          renderOverrides={[
-            // ['changes', RenderAnyTruncated]
-          ]}
-        />
+
+        {extractionRecordStrata}
       </Col>
+
+      <Text>CheckBox #{cbInfo[0]} updated to {cbInfo[1]}</Text>
 
       <Col marginLeft={4} marginBottom={1} marginTop={2} >
         <Text>--- Menu -----</Text>

@@ -22,7 +22,8 @@ export function toObjectPath(qp: QualifiedPath): string[] {
   return _.map(qp[0], p => p.key);
 }
 
-type ArgType = Array<any> | _.AnyKindOfDictionary;
+// type ArgType = Array<any> | _.AnyKindOfDictionary;
+type ArgType = any;
 
 /**
  * Recursively gather all paths and values in an object

@@ -7,8 +7,42 @@ import ansiEscapes from 'ansi-escapes';
 import { useKeymap } from '~/qa-review/keymaps';
 import { text, Col, Row } from '~/qa-review/ink-widgets';
 import { CheckBox, defaultStateIndicators } from '~/qa-review/ink-checkbox';
-import { RenderRec, RenderAnyTruncated, RenderQualifiedPath } from '~/qa-review/ink-records';
-import { toQualifiedPaths, toObjectPath } from '~/qa-review/to-pairs-deep';
+import { RenderQualifiedPath } from '~/qa-review/ink-records';
+import { toQualifiedPaths } from '~/qa-review/to-pairs-deep';
+import fs from "fs-extra";
+import path from "path";
+
+const sampleRec2: Record<string, any> = {
+  quux: [
+    {
+      alpha: {
+        omega: 1
+      },
+      crux: null,
+      crax: undefined,
+      gamma: {
+        romeo: 'capulet',
+        houses: 2,
+      },
+      baz: [
+        {
+          alpha: 'alpha',
+          beta: 33,
+        },
+        'alpha',
+        false,
+      ]
+    }
+  ],
+  bar: "some bar value",
+};
+
+const switchRecord = (): any => {
+  const testDirPath = './test/resources/extraction-records';
+  const recFile = path.resolve(testDirPath, 'extraction-records.0.json');
+  const content = fs.readJsonSync(recFile);
+  return content;
+}
 
 const KeymapDemo: React.FC<{}> = ({ }) => {
   const { exit } = useApp();
@@ -16,48 +50,7 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
   const [addKeymapping, keymapElem] = useKeymap();
   const focusManager = useFocusManager();
 
-  useEffect(() => {
-    addKeymapping({
-      keys: "q",
-      desc: "quit",
-      action: () => { process.exit(); }
-    });
-
-    addKeymapping({ keys: "j", desc: "focus next", action: () => { focusManager.focusNext(); } });
-    addKeymapping({ keys: "k", desc: "focus prev", action: () => { focusManager.focusPrevious(); } });
-
-    addKeymapping({ keys: "vab", desc: "(v)iew a b", action: () => { exit(); } });
-    addKeymapping({ keys: "vac", desc: "(v)iew a c", action: () => { exit(); } });
-    addKeymapping({ keys: "vba", desc: "(v)iew b a", action: () => { exit(); } });
-    addKeymapping({ keys: "vbb", desc: "(v)iew b b", action: () => { exit(); } });
-
-  }, []);
-
-  const sampleRec2: Record<string, any> = {
-    quux: [
-      {
-        alpha: {
-          omega: 1
-        },
-        crux: null,
-        crax: undefined,
-        gamma: {
-          romeo: 'capulet',
-          houses: 2,
-        },
-        baz: [
-          {
-            alpha: 'alpha',
-            beta: 33,
-          },
-          'alpha',
-          false,
-        ]
-      }
-    ],
-    bar: "some bar value",
-  };
-
+  const currentRecord = switchRecord();
 
   const [cbInfo, setCBInfo] = useState<[number, number]>([0, 0])
 
@@ -65,16 +58,14 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     setCBInfo([cbIndex, cbState]);
   };
 
-  const qualifiedPaths = toQualifiedPaths(sampleRec2);
+  const qualifiedPaths = toQualifiedPaths(currentRecord);
 
   const qpathRenders = _.map(qualifiedPaths, (qpath, index) => {
-    const opath = toObjectPath(qpath);
-    const [kpath, value] = qpath;
+    const [kpath] = qpath;
     const localKey = kpath.slice(0, index).map(p => p.key).join(".");
 
     let leftMarginControls = (<Row></Row>);
-
-    const shouldHaveCheckbox = /alpha/.test(localKey);
+    const shouldHaveCheckbox = false; // /(exists|count|value)/.test(localKey);
 
     if (shouldHaveCheckbox) {
       const checkbox = (
@@ -93,7 +84,7 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
 
     return (
       <Row key={`row.${localKey}#${index}`}>
-        <Row width="20%">
+        <Row width={12}>
           {leftMarginControls}
         </Row>
         <Row>
@@ -103,23 +94,28 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     );
   });
 
+  useEffect(() => {
+    addKeymapping({
+      keys: "q",
+      desc: "quit",
+      action: () => { process.exit(); }
+    });
+
+    addKeymapping({ keys: "j", desc: "focus next", action: () => { focusManager.focusNext(); } });
+    addKeymapping({ keys: "k", desc: "focus prev", action: () => { focusManager.focusPrevious(); } });
+
+    addKeymapping({ keys: "vab", desc: "(v)iew a b", action: () => { exit(); } });
+    addKeymapping({ keys: "vac", desc: "(v)iew a c", action: () => { exit(); } });
+    addKeymapping({ keys: "vba", desc: "(v)iew b a", action: () => { exit(); } });
+    addKeymapping({ keys: "vbb", desc: "(v)iew b b", action: () => { exit(); } });
+
+  }, []);
+
+
   return (
     <Col marginLeft={1} >
 
       <Row marginLeft={1} marginRight={3} width="80%" >
-
-        <Col>
-          {text('Record Display')}
-          <Newline />
-
-          <RenderRec
-            rec={sampleRec2}
-            renderOverrides={[
-              ['overlong', RenderAnyTruncated],
-              ['priest', RenderAnyTruncated],
-            ]}
-          />
-        </Col>
 
         <Col>
           {text('Updated Ver.')}
@@ -140,6 +136,7 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
   );
 
 };
+
 
 export async function runKeymapDemo(): Promise<void> {
   process.stdout.write(ansiEscapes.clearTerminal);

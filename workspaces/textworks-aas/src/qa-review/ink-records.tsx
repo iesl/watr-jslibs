@@ -3,7 +3,7 @@ import _ from "lodash";
 import React from "react";
 import { Text, Box } from "ink";
 
-import { text, boldBlue, Row, dim, gray, Col, bold, red, objKeyColor, kvSepColor, blue } from './ink-widgets';
+import { text, boldBlue, Row, dim, gray, Col, bold, red, objKeyColor, kvSepColor, blue, wrap } from './ink-widgets';
 import { QualifiedPath, toObjectPath } from './to-pairs-deep';
 
 interface RenderAnyArgs {
@@ -37,7 +37,7 @@ export const RenderAny: React.FC<RenderAnyArgs> = ({ item, renderOverrides, dept
   const isPrimitive = _.isString(item) || _.isNumber(item) || _.isBoolean(item);
 
   if (isPrimitive) {
-    return bold(blue(`${item}`));
+    return wrap(bold(blue(`${item}`)));
   }
 
   if (_.isNull(item)) {
@@ -218,7 +218,7 @@ export const RenderQualifiedPath: React.FC<RenderQualifiedPathArgs> = ({ qpath }
         <Box key={`${opathKey}:${key}`}>
           {indentIndicators}
           {dim(gray(`${n}.`))}
-          <Box marginLeft={2}>
+          <Box marginLeft={2} >
             {itemBox}
           </Box>
         </Box>
@@ -230,17 +230,15 @@ export const RenderQualifiedPath: React.FC<RenderQualifiedPathArgs> = ({ qpath }
         : isLast ? lst
           : mid;
 
-    const padRight = 2;
-    const capCaseKey = capitalizeDottedString(key)
-      .padEnd(padRight);
+    const capCaseKey = capitalizeDottedString(key);
 
     return (
       <Box key={`${opathKey}:${key}`}>
         {indentIndicators}
         {dim(gray(prefixChar))}
         {objKeyColor(capCaseKey)}
-        {kvSepColor(' ─> ')}
-        <Box marginLeft={2}>
+        {kvSepColor('─>')}
+        <Box marginLeft={4} marginRight={4}>
           {itemBox}
         </Box>
       </Box>
