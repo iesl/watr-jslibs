@@ -31,45 +31,8 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     addKeymapping({ keys: "vba", desc: "(v)iew b a", action: () => { exit(); } });
     addKeymapping({ keys: "vbb", desc: "(v)iew b b", action: () => { exit(); } });
 
-    addKeymapping({ keys: "o1", desc: "(o)pen 1", action: () => { exit(); } });
-    addKeymapping({ keys: "o2", desc: "(o)pen 2", action: () => { exit(); } });
-
-    addKeymapping({ keys: "c1", desc: "(c)lose 1", action: () => { exit(); } });
-    addKeymapping({ keys: "c2", desc: "(c)lose 2", action: () => { exit(); } });
   }, []);
 
-  const sampleRec1: Record<string, any> = {
-    foo: "some foo value",
-    quux: [
-      {
-        alpha: 'alpha',
-        beta: 'beta',
-        gamma: {
-          romeo: 'capulet',
-          juliet: 'montague',
-          priest: 'roman, but really not, I do not think',
-        },
-        baz: [
-          {
-            alpha: 'alpha',
-            beta: 'beta',
-          },
-          'alpha',
-          'beta',
-          'gamma',
-        ],
-        overlong: [
-          'alpha',
-          'alpha',
-          'alpha',
-          'beta',
-          'gamma',
-        ],
-        delta: 'delta',
-      }
-    ],
-    bar: "some bar value",
-  };
   const sampleRec2: Record<string, any> = {
     quux: [
       {
@@ -94,7 +57,7 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     ],
     bar: "some bar value",
   };
-  // Render Record w/left margin controls
+
 
   const [cbInfo, setCBInfo] = useState<[number, number]>([0, 0])
 
@@ -102,24 +65,42 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
     setCBInfo([cbIndex, cbState]);
   };
 
-  useEffect(() => {
-  }, [cbInfo]);
-
-  const focusables = _.map(_.range(4), index => {
-    return <CheckBox
-      label={`key#${index}`}
-      initialState={0}
-      stateCallback={cbStateCallback(index)}
-      stateIndicators={defaultStateIndicators(3)}
-    />
-  });
-
   const qualifiedPaths = toQualifiedPaths(sampleRec2);
 
-  const qpathRenders = _.map(qualifiedPaths, qpath => {
+  const qpathRenders = _.map(qualifiedPaths, (qpath, index) => {
     const opath = toObjectPath(qpath);
     const [kpath, value] = qpath;
-    return <RenderQualifiedPath qpath={qpath}></RenderQualifiedPath>;
+    const localKey = kpath.slice(0, index).map(p => p.key).join(".");
+
+    let leftMarginControls = (<Row></Row>);
+
+    const shouldHaveCheckbox = /alpha/.test(localKey);
+
+    if (shouldHaveCheckbox) {
+      const checkbox = (
+        <CheckBox
+          key={`cb.${localKey}#${index}`}
+          label={`${index} -`}
+          initialState={0}
+          stateCallback={cbStateCallback(index)}
+          stateIndicators={defaultStateIndicators(3)}
+        />);
+
+      leftMarginControls = checkbox;
+    }
+
+    const qpathRender = <RenderQualifiedPath key={`rqp.${localKey}#${index}`} qpath={qpath}></RenderQualifiedPath>;
+
+    return (
+      <Row key={`row.${localKey}#${index}`}>
+        <Row width="20%">
+          {leftMarginControls}
+        </Row>
+        <Row>
+          {qpathRender}
+        </Row>
+      </Row>
+    );
   });
 
   return (
@@ -148,9 +129,6 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
 
       </Row>
 
-      <Col>
-        {focusables}
-      </Col>
       <Text>CheckBox #{cbInfo[0]} updated to {cbInfo[1]}</Text>
 
       <Col marginLeft={1} marginBottom={1} width="80%" >
