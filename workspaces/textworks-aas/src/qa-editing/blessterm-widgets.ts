@@ -90,3 +90,34 @@ export function createListTable(opts: B.Widgets.ListTableOptions): B.Widgets.Lis
   const table = blessed.listtable(opts);
   return table;
 }
+
+export function createCheckBox(opts: B.Widgets.CheckboxOptions): B.Widgets.CheckboxElement {
+  return blessed.checkbox(opts);
+}
+
+export function createLayout(opts: B.Widgets.LayoutOptions): B.Widgets.LayoutElement {
+  return blessed.layout(opts);
+}
+
+export function createForm(opts: B.Widgets.FormOptions): B.Widgets.FormElement {
+  // submit.on('press', function() {
+  //   form.submit();
+  // });
+
+  // cancel.on('press', function() {
+  //   form.reset();
+  // });
+
+  // form.on('submit', function(data) {
+  //   form.setContent('Submitted.');
+  //   screen.render();
+  // });
+
+  // form.on('reset', function(data) {
+  //   form.setContent('Canceled.');
+  //   screen.render();
+  // });
+
+  return blessed.form(opts);
+}
+

@@ -1,7 +1,7 @@
 import _ from "lodash";
 import B from 'blessed';
 import { toQualifiedPaths, QualifiedPath } from '~/qa-review/to-pairs-deep';
-import { createListTable } from './blessterm-widgets';
+import { createListTable, createForm, createCheckBox } from './blessterm-widgets';
 import { blue, red, bold, StyledText, text, dim, gray, concatStyledText, wrapStyledText, textLength, appendStyledTexts } from './text-styling';
 
 const [fst, lst, mid, sole] = "╭╰│═".split(''); /*  "┏┗┃═" */
@@ -31,11 +31,22 @@ export function renderAnyVal(item: any): StyledText {
 
 export function renderQualifiedPaths<T>(inputRec: T): B.Widgets.ListTableElement {
   const qualifiedPaths = toQualifiedPaths(inputRec);
+  const controlForms = createForm({
+  });
+
   const qpathRenders = _.map(qualifiedPaths, (qpath, index) => {
     const [kpath] = qpath;
     const localKey = kpath.slice(0, index).map(p => p.key).join(".");
 
-    // const shouldHaveCheckbox = /(count|exists|value)/.test(localKey);
+    const shouldHaveCheckbox = /(count|exists|value)/.test(localKey);
+
+    if (shouldHaveCheckbox) {
+      const checkbox = createCheckBox({
+        parent: controlForms,
+        mouse: true,
+      });
+    }
+
     const qpathRender = renderQualifiedPath(qpath);
     const empty: string[] = [];
     const emptys: string = '';
@@ -80,6 +91,7 @@ export function renderQualifiedPaths<T>(inputRec: T): B.Widgets.ListTableElement
     }
   };
   const listTable = createListTable(ltopts)
+  listTable.append(controlForms);
 
   listTable.setData(headers);
   return listTable;
