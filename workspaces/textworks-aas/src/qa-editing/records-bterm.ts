@@ -33,11 +33,12 @@ export function layoutTreeWithInlineControls<T>(inputRec: T): B.Widgets.LayoutEl
   const qualifiedPaths = toQualifiedPaths(inputRec);
   const layout = createLayout({
     layout: 'inline',
-    // border: 'line',
     border: undefined,
     bg: "#343434",
-    width: "80%",
-    height: "50%",
+    top: 4,
+    left: 4,
+    width: "95%",
+    height: "95%",
   });
 
   const mainContent = createLayout({
@@ -100,7 +101,6 @@ export function layoutTreeWithInlineControls<T>(inputRec: T): B.Widgets.LayoutEl
         });
 
       } else {
-        // const filler = textDivBox(abbrevKey);
         const filler = textDivBox('');
         leftSide.append(filler);
       }
@@ -117,214 +117,6 @@ export function layoutTreeWithInlineControls<T>(inputRec: T): B.Widgets.LayoutEl
   });
 
   return layout;
-}
-
-export function layoutTreeWithControls<T>(inputRec: T): B.Widgets.LayoutElement {
-  const qualifiedPaths = toQualifiedPaths(inputRec);
-  const layout = createLayout({
-    layout: 'inline',
-    width: "100%",
-    height: "100%",
-  });
-  const leftSide = createLayout({
-    parent: layout,
-    layout: 'inline',
-    border: 'line',
-    bg: "#343434",
-    top: 0,
-    left: 0,
-    width: "20%-2",
-    height: "100%",
-  });
-
-  const rightSide = createLayout({
-    parent: layout,
-    layout: 'inline',
-    border: 'line',
-    bg: "#434343",
-    top: 0,
-    left: 0,
-    width: "80%-2",
-    height: "100%",
-  });
-
-  const controlForms = createForm({
-    parent: leftSide,
-  });
-
-  const controlPanelLayout = createLayout({
-    parent: controlForms,
-    layout: 'inline',
-    border: 'line',
-    bg: "#232323",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-  });
-
-  const qpathRenders = _.map(qualifiedPaths, (qpath, index) => {
-    const [kpath] = qpath;
-    const localKey = kpath.slice(0, index).map(p => p.key).join(".");
-
-    const shouldHaveCheckbox = /(count|exists|value|errors)/.test(localKey);
-
-    if (shouldHaveCheckbox) {
-
-      const [radioSet, buttons] = createRadios({
-        parent: controlPanelLayout,
-        name: 'name',
-        content: 'content',
-        label: "label",
-        text: "text",
-        width: "100%"
-      }, [
-        {
-          mouse: true,
-          keys: false,
-          shrink: true,
-          height: 1,
-          top: 0,
-          name: '?',
-          content: '!'
-        },
-        {
-          mouse: true,
-          keys: false,
-          shrink: true,
-          height: 1,
-          top: 0,
-          name: 'X',
-          content: 'x'
-        },
-        {
-          mouse: true,
-          keys: false,
-          shrink: true,
-          height: 1,
-          top: 0,
-          name: 'Y',
-          content: 'y'
-        },
-      ]);
-    }
-
-    const qpathRender = renderQualifiedPath(qpath);
-    const empty: string[] = [];
-    const emptys: string = '';
-    if (qpathRender.length === 0) return [emptys, empty] as const;
-
-    return [localKey, qpathRender] as const;
-  });
-
-  const recordRows = qpathRenders
-    .filter(p => p[1].length > 0);
-
-  const rows = _.flatMap(recordRows, ([key, recRender]) => {
-    return _.map(recRender, (rec, i) => {
-      return i === 0 ? [key, rec] : [' ...', rec];
-    });
-  });
-
-  const headers = [['Key', 'Record']];
-  headers.push(...rows)
-
-  const ltopts: B.Widgets.ListTableOptions = {
-    parent: rightSide,
-    data: undefined,
-    border: "line", // 'line'',
-    align: 'left',
-    tags: true,
-    keys: true,
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    vi: true,
-    mouse: false,
-    style: {
-      header: {
-        fg: 'blue',
-        bold: true
-      },
-      cell: {
-        selected: {
-          bg: 'blue'
-        }
-      }
-    }
-  };
-  const listTable = createListTable(ltopts)
-  listTable.setData(headers);
-  return layout;
-}
-export function renderQualifiedPaths<T>(inputRec: T): B.Widgets.ListTableElement {
-  const qualifiedPaths = toQualifiedPaths(inputRec);
-  const controlForms = createForm({
-  });
-
-  const qpathRenders = _.map(qualifiedPaths, (qpath, index) => {
-    const [kpath] = qpath;
-    const localKey = kpath.slice(0, index).map(p => p.key).join(".");
-
-    const shouldHaveCheckbox = /(count|exists|value)/.test(localKey);
-
-    if (shouldHaveCheckbox) {
-      const checkbox = createCheckBox({
-        parent: controlForms,
-        mouse: true,
-      });
-    }
-
-    const qpathRender = renderQualifiedPath(qpath);
-    const empty: string[] = [];
-    const emptys: string = '';
-    if (qpathRender.length === 0) return [emptys, empty] as const;
-
-    return [localKey, qpathRender] as const;
-  });
-
-  const recordRows = qpathRenders
-    .filter(p => p[1].length > 0);
-
-  const rows = _.flatMap(recordRows, ([key, recRender]) => {
-    return _.map(recRender, (rec, i) => {
-      return i === 0 ? [key, rec] : [' ...', rec];
-    });
-  });
-
-
-  const headers = [['Key', 'Record']];
-  headers.push(...rows)
-
-  const ltopts: B.Widgets.ListTableOptions = {
-    data: undefined,
-    border: undefined, // 'line'',
-    align: 'left',
-    tags: true,
-    keys: true,
-    // width: 'shrink',
-    // height: 'shrink',
-    vi: true,
-    mouse: true,
-    style: {
-      header: {
-        fg: 'blue',
-        bold: true
-      },
-      cell: {
-        selected: {
-          bg: 'blue'
-        }
-      }
-    }
-  };
-  const listTable = createListTable(ltopts)
-  listTable.append(controlForms);
-
-  listTable.setData(headers);
-  return listTable;
-
 }
 
 function renderQualifiedPath(qpath: QualifiedPath): string[] {
@@ -355,7 +147,7 @@ function renderQualifiedPath(qpath: QualifiedPath): string[] {
   const indentIndicators = indentIndicators0.length > 0 ?
     concatStyledText(indentIndicators0) : text('');
 
-  const valueLines: StyledText[] = hasValue ? wrapStyledText(100, renderAnyVal(item)) : [];
+  const valueLines: StyledText[] = hasValue ? wrapStyledText(180, renderAnyVal(item)) : [];
 
   const appendValueLines = (l: StyledText): StyledText[] => {
     if (valueLines.length === 0) {

@@ -9,7 +9,7 @@ import { readExtractionRecord } from '~/extract/abstracts/extract-abstracts';
 // import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extract/core/ground-truth-records';
 import { openFileWithLess, openFileWithBrowser } from '~/qa-review/view-files';
 import { appFrame, createScreen, textDivBox } from './blessterm-widgets';
-import { renderQualifiedPaths, layoutTreeWithControls, layoutTreeWithInlineControls } from './records-bterm';
+import { layoutTreeWithInlineControls } from './records-bterm';
 import { bold, red, blue } from './text-styling';
 
 const openWithLess = (filename: string) => () => {
@@ -23,8 +23,12 @@ const openWithBrowser = (filename: string) => () => {
 };
 
 
+import ansiEscapes from 'ansi-escapes';
 export async function interactiveUIAppMain(entryPath: ExpandedDir): Promise<void> {
 
+  process.stdout.write(ansiEscapes.clearTerminal);
+  process.stdout.write(ansiEscapes.clearScreen);
+  // process.stdout.write(ansiEscapes.cursorDown(1));
   const screen = createScreen();
 
   return new Promise((resolve, reject) => {
