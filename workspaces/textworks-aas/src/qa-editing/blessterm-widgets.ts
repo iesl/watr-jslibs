@@ -115,8 +115,16 @@ export function createRadios(
 
   let currLeft = 0;
   const buttons = _.map(buttonOpts, (o, bi) => {
-    const radio = blessed.radiobutton(o);
-    radio.left = currLeft;
+    const buttonOpts = _.merge({}, {
+      left: currLeft,
+      mouse: true,
+      keys: true,
+      top: 0,
+      height: 1,
+      shrink: true,
+    }, o);
+    const radio = blessed.radiobutton(buttonOpts);
+
     const isFirst = bi === 0;
     const prefix = " ";
     const suffix = " ";
@@ -135,22 +143,57 @@ export function createRadios(
       const content = `${prefix}${indicator}${suffix}`;
       const isChecked = this.checked;
 
-      this.style.fg =  isChecked? '#ffffff' : '#343434';
-      this.style.bg =  isChecked? '#0000ff' : '#442222';
+      this.style.fg = isChecked ? '#ffffff' : '#343434';
+      this.style.bg = isChecked ? '#0000ff' : '#442222';
       this.style.bold = isChecked;
 
       this.setContent(content, /* no-clear= */false, /* no-tags= */true);
       return this._render();
     }
-
     radioSet.append(radio);
     return radio;
   });
-
-
-
-
   return [radioSet, buttons];
+}
+
+export function createRadioEmmitter(
+  id: string,
+  radioCount: number
+): B.Widgets.FormElement {
+  const fopts = {
+    width: '100%',
+    height: 1,
+    style: {
+      // bg: "green"
+    }
+  };
+  const emitterForm = createForm(fopts);
+  const emitterLayout = createLayout({
+    parent: emitterForm, layout: 'inline',
+    top: 0, left: `100%-${radioCount*3}-1`, width: "shrink", height: "100%",
+    style: {
+      bg: "red"
+    }
+  });
+
+  const buttonOpts = _.map(_.range(radioCount), radioNum => {
+    return { name: `radio-${radioNum}` }
+  });
+
+  const [radioSet, buttons] = createRadios({
+    parent: emitterLayout,
+  }, buttonOpts);
+
+  _.each(buttons, (button, i) => {
+    button.on('check', () => {
+      emitterForm.emit('radio-select', { id, check: true, button: i });
+    });
+    button.on('uncheck', () => {
+      emitterForm.emit('radio-select', { id, check: false, button: i });
+    });
+  });
+
+  return emitterForm;
 }
 
 export function createForm(opts: B.Widgets.FormOptions): B.Widgets.FormElement {

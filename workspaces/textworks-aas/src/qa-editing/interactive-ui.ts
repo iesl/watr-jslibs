@@ -9,7 +9,7 @@ import { readExtractionRecord } from '~/extract/abstracts/extract-abstracts';
 // import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extract/core/ground-truth-records';
 import { openFileWithLess, openFileWithBrowser } from '~/qa-review/view-files';
 import { appFrame, createScreen, textDivBox } from './blessterm-widgets';
-import { renderQualifiedPaths, layoutTreeWithControls } from './records-bterm';
+import { renderQualifiedPaths, layoutTreeWithControls, layoutTreeWithInlineControls } from './records-bterm';
 import { bold, red, blue } from './text-styling';
 
 const openWithLess = (filename: string) => () => {
@@ -43,7 +43,7 @@ export async function interactiveUIAppMain(entryPath: ExpandedDir): Promise<void
       frame.append(headerLine1);
       frame.append(headerLine2);
 
-      const treeWithControls = layoutTreeWithControls(extractionRecord);
+      const treeWithControls = layoutTreeWithInlineControls(extractionRecord);
       treeWithControls.top = 4;
       treeWithControls.left = 2;
       // const listTable = renderQualifiedPaths(extractionRecord);
@@ -51,7 +51,6 @@ export async function interactiveUIAppMain(entryPath: ExpandedDir): Promise<void
       // listTable.left = 2;
 
       frame.append(treeWithControls);
-      treeWithControls.focus();
 
       screen.key(
         ['escape', 'q', 'C-c'],
