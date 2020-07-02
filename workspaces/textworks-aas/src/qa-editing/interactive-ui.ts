@@ -1,14 +1,16 @@
 import _ from "lodash";
 import { ExpandedDir } from "commons";
 import B from 'blessed';
+import path from "path";
 
 import { readExtractionRecord } from '~/extract/abstracts/extract-abstracts';
 // import { resolveCachedNormalFile } from '~/extract/core/field-extract';
 // import { updateCorpusJsonFile, readCorpusJsonFile, listCorpusArtifacts } from '~/corpora/corpus-file-walkers';
 // import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extract/core/ground-truth-records';
 import { openFileWithLess, openFileWithBrowser } from '~/qa-review/view-files';
-import { appFrame, createScreen } from './blessterm-widgets';
+import { appFrame, createScreen, textDivBox } from './blessterm-widgets';
 import { renderQualifiedPaths } from './records-bterm';
+import { bold, red, blue } from './text-styling';
 
 const openWithLess = (filename: string) => () => {
   openFileWithLess(filename);
@@ -30,7 +32,17 @@ export async function interactiveUIAppMain(entryPath: ExpandedDir): Promise<void
   const frame = appFrame();
   screen.append(frame);
 
+  const headerLine1 = textDivBox(bold(red('--- Entry ----')));
+  const headerLine2 = textDivBox(bold(blue(path.basename(entryPath.dir))));
+  headerLine1.top = 1;
+  headerLine2.top = 2;
+
+  frame.append(headerLine1);
+  frame.append(headerLine2);
+
   const listTable = renderQualifiedPaths(extractionRecord);
+  listTable.top = 4;
+  listTable.left = 2;
 
   frame.append(listTable);
   listTable.focus();
@@ -44,9 +56,9 @@ export async function interactiveUIAppMain(entryPath: ExpandedDir): Promise<void
       });
 
     screen.key('n', () => {
-        screen.destroy();
-        resolve();
-      });
+      screen.destroy();
+      resolve();
+    });
 
     screen.render();
   });

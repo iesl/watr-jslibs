@@ -4,72 +4,27 @@
   * Note: Type checking is turned off in this file because neo-blessed/neo-blessed-contrib don't have
   * typescript .d.ts files available. When they do, the ts-nocheck should be turned off.
  */
+import _ from "lodash";
 import B from 'blessed';
 import blessed from 'neo-blessed';
-import NB from 'neo-blessed';
-import nbc from 'neo-blessed-contrib';
+// import NB from 'neo-blessed';
+// import nbc from 'neo-blessed-contrib';
 
-
-export type NBCTree = any;
-
-export function treeDemo(): NBCTree {
-  const tree = nbc.tree({ fg: 'green' })
-
-
-  tree.on('select', function(node) {
-    if (node.myCustomProperty) {
-      console.log(node.myCustomProperty);
-    }
-    console.log(node.name);
+export function textDivBox(content: string | StyledText): B.Widgets.BoxElement {
+  const c = _.isString(content)? content : content.render();
+  const b = blessed.box({
+    tags: true,
+    width: '100%',
+    height: 1,
   });
-
-  // you can specify a name property at root level to display root
-  tree.setData({
-    extended: true
-    , children:
-    {
-      'Fruit':
-      {
-        children:
-        {
-          'Banana': {}
-          , 'Apple': {}
-          , 'Cherry': {}
-          , 'Exotics': {
-            children:
-            {
-              'Mango': {}
-              , 'Papaya': {}
-              , 'Kiwi': { name: 'Kiwi (not the bird!)', myCustomProperty: "hairy fruit" }
-            }
-          }
-          , 'Pear': {}
-        }
-      }
-      , 'Vegetables':
-      {
-        children:
-        {
-          'Peas': {}
-          , 'Lettuce': {}
-          , 'Pepper': {}
-        }
-      }
-    }
-  });
-
-  return tree;
+  b.setContent(c);
+  return b;
 }
 
 export function appFrame(): B.Widgets.BoxElement {
   const box = blessed.box({
-    // top: 'center',
-    // left: 'center',
     width: '100%',
     height: '100%',
-    // border: {
-    //   type: 'line'
-    // },
     style: {
       fg: 'white',
       border: {
@@ -134,12 +89,4 @@ export function createScreen(): B.Widgets.Screen {
 export function createListTable(opts: B.Widgets.ListTableOptions): B.Widgets.ListTableElement {
   const table = blessed.listtable(opts);
   return table;
-}
-
-export function text(str: string): B.Widgets.BoxElement {
-  const box = blessed.box({
-    content: str,
-  });
-  box
-  return box;
 }

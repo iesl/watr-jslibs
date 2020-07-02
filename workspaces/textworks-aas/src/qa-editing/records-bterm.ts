@@ -63,8 +63,8 @@ export function renderQualifiedPaths<T>(inputRec: T): B.Widgets.ListTableElement
     align: 'left',
     tags: true,
     keys: true,
-    width: 'shrink',
-    height: '70%',
+    // width: 'shrink',
+    // height: 'shrink',
     vi: true,
     mouse: true,
     style: {
