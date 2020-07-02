@@ -3,12 +3,12 @@ import { ExpandedDir } from "commons";
 import B from 'blessed';
 
 import { readExtractionRecord } from '~/extract/abstracts/extract-abstracts';
-import { resolveCachedNormalFile } from '~/extract/core/field-extract';
-import { updateCorpusJsonFile, readCorpusJsonFile, listCorpusArtifacts } from '~/corpora/corpus-file-walkers';
-import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extract/core/ground-truth-records';
+// import { resolveCachedNormalFile } from '~/extract/core/field-extract';
+// import { updateCorpusJsonFile, readCorpusJsonFile, listCorpusArtifacts } from '~/corpora/corpus-file-walkers';
+// import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extract/core/ground-truth-records';
 import { openFileWithLess, openFileWithBrowser } from '~/qa-review/view-files';
-import { renderQualifiedPaths } from './blessed-demo';
 import { appFrame, createScreen } from './blessterm-widgets';
+import { renderQualifiedPaths } from './records-bterm';
 
 const openWithLess = (filename: string) => () => {
   openFileWithLess(filename);

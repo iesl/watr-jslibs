@@ -59,7 +59,7 @@ export function renderQualifiedPaths<T>(inputRec: T): B.Widgets.ListTableElement
 
   const ltopts: B.Widgets.ListTableOptions = {
     data: undefined,
-    border: 'line',
+    border: undefined, // 'line'',
     align: 'left',
     tags: true,
     keys: true,
@@ -114,7 +114,7 @@ function renderQualifiedPath(qpath: QualifiedPath): string[] {
   const indentIndicators = indentIndicators0.length > 0 ?
     concatStyledText(indentIndicators0) : text('');
 
-  const valueLines: StyledText[] = wrapStyledText(100, renderAnyVal(item));
+  const valueLines: StyledText[] = hasValue? wrapStyledText(100, renderAnyVal(item)) : [];
 
   const appendValueLines = (l: StyledText): StyledText[] => {
     if (valueLines.length === 0) {
