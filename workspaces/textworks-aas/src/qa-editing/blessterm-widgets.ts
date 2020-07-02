@@ -11,7 +11,7 @@ import blessed from 'neo-blessed';
 // import nbc from 'neo-blessed-contrib';
 
 export function textDivBox(content: string | StyledText): B.Widgets.BoxElement {
-  const c = _.isString(content)? content : content.render();
+  const c = _.isString(content) ? content : content.render();
   const b = blessed.box({
     tags: true,
     width: '100%',
@@ -99,6 +99,60 @@ export function createLayout(opts: B.Widgets.LayoutOptions): B.Widgets.LayoutEle
   return blessed.layout(opts);
 }
 
+const defaultIndicators = [
+  '○',
+  '✓',
+  '✗',
+  '⚑',
+  '●',
+];
+
+export function createRadios(
+  setOpts: B.Widgets.RadioSetOptions,
+  buttonOpts: B.Widgets.RadioButtonOptions[]
+): [B.Widgets.RadioSetElement, B.Widgets.RadioButtonElement[]] {
+  const radioSet = blessed.radioset(setOpts);
+
+  let currLeft = 0;
+  const buttons = _.map(buttonOpts, (o, bi) => {
+    const radio = blessed.radiobutton(o);
+    radio.left = currLeft;
+    const isFirst = bi === 0;
+    const prefix = " ";
+    const suffix = " ";
+
+    currLeft += prefix.length + suffix.length + 1;
+
+    if (isFirst) {
+      radio.checked = true;
+    }
+
+    // Override the default rendering
+    radio.render = function() {
+      this.clearPos(true);
+      // const indicator = this.checked? defaultIndicators[bi] : ' ';
+      const indicator = defaultIndicators[bi];
+      const content = `${prefix}${indicator}${suffix}`;
+      const isChecked = this.checked;
+
+      this.style.fg =  isChecked? '#ffffff' : '#343434';
+      this.style.bg =  isChecked? '#0000ff' : '#442222';
+      this.style.bold = isChecked;
+
+      this.setContent(content, /* no-clear= */false, /* no-tags= */true);
+      return this._render();
+    }
+
+    radioSet.append(radio);
+    return radio;
+  });
+
+
+
+
+  return [radioSet, buttons];
+}
+
 export function createForm(opts: B.Widgets.FormOptions): B.Widgets.FormElement {
   // submit.on('press', function() {
   //   form.submit();
@@ -120,4 +174,3 @@ export function createForm(opts: B.Widgets.FormOptions): B.Widgets.FormElement {
 
   return blessed.form(opts);
 }
-

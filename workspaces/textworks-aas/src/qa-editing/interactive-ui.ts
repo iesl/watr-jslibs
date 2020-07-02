@@ -9,7 +9,7 @@ import { readExtractionRecord } from '~/extract/abstracts/extract-abstracts';
 // import { initGroundTruthEntry, GroundTruthLog, initGroundTruthLog } from '~/extract/core/ground-truth-records';
 import { openFileWithLess, openFileWithBrowser } from '~/qa-review/view-files';
 import { appFrame, createScreen, textDivBox } from './blessterm-widgets';
-import { renderQualifiedPaths } from './records-bterm';
+import { renderQualifiedPaths, layoutTreeWithControls } from './records-bterm';
 import { bold, red, blue } from './text-styling';
 
 const openWithLess = (filename: string) => () => {
@@ -24,42 +24,51 @@ const openWithBrowser = (filename: string) => () => {
 
 
 export async function interactiveUIAppMain(entryPath: ExpandedDir): Promise<void> {
-  const extractionRecord = readExtractionRecord(entryPath.dir);
 
   const screen = createScreen();
 
-  screen.title = 'Q/A Interactive Review';
-  const frame = appFrame();
-  screen.append(frame);
+  return new Promise((resolve, reject) => {
+    try {
+      const extractionRecord = readExtractionRecord(entryPath.dir);
 
-  const headerLine1 = textDivBox(bold(red('--- Entry ----')));
-  const headerLine2 = textDivBox(bold(blue(path.basename(entryPath.dir))));
-  headerLine1.top = 1;
-  headerLine2.top = 2;
+      screen.title = 'Q/A Interactive Review';
+      const frame = appFrame();
+      screen.append(frame);
 
-  frame.append(headerLine1);
-  frame.append(headerLine2);
+      const headerLine1 = textDivBox(bold(red('--- Entry ----')));
+      const headerLine2 = textDivBox(bold(blue(path.basename(entryPath.dir))));
+      headerLine1.top = 1;
+      headerLine2.top = 2;
 
-  const listTable = renderQualifiedPaths(extractionRecord);
-  listTable.top = 4;
-  listTable.left = 2;
+      frame.append(headerLine1);
+      frame.append(headerLine2);
 
-  frame.append(listTable);
-  listTable.focus();
+      const treeWithControls = layoutTreeWithControls(extractionRecord);
+      treeWithControls.top = 4;
+      treeWithControls.left = 2;
+      // const listTable = renderQualifiedPaths(extractionRecord);
+      // listTable.top = 4;
+      // listTable.left = 2;
 
-  return new Promise((resolve) => {
-    screen.key(
-      ['escape', 'q', 'C-c'],
-      (_ch: string, _key: B.Widgets.Events.IKeyEventArg) => {
+      frame.append(treeWithControls);
+      treeWithControls.focus();
+
+      screen.key(
+        ['escape', 'q', 'C-c'],
+        (_ch: string, _key: B.Widgets.Events.IKeyEventArg) => {
+          screen.destroy();
+          process.exit();
+        });
+
+      screen.key('n', () => {
         screen.destroy();
-        process.exit();
+        resolve();
       });
 
-    screen.key('n', () => {
+      screen.render();
+    } catch (e) {
       screen.destroy();
-      resolve();
-    });
-
-    screen.render();
+      reject(e);
+    }
   });
 }
