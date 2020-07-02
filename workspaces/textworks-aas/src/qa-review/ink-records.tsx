@@ -34,10 +34,15 @@ export const RenderAnyTruncated: RenderAnyType = ({ item, renderOverrides, depth
 
 export const RenderAny: React.FC<RenderAnyArgs> = ({ item, renderOverrides, depth }) => {
 
-  const isPrimitive = _.isString(item) || _.isNumber(item) || _.isBoolean(item);
+  if (_.isString(item)) {
+    /* return bold(blue(`${item}`)); */
+    return <Text backgroundColor="yellow" dimColor color="blue">{item}</Text>;
+  }
 
-  if (isPrimitive) {
-    return wrap(bold(blue(`${item}`)));
+  const isNumOrBool = _.isNumber(item) || _.isBoolean(item);
+
+  if (isNumOrBool) {
+    return bold(blue(`${item}`));
   }
 
   if (_.isNull(item)) {
@@ -182,11 +187,12 @@ export const RenderQualifiedPath: React.FC<RenderQualifiedPathArgs> = ({ qpath }
     if (isArrayIndex) {
       return (
         <Box key={localKey} >
-          {text(' ')}
+          {text('Z')}
         </Box>
       );
     }
-    const prefix = isNotEnd? mid : '';
+
+    const prefix = isNotEnd ? mid : '';
 
     return (
       <Box key={localKey} marginRight={4}>
@@ -233,15 +239,14 @@ export const RenderQualifiedPath: React.FC<RenderQualifiedPathArgs> = ({ qpath }
     const capCaseKey = capitalizeDottedString(key);
 
     return (
-      <Box key={`${opathKey}:${key}`}>
+      <Row marginLeft={2} key={`${opathKey}:${key}`}>
         {indentIndicators}
         {dim(gray(prefixChar))}
         {objKeyColor(capCaseKey)}
-        {kvSepColor('─>')}
-        <Box marginLeft={4} marginRight={4}>
-          {itemBox}
-        </Box>
-      </Box>
+        <Text backgroundColor="magenta" dimColor color="gray">{'->'}</Text>
+        <Row marginRight={1} />
+        {itemBox}
+      </Row>
     );
   }
 
@@ -249,3 +254,4 @@ export const RenderQualifiedPath: React.FC<RenderQualifiedPathArgs> = ({ qpath }
     <Row>{indentIndicators}</Row>
   );
 };
+

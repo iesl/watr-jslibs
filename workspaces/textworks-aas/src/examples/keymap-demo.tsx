@@ -37,6 +37,16 @@ const sampleRec2: Record<string, any> = {
   bar: "some bar value",
 };
 
+
+const sampleRec4 = {
+  evidence: null,
+  value1: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.",
+  value2: "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo ",
+};
+
+
+
+
 const switchRecord = (): any => {
   const testDirPath = './test/resources/extraction-records';
   const recFile = path.resolve(testDirPath, 'extraction-records.0.json');
@@ -50,7 +60,7 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
   const [addKeymapping, keymapElem] = useKeymap();
   const focusManager = useFocusManager();
 
-  const currentRecord = switchRecord();
+  const currentRecord = sampleRec4; // switchRecord();
 
   const [cbInfo, setCBInfo] = useState<[number, number]>([0, 0])
 
@@ -60,12 +70,19 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
 
   const qualifiedPaths = toQualifiedPaths(currentRecord);
 
+  const qpathKeys = _.map(qualifiedPaths, (qpath, index) => {
+    const [kpath] = qpath;
+    const localKey = kpath.slice(0, index).map(p => p.key).join(".");
+    /* console.log('qualifiedPaths', qpath); */
+    return localKey;
+  });
+
   const qpathRenders = _.map(qualifiedPaths, (qpath, index) => {
     const [kpath] = qpath;
     const localKey = kpath.slice(0, index).map(p => p.key).join(".");
 
     let leftMarginControls = (<Row></Row>);
-    const shouldHaveCheckbox = false; // /(exists|count|value)/.test(localKey);
+    const shouldHaveCheckbox = /(count|exists|value)/.test(localKey);
 
     if (shouldHaveCheckbox) {
       const checkbox = (
@@ -84,9 +101,7 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
 
     return (
       <Row key={`row.${localKey}#${index}`}>
-        <Row width={12}>
-          {leftMarginControls}
-        </Row>
+        {/* <Row width={12}>{leftMarginControls}</Row> */}
         <Row>
           {qpathRender}
         </Row>
@@ -113,19 +128,23 @@ const KeymapDemo: React.FC<{}> = ({ }) => {
 
 
   return (
-    <Col marginLeft={1} >
+    <Col marginLeft={0} >
 
-      <Row marginLeft={1} marginRight={3} width="80%" >
+      <Row marginLeft={0} marginRight={0} width="80%" >
 
         <Col>
           {text('Updated Ver.')}
-          <Newline />
           {qpathRenders}
         </Col>
 
       </Row>
 
       <Text>CheckBox #{cbInfo[0]} updated to {cbInfo[1]}</Text>
+
+      <Newline />
+
+      <Text>Keys</Text>
+      <Text>{qpathKeys}</Text>
 
       <Col marginLeft={1} marginBottom={1} width="80%" >
         {text('KeyMap')}

@@ -42,7 +42,6 @@ export function highlightRegions(input: string, matches: Array<[number, number]>
 }
 
 export function clipParagraph(width: number, height: number, para: string): string {
-
   const wrappedLines = wrapAnsi(para, width).split('\n');
 
   let clipped: string;

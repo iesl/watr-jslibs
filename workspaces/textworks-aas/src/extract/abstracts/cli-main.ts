@@ -14,6 +14,7 @@ import { walkScrapyCacheCorpus, ensureArtifactDirectories, writeCorpusJsonFile }
 import { readUrlFetchChainsFromScrapyLogs } from '../urls/url-fetch-chains';
 import { diff } from 'deep-diff';
 import { runInteractiveReviewUI } from '~/qa-review/interactive-ui';
+import { interactiveUIAppMain } from '~/qa-editing/interactive-ui';
 
 async function createAlphaRecordDict(csvFile: string): Promise<Map<string, AlphaRecord>> {
   const inputStream = readOrderCsv(csvFile);
@@ -107,8 +108,8 @@ export async function runMainInteractiveFieldReview(
     .viaStream<string>(dirEntryStream)
     .throughF(expandDir)
     .tap((entryPath) => {
-      return runInteractiveReviewUI({ entryPath });
-    })
+      return interactiveUIAppMain(entryPath);
+    });
 
   return pumpBuilder.toPromise()
     .then(() => undefined);

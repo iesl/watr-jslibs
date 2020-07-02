@@ -22,7 +22,6 @@ export function toObjectPath(qp: QualifiedPath): string[] {
   return _.map(qp[0], p => p.key);
 }
 
-// type ArgType = Array<any> | _.AnyKindOfDictionary;
 type ArgType = any;
 
 /**
@@ -67,5 +66,5 @@ export function toQualifiedPaths(obj: ArgType): QualifiedPath[] {
     return [[parentPath, subobj]];
   }
 
-  return _loop(obj, []);
+  return _loop(obj, []).slice(1);
 }
