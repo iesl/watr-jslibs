@@ -1,25 +1,45 @@
 {
-  "extends": "../commons/tsconfig.json",
-
   "compilerOptions": {
     "baseUrl": ".",
     "target": "es6",
     "module": "commonjs",
+    "moduleResolution": "node",
+
+    "esModuleInterop": true,
+    "importHelpers": true,
+    "allowSyntheticDefaultImports": true,
+
+    "incremental": true,
+    "experimentalDecorators": true,
+    "strict": true,
+    "noEmit": false,
+    "outDir": "./dist",
+
+    "noImplicitReturns": true,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false,
+
+    "inlineSourceMap": true,
+    "preserveConstEnums": true,
+    "declaration": true,
+    "declarationMap": true,
 
     "types": [
       "jest",
       "chai",
-      "@types/node",
-      "../commons/@types/pumpify"
-    ]
+      "@types/node"
+    ],
+
+    "paths": {
+      "~/*":  ["./src/*"],
+      "@/*":  ["./src/*"],
+      "~~/*": ["./src/*"],
+      "@@/*": ["./src/*"]
+    }
   },
 
   "include": [
-    "./src",
-    "../commons/@types/**/*"
-  ],
-  "exclude": [
-    "node_modules"
+    "./src/**/*"
   ]
 
 }

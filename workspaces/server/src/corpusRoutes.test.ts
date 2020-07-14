@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import path from "path";
 
-import { readCorpusEntries } from "./corpusRoutes";
+// import { readCorpusEntries } from "./corpusRoutes";
 import fs from "fs-extra";
 
 const scratchDir = path.join(".", "scratch.d");
@@ -50,8 +50,8 @@ describe("read corpus entries", () => {
 
 
   it("read entries", () => {
-    const entries = readCorpusEntries(corpusRoot, 0, 20);
-    console.log(entries);
+    // const entries = readCorpusEntries(corpusRoot, 0, 20);
+    // console.log(entries);
   });
 
 });

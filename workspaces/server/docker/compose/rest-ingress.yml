@@ -1,10 +1,19 @@
 version: '3.8'
 
+volumes:
+  filebeat-logs:
+  filebeat-data:
+  filebeat-config:
+
 services:
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.8.0
     container_name: filebeat 
     restart: always
+    volumes:
+      - filebeat-logs:/usr/share/filebeat/logs
+      - filebeat-data:/usr/share/filebeat/data
+      - filebeat-config:/usr/share/filebeat
 
   rest-ingress:
     image: node:14.5-slim

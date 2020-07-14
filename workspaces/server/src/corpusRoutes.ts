@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import pumpify from "pumpify";
+// import pumpify from "pumpify";
 import path from "path";
 import fs from 'fs-extra';
 import send from 'koa-send';
@@ -22,32 +22,33 @@ export interface CorpusPage {
   offset: number;
 }
 
-export async function readCorpusEntries(
-  corpusRoot: string,
-  start: number,
-  len: number
-): Promise<CorpusPage> {
-  const entryStream = corpusEntryStream(corpusRoot);
-  const pipe = pumpify.obj(
-    entryStream,
-    sliceStream(start, len),
-    expandDirTrans,
-  );
+// TODO reinstate w/o pumpify (use 'commons')
+// export async function readCorpusEntries(
+//   corpusRoot: string,
+//   start: number,
+//   len: number
+// ): Promise<CorpusPage> {
+//   const entryStream = corpusEntryStream(corpusRoot);
+//   const pipe = pumpify.obj(
+//     entryStream,
+//     sliceStream(start, len),
+//     expandDirTrans,
+//   );
 
-  return new Promise((resolve) => {
-    const entries: CorpusEntry[] = [];
-    pipe.on("data", (data: CorpusEntry) => {
-      entries.push(data);
-    });
-    pipe.on("end", () => {
-      const corpusPage = {
-        corpusEntries: entries,
-        offset: start
-      };
-      resolve(corpusPage);
-    });
-  })
-}
+//   return new Promise((resolve) => {
+//     const entries: CorpusEntry[] = [];
+//     pipe.on("data", (data: CorpusEntry) => {
+//       entries.push(data);
+//     });
+//     pipe.on("end", () => {
+//       const corpusPage = {
+//         corpusEntries: entries,
+//         offset: start
+//       };
+//       resolve(corpusPage);
+//     });
+//   })
+// }
 
 export async function listCorpusArtifacts(
   entryPath: string,
