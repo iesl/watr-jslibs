@@ -1,7 +1,7 @@
 import _ from "lodash";
 import B from 'blessed';
 import { createScreen, appFrame } from './blessterm-widgets';
-import { renderQualifiedPaths } from './records-bterm';
+import { layoutTreeWithInlineControls, layoutTreeAndMarginalControls } from './records-bterm';
 
 const sampleRec2: Record<string, any> = {
   quux: [
@@ -37,30 +37,41 @@ const sampleRec4 = {
 };
 
 
-// export function runInteractiveReviewUI({ entryPath }: AppArgs): void {
-export function runMainUI(): void {
-  const screen = createScreen();
-
-  screen.title = 'Q/A Interactive Review';
-  const frame = appFrame();
-  screen.append(frame);
-
-  const listTable = renderQualifiedPaths(sampleRec2);
-
-  // Append our box to the screen.
-  frame.append(listTable);
-  listTable.focus();
-
-  // Quit on Escape, q, or Control-C.
-  screen.key(
-    ['escape', 'q', 'C-c'],
-    (_ch: string, _key: B.Widgets.Events.IKeyEventArg) => {
+export async function promisifyBlessedApp(f: (screen: B.Widgets.Screen) => void): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const screen = createScreen();
+    try {
+      f(screen);
+      resolve();
+    } catch (e) {
       screen.destroy();
-      process.exit();
-    });
+      reject(e);
+    }
+  });
+}
 
-  // Render the screen.
-  screen.render();
+export async function runMainUI(): Promise<void> {
+  return promisifyBlessedApp((screen) => {
+    screen.title = 'Q/A Interactive Review';
+    const frame = appFrame();
+    screen.append(frame);
+
+    const recLayout = layoutTreeAndMarginalControls(sampleRec2);
+
+    frame.append(recLayout);
+    recLayout.focus();
+
+    // Quit on Escape, q, or Control-C.
+    screen.key(
+      ['escape', 'q', 'C-c'],
+      (_ch: string, _key: B.Widgets.Events.IKeyEventArg) => {
+        screen.destroy();
+        process.exit();
+      });
+
+    // Render the screen.
+    screen.render();
+  });
 }
 
 

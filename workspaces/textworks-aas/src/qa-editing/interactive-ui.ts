@@ -23,12 +23,9 @@ const openWithBrowser = (filename: string) => () => {
 };
 
 
-import ansiEscapes from 'ansi-escapes';
+
 export async function interactiveUIAppMain(entryPath: ExpandedDir): Promise<void> {
 
-  process.stdout.write(ansiEscapes.clearTerminal);
-  process.stdout.write(ansiEscapes.clearScreen);
-  // process.stdout.write(ansiEscapes.cursorDown(1));
   const screen = createScreen();
 
   return new Promise((resolve, reject) => {
@@ -50,17 +47,26 @@ export async function interactiveUIAppMain(entryPath: ExpandedDir): Promise<void
       const treeWithControls = layoutTreeWithInlineControls(extractionRecord);
       treeWithControls.top = 4;
       treeWithControls.left = 2;
-      // const listTable = renderQualifiedPaths(extractionRecord);
-      // listTable.top = 4;
-      // listTable.left = 2;
 
       frame.append(treeWithControls);
+      screen.sendFocus
 
       screen.key(
         ['escape', 'q', 'C-c'],
         (_ch: string, _key: B.Widgets.Events.IKeyEventArg) => {
           screen.destroy();
           process.exit();
+        });
+      screen.key(
+        ['j'],
+        (_ch: string, _key: B.Widgets.Events.IKeyEventArg) => {
+          screen.focusNext();
+        });
+
+      screen.key(
+        'k',
+        (_ch: string, _key: B.Widgets.Events.IKeyEventArg) => {
+          screen.focusPrevious();
         });
 
       screen.key('n', () => {

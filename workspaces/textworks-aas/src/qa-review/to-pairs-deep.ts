@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-type ObjectPath = string[];
+export type ObjectPath = string[];
 type ObjectPathAndPrimitive = Readonly<[ObjectPath, string, any]>;
 type ObjectPathOnly = Readonly<[ObjectPath, string]>;
 export type ObjectPathWithValue = ObjectPathAndPrimitive | ObjectPathOnly;
@@ -17,6 +17,16 @@ export type PathParts = PathPart[];
 export type QualifiedKey = Readonly<[PathParts]>;
 export type QualifiedKeyValue = Readonly<[PathParts, any]>;
 export type QualifiedPath = QualifiedKey | QualifiedKeyValue;
+
+
+export function isQualifiedKey(qp: QualifiedPath): qp is QualifiedKey {
+  return qp.length === 1;
+}
+
+export function isQualifiedKeyValue(qp: QualifiedPath): qp is QualifiedKeyValue {
+  return qp.length === 2;
+}
+
 
 export function toObjectPath(qp: QualifiedPath): string[] {
   return _.map(qp[0], p => p.key);

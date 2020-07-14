@@ -1,18 +1,22 @@
-// @ts-nocheck
-
 /**
   * Note: Type checking is turned off in this file because neo-blessed/neo-blessed-contrib don't have
   * typescript .d.ts files available. When they do, the ts-nocheck should be turned off.
  */
 import _ from "lodash";
 import B from 'blessed';
-import blessed from 'neo-blessed';
-// import NB from 'neo-blessed';
-// import nbc from 'neo-blessed-contrib';
+import * as BB from './blessterm-basics';
+import ansiEscapes from 'ansi-escapes';
+import { StyledText } from './text-styling';
 
-export function textDivBox(content: string | StyledText): B.Widgets.BoxElement {
+
+export function clearScreen(): void {
+  process.stdout.write(ansiEscapes.clearTerminal);
+  process.stdout.write(ansiEscapes.clearScreen);
+}
+
+export function textDivBox(content: string | StyledText):  B.Widgets.BoxElement {
   const c = _.isString(content) ? content : content.render();
-  const b = blessed.box({
+  const b = BB.box({
     tags: true,
     width: '100%',
     height: 1,
@@ -22,7 +26,7 @@ export function textDivBox(content: string | StyledText): B.Widgets.BoxElement {
 }
 
 export function appFrame(): B.Widgets.BoxElement {
-  const box = blessed.box({
+  return BB.box({
     width: '100%',
     height: '100%',
     style: {
@@ -35,69 +39,14 @@ export function appFrame(): B.Widgets.BoxElement {
       }
     }
   });
-  return box;
-}
-
-export function boxDemo(): B.Widgets.BoxElement {
-  const box = blessed.box({
-    top: 'center',
-    left: 'center',
-    width: '50%',
-    height: '50%',
-    content: 'Hello {bold}world{/bold}!',
-    tags: true,
-    border: {
-      type: 'line'
-    },
-    style: {
-      fg: 'white',
-      bg: 'magenta',
-      border: {
-        fg: '#f0f0f0'
-      },
-      hover: {
-        bg: 'green'
-      }
-    }
-  });
-
-  // If our box is clicked, change the content.
-  box.on('click', function(data) {
-    box.setContent('{center}Some different {red-fg}content{/red-fg}.{/center}');
-    screen.render();
-  });
-
-  // If box is focused, handle `enter`/`return` and give us some more content.
-  box.key('enter', function(ch, key) {
-    box.setContent('{right}Even different {black-fg}content{/black-fg}.{/right}\n');
-    box.setLine(1, 'bar');
-    box.insertLine(1, 'foo');
-    screen.render();
-  });
-  return box;
 }
 
 export function createScreen(): B.Widgets.Screen {
-  // Create a screen object.
-  const screen = blessed.screen({
+  return BB.screen({
     smartCSR: true
   });
-  return screen;
 }
 
-
-export function createListTable(opts: B.Widgets.ListTableOptions): B.Widgets.ListTableElement {
-  const table = blessed.listtable(opts);
-  return table;
-}
-
-export function createCheckBox(opts: B.Widgets.CheckboxOptions): B.Widgets.CheckboxElement {
-  return blessed.checkbox(opts);
-}
-
-export function createLayout(opts: B.Widgets.LayoutOptions): B.Widgets.LayoutElement {
-  return blessed.layout(opts);
-}
 
 const defaultIndicators = [
   '○',
@@ -111,7 +60,8 @@ export function createRadios(
   setOpts: B.Widgets.RadioSetOptions,
   buttonOpts: B.Widgets.RadioButtonOptions[]
 ): [B.Widgets.RadioSetElement, B.Widgets.RadioButtonElement[]] {
-  const radioSet = blessed.radioset(setOpts);
+
+  const radioSet = BB.radioset(setOpts);
 
   let currLeft = 0;
   const buttons = _.map(buttonOpts, (o, bi) => {
@@ -123,7 +73,8 @@ export function createRadios(
       height: 1,
       shrink: true,
     }, o);
-    const radio = blessed.radiobutton(buttonOpts);
+
+    const radio = BB.radiobutton(buttonOpts);
 
     const isFirst = bi === 0;
     const prefix = " ";
@@ -137,6 +88,7 @@ export function createRadios(
 
     // Override the default rendering
     radio.render = function() {
+      // @ts-ignore
       this.clearPos(true);
       // const indicator = this.checked? defaultIndicators[bi] : ' ';
       const indicator = defaultIndicators[bi];
@@ -147,7 +99,9 @@ export function createRadios(
       this.style.bg = isChecked ? '#0000ff' : '#442222';
       this.style.bold = isChecked;
 
+      // @ts-ignore
       this.setContent(content, /* no-clear= */false, /* no-tags= */true);
+      // @ts-ignore
       return this._render();
     }
     radioSet.append(radio);
@@ -159,16 +113,21 @@ export function createRadios(
 export function createRadioEmmitter(
   id: string,
   radioCount: number
-): B.Widgets.FormElement {
+): B.Widgets.FormElement<any> {
   const fopts = {
     width: '100%',
+    input: true,
+    // keys: true,
     height: 1,
     style: {
-      // bg: "green"
+      bg: "red",
+      focus: {
+        bg: "yellow"
+      }
     }
   };
-  const emitterForm = createForm(fopts);
-  const emitterLayout = createLayout({
+  const emitterForm = BB.form(fopts);
+  const emitterLayout = BB.layout({
     parent: emitterForm, layout: 'inline',
     top: 0, left: `100%-${radioCount*3}-1`, width: "shrink", height: "100%",
     style: {
@@ -177,7 +136,11 @@ export function createRadioEmmitter(
   });
 
   const buttonOpts = _.map(_.range(radioCount), radioNum => {
-    return { name: `radio-${radioNum}` }
+    return {
+      input: false,
+      keys: false,
+      name: `radio-${radioNum}`
+    }
   });
 
   const [radioSet, buttons] = createRadios({
@@ -194,26 +157,4 @@ export function createRadioEmmitter(
   });
 
   return emitterForm;
-}
-
-export function createForm(opts: B.Widgets.FormOptions): B.Widgets.FormElement {
-  // submit.on('press', function() {
-  //   form.submit();
-  // });
-
-  // cancel.on('press', function() {
-  //   form.reset();
-  // });
-
-  // form.on('submit', function(data) {
-  //   form.setContent('Submitted.');
-  //   screen.render();
-  // });
-
-  // form.on('reset', function(data) {
-  //   form.setContent('Canceled.');
-  //   screen.render();
-  // });
-
-  return blessed.form(opts);
 }
