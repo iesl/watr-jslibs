@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+
+  redis:
+    image: redis
+    container_name: redis
+    networks:
+      - watr-net 
+    environment:
+      LOG_STDOUT: "true"
+      LOG_JSON: "false"
+    ports:
+      - "6379:6379"
+    restart: always
+    volumes:
+      - redis-logs:/var/log
+
+volumes:
+  redis-logs:
+    driver: local

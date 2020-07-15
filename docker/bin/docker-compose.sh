@@ -7,6 +7,7 @@ BIN=$(dirname "$SCRIPT")
 docker-compose \
     -f $COMPOSE/watr-front.yml \
     -f $COMPOSE/filebeat.yml \
+    -f $COMPOSE/elk.yml \
     $@
 
 
