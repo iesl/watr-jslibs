@@ -11,7 +11,6 @@ services:
     restart: always
     volumes:
       - app-volume:/usr/src/app
-      - ${CONFIG}/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - ${DOCKER_DATA}:/var/lib/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock
     networks:

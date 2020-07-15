@@ -13,10 +13,4 @@ do
 
     echo "docker builder build -t $tag -f $dockerfile ."
     docker builder build -t $tag -f $dockerfile .
-    # docker builder build \
-    #        --build-arg DOCKER=$DOCKER \
-    #        --build-arg CONFIG=$CONFIG \
-    #        --build-arg SHARED=$SHARED \
-    #        -t $tag \
-    #        $imaged
 done
