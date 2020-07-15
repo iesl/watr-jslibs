@@ -2,21 +2,22 @@
 import Koa, { Context } from 'koa';
 import Router from 'koa-router';
 import json from 'koa-json';
-import opts from 'commander';
+// import opts from 'commander';
 
 import { initFileBasedRoutes } from './corpusRoutes';
 
 const rootRouter = new Router();
 const app = new Koa();
 
-opts
-  .version('0.1.0')
-  .option('--corpus <path>', 'Path to corpus')
-  .option('--port <port>', 'port to listen to')
-  .parse(process.argv)
-  ;
+// opts
+//   .version('0.1.0')
+//   .option('--corpus <path>', 'Path to corpus')
+//   .option('--port <port>', 'port to listen to')
+//   .parse(process.argv)
+//   ;
 
-const { corpus } = opts;
+// const { corpus } = opts;
+const corpus = "TODO";
 
 const apiRouter = initFileBasedRoutes(corpus);
 

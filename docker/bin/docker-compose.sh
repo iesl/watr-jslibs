@@ -5,7 +5,7 @@ BIN=$(dirname "$SCRIPT")
 . $BIN/paths.sh
 
 docker-compose \
-    -f $COMPOSE/docker-compose.yml \
+    -f $COMPOSE/rest-portal.yml \
     $@
 
 

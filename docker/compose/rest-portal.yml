@@ -1,0 +1,12 @@
+version: '3.8'
+
+volumes:
+  rest-logs:
+
+services:
+  rest-portal:
+    image: adamchandra/rest-portal
+    container_name: rest-portal 
+    restart: always
+    volumes:
+      - rest-logs:/usr/src/app

@@ -6,4 +6,4 @@ BIN=$(dirname "$SCRIPT")
 
 DOCKER_BUILDKIT=1
 
-docker build -t acs/rest-portal $IMAGES/rest-portal
+docker --log-level=debug build -t adamchandra/rest-portal -f $IMAGES/rest-portal/Dockerfile $PRJ_ROOT

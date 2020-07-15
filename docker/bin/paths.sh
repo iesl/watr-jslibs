@@ -1,9 +1,10 @@
 #!/bin/bash
 
 SCRIPT=$(readlink -f "$0")
-SCRIPTPATH=$(dirname "$SCRIPT")
+BIN=$(dirname "$SCRIPT")
 
-DROOT=$(dirname "$SCRIPTPATH/..")
+DROOT="$BIN/.."
 CONFIG="$DROOT/config"
 IMAGES="$DROOT/images"
 COMPOSE="$DROOT/compose"
+PRJ_ROOT=$(pwd)

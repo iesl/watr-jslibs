@@ -4,6 +4,7 @@ volumes:
   filebeat-logs:
   filebeat-data:
   filebeat-config:
+  rest-logs:
 
 services:
   filebeat:
@@ -15,7 +16,9 @@ services:
       - filebeat-data:/usr/share/filebeat/data
       - filebeat-config:/usr/share/filebeat
 
-  rest-ingress:
-    image: node:14.5-slim
-    container_name: rest-ingress 
+  rest-portal:
+    image: adamchandra/rest-portal
+    container_name: rest-portal 
     restart: always
+    volumes:
+      - rest-logs:/usr/src/app

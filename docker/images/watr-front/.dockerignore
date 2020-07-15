@@ -1,0 +1,14 @@
+node_modules/
+npm-debug.log
+.gitgnore
+bin/
+*.d/
+development.org
+docker/
+.envrc
+.git*
+.ignore
+lerna-debug.log
+lib/
+notes/
+readme.org

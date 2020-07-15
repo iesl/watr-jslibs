@@ -6,4 +6,4 @@ BIN=$(dirname "$SCRIPT")
 
 DOCKER_BUILDKIT=1
 
-docker build -t acs/rest-portal $IMAGES/rest-portal
+docker --log-level debug builder build -t adamchandra/watr-front -f $IMAGES/watr-front/Dockerfile .
