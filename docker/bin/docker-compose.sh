@@ -6,6 +6,7 @@ BIN=$(dirname "$SCRIPT")
 
 docker-compose \
     -f $COMPOSE/rest-portal.yml \
+    -f $COMPOSE/filebeat.yml \
     $@
 
 

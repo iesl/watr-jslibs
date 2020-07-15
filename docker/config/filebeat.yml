@@ -2,7 +2,7 @@ filebeat.inputs:
   - type: log
     enabled: true
     paths:
-      - /var/log/*.log
+      - /usr/src/app/logs/*.log
 
 output.elasticsearch:
-  hosts: ["myEShost:9200"]
+  hosts: ["elasticsearch:9200"]

@@ -22,4 +22,6 @@ RUN lerna bootstrap
 RUN lerna run build 
 # If you are building your code for production
 # RUN npm ci --only=production
-ENTRYPOINT ["node", "./workspaces/server/dist/extraction-rest-portal/rest-server.js"]
+
+ENTRYPOINT ["node"]
+CMD ["./workspaces/server/dist/extraction-rest-portal/rest-server.js"]
