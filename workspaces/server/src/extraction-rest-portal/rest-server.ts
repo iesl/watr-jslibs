@@ -38,7 +38,7 @@ export function createAppLogger(): Logger {
       new transports.Console(),
       new transports.File({
         filename: "portal-rest-service.log",
-        dirname: "./",
+        dirname: "./logs",
         tailable: true,
       })
     ],

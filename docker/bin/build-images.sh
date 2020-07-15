@@ -7,3 +7,4 @@ BIN=$(dirname "$SCRIPT")
 DOCKER_BUILDKIT=1
 
 docker --log-level debug builder build -t adamchandra/watr-front -f $IMAGES/watr-front/Dockerfile .
+docker --log-level debug builder build -t adamchandra/filebeat -f $IMAGES/filebeat/Dockerfile .

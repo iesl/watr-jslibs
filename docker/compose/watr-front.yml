@@ -5,8 +5,10 @@ volumes:
 
 services:
   rest-portal:
-    image: adamchandra/rest-portal
+    image: adamchandra/watr-front
     container_name: rest-portal 
+    ports:
+      - "3100:3100"
     restart: always
     volumes:
-      - rest-logs:/usr/src/app
+      - rest-logs:/usr/src/app/logs

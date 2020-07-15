@@ -4,14 +4,14 @@ volumes:
   filebeat-logs:
   filebeat-data:
   filebeat-config:
-  rest-portal-logs:
+  rest-logs:
 
 services:
   filebeat:
-    image: docker.elastic.co/beats/filebeat:7.8.0
+    image: adamchandra/filebeat
     container_name: filebeat
     restart: always
     volumes:
       - filebeat-logs:/usr/share/filebeat/logs
       - filebeat-data:/usr/share/filebeat/data
-      - ${PWD}/docker/config/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - rest-logs:/usr/src/app/logs

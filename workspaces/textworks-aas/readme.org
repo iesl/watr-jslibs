@@ -1,21 +1,18 @@
 
 * Textworks as a service
    
-** Usage Overview
-
-*** Q/A Workflow
-**** Collecting stats
-     yarn workspace textworks-aas corpus collect-stats --cwd=../../orc.d --corpus-root=corpus.d --logfile logs.d/qa-write-abstracts.json
-     
-     
 ** Subsystems
    
-*** REST Ingress
+*** REST Portal 
     - listen for CSV inputs
     - filter out already spidered/extracted URLs
     - write out spidering-urls.csv
-    - respond via REST with results and/or status
+      - (or communicate to spider via redis/kafka/etc)
+    - respond via REST with results and status
       
+*** Elasticsearch/filebeat/Kibana Modules
+    - Elasticsearch is single-source-of-truth for overall state of processing
+    - All logs pushed by filebeat from other subsystems to ES.
 
 *** Spider/Scraper
     - Targeted scraping of explicit URLs
@@ -33,6 +30,12 @@
     
 *** Extraction Q/A Editing
     Review extraction choices and interactively approve or mark errors 
+*** Q/A Workflow
+**** Collecting stats
+     yarn workspace textworks-aas corpus collect-stats --cwd=../../orc.d --corpus-root=corpus.d --logfile logs.d/qa-write-abstracts.json
+    
+
+
 
 ** Pipeline structure
    
