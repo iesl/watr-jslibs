@@ -5,6 +5,12 @@ BIN=$(dirname "$SCRIPT")
 . $BIN/paths.sh
 
 DOCKER_BUILDKIT=1
+for imaged in $IMAGES/*
+do
+    base=$(basename $imaged)
+    tag="adamchandra/$base"
+    dockerfile="$imaged/Dockerfile"
 
-docker --log-level debug builder build -t adamchandra/watr-front -f $IMAGES/watr-front/Dockerfile .
-docker --log-level debug builder build -t adamchandra/filebeat -f $IMAGES/filebeat/Dockerfile .
+    # docker builder build -t $tag -f $dockerfile .
+    docker builder build -t $tag $dockerfile
+done

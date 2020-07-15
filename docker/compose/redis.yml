@@ -1,7 +1,11 @@
 version: '3.8'
 
-services:
+volumes:
+  app-volume:
+  redis-logs:
+    driver: local
 
+services:
   redis:
     image: redis
     container_name: redis
@@ -16,6 +20,3 @@ services:
     volumes:
       - redis-logs:/var/log
 
-volumes:
-  redis-logs:
-    driver: local

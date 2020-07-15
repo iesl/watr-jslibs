@@ -1,15 +1,20 @@
 version: '3.8'
 
-services:
+volumes:
+  app-volume:
+  es-data:
 
+networks:
+  watr-net:
+    driver: bridge
+
+services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0
     container_name: elasticsearch
     environment:
-      - node.name=elasticsearch
-      - cluster.name=es-docker-cluster
-      - cluster.initial_master_nodes=elasticsearch
-      - bootstrap.memory_lock=true
+    environment:
+      - "discovery.type=single-node"
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
@@ -34,12 +39,5 @@ services:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
     networks:
-      - watr-net 
+      - watr-net
 
-volumes:
-  es-data:
-    driver: local
-
-networks:
-  watr-net:
-    driver: bridge

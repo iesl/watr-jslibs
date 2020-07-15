@@ -3,8 +3,16 @@
 SCRIPT=$(readlink -f "$0")
 BIN=$(dirname "$SCRIPT")
 
-DROOT="$BIN/.."
-CONFIG="$DROOT/config"
-IMAGES="$DROOT/images"
-COMPOSE="$DROOT/compose"
-PRJ_ROOT=$(pwd)
+export DOCKER=$(cd "$BIN/.." && pwd)
+export CONFIG="$DOCKER/config"
+export IMAGES="$DOCKER/images"
+export COMPOSE="$DOCKER/compose"
+export DOCKER_DATA=$($BIN/get-docker-data-path.sh)
+export PWD=$(pwd)
+
+# echo "DOCKER          $DOCKER"
+# echo "CONFIG          $CONFIG"
+# echo "IMAGES          $IMAGES"
+# echo "COMPOSE         $COMPOSE"
+# echo "DOCKER_DATA     $DOCKER_DATA"
+# echo "PWD             $PWD"

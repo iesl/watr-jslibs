@@ -3,10 +3,15 @@ FROM node:14-alpine
 # RUN apk update 
 RUN npm i -g lerna 
 RUN npm i -g rollup 
+
+RUN mkdir -p /usr/src/app/logs
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 ADD lerna.json ./
+
+# copy shell init files for convenience when attaching to containers
+COPY docker/shared/root.profile /root/.profile
 
 COPY workspaces/commons/package*.json ./workspaces/commons/
 ADD workspaces/commons/src ./workspaces/commons/src

@@ -29,10 +29,9 @@ import {
 
 export function createAppLogger(): Logger {
   return createLogger({
-    level: "info",
     format: format.combine(
       format.timestamp(),
-      format.prettyPrint()
+      format.json()
     ),
     transports: [
       new transports.Console(),
@@ -56,7 +55,12 @@ export function readOrderCsv(csvfile: string): Promise<void> {
       const rec = {
         noteId, dblpConfId, url, title, authorId
       };
-      log.info(rec)
+      log.log({
+        level: 'info',
+        message: 'rest-portal-input',
+        id: `${noteId}+${url}`,
+        ...rec
+      });
       return rec
     })
   ;
