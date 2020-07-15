@@ -11,6 +11,12 @@ do
     tag="adamchandra/$base"
     dockerfile="$imaged/Dockerfile"
 
-    # docker builder build -t $tag -f $dockerfile .
-    docker builder build -t $tag $dockerfile
+    echo "docker builder build -t $tag -f $dockerfile ."
+    docker builder build -t $tag -f $dockerfile .
+    # docker builder build \
+    #        --build-arg DOCKER=$DOCKER \
+    #        --build-arg CONFIG=$CONFIG \
+    #        --build-arg SHARED=$SHARED \
+    #        -t $tag \
+    #        $imaged
 done
