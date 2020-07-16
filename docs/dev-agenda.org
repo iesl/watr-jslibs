@@ -1,6 +1,5 @@
 * Dev Notes
 
-
 ** Problem with text that appears outside of PDFs declared page geometry 
    Example from corpus-test.d:
    localhost:3000/stories/autogen/extractedTextViewer?id=1503.00580.pdf.d
