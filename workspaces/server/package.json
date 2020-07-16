@@ -5,6 +5,7 @@
   "description": "Backend server for WatrColors",
   "keywords": [],
   "dependencies": {
+    "@types/redis": "^2.8.25",
     "commons": "0.1.0",
     "fs-extra": "^9.0.1",
     "koa": "^2.13.0",
@@ -14,6 +15,7 @@
     "koa-json": "^2.0.2",
     "koa-router": "^9.1.0",
     "koa-send": "^5.0.1",
+    "redis": "^3.0.2",
     "tslib": "^2.0.0",
     "winston": "^3.3.3",
     "yargs": "^15.4.1"
