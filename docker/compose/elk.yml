@@ -4,10 +4,6 @@ volumes:
   app-volume:
   es-data:
 
-networks:
-  watr-net:
-    driver: bridge
-
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.8.0

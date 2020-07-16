@@ -1,20 +1,3 @@
-
-** Subprobjects
-
-*** ClientApp
-    The first production version of WatrColors.
-
-*** shared
-    library of assorted utilities
-
-*** VueComponents
-    Web UI components (mostly based on Vue.js), and updated UI moved and refactored
-    from ClientApp
-
-*** WatrmarksJs
-    Scala code cross-compiled to javascript and used as a helper library
-
-
 ** Applications and Subsystems
 
 *** Visual Tracelog Viewer
@@ -45,12 +28,7 @@
 *** MIT Material Science Annotator
 **** Relation and graph editor
 
-*** Login/Authentication and Permission system
-
-*** Commentary overlay (OpenReview feature)
-
 *** Pdf Page thumbnail viewer/browser
 
 *** Pdf extraction artifact overview/viewer
     Planned. Show all artifacts and information related to a particular pdf
-

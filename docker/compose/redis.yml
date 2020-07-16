@@ -1,13 +1,12 @@
 version: '3.8'
 
 volumes:
-  app-volume:
   redis-logs:
     driver: local
 
 services:
   redis:
-    image: redis
+    image: redis:6.0.5
     container_name: redis
     networks:
       - watr-net 

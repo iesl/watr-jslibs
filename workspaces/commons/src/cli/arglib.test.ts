@@ -49,7 +49,7 @@ describe("Arglib tests", () => {
       )
     )((args: any) => {
       prettyPrint({ msg: 'success!', args });
-    }, true);
+    });
 
     const args1 = 'extract-abstracts --cwd . --corpus-root a/b/c --overwrite'.split(' ');
     const args1b = 'extract-abstracts --cwd . --corpus-root . --overwrite'.split(' ');
@@ -60,7 +60,7 @@ describe("Arglib tests", () => {
       opt.existingDir("dir: dir 0"),
     )((args: any) => {
       prettyPrint({ 'running cmd': args })
-    }, true)
+    })
     const args2 = "c1 --dir non-existent".split(" ")
 
     YArgs
