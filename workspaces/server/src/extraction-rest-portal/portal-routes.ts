@@ -1,14 +1,13 @@
 import { Context } from 'koa';
 import Router from 'koa-router';
-import redis from "redis";
-import { promisify } from 'util';
 
 import {
   csvStream,
   streamPump,
+  getAsyncRedisClient,
 } from "commons";
+
 import { createAppLogger } from './portal-logger';
-import { getRedisClient, getAsyncRedisClient } from './redis-client';
 
 export function readOrderCsv(csvfile: string): Promise<void> {
   const inputStream = csvStream(csvfile);
@@ -42,25 +41,10 @@ export function readOrderCsv(csvfile: string): Promise<void> {
   return p;
 }
 
-async function publishDownstream() {
-
-  const redisClient = await getAsyncRedisClient();
-  await redisClient.set("key", "value")
-    .then(() => undefined);
-
-
-
-  await redisClient.get("key")
-    .then((z) => console.log(z))
-    .catch(console.error)
-  ;
-
-  await redisClient.quit();
-
-
-}
 async function postBatchCsv(ctx: Context, next: () => Promise<any>): Promise<Router> {
   const { files } = ctx.request;
+
+  const redisClient = await getAsyncRedisClient();
 
   // Stash incoming file to /data-root/portal/ingress/zzz-incoming.csv/json
   // Respond with status/endpoints for completed work
@@ -69,12 +53,14 @@ async function postBatchCsv(ctx: Context, next: () => Promise<any>): Promise<Rou
   if (files) {
     const { data } = files;
     await readOrderCsv(data.path)
+    redisClient.publish('portal.ingress', 'csv.ready');
     ctx.response.body = { status: 'ok' };
   } else {
     ctx.response.body = { status: 'error' };
   }
 
-  return next();
+  return redisClient.quit()
+    .then(() => next());
 }
 
 async function getBatchCsv(ctx: Context, next: () => Promise<any>): Promise<Router> {
