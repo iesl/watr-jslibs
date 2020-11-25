@@ -49,13 +49,13 @@
     "src": "src"
   },
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc --watch",
-    "serve": "ts-node-dev --notify=false ./src/server.ts",
-    "ui:dev": "./bin/ts-node ./src/server.ts --corpus ../../corpus-test.d",
-    "lint": "eslint --config .eslintrc.js --ext .ts --ignore-path ../../.gitignore ./src",
-    "test": "jest",
-    "ex-portal:serve": "ts-node-dev --notify=false ./src/extraction-rest-portal/rest-server.ts"
+    "XXX:build": "tsc",
+    "XXX:watch": "tsc --watch",
+    "XXX:serve": "ts-node-dev --notify=false ./src/server.ts",
+    "XXX:ui:dev": "./bin/ts-node ./src/server.ts --corpus ../../corpus-test.d",
+    "XXX:lint": "eslint --config .eslintrc.js --ext .ts --ignore-path ../../.gitignore ./src",
+    "XXX:test": "jest",
+    "XXX:ex-portal:serve": "ts-node-dev --notify=false ./src/extraction-rest-portal/rest-server.ts"
   },
   "jest": {
     "preset": "ts-jest",
