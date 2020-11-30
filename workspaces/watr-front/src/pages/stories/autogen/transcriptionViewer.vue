@@ -1,5 +1,5 @@
 <script lang="ts">
-import vueComponent from '~/components/single-pane/__stories__/transcription-viewer-story/index.vue'
+import vueComponent from '~/components/single-pane/__stories__/transcript-viewer-story/index.vue'
 export default { components: { vueComponent } }
 </script>
 <template lang="html">

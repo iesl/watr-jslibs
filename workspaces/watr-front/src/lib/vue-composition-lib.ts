@@ -1,10 +1,10 @@
 
 import {
   ref,
-  Ref,
-} from '@vue/composition-api';
+  Ref
+} from '@vue/composition-api'
 
 export function divRef(div?: HTMLDivElement): Ref<HTMLDivElement|null> {
-  const d = div? div : null;
-  return ref(d);
+  const d = div || null
+  return ref(d)
 }

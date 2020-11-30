@@ -1,10 +1,9 @@
-
 import { getOrDie } from './utils';
 
-describe("getOrDie", () => {
+describe('getOrDie', () => {
 
-  type Foo = "foo" | "bar";
-  it("coerce type args properly", () => {
+  type Foo = 'foo' | 'bar';
+  it('coerce type args properly', () => {
 
     const a: Foo = null as any as Foo;
 
@@ -16,7 +15,7 @@ describe("getOrDie", () => {
       // ok
     }
 
-    const b: Foo = "bar";
+    const b: Foo = 'bar';
 
     try {
       const got = getOrDie(b);

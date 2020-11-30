@@ -13,6 +13,7 @@ import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
 import * as Tr from '~/lib/transcript';
 
 
+
 export interface TextgridAndBounds {
   // textgrid: GridTypes.Textgrid;
   trPage: Tr.Page;
@@ -59,34 +60,34 @@ export async function useTranscriptViewer({
 
     textDiv.style.visibility = 'hidden';
 
-    let currY = textMarginTop;
-    let maxWidth = 0;
+    // let currY = textMarginTop;
+    // let maxWidth = 0;
 
-    const allIndexables = _.flatMap(trPage.lines, (line) => {
-      const text = line.text;
-      const lineDimensions = putTextLn(style, textMarginLeft, currY, text);
-      maxWidth = Math.max(maxWidth, lineDimensions.width);
-      const indexables: RTreeIndexable[] = lineDimensions
-        .elementDimensions
-        .map(textDimensions => {
-          const { x, y, width, height } = textDimensions;
-          return {
-            id: nextId(),
-            minX: x,
-            minY: y,
-            maxX: x + width,
-            maxY: y + height
-          };
-        });
+    // const allIndexables = _.flatMap(trPage.lines, (line) => {
+    //   const text = line.text;
+    //   const lineDimensions = putTextLn(style, textMarginLeft, currY, text);
+    //   maxWidth = Math.max(maxWidth, lineDimensions.width);
+    //   const indexables: RTreeIndexable[] = lineDimensions
+    //     .elementDimensions
+    //     .map(textDimensions => {
+    //       const { x, y, width, height } = textDimensions;
+    //       return {
+    //         id: nextId(),
+    //         minX: x,
+    //         minY: y,
+    //         maxX: x + width,
+    //         maxY: y + height
+    //       };
+    //     });
 
-      currY += size+2;
-      return indexables;
-    });
+    //   currY += size+2;
+    //   return indexables;
+    // });
 
-    maxWidth += textMarginLeft*2;
+    // maxWidth += textMarginLeft*2;
 
-    spatialSearch.setGrid(allIndexables);
-    superimposedElements.setDimensions(maxWidth, currY+textMarginTop);
+    // spatialSearch.setGrid(allIndexables);
+    // superimposedElements.setDimensions(maxWidth, currY+textMarginTop);
     textDiv.style.visibility = 'visible';
   };
 

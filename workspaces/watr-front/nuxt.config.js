@@ -11,7 +11,7 @@ const rootDir = __dirname;
 const srcDir = resolve(rootDir, 'src');
 
 export default {
-  mode: 'spa',
+  ssr: false,
   srcDir,
 
   head: {

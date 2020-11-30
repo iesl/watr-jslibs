@@ -21,7 +21,7 @@ export interface WaitForOptions {
 /**
  * watch a ref for non-null/undefined values, then run callback
  */
-export function watchFor<T>(tref: Ref<T | null | undefined>, fn: (t: T) => void) {
+export function watchFor<T>(tref: Ref<T | null | undefined>, fn: (t: T) => void): void {
   watch(tref, (tval) => {
     if (!tval) return;
     fn(tval);
@@ -31,7 +31,7 @@ export function watchFor<T>(tref: Ref<T | null | undefined>, fn: (t: T) => void)
 /**
  * watch (once) a ref for non-null/undefined values, then run callback
  */
-export function watchOnceFor<T>(tref: Ref<T | null | undefined>, fn: (t: T) => void) {
+export function watchOnceFor<T>(tref: Ref<T | null | undefined>, fn: (t: T) => void): void {
   const tv = tref.value;
   if (tv !== null && tv !== undefined) {
     // Check initial ref value, as the watch must be run lazily (skip initial check)
@@ -43,14 +43,17 @@ export function watchOnceFor<T>(tref: Ref<T | null | undefined>, fn: (t: T) => v
     if (!tval) return;
     stop();
     fn(tval);
-  }, { lazy: true });
+  }, {
+    // lazy: true TODO check that this api change behaves correctly
+    immediate: false
+  });
 }
 
 /**
  * Create a watchable object that signals when all passed in
  * refs have a value !== null/undefined
  */
-export function watchAll(rs?: Ref<any>[]) {
+export function watchAll(rs?: Ref<any>[]): any {
   if (!rs) return toRefs(reactive({
     done: true,
     len: 0,
@@ -83,10 +86,12 @@ export function watchAll(rs?: Ref<any>[]) {
         next.value += 1;
       }
 
-    }, { lazy: true });
+    }, { immediate: false });
 
     startFlag.value = true;
-  }, { lazy: true });
+  }, {
+    immediate: false
+  });
 
   next.value += 1;
 
@@ -107,7 +112,7 @@ export function waitFor(
   name: string,
   { state, dependsOn, ensureTruthy }: WaitForOptions,
   userFunc: () => void
-) {
+): void {
   // state.register(name);
 
   const startFlag = ref(false);
@@ -128,7 +133,7 @@ export function waitFor(
       stopPhase1();
       upstreamsReady.value = true;
     }
-  }, { lazy: true, deep: true });
+  }, { immediate: false, deep: true });
 
 
   const stopPhase2 = watch(upstreamsReady, (ready) => {
@@ -140,7 +145,7 @@ export function waitFor(
       userFunc();
       userFuncRan.value = true;
     }
-  }, { lazy: true, deep: true });
+  }, { immediate: false, deep: true });
 
   const downstreamWatcher = watchAll(ensureTruthy);
 
@@ -151,7 +156,7 @@ export function waitFor(
       stopPhase3();
       // console.log(`${prefix} downstreams are satisfied!`);
     }
-  }, { lazy: true });
+  }, { immediate: false });
 
   // console.log(`${prefix}  GO!`);
 
@@ -230,7 +235,7 @@ export async function resolveWhen<T>(t: T, ...refs: Ref<any>[]): Promise<T> {
   });
 }
 
-export async function awaitRef<T>(tref: Ref<T|null|undefined>): Promise<T> {
+export async function awaitRef<T>(tref: Ref<T | null | undefined>): Promise<T> {
   return new Promise((resolve) => {
     watchOnceFor(tref, (t) => resolve(t));
   });

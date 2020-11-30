@@ -16,11 +16,11 @@ export interface Point {
   y: number;
 }
 
-export const PointRepr = io.tuple([io.number, io.number], "PointRepr");
+export const PointRepr = io.tuple([io.number, io.number], 'PointRepr');
 export type PointRepr = io.TypeOf<typeof PointRepr>;
 
 export const Point = new io.Type<Point, PointRepr, unknown>(
-  "Point", isKind("point"),
+  'Point', isKind('point'),
   (repr: unknown, c: io.Context) => either.chain(
     PointRepr.validate(repr, c),
     validRepr => io.success(uPoint(validRepr))
@@ -34,11 +34,11 @@ export interface Circle {
   r: number;
 }
 
-export const CircleRepr = io.tuple([PointRepr, io.number], "CircleRepr");
+export const CircleRepr = io.tuple([PointRepr, io.number], 'CircleRepr');
 export type CircleRepr = io.TypeOf<typeof CircleRepr>;
 
 export const Circle = new io.Type<Circle, CircleRepr, unknown>(
-  "Circle", isKind("circle"),
+  'Circle', isKind('circle'),
   (repr: unknown, c: io.Context) => either.chain(
     CircleRepr.validate(repr, c),
     validRepr => io.success(uCircle(validRepr))
@@ -53,11 +53,11 @@ export interface Line {
   p2: Point;
 }
 
-export const LineRepr = io.tuple([PointRepr, PointRepr], "LineRepr");
+export const LineRepr = io.tuple([PointRepr, PointRepr], 'LineRepr');
 export type LineRepr = io.TypeOf<typeof LineRepr>;
 
 export const Line = new io.Type<Line, LineRepr, unknown>(
-  "Line", isKind("line"),
+  'Line', isKind('line'),
   (repr: unknown, c: io.Context) => either.chain(
     LineRepr.validate(repr, c),
     validRepr => io.success(uLine(validRepr))
@@ -73,11 +73,11 @@ export interface Triangle {
   p3: Point;
 }
 
-export const TriangleRepr = io.tuple([PointRepr, PointRepr, PointRepr], "TriangleRepr");
+export const TriangleRepr = io.tuple([PointRepr, PointRepr, PointRepr], 'TriangleRepr');
 export type TriangleRepr = io.TypeOf<typeof TriangleRepr>;
 
 export const Triangle = new io.Type<Triangle, TriangleRepr, unknown>(
-  "Triangle", isKind("triangle"),
+  'Triangle', isKind('triangle'),
   (repr: unknown, c: io.Context) => either.chain(
     TriangleRepr.validate(repr, c),
     validRepr => io.success(uTriangle(validRepr))
@@ -95,12 +95,12 @@ export interface Rect {
 
 // export const RectRepr = io.tuple<io.NumberType, io.NumberType, io.NumberType, io.NumberType>(
 export const RectRepr =
-  io.tuple([io.number, io.number, io.number, io.number], "RectRepr");
+  io.tuple([io.number, io.number, io.number, io.number], 'RectRepr');
 
 export type RectRepr = io.TypeOf<typeof RectRepr>;
 
 export const Rect = new io.Type<Rect, RectRepr, unknown>(
-  "Rect", isKind('rect'),
+  'Rect', isKind('rect'),
   (u: unknown, c: io.Context) => either.chain(
     RectRepr.validate(u, c),
     validRepr => io.success(uRect(validRepr))),
@@ -125,13 +125,13 @@ export interface Trapezoid {
 
 export const TrapezoidRepr = io.tuple(
   [PointRepr, io.number, PointRepr, io.number],
-  "TrapezoidRepr"
+  'TrapezoidRepr'
 );
 
 export type TrapezoidRepr = io.TypeOf<typeof TrapezoidRepr>;
 
 export const Trapezoid = new io.Type<Trapezoid, TrapezoidRepr, unknown>(
-  "Trapezoid", isKind("trapezoid"),
+  'Trapezoid', isKind('trapezoid'),
   (repr: unknown, c: io.Context) => either.chain(
     TrapezoidRepr.validate(repr, c),
     validRepr => io.success(uTrapezoid(validRepr))
@@ -150,7 +150,7 @@ export const Trapezoid = new io.Type<Trapezoid, TrapezoidRepr, unknown>(
    * order, or else the Triangle will decode as  a line with some extra info
    * at the end.
    */
-export const Shape = io.union([Rect, Point, Triangle, Trapezoid, Line, Circle], "Shape");
+export const Shape = io.union([Rect, Point, Triangle, Trapezoid, Line, Circle], 'Shape');
 export type Shape = io.TypeOf<typeof Shape>;
 export type ShapeKind = Shape['kind'];
 
@@ -164,23 +164,23 @@ function floatToIntRep(n: number): number {
 
 function uPoint(repr: PointRepr): Point {
   const [x, y] = repr;
-  return { kind: "point", x: uFloat(x), y: uFloat(y) };
+  return { kind: 'point', x: uFloat(x), y: uFloat(y) };
 }
 
 function uCircle(repr: CircleRepr): Circle {
   const [p, r] = repr;
-  return { kind: "circle", p: uPoint(p), r: uFloat(r) };
+  return { kind: 'circle', p: uPoint(p), r: uFloat(r) };
 }
 
 function uTriangle(repr: TriangleRepr): Triangle {
   const [p1, p2, p3] = repr;
-  return { kind: "triangle", p1: uPoint(p1), p2: uPoint(p2), p3: uPoint(p3),};
+  return { kind: 'triangle', p1: uPoint(p1), p2: uPoint(p2), p3: uPoint(p3),};
 }
 
 function uTrapezoid(repr: TrapezoidRepr): Trapezoid {
   const [tl, tw, bl, bw] = repr;
   return {
-    kind: "trapezoid",
+    kind: 'trapezoid',
     topLeft: uPoint(tl),
     topWidth: uFloat(tw),
     bottomLeft: uPoint(bl),
@@ -190,13 +190,13 @@ function uTrapezoid(repr: TrapezoidRepr): Trapezoid {
 
 function uLine(repr: LineRepr): Line {
   const [p1, p2] = repr;
-  return { kind: "line", p1: uPoint(p1), p2: uPoint(p2) };
+  return { kind: 'line', p1: uPoint(p1), p2: uPoint(p2) };
 }
 
 export function uRect(repr: RectRepr): Rect {
   const [x, y, w, h] = repr;
   return {
-    kind: "rect",
+    kind: 'rect',
     x: uFloat(x),
     y: uFloat(y),
     width: uFloat(w),

@@ -1,26 +1,22 @@
 import _ from 'lodash';
 
-// import pumpify from "pumpify";
-import path from "path";
+import path from 'path';
 import fs from 'fs-extra';
 import send from 'koa-send';
 
-import { Context } from "koa";
-import Router from "koa-router";
+import { Context } from 'koa';
+import Router from 'koa-router';
 
 import {
-  corpusEntryStream,
-  expandDirTrans,
-  CorpusEntry,
-  dirstream,
-  sliceStream
-} from "commons";
+  expandDirRecursive,
+  putStrLn,
+} from 'commons';
 
 
-export interface CorpusPage {
-  corpusEntries: CorpusEntry[];
-  offset: number;
-}
+// export interface CorpusPage {
+//   corpusEntries: CorpusEntry[];
+//   offset: number;
+// }
 
 // TODO reinstate w/o pumpify (use 'commons')
 // export async function readCorpusEntries(
@@ -50,25 +46,17 @@ export interface CorpusPage {
 //   })
 // }
 
-export async function listCorpusArtifacts(
-  entryPath: string,
-): Promise<string[]> {
-  const pipe = dirstream(entryPath, true);
 
-  return new Promise((resolve) => {
-    const artifacts: string[] = [];
-
-    pipe.on("data", (p: string) => artifacts.push(p));
-    pipe.on("end", () => resolve(artifacts));
-  })
-}
 
 export async function resolveArtifact(
   entryPath: string,
   remainingPath: string[]
 ): Promise<string | undefined> {
 
-  const allpaths = await listCorpusArtifacts(entryPath);
+  console.log('resolveArtifact', entryPath);
+
+  const allpaths = await expandDirRecursive(entryPath);
+  console.log('resolveArtifact', allpaths);
 
   const isFile = (f: string) => fs.statSync(f).isFile();
   const isNumeric = (s: string) => /^\d+$/.test(s);
@@ -106,6 +94,7 @@ export async function resolveArtifact(
 
 export function initFileBasedRoutes(corpusRootPath: string): Router {
   // TODO get this prefixed route working properly
+  putStrLn(`initializing server with root @${corpusRootPath}`);
   const apiRouter = new Router({
     // prefix: "/api"
   });
@@ -116,6 +105,7 @@ export function initFileBasedRoutes(corpusRootPath: string): Router {
   apiRouter
     .get(re, async (ctx: Context, next) => {
       const p = ctx.path;
+      putStrLn(`server: GET ${p}`);
 
       // map path entry id to physical path
       const endPath = p.substr(pathPrefix.length + 1)

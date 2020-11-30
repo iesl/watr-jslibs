@@ -17,7 +17,7 @@ import { useEventlibSelect } from '~/components/basics/eventlib-select';
 import { resolveCorpusUrl } from '~/lib/axios';
 import { LogEntry } from '~/lib/tracelogs';
 import { fromFigure } from '~/lib/coord-sys';
-import * as d3 from "d3-selection";
+import * as d3 from 'd3-selection';
 import { Rect } from '~/lib/shapes';
 
 type Args = StateArgs & {
@@ -113,7 +113,7 @@ export async function useTracelogPdfPageViewer({
   superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
   watch(logEntryRef, (logEntries) => {
 
-    const geometryLogs = _.filter(logEntries, e => e.logType === "Geometry");
+    const geometryLogs = _.filter(logEntries, e => e.logType === 'Geometry');
 
     const shapes = geometryLogs.flatMap(log => {
       return log.body.flatMap(sh => {
@@ -144,7 +144,7 @@ export async function useTracelogPdfPageViewer({
 }
 
 function getCls(data: any) {
-  let cls = "shape";
+  let cls = 'shape';
   if (data.class !== undefined) {
     cls = `${cls} ${data.class}`;
   }
@@ -159,60 +159,60 @@ function initShapeAttrs(r: any) {
   const shape = r.node().nodeName.toLowerCase();
 
   switch (shape) {
-    case "rect":
-      return r.attr("x", (d: any) => d.x)
-          .attr("y", (d: any) => d.y)
-          .attr("width", (d: any) => d.width)
-          .attr("height", (d: any) => d.height)
-          .attr("class", getCls)
+    case 'rect':
+      return r.attr('x', (d: any) => d.x)
+          .attr('y', (d: any) => d.y)
+          .attr('width', (d: any) => d.width)
+          .attr('height', (d: any) => d.height)
+          .attr('class', getCls)
           // .attr("label", getCls)
-          .attr("id", (d: any) => d.id)
-          .attr("opacity", 0.3)
-          .attr("fill-opacity", 0.4)
-          .attr("stroke-opacity", 0.9)
-          .attr("stroke-width", 2)
-          .attr("fill",  "black")
+          .attr('id', (d: any) => d.id)
+          .attr('opacity', 0.3)
+          .attr('fill-opacity', 0.4)
+          .attr('stroke-opacity', 0.9)
+          .attr('stroke-width', 2)
+          .attr('fill',  'black')
           // .attr("fill",  setDefaultFillColor)
-          .attr("stroke", "green")
+          .attr('stroke', 'green')
           // .call(addTooltip)
       ;
 
-    case "circle":
-      return r.attr("cx", (d: any) => d.cx)
-          .attr("cy", (d: any) => d.cy)
-          .attr("r", (d: any) => d.r)
-          .attr("class", getCls)
+    case 'circle':
+      return r.attr('cx', (d: any) => d.cx)
+          .attr('cy', (d: any) => d.cy)
+          .attr('r', (d: any) => d.r)
+          .attr('class', getCls)
           // .attr("label", getCls)
-          .attr("id", (d: any) => d.id)
-          .attr("fill-opacity", 0.2)
-          .attr("stroke-width", 1)
-          .attr("fill",  "black")
-          .attr("stroke", "green")
+          .attr('id', (d: any) => d.id)
+          .attr('fill-opacity', 0.2)
+          .attr('stroke-width', 1)
+          .attr('fill',  'black')
+          .attr('stroke', 'green')
           // .call(addTooltip)
       ;
 
-    case "line":
-      return r.attr("x1", (d: any) => d.x1)
-          .attr("y1", (d: any) => d.y1)
-          .attr("x2", (d: any) => d.x2)
-          .attr("y2", (d: any) => d.y2)
-          .attr("class", getCls)
+    case 'line':
+      return r.attr('x1', (d: any) => d.x1)
+          .attr('y1', (d: any) => d.y1)
+          .attr('x2', (d: any) => d.x2)
+          .attr('y2', (d: any) => d.y2)
+          .attr('class', getCls)
           // .attr("label", getCls)
-          .attr("id", (d: any) => d.id)
-          .attr("stroke-width", 2)
-          .attr("fill",  "black")
-          .attr("stroke", "green")
+          .attr('id', (d: any) => d.id)
+          .attr('stroke-width', 2)
+          .attr('fill',  'black')
+          .attr('stroke', 'green')
       ;
-    case "path":
-      return r.attr("d", (d: any) => d.d)
-          .attr("class", getCls)
+    case 'path':
+      return r.attr('d', (d: any) => d.d)
+          .attr('class', getCls)
           // .attr("label", getCls)
-          .attr("id", (d: any) => d.id)
-          .attr("stroke-width", 1)
-          .attr("fill",  "blue")
-          .attr("stroke", "black")
-          .attr("fill-opacity", 0.2)
-          .attr("stroke-opacity", 0.3)
+          .attr('id', (d: any) => d.id)
+          .attr('stroke-width', 1)
+          .attr('fill',  'blue')
+          .attr('stroke', 'black')
+          .attr('fill-opacity', 0.2)
+          .attr('stroke-opacity', 0.3)
       ;
   }
 
@@ -223,23 +223,23 @@ function initShapeAttrs(r: any) {
 function getId(data: any): string {
   const shape = data.type;
 
-  let id = "";
+  let id = '';
 
   if (data.id !== undefined) {
     id = data.id;
   } else {
 
     switch (shape) {
-      case "rect":
+      case 'rect':
         id =  `r_${data.x}_${data.y}_${data.width}_${data.height}`;
         break;
-      case "circle":
+      case 'circle':
         id =  `c_${data.cx}_${data.cy}_${data.r}`;
         break;
-      case "line":
+      case 'line':
         id =  `l_${data.x1}_${data.y1}_${data.x2}_${data.y2}`;
         break;
-      case "path":
+      case 'path':
         id =  `p_${data.d}`;
         break;
       default:

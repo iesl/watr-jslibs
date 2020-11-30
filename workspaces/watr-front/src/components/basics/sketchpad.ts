@@ -1,15 +1,15 @@
 /**
  * Provide a means to draw shape primitives to an underlying SVG.
  */
-import _ from 'lodash';
+import _ from 'lodash'
 // import * as d3 from 'd3-selection';
 
 // import {
 //   Ref,
 // } from '@vue/composition-api';
 
-import { StateArgs } from './component-basics';
-import { SuperimposedElements } from './superimposed-elements';
+import { StateArgs } from './component-basics'
+import { SuperimposedElements } from './superimposed-elements'
 // import { ShapeIntRepsToFloats, foldShape, mapShape, FoldF } from '~/lib/tracelogs';
 // import { Line, Point, Rect, Trapezoid, Shape } from '~/lib/shapes';
 // import { Ref, ref, watch } from '@vue/composition-api';
@@ -18,7 +18,6 @@ import { SuperimposedElements } from './superimposed-elements';
 //   Selection,
 //   BaseType,
 // } from "d3-selection";
-
 
 export interface Sketchpad {
   // mousePosRef: UnwrapRef<SketchpadPoint>;
@@ -31,13 +30,10 @@ type Args = StateArgs & {
   superimposedElements: SuperimposedElements;
 };
 
-
-
 export function useSketchpad({
   // state,
-  superimposedElements,
+  superimposedElements
 }: Args): Sketchpad {
-
   // const svgLayer = superimposedElements.overlayElements.svg!;
   // const drawablesRef: Ref<Shape[]> = ref([]);
 
@@ -51,7 +47,7 @@ export function useSketchpad({
   // });
 
   return {
-  };
+  }
 }
 
 // function shapeToD3Fold

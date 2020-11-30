@@ -1,14 +1,14 @@
 
+import { defineComponent } from '@vue/composition-api'
 import TracelogViewer from '~/components/multi-pane/tracelog-viewer/index.vue'
-import { defineComponent } from '@vue/composition-api';
 
 export default defineComponent({
-  layout: 'app-layout',
   components: { TracelogViewer },
+  layout: 'app-layout',
   head() {
-    const title = "Tracelog Viewer";
+    const title = 'Tracelog Viewer'
     return {
       title
-    };
+    }
   }
 })

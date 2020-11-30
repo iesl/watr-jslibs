@@ -10,7 +10,7 @@ function getCallerContext() {
   // Get caller context
   const err = getErrorObject();
   const stack = err.stack;
-  let lines = stack? stack.split('\n') : [];
+  let lines = stack ? stack.split('\n') : [];
   lines = _.dropWhile(lines, (l) => !l.includes('at prettyPrint'));
   lines = _.drop(lines, 1);
   lines = _.takeWhile(lines, l => !l.includes('node_modules'));
@@ -19,7 +19,7 @@ function getCallerContext() {
   const callerContext = _.join(
     _.map(_.reverse(lines), l => {
       let line = _.trim(l);
-      const index = line.indexOf("at ");
+      const index = line.indexOf('at ');
       line = line.slice(index + 3, line.length);
       const parts = _.split(line, '(');
       const callingContext = _.trim(parts[0]);
@@ -99,15 +99,15 @@ const inspectOptionDefaults = {
   maxArrayLength: 100,
   breakLength: 80,
   compact: 10,
-  sorted: true,
+  sorted: false,
   getters: false,
   showContext: false,
 };
 
 
 /**
- * Prints out one or more expressions via console.log, with a few improvements
- *   to make debug printing easier.
+ * Prints out one or more expressions directly to process.stdout, with a few
+ *   improvements over console.log to make debug printing easier.
  * Usage:
  *   let x=1, y=2, z=3;
  *   prettyPrint({x, y, z}); <== note use of braces
@@ -122,7 +122,9 @@ const inspectOptionDefaults = {
  *      z: 3
  *      ===
  */
-export function prettyPrint(vsobj: object, options: Partial<InspectOptions> = {}): void {
+const [fst, lst, mid, sole] = '╭╰│═'.split(''); /*  "┏┗┃═" */
+
+export function prettyPrint(vsobj: any, options: Partial<InspectOptions> = {}): void {
   let callerContext = '';
   const opts = Object.assign({}, inspectOptionDefaults, options);
 
@@ -132,15 +134,44 @@ export function prettyPrint(vsobj: object, options: Partial<InspectOptions> = {}
   }
 
   const props = Object.getOwnPropertyNames(vsobj);
+  const lens = _.map(props, p => p.length)
+  const maxlen = _.max(lens) || 0;
 
-  const fmt = _.join(_.map(props, p => {
+  const fmt = _.join(_.map(props, (p, pi) => {
+    const isSolo = props.length === 1;
+    const isFirst = pi === 0;
+    const isLast = pi === props.length - 1;
+    const prefixChar = isSolo ? sole
+      : isFirst ? fst
+        : isLast ? lst
+          : mid;
     const o = vsobj as any;
     const v = o[p];
     const ins = util.inspect(v, opts);
-    return p + ': ' + ins;
+    const insLines = ins.split('\n');
+    const ins0 = insLines[0];
+
+    const indented = _.map(insLines.slice(1), (l) => {
+      const indentPad = ''.padEnd(maxlen);
+      return `    ${indentPad}${l}`;
+    }).join('\n');
+    const continuation = indented.length > 0? `\n${indented}` : ''
+    return `  ${prefixChar} ${p.padEnd(maxlen)}: ${ins0}${continuation}`;
   }), '\n');
 
   const output = callerContext + fmt;
-  // util.log(output);
-  console.log(output);
+  putStrLn(output);
 }
+
+export function putStrLn(...vs: any[]) {
+  const fmts = _.map(vs, v => {
+    if (_.isString(v)) {
+      return v;
+    }
+    return util.inspect(v, inspectOptionDefaults);
+  });
+  const fmt = fmts.join(' ');
+  process.stdout.write(fmt);
+  process.stdout.write('\n');
+}
+

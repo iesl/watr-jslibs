@@ -1,15 +1,21 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
 
+    "lib": [
+      "dom"
+    ],
+
+    "incremental": true,
     "esModuleInterop": true,
     "importHelpers": true,
     "allowSyntheticDefaultImports": true,
+    "skipDefaultLibCheck": true,
 
-    "incremental": true,
     "experimentalDecorators": true,
     "strict": true,
     "noEmit": false,
@@ -21,20 +27,18 @@
 
     "inlineSourceMap": true,
     "preserveConstEnums": true,
+
     "declaration": true,
     "declarationMap": true,
 
     "types": [
       "jest",
-      "chai",
-      "@types/node"
+      "chai"
     ],
 
+
     "paths": {
-      "~/*":  ["./src/*"],
-      "@/*":  ["./src/*"],
-      "~~/*": ["./src/*"],
-      "@@/*": ["./src/*"]
+      "~/*":  ["./src/*"]
     }
 
   },
@@ -42,8 +46,12 @@
   "typeRoots": ["@types", "node_modules/@types"],
 
   "include": [
-    "./src/**/*",
-    "./@types/**/*"
+    "src", "@types"
+  ],
+
+  "exclude": [
+    "**/node_modules",
+    "**/.*/"
   ]
 
 }

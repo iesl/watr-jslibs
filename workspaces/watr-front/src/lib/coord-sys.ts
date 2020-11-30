@@ -72,7 +72,7 @@ export class Point {
 
   public svgShape() {
     return {
-      type: "circle",
+      type: 'circle',
       r: 3,
       cx: this.x,
       cy: this.y,
@@ -92,7 +92,7 @@ class Line {
 
   public svgShape() {
     return {
-      type: "line",
+      type: 'line',
       x1: this.p1.x,
       x2: this.p2.x,
       y1: this.p1.y,
@@ -116,7 +116,7 @@ class Trapezoid {
     const p3 = this.bottomLine.p2;
     const p4 = this.bottomLine.p1;
     return {
-      type: "path",
+      type: 'path',
       d: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} L ${p4.x} ${p4.y} Z`,
     };
   }
@@ -239,7 +239,7 @@ export class BBox implements LTBounds {
 
   public svgShape() {
     return {
-      type: "rect",
+      type: 'rect',
       x: this.x,
       y: this.y,
       width: this.width,

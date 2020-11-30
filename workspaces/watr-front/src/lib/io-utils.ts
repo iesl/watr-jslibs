@@ -12,23 +12,23 @@ interface NonNegative {
 export const PositiveNumber = io.brand(
   io.number,
   (n: number): n is io.Branded<number, Positive> => n > 0,
-  "Positive"
+  'Positive'
 );
 
 export const NonNegativeNumber = io.brand(
   io.number,
   (n: number): n is io.Branded<number, NonNegative> => n >= 0,
-  "NonNegative"
+  'NonNegative'
 );
 
 export const PositiveInteger = io.brand(
   io.number,
   (n: number): n is io.Branded<number, Positive> => n > 0 && Number.isInteger(n),
-  "Positive"
+  'Positive'
 );
 
 export const NonNegativeInteger = io.brand(
   io.number,
   (n: number): n is io.Branded<number, NonNegative> => n >= 0 && Number.isInteger(n),
-  "NonNegative"
+  'NonNegative'
 );

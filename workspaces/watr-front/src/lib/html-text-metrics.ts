@@ -3,6 +3,8 @@
  * html text.
  **/
 
+import _ from 'lodash'
+
 export interface TextStyle {
   style: string;
   variant?: string;
@@ -12,7 +14,7 @@ export interface TextStyle {
 }
 
 export function makeStyleString(style: TextStyle): string {
-  return `${style.weight} ${style.size}px ${style.family}`;
+  return `${style.weight} ${style.size}px ${style.family}`
 }
 
 export interface LineDimensions {
@@ -30,23 +32,20 @@ export interface TextDimensions {
   height: number;
 }
 
-
 export function getTextWidth(ctx: CanvasRenderingContext2D, text: string, font: string): number {
-  ctx.font = font;
-  const metrics: TextMetrics = ctx.measureText(text);
-  return metrics.width;
+  ctx.font = font
+  const metrics: TextMetrics = ctx.measureText(text)
+  return metrics.width
 }
-
-import _ from 'lodash';
 
 // TODO make sure that div.offsetWidth/Height are equivalent crossbrowser to $(div).outerWidth
 export function showText(text: string, div: HTMLDivElement, atX: number, atY: number): LineDimensions {
-  const lineWidth = div.offsetWidth;
-  const lineHeight = div.offsetHeight;
+  const lineWidth = div.offsetWidth
+  const lineHeight = div.offsetHeight
 
   // let currX = atX;
   // let init = '';
-  const sizes: TextDimensions[] = [];
+  const sizes: TextDimensions[] = []
   // TODO re-enable char-wise size calculation when you can figure out how to do it efficiently
   // for (let i=0; i<text.length; i++) {
   //   init += text.charAt(i);
@@ -62,11 +61,12 @@ export function showText(text: string, div: HTMLDivElement, atX: number, atY: nu
   // }
 
   const lineDimensions: LineDimensions = {
-    x: 0, y: 0,
+    x: 0,
+    y: 0,
     width: lineWidth,
     height: lineHeight,
     elementDimensions: sizes
-  };
+  }
 
-  return lineDimensions;
+  return lineDimensions
 }

@@ -1,8 +1,8 @@
-import _ from "lodash";
+import _ from 'lodash';
 
 // import { Rect, RectRepr, Shape } from "./shapes";
 import * as io from 'io-ts';
-import { Label } from "./transcript";
+import { Label } from './transcript';
 
 const LogHeaders = io.type({
   tags: io.string,

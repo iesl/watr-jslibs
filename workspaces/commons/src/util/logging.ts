@@ -1,30 +1,24 @@
-import _ from "lodash";
-
-import fs from "fs-extra";
+import _ from 'lodash';
+import path from 'path';
 
 import {
   createLogger,
   format,
+  config,
   transports,
   Logger,
-} from "winston";
-import * as LogTransport from 'winston-transport';
+} from 'winston';
+
+import * as winston from 'winston';
 
 const { combine, timestamp, prettyPrint } = format;
-import logform from "logform";
-import { newIdGenerator } from './utils';
+const cli = config.cli;
 
-const nextId = newIdGenerator();
-
-const uniqIdFormat = logform.format((info) => {
-  info.id = nextId();
-  return info;
-});
-
+export type TransportType = 'file' | 'console';
 
 export function createConsoleLogger(): Logger {
   return createLogger({
-    level: "info",
+    level: 'info',
     format: combine(timestamp(), prettyPrint()),
     transports: [
       new transports.Console(),
@@ -32,135 +26,126 @@ export function createConsoleLogger(): Logger {
   });
 }
 
-export function createFileAndConsoleLogger(logfile: string): Logger {
-  const logger = createConsoleLogger();
-  const transportA = newFileStreamTransport(logfile);
-  logger.add(transportA);
-  return logger;
+export function setLogLabel(log: Logger, label: string) {
+  log.format = format.combine(
+    format.label({ label, message: true })
+  );
 }
 
+export function setLogLevel(log: Logger, transportType: TransportType, level: string) {
+  _.each(
+    log.transports, t => {
+      const setLevel = ((transportType === 'file') && (t instanceof transports.File))
+        || ((transportType === 'console') && (t instanceof transports.Console))
+      ;
 
-export function newFileStreamTransport(logname: string): transports.StreamTransportInstance {
-  const logWriteStream = fs.createWriteStream(logname, { flags: 'a' });
-  const streamTransport = new transports.Stream({
-    stream: logWriteStream,
-    format: format.combine(format.timestamp(), format.json()),
+      if (setLevel) {
+        t.level = level;
+      }
+    }
+  )
+}
+
+export function consoleTransport(level: string): transports.ConsoleTransportInstance  {
+  return new transports.Console({
+    format: format.combine(
+      format.colorize(),
+      format.simple(),
+    ),
+    level
   });
-  return streamTransport;
-
 }
 
-function initLogger(logname: string): Logger {
-  const transportA = newFileStreamTransport(logname);
-  transportA.format = format.combine(format.timestamp(), format.json());
-  const lognamePretty = `${logname}.pretty.txt`;
-  const transportB = newFileStreamTransport(lognamePretty);
-  transportB.format = format.combine(format.prettyPrint());
+export function newLogger(...transports: winston.transport[]): Logger {
+  return createLogger({
+    levels: cli.levels,
+    transports,
+  });
+}
+
+export function fileTransport(dirname: string, filename: string, level: string): transports.FileTransportInstance  {
+  return new transports.File({
+    filename,
+    level,
+    format: format.combine(
+      format.timestamp(),
+      format.json()
+    ),
+    dirname,
+    tailable: true,
+  })
+}
+
+export function getLogger(
+  logfilePath: string,
+  consoleLogLevel: string = 'info',
+): Logger {
+  const rootLoggingPath = path.dirname(logfilePath);
+  const logfile = path.basename(logfilePath);
+
+  const consoleTransport = new transports.Console({
+    format: format.combine(
+      format.colorize(),
+      format.simple(),
+    ),
+    level: consoleLogLevel
+  });
+
+  const fileTransport = new transports.File({
+    filename: logfile,
+    level: 'silly',
+    format: format.combine(
+      format.timestamp(),
+      format.json()
+    ),
+    dirname: rootLoggingPath,
+    tailable: true,
+  })
+
 
   const logger = createLogger({
-    level: "info",
-    format: format.combine(uniqIdFormat()),
+    levels: config.cli.levels,
     transports: [
-      transportA,
-      transportB,
+      consoleTransport,
+      fileTransport
     ],
   });
-
   return logger;
 }
 
-type MakeTransport = () => LogTransport;
+export function getConsoleAndFileLogger(
+  logfilePath: string,
+  consoleLogLevel: string = 'info',
+): Logger {
+  const rootLoggingPath = path.dirname(logfilePath);
+  const logfile = path.basename(logfilePath);
 
-export async function flushAndReopen(
-  // logpath: string,
-  logger: Logger,
-  transportFs: MakeTransport[]
-): Promise<void> {
-  // logger.pause();
-  // logger.cork();
-
-  const allPromises = _(logger.transports)
-    .map((trn) => {
-      logger.remove(trn);
-      return trn;
-    })
-    .map(trn => {
-      if (!trn) return Promise.resolve();
-
-      const endPromise = new Promise((resolve) => {
-
-        trn.on("end", () => {
-          console.log('transport end');
-        });
-        trn.on("close", () => {
-          console.log('transport closed');
-          // resolve();
-        });
-
-        trn.on("finish", () => {
-          console.log('transport finished');
-          _(transportFs)
-            .map(f => f())
-            .each(t => logger.add(t));
-
-          // logger.resume();
-          // logger.uncork();
-          resolve();
-        })
-        trn.destroy();
-      });
-
-      return endPromise;
-    })
-    .value();
-
-  return Promise.all(allPromises).then(() => undefined);
-}
-
-type Loggable = string | any;
-
-/**
- * Maintains logs and headers so that they can be written all together,
- *   as a single Json record
- */
-export interface BufferedLogger {
-  logger: Logger;
-  logBuffer: Record<string, any>;
-  // append(obj: string): void;
-  append(key: string, value: Loggable): void;
-  commitLogs(): Promise<void>;
-  commitAndClose(): Promise<void>;
-}
-
-
-export function initBufferedLogger(logname: string,): BufferedLogger {
-  return {
-    logger: initLogger(logname),
-    logBuffer: {},
-    append: function(key: string, value: Loggable): void {
-      this.logBuffer[key] = value;
-    },
-    commitLogs: function(): Promise<void> {
-      const logBuffer = _.merge({}, this.logBuffer);
-      this.logBuffer = {};
-
-      this.logger.info(logBuffer);
-
-      return Promise.resolve();
-    },
-    commitAndClose: function(): Promise<void> {
-      this.commitLogs();
-      const p = promisifyLoggerClose(this.logger);
-      this.logger.end();
-      return p;
-    },
-  };
-}
-
-export async function promisifyLoggerClose(logger: Logger): Promise<void> {
-  return new Promise((resolve) => {
-    logger.on('finish', function() {
-      resolve();
-    });
+  const consoleTransport = new transports.Console({
+    format: format.combine(
+      format.colorize(),
+      format.simple(),
+    ),
+    level: consoleLogLevel
   });
+
+  const fileTransport = new transports.File({
+    filename: logfile,
+    level: 'silly',
+    format: format.combine(
+      format.timestamp(),
+      format.json()
+    ),
+    dirname: rootLoggingPath,
+    tailable: true,
+  })
+
+
+  const logger = createLogger({
+    levels: config.cli.levels,
+    transports: [
+      consoleTransport,
+      fileTransport
+    ],
+  });
+  return logger;
 }

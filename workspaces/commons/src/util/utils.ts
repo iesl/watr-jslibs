@@ -1,8 +1,8 @@
-import _ from "lodash";
+import _ from 'lodash';
 import path from 'path';
 import fs from 'fs-extra';
 
-export function getOrDie<T>(v: T | null | undefined, msg: string = "null|undef"): T {
+export function getOrDie<T>(v: T | null | undefined, msg: string = 'null|undef'): T {
   if (v === null || v === undefined) {
     throw new Error(`Error: ${msg}`);
   }
@@ -26,23 +26,24 @@ export function fileOrUndef(file: string|undefined, ...ps: string[]): string|und
 export function makeNowTimeString(): string {
   const now = new Date();
   const timeOpts = {
-    timeStyle: "medium",
-    hour: "2-digit",
-    minute: "2-digit",
-    seconds: "2-digit",
+    timeStyle: 'medium',
+    hour: '2-digit',
+    minute: '2-digit',
+    seconds: '2-digit',
     hour12: false,
   };
-  const nowTime = now.toLocaleTimeString("en-US", timeOpts);
+  const nowTime = now.toLocaleTimeString('en-US', timeOpts);
 
-  const timestamp = nowTime.replace(/:/g, ".");
+  const timestamp = nowTime.replace(/:/g, '.');
   return timestamp;
 }
 
 
 export const delay = (t: number) => new Promise(resolve => setTimeout(resolve, t));
 
-export function newIdGenerator() {
-  let currId = -1;
+
+export function newIdGenerator(start: number) {
+  let currId = start-1;
   const nextId = () => {
     currId += 1;
     return currId;

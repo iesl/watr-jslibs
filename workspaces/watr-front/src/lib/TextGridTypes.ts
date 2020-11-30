@@ -1,5 +1,5 @@
-import * as coords from "./coord-sys";
-import { BBoxArray } from "./coord-sys";
+import * as coords from './coord-sys';
+import { BBoxArray } from './coord-sys';
 
 export interface Grid {
   description: string;
@@ -41,8 +41,8 @@ export interface Labels {
 }
 
 export enum CellLabelEnum {
-  SegSub = "seg:Sub",
-  SegSup = "seg:Sup",
+  SegSub = 'seg:Sub',
+  SegSup = 'seg:Sup',
 }
 
 export interface Row {

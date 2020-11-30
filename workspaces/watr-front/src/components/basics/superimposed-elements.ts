@@ -58,8 +58,8 @@ export function useSuperimposedElements({
   }
   if (useElem(ElementTypes.Svg)) {
     const el = overlayElements.svg =
-      document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    el.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+      document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    el.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xlink', 'http://www.w3.org/1999/xlink');
     el.classList.add('layer');
   }
   if (useElem(ElementTypes.Text)) {
@@ -67,7 +67,8 @@ export function useSuperimposedElements({
     el.classList.add('layer', 'text-layer');
   }
 
-  const dimensions: Ref<[number, number]> = ref([200, 500]);
+
+  const dimensions: Ref<[number, number]> = ref([200, 500] as [number, number]);
 
   const width = () => dimensions.value[0];
   const height = () => dimensions.value[1];

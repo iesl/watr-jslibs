@@ -57,7 +57,7 @@ export function useGlyphOverlays({
     const svgSelect = d3.select(svgLayer);
     watch(flashlight.litItemsRef, (litItems) => {
       const items = _.sortBy(
-        _.filter(litItems, (hit) => hit.glyphData !== undefined),
+        _.filter(litItems, (hit: TextDataPoint) => hit.glyph !== undefined),
         (hit) => [hit.minY, hit.minX]
       );
 

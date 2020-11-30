@@ -2,20 +2,20 @@
  * Initialize and return an rtree interface
  */
 
-import _ from 'lodash';
-import RBush from "rbush";
+import _ from 'lodash'
+import RBush from 'rbush'
 
 import {
   Ref,
   watch,
-  ref,
-} from '@vue/composition-api';
+  ref
+} from '@vue/composition-api'
 
+import { EventlibCore } from './eventlib-core'
 import { StateArgs } from '~/components/basics/component-basics'
-import * as coords from '~/lib/coord-sys';
-import { BBox } from '~/lib/coord-sys';
-import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers';
-import { EventlibCore } from './eventlib-core';
+import * as coords from '~/lib/coord-sys'
+import { BBox } from '~/lib/coord-sys'
+import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers'
 
 type LoadData<T> = (data: T[]) => void;
 type Search<T> = (query: BBox) => T[];
@@ -37,58 +37,56 @@ type Args = StateArgs & {}
 
 export function useRTreeIndex<T>({
 }: Args): RTreeIndex<T> {
-  const rtree: RBush<T> = new RBush<T>();
-  const dataRef: Ref<T[] | null> = ref(null);
-
+  const rtree: RBush<T> = new RBush<T>()
+  const dataRef: Ref<T[] | null> = ref(null)
 
   watch(dataRef, () => {
-    const data = dataRef.value;
+    const data = dataRef.value
     if (data) {
-      rtree.load(data);
-      dataRef.value = null;
+      rtree.load(data)
+      dataRef.value = null
     }
-  });
+  })
 
   const loadData: LoadData<T> = (data) => {
-    dataRef.value = data;
+    dataRef.value = data
   }
 
   const search: Search<T> = (query) => {
-    return rtree.search(query);
+    return rtree.search(query)
   }
 
   const flashlight: FlashlightToggle<T> = (eventlibCore) => {
-    const litItemsRef: Ref<T[]> = ref([]);
+    const litItemsRef: Ref<T[]> = ref([])
 
     const mousemove = (e: EMouseEvent) => {
-      const pos = e.pos;
-      const mousePt = coords.mkPoint.fromXy(pos.x, pos.y);
-      const queryBox = coords.boxCenteredAt(mousePt, 8, 8);
-      const hits = rtree.search(queryBox);
-      litItemsRef.value = hits;
+      const pos = e.pos
+      const mousePt = coords.mkPoint.fromXy(pos.x, pos.y)
+      const queryBox = coords.boxCenteredAt(mousePt, 8, 8)
+      const hits = rtree.search(queryBox)
+      litItemsRef.value = hits
     }
 
-    const handlers: MouseHandlerInit = () =>  {
+    const handlers: MouseHandlerInit = () => {
       return {
-        mousemove,
+        mousemove
       }
     }
 
-    eventlibCore.setMouseHandlers([handlers]);
+    eventlibCore.setMouseHandlers([handlers])
 
     const off = () => {
       // TODO unwatch(litItemsRef)
-    };
+    }
 
     return {
       litItemsRef, off
-    };
+    }
   }
 
   return {
     loadData,
     search,
     flashlight
-  };
-
+  }
 }

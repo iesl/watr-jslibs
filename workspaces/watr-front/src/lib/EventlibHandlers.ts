@@ -1,12 +1,13 @@
-import _ from "lodash";
+import _ from 'lodash';
 
 import {
   Ref,
 } from '@vue/composition-api';
 
-import { UnwrapRef } from '@vue/composition-api/dist/reactivity';
+// import { UnwrapRef } from '@vue/composition-api/dist/reactivity';
+import { UnwrapRef } from '@vue/composition-api';
 
-export function getCursorPosition(elem: Element, event: MouseEvent) {
+export function getCursorPosition(elem: Element, event: MouseEvent): EventlibPoint {
   const rect: DOMRect | ClientRect = elem.getBoundingClientRect()
   const x = event.clientX - rect.left
   const y = event.clientY - rect.top
@@ -56,18 +57,18 @@ interface MouseEventMap {
 }
 
 const MouseEvents: MouseEventT[] = [
-  "auxclick",
-  "click",
-  "contextmenu",
-  "dblclick",
-  "mousedown",
-  "mouseenter",
-  "mouseleave",
-  "mousemove",
-  "mouseout",
-  "mouseover",
-  "mouseup",
-  "wheel",
+  'auxclick',
+  'click',
+  'contextmenu',
+  'dblclick',
+  'mousedown',
+  'mouseenter',
+  'mouseleave',
+  'mousemove',
+  'mouseout',
+  'mouseover',
+  'mouseup',
+  'wheel',
 ];
 
 export type MouseHandlers = Partial<MouseEventMap>;

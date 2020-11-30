@@ -3,17 +3,17 @@ import 'chai/register-should';
 
 import _ from 'lodash';
 import through from 'through2';
-import { dirstream } from './dirstream';
+import { expandDirRecursive, getDirWalkerStream } from './dirstream';
 import { prettyPrint } from '~/util/pretty-print';
 
 describe('File corpus operations',  () => {
   const testDirPath = './test/resources/test-dirs';
 
-  it("should traverse all files/directories using readable stream", async (done) => {
+  it('should traverse all files/directories using readable stream', async (done) => {
 
     const filesRead: string[] = [];
 
-    const dirStream = dirstream(testDirPath, false);
+    const dirStream = getDirWalkerStream(testDirPath, false);
 
     dirStream.pipe(through.obj(
       (chunk: string, _enc: string, next: (err: any, v: any) => void) => {
@@ -26,6 +26,12 @@ describe('File corpus operations',  () => {
         done();
       }
     ));
+  });
+
+  it.only('should full expand a directory of files', async (done) => {
+    const expanded = await expandDirRecursive(testDirPath, true, false);
+    prettyPrint({ expanded })
+    done();
   });
 
 

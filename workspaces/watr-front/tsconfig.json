@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "allowJs": true,
 
-    "target": "es2018",
+    "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
 
@@ -15,16 +15,18 @@
       "dom"
     ],
 
+    "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "skipDefaultLibCheck": true,
+
     "sourceMap": true,
     "strict": true,
     "noEmit": true,
 
     "types": [
-      "@types/jest",
-      "@types/node",
-      "@nuxt/types"
+      "jest",
+      "node"
     ],
 
     "paths": {
@@ -38,8 +40,6 @@
   ],
 
   "exclude": [
-    "node_modules",
-    "dist",
-    "coverage"
+    "node_modules"
   ]
 }
