@@ -1,5 +1,5 @@
 import path from 'path';
-import { makeHashEncodedPath } from '~/util/hash-encoded-paths';
+import { makeHashEncodedPath } from 'commonlib-shared';
 
 
 export const Env = {

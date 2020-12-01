@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import through from 'through2';
 import { expandDirRecursive, getDirWalkerStream } from './dirstream';
-import { prettyPrint } from '~/util/pretty-print';
+import { prettyPrint } from 'commonlib-shared';
 
 describe('File corpus operations',  () => {
   const testDirPath = './test/resources/test-dirs';

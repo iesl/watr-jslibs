@@ -9,8 +9,11 @@ import Router from 'koa-router';
 
 import {
   expandDirRecursive,
+} from 'commonlib-node';
+
+import {
   putStrLn,
-} from 'commons';
+} from 'commonlib-shared';
 
 
 // export interface CorpusPage {

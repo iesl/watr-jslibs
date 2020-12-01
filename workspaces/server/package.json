@@ -6,7 +6,8 @@
   "keywords": [],
   "dependencies": {
     "fs-extra": "^9.0.1",
-    "commons": "0.1.0",
+    "commonlib-node": "0.1.0",
+    "commonlib-shared": "0.1.0",
     "koa": "^2.13.0",
     "koa-body": "^4.2.0",
     "koa-bodyparser": "^4.3.0",
@@ -47,8 +48,8 @@
     "src": "src"
   },
   "scripts": {
-    "XXX:build": "tsc",
-    "XXX:watch": "tsc --watch",
+    "compile": "tsc",
+    "build": "tsc",
     "XXX:serve": "ts-node-dev --notify=false ./src/server.ts",
     "ui:dev": "./bin/ts-node ./src/corpus-artifact-server/server.ts corpus-server --corpus-root ../../corpus-test.d",
     "lint": "eslint --config .eslintrc.js --ext .ts --ignore-path ../../.gitignore ./src",

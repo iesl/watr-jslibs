@@ -9,7 +9,6 @@ export default [
 		input: 'src/index.ts',
 		plugins: [
       resolve({
-        // rootDir: path.join(process.cwd(), '../..')
         rootDir: process.cwd()
       }),
       commonjs({

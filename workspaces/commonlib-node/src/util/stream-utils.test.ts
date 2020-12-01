@@ -1,5 +1,5 @@
 import 'chai';
-import { prettyPrint } from './pretty-print';
+import { prettyPrint } from 'commonlib-shared';
 
 import {
   stanzaChunker,

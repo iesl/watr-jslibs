@@ -4,7 +4,8 @@ import path from 'path';
 import fs from 'fs-extra';
 import { getDirWalkerStream, stringStreamFilter } from './dirstream';
 import { throughFunc } from '~/util/stream-utils';
-import { shaEncodeAsHex } from '~/util/string-utils';
+import { shaEncodeAsHex } from 'commonlib-shared';
+
 
 export interface ExpandedDir {
   dir: string;

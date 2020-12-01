@@ -2,7 +2,7 @@
 import Koa, { Context } from 'koa';
 import Router from 'koa-router';
 import json from 'koa-json';
-import { arglib } from 'commons';
+import { arglib } from 'commonlib-node';
 const { opt, config, registerCmd } = arglib;
 
 import { initFileBasedRoutes } from './corpusRoutes';
@@ -10,14 +10,6 @@ import { initFileBasedRoutes } from './corpusRoutes';
 const rootRouter = new Router();
 const app = new Koa();
 
-// opts
-//   .version('0.1.0')
-//   .option('--corpus <path>', 'Path to corpus')
-//   .option('--port <port>', 'port to listen to')
-//   .parse(process.argv)
-//   ;
-
-// const { corpus } = opts;
 registerCmd(
   arglib.YArgs,
   'corpus-server',

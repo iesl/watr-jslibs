@@ -23,8 +23,6 @@
     "inlineSourceMap": true,
     "preserveConstEnums": true,
 
-    "diagnostics": true,
-
     "outDir": "./dist"
   },
 

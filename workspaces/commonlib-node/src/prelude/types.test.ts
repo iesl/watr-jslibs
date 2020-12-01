@@ -1,6 +1,6 @@
 
 import _ from 'lodash';
-import { prettyPrint } from '~/util/pretty-print';
+import { prettyPrint } from 'commonlib-shared';
 import { AlphaRecord } from './types';
 
 describe('Shared types', () => {

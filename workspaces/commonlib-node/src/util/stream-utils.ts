@@ -2,7 +2,7 @@ import _ from 'lodash';
 import fs from 'fs-extra';
 import through from 'through2';
 import { Transform, Readable } from 'stream';
-import { prettyPrint } from './pretty-print';
+import { prettyPrint } from 'commonlib-shared';
 import split from 'split';
 import { ChildProcessWithoutNullStreams } from 'child_process';
 import stream from 'stream';

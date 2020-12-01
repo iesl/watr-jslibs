@@ -4,7 +4,7 @@ import 'chai';
 import _ from 'lodash';
 import { config, opt, ArgvApp, registerCmd, YArgs } from '~/cli/arglib';
 import yargs from 'yargs';
-import { prettyPrint } from '~/util/pretty-print';
+import { prettyPrint } from 'commonlib-shared';
 
 describe('Arglib tests', () => {
   beforeEach(() => {
