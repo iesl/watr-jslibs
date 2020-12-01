@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import { Rect, Shape } from './shapes';
 import * as io from 'io-ts';
-import { NonNegativeInteger, PositiveInteger } from './io-utils';
+import { NonNegativeInteger, PositiveInteger } from '~/lib/io-utils';
 import { Glyph } from './glyph';
 
 // Define the Repr serialization types for Glyphs / GlyphProps

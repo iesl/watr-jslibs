@@ -1,5 +1,5 @@
-import * as coords from './coord-sys';
-import { BBoxArray } from './coord-sys';
+import * as coords from '~/lib//coord-sys';
+import { BBoxArray } from '~/lib/coord-sys';
 
 export interface Grid {
   description: string;

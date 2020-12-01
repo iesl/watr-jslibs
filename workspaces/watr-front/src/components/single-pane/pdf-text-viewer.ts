@@ -7,11 +7,11 @@ import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
 import { useSpatialSearch } from '~/components/basics/glyph-overlays';
 import { BBox } from '~/lib/coord-sys';
-import * as GridTypes from '~/lib/TextGridTypes';
+import * as GridTypes from '~/lib/transcript/TextGridTypes';
 import { useMeasuredTextOverlay  } from '~/components/basics/measured-text-overlay';
 import { TextStyle } from '~/lib/html-text-metrics';
 import { newIdGenerator } from '~/lib/utils';
-import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
+import { RTreeIndexable } from '~/lib/transcript/TextGlyphDataTypes';
 
 export interface TextgridAndBounds {
   textgrid: GridTypes.Textgrid;

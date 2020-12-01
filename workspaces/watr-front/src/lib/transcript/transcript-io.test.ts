@@ -1,5 +1,3 @@
-import 'chai/register-should'
-
 import _ from 'lodash'
 import { Transcript, Label, Range } from './transcript'
 import { isIsomorphic } from '~/lib/utils'

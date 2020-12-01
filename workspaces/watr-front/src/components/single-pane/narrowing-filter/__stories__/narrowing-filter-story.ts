@@ -4,7 +4,7 @@ import { ref, defineComponent, provide, Ref } from '@vue/composition-api'
 import NarrowingFilter from '../index.vue'
 import { ProvidedChoices } from '../narrowing-filter'
 import { configAxios, getArtifactData } from '~/lib/axios'
-import { groupTracelogsByKey } from '~/lib/tracelogs'
+import { groupTracelogsByKey } from '~/lib/transcript/tracelogs'
 
 export default defineComponent({
   components: {

@@ -12,10 +12,10 @@ import { getQueryString } from '../tracelog-viewer/tracelog-viewer'
 import { divRef } from '~/lib/vue-composition-lib'
 import { initState, awaitRef } from '~/components/basics/component-basics'
 import { getArtifactData } from '~/lib/axios'
-import { LogEntry } from '~/lib/tracelogs'
+import { LogEntry } from '~/lib/transcript/tracelogs'
 import { useTracelogPdfPageViewer } from '~/components/single-pane/pdf-page-viewer'
 import { useTranscriptViewer } from '~/components/single-pane/transcript-viewer'
-import { Transcript } from '~/lib/transcript'
+import { Transcript } from '~/lib/transcript/transcript'
 
 export default defineComponent({
 

@@ -9,8 +9,8 @@ import { useSpatialSearch } from '~/components/basics/glyph-overlays';
 import { useMeasuredTextOverlay  } from '~/components/basics/measured-text-overlay';
 import { TextStyle } from '~/lib/html-text-metrics';
 import { newIdGenerator } from '~/lib/utils';
-import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
-import * as Tr from '~/lib/transcript';
+import { RTreeIndexable } from '~/lib/transcript/TextGlyphDataTypes';
+import * as Tr from '~/lib/transcript/transcript';
 
 
 

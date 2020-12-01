@@ -4,7 +4,7 @@ import { useTranscriptViewer } from '../../transcript-viewer'
 import { initState } from '~/components/basics/component-basics'
 import { divRef } from '~/lib/vue-composition-lib'
 import { getArtifactData } from '~/lib/axios'
-import { Transcript } from '~/lib/transcript'
+import { Transcript } from '~/lib/transcript/transcript'
 
 export default defineComponent({
   components: {},

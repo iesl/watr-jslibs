@@ -10,7 +10,7 @@ import {
 
 import 'd3-transition';
 
-import { BBox } from './coord-sys';
+import { BBox } from '~/lib/coord-sys';
 import { SelectionOrTransition } from 'd3-transition';
 
 export function initRect<GElement extends BaseType, Datum, PElement extends BaseType, PDatum > (

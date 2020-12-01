@@ -12,7 +12,7 @@ import {
 
 import RBush, {} from 'rbush';
 
-import { RTreeIndexable } from '~/lib/TextGlyphDataTypes';
+import { RTreeIndexable } from '~/lib/transcript/TextGlyphDataTypes';
 import { StateArgs, resolveWhen, awaitRef } from '~/components/basics/component-basics'
 
 import {

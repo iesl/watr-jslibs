@@ -15,7 +15,7 @@ import { useEventlibSelect, selectExtentHandlers } from '~/components/basics/eve
 import { initState, waitFor } from '~/components/basics/component-basics'
 
 import { useSketchpad } from '../../sketchpad';
-import { ShapeKind } from '~/lib/shapes';
+import { ShapeKind } from '~/lib/transcript/shapes';
 
 type InkwellItem = {
   title: ShapeKind;

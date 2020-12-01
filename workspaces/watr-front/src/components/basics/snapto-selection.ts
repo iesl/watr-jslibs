@@ -23,7 +23,7 @@ import {
 import { StateArgs, waitFor } from '~/components/basics/component-basics'
 import { EventlibSelect } from '~/components/basics/eventlib-select';
 import { RTreeIndex } from '~/components/basics/rtree-search';
-import { TextDataPoint } from '~/lib/TextGlyphDataTypes';
+import { TextDataPoint } from '~/lib/transcript/TextGlyphDataTypes';
 import { tweenBBox } from '~/lib/tweening';
 
 export interface SnaptoSelection {

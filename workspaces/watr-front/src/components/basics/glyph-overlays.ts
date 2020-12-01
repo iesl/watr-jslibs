@@ -16,7 +16,7 @@ import { StateArgs } from '~/components/basics/component-basics'
 import { EventlibCore } from '~/components/basics/eventlib-core';
 import { SuperimposedElements } from '~/components/basics/superimposed-elements';
 import { useRTreeIndex, RTreeIndex } from '~/components/basics/rtree-search';
-import { TextDataPoint, RTreeIndexable } from '~/lib/TextGlyphDataTypes';
+import { TextDataPoint, RTreeIndexable } from '~/lib/transcript/TextGlyphDataTypes';
 import * as d3x from '~/lib/d3-extras';
 import { BBox, toBox } from '~/lib/coord-sys';
 

@@ -16,8 +16,8 @@ import { initState, watchOnceFor } from '~/components/basics/component-basics'
 import NarrowingFilter from '~/components/single-pane/narrowing-filter/index.vue'
 import { ProvidedChoices } from '~/components/single-pane/narrowing-filter/narrowing-filter'
 import { getArtifactData } from '~/lib/axios'
-import { groupTracelogsByKey, LogEntryGroup, LogEntry, Tracelog } from '~/lib/tracelogs'
-import { Transcript } from '~/lib/transcript'
+import { groupTracelogsByKey, LogEntryGroup, LogEntry, Tracelog } from '~/lib/transcript/tracelogs'
+import { Transcript } from '~/lib/transcript/transcript'
 
 type Dictionary<T> = { [key: string]: T }
 type QObject = Dictionary<string | (string | null)[]>;

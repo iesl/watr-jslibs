@@ -15,10 +15,10 @@ import { useGlyphOverlays, SetGrid } from '~/components/basics/glyph-overlays';
 import { useSnaptoSelection } from '~/components/basics/snapto-selection';
 import { useEventlibSelect } from '~/components/basics/eventlib-select';
 import { resolveCorpusUrl } from '~/lib/axios';
-import { LogEntry } from '~/lib/tracelogs';
+import { LogEntry } from '~/lib/transcript/tracelogs';
 import { fromFigure } from '~/lib/coord-sys';
 import * as d3 from 'd3-selection';
-import { Rect } from '~/lib/shapes';
+import { Rect } from '~/lib/transcript/shapes';
 
 type Args = StateArgs & {
   mountPoint: Ref<HTMLDivElement | null>;

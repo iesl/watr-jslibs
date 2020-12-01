@@ -6,7 +6,7 @@ import * as Arr from 'fp-ts/lib/Array';
 import * as Ap from 'fp-ts/lib/Apply';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { NonNegativeInteger } from './io-utils';
+import { NonNegativeInteger } from '~/lib/io-utils';
 // import { prettyPrint } from "commons";
 
 /**

@@ -10,8 +10,8 @@ import _ from 'lodash'
 
 import { StateArgs } from './component-basics'
 import { SuperimposedElements } from './superimposed-elements'
-// import { ShapeIntRepsToFloats, foldShape, mapShape, FoldF } from '~/lib/tracelogs';
-// import { Line, Point, Rect, Trapezoid, Shape } from '~/lib/shapes';
+// import { ShapeIntRepsToFloats, foldShape, mapShape, FoldF } from '~/lib/transcript/tracelogs';
+// import { Line, Point, Rect, Trapezoid, Shape } from '~/lib/transcript/shapes';
 // import { Ref, ref, watch } from '@vue/composition-api';
 
 // import {

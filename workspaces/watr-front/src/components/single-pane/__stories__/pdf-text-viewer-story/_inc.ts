@@ -1,6 +1,6 @@
 import { defineComponent } from '@vue/composition-api'
 import { usePdfTextViewer } from '~/components/single-pane/pdf-text-viewer'
-import * as GridTypes from '~/lib/TextGridTypes'
+import * as GridTypes from '~/lib/transcript/TextGridTypes'
 import * as coords from '~/lib/coord-sys'
 import { getArtifactData } from '~/lib/axios'
 import { initState } from '~/components/basics/component-basics'

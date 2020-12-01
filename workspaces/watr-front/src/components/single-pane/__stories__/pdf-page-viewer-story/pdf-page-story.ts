@@ -7,11 +7,11 @@ import { isRight } from 'fp-ts/lib/Either'
 import { initState } from '~/components/basics/component-basics'
 import { usePdfPageViewer } from '~/components/single-pane/pdf-page-viewer'
 import * as coords from '~/lib/coord-sys'
-// import { initGridData, gridDataToGlyphData } from '~/lib/TextGlyphDataTypes';
+// import { initGridData, gridDataToGlyphData } from '~/lib/transcript/TextGlyphDataTypes';
 import { Point } from '~/lib/coord-sys'
 import { resolveCorpusUrl, getArtifactData } from '~/lib/axios'
-import { LogEntry } from '~/lib/tracelogs'
-import { Transcript } from '~/lib/transcript'
+import { LogEntry } from '~/lib/transcript/tracelogs'
+import { Transcript } from '~/lib/transcript/transcript'
 
 export default {
   setup() {
