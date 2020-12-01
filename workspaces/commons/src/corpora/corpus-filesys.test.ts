@@ -1,5 +1,3 @@
-import 'chai/register-should';
-
 import _ from 'lodash';
 import { updateCorpusJsonFile, readCorpusJsonFile } from './corpus-file-walkers';
 import path from 'path';

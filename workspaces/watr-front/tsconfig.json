@@ -23,6 +23,7 @@
     "sourceMap": true,
     "strict": true,
     "noEmit": true,
+    "outDir": "./dist",
 
     "types": [
       "jest",

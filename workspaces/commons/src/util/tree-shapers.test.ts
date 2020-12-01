@@ -1,5 +1,3 @@
-import 'chai/register-should';
-
 import _ from 'lodash';
 import { Edges, makeTreeFromPairs } from './tree-shapers';
 import * as Tree from 'fp-ts/lib/Tree';

@@ -4,7 +4,6 @@ import fs, { } from 'fs-extra';
 import stream, { Readable, Transform } from 'stream';
 import through from 'through2';
 import { createPump } from '~/util/stream-pump';
-import { prettyPrint } from '~/util/pretty-print';
 
 interface DirStackEntry {
   fullpath: string;
@@ -14,10 +13,9 @@ interface DirStackEntry {
 
 export async function expandDirRecursive(
   rootDir: string,
-  includeFiles: boolean = true,
-  includeDirectories: boolean = true
+  includeFiles: boolean = true
 ): Promise<string[]> {
-  const corpusDirStream = getDirWalkerStream(rootDir, includeFiles, includeDirectories);
+  const corpusDirStream = getDirWalkerStream(rootDir, includeFiles);
 
   const allFilesP = createPump()
     .viaStream<string>(corpusDirStream)
@@ -35,14 +33,12 @@ export async function expandDirRecursive(
 
 export function getDirWalkerStream(
   root: string,
-  includeFiles: boolean = false,
-  includeDirectories: boolean = true
+  includeFiles: boolean = false
 ): Readable {
   const stack: DirStackEntry[] = [{ fullpath: root, expanded: false, files: [] }];
 
   function expand(): DirStackEntry | undefined {
     let top = _.last(stack)
-    prettyPrint({ msg: 'pre', top });
     while (top && !top.expanded) {
       const topPath = top.fullpath;
       const dirEntries = fs.readdirSync(top.fullpath, { withFileTypes: true });
@@ -74,7 +70,6 @@ export function getDirWalkerStream(
       top = _.last(stack)
     }
     const next = stack.pop();
-    prettyPrint({ msg: 'post', next });
     return next;
   }
 
@@ -82,17 +77,17 @@ export function getDirWalkerStream(
     objectMode: true,
     read() {
       const data = expand();
-      prettyPrint({ msg: 'read', data });
-      if (data) {
-        if (includeDirectories) {
-          this.push(data.fullpath);
-        }
-        if (includeFiles) {
-          data.files.forEach(f => this.push(f));
-        }
+      if (!data) {
+        this.push(null);
         return;
       }
-      this.push(null)
+
+      this.push(data.fullpath);
+
+      if (includeFiles) {
+        data.files.forEach(f => this.push(f));
+      }
+
     }
   });
 

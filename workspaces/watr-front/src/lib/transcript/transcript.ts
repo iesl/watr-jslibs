@@ -109,8 +109,8 @@ export const LabelRange = io.type({
     label: LabelID
   })
 });
-export type LabelRange = io.TypeOf<typeof LabelRange>;
 
+export type LabelRange = io.TypeOf<typeof LabelRange>;
 
 export const Range = io.union([
   TextRange,

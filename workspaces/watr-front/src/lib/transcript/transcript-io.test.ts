@@ -57,18 +57,47 @@ describe('Transcript IO', () => {
 
     _.each(examples, (example) => {
       expect(isIsomorphic(Label, example)).toBe(true)
-    })
+    });
   })
+
+  it('should I/O Stanzas', () => {
+    const example = {
+      name: 'body',
+      kind: 'text:lines',
+      id: '1',
+      lines: [
+        {
+          text: 'see ^{[1]}.',
+          glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8],
+          labels: [
+            { name: 'Link', range: [{ unit: 'text:char', at: { span: [6, 3] } }] },
+          ]
+        },
+      ]
+    };
+
+  });
 
   it('should I/O Transcript', () => {
     const example = {
       documentId: 'doc-25-id',
       pages: [{
         page: 1,
+        bounds: [0, 0, 100, 200],
+        glyphs: [
+          ['H', [19, 94, 9, 10]],
+          ['2', [20, 94, 9, 10]],
+          ['O', [21, 94, 9, 10]],
+          [' ', [22, 94, 9, 10]],
+          ['I', [23, 94, 9, 10]],
+          ['+', [24, 94, 9, 10]],
+        ]
+      }, {
+        page: 2,
         bounds: [0, 0, 10, 20],
         glyphs: [
-          ['a', [19, 94, 9, 10]],
-          [' ', [19, 94, 9, 10], { kind: 'ws' }]
+          ['b', [19, 94, 9, 10]],
+          [' ', [19, 94, 9, 10]]
         ]
       }],
       stanzas: [
@@ -76,9 +105,18 @@ describe('Transcript IO', () => {
           kind: 'body',
           id: '1',
           lines: [{ text: 'a ', glyphs: [0, 1] }]
+        },
+        {
+          unit: 'text:line',
+          id: '1',
+          units: [
+            { text: 'a ', glyphs: [0, 1] }
+          ]
         }
       ],
-      labels: []
+      labels: [
+        { name: 'HasReferences', range: [{ unit: 'page', at: { page: 10 } }] }
+      ]
     }
 
     expect(isIsomorphic(Transcript, example, true)).toBe(true)

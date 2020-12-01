@@ -53,10 +53,7 @@ export async function resolveArtifact(
   remainingPath: string[]
 ): Promise<string | undefined> {
 
-  console.log('resolveArtifact', entryPath);
-
   const allpaths = await expandDirRecursive(entryPath);
-  console.log('resolveArtifact', allpaths);
 
   const isFile = (f: string) => fs.statSync(f).isFile();
   const isNumeric = (s: string) => /^\d+$/.test(s);
@@ -116,7 +113,7 @@ export function initFileBasedRoutes(corpusRootPath: string): Router {
 
       if (artifactPath) {
         const respRelFile = path.relative(corpusRootPath, artifactPath);
-        console.log('serving', respRelFile);
+        putStrLn(`server: servign ${respRelFile}`);
         return await send(ctx, respRelFile, { root: corpusRootPath });
       }
 
