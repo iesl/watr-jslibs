@@ -1,4 +1,3 @@
-//
 
 export type SlidingWindowFunc = <A>(xs: ReadonlyArray<A>) => ReadonlyArray<ReadonlyArray<A>>;
 

@@ -32,7 +32,7 @@ const GlyphRepr2: io.Type<GlyphRepr2> =
   );
 
 
-type GlyphRepr = GlyphRepr1 | GlyphRepr2;
+export type GlyphRepr = GlyphRepr1 | GlyphRepr2;
 export const GlyphRepr: io.Type<GlyphRepr> =
   io.recursion(
     'GlyphRepr',
