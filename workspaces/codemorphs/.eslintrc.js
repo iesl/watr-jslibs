@@ -8,12 +8,12 @@ module.exports = {
 
   parser: '@typescript-eslint/parser',
   extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended'
   ],
   plugins: [
-    "@typescript-eslint",
-    "chai-expect"
+    '@typescript-eslint',
+    'chai-expect'
   ],
 
   globals: {
@@ -21,19 +21,19 @@ module.exports = {
   },
 
   rules: {
-    "@typescript-eslint/no-explicit-any": ["off"],
-    "@typescript-eslint/explicit-function-return-type": ["off"],
-    "@typescript-eslint/no-inferrable-types": ["off"],
-    "@typescript-eslint/no-use-before-define": ["off"],
-    "@typescript-eslint/no-unused-vars": ["off"],
+    '@typescript-eslint/no-explicit-any': ['off'],
+    '@typescript-eslint/explicit-function-return-type': ['off'],
+    '@typescript-eslint/no-inferrable-types': ['off'],
+    '@typescript-eslint/no-use-before-define': ['off'],
+    '@typescript-eslint/no-unused-vars': ['off'],
   },
 
-  "overrides": [
+  'overrides': [
     {
-      "files": ["*.ts"],
-      "excludedFiles": ["*.d.ts"],
-      "rules": {
-        "indent": "off"
+      'files': ['*.ts'],
+      'excludedFiles': ['*.d.ts'],
+      'rules': {
+        'indent': 'off'
       }
     }
   ]

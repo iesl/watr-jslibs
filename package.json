@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "clean": "lerna clean -y && lerna exec --stream -- rm -r dist",
+    "clean": "lerna clean -y && lerna exec --stream -- rm -rf dist",
     "reset": "npm run clean && lerna bootstrap",
     "build": "lerna run --stream build",
     "deps:check": "lerna --concurrency 1 exec --stream -- ncu",

@@ -6,10 +6,8 @@ export * from './util/stream-utils';
 export * from './util/to-pairs-deep';
 export * from './util/utils';
 export * from './prelude/config';
-export * from './prelude/types';
 
 export * as arglib from './cli/arglib';
 export * as streamUtils from './util/stream-utils';
 export * as streamPump from './util/stream-pump';
 export * as config from './prelude/config';
-export * as types from './prelude/types';
