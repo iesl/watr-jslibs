@@ -33,3 +33,36 @@ export function makeGlyphReprs(str: string): GlyphRepr[] {
   const reprs = _.map(str, char => makeGlyphRepr(char))
   return reprs;
 }
+
+export const sampleTranscript = {
+  documentId: 'doc-25-id',
+  pageCount: 4,
+  glyphCount: 200,
+  pages: [
+    {
+      page: 1,
+      bounds: [0, 0, 100, 200],
+      glyphCount: 200,
+      glyphs: [
+        ['a', [100, 200, 300, 400]],
+        [' ', [1, 2, 3, 4]],
+        ['ffi', [10, 2, 3, 4], {kind: 'rewrite', gs: [['ﬃ', [19, 94, 9, 10]]]}],
+        ['â', [19, 94, 9, 10], {kind: 'rewrite', gs: [['a', [19, 94, 9, 10]], ['^', [19, 94, 9, 10]]]}]
+      ]
+    }
+  ],
+  stanzas: [
+    {
+      lines: [
+        { glyphs: [0, 1] }
+      ],
+      labels: [
+
+      ]
+
+    },
+  ],
+  labels: [
+    { name: 'HasReferences', range: [{ unit: 'page', at: { page: 10 } }] }
+  ]
+}

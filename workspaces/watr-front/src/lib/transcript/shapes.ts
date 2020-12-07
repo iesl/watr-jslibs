@@ -151,8 +151,13 @@ export const Trapezoid = new io.Type<Trapezoid, TrapezoidRepr, unknown>(
    * at the end.
    */
 export const Shape = io.union([Rect, Point, Triangle, Trapezoid, Line, Circle], 'Shape');
+export const ShapeRepr = io.union([RectRepr, PointRepr, TriangleRepr, TrapezoidRepr, LineRepr, CircleRepr], 'ShapeRepr');
+
 export type Shape = io.TypeOf<typeof Shape>;
+export type ShapeRepr = io.TypeOf<typeof ShapeRepr>;
+
 export type ShapeKind = Shape['kind'];
+// export type ShapeRepr = RectRepr | PointRepr | TriangleRepr | TrapezoidRepr | LineRepr | CircleRepr;
 
 function uFloat(n: number): number {
   return n / 100.0;

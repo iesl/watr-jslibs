@@ -3,8 +3,9 @@
  */
 import _ from 'lodash'
 import * as io from 'io-ts'
-import { isRight } from 'fp-ts/lib/Either'
+import { isRight, isLeft } from 'fp-ts/lib/Either'
 import { PathReporter } from 'io-ts/lib/PathReporter'
+import { prettyPrint } from 'commonlib-shared'
 
 export function getOrDie<T>(v: T | null | undefined, msg: string = 'null|undef'): T {
   if (v === null || v === undefined) {
@@ -12,6 +13,7 @@ export function getOrDie<T>(v: T | null | undefined, msg: string = 'null|undef')
   }
   return v
 }
+
 /**
  */
 export function corpusEntry(): string {
@@ -39,25 +41,48 @@ export function newIdGenerator() {
   return nextId
 }
 
-export function isIsomorphic<A, O, I>(ioType: io.Type<A, O, I>, input: I, verbose: boolean = false): boolean {
-  const dec = ioType.decode(input)
-  if (isRight(dec)) {
-    const adecoded = dec.right
-    const aencoded = ioType.encode(adecoded)
-    if (_.isEqual(aencoded, input)) {
-      if (verbose) {
-        // prettyPrint({ m: `isIsomorphic(${ioType.name}) === true`, input, adecoded })
-      }
-      return true
-    }
+
+// export function isIsomorphic<A, O, I>(ioType: io.Type<A, O, I>, input: I, verbose: boolean = false): boolean {
+export function isIsomorphic<A, IO>(ioType: io.Type<A, IO, IO>, input: IO, verbose: boolean = false): boolean {
+  const maybeDecoded = ioType.decode(input)
+  if (isLeft(maybeDecoded)) {
+    const report = PathReporter.report(maybeDecoded)
     if (verbose) {
-      // prettyPrint({ m: `isIsomorphic(${ioType.name}) === false`, input, adecoded, aencoded })
+      prettyPrint({ m: `isIsomorphic(${ioType.name})/decode === false`, input, report})
     }
     return false
   }
-  const report = PathReporter.report(dec)
-  if (verbose) {
-    // prettyPrint({ m: `isIsomorphic(${ioType.name}) === false`, report, input })
+
+  const decoded = maybeDecoded.right
+  const reEncoded = ioType.encode(decoded)
+  if (!_.isEqual(input, reEncoded)) {
+    if (verbose) {
+      prettyPrint({ m: `isIsomorphic(${ioType.name})/re-encode === false`, input, decoded, reEncoded })
+    }
+    return false;
   }
-  return false
+
+  const maybeReDecoded = ioType.decode(reEncoded)
+  if (isLeft(maybeReDecoded)) {
+    const report = PathReporter.report(maybeReDecoded)
+    if (verbose) {
+      prettyPrint({ m: `isIsomorphic(${ioType.name})/re-decode === false`, report, input, reEncoded })
+    }
+    return false
+  }
+
+  const reDecoded = maybeReDecoded.right;
+
+  if (!_.isEqual(decoded, reDecoded)) {
+    if (verbose) {
+      prettyPrint({ m: `isIsomorphic(${ioType.name})/re-decode === false`, input, decoded, reDecoded })
+    }
+    return false;
+  }
+
+  if (verbose) {
+    prettyPrint({ m: `isIsomorphic(${ioType.name}) === true`, input, decoded, reEncoded, reDecoded })
+  }
+
+  return true
 }
