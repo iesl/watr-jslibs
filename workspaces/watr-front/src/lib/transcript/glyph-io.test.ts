@@ -5,7 +5,6 @@ import { Transcript } from './transcript';
 import { isIsomorphic } from '~/lib/utils';
 import { GlyphRepr, Glyph, GlyphPropsRepr, GlyphProps } from './glyph';
 
-
 describe('Glyph IO and representations', () => {
 
   it('should I/O GlyphReprs, Glyphs', () => {
@@ -29,16 +28,15 @@ describe('Glyph IO and representations', () => {
       }]
     ];
 
-    const pageNumber = 3;
     const verbose = false;
     _.each(examples, example => {
       const [, , propsRepr] = example;
       if (propsRepr !== undefined) {
         expect(isIsomorphic(GlyphPropsRepr, propsRepr, verbose)).toBe(true);
-        expect(isIsomorphic(GlyphProps(pageNumber), propsRepr, verbose)).toBe(true);
+        expect(isIsomorphic(GlyphProps, propsRepr, verbose)).toBe(true);
       }
       expect(isIsomorphic(GlyphRepr, example, verbose)).toBe(true);
-      expect(isIsomorphic(Glyph(pageNumber), example, verbose)).toBe(true);
+      expect(isIsomorphic(Glyph, example, verbose)).toBe(true);
     });
   });
 

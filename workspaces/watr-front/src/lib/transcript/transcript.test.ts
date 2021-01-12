@@ -1,7 +1,8 @@
 import _ from 'lodash'
-// import { GlyphPropsRepr, GlyphRepr } from './glyph';
 import { prettyPrint } from 'commonlib-shared';
 import { makeGlyphReprs } from './gendata.test';
+import { Transcript } from './transcript'
+import { isIsomorphic } from '~/lib/utils'
 
 
 describe('Transcripts', () => {
@@ -41,19 +42,68 @@ describe('Transcripts', () => {
   // { // Inset math/chemical formulae/matrix etc.
 
 
-  it.only('glyph bounding box PDF overlays', () => {
+  it('glyph bounding box PDF overlays', () => {
     prettyPrint({ page1 })
-
   });
+
   it('text substitutions/formatting/escape chars', () => {
+    // Super/sub
+    const glyphs = [
+      4,
+      { kind: 'super', text: '^{' },
+      5, 6, 7,
+      { kind: '/super', text: '}' },
+      8
+    ];
   });
   it('links between text sections', () => {
+    const bodyGlyphs = [
+      4,
+      { kind: 'link', ref: 32 },
+      5, 6,
+      { kind: '/link' },
+      7,
+    ];
+    const referenceGlyphs = [
+      { kind: 'anchor/', id: 32 },
+      5, 6, 7,
+    ];
+    // Link body text to reference
+    // Link from body text to separate stanza representing inset math
   });
   it('ordering over text/glyphs/shapes', () => {
   });
   it('extracted text with labeled lines/regions', () => {
   });
   it('tracelog shapes', () => {
+    // base/top/midline, left/right column points/lines
+    const glyphLineLabel = {
+      name: 'GlyphLine', range: [{ unit: 'page', at: 3 }], children: [
+        {
+          name: 'OuterRect', range: [{ unit: 'shape', at: [10, 10, 40, 8] }], children: [
+            { name: 'TopLine', range: [{ unit: 'shape', at: [[10, 10], [40, 10]] }] },
+            { name: 'MidLine', range: [{ unit: 'shape', at: [[10, 20], [40, 20]] }] },
+            { name: 'Glyphs', range: [{ unit: 'text:glyph', at: [23, 24, 12, 34, 22] }] },
+          ]
+        }
+      ]
+    };
+
+    const leftColEvidence = {
+      name: 'LeftColEvidence', range: [{ unit: 'page', at: 3 }], children: [
+        {
+          name: 'ColEvidence', range: [
+            { unit: 'shape', at: [10, 10] },
+            { unit: 'shape', at: [20, 12] },
+            { unit: 'shape', at: [30, 14] },
+          ]
+        },
+      ]
+    };
+
+    // {unit: 'page', at: 3}
+    // {unit: 'shape', at: topLine}
+    // {unit: 'shape', at: midLine}
   });
   it('hierarchical labels over spans of text (textgrid functionality)', () => {
   });
@@ -62,82 +112,105 @@ describe('Transcripts', () => {
   it('represent zones (clipped region of PDF page with contained text)', () => {
   });
 
-  // it('multi-page stanzas', () => {
-  it('MAYBE OLD Version?   should represent various pattern of glyph extraction', () => {
+  it('smokescreen', () => {
 
-      const transcriptTemplate = {
-        documentId: 'doc-25-id',
-        glyphCount: 1034,
-        pages: [{
-          page: 1,
-          bounds: [0, 0, 61200, 79200],
-          _c0_: { comment: "let's introduce a debugging field for comments, refs, etc" },
-          glyphCount: 5,
-          glyphs: [
-            ['a', [19, 94, 9, 10]],
-            [' ', [19, 94, 9, 10], { kind: 'ws' }],
-            ['b', [19, 94, 9, 10]],
-            ['    ', [19, 94, 9, 10], { kind: 'ws:tab4' }],
-            ['c', [19, 94, 9, 10]],
-          ],
-        }],
-        stanzas: [
-          {
-            name: 'body',
-            kind: 'text:lines',
-            _c0_: { comment: 'A stanza is a block of text lines' },
-            id: '1',
-            _c1_: { comment: 'glyphIds within stanzas are 0-indexed from the first page/first char, extending across all pages' },
-            lines: [
-              { text: 'ffi', glyph: [10, 10, 10] },
-              { text: 'A reference to $link{reference:22}{Citation 1.}', glyphs: [10, 10, 10, null, null, null] },
-              {
-                text: 'see ^{[1]}.', // <- linked reference
-                glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8],
-                labels: [
-                  { name: 'Link', range: [{ unit: 'text:char', at: { span: [6, 3] } }] },
-                ]
-              },
-            ]
-          },
-          {
-            name: 'table',
-            kind: 'schema:table',
-            id: '2',
-            data: {
-              headers: [],
-              records: [{ a: 1, b: 2 }]
-            }
-          },
-          {
-            kind: 'bibliography',
-            id: '3',
-            lines: [
-              { text: 'Saunders, A.C., etal, WatrWorks ...', glyphIds: [10, 10, 10] },
-            ]
-          },
-          {
-            name: 'reference',
-            kind: 'text:lines',
-            id: '22',
-            lines: [
-              { text: 'Saunders, A.C., etal, WatrWorks ...', glyphIds: [10, 10, 10] },
-            ]
-          },
+    const transcriptTemplate = {
+      documentId: 'doc-25-id',
+      glyphCount: 1034,
+      pages: [{
+        page: 1,
+        bounds: [0, 0, 61200, 79200],
+        glyphs: [
+          ['I', [19, 94, 9, 10]],
+          [' ', [19, 94, 9, 10], { kind: 'ws', font: 3 }],
+          ['2', [19, 94, 9, 10]],
         ],
+        fonts: {
+          scaledFonts: [
+            {
+              declaredName: 'MOOKBM+AdvSPSMI',
+              derivedName: 'MOOKBM+AdvSPSMIx41',
+              id: 0,
+              metrics: {
+                scalingFactor: 41,
+                cap: 0,
+                ascent: 0,
+                midrise: 0,
+                descent: 0,
+                bottom: 0
+              }
+            },
+          ]
+        },
         labels: [
+          // page-level shapes, ala tracelog labeling
           {
-            _c1_: { comment: 'represent a bibliography as a labeled set of reference stanzas' },
-            name: 'Bibliography',
-            id: 'L#3',
-            range: [
-              { unit: 'stanza', at: [22, 23, 24] }
+            name: 'GlyphLine', range: [{ unit: 'page', at: 1 }], children: [
+              {
+                name: 'OuterRect', range: [{ unit: 'shape', at: [10, 10, 40, 8] }], children: [
+                  { name: 'TopLine', range: [{ unit: 'shape', at: [[10, 10], [40, 10]] }] },
+                  { name: 'MidLine', range: [{ unit: 'shape', at: [[10, 20], [40, 20]] }] },
+                  { name: 'Glyphs', range: [{ unit: 'text:glyph', at: [23, 24, 12, 34, 22] }] },
+                ]
+              }
             ]
-          },
+          }
+
         ]
-      };
+      }],
+      stanzas: [
+        {
+          id: '1',
+          lines: [
+            { text: 'ffi', glyphs: [10, 10, 10] },
+            { text: 'see reference ^{[1]}.', glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8] },
+          ],
+          labels: {
+            name: 'PageText', range: [{ unit: 'page', at: 1 }], children: [
+              { name: 'BodyContent', range: [{ unit: 'text:line', at: [1, 3] }] },
+              { name: 'HeaderContent', range: [{ unit: 'text:line', at: [4, 10] }] }
 
-      // expect(isIsomorphic(Transcript, transcriptTemplate)).toBe(true);
+            ]
+          }
+        },
+      ],
+    };
 
+    expect(isIsomorphic(Transcript, transcriptTemplate)).toBe(true);
   });
+
 });
+
+// {
+//   name: 'table',
+//   kind: 'schema:table',
+//   id: '2',
+//   data: {
+//     headers: [],
+//     records: [{ a: 1, b: 2 }]
+//   }
+// },
+// {
+//   kind: 'bibliography',
+//   id: '3',
+//   lines: [
+//     { text: 'Saunders, A.C., etal, WatrWorks ...', glyphIds: [10, 10, 10] },
+//   ]
+// },
+// {
+//   name: 'reference',
+//   kind: 'text:lines',
+//   id: '22',
+//   lines: [
+//     { text: 'Saunders, A.C., etal, WatrWorks ...', glyphIds: [10, 10, 10] },
+//   ]
+// },
+
+// {
+//   _c1_: { comment: 'represent a bibliography as a labeled set of reference stanzas' },
+//   name: 'Bibliography',
+//   id: 'L#3',
+//   range: [
+//     { unit: 'stanza', at: [22, 23, 24] }
+//   ]
+// },

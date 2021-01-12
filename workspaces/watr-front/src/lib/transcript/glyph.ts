@@ -6,7 +6,7 @@ import * as Arr from 'fp-ts/lib/Array';
 import * as Ap from 'fp-ts/lib/Apply';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { NonNegativeInteger } from '~/lib/io-utils';
+import { NonNegativeInt } from '~/lib/io-utils';
 // import { prettyPrint } from "commons";
 
 /**
@@ -52,7 +52,6 @@ export const GlyphPropsRepr: io.Type<GlyphPropsRepr> =
 export interface Glyph {
   char: string;
   rect: Rect;
-  page: number;
   props?: GlyphProps;
 }
 
@@ -65,15 +64,15 @@ export interface GlyphProps {
 //  travArray :: A[] => (A => Either<E, B>) => Either<E, B[]>
 const travArray = Arr.array.traverse(E.either);
 
-const decodeGlyphProps: (page: number) => (unk: unknown, ctx: io.Context) => E.Either<io.Errors, GlyphProps> =
-  (page: number) => (unk: unknown, ctx: io.Context) => {
+const decodeGlyphProps: (unk: unknown, ctx: io.Context) => E.Either<io.Errors, GlyphProps> =
+  (unk: unknown, ctx: io.Context) => {
     return pipe(
       unk,
       v => GlyphPropsRepr.validate(v, ctx),
       E.chain(({ kind, gs }) => {
         if (gs) {
           const gsValid: E.Either<io.Errors, Glyph[]> =
-            travArray(gs, g => Glyph(page).validate(g, ctx));
+            travArray(gs, g => Glyph.validate(g, ctx));
 
           const mapf = E.map(((gs: Glyph[]) => ({ kind, gs } as GlyphProps)));
 
@@ -84,20 +83,20 @@ const decodeGlyphProps: (page: number) => (unk: unknown, ctx: io.Context) => E.E
     );
   };
 
-export const GlyphProps = (page: number): io.Type<GlyphProps, GlyphPropsRepr, unknown> =>
+export const GlyphProps: io.Type<GlyphProps, GlyphPropsRepr, unknown> =
   new io.Type<GlyphProps, GlyphPropsRepr, unknown>(
     'GlyphProps',
     (a: any): a is GlyphProps => {
       const k = a['kind'];
       const gs = a['gs'];
-      return io.string.is(k) && io.array(Glyph(page)).is(gs);
+      return io.string.is(k) && io.array(Glyph).is(gs);
     },
-    (unk: unknown, ctx: io.Context) => decodeGlyphProps(page)(unk, ctx),
+    (unk: unknown, ctx: io.Context) => decodeGlyphProps(unk, ctx),
     (a: GlyphProps) => {
       const { kind, gs } = a;
       const propsRepr = GlyphPropsRepr.encode({ kind });
       if (gs) {
-        propsRepr.gs = _.map(gs, Glyph(page).encode);
+        propsRepr.gs = _.map(gs, Glyph.encode);
       }
       return propsRepr;
     }
@@ -105,32 +104,25 @@ export const GlyphProps = (page: number): io.Type<GlyphProps, GlyphPropsRepr, un
 
 const seqTupleEither = Ap.sequenceT(E.either);
 
-export const Glyph = (page: number): io.Type<Glyph, GlyphRepr, unknown> =>
+export const Glyph: io.Type<Glyph, GlyphRepr, unknown> =
   new io.Type<Glyph, GlyphRepr, unknown>(
     'Glyph',
     (a: any): a is Glyph =>
       io.string.is(a.char)
-      && NonNegativeInteger.is(a.page)
+      && NonNegativeInt.is(a.page)
       && Rect.is(a.rect)
-      && (a.props === undefined || GlyphProps(page).is(a.props)),
+      && (a.props === undefined || GlyphProps.is(a.props)),
 
     (unk: unknown, ctx: io.Context) => pipe(
       unk,
       v => GlyphRepr.validate(v, ctx),
       E.chain(([char, rect, props]) => {
-        // prettyPrint({ m: "Glyph", ctx, unk });
-        return pipe(
-          NonNegativeInteger.validate(page, ctx),
-          E.chain(pageNum => E.right([char, rect, pageNum, props]))
-        );
-      }),
-      E.chain(([char, rect, pageNum, props]) => {
         const rdec = Rect.decode(rect);
-        const mapf = E.map(((r: Rect) => ({ char, page: pageNum, rect: r } as Glyph)));
+        const mapf = E.map(((r: Rect) => ({ char, rect: r } as Glyph)));
         const glyph0 = mapf(rdec);
 
         if (props) {
-          const ps = decodeGlyphProps(page)(props, ctx);
+          const ps = decodeGlyphProps(props, ctx);
           const glyphAndProps: E.Either<io.Errors, [Glyph, GlyphProps]> =
             seqTupleEither(glyph0, ps);
 
@@ -151,6 +143,6 @@ export const Glyph = (page: number): io.Type<Glyph, GlyphRepr, unknown> =>
     (a: Glyph) => {
       return (a.props === undefined
         ? [a.char, Rect.encode(a.rect)]
-        : [a.char, Rect.encode(a.rect), GlyphProps(page).encode(a.props)]);
+        : [a.char, Rect.encode(a.rect), GlyphProps.encode(a.props)]);
     }
   );

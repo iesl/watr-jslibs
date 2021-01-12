@@ -1,9 +1,9 @@
 import _ from 'lodash'
-// import { Transcript  } from './transcript'
-// import { Label, Range } from './labels'
+import { Transcript  } from './transcript'
 import { isIsomorphic } from '~/lib/utils'
 
 describe('Transcript/Stanza IO', () => {
+
 
   it('should I/O Stanzas', () => {
     // const example0 = {

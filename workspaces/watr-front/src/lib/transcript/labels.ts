@@ -6,13 +6,6 @@ import { PageNumber, Span } from '~/lib/io-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as E from 'fp-ts/lib/Either';
 
-// export const RangeUnit = io.keyof({
-//   'text:line': null,
-//   'text:char': null,
-//   'page': null,
-//   'shape': null
-// });
-
 const DocumentRange = io.type({
   unit: io.literal('document'),
   at: io.string
