@@ -6,10 +6,6 @@
     "module": "esnext",
     "moduleResolution": "node",
 
-    "lib": [
-      "dom"
-    ],
-
     "incremental": true,
     "esModuleInterop": true,
     "importHelpers": true,
@@ -32,9 +28,9 @@
 
     "types": [
       "jest",
-      "chai"
+      "chai",
+      "node"
     ],
-
 
     "paths": {
       "~/*":  ["./src/*"]

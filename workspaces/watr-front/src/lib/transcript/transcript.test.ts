@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { prettyPrint } from 'commonlib-shared';
-import { makeGlyphReprs } from './gendata.test';
+import { makeGlyphReprs } from './gen-testdata';
 import { Transcript } from './transcript'
 import { isIsomorphic } from '~/lib/utils'
 
@@ -112,7 +112,7 @@ describe('Transcripts', () => {
   it('represent zones (clipped region of PDF page with contained text)', () => {
   });
 
-  it('smokescreen', () => {
+  it.only('smokescreen', () => {
 
     const transcriptTemplate = {
       documentId: 'doc-25-id',
@@ -157,26 +157,29 @@ describe('Transcripts', () => {
           }
 
         ]
-      }],
+ }],
       stanzas: [
         {
           id: '1',
+          schema: 'TextLines',
           lines: [
             { text: 'ffi', glyphs: [10, 10, 10] },
             { text: 'see reference ^{[1]}.', glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8] },
           ],
-          labels: {
-            name: 'PageText', range: [{ unit: 'page', at: 1 }], children: [
-              { name: 'BodyContent', range: [{ unit: 'text:line', at: [1, 3] }] },
-              { name: 'HeaderContent', range: [{ unit: 'text:line', at: [4, 10] }] }
-
-            ]
-          }
+          labels: [
+            {
+              name: 'PageText', range: [{ unit: 'page', at: 1 }], children: [
+                { name: 'BodyContent', range: [{ unit: 'text:line', at: [1, 3] }] },
+                { name: 'HeaderContent', range: [{ unit: 'text:line', at: [4, 10] }] }
+              ]
+            }
+          ]
         },
       ],
     };
 
-    expect(isIsomorphic(Transcript, transcriptTemplate)).toBe(true);
+    const verbose = true;
+    expect(isIsomorphic(Transcript, transcriptTemplate, verbose)).toBe(true);
   });
 
 });

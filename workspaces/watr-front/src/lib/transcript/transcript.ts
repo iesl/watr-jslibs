@@ -6,12 +6,19 @@ import { PositiveInt } from '~/lib/io-utils';
 import { Glyph } from './glyph';
 import { Label } from './labels';
 
+export const GlyphRef = io.union([
+  io.Int,
+  io.string
+]);
+
 export const Line = io.type({
   text: io.string,
-  glyphs: io.array(io.Int)
+  glyphs: io.array(GlyphRef)
 });
 
 export type Line = io.TypeOf<typeof Line>;
+
+
 
 export const Page = io.type({
   page: PositiveInt,
@@ -22,9 +29,10 @@ export const Page = io.type({
 export type Page = io.TypeOf<typeof Page>;
 
 export const Stanza = io.type({
-  kind: io.string,
   id: io.string,
-  lines: io.array(Line)
+  schema: io.string,
+  lines: io.array(Line),
+  labels: io.array(Label)
 });
 
 

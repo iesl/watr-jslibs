@@ -1,38 +1,35 @@
 import _ from 'lodash'
-import { Transcript  } from './transcript'
+import { Stanza } from './transcript'
 import { isIsomorphic } from '~/lib/utils'
 
 describe('Transcript/Stanza IO', () => {
 
+  const verbose = false;
+
 
   it('should I/O Stanzas', () => {
-    // const example0 = {
-    //   name: 'body',
-    //   kind: 'text:lines',
-    //   id: '1',
-    //   lines: [
-    //     {
-    //       text: 'see ^{[1]}.',
-    //       glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8],
-    //       labels: [
-    //         { name: 'Link', range: [{ unit: 'text:char', at: { span: [6, 3] } }] },
-    //       ]
-    //     },
-    //   ]
-    // };
-    const stanza21 = {
-      id: '21',
-      kind: 'text:lines',
-      labels: [
-        { name: 'BodyText' },
-        { name: 'Feature:SuperSubLayout' },
-        { name: 'Feature:JoinedText' },
-      ],
-      content: [
-        { text: 'H_{2}O^{+}', glyphs: [11, '_{', 12, '}', 13, '^{', 14, '}'] },
-      ]
-    };
+    const examples = [
+      {
+        id: '1',
+        schema: 'TextLines',
+        lines: [
+          { text: 'ffi', glyphs: [10, 10, 10] },
+          { text: 'see reference ^{[1]}.', glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8] },
+        ],
+        labels: [
+          {
+            name: 'PageText', range: [{ unit: 'page', at: 1 }], children: [
+              { name: 'BodyContent', range: [{ unit: 'text:line', at: [1, 3] }] },
+              { name: 'HeaderContent', range: [{ unit: 'text:line', at: [4, 10] }] }
+            ]
+          }
+        ]
+      },
+    ];
 
+    _.each(examples, example => {
+      expect(isIsomorphic(Stanza, example, verbose)).toBe(true)
+    });
   });
 
   it('should I/O Transcript', () => {

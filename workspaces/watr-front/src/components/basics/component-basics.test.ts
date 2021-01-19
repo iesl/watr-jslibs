@@ -9,6 +9,7 @@ import VueCompositionApi, {
 
 import Vue from 'vue'
 import { watchAll, initState, waitFor } from './component-basics'
+import { putStrLn } from 'commonlib-shared'
 
 describe('Component Basics', () => {
   Vue.use(VueCompositionApi)
@@ -21,13 +22,13 @@ describe('Component Basics', () => {
       // this should not be triggered by dep2
       const d1 = dep1.value
       const d2 = dep2.value
-      console.log(`explicit watch(d1) triggered! dep1=${d1} dep2=${d2}`)
+      // putStrLn(`explicit watch(d1) triggered! dep1=${d1} dep2=${d2}`)
       onCleanup(() => {
         // Called just before the body of this watch is re-called
         // Does cleanup trigger other things?
         // const dd1 = dep1.value;
         // const dd2 = dep2.value;
-        console.log(`Cleanup on explicit watch(d1) dep1=${d1} dep2=${d2}`)
+        // putStrLn(`Cleanup on explicit watch(d1) dep1=${d1} dep2=${d2}`)
       })
     })
 
@@ -35,7 +36,7 @@ describe('Component Basics', () => {
       // this should not be triggered by dep1
       const d1 = dep1.value
       const d2 = dep2.value
-      console.log(`explicit watch(d2) triggered! dep1=${d1} dep2=${d2}`)
+      // putStrLn(`explicit watch(d2) triggered! dep1=${d1} dep2=${d2}`)
     })
 
     dep2.value = 20
@@ -44,14 +45,14 @@ describe('Component Basics', () => {
     watchEffect(() => {
       const d1 = dep1.value
       const d2 = dep2.value
-      console.log(`implicit watch triggered! dep1=${d1} dep2=${d2}`)
+      // putStrLn(`implicit watch triggered! dep1=${d1} dep2=${d2}`)
     })
 
     watch(dep1, () => {
       // this should not be triggered by dep2
       const d1 = dep1.value
       const d2 = dep2.value
-      console.log(`explicit watch(d1)+options triggered! dep1=${d1} dep2=${d2}`)
+      // putStrLn(`explicit watch(d1)+options triggered! dep1=${d1} dep2=${d2}`)
       stopD2()
 
       // this should trigger other watches, but not d2
@@ -79,7 +80,7 @@ describe('Component Basics', () => {
       const done = allDone.done.value
       const curr = allDone.curr.value
       const len = allDone.len.value
-      console.log(`test/allDone done= ${done}: on #${curr} of ${len}`)
+      // putStrLn(`test/allDone done= ${done}: on #${curr} of ${len}`)
 
       expect(done).toBe(curr === len)
     })
@@ -90,9 +91,9 @@ describe('Component Basics', () => {
     // self-stopping?
     const stopMe = watch(dep3, (_nv, _ov, onCleanup: any) => {
       // this should not be triggered by dep2
-      // console.log(`explicit watch(d3) triggered! dep1=${d1} dep2=${d2}`)
+      // // putStrLn(`explicit watch(d3) triggered! dep1=${d1} dep2=${d2}`)
       const d3 = dep3.value
-      console.log(`1. explicit watch(d3=${d3}) triggered!`)
+      // putStrLn(`1. explicit watch(d3=${d3}) triggered!`)
       if (d3 > 5) {
         stopMe()
       }
@@ -100,7 +101,7 @@ describe('Component Basics', () => {
 
       onCleanup(() => {
         const dd3 = dep3.value
-        console.log(`1. Cleanup on explicit watch(d3=${dd3}) triggered!`)
+        // putStrLn(`1. Cleanup on explicit watch(d3=${dd3}) triggered!`)
       })
     }, {
       // lazy: true,
@@ -117,8 +118,8 @@ describe('Component Basics', () => {
     // const a1 = [];
     // const every1 = _.every(a1, a => a === 0);
     // const some1 = _.some(a1, a => a === 0);
-    // console.log('every1', every1);
-    // console.log('some', some1);
+    // putStrLn('every1', every1);
+    // putStrLn('some', some1);
 
     // const state = initState();
 
@@ -148,36 +149,36 @@ describe('Component Basics', () => {
     const dep1 = ref(false)
     const dep2 = ref(false)
 
-    console.log('before zero-comp')
+    // putStrLn('before zero-comp')
     waitFor('zero-comp', {
       state,
       dependsOn: [],
       ensureTruthy: []
     }, () => {
-      console.log('inside zero-comp')
+      // putStrLn('inside zero-comp')
     })
-    console.log('after zero-comp')
+    // putStrLn('after zero-comp')
 
-    console.log('before one-comp')
+    // putStrLn('before one-comp')
     waitFor('one-comp', {
       state,
       dependsOn: [dep1],
       ensureTruthy: [dep2]
     }, () => {
-      console.log('inside one-comp')
+      // putStrLn('inside one-comp')
       dep2.value = true
     })
-    console.log('after one-comp')
+    // putStrLn('after one-comp')
 
-    console.log('before two-comp')
+    // putStrLn('before two-comp')
     waitFor('two-comp', {
       state,
       dependsOn: [dep2],
       ensureTruthy: []
     }, () => {
-      console.log('inside two-comp')
+      // putStrLn('inside two-comp')
     })
-    console.log('after two-comp')
+    // putStrLn('after two-comp')
 
     dep1.value = true
   })

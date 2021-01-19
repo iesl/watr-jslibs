@@ -11,7 +11,8 @@
 
     "lib": [
       "esnext",
-      "esnext.asynciterable"
+      "esnext.asynciterable",
+      "dom"
     ],
 
     "incremental": true,
