@@ -66,7 +66,6 @@ export default {
     waitFor('', {
       state,
       dependsOn: [mountPoint],
-
     }, () => {
       // const pixiJsApp = pixiJsAppRef.value!;
       const svgLayer = superimposedElements.overlayElements.svg!;

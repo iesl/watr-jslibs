@@ -4,7 +4,6 @@ import {
   Ref, watch,
 } from '@vue/composition-api';
 
-
 import { GetterTree, MutationTree, ActionTree, Plugin } from 'vuex'
 
 import { StateArgs } from '~/components/basics/component-basics'
@@ -52,6 +51,7 @@ export async function usePdfPageViewer({
   // const bounds = mk.fromArray(pageBounds);
   superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
 
+
   const setGrid = glyphOverlays.setGrid;
 
   return {
@@ -60,7 +60,6 @@ export async function usePdfPageViewer({
     setGrid
   }
 }
-
 
 interface PdfPageViewerState {
   drawables: object[];

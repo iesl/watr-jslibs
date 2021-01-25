@@ -52,3 +52,4 @@ dist
 .nuxt
 .clinic
 .eslintrc.emacs.js
+.eslintcache

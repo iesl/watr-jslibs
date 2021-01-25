@@ -11,16 +11,14 @@ export const GlyphRef = io.union([
   io.string
 ]);
 
-export const Line = io.type({
+export const Line = io.strict({
   text: io.string,
   glyphs: io.array(GlyphRef)
 });
 
 export type Line = io.TypeOf<typeof Line>;
 
-
-
-export const Page = io.type({
+export const Page = io.strict({
   page: PositiveInt,
   bounds: Rect,
   glyphs: io.array(Glyph)
@@ -28,7 +26,7 @@ export const Page = io.type({
 
 export type Page = io.TypeOf<typeof Page>;
 
-export const Stanza = io.type({
+export const Stanza = io.strict({
   id: io.string,
   schema: io.string,
   lines: io.array(Line),
@@ -36,11 +34,10 @@ export const Stanza = io.type({
 });
 
 
-export const Transcript = io.type({
+export const Transcript = io.strict({
   documentId: io.string,
   pages: io.array(Page),
   stanzas: io.array(Stanza),
-  labels: io.array(Label),
 }, 'Transcript');
 
 export type Transcript = io.TypeOf<typeof Transcript>;

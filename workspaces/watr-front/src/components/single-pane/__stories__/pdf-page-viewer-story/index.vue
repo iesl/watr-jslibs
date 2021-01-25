@@ -2,10 +2,11 @@
     <story-layout>
 
         <template v-slot:title>
-            Pdf page display, selection, etc
+          Pdf Page Image Viewer
         </template>
 
         <template v-slot:description>
+          Image Display, Region Selection, ...
         </template>
 
         <template v-slot:controls>

@@ -85,6 +85,10 @@ export function useSuperimposedElements({
     const { img, canvas, svg, textDiv, eventDiv } = overlayElements;
 
     if (img) {
+      img.onload = function(){
+        const {width, height } = img;
+        dimensions.value = [width, height];
+      };
       overlayContainer.append(img);
     }
     if (canvas) {

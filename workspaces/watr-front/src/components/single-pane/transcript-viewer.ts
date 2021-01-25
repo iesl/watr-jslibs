@@ -33,7 +33,6 @@ export interface TranscriptViewer {
   setText: SetText;
 }
 
-
 export async function useTranscriptViewer({
   mountPoint, state
 }: Args): Promise<TranscriptViewer> {

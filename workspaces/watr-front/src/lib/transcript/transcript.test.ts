@@ -36,8 +36,6 @@ describe('Transcripts', () => {
 
   // de-hyphenated text e.g., "in-" "tend" with line break
   //   TODO: should this be handled within glyph class?
-  // TODO add an 'empty' geometry shape, for things like spaces/markup that appear but don't correspond
-  //   to a particular geometric area
   // { // Super/subscript markup 'H_{2}SO_{4}^{+}', // extracted glyphs: "H2SO4+"
   // { // Inset math/chemical formulae/matrix etc.
 
@@ -47,15 +45,8 @@ describe('Transcripts', () => {
   });
 
   it('text substitutions/formatting/escape chars', () => {
-    // Super/sub
-    const glyphs = [
-      4,
-      { kind: 'super', text: '^{' },
-      5, 6, 7,
-      { kind: '/super', text: '}' },
-      8
-    ];
   });
+
   it('links between text sections', () => {
     const bodyGlyphs = [
       4,
@@ -100,10 +91,6 @@ describe('Transcripts', () => {
         },
       ]
     };
-
-    // {unit: 'page', at: 3}
-    // {unit: 'shape', at: topLine}
-    // {unit: 'shape', at: midLine}
   });
   it('hierarchical labels over spans of text (textgrid functionality)', () => {
   });
@@ -112,52 +99,57 @@ describe('Transcripts', () => {
   it('represent zones (clipped region of PDF page with contained text)', () => {
   });
 
+  it.only('(updated) glyphs inline with stanzas', () => {
+
+    const transcriptTemplate = {
+      documentId: 'doc-25-id',
+      pages: [{
+        page: 1,
+        bounds: [0, 0, 61200, 79200]
+      }],
+      stanzas: [
+        {
+          id: '1',
+          schema: 'TextLines',
+          lines: [
+            { text: 'ffi', glyphs: [10, 10, 10] },
+            { text: 'see reference ^{[1]}.', glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8] },
+          ],
+          labels: [
+            {
+              name: 'Role', value: '', range: [{ unit: 'page', at: 1 }], children: [
+              ]
+            },
+            {
+              name: 'PageText', range: [{ unit: 'page', at: 1 }], children: [
+                { name: 'BodyContent', range: [{ unit: 'text:line', at: [1, 3] }] },
+                { name: 'HeaderContent', range: [{ unit: 'text:line', at: [4, 10] }] }
+              ]
+            }
+          ]
+        },
+      ],
+    };
+
+    const verbose = true;
+    expect(isIsomorphic(Transcript, transcriptTemplate, verbose)).toBe(true);
+  });
+
   it.only('smokescreen', () => {
 
     const transcriptTemplate = {
       documentId: 'doc-25-id',
-      glyphCount: 1034,
+      // glyphCount: 1034,
       pages: [{
         page: 1,
         bounds: [0, 0, 61200, 79200],
         glyphs: [
           ['I', [19, 94, 9, 10]],
-          [' ', [19, 94, 9, 10], { kind: 'ws', font: 3 }],
+          [' ', [19, 94, 9, 10], { kind: 'ws' }],
           ['2', [19, 94, 9, 10]],
         ],
-        fonts: {
-          scaledFonts: [
-            {
-              declaredName: 'MOOKBM+AdvSPSMI',
-              derivedName: 'MOOKBM+AdvSPSMIx41',
-              id: 0,
-              metrics: {
-                scalingFactor: 41,
-                cap: 0,
-                ascent: 0,
-                midrise: 0,
-                descent: 0,
-                bottom: 0
-              }
-            },
-          ]
-        },
-        labels: [
-          // page-level shapes, ala tracelog labeling
-          {
-            name: 'GlyphLine', range: [{ unit: 'page', at: 1 }], children: [
-              {
-                name: 'OuterRect', range: [{ unit: 'shape', at: [10, 10, 40, 8] }], children: [
-                  { name: 'TopLine', range: [{ unit: 'shape', at: [[10, 10], [40, 10]] }] },
-                  { name: 'MidLine', range: [{ unit: 'shape', at: [[10, 20], [40, 20]] }] },
-                  { name: 'Glyphs', range: [{ unit: 'text:glyph', at: [23, 24, 12, 34, 22] }] },
-                ]
-              }
-            ]
-          }
 
-        ]
- }],
+      }],
       stanzas: [
         {
           id: '1',
@@ -215,5 +207,39 @@ describe('Transcripts', () => {
 //   id: 'L#3',
 //   range: [
 //     { unit: 'stanza', at: [22, 23, 24] }
+//   ]
+// },
+
+// labels: [
+//   // page-level shapes, ala tracelog labeling
+//   {
+//     name: 'GlyphLine', range: [{ unit: 'page', at: 1 }], children: [
+//       {
+//         name: 'OuterRect', range: [{ unit: 'shape', at: [10, 10, 40, 8] }], children: [
+//           { name: 'TopLine', range: [{ unit: 'shape', at: [[10, 10], [40, 10]] }] },
+//           { name: 'MidLine', range: [{ unit: 'shape', at: [[10, 20], [40, 20]] }] },
+//           { name: 'Glyphs', range: [{ unit: 'text:glyph', at: [23, 24, 12, 34, 22] }] },
+//         ]
+//       }
+//     ]
+//   }
+
+// ]
+
+// fonts: {
+//   scaledFonts: [
+//     {
+//       declaredName: 'MOOKBM+AdvSPSMI',
+//       derivedName: 'MOOKBM+AdvSPSMIx41',
+//       id: 0,
+//       metrics: {
+//         scalingFactor: 41,
+//         cap: 0,
+//         ascent: 0,
+//         midrise: 0,
+//         descent: 0,
+//         bottom: 0
+//       }
+//     },
 //   ]
 // },
