@@ -85,7 +85,7 @@ export async function useTranscriptViewer({
 
     // maxWidth += textMarginLeft*2;
 
-    // spatialSearch.setGrid(allIndexables);
+    // spatialSearch.setGlyphOverlays(allIndexables);
     // superimposedElements.setDimensions(maxWidth, currY+textMarginTop);
     textDiv.style.visibility = 'visible';
   };

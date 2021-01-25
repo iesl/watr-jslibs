@@ -3,7 +3,6 @@ import _ from 'lodash';
 import { Rect, RectRepr } from './shapes';
 import * as io from 'io-ts';
 import * as Arr from 'fp-ts/lib/Array';
-import * as Ap from 'fp-ts/lib/Apply';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { NonNegativeInt } from '~/lib/io-utils';
@@ -21,14 +20,14 @@ export interface GlyphPropsRepr {
   gs?: GlyphRepr[];
 }
 
-const GlyphRepr1 = io.tuple([io.string, RectRepr], 'GlyphRepr1');
+const GlyphRepr1 = io.tuple([io.string, io.number, RectRepr], 'GlyphRepr1');
 type GlyphRepr1 = io.TypeOf<typeof GlyphRepr1>;
 
-type GlyphRepr2 = [string, RectRepr, GlyphPropsRepr];
+type GlyphRepr2 = [string, number, RectRepr, GlyphPropsRepr];
 const GlyphRepr2: io.Type<GlyphRepr2> =
   io.recursion(
     'GlyphRepr2',
-    () => io.tuple([io.string, RectRepr, GlyphPropsRepr])
+    () => io.tuple([io.string, io.number, RectRepr, GlyphPropsRepr])
   );
 
 
@@ -51,6 +50,7 @@ export const GlyphPropsRepr: io.Type<GlyphPropsRepr> =
 
 export interface Glyph {
   char: string;
+  id: number;
   rect: Rect;
   props?: GlyphProps;
 }
@@ -102,47 +102,80 @@ export const GlyphProps: io.Type<GlyphProps, GlyphPropsRepr, unknown> =
     }
   );
 
-const seqTupleEither = Ap.sequenceT(E.either);
+// const seqTupleEither = Ap.sequenceT(E.either);
 
 export const Glyph: io.Type<Glyph, GlyphRepr, unknown> =
   new io.Type<Glyph, GlyphRepr, unknown>(
     'Glyph',
     (a: any): a is Glyph =>
       io.string.is(a.char)
-      && NonNegativeInt.is(a.page)
+      && NonNegativeInt.is(a.id)
       && Rect.is(a.rect)
       && (a.props === undefined || GlyphProps.is(a.props)),
 
     (unk: unknown, ctx: io.Context) => pipe(
-      unk,
-      v => GlyphRepr.validate(v, ctx),
-      E.chain(([char, rect, props]) => {
-        const rdec = Rect.decode(rect);
-        const mapf = E.map(((r: Rect) => ({ char, rect: r } as Glyph)));
-        const glyph0 = mapf(rdec);
-
-        if (props) {
-          const ps = decodeGlyphProps(props, ctx);
-          const glyphAndProps: E.Either<io.Errors, [Glyph, GlyphProps]> =
-            seqTupleEither(glyph0, ps);
-
-          const mapf1 = E.map<[Glyph, GlyphProps], Glyph>(([glyph, props]) => {
-            glyph.props = props;
-            return glyph;
-          });
-
-          const glyph1 = mapf1(glyphAndProps);
-
-          return glyph1;
+      GlyphRepr.validate(unk, ctx),
+      E.bindTo('repr'),
+      E.bind('char', ({ repr: [char, _id, _rect, _props] }) => io.success(char)),
+      E.bind('id', ({ repr: [_char, id, _rect, _props] }) => io.success(id)),
+      E.bind('rect', ({ repr: [_char, _id, rect, _props] }) => Rect.decode(rect)),
+      E.bind('props', ({ repr: [_char, _id, _rect, props] }) => props !== undefined ?
+        decodeGlyphProps(props, ctx) : io.success(undefined)),
+      E.chain(({ char, id, rect, props }) => {
+        const g: Glyph = { char, id, rect };
+        if (props !== undefined) {
+          g.props = props;
         }
-
-        return glyph0;
+        return io.success(g);
       })
     ),
 
     (a: Glyph) => {
       return (a.props === undefined
-        ? [a.char, Rect.encode(a.rect)]
-        : [a.char, Rect.encode(a.rect), GlyphProps.encode(a.props)]);
+        ? [a.char, a.id, Rect.encode(a.rect)]
+        : [a.char, a.id, Rect.encode(a.rect), GlyphProps.encode(a.props)]);
     }
   );
+
+// export const Glyph: io.Type<Glyph, GlyphRepr, unknown> =
+//   new io.Type<Glyph, GlyphRepr, unknown>(
+//     'Glyph',
+//     (a: any): a is Glyph =>
+//       io.string.is(a.char)
+//       && NonNegativeInt.is(a.id)
+//       && Rect.is(a.rect)
+//       && (a.props === undefined || GlyphProps.is(a.props)),
+
+//     (unk: unknown, ctx: io.Context) => pipe(
+//       unk,
+//       v => GlyphRepr.validate(v, ctx),
+//       E.chain(([char, rect, props]) => {
+//         const rdec = Rect.decode(rect);
+//         const mapf = E.map(((r: Rect) => ({ char, rect: r } as Glyph)));
+//         const glyph0 = mapf(rdec);
+
+//         if (props) {
+//           const ps = decodeGlyphProps(props, ctx);
+//           const glyphAndProps: E.Either<io.Errors, [Glyph, GlyphProps]> =
+//             seqTupleEither(glyph0, ps);
+
+//           const mapf1 = E.map<[Glyph, GlyphProps], Glyph>(([glyph, props]) => {
+//             glyph.props = props;
+//             return glyph;
+//           });
+
+//           const glyph1 = mapf1(glyphAndProps);
+
+//           return glyph1;
+//         }
+
+//         return glyph0;
+//       })
+//     ),
+
+//     (a: Glyph) => {
+//       return (a.props === undefined
+//         ? [a.char, Rect.encode(a.rect)]
+//         : [a.char, Rect.encode(a.rect), GlyphProps.encode(a.props)]);
+//     }
+//   );

@@ -10,7 +10,8 @@ import { StateArgs } from '~/components/basics/component-basics'
 import { useEventlibCore, EventlibCore } from '~/components/basics/eventlib-core';
 import { useSuperimposedElements, SuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
 
-import { useGlyphOverlays, SetGrid } from '~/components/basics/glyph-overlays';
+
+import { useGlyphOverlays, SetGlyphOverlays } from '~/components/basics/glyph-overlays';
 import { useSnaptoSelection } from '~/components/basics/snapto-selection';
 import { useEventlibSelect } from '~/components/basics/eventlib-select';
 import { resolveCorpusUrl } from '~/lib/axios';
@@ -30,7 +31,7 @@ type Args = StateArgs & {
 export interface PdfPageViewer {
   eventlibCore: EventlibCore;
   superimposedElements: SuperimposedElements;
-  setGrid: SetGrid;
+  setGlyphOverlays: SetGlyphOverlays;
 }
 
 export async function usePdfPageViewer({
@@ -52,12 +53,12 @@ export async function usePdfPageViewer({
   superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
 
 
-  const setGrid = glyphOverlays.setGrid;
+  const setGlyphOverlays = glyphOverlays.setGlyphOverlays;
 
   return {
     eventlibCore,
     superimposedElements,
-    setGrid
+    setGlyphOverlays
   }
 }
 
@@ -106,7 +107,7 @@ export async function useTracelogPdfPageViewer({
   const { rtreeIndex } = glyphOverlays;
   useSnaptoSelection({ rtreeIndex, eventlibSelect, state });
 
-  const setGrid = glyphOverlays.setGrid;
+  const setGlyphOverlays = glyphOverlays.setGlyphOverlays;
   const svg = superimposedElements.overlayElements.svg!;
 
   superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
@@ -138,7 +139,7 @@ export async function useTracelogPdfPageViewer({
   return {
     eventlibCore,
     superimposedElements,
-    setGrid
+    setGlyphOverlays
   }
 }
 

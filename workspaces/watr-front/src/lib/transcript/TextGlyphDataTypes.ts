@@ -26,11 +26,11 @@ export interface TextDataPoint extends RTreeIndexable {
   pageNum: number;
 }
 
-export interface TranscriptReadableFlow {
-  textDataPoints: TextDataPoint[];
-  maxLineWidth: number;
-  totalLineHeight: number;
-}
+// export interface TranscriptReadableFlow {
+//   textDataPoints: TextDataPoint[];
+//   maxLineWidth: number;
+//   totalLineHeight: number;
+// }
 
 /**
  * Convert Transcript into format suitable for display and RTree indexing as

@@ -19,12 +19,12 @@ export function makeGlyphRepr(char: string): GlyphRepr {
   switch (char) {
     case 'ﬃ':
       gchar = 'ffi';
-      gprops = { kind: 'rewrite', gs: [['ﬃ', [19, 94, 9, 10]]] };
+      gprops = { kind: 'rewrite', gs: [['ﬃ', 1, [19, 94, 9, 10]]] };
       break;
   }
   const repr: GlyphRepr = gprops ?
-    [gchar, [100, 200, 300, 400], gprops] :
-    [gchar, [100, 200, 300, 400]];
+    [gchar, 2, [100, 200, 300, 400], gprops] :
+    [gchar, 3, [100, 200, 300, 400]];
 
   return repr;
 }
@@ -44,10 +44,10 @@ export const sampleTranscript = {
       bounds: [0, 0, 100, 200],
       glyphCount: 200,
       glyphs: [
-        ['a', [100, 200, 300, 400]],
-        [' ', [1, 2, 3, 4]],
-        ['ffi', [10, 2, 3, 4], {kind: 'rewrite', gs: [['ﬃ', [19, 94, 9, 10]]]}],
-        ['â', [19, 94, 9, 10], {kind: 'rewrite', gs: [['a', [19, 94, 9, 10]], ['^', [19, 94, 9, 10]]]}]
+        ['a', 0, [100, 200, 300, 400]],
+        [' ', 1, [1, 2, 3, 4]],
+        ['ffi', 2, [10, 2, 3, 4], {kind: 'rewrite', gs: [['ﬃ', 3, [19, 94, 9, 10]]]}],
+        ['â', 4, [19, 94, 9, 10], {kind: 'rewrite', gs: [['a', 5, [19, 94, 9, 10]], ['^', 6, [19, 94, 9, 10]]]}]
       ]
     }
   ],

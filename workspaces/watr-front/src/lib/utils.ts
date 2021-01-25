@@ -48,7 +48,7 @@ export function isIsomorphic<A, IO>(ioType: io.Type<A, IO, IO>, input: IO, verbo
   if (isLeft(maybeDecoded)) {
     const report = PathReporter.report(maybeDecoded)
     if (verbose) {
-      prettyPrint({ m: `isIsomorphic(${ioType.name})/decode === false`, input, report})
+      prettyPrint({ m: `isIsomorphic(${ioType.name})/decode === false`, input, report })
     }
     return false
   }

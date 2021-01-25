@@ -99,61 +99,23 @@ describe('Transcripts', () => {
   it('represent zones (clipped region of PDF page with contained text)', () => {
   });
 
-  it.only('(updated) glyphs inline with stanzas', () => {
-
-    const transcriptTemplate = {
-      documentId: 'doc-25-id',
-      pages: [{
-        page: 1,
-        bounds: [0, 0, 61200, 79200]
-      }],
-      stanzas: [
-        {
-          id: '1',
-          schema: 'TextLines',
-          lines: [
-            { text: 'ffi', glyphs: [10, 10, 10] },
-            { text: 'see reference ^{[1]}.', glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8] },
-          ],
-          labels: [
-            {
-              name: 'Role', value: '', range: [{ unit: 'page', at: 1 }], children: [
-              ]
-            },
-            {
-              name: 'PageText', range: [{ unit: 'page', at: 1 }], children: [
-                { name: 'BodyContent', range: [{ unit: 'text:line', at: [1, 3] }] },
-                { name: 'HeaderContent', range: [{ unit: 'text:line', at: [4, 10] }] }
-              ]
-            }
-          ]
-        },
-      ],
-    };
-
-    const verbose = true;
-    expect(isIsomorphic(Transcript, transcriptTemplate, verbose)).toBe(true);
-  });
-
   it.only('smokescreen', () => {
 
     const transcriptTemplate = {
       documentId: 'doc-25-id',
-      // glyphCount: 1034,
       pages: [{
         page: 1,
         bounds: [0, 0, 61200, 79200],
         glyphs: [
-          ['I', [19, 94, 9, 10]],
-          [' ', [19, 94, 9, 10], { kind: 'ws' }],
-          ['2', [19, 94, 9, 10]],
+          ['I', 1, [19, 94, 9, 10]],
+          [' ', 2, [19, 94, 9, 10], { kind: 'ws' }],
+          ['2', 3, [19, 94, 9, 10]],
         ],
 
       }],
       stanzas: [
         {
           id: '1',
-          schema: 'TextLines',
           lines: [
             { text: 'ffi', glyphs: [10, 10, 10] },
             { text: 'see reference ^{[1]}.', glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8] },
@@ -170,7 +132,7 @@ describe('Transcripts', () => {
       ],
     };
 
-    const verbose = true;
+    const verbose = false;
     expect(isIsomorphic(Transcript, transcriptTemplate, verbose)).toBe(true);
   });
 
