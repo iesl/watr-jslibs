@@ -42,9 +42,7 @@ export function useMeasuredTextOverlay({
     div.append(node)
     textDiv.appendChild(div);
 
-    const lineDimensions = showText(text, div, x, y);
-
-    return lineDimensions;
+    return showText(text, div, x, y);
   }
 
   const clearText: ClearText = () => {

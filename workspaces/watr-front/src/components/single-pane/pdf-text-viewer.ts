@@ -5,13 +5,12 @@ import { Ref } from '@vue/composition-api';
 import { StateArgs } from '~/components/basics/component-basics'
 import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
-import { useSpatialSearch } from '~/components/basics/glyph-overlays';
 import { BBox } from '~/lib/coord-sys';
 import * as GridTypes from '~/lib/transcript/TextGridTypes';
-import { useMeasuredTextOverlay  } from '~/components/basics/measured-text-overlay';
+import { useMeasuredTextOverlay } from '~/components/basics/measured-text-overlay';
 import { TextStyle } from '~/lib/html-text-metrics';
-import { newIdGenerator } from '~/lib/utils';
-import { RTreeIndexable } from '~/lib/transcript/TextGlyphDataTypes';
+
+import { PutTextLn, TranscriptIndex } from '~/lib/transcript/transcript-index';
 
 export interface TextgridAndBounds {
   textgrid: GridTypes.Textgrid;
@@ -19,26 +18,23 @@ export interface TextgridAndBounds {
 }
 
 export type SetText = (textAndBounds: TextgridAndBounds) => void;
+export type ShowStanza = (transcriptIndex: TranscriptIndex, stanzaId: number) => void;
 
 type Args = StateArgs & {
-  mountPoint: Ref<HTMLDivElement|null>;
+  mountPoint: Ref<HTMLDivElement | null>;
 };
 
-export interface PdfTextViewer {
-  setText: SetText;
+export interface StanzaViewer {
+  showStanza: ShowStanza;
 }
 
-export async function usePdfTextViewer({
+export async function useStanzaViewer({
   mountPoint, state
-}: Args): Promise<PdfTextViewer> {
+}: Args): Promise<StanzaViewer> {
 
-  const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state } );
+  // const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state } );
   const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Text, ElementTypes.Svg], mountPoint, state });
-  const spatialSearch = useSpatialSearch({ state, eventlibCore, superimposedElements });
-
-  const { putTextLn } = useMeasuredTextOverlay({ superimposedElements, state });
-  const textDiv = superimposedElements.overlayElements.textDiv!;
-  const nextId = newIdGenerator();
+  // const spatialSearch = useSpatialSearch({ state, eventlibCore, superimposedElements });
 
   const size = 15;
   const style: TextStyle = {
@@ -48,45 +44,21 @@ export async function usePdfTextViewer({
     weight: 'normal'
   };
 
-  const setText: SetText = (textAndBounds) => {
-
-    const { textgrid, pageBounds } = textAndBounds;
-    const pageLeft = pageBounds.left;
-    const pageTop = pageBounds.top;
-
-    textDiv.style.visibility = 'hidden';
-
-    let currY = pageTop;
-    let maxWidth = 0;
-    const allIndexables = _.flatMap(textgrid.rows, (row) => {
-      const text = row.text;
-      const lineDimensions = putTextLn(style, pageLeft, currY, text);
-      maxWidth = Math.max(maxWidth, lineDimensions.width);
-      const indexables: RTreeIndexable[] = lineDimensions
-        .elementDimensions
-        .map(textDimensions => {
-          const { x, y, width, height } = textDimensions;
-          return {
-            id: nextId(),
-            minX: x,
-            minY: y,
-            maxX: x + width,
-            maxY: y + height
-          };
-        });
-
-      currY += size+2;
-      return indexables;
-    });
-
-    maxWidth += pageLeft*2;
-
-    spatialSearch.setGrid(allIndexables);
-    superimposedElements.setDimensions(maxWidth, currY+pageTop);
-    textDiv.style.visibility = 'visible';
+  const mtext = useMeasuredTextOverlay({ superimposedElements, state });
+  const textDiv = superimposedElements.overlayElements.textDiv!;
+  const pageLeft = 0;
+  const putTextLn: PutTextLn = (lineNum: number, text: string) => {
+    const lineY = (size + 2) * lineNum;
+    return mtext.putTextLn(style, pageLeft, lineY, text);
   };
 
+  const showStanza: ShowStanza = (transcriptIndex, stanzaId) => {
+    textDiv.style.visibility = 'hidden';
+    const stanzaBounds = transcriptIndex.indexStanza(stanzaId, putTextLn)
+    superimposedElements.setDimensions(stanzaBounds.width, stanzaBounds.height);
+    textDiv.style.visibility = 'visible';
+  };
   return {
-    setText
+    showStanza
   };
 }

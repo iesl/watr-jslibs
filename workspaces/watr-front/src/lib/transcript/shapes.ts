@@ -93,7 +93,7 @@ export interface Rect {
   height: number;
 }
 
-// export const RectRepr = io.tuple<io.NumberType, io.NumberType, io.NumberType, io.NumberType>(
+
 export const RectRepr =
   io.tuple([io.number, io.number, io.number, io.number], 'RectRepr');
 

@@ -1,10 +1,13 @@
 import { defineComponent } from '@vue/composition-api'
-import { usePdfTextViewer } from '~/components/single-pane/pdf-text-viewer'
-import * as GridTypes from '~/lib/transcript/TextGridTypes'
-import * as coords from '~/lib/coord-sys'
+import { useStanzaViewer } from '~/components/single-pane/pdf-text-viewer'
+import { PathReporter } from 'io-ts/lib/PathReporter'
+import * as E from 'fp-ts/lib/Either'
 import { getArtifactData } from '~/lib/axios'
 import { initState } from '~/components/basics/component-basics'
 import { divRef } from '~/lib/vue-composition-lib'
+import { Transcript } from '~/lib/transcript/transcript'
+import _ from 'lodash';
+import { TranscriptIndex } from '~/lib/transcript/transcript-index'
 
 export default defineComponent({
   components: {},
@@ -12,19 +15,29 @@ export default defineComponent({
     const state = initState()
     const mountPoint = divRef()
 
-    usePdfTextViewer({ mountPoint, state }).then((pdfTextViewer) => {
-      const { setText } = pdfTextViewer
+    useStanzaViewer({ mountPoint, state }).then((stanzaViewer) => {
+      const { showStanza } = stanzaViewer;
 
-      const entryId = '1503.00580.pdf.d'
+      const entryId = 'austenite.pdf.d';
 
-      getArtifactData(entryId, 'textgrid')
-        .then((grid: GridTypes.Grid) => {
-          const page0 = grid.pages[0]
-          const textgrid = page0.textgrid
-          const pageBounds = coords.mk.fromLtwh(20, 20, 0, 0)
-          setText({ textgrid, pageBounds })
-        })
-    })
+      getArtifactData(entryId, 'transcript')
+        .then(async (transcriptJson) => {
+          const maybeDecoded = Transcript.decode(transcriptJson)
+          console.log(maybeDecoded)
+          if (E.isLeft(maybeDecoded)) {
+            const report = PathReporter.report(maybeDecoded)
+            console.log('error decoding transcript');
+            _.each(report, r => {
+              console.log('Error:', r);
+            });
+            return;
+          } else {
+            const transcript = maybeDecoded.right
+            const transcriptIndex = new TranscriptIndex(transcript);
+            showStanza(transcriptIndex, 0);
+          }
+        });
+    });
 
     return {
       mountPoint

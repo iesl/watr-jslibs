@@ -32,13 +32,13 @@ export function getParameterByName(name: string, urlstr?: string) {
   return decodeURIComponent(results[2].replace(/\+/g, ' '))
 }
 
-export function newIdGenerator() {
-  let currId = -1
+export function newIdGenerator(start: number) {
+  let currId = start-1;
   const nextId = () => {
-    currId += 1
-    return currId
-  }
-  return nextId
+    currId += 1;
+    return currId;
+  };
+  return nextId;
 }
 
 

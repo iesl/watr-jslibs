@@ -15,6 +15,6 @@ export const storyItems: StoryEntry[] = [
   { title: 'Text Overlay', to: '/stories/autogen/textOverlay' },
   { title: 'Pdf Page Viewer', to: '/stories/autogen/pdfPageViewer?id=1503.00580.pdf.d' },
   { title: 'Pdf Text Viewer', to: '/stories/autogen/pdfTextViewer' },
-  { title: 'Transcribed Text Viewer', to: '/stories/autogen/transcriptionViewer' },
-  { title: 'Selection narrowing filter', to: '/stories/autogen/narrowingFilter' }
-]
+  { title: 'Selection narrowing filter', to: '/stories/autogen/narrowingFilter' },
+];
+

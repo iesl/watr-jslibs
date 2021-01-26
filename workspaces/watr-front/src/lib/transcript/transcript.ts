@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import { Rect } from './shapes';
 import * as io from 'io-ts';
-import { NonNegativeInt, PositiveInt } from '~/lib/io-utils';
+import { NonNegativeInt } from '~/lib/io-utils';
 import { Glyph } from './glyph';
 import { Label } from './labels';
 

@@ -14,8 +14,9 @@ import { initState, awaitRef } from '~/components/basics/component-basics'
 import { getArtifactData } from '~/lib/axios'
 import { LogEntry } from '~/lib/transcript/tracelogs'
 import { useTracelogPdfPageViewer } from '~/components/single-pane/pdf-page-viewer'
-import { useTranscriptViewer } from '~/components/single-pane/transcript-viewer'
 import { Transcript } from '~/lib/transcript/transcript'
+import { useStanzaViewer } from '~/components/single-pane/pdf-text-viewer'
+import { TranscriptIndex } from '~/lib/transcript/transcript-index'
 
 export default defineComponent({
 
@@ -36,15 +37,16 @@ export default defineComponent({
 
             if (isRight(transEither)) {
               const transcript = transEither.right
+              const transcriptIndex = new TranscriptIndex(transcript);
 
               _.each(transcript.pages, async (page, pageNumber) => {
                 const tmount = document.createElement('div')
                 pageTextsDiv.appendChild(tmount)
                 const tmountRef = divRef()
                 tmountRef.value = tmount
-                const transcriptViewer = await useTranscriptViewer({ mountPoint: tmountRef, state })
-                const { setText } = transcriptViewer
-                setText({ trPage: page, textMarginLeft: 20, textMarginTop: 20 })
+                const transcriptViewer = await useStanzaViewer({ mountPoint: tmountRef, state })
+                // const { setText } = transcriptViewer
+                // setText({ trPage: page, textMarginLeft: 20, textMarginTop: 20 })
 
                 const mount = document.createElement('div')
                 const pageViewersDiv = await awaitRef(pageViewers)
@@ -54,12 +56,13 @@ export default defineComponent({
 
                 const logEntryRef: Ref<LogEntry[]> = ref([])
 
+
                 await useTracelogPdfPageViewer({
                   mountPoint: mountRef,
                   pageNumber,
                   entryId,
+                  transcriptIndex,
                   logEntryRef,
-                  pageBounds: page.bounds,
                   state
                 })
               })

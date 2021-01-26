@@ -116,7 +116,7 @@ export function initFileBasedRoutes(corpusRootPath: string): Router {
 
       if (artifactPath) {
         const respRelFile = path.relative(corpusRootPath, artifactPath);
-        putStrLn(`server: servign ${respRelFile}`);
+        putStrLn(`server: serving ${respRelFile}`);
         return await send(ctx, respRelFile, { root: corpusRootPath });
       }
 

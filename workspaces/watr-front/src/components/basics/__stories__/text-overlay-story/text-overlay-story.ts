@@ -92,7 +92,7 @@ export default {
 
         _.each(inputLines, (line, linenum) => {
           const lineDimensions = textOverlay.putTextLn(style, left, top+(linenum*size), line)
-          const dims = lineDimensions.elementDimensions;
+          const dims = lineDimensions.charBounds;
           svgSelect
             .selectAll('.chars')
             .data(dims, (d: any) => `${d.x}x${d.y}`)

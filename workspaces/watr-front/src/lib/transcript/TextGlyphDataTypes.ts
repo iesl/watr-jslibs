@@ -20,11 +20,11 @@ export interface RTreeIndexable extends MinMaxBox {
   id: number;
 }
 
-export interface TextDataPoint extends RTreeIndexable {
-  char: string;
-  glyph: Glyph;
-  pageNum: number;
-}
+// export interface TextDataPoint extends RTreeIndexable {
+//   char: string;
+//   glyph: Glyph;
+//   pageNum: number;
+// }
 
 // export interface TranscriptReadableFlow {
 //   textDataPoints: TextDataPoint[];

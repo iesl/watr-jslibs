@@ -8,12 +8,10 @@ import * as E from 'fp-ts/lib/Either'
 import { PathReporter } from 'io-ts/lib/PathReporter'
 import { initState } from '~/components/basics/component-basics'
 import { usePdfPageViewer } from '~/components/single-pane/pdf-page-viewer'
-import * as coords from '~/lib/coord-sys'
-// import { initGridData, gridDataToGlyphData } from '~/lib/transcript/TextGlyphDataTypes';
-import { Point } from '~/lib/coord-sys'
 import { resolveCorpusUrl, getArtifactData } from '~/lib/axios'
 import { LogEntry } from '~/lib/transcript/tracelogs'
 import { Transcript } from '~/lib/transcript/transcript'
+import { TranscriptIndex } from '~/lib/transcript/transcript-index';
 
 export default {
   setup() {
@@ -24,26 +22,17 @@ export default {
 
     // const entryId = '1503.00580.pdf.d'
     const entryId = 'austenite.pdf.d'
+    const pageNumber = 1;
+    const pageImageNumber = (pageNumber+1).toString();
 
     const run = async () => {
-      const pdfPageViewer = await usePdfPageViewer({
-        mountPoint,
-        state,
-        pageNumber: 1,
-        entryId,
-        logEntryRef,
-        pageBounds: { kind: 'rect', x: 10, y: 10, width: 1000, height: 1000 }
-      });
 
-
-      const { superimposedElements } = pdfPageViewer
-      const imageUrl = resolveCorpusUrl(entryId, 'image', '1')
-      superimposedElements.setImageSource(imageUrl);
-
+      console.log('starting fetch');
       getArtifactData(entryId, 'transcript')
         .then(async (transcriptJson) => {
+          console.log('fetched');
           const maybeDecoded = Transcript.decode(transcriptJson)
-          console.log(maybeDecoded)
+          console.log('decoded');
           if (E.isLeft(maybeDecoded)) {
             const report = PathReporter.report(maybeDecoded)
             console.log('error decoding transcript');
@@ -55,17 +44,23 @@ export default {
           } else {
             const transcript = maybeDecoded.right
 
-            const page0 = transcript.pages[0]
-            //         // TODO: why is this margin here? hardcoded?
+            const transcriptIndex = new TranscriptIndex(transcript);
+            const page0 = transcript.pages[pageNumber];
             const pageBounds = page0.bounds;
-            //         // page0.glyphs
-            //         const tmpPageMargin = 10
-            //         const origin = new Point(tmpPageMargin, tmpPageMargin, coords.CoordSys.GraphUnits)
-            //         // const gridData = initGridData(page0.textgrid, () => 10, origin, 10);
-            //         // const glyphData = gridDataToGlyphData(gridData.textDataPoints);
-            const glyphs = page0.glyphs;
 
-            pdfPageViewer.setGlyphOverlays(glyphs, pageBounds);
+            const pdfPageViewer = await usePdfPageViewer({
+              mountPoint,
+              state,
+              transcriptIndex,
+              pageNumber,
+              entryId,
+              logEntryRef,
+            });
+
+            const { superimposedElements } = pdfPageViewer
+            const imageUrl = resolveCorpusUrl(entryId, 'image', pageImageNumber)
+            superimposedElements.setImageSource(imageUrl);
+            superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
           }
         })
 

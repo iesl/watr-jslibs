@@ -1,7 +1,8 @@
 import _ from 'lodash';
 
 import {
-  Ref, watch,
+  Ref,
+  watch,
 } from '@vue/composition-api';
 
 import { GetterTree, MutationTree, ActionTree, Plugin } from 'vuex'
@@ -11,31 +12,33 @@ import { useEventlibCore, EventlibCore } from '~/components/basics/eventlib-core
 import { useSuperimposedElements, SuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
 
 
-import { useGlyphOverlays, SetGlyphOverlays } from '~/components/basics/glyph-overlays';
+import { useGlyphOverlays} from '~/components/basics/glyph-overlays';
 import { useSnaptoSelection } from '~/components/basics/snapto-selection';
 import { useEventlibSelect } from '~/components/basics/eventlib-select';
 import { resolveCorpusUrl } from '~/lib/axios';
 import { LogEntry } from '~/lib/transcript/tracelogs';
 import { fromFigure } from '~/lib/coord-sys';
 import * as d3 from 'd3-selection';
-import { Rect } from '~/lib/transcript/shapes';
+import { TranscriptIndex } from '~/lib/transcript/transcript-index';
+
 
 type Args = StateArgs & {
   mountPoint: Ref<HTMLDivElement | null>;
+  transcriptIndex: TranscriptIndex;
   pageNumber: number;
   entryId: string;
   logEntryRef: Ref<LogEntry[]>;
-  pageBounds: Rect;
 };
 
 export interface PdfPageViewer {
   eventlibCore: EventlibCore;
   superimposedElements: SuperimposedElements;
-  setGlyphOverlays: SetGlyphOverlays;
 }
 
 export async function usePdfPageViewer({
-  mountPoint, state, pageBounds
+  mountPoint, state,
+  transcriptIndex,
+  pageNumber
 }: Args): Promise<PdfPageViewer> {
 
   const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state });
@@ -45,102 +48,102 @@ export async function usePdfPageViewer({
     mountPoint, state
   });
 
-  const glyphOverlays = useGlyphOverlays({ state, eventlibCore, superimposedElements });
-  const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
-  const { rtreeIndex } = glyphOverlays;
-  useSnaptoSelection({ rtreeIndex, eventlibSelect, state });
+  const glyphOverlays = useGlyphOverlays({ state, eventlibCore, superimposedElements, transcriptIndex, pageNumber });
+  // const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
+  // const { rtreeIndex } = glyphOverlays;
+  // useSnaptoSelection({ rtreeIndex, eventlibSelect, state });
   // const bounds = mk.fromArray(pageBounds);
-  superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
+  // superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
 
 
-  const setGlyphOverlays = glyphOverlays.setGlyphOverlays;
+  // const setGlyphOverlays = glyphOverlays.setGlyphOverlays;
 
   return {
     eventlibCore,
     superimposedElements,
-    setGlyphOverlays
   }
 }
 
-interface PdfPageViewerState {
-  drawables: object[];
-}
+// interface PdfPageViewerState {
+//   drawables: object[];
+// }
 
-export interface StateModule<S> {
-  state: () => S;
-  actions?: ActionTree<S, any>;
-  mutations?: MutationTree<S>;
-  getters?: GetterTree<S, any>;
-  plugins?: Plugin<S>[];
-}
+// export interface StateModule<S> {
+//   state: () => S;
+//   actions?: ActionTree<S, any>;
+//   mutations?: MutationTree<S>;
+//   getters?: GetterTree<S, any>;
+//   plugins?: Plugin<S>[];
+// }
 
-export type StateModuleP<S> = Partial<StateModule<S>>;
+// export type StateModuleP<S> = Partial<StateModule<S>>;
 
-export const PdfPageViewerModule: StateModule<PdfPageViewerState> = {
-  state: () => ({
-    drawables: []
-  }),
-}
+// export const PdfPageViewerModule: StateModule<PdfPageViewerState> = {
+//   state: () => ({
+//     drawables: []
+//   }),
+// }
 
 // TODO pull out all of the tracelog drawing code from useTracelogPdfPageViewer into it's own package
 export async function useTracelogPdfPageViewer({
   mountPoint,
+  transcriptIndex,
   pageNumber,
   entryId,
   logEntryRef,
-  pageBounds,
   state
 }: Args): Promise<PdfPageViewer> {
-  const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state });
+  return usePdfPageViewer({ entryId, logEntryRef, state, mountPoint, transcriptIndex, pageNumber, })
+  // const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state });
 
-  const superimposedElements = useSuperimposedElements({
-    includeElems: [ElementTypes.Img, ElementTypes.Svg],
-    mountPoint, state
-  });
+  // const superimposedElements = useSuperimposedElements({
+  //   includeElems: [ElementTypes.Img, ElementTypes.Svg],
+  //   mountPoint, state
+  // });
 
-  const page = `${pageNumber + 1}`;
-  const imageUrl = resolveCorpusUrl(entryId, 'image', page);
-  superimposedElements.setImageSource(imageUrl);
+  // const page = `${pageNumber + 1}`;
+  // const imageUrl = resolveCorpusUrl(entryId, 'image', page);
+  // superimposedElements.setImageSource(imageUrl);
 
-  const glyphOverlays = useGlyphOverlays({ state, eventlibCore, superimposedElements });
-  const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
-  const { rtreeIndex } = glyphOverlays;
-  useSnaptoSelection({ rtreeIndex, eventlibSelect, state });
+  // const glyphOverlays = useGlyphOverlays({ state, eventlibCore, superimposedElements });
+  // const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state });
+  // const { rtreeIndex } = glyphOverlays;
+  // useSnaptoSelection({ rtreeIndex, eventlibSelect, state });
 
-  const setGlyphOverlays = glyphOverlays.setGlyphOverlays;
-  const svg = superimposedElements.overlayElements.svg!;
+  // const setGlyphOverlays = glyphOverlays.setGlyphOverlays;
+  // const svg = superimposedElements.overlayElements.svg!;
 
-  superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
-  watch(logEntryRef, (logEntries) => {
+  // superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
+  // watch(logEntryRef, (logEntries) => {
 
-    const geometryLogs = _.filter(logEntries, e => e.logType === 'Geometry');
+  //   const geometryLogs = _.filter(logEntries, e => e.logType === 'Geometry');
 
-    const shapes = geometryLogs.flatMap(log => {
-      return log.body.flatMap(sh => {
-        const svgShape = fromFigure(sh).svgShape() as any;
-        svgShape.id = getId(svgShape);
-        return svgShape;
-      });
-    })
-    const dataSelection = d3.select(svg)
-      .selectAll('.shape')
-      .data(shapes, (sh: any) => sh.id);
+  //   const shapes = geometryLogs.flatMap(log => {
+  //     return log.body.flatMap(sh => {
+  //       const svgShape = fromFigure(sh).svgShape() as any;
+  //       svgShape.id = getId(svgShape);
+  //       return svgShape;
+  //     });
+  //   })
+  //   const dataSelection = d3.select(svg)
+  //     .selectAll('.shape')
+  //     .data(shapes, (sh: any) => sh.id);
 
-    dataSelection.exit().remove();
+  //   dataSelection.exit().remove();
 
-    dataSelection.enter()
-      .each(function (shape: any) {
-        const self = d3.select(this);
-        return self.append(shape.type)
-          .call(initShapeAttrs) ;
-      });
-  });
+  //   dataSelection.enter()
+  //     .each(function (shape: any) {
+  //       const self = d3.select(this);
+  //       return self.append(shape.type)
+  //         .call(initShapeAttrs) ;
+  //     });
+  // });
 
-  return {
-    eventlibCore,
-    superimposedElements,
-    setGlyphOverlays
-  }
+  // return {
+  //   eventlibCore,
+  //   superimposedElements,
+  //   setGlyphOverlays
+  // }
 }
 
 function getCls(data: any) {

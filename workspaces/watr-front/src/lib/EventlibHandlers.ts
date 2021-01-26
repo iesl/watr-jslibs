@@ -11,7 +11,7 @@ export function getCursorPosition(elem: Element, event: MouseEvent): EventlibPoi
   const rect: DOMRect | ClientRect = elem.getBoundingClientRect()
   const x = event.clientX - rect.left
   const y = event.clientY - rect.top
-  return {x, y};
+  return { x, y };
 }
 
 export interface EventlibPoint {
@@ -20,7 +20,7 @@ export interface EventlibPoint {
 }
 
 export interface EventlibMouse {
-  mousePosRef: UnwrapRef<EventlibPoint|null>; // TODO why or null ??
+  mousePosRef: UnwrapRef<EventlibPoint | null>; // TODO why or null ??
 }
 
 export interface EMouseEvent {
@@ -35,10 +35,10 @@ type GEMap = GlobalEventHandlersEventMap;
 // Union of all mouse event type keys "mousemove", etc..., exluding Pointer/Drag events
 export type MouseEventT = {
   [K in keyof GEMap]:
-  GEMap[K] extends MouseEvent?
-    (GEMap[K] extends DragEvent? never : (
-      GEMap[K] extends PointerEvent? never : K
-    )) : never
+  GEMap[K] extends MouseEvent ?
+  (GEMap[K] extends DragEvent ? never : (
+    GEMap[K] extends PointerEvent ? never : K
+  )) : never
 }[keyof GEMap];
 
 interface MouseEventMap {
@@ -76,7 +76,7 @@ export type MouseHandlers = Partial<MouseEventMap>;
 export type MouseHandlerInit = (t?: any) => MouseHandlers;
 
 export function setMouseHandlers(
-  targetDivRef: Ref<HTMLDivElement|null>,
+  targetDivRef: Ref<HTMLDivElement | null>,
   handlers: MouseHandlerInit[]
 ): void {
 
@@ -98,7 +98,7 @@ export function setMouseHandlers(
           return eventHandler(ev);
         };
 
-        const addEventListenerOptions: AddEventListenerOptions  = {
+        const addEventListenerOptions: AddEventListenerOptions = {
           capture: false,
           once: false,
           passive: false

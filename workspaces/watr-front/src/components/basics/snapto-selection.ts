@@ -14,6 +14,7 @@ import _ from 'lodash';
 import {
   mk,
   BBox,
+  MinMaxBox,
 } from '~/lib/coord-sys';
 
 import {
@@ -22,23 +23,24 @@ import {
 
 import { StateArgs, waitFor } from '~/components/basics/component-basics'
 import { EventlibSelect } from '~/components/basics/eventlib-select';
-import { RTreeIndex } from '~/components/basics/rtree-search';
-import { TextDataPoint } from '~/lib/transcript/TextGlyphDataTypes';
+// import { RTreeIndex } from '~/components/basics/rtree-search';
 import { tweenBBox } from '~/lib/tweening';
+// import { GlyphOverlay } from './glyph-overlays';
+
 
 export interface SnaptoSelection {
 }
 
 type Args = StateArgs & {
   eventlibSelect: EventlibSelect;
-  rtreeIndex: RTreeIndex<TextDataPoint>;
+  // rtreeIndex: RTreeIndex<GlyphOverlay>;
 };
 
 
 export function useSnaptoSelection({
   state,
   eventlibSelect,
-  rtreeIndex,
+  // rtreeIndex,
 }: Args): SnaptoSelection {
   const { selectionRef } = eventlibSelect;
 
@@ -52,21 +54,21 @@ export function useSnaptoSelection({
     watch(selectionRef, () => {
       const selection = selectionRef.value!;
       // search for glyphs in selection box...
-      const selectedGlyphs = rtreeIndex.search(selection);
-      const minBounds = queryHitsMBR(selectedGlyphs);
+      // const selectedGlyphs = rtreeIndex.search(selection);
+      // const minBounds = queryHitsMBR(selectedGlyphs);
       // const selectionRect = new PIXI.Graphics();
       // const lineColor = chroma('blue').num();
       // const fillColor = chroma('green').num();
 
-      if (minBounds) {
-        const tweenPromise = tweenBBox(selection, minBounds, (currBBox) => {
-          // selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
-        });
+      // if (minBounds) {
+      //   const tweenPromise = tweenBBox(selection, minBounds, (currBBox) => {
+      //     // selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
+      //   });
 
-        tweenPromise.then(() => {
-          // pixiJsApp.stage.removeChild(selectionRect);
-        });
-      }
+      //   tweenPromise.then(() => {
+      //     // pixiJsApp.stage.removeChild(selectionRect);
+      //   });
+      // }
     });
 
   });
@@ -75,7 +77,7 @@ export function useSnaptoSelection({
 }
 
 /** return min-bounding rect for rtree search hits */
-export function queryHitsMBR(hits: TextDataPoint[]): BBox | undefined {
+export function queryHitsMBR(hits: MinMaxBox[]): BBox | undefined {
   if (hits.length === 0 ) {
     return undefined;
   }
