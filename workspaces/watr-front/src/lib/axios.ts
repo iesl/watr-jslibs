@@ -38,7 +38,7 @@ export function resolveCorpusPath(entryId: string, ...artifactPaths: string[]): 
   return full
 }
 
-export async function getArtifactData(entryId: string, ...artifactPaths: string[]) {
+export async function getArtifactData<T>(entryId: string, ...artifactPaths: string[]): Promise<T | undefined> {
   return configAxios()
     .get(resolveCorpusPath(entryId, ...artifactPaths))
     .then(resp => resp.data)

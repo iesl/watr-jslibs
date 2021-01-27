@@ -31,7 +31,7 @@
 
 <script lang="ts">
 // story-name=tracelogViewer
-// story-args=id=1503.00580.pdf.d
+// story-args=id=austenite.pdf.d
 // story-title=Tracelog Viewer
 import TracelogViewer from '~/components/multi-pane/tracelog-viewer/index.vue'
 export default {

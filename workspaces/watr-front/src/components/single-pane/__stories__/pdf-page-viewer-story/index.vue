@@ -30,6 +30,6 @@
 
 <script lang="ts" src="./pdf-page-story.ts">
 // story-name=pdfPageViewer
-// story-args=id=1503.00580.pdf.d
+// story-args=id=austenite.pdf.d
 // story-title=Pdf Page Viewer
 </script>

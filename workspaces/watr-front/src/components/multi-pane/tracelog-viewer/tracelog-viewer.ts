@@ -18,6 +18,7 @@ import { ProvidedChoices } from '~/components/single-pane/narrowing-filter/narro
 import { getArtifactData } from '~/lib/axios'
 import { groupTracelogsByKey, LogEntryGroup, LogEntry, Tracelog } from '~/lib/transcript/tracelogs'
 import { Transcript } from '~/lib/transcript/transcript'
+import { TranscriptIndex } from '~/lib/transcript/transcript-index'
 
 type Dictionary<T> = { [key: string]: T }
 type QObject = Dictionary<string | (string | null)[]>;
@@ -71,18 +72,19 @@ export default defineComponent({
       })
     }
 
-    const query = { id: '1503.00580.pdf.d' }
+    const query = { id: 'austenite.pdf.d' }
     const entryId = getQueryString(query, 'id')
     if (entryId) {
       watchOnceFor(pageViewers, (pageViewersDiv) => {
-        getArtifactData(entryId, 'textgrid')
+        getArtifactData(entryId, 'transcript')
           .then((transcriptJson) => {
             const transEither = Transcript.decode(transcriptJson)
 
             if (isRight(transEither)) {
-              const trans = transEither.right
+              const transcript = transEither.right
+              const transcriptIndex = new TranscriptIndex(transcript);
 
-              _.each(trans.pages, (page, pageNumber) => {
+              _.each(transcript.pages, (page, pageNumber) => {
                 const mount = document.createElement('div')
                 pageViewersDiv.appendChild(mount)
                 const mountRef = divRef()
@@ -93,10 +95,10 @@ export default defineComponent({
 
                 useTracelogPdfPageViewer({
                   mountPoint: mountRef,
+                  transcriptIndex,
                   pageNumber,
                   entryId,
                   logEntryRef,
-                  pageBounds: page.bounds,
                   state
                 })
               })

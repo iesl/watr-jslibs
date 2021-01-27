@@ -1,6 +1,5 @@
 import _ from 'lodash';
 
-// import { Rect, RectRepr, Shape } from "./shapes";
 import * as io from 'io-ts';
 import { Label } from './labels';
 
@@ -9,16 +8,20 @@ const LogHeaders = io.type({
   name: io.string,
   callSite: io.string,
   timestamp: io.number
-});
+}, 'LogHeaders');
 
 export type LogHeaders = io.TypeOf<typeof LogHeaders>;
+const LogBody = io.union([
+  io.array(Label),
+  io.array(io.unknown),
+], 'LogBody')
 
 const LogEntry = io.type({
   headers: LogHeaders,
-  body: io.array(Label),
+  body: LogBody,
   logType: io.string,
   page: io.number
-});
+}, 'LogEntry');
 
 export type LogEntry = io.TypeOf<typeof LogEntry>;
 

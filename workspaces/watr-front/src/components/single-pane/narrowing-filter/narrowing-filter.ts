@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import { ref, watch, Ref, defineComponent, inject, SetupContext  } from '@vue/composition-api';
+import { watchOnceFor } from '~/components/basics/component-basics';
 
 export const ProvidedChoices = 'ProvidedChoices';
 
@@ -19,14 +20,15 @@ export default defineComponent({
 
     const onReset = () => {
       queryTextRef.value = '';
-      currSelectionRef.value = [];
+      // currSelectionRef.value = [];
       emit('items-reset');
     };
 
-    watch(choicesRef, (choices: string[] | null) => {
+    watchOnceFor(choicesRef, (choices: string[] | null) => {
       if (choices===null) return;
 
       const choicesLC = choices.map(c => [c, c.toLowerCase()] as const);
+      currSelectionRef.value = choices;
 
       const updateSelection = (query: string) => {
         const terms = query.split(/[ ]+/g);
