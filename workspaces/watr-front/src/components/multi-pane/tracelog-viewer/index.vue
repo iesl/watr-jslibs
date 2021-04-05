@@ -19,5 +19,14 @@
   flex-direction: row;
   height: 100%;
 }
+.pageViewers {
+  min-width: 300px;
+}
+
+svg {
+  .shape:hover {
+     fill: red;
+  }
+}
 
 </style>

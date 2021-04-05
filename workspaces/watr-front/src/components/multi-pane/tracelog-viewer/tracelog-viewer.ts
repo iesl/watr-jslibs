@@ -8,17 +8,17 @@ import {
   SetupContext
 } from '@vue/composition-api'
 
-import { isRight } from 'fp-ts/lib/Either'
-import { PathReporter } from 'io-ts/lib/PathReporter'
-import { useTracelogPdfPageViewer } from '~/components/single-pane/pdf-page-viewer'
 import { divRef } from '~/lib/vue-composition-lib'
 import { initState, watchOnceFor } from '~/components/basics/component-basics'
 import NarrowingFilter from '~/components/single-pane/narrowing-filter/index.vue'
 import { ProvidedChoices } from '~/components/single-pane/narrowing-filter/narrowing-filter'
-import { getArtifactData } from '~/lib/axios'
-import { groupTracelogsByKey, LogEntryGroup, LogEntry, Tracelog } from '~/lib/transcript/tracelogs'
-import { Transcript } from '~/lib/transcript/transcript'
+import { groupTracelogsByKey, LogEntryGroup, LogEntry } from '~/lib/transcript/tracelogs'
 import { TranscriptIndex } from '~/lib/transcript/transcript-index'
+
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as TE from 'fp-ts/lib/TaskEither';
+import { fetchAndDecodeTracelog, fetchAndDecodeTranscript } from '~/lib/data-fetch'
+import { useTracelogPdfPageViewer } from '~/components/single-pane/tracelog-viewer'
 
 type Dictionary<T> = { [key: string]: T }
 type QObject = Dictionary<string | (string | null)[]>;
@@ -43,15 +43,11 @@ export default defineComponent({
     const mountPoint = divRef()
     const state = initState()
 
-    // context
-
-    // const { query } = context.root.$route;
     const choicesRef: Ref<Array<string> | null> = ref(null)
     const tracelogRefs: Array<Ref<LogEntry[]>> = []
     let logEntryGroups: LogEntryGroup[] = []
 
     const onItemsReset = () => {
-      //
       _.each(tracelogRefs, (r) => {
         if (r.value.length > 0) {
           r.value = []
@@ -74,56 +70,52 @@ export default defineComponent({
 
     const query = { id: 'austenite.pdf.d' }
     const entryId = getQueryString(query, 'id')
+
+
+
     if (entryId) {
+
       watchOnceFor(pageViewers, (pageViewersDiv) => {
-        getArtifactData(entryId, 'transcript')
-          .then((transcriptJson) => {
-            const transEither = Transcript.decode(transcriptJson)
 
-            if (isRight(transEither)) {
-              const transcript = transEither.right
-              const transcriptIndex = new TranscriptIndex(transcript);
+        const run = pipe(
+          TE.right({ entryId }),
+          TE.bind('tracelog', ({ entryId }) => fetchAndDecodeTracelog(entryId)),
+          TE.bind('transcript', ({ entryId }) => fetchAndDecodeTranscript(entryId)),
+          TE.bind('transcriptIndex', ({ transcript }) => TE.right(new TranscriptIndex(transcript))),
+          TE.mapLeft(errors => {
+            _.each(errors, error => console.log('error', error));
+            return errors;
+          }),
+          TE.map(({ tracelog, transcript, transcriptIndex }) => {
+            _.each(transcript.pages, (page, pageNumber) => {
+              const mount = document.createElement('div')
+              pageViewersDiv.appendChild(mount)
+              const mountRef = divRef()
+              mountRef.value = mount
 
-              _.each(transcript.pages, (page, pageNumber) => {
-                const mount = document.createElement('div')
-                pageViewersDiv.appendChild(mount)
-                const mountRef = divRef()
-                mountRef.value = mount
+              const logEntryRef: Ref<LogEntry[]> = ref([])
+              tracelogRefs[pageNumber] = logEntryRef
 
-                const logEntryRef: Ref<LogEntry[]> = ref([])
-                tracelogRefs[pageNumber] = logEntryRef
+              useTracelogPdfPageViewer({
+                mountPoint: mountRef,
+                transcriptIndex,
+                pageNumber,
+                entryId,
+                logEntryRef,
+                state
+              });
+            });
 
-                useTracelogPdfPageViewer({
-                  mountPoint: mountRef,
-                  transcriptIndex,
-                  pageNumber,
-                  entryId,
-                  logEntryRef,
-                  state
-                })
-              })
-            } else {
-              const report = PathReporter.report(transEither)
-              console.log('error decoding textgrid', report)
-            }
+
+            logEntryGroups = groupTracelogsByKey(tracelog);
+            const choices = _.map(logEntryGroups, ({ groupKey }) => groupKey);
+            choicesRef.value = choices;
           })
-      })
+        );
 
-      getArtifactData(entryId, 'tracelog', 'tracelog')
-        .then((tracelogJson) => {
-          console.log('got tracelog json', tracelogJson)
-          const tracelogEither = Tracelog.decode(tracelogJson)
-          if (isRight(tracelogEither)) {
-            const tracelog = tracelogEither.right
-            console.log('got tracelog', tracelog)
-            logEntryGroups = groupTracelogsByKey(tracelog)
-            const choices = _.map(logEntryGroups, ({ groupKey }) => groupKey)
-            choicesRef.value = choices
-          } else {
-            const report = PathReporter.report(tracelogEither)
-            console.log('error decoding tracelog', report)
-          }
-        })
+        run().then(() => undefined);
+
+      });
 
       provide(ProvidedChoices, choicesRef)
     }

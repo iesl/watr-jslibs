@@ -53,9 +53,9 @@ export default {
     const inkwellToggle = ref(0);
     const inkwellSelection: Ref<ShapeKind> = ref('point');
 
-    useEventlibCore({ targetDivRef: mountPoint, state } ).then(eventlibCore => {
+    useEventlibCore({ targetDivRef: mountPoint, state } ).then(async eventlibCore => {
 
-      const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Svg], mountPoint, state });
+      const superimposedElements = await useSuperimposedElements({ includeElems: [ElementTypes.Canvas, ElementTypes.Svg], mountPoint, state });
 
       useSketchpad({ superimposedElements, state });
       const eventlibSelect = useEventlibSelect({ superimposedElements, eventlibCore, state });

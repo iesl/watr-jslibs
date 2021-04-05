@@ -13,10 +13,10 @@ export const enum ElementTypes {
 }
 
 export interface OverlayElements {
-  img?      : HTMLImageElement;
-  canvas?   : HTMLCanvasElement;
-  svg?      : SVGElement;
-  textDiv?  : HTMLDivElement;
+  img?: HTMLImageElement;
+  canvas?: HTMLCanvasElement;
+  svg?: SVGElement;
+  textDiv?: HTMLDivElement;
   eventDiv: HTMLDivElement;
 }
 
@@ -28,13 +28,13 @@ export interface SuperimposedElements {
 }
 
 type Args = StateArgs & {
-  mountPoint: Ref<HTMLDivElement|null>;
+  mountPoint: Ref<HTMLDivElement | null>;
   includeElems: ElementTypes[];
 };
 
 export function useSuperimposedElements({
   mountPoint, includeElems, state
-}: Args): SuperimposedElements {
+}: Args): Promise<SuperimposedElements> {
 
   const useElem: (et: ElementTypes) => boolean =
     (et) => includeElems.includes(et);
@@ -73,90 +73,93 @@ export function useSuperimposedElements({
   const width = () => dimensions.value[0];
   const height = () => dimensions.value[1];
   const placeholderImage = () => `http://via.placeholder.com/${width()}x${height()}`;
-  const imgElemSource: Ref<string|null> = ref(null);
+  const imgElemSource: Ref<string | null> = ref(null);
 
-  waitFor('ImgCanvasOverlays', {
-    state,
-    dependsOn: [mountPoint],
-  }, () => {
+  return new Promise(resolve => {
 
-    const overlayContainer = mountPoint.value!;
-    overlayContainer.classList.add('layers');
-    const { img, canvas, svg, textDiv, eventDiv } = overlayElements;
+    waitFor('ImgCanvasOverlays', {
+      state,
+      dependsOn: [mountPoint],
+    }, () => {
 
-    if (img) {
-      img.onload = function(){
-        const {width, height } = img;
-        dimensions.value = [width, height];
-      };
-      overlayContainer.append(img);
-    }
-    if (canvas) {
-      overlayContainer.append(canvas);
-    }
-    if (svg) {
-      overlayContainer.append(svg);
-    }
-    if (textDiv) {
-      overlayContainer.append(textDiv);
-    }
+      const overlayContainer = mountPoint.value!;
+      overlayContainer.classList.add('layers');
+      const { img, canvas, svg, textDiv, eventDiv } = overlayElements;
 
-    overlayContainer.append(eventDiv);
-
-    if (img) {
-      watch(imgElemSource, (src) => {
-        if (src) {
-          img.src = src;
-        }
-      });
-    }
-
-    watch(dimensions, ([width, height]) => {
-
-      const w = `${width}px`;
-      const h = `${height}px`;
-
-      overlayContainer.style.width = w;
-      overlayContainer.style.height = h;
       if (img) {
-        if (imgElemSource.value) {
-          img.width = width;
-          img.height = height;
-        } else {
-          img.src = placeholderImage();
-        }
+        img.onload = function() {
+          const { width, height } = img;
+          dimensions.value = [width, height];
+        };
+        overlayContainer.append(img);
       }
       if (canvas) {
-        canvas.setAttribute('width', w);
-        canvas.setAttribute('height', h);
+        overlayContainer.append(canvas);
       }
       if (svg) {
-        svg.setAttribute('width', w);
-        svg.setAttribute('height', h);
+        overlayContainer.append(svg);
       }
       if (textDiv) {
-        textDiv.style.width = w;
-        textDiv.style.height = h;
+        overlayContainer.append(textDiv);
       }
 
-      eventDiv.style.width = w;
-      eventDiv.style.height = h;
+      overlayContainer.append(eventDiv);
 
+      if (img) {
+        watch(imgElemSource, (src) => {
+          if (src) {
+            img.src = src;
+          }
+        });
+      }
+
+      watch(dimensions, ([width, height]) => {
+
+        const w = `${width}px`;
+        const h = `${height}px`;
+
+        overlayContainer.style.width = w;
+        overlayContainer.style.height = h;
+        if (img) {
+          if (imgElemSource.value) {
+            img.width = width;
+            img.height = height;
+          } else {
+            img.src = placeholderImage();
+          }
+        }
+        if (canvas) {
+          canvas.setAttribute('width', w);
+          canvas.setAttribute('height', h);
+        }
+        if (svg) {
+          svg.setAttribute('width', w);
+          svg.setAttribute('height', h);
+        }
+        if (textDiv) {
+          textDiv.style.width = w;
+          textDiv.style.height = h;
+        }
+
+        eventDiv.style.width = w;
+        eventDiv.style.height = h;
+
+      });
+    });
+
+    function setImageSource(src: string) {
+      imgElemSource.value = src;
+    }
+
+    function setDimensions(width: number, height: number) {
+      dimensions.value = [width, height];
+    }
+
+    resolve({
+      overlayElements,
+      setDimensions,
+      dimensions,
+      setImageSource,
     });
   });
-
-  function setImageSource(src: string) {
-    imgElemSource.value = src;
-  }
-
-  function setDimensions(width: number, height: number) {
-    dimensions.value = [width, height];
-  }
-
-  return {
-    overlayElements,
-    setDimensions,
-    dimensions,
-    setImageSource,
-  };
 }

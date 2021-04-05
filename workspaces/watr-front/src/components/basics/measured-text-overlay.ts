@@ -26,6 +26,7 @@ export function useMeasuredTextOverlay({
   superimposedElements,
 }: Args): TextOverlay {
 
+  const charWidthCache: Record<string, number> = {};
 
   function putTextLn(style: TextStyle, x: number, y: number, text: string): LineDimensions {
     const textDiv = superimposedElements.overlayElements.textDiv!;
@@ -42,7 +43,7 @@ export function useMeasuredTextOverlay({
     div.append(node)
     textDiv.appendChild(div);
 
-    return showText(text, div, x, y);
+    return showText(text, div, x, y, charWidthCache);
   }
 
   const clearText: ClearText = () => {

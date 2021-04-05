@@ -20,7 +20,6 @@ export default defineComponent({
 
     const onReset = () => {
       queryTextRef.value = '';
-      // currSelectionRef.value = [];
       emit('items-reset');
     };
 

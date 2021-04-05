@@ -29,24 +29,41 @@ export function getTextWidth(ctx: CanvasRenderingContext2D, text: string, font: 
   return metrics.width
 }
 
-export function showText(text: string, div: HTMLDivElement, atX: number, atY: number): LineDimensions {
+export function showText(
+  text: string,
+  div: HTMLDivElement,
+  atX: number,
+  atY: number,
+  charWidthCache: Record<string, number>
+): LineDimensions {
   const lineWidth = div.offsetWidth
   const lineHeight = div.offsetHeight
 
   let currX = atX;
-  let init = '';
+  // let init = '';
   const sizes: Rect[] = []
   // TODO re-enable char-wise size calculation when you can figure out how to do it efficiently
-  for (let i=0; i<text.length; i++) {
-    init += text.charAt(i);
-    div.innerText = init;
+  for (let i = 0; i < text.length; i++) {
+    const char = text.charAt(i);
+    // init += char;
+    const width = charWidthCache[char];
+    // if (_.isNumber(width)) {
+    //   const charWidth = width;
+    //   const size: Rect = { kind: 'rect', x: currX, y: atY, width: charWidth, height: lineHeight };
+    //   sizes.push(size);
+    //   currX += charWidth;
+    // } else {
+      div.innerText = text.slice(0, i+1);
 
-    const currWidth = div.offsetWidth;
-    const charWidth = currWidth - currX + atX;
-    const size: Rect = { kind: 'rect', x: currX, y: atY, width: charWidth, height: lineHeight};
-    sizes.push(size);
-    currX = currWidth + atX;
+      const currWidth = div.offsetWidth;
+      const charWidth = currWidth - currX + atX;
+      charWidthCache[char] = charWidth;
+      const size: Rect = { kind: 'rect', x: currX, y: atY, width: charWidth, height: lineHeight };
+      sizes.push(size);
+      currX = currWidth + atX;
+    // }
   }
+  // div.innerText = text;
 
   const lineDimensions: LineDimensions = {
     kind: 'rect',

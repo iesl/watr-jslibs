@@ -14,10 +14,12 @@
         <v-btn v-on:click="onReset" class="mx-3" small color="primary">Reset</v-btn>
 
     </div>
-    <ul class="selection">
-        <li v-for="(item, i) in currSelectionRef"
+      <div class="selection-frame">
+        <ul class="selection">
+          <li v-for="(item, i) in currSelectionRef"
             :key="i">
             {{item}}
-        </li>
-    </ul>
+          </li>
+        </ul>
+      </div>
 </div>

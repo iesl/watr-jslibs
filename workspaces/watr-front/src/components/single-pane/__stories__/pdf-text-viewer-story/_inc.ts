@@ -1,13 +1,14 @@
+import _ from 'lodash';
+
 import { defineComponent } from '@vue/composition-api'
 import { useStanzaViewer } from '~/components/single-pane/pdf-text-viewer'
-import { PathReporter } from 'io-ts/lib/PathReporter'
-import * as E from 'fp-ts/lib/Either'
-import { getArtifactData } from '~/lib/axios'
 import { initState } from '~/components/basics/component-basics'
 import { divRef } from '~/lib/vue-composition-lib'
-import { Transcript } from '~/lib/transcript/transcript'
-import _ from 'lodash';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { TranscriptIndex } from '~/lib/transcript/transcript-index'
+import { getURLQueryParam } from '~/lib/utils'
+import * as TE from 'fp-ts/lib/TaskEither';
+import { fetchAndDecodeTranscript } from '~/lib/data-fetch'
 
 export default defineComponent({
   components: {},
@@ -18,25 +19,22 @@ export default defineComponent({
     useStanzaViewer({ mountPoint, state }).then((stanzaViewer) => {
       const { showStanza } = stanzaViewer;
 
-      const entryId = 'austenite.pdf.d';
+      const entryId = getURLQueryParam('id') || 'missing-id';
 
-      getArtifactData(entryId, 'transcript')
-        .then(async (transcriptJson) => {
-          const maybeDecoded = Transcript.decode(transcriptJson)
-          console.log(maybeDecoded)
-          if (E.isLeft(maybeDecoded)) {
-            const report = PathReporter.report(maybeDecoded)
-            console.log('error decoding transcript');
-            _.each(report, r => {
-              console.log('Error:', r);
-            });
-            return;
-          } else {
-            const transcript = maybeDecoded.right
-            const transcriptIndex = new TranscriptIndex(transcript);
-            showStanza(transcriptIndex, 0);
-          }
-        });
+      const run = pipe(
+        TE.right({ entryId }),
+        TE.bind('transcript', ({ entryId }) => fetchAndDecodeTranscript(entryId)),
+        TE.bind('transcriptIndex', ({ transcript }) => TE.right(new TranscriptIndex(transcript))),
+        TE.mapLeft(errors => {
+          _.each(errors, error => console.log('error', error));
+          return errors;
+        }),
+        TE.map(({ transcriptIndex }) => {
+          showStanza(transcriptIndex, 0);
+        })
+
+      );
+      return run();
     });
 
     return {

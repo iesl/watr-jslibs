@@ -8,3 +8,11 @@
   font-weight: normal;
   color: white;
 }
+
+
+.selection-frame {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  bottom: auto;
+  height: 80%;
+}

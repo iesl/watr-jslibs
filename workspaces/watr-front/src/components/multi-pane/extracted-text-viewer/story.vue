@@ -1,6 +1,6 @@
 <script lang="ts">
 // story-name=extractedTextViewer
-// story-args=id=1503.00580.pdf.d
+// story-args=id=austenite.pdf.d
 // story-title= Two Panel: [PageImage | Text]
 import StoryComponent from './index.vue'
 export default {

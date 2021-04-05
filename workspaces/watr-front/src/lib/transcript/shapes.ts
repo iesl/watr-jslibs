@@ -3,6 +3,7 @@
  */
 import * as io from 'io-ts';
 import { either } from 'fp-ts/lib/Either'
+import _ from 'lodash';
 
 function isKind<T>(k: string): (v: any) => v is T {
   return function f(a: any): a is T {
@@ -15,6 +16,8 @@ export interface Point {
   x: number;
   y: number;
 }
+
+
 
 export const PointRepr = io.tuple([io.number, io.number], 'PointRepr');
 export type PointRepr = io.TypeOf<typeof PointRepr>;
@@ -159,6 +162,91 @@ export type ShapeRepr = io.TypeOf<typeof ShapeRepr>;
 export type ShapeKind = Shape['kind'];
 // export type ShapeRepr = RectRepr | PointRepr | TriangleRepr | TrapezoidRepr | LineRepr | CircleRepr;
 
+export interface PointSvg {
+  type: 'circle';
+  r: number;
+  cx: number;
+  cy: number;
+  id?: string;
+}
+
+export interface LineSvg {
+  type: 'line';
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  id?: string;
+}
+
+export interface RectSvg {
+  type: 'rect';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  id?: string;
+}
+export interface PathSvg {
+  type: 'path';
+  d: string;
+  id?: string;
+}
+
+export type ShapeSvg = PointSvg | LineSvg | RectSvg | PathSvg;
+
+export function shapeToSvg(shape: Shape): ShapeSvg {
+  switch (shape.kind) {
+    case 'point':
+      return <PointSvg>{
+        type: 'circle',
+        r: 3,
+        cx: shape.x,
+        cy: shape.y
+      };
+    case 'line':
+      return <LineSvg>{
+        type: 'line',
+        x1: shape.p1.x,
+        y1: shape.p1.y,
+        x2: shape.p2.x,
+        y2: shape.p2.y,
+      };
+    case 'rect':
+      return <RectSvg>{
+        type: 'rect',
+        x: shape.x,
+        y: shape.y,
+        width: shape.width,
+        height: shape.height
+      };
+    case 'circle':
+      return <PointSvg>{
+        type: 'circle',
+        r: shape.r,
+        cx: shape.p.x,
+        cy: shape.p.y
+      };
+    case 'triangle':
+      const { p1, p2 ,p3 } = shape;
+      return <PathSvg>{
+        type: 'path',
+        d: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} Z`,
+      };
+    case 'trapezoid':
+      const { topLeft, topWidth, bottomLeft, bottomWidth } = shape;
+      const bottomRight = _.clone(bottomLeft);
+      bottomRight.x += bottomWidth;
+      const topRight = _.clone(topLeft);
+      topRight.x += topWidth;
+
+      return <PathSvg>{
+        type: 'path',
+        d: `M ${topLeft.x} ${topLeft.y} L ${bottomLeft.x} ${bottomLeft.y} L ${bottomRight.x} ${bottomRight.y} L ${topRight.x} ${topRight.y} Z`,
+      };
+  }
+}
+
 function uFloat(n: number): number {
   return n / 100.0;
 }
@@ -179,7 +267,7 @@ function uCircle(repr: CircleRepr): Circle {
 
 function uTriangle(repr: TriangleRepr): Triangle {
   const [p1, p2, p3] = repr;
-  return { kind: 'triangle', p1: uPoint(p1), p2: uPoint(p2), p3: uPoint(p3),};
+  return { kind: 'triangle', p1: uPoint(p1), p2: uPoint(p2), p3: uPoint(p3), };
 }
 
 function uTrapezoid(repr: TrapezoidRepr): Trapezoid {

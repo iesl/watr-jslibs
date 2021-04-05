@@ -4,67 +4,45 @@ import {
 } from '@vue/composition-api'
 
 import _ from 'lodash';
-import * as E from 'fp-ts/lib/Either'
-import { PathReporter } from 'io-ts/lib/PathReporter'
 import { initState } from '~/components/basics/component-basics'
 import { usePdfPageViewer } from '~/components/single-pane/pdf-page-viewer'
-import { resolveCorpusUrl, getArtifactData } from '~/lib/axios'
-import { LogEntry } from '~/lib/transcript/tracelogs'
-import { Transcript } from '~/lib/transcript/transcript'
 import { TranscriptIndex } from '~/lib/transcript/transcript-index';
+
+import { pipe } from 'fp-ts/lib/pipeable';
+import * as TE from 'fp-ts/lib/TaskEither';
+import { fetchAndDecodeTranscript } from '~/lib/data-fetch'
+import { getURLQueryParam } from '~/lib/utils';
 
 export default {
   setup() {
     const state = initState()
-
     const mountPoint: Ref<HTMLDivElement | null> = ref(null)
-    const logEntryRef: Ref<LogEntry[]> = ref([])
 
-    // const entryId = '1503.00580.pdf.d'
-    const entryId = 'austenite.pdf.d'
+    const entryId = getURLQueryParam('id') || 'missing-id';
     const pageNumber = 1;
-    const pageImageNumber = (pageNumber+1).toString();
 
-    const run = async () => {
+    let uri = window.location.search.substring(1);
+    let params = new URLSearchParams(uri);
+    console.log('id', params.get('id'));
 
-      console.log('starting fetch');
-      getArtifactData(entryId, 'transcript')
-        .then(async (transcriptJson) => {
-          console.log('fetched');
-          const maybeDecoded = Transcript.decode(transcriptJson)
-          console.log('decoded');
-          if (E.isLeft(maybeDecoded)) {
-            const report = PathReporter.report(maybeDecoded)
-            console.log('error decoding transcript');
-            _.each(report, r => {
-              console.log('Error:', r);
-
-            })
-            return;
-          } else {
-            const transcript = maybeDecoded.right
-
-            const transcriptIndex = new TranscriptIndex(transcript);
-            const page0 = transcript.pages[pageNumber];
-            const pageBounds = page0.bounds;
-
-            const pdfPageViewer = await usePdfPageViewer({
-              mountPoint,
-              state,
-              transcriptIndex,
-              pageNumber,
-              entryId,
-              logEntryRef,
-            });
-
-            const { superimposedElements } = pdfPageViewer
-            const imageUrl = resolveCorpusUrl(entryId, 'image', pageImageNumber)
-            superimposedElements.setImageSource(imageUrl);
-            superimposedElements.setDimensions(pageBounds.width, pageBounds.height);
-          }
-        })
-
-    };
+    const run = pipe(
+      TE.right({ entryId }),
+      TE.bind('transcript', ({ entryId }) => fetchAndDecodeTranscript(entryId)),
+      TE.bind('transcriptIndex', ({ transcript }) => TE.right(new TranscriptIndex(transcript))),
+      TE.mapLeft(errors => {
+        _.each(errors, error => console.log('error', error));
+        return errors;
+      }),
+      TE.map(({ transcriptIndex }) => {
+        usePdfPageViewer({
+          mountPoint,
+          state,
+          transcriptIndex,
+          pageNumber,
+          entryId,
+        });
+      })
+    );
 
     run();
 

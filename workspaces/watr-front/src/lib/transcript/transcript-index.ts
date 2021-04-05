@@ -78,7 +78,6 @@ export class TranscriptIndex {
       totalHeight += lineDimensions.height;
 
       const lineIndexables = _.map(line.glyphs, (glyphRef, i) => {
-        // const char = line.text[i];
         const charDim = lineDimensions.charBounds[i];
         const { x, y, width, height } = charDim;
         const charBounds = mk.fromLtwh(x, y, width, height);

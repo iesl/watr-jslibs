@@ -33,7 +33,7 @@ export async function useStanzaViewer({
 }: Args): Promise<StanzaViewer> {
 
   // const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state } );
-  const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Text, ElementTypes.Svg], mountPoint, state });
+  const superimposedElements = await useSuperimposedElements({ includeElems: [ElementTypes.Text, ElementTypes.Svg], mountPoint, state });
   // const spatialSearch = useSpatialSearch({ state, eventlibCore, superimposedElements });
 
   const size = 15;

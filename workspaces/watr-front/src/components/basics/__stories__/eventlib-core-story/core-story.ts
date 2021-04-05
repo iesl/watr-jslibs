@@ -35,10 +35,10 @@ function setup() {
     }
   }
 
-  useEventlibCore({ targetDivRef: mountPoint, state }).then((eventlibCore) => {
+  useEventlibCore({ targetDivRef: mountPoint, state }).then( async (eventlibCore) => {
     const { setMouseHandlers } = eventlibCore
 
-    const superimposedElements = useSuperimposedElements({ includeElems: [ElementTypes.Img, ElementTypes.Svg], mountPoint, state })
+    const superimposedElements = await useSuperimposedElements({ includeElems: [ElementTypes.Img, ElementTypes.Svg], mountPoint, state })
 
     const eventlibSelect = useEventlibSelect({ eventlibCore, superimposedElements, state })
 
