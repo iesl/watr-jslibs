@@ -8,27 +8,18 @@ import {
   watch,
 } from '@vue/composition-api';
 
-
 import * as d3 from 'd3-selection';
 
 import { StateArgs } from '~/components/basics/component-basics'
 import { EventlibCore } from '~/components/basics/eventlib-core';
 import { SuperimposedElements } from '~/components/basics/superimposed-elements';
-// import { useRTreeIndex, RTreeIndex } from '~/components/basics/rtree-search';
 
-import { RTreeIndexable } from '~/lib/transcript/TextGlyphDataTypes';
 import * as d3x from '~/lib/d3-extras';
-import { Glyph } from '~/lib/transcript/glyph';
 
 const { initStroke, initFill, initRect } = d3x;
-import { Rect } from '~/lib/transcript/shapes';
 import { TranscriptIndex } from '~/lib/transcript/transcript-index';
 import { useFlashlight } from './rtree-search';
 
-
-// export interface GlyphOverlay extends RTreeIndexable {
-//   glyph: Glyph;
-// }
 
 // export type SetGlyphOverlays = (glyphs: Glyph[], pageGeometry: Rect) => void;
 export interface GlyphOverlays {

@@ -1,5 +1,3 @@
-//
-
 import _ from 'lodash';
 import { Transcript } from './transcript';
 import { Glyph } from '~/lib/transcript/glyph';

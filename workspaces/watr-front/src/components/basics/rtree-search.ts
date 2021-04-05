@@ -15,9 +15,6 @@ import * as coords from '~/lib/coord-sys'
 import { EMouseEvent, MouseHandlerInit } from '~/lib/EventlibHandlers'
 import { TranscriptIndex, TranscriptIndexable } from '~/lib/transcript/transcript-index'
 
-// type LoadData<T> = (data: T[]) => void;
-// type Search<T> = (query: BBox) => T[];
-
 interface Flashlight<T> {
   off(): void;
   litItemsRef: Ref<TranscriptIndexable<T>[]>;

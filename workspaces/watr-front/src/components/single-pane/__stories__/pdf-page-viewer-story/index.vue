@@ -28,7 +28,7 @@
     </story-layout>
 </template>
 
-<script lang="ts" src="./pdf-page-story.ts">
+<script lang="ts" src="./_inc.ts">
 // story-name=pdfPageViewer
 // story-args=id=austenite.pdf.d
 // story-title=Pdf Page Viewer
