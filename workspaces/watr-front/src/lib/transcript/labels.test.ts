@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { isIsomorphic } from '~/lib/utils'
+import { isIsomorphic } from '~/lib/codec-utils'
 
 import { Label, LabelRepr, Range, RangeRepr } from './labels'
 

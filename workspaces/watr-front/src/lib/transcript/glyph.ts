@@ -5,7 +5,7 @@ import * as io from 'io-ts';
 import * as Arr from 'fp-ts/lib/Array';
 import * as E from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { NonNegativeInt } from '~/lib/io-utils';
+import { NonNegativeInt } from '~/lib/codec-utils';
 // import { prettyPrint } from "commons";
 
 /**

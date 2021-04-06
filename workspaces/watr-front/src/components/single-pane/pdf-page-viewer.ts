@@ -1,3 +1,7 @@
+/**
+ * Create and setup SVG/Img/Div + EventHandlers to view a particular page image
+ * from a PDF
+ **/
 import _ from 'lodash';
 
 import {
@@ -9,7 +13,6 @@ import { useEventlibCore, EventlibCore } from '~/components/basics/eventlib-core
 import { useSuperimposedElements, SuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
 import { resolveCorpusUrl } from '~/lib/axios';
 import { TranscriptIndex } from '~/lib/transcript/transcript-index';
-import { useGlyphOverlays } from '../basics/glyph-overlays';
 
 type Args = StateArgs & {
   mountPoint: Ref<HTMLDivElement | null>;

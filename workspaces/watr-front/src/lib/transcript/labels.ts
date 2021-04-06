@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import { Shape, ShapeRepr } from './shapes';
 import * as io from 'io-ts';
-import { PageNumber, Span } from '~/lib/io-utils';
+import { PageNumber, Span } from '~/lib/codec-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as E from 'fp-ts/lib/Either';
 

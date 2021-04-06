@@ -2,7 +2,7 @@ import 'chai/register-should'
 
 import _ from 'lodash'
 import { PointRepr, Point, RectRepr, Rect, CircleRepr, Circle, LineRepr, Line, TriangleRepr, Triangle, TrapezoidRepr, Trapezoid, Shape } from './shapes'
-import { isIsomorphic } from '~/lib/utils'
+import { isIsomorphic } from '~/lib/codec-utils'
 
 describe('Shape IO', () => {
   const verbose = false

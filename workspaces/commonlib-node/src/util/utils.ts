@@ -23,20 +23,20 @@ export function fileOrUndef(file: string|undefined, ...ps: string[]): string|und
 }
 
 
-export function makeNowTimeString(): string {
-  const now = new Date();
-  const timeOpts = {
-    timeStyle: 'medium',
-    hour: '2-digit',
-    minute: '2-digit',
-    seconds: '2-digit',
-    hour12: false,
-  };
-  const nowTime = now.toLocaleTimeString('en-US', timeOpts);
+// export function makeNowTimeString(): string {
+//   const now = new Date();
+//   const timeOpts = {
+//     timeStyle: 'medium',
+//     hour: '2-digit',
+//     minute: '2-digit',
+//     seconds: '2-digit',
+//     hour12: false,
+//   };
+//   const nowTime = now.toLocaleTimeString('en-US', timeOpts);
 
-  const timestamp = nowTime.replace(/:/g, '.');
-  return timestamp;
-}
+//   const timestamp = nowTime.replace(/:/g, '.');
+//   return timestamp;
+// }
 
 
 export const delay = (t: number) => new Promise(resolve => setTimeout(resolve, t));

@@ -13,7 +13,6 @@ import {
 
 import RBush, {} from 'rbush';
 
-import { RTreeIndexable } from '~/lib/transcript/TextGlyphDataTypes';
 import { StateArgs, resolveWhen, awaitRef } from '~/components/basics/component-basics'
 
 import {
@@ -22,6 +21,7 @@ import {
   EventlibPoint,
   getCursorPosition,
 } from '~/lib/EventlibHandlers';
+import { RTreeIndexable } from './rtree-search';
 
 
 

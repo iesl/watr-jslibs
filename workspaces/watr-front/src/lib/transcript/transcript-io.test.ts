@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { Stanza } from './transcript'
-import { isIsomorphic } from '~/lib/utils'
+import { isIsomorphic } from '~/lib/codec-utils'
 
 describe('Transcript/Stanza IO', () => {
 

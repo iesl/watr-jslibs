@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { prettyPrint } from 'commonlib-shared';
 import { makeGlyphReprs } from './gen-testdata';
 import { Transcript } from './transcript'
-import { isIsomorphic } from '~/lib/utils'
+import { isIsomorphic } from '~/lib/codec-utils'
 
 
 describe('Transcripts', () => {

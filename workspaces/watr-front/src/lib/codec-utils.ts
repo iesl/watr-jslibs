@@ -1,60 +1,52 @@
-/**
- * Various Utility functions
- */
+
 import _ from 'lodash'
-import * as io from 'io-ts'
+import * as io from 'io-ts';
 import { isLeft } from 'fp-ts/lib/Either'
 import { PathReporter } from 'io-ts/lib/PathReporter'
 import { prettyPrint } from 'commonlib-shared'
 
-export function getOrDie<T>(v: T | null | undefined, msg: string = 'null|undef'): T {
-  if (v === null || v === undefined) {
-    throw new Error(`Error: ${msg}`)
-  }
-  return v
+interface Positive {
+  readonly Positive: unique symbol;
 }
 
-/**
- *
- */
-export function corpusEntry(): string {
-  const entry = location.href.split('/').reverse()[0].split('?')[0]
-  return entry
+interface NonNegative {
+  readonly NonNegative: unique symbol;
 }
 
-export function getParameterByName(name: string, urlstr?: string) {
-  let url = urlstr
-  if (!url) { url = window.location.href }
-  const name0 = name.replace(/[[]]/g, '\\$&')
-  const regex = new RegExp(`[?&]${name0}(=([^&#]*)|&|#|$)`)
-  const results = regex.exec(url)
-  if (!results) { return null }
-  if (!results[2]) { return '' }
-  return decodeURIComponent(results[2].replace(/\+/g, ' '))
-}
+export const Positive = io.brand(
+  io.number,
+  (n: number): n is io.Branded<number, Positive> => n > 0,
+  'Positive'
+);
 
-export function getURLQueryParams() {
-  const uri = window.location.search.substring(1);
-  return new URLSearchParams(uri);
-}
-
-export function getURLQueryParam(key: string): string | undefined {
-  const ps = getURLQueryParams();
-  const v = ps.get(key);
-  return _.isString(v)? v : undefined;
-}
+export const NonNegative = io.brand(
+  io.number,
+  (n: number): n is io.Branded<number, NonNegative> => n >= 0,
+  'NonNegative'
+);
 
 
-export function newIdGenerator(start: number) {
-  let currId = start-1;
-  const nextId = () => {
-    currId += 1;
-    return currId;
-  };
-  return nextId;
-}
+export const PositiveInt = io.intersection([io.Int, Positive])
+export type PositiveInt = io.TypeOf<typeof PositiveInt>
 
-// export function isIsomorphic<A, O, I>(ioType: io.Type<A, O, I>, input: I, verbose: boolean = false): boolean {
+export const NonNegativeInt = io.intersection([io.Int, NonNegative])
+export type NonNegativeInt = io.TypeOf<typeof NonNegativeInt>
+
+// export const Begin = NonNegativeInt;
+const Begin = io.number;
+export type Begin = io.TypeOf<typeof Begin>;
+
+// const Length = NonNegativeInt;
+const Length = io.number;
+type Length = io.TypeOf<typeof Length>;
+
+// export type Span = [Begin, Length];
+export const Span = io.tuple([Begin, Length], 'Span');
+export type Span = io.TypeOf<typeof Span>;
+
+// export const PageNumber = PositiveInteger;
+export const PageNumber = io.number;
+
 export function isIsomorphic<A, IO>(ioType: io.Type<A, IO, IO>, input: IO, verbose: boolean = false): boolean {
   const maybeDecoded = ioType.decode(input)
   if (isLeft(maybeDecoded)) {

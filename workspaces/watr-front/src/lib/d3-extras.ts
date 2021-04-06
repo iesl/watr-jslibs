@@ -1,5 +1,5 @@
 /**
- *
+ * Various helper functions for working with d3.js
  */
 
 import {
@@ -40,16 +40,6 @@ export function initFill<GElement extends BaseType, Datum, PElement extends Base
   sel.attr('fill-opacity', fillOpacity);
 }
 
-
-
-export function initFillx<GElement extends BaseType, Datum, PElement extends BaseType, PDatum> (
-  sel: Selection<GElement, Datum, PElement, PDatum>,
-  fill: string, fillOpacity: number
-) {
-  sel.attr('fill', fill)
-    .attr('fill-opacity', fillOpacity);
-}
-
 export function getId(data: any) {
   const shape = data.type;
 
@@ -72,37 +62,4 @@ export function d3id<GElement extends BaseType>(
   selector: string
 ): Selection<GElement, any, HTMLElement, any> {
   return select<GElement, any>(`#${selector}`);
-}
-
-/**
- *
- * Allow sequencing of d3 animations by waiting for all transitions to end before moving to the next "step"
- *
- */
-
-function onEndAll (transition: any, callback: any) {
-  if (transition.empty()) {
-    callback();
-  } else {
-    let n = transition.size();
-    transition.on('end',  () => {
-      n = n-1;
-      if (n === 0) {
-        callback();
-      }
-    });
-  }
-}
-
-export function stepThrough(interpFunc: any, steps: any) {
-  if (steps.length > 0) {
-    const step = steps[0];
-
-    interpFunc(step)
-      .transition()
-      .delay(300)
-      .call(onEndAll, () => {
-        stepThrough(interpFunc, steps.slice(1));
-      });
-  }
 }

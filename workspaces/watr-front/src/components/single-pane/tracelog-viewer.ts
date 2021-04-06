@@ -5,7 +5,6 @@ import {
   watch,
 } from '@vue/composition-api';
 
-
 import { StateArgs } from '~/components/basics/component-basics'
 import { LogEntry } from '~/lib/transcript/tracelogs';
 import * as d3 from 'd3-selection';
@@ -34,7 +33,7 @@ export async function useTracelogPdfPageViewer({
   logEntryRef,
   state
 }: Args): Promise<TracelogViewer> {
-  const pdfPageViewer = await usePdfPageViewer({ entryId, state, mountPoint, transcriptIndex, pageNumber, })
+  const pdfPageViewer = await usePdfPageViewer({ entryId, state, mountPoint, transcriptIndex, pageNumber })
   const { superimposedElements } = pdfPageViewer;
 
   const svg = superimposedElements.overlayElements.svg!;

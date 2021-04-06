@@ -1,12 +1,16 @@
+/**
+ *
+ **/
+
 import _ from 'lodash';
 import { Transcript } from './transcript';
 import { Glyph } from '~/lib/transcript/glyph';
-import { RTreeIndexable } from '~/lib/transcript/TextGlyphDataTypes';
 import { mk } from '~/lib/coord-sys'
 import RBush from 'rbush'
 import { Rect } from './shapes';
 import { LineDimensions } from '../html-text-metrics';
-import { newIdGenerator } from '../utils';
+import { newIdGenerator } from '../misc-utils';
+import { RTreeIndexable } from '~/components/basics/rtree-search';
 
 type RTreeIndexKey = string;
 
@@ -66,7 +70,7 @@ export class TranscriptIndex {
     const stanza = this.transcript.stanzas[stanzaIndex];
 
     const primaryKey = `stanza#${stanzaIndex}`;
-    const rtree = new RBush<TranscriptIndexable<string|number>>()
+    const rtree = new RBush<TranscriptIndexable<string | number>>()
     this.indexes[primaryKey] = rtree;
     let maxWidth = 0;
     let totalHeight = 0;

@@ -11,7 +11,7 @@ import { TranscriptIndex } from '~/lib/transcript/transcript-index';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { fetchAndDecodeTranscript } from '~/lib/data-fetch'
-import { getURLQueryParam } from '~/lib/utils';
+import { getURLQueryParam } from '~/lib/url-utils';
 
 export default {
   setup() {

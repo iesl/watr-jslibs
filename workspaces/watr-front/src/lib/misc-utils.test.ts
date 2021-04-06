@@ -1,4 +1,4 @@
-import { getOrDie } from './utils';
+import { getOrDie } from './misc-utils';
 
 describe('getOrDie', () => {
 
