@@ -1,3 +1,3 @@
-<template lang="html" src="./narrowing-filter.html"></template>
-<script lang="ts" src="./narrowing-filter.ts"></script>
-<style lang="scss" src="./narrowing-filter.scss" scoped></style>
+<template lang="html" src="./_inc.html"></template>
+<script lang="ts" src="./_inc.ts"></script>
+<style lang="scss" src="./_inc.scss" scoped></style>

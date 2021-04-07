@@ -6,18 +6,11 @@ import { StateArgs } from '~/components/basics/component-basics'
 import { useEventlibCore } from '~/components/basics/eventlib-core';
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
 import { BBox } from '~/lib/coord-sys';
-import * as GridTypes from '~/lib/transcript/TextGridTypes';
 import { useMeasuredTextOverlay } from '~/components/basics/measured-text-overlay';
 import { TextStyle } from '~/lib/html-text-metrics';
 
 import { PutTextLn, TranscriptIndex } from '~/lib/transcript/transcript-index';
 
-export interface TextgridAndBounds {
-  textgrid: GridTypes.Textgrid;
-  pageBounds: BBox;
-}
-
-export type SetText = (textAndBounds: TextgridAndBounds) => void;
 export type ShowStanza = (transcriptIndex: TranscriptIndex, stanzaId: number) => void;
 
 type Args = StateArgs & {
@@ -33,7 +26,12 @@ export async function useStanzaViewer({
 }: Args): Promise<StanzaViewer> {
 
   // const eventlibCore = await useEventlibCore({ targetDivRef: mountPoint, state } );
-  const superimposedElements = await useSuperimposedElements({ includeElems: [ElementTypes.Text, ElementTypes.Svg], mountPoint, state });
+  const superimposedElements = await useSuperimposedElements({
+    includeElems: [ElementTypes.Text, ElementTypes.Svg],
+    mountPoint,
+    state
+  });
+
   // const spatialSearch = useSpatialSearch({ state, eventlibCore, superimposedElements });
 
   const size = 15;

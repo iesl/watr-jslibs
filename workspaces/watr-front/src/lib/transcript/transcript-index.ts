@@ -1,4 +1,6 @@
 /**
+ * Container for a Transcript which provides access to glyphs/stanzas/labels/etc., and
+ * maintains a cache of any rtree-indexes, cross-references, ... within the transcript
  *
  **/
 
@@ -16,8 +18,14 @@ type RTreeIndexKey = string;
 
 export interface TranscriptIndexable<T> extends RTreeIndexable {
   cargo: T;
+  // cross-ref for other indexed rects corresponding to this one
+  //   e.g., pdf-page glyph vs. stanza text glyph
   indexedRects: Record<RTreeIndexKey, Rect>;
+
+  // key for the cached index in which this indexable appears
   primaryKey: RTreeIndexKey;
+
+  // The bounding rect for this indexable in the rtree specified by the primary key
   primaryRect: Rect;
 }
 
@@ -38,7 +46,6 @@ export class TranscriptIndex {
   initIndexables(): void {
     const { pages } = this.transcript;
     _.each(pages, (page) => {
-
       const primaryKey = `page#${page.page}/glyphs`;
       const pageIndexables = _.map(page.glyphs, (glyph) => {
         const { x, y, width, height } = glyph.rect;
@@ -63,6 +70,21 @@ export class TranscriptIndex {
       rtree.load(pageIndexables);
       this.indexes[primaryKey] = rtree;
     });
+  }
+
+  // filter examples:
+  //    page=3
+  //    name=Trapezoid
+
+  // view-merged / view-tiled
+  public indexLabels(nameFilter: string, viewMode: 'merged' | 'tiled'): void {
+    const { labels } = this.transcript;
+    const matchingLabels = _.filter(labels, (l) => l.name.match(nameFilter) !== null);
+    if (viewMode === 'merged') {
+      _.each(matchingLabels, ({ range }) => {
+
+      });
+    }
   }
 
 

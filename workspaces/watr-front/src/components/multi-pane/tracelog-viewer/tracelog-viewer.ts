@@ -71,8 +71,6 @@ export default defineComponent({
     const query = { id: 'austenite.pdf.d' }
     const entryId = getQueryString(query, 'id')
 
-
-
     if (entryId) {
 
       watchOnceFor(pageViewers, (pageViewersDiv) => {

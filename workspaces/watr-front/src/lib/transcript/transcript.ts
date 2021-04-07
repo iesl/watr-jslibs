@@ -45,6 +45,7 @@ export const Transcript = io.strict({
   documentId: io.string,
   pages: io.array(Page),
   stanzas: io.array(Stanza),
+  labels: io.array(Label)
   // buildInfo: BuildInfo,
 }, 'Transcript');
 

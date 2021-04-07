@@ -28,9 +28,7 @@ const TextRange = io.type({
   at: Span
 }, 'TextRange');
 
-
 type TextRange = io.TypeOf<typeof TextRange>;
-
 
 const StanzaRange = io.type({
   unit: io.literal('stanza'),
@@ -38,7 +36,6 @@ const StanzaRange = io.type({
 });
 
 type StanzaRange = io.TypeOf<typeof StanzaRange>;
-
 
 const PageRange = io.type({
   unit: io.literal('page'),
