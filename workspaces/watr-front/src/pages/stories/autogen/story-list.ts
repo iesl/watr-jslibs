@@ -13,7 +13,7 @@ export const storyItems: StoryEntry[] = [
   { title: 'Superimposed Elements Story', to: '/stories/autogen/superimposedElementsStory' },
   { title: 'Text Overlay', to: '/stories/autogen/textOverlay' },
   { title: 'Pdf Page Viewer', to: '/stories/autogen/pdfPageViewer?id=austenite.pdf.d' },
-  { title: 'Pdf Text Viewer', to: '/stories/autogen/pdfTextViewer' },
+  { title: 'Stanza (Text) Viewer', to: '/stories/autogen/stanzaViewer' },
   { title: 'Selection narrowing filter', to: '/stories/autogen/narrowingFilter' },
 ];
 

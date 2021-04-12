@@ -13,6 +13,7 @@ import { Rect } from './shapes';
 import { LineDimensions } from '../html-text-metrics';
 import { newIdGenerator } from '../misc-utils';
 import { RTreeIndexable } from '~/components/basics/rtree-search';
+import { Label } from './labels';
 
 type RTreeIndexKey = string;
 
@@ -72,21 +73,22 @@ export class TranscriptIndex {
     });
   }
 
-  // filter examples:
-  //    page=3
-  //    name=Trapezoid
+  public getLabels(labelNames: string[], pageNumber: number | undefined = undefined): Label[] {
+    const { pages } = this.transcript;
+    // const pageN = pages[pageNumber];
+    const pageNs = pageNumber === undefined ? pages : [pages[pageNumber]];
+    const labels = pageNs.flatMap(p => p.labels)
 
-  // view-merged / view-tiled
-  public indexLabels(nameFilter: string, viewMode: 'merged' | 'tiled'): void {
-    const { labels } = this.transcript;
-    const matchingLabels = _.filter(labels, (l) => l.name.match(nameFilter) !== null);
-    if (viewMode === 'merged') {
-      _.each(matchingLabels, ({ range }) => {
+    const shapeLabels = _.filter(labels, l => {
+      const hasName = labelNames.length === 0 || labelNames.includes(l.name);
+      if (!hasName) return false;
 
-      });
-    }
+      const isShape = _.some(l.range, r => r.unit === 'shape');
+      return isShape;
+    });
+    return shapeLabels;
+
   }
-
 
   public indexStanza(stanzaIndex: number, putTextLn: PutTextLn): Rect {
     const stanza = this.transcript.stanzas[stanzaIndex];

@@ -21,7 +21,8 @@ export type Line = io.TypeOf<typeof Line>;
 export const Page = io.strict({
   page: NonNegativeInt,
   bounds: Rect,
-  glyphs: io.array(Glyph)
+  glyphs: io.array(Glyph),
+  labels: io.array(Label)
 });
 
 export type Page = io.TypeOf<typeof Page>;

@@ -5,13 +5,15 @@ import {
 
 import _ from 'lodash';
 import { initState } from '~/components/basics/component-basics'
-import { usePdfPageViewer } from '~/components/single-pane/pdf-page-viewer'
+import { usePdfPageViewer } from '~/components/single-pane/page-viewer'
 import { TranscriptIndex } from '~/lib/transcript/transcript-index';
 
 import { pipe } from 'fp-ts/lib/pipeable';
+import * as E from 'fp-ts/lib/Either';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { fetchAndDecodeTranscript } from '~/lib/data-fetch'
 import { getURLQueryParam } from '~/lib/url-utils';
+import { useLabelOverlay } from '../../label-overlay';
 
 export default {
   setup() {
@@ -29,19 +31,25 @@ export default {
       TE.right({ entryId }),
       TE.bind('transcript', ({ entryId }) => fetchAndDecodeTranscript(entryId)),
       TE.bind('transcriptIndex', ({ transcript }) => TE.right(new TranscriptIndex(transcript))),
+      TE.bind('pdfPageViewer', ({ transcriptIndex }) => () => usePdfPageViewer({
+        mountPoint,
+        state,
+        transcriptIndex,
+        pageNumber,
+        entryId,
+      }).then(x => E.right(x))),
+
+      TE.bind('labelOverlay', ({ pdfPageViewer, transcriptIndex }) => () => useLabelOverlay({
+        pdfPageViewer,
+        transcriptIndex,
+        pageNumber,
+        state
+      }).then(x => E.right(x))),
+
       TE.mapLeft(errors => {
         _.each(errors, error => console.log('error', error));
         return errors;
       }),
-      TE.map(({ transcriptIndex }) => {
-        usePdfPageViewer({
-          mountPoint,
-          state,
-          transcriptIndex,
-          pageNumber,
-          entryId,
-        });
-      })
     );
 
     run();

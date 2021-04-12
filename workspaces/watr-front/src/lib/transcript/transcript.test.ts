@@ -41,7 +41,7 @@ describe('Transcripts', () => {
 
 
   it('glyph bounding box PDF overlays', () => {
-    prettyPrint({ page1 })
+    // prettyPrint({ page1 })
   });
 
   it('text substitutions/formatting/escape chars', () => {
@@ -99,7 +99,7 @@ describe('Transcripts', () => {
   it('represent zones (clipped region of PDF page with contained text)', () => {
   });
 
-  it.only('smokescreen', () => {
+  it('smokescreen', () => {
 
     const transcriptTemplate = {
       documentId: 'doc-25-id',
@@ -113,9 +113,10 @@ describe('Transcripts', () => {
         ],
 
       }],
+      labels: [],
       stanzas: [
         {
-          id: '1',
+          id: 1,
           lines: [
             { text: 'ffi', glyphs: [10, 10, 10] },
             { text: 'see reference ^{[1]}.', glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8] },

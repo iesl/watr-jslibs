@@ -14,7 +14,7 @@ type DocumentRange = io.TypeOf<typeof DocumentRange>;
 
 const LabelRange = io.type({
   unit: io.literal('label'),
-  at: io.string
+  at: io.number
 });
 type LabelRange = io.TypeOf<typeof LabelRange>;
 
@@ -89,8 +89,9 @@ export const Range = io.union([
 export type Range = io.TypeOf<typeof Range>;
 
 export interface LabelPartials {
-  id?: string;
+  id?: number;
   children?: Label[];
+  props?: Record<string, string[]>;
 }
 
 export interface Label extends LabelPartials {
@@ -100,9 +101,10 @@ export interface Label extends LabelPartials {
 
 export interface LabelRepr {
   name: string;
-  id?: string;
+  id?: number;
   range: RangeRepr[];
   children?: LabelRepr[];
+  props?: Record<string, string[]>;
 }
 
 export const LabelNameRangeRepr = io.type({
@@ -121,15 +123,16 @@ export const LabelRepr: io.Type<LabelRepr> = io.recursion(
 );
 
 export const LabelPartialsRepr = io.partial({
-  id: io.string,
-  children: io.array(LabelRepr)
+  id: io.number,
+  children: io.array(LabelRepr),
+  props: io.record(io.string, io.array(io.string))
 });
 export type LabelPartialsRepr = io.TypeOf<typeof LabelPartialsRepr>;
 
 export const LabelPartials: io.Type<LabelPartials, LabelPartialsRepr, unknown> = io.recursion(
   'LabelPartials',
   () => io.partial({
-    id: io.string,
+    id: io.number,
     children: io.array(Label)
   })
 );
@@ -148,8 +151,9 @@ export const Label = new io.Type<Label, LabelRepr, unknown>(
     E.bind('label', ({ name, range }) => io.success({ name, range })),
     E.bind('partials', ({ repr }) => LabelPartialsRepr.validate(repr, c)),
     E.bind('id', ({ partials: { id } }) => id === undefined ? io.success({}) : io.success({ id })),
+    E.bind('props', ({ partials: { props } }) => props === undefined ? io.success({}) : io.success({ props })),
     E.bind('children', ({ partials: { children } }) => children === undefined ? io.success({}) : io.success({children })),
-    E.chain(({ label, id, children }) => io.success(_.merge(label, id, children)))
+    E.chain(({ label, id, children, props }) => io.success(_.merge(label, id, children, props)))
   ),
   (a: Label) => {
     const lenc: LabelRepr = {
@@ -162,6 +166,9 @@ export const Label = new io.Type<Label, LabelRepr, unknown>(
     }
     if (partials.children !== undefined) {
       lenc.children = partials.children;
+    }
+    if (partials.props !== undefined) {
+      lenc.props = partials.props;
     }
     return lenc;
   }

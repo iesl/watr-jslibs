@@ -6,12 +6,11 @@ describe('Transcript/Stanza IO', () => {
 
   const verbose = false;
 
-
   it('should I/O Stanzas', () => {
     const examples = [
       {
-        id: '1',
-        schema: 'TextLines',
+        id: 1,
+        // schema: 'TextLines',
         lines: [
           { text: 'ffi', glyphs: [10, 10, 10] },
           { text: 'see reference ^{[1]}.', glyphs: [1, 2, 3, 4, '^{', 5, 6, 7, '}', 8] },

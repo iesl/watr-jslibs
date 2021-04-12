@@ -1,78 +1,70 @@
 import _ from 'lodash';
 
-import {
-  Ref,
-  watch,
-} from '@vue/composition-api';
+// import {
+//   Ref,
+// } from '@vue/composition-api';
 
 import { StateArgs } from '~/components/basics/component-basics'
-import { LogEntry } from '~/lib/transcript/tracelogs';
+// import { LogEntry } from '~/lib/transcript/tracelogs';
 import * as d3 from 'd3-selection';
 import { TranscriptIndex } from '~/lib/transcript/transcript-index';
 import { Label } from '~/lib/transcript/labels';
 import { ShapeSvg, shapeToSvg } from '~/lib/transcript/shapes';
-import { PdfPageViewer, usePdfPageViewer } from './pdf-page-viewer';
+import { PdfPageViewer } from './page-viewer';
 
 type Args = StateArgs & {
-  mountPoint: Ref<HTMLDivElement | null>;
+  // mountPoint: Ref<HTMLDivElement | null>;
   transcriptIndex: TranscriptIndex;
+  pdfPageViewer: PdfPageViewer;
   pageNumber: number;
-  entryId: string;
-  logEntryRef: Ref<LogEntry[]>;
+  // entryId: string;
+  // logEntryRef: Ref<LogEntry[]>;
 };
 
-export interface TracelogViewer {
-  pdfPageViewer: PdfPageViewer;
+export interface LabelOverlay {
+  //
 }
 
-export async function useTracelogPdfPageViewer({
-  mountPoint,
+export async function useLabelOverlay({
   transcriptIndex,
+  pdfPageViewer,
   pageNumber,
-  entryId,
-  logEntryRef,
-  state
-}: Args): Promise<TracelogViewer> {
-  const pdfPageViewer = await usePdfPageViewer({ entryId, state, mountPoint, transcriptIndex, pageNumber })
+}: Args): Promise<LabelOverlay> {
   const { superimposedElements } = pdfPageViewer;
+
+  const labelsToDisplay = [
+    'BaselineMidriseBand'
+  ];
+
+  const displayableLabels = transcriptIndex.getLabels(labelsToDisplay, pageNumber);
 
   const svg = superimposedElements.overlayElements.svg!;
 
-  watch(logEntryRef, (logEntries) => {
-
-    const geometryLogs = _.filter(logEntries, e => e.logType === 'Geometry');
-
-    const shapes = geometryLogs.flatMap(log => {
-      const qwe = _.flatMap(log.body, (label: Label) => {
-        return _.flatMap(label.range, range => {
-          if (range.unit === 'shape') {
-            const svg = shapeToSvg(range.at);
-            addShapeId(svg);
-            return [svg];
-          }
-          return [];
-        });
-      });
-      return qwe;
+  const shapes = _.flatMap(displayableLabels, (label: Label) => {
+    return _.flatMap(label.range, range => {
+      if (range.unit === 'shape') {
+        const svg = shapeToSvg(range.at);
+        addShapeId(svg);
+        return [svg];
+      }
+      return [];
     });
-
-    const dataSelection = d3.select(svg)
-      .selectAll('.shape')
-      .data(shapes, (sh: any) => sh.id);
-
-    dataSelection.exit().remove();
-
-    dataSelection.enter()
-      .each(function(shape: any) {
-        const self = d3.select(this);
-        return self.append(shape.type)
-          .call(initShapeAttrs);
-      });
   });
 
-  return {
-    pdfPageViewer
-  };
+  const dataSelection = d3.select(svg)
+    .selectAll('.shape')
+    .data(shapes, (sh: any) => sh.id);
+
+  dataSelection.exit().remove();
+
+  dataSelection.enter()
+    .each(function(shape: any) {
+      const self = d3.select(this);
+      return self.append(shape.type)
+        .call(initShapeAttrs);
+    });
+
+  return {};
 }
 
 function getCls(data: any) {

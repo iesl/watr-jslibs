@@ -16,7 +16,7 @@ describe('Label/Range IO', () => {
       { unit: 'text:line', at: [1, 2] },
       { unit: 'text:char', at: [1, 2] },
       { unit: 'document', at: 'Doc#23' },
-      { unit: 'label', at: 'Lbl#32' }
+      { unit: 'label', at: 32 }
     ];
 
     _.each(examples, (example) => {
@@ -25,15 +25,14 @@ describe('Label/Range IO', () => {
     });
   });
 
-
   it('should I/O Labels/Reprs', () => {
     const examples: any[] = [
-      { name: 'AnonLabel', range: [] },
-      { name: 'AnonLabel', range: [], children: [{ name: 'AnonLabel', range: [] }] },
-      { name: 'AnonLabel', range: [{ unit: 'shape', at: [8454, 8483], }] },
-      { name: 'IdLabel', id: 'id#21', range: [{ unit: 'page', at: 3 }] },
-      { name: 'LabelWithID', id: 'xyz', range: [{ unit: 'text:line', at: [8454, 8483], }] },
-      // { name: 'LabelWithProps', range: [], props: { key1: 'value', key2: 32, key3: false, key4: -32.45 } },
+      // { name: 'AnonLabel', range: [] },
+      // { name: 'AnonLabel', range: [], children: [{ name: 'AnonLabel', range: [] }] },
+      // { name: 'AnonLabel', range: [{ unit: 'shape', at: [8454, 8483], }] },
+      // { name: 'IdLabel', id: 21, range: [{ unit: 'page', at: 3 }] },
+      // { name: 'LabelWithID', id: 22, range: [{ unit: 'text:line', at: [8454, 8483], }] },
+      { name: 'LabelWithProps', range: [], props: { key1: ['value'], key2: ['32'] } },
     ]
 
     _.each(examples, (example) => {

@@ -12,9 +12,9 @@ import { divRef } from '~/lib/vue-composition-lib'
 import { initState, awaitRef, watchOnceFor } from '~/components/basics/component-basics'
 import { getArtifactData } from '~/lib/axios'
 import { LogEntry } from '~/lib/transcript/tracelogs'
-import { usePdfPageViewer } from '~/components/single-pane/pdf-page-viewer'
+import { usePdfPageViewer } from '~/components/single-pane/page-viewer'
 import { Transcript } from '~/lib/transcript/transcript'
-import { useStanzaViewer } from '~/components/single-pane/pdf-text-viewer'
+import { useStanzaViewer } from '~/components/single-pane/stanza-viewer'
 import { TranscriptIndex } from '~/lib/transcript/transcript-index'
 
 import { pipe } from 'fp-ts/lib/pipeable';

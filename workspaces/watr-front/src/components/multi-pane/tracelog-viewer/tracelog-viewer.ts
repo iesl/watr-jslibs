@@ -11,14 +11,14 @@ import {
 import { divRef } from '~/lib/vue-composition-lib'
 import { initState, watchOnceFor } from '~/components/basics/component-basics'
 import NarrowingFilter from '~/components/single-pane/narrowing-filter/index.vue'
-import { ProvidedChoices } from '~/components/single-pane/narrowing-filter/narrowing-filter'
+import { ProvidedChoices } from '~/components/single-pane/narrowing-filter/_inc'
 import { groupTracelogsByKey, LogEntryGroup, LogEntry } from '~/lib/transcript/tracelogs'
 import { TranscriptIndex } from '~/lib/transcript/transcript-index'
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { fetchAndDecodeTracelog, fetchAndDecodeTranscript } from '~/lib/data-fetch'
-import { useTracelogPdfPageViewer } from '~/components/single-pane/tracelog-viewer'
+import { useLabelOverlay } from '~/components/single-pane/label-overlay'
 
 type Dictionary<T> = { [key: string]: T }
 type QObject = Dictionary<string | (string | null)[]>;
@@ -94,14 +94,14 @@ export default defineComponent({
               const logEntryRef: Ref<LogEntry[]> = ref([])
               tracelogRefs[pageNumber] = logEntryRef
 
-              useTracelogPdfPageViewer({
-                mountPoint: mountRef,
-                transcriptIndex,
-                pageNumber,
-                entryId,
-                logEntryRef,
-                state
-              });
+              // useTracelogPdfPageViewer({
+              //   mountPoint: mountRef,
+              //   transcriptIndex,
+              //   pageNumber,
+              //   entryId,
+              //   logEntryRef,
+              //   state
+              // });
             });
 
 
