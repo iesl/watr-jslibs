@@ -1,11 +1,15 @@
 @import '~/assets/sass/inc/_solarized';
 
-.extractedTextViewer {
+.transcriptViewer {
   display: flex;
   flex-direction: row;
   height: 100%;
 
-  .pageTextFrame {
+  .pageImagesFrame {
+
+  }
+
+  .pageTextsFrame {
     border: 3px solid white;
     margin-right: 1em;
     height: auto;

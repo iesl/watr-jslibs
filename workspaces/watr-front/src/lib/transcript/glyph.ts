@@ -4,9 +4,8 @@ import { Rect, RectRepr } from './shapes';
 import * as io from 'io-ts';
 import * as Arr from 'fp-ts/lib/Array';
 import * as E from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { NonNegativeInt } from '~/lib/codec-utils';
-// import { prettyPrint } from "commons";
 
 /**
  * Glyphs are represented in JSON as tuples, as defined by GlyphRepr* and GlyphPropsRepr*
@@ -60,19 +59,18 @@ export interface GlyphProps {
   gs?: Glyph[];
 }
 
-// Typeclass instance
-//  travArray :: A[] => (A => Either<E, B>) => Either<E, B[]>
-const travArray = Arr.array.traverse(E.either);
-
 const decodeGlyphProps: (unk: unknown, ctx: io.Context) => E.Either<io.Errors, GlyphProps> =
   (unk: unknown, ctx: io.Context) => {
+
+    const validateGlyph = (g: GlyphRepr): E.Either<io.Errors, Glyph> => Glyph.validate(g, ctx);
+
+    const traverseGlyphs = Arr.traverse(E.Applicative)(validateGlyph);
     return pipe(
       unk,
       v => GlyphPropsRepr.validate(v, ctx),
       E.chain(({ kind, gs }) => {
         if (gs) {
-          const gsValid: E.Either<io.Errors, Glyph[]> =
-            travArray(gs, g => Glyph.validate(g, ctx));
+          const gsValid = traverseGlyphs(gs)
 
           const mapf = E.map(((gs: Glyph[]) => ({ kind, gs } as GlyphProps)));
 
@@ -136,46 +134,3 @@ export const Glyph: io.Type<Glyph, GlyphRepr, unknown> =
         : [a.char, a.id, Rect.encode(a.rect), GlyphProps.encode(a.props)]);
     }
   );
-
-// export const Glyph: io.Type<Glyph, GlyphRepr, unknown> =
-//   new io.Type<Glyph, GlyphRepr, unknown>(
-//     'Glyph',
-//     (a: any): a is Glyph =>
-//       io.string.is(a.char)
-//       && NonNegativeInt.is(a.id)
-//       && Rect.is(a.rect)
-//       && (a.props === undefined || GlyphProps.is(a.props)),
-
-//     (unk: unknown, ctx: io.Context) => pipe(
-//       unk,
-//       v => GlyphRepr.validate(v, ctx),
-//       E.chain(([char, rect, props]) => {
-//         const rdec = Rect.decode(rect);
-//         const mapf = E.map(((r: Rect) => ({ char, rect: r } as Glyph)));
-//         const glyph0 = mapf(rdec);
-
-//         if (props) {
-//           const ps = decodeGlyphProps(props, ctx);
-//           const glyphAndProps: E.Either<io.Errors, [Glyph, GlyphProps]> =
-//             seqTupleEither(glyph0, ps);
-
-//           const mapf1 = E.map<[Glyph, GlyphProps], Glyph>(([glyph, props]) => {
-//             glyph.props = props;
-//             return glyph;
-//           });
-
-//           const glyph1 = mapf1(glyphAndProps);
-
-//           return glyph1;
-//         }
-
-//         return glyph0;
-//       })
-//     ),
-
-//     (a: Glyph) => {
-//       return (a.props === undefined
-//         ? [a.char, Rect.encode(a.rect)]
-//         : [a.char, Rect.encode(a.rect), GlyphProps.encode(a.props)]);
-//     }
-//   );

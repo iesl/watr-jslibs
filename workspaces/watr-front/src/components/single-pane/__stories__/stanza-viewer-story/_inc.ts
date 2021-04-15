@@ -4,7 +4,7 @@ import { defineComponent } from '@vue/composition-api'
 import { useStanzaViewer } from '~/components/single-pane/stanza-viewer'
 import { initState } from '~/components/basics/component-basics'
 import { divRef } from '~/lib/vue-composition-lib'
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import { TranscriptIndex } from '~/lib/transcript/transcript-index'
 import { getURLQueryParam } from '~/lib/url-utils'
 import * as TE from 'fp-ts/lib/TaskEither';

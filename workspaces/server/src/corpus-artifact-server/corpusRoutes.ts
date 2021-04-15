@@ -108,20 +108,26 @@ export function initFileBasedRoutes(corpusRootPath: string): Router {
       putStrLn(`server: GET ${p}`);
 
       // map path entry id to physical path
-      const endPath = p.substr(pathPrefix.length + 1)
-      const pathParts = endPath.split('/');
-      const [entryId, ...remainingPath] = pathParts;
-      const entryPath = path.resolve(corpusRootPath, entryId);
-      const artifactPath = await resolveArtifact(entryPath, remainingPath)
+      try {
+        const endPath = p.substr(pathPrefix.length + 1)
+        const pathParts = endPath.split('/');
+        const [entryId, ...remainingPath] = pathParts;
+        const entryPath = path.resolve(corpusRootPath, entryId);
+        const artifactPath = await resolveArtifact(entryPath, remainingPath)
 
-      if (artifactPath) {
-        const respRelFile = path.relative(corpusRootPath, artifactPath);
-        putStrLn(`server: serving ${respRelFile}`);
-        return await send(ctx, respRelFile, { root: corpusRootPath });
+        if (artifactPath) {
+          const respRelFile = path.relative(corpusRootPath, artifactPath);
+          putStrLn(`server: serving ${respRelFile}`);
+          return await send(ctx, respRelFile, { root: corpusRootPath });
+        }
+
+      } catch (error) {
+        putStrLn(`server: could not serve ${p}`);
       }
 
       return next();
     });
+
 
   return apiRouter;
 

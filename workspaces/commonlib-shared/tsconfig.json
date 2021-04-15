@@ -28,7 +28,6 @@
 
     "types": [
       "jest",
-      "chai",
       "node"
     ],
 

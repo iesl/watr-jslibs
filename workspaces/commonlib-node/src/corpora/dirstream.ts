@@ -35,6 +35,16 @@ export function getDirWalkerStream(
   root: string,
   includeFiles: boolean = false
 ): Readable {
+
+  const rootExists = fs.existsSync(root);
+  const rootIsDir = rootExists ? fs.statSync(root).isDirectory() : false;
+  if (!rootIsDir) {
+    const emptyStream = new stream.Readable({
+      read() { this.push(null); }
+    });
+    return emptyStream;
+  }
+
   const stack: DirStackEntry[] = [{ fullpath: root, expanded: false, files: [] }];
 
   function expand(): DirStackEntry | undefined {

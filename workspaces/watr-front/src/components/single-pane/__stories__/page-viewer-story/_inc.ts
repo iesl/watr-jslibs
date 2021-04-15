@@ -8,7 +8,7 @@ import { initState } from '~/components/basics/component-basics'
 import { usePdfPageViewer } from '~/components/single-pane/page-viewer'
 import { TranscriptIndex } from '~/lib/transcript/transcript-index';
 
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import * as E from 'fp-ts/lib/Either';
 import * as TE from 'fp-ts/lib/TaskEither';
 import { fetchAndDecodeTranscript } from '~/lib/data-fetch'

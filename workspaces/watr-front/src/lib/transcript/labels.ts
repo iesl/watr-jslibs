@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { Shape, ShapeRepr } from './shapes';
 import * as io from 'io-ts';
 import { PageNumber, Span } from '~/lib/codec-utils';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import * as E from 'fp-ts/lib/Either';
 
 const DocumentRange = io.type({

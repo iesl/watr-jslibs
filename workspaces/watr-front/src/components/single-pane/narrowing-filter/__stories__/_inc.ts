@@ -7,7 +7,7 @@ import { groupLabelsByNameAndTags } from '~/lib/transcript/tracelogs'
 import { fetchAndDecodeTranscript } from '~/lib/data-fetch'
 import { TranscriptIndex } from '~/lib/transcript/transcript-index';
 
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import * as TE from 'fp-ts/lib/TaskEither';
 
 export default defineComponent({

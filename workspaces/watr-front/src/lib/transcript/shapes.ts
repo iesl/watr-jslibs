@@ -2,7 +2,8 @@
  * Shape types and serialization functions
  */
 import * as io from 'io-ts';
-import { either } from 'fp-ts/lib/Either'
+import * as E from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/function';
 import _ from 'lodash';
 
 function isKind<T>(k: string): (v: any) => v is T {
@@ -24,9 +25,9 @@ export type PointRepr = io.TypeOf<typeof PointRepr>;
 
 export const Point = new io.Type<Point, PointRepr, unknown>(
   'Point', isKind('point'),
-  (repr: unknown, c: io.Context) => either.chain(
+  (repr: unknown, c: io.Context) => pipe(
     PointRepr.validate(repr, c),
-    validRepr => io.success(uPoint(validRepr))
+    E.chain(validRepr => io.success(uPoint(validRepr))),
   ),
   (a: Point) => [floatToIntRep(a.x), floatToIntRep(a.y)]
 );
@@ -42,9 +43,9 @@ export type CircleRepr = io.TypeOf<typeof CircleRepr>;
 
 export const Circle = new io.Type<Circle, CircleRepr, unknown>(
   'Circle', isKind('circle'),
-  (repr: unknown, c: io.Context) => either.chain(
+  (repr: unknown, c: io.Context) => pipe(
     CircleRepr.validate(repr, c),
-    validRepr => io.success(uCircle(validRepr))
+    E.chain(validRepr => io.success(uCircle(validRepr)))
   ),
   (a: Circle) => [Point.encode(a.p), floatToIntRep(a.r)]
 );
@@ -61,9 +62,9 @@ export type LineRepr = io.TypeOf<typeof LineRepr>;
 
 export const Line = new io.Type<Line, LineRepr, unknown>(
   'Line', isKind('line'),
-  (repr: unknown, c: io.Context) => either.chain(
+  (repr: unknown, c: io.Context) => pipe(
     LineRepr.validate(repr, c),
-    validRepr => io.success(uLine(validRepr))
+    E.chain(validRepr => io.success(uLine(validRepr)))
   ),
   (a: Line) => [Point.encode(a.p1), Point.encode(a.p2)]
 );
@@ -81,9 +82,9 @@ export type TriangleRepr = io.TypeOf<typeof TriangleRepr>;
 
 export const Triangle = new io.Type<Triangle, TriangleRepr, unknown>(
   'Triangle', isKind('triangle'),
-  (repr: unknown, c: io.Context) => either.chain(
+  (repr: unknown, c: io.Context) => pipe(
     TriangleRepr.validate(repr, c),
-    validRepr => io.success(uTriangle(validRepr))
+    E.chain(validRepr => io.success(uTriangle(validRepr)))
   ),
   (a: Triangle) => [Point.encode(a.p1), Point.encode(a.p2), Point.encode(a.p3)]
 );
@@ -104,9 +105,10 @@ export type RectRepr = io.TypeOf<typeof RectRepr>;
 
 export const Rect = new io.Type<Rect, RectRepr, unknown>(
   'Rect', isKind('rect'),
-  (u: unknown, c: io.Context) => either.chain(
+  (u: unknown, c: io.Context) => pipe(
     RectRepr.validate(u, c),
-    validRepr => io.success(uRect(validRepr))),
+    E.chain(validRepr => io.success(uRect(validRepr)))
+  ),
   (a: Rect) => {
     const { x, y, width, height } = a;
     return [
@@ -135,9 +137,9 @@ export type TrapezoidRepr = io.TypeOf<typeof TrapezoidRepr>;
 
 export const Trapezoid = new io.Type<Trapezoid, TrapezoidRepr, unknown>(
   'Trapezoid', isKind('trapezoid'),
-  (repr: unknown, c: io.Context) => either.chain(
+  (repr: unknown, c: io.Context) => pipe(
     TrapezoidRepr.validate(repr, c),
-    validRepr => io.success(uTrapezoid(validRepr))
+    E.chain(validRepr => io.success(uTrapezoid(validRepr)))
   ),
   (a: Trapezoid) => [
     Point.encode(a.topLeft), floatToIntRep(a.topWidth),
@@ -228,7 +230,7 @@ export function shapeToSvg(shape: Shape): ShapeSvg {
         cy: shape.p.y
       };
     case 'triangle':
-      const { p1, p2 ,p3 } = shape;
+      const { p1, p2, p3 } = shape;
       return <PathSvg>{
         type: 'path',
         d: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} Z`,

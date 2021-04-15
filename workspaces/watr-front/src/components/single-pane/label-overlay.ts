@@ -1,11 +1,7 @@
 import _ from 'lodash';
 
-// import {
-//   Ref,
-// } from '@vue/composition-api';
 
 import { StateArgs } from '~/components/basics/component-basics'
-// import { LogEntry } from '~/lib/transcript/tracelogs';
 import * as d3 from 'd3-selection';
 import { TranscriptIndex } from '~/lib/transcript/transcript-index';
 import { Label } from '~/lib/transcript/labels';
@@ -13,12 +9,9 @@ import { ShapeSvg, shapeToSvg } from '~/lib/transcript/shapes';
 import { PdfPageViewer } from './page-viewer';
 
 type Args = StateArgs & {
-  // mountPoint: Ref<HTMLDivElement | null>;
   transcriptIndex: TranscriptIndex;
   pdfPageViewer: PdfPageViewer;
   pageNumber: number;
-  // entryId: string;
-  // logEntryRef: Ref<LogEntry[]>;
 };
 
 export interface LabelOverlay {
