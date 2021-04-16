@@ -1,4 +1,3 @@
-
 import _ from 'lodash';
 
 import {
@@ -9,22 +8,29 @@ import {
   toRefs,
 } from '@vue/composition-api';
 
-type ComponentName = string;
-type ComponentInitRec = [ComponentName, boolean];
-
-export interface WaitForOptions {
-  state: ComponentState;
-  dependsOn?: Array<Ref<any>>;
-  ensureTruthy?: Array<Ref<any>>;
+export interface ComponentState {
+  // register(name: string): void;
 }
 
-/**
- * watch a ref for non-null/undefined values, then run callback
- */
-export function watchFor<T>(tref: Ref<T | null | undefined>, fn: (t: T) => void): void {
-  watch(tref, (tval) => {
-    if (!tval) return;
-    fn(tval);
+export type StateArgs = {
+  state: ComponentState;
+};
+
+ /**
+  * Currently unused.
+  * Implemented to track the init state of components, but I went with another
+  * implementation. I'm leaving it here because I think it may be useful for other
+  * things soon.
+  */
+export function initState(): ComponentState {
+  const st = {
+  }
+
+  return st;
+}
+export async function awaitRef<T>(tref: Ref<T | null | undefined>): Promise<T> {
+  return new Promise((resolve) => {
+    watchOnceFor(tref, (t) => resolve(t));
   });
 }
 
@@ -98,145 +104,10 @@ export function watchAll(rs?: Ref<any>[]): any {
   return state;
 }
 
-// TODO simplify the waitFor paradigm to something like the following:
-// export function useSketchlibCore({ state, svgDrawTo, eventlibSelect }: Args)  {
-//   waitFor(allInputArgs(), () => {
-//     const pixiJsApp = pixiJsAppRef.value!;
-//   });
-//   return {};
-// }
-
-// TODO make a simplified version of this that auto-detects the caller's name, and
-//   waits for completion of all function arguments
-export function waitFor(
-  name: string,
-  { state, dependsOn, ensureTruthy }: WaitForOptions,
-  userFunc: () => void
-): void {
-  // state.register(name);
-
-  const startFlag = ref(false);
-  const upstreamsReady = ref(false);
-  const userFuncRan = ref(false);
-
-  // const prefix = `${name}::waitFor`;
-  // console.log(`${prefix}/Setup`);
-
-  const depsReady = watchAll(dependsOn);
-
-  const stopPhase1 = watch([startFlag, depsReady.done], () => {
-    // console.log(`${prefix}/Phase1: checkUpstream`);
-
-    const ready = depsReady.done.value;
-
-    if (ready) {
-      stopPhase1();
-      upstreamsReady.value = true;
-    }
-  }, { immediate: false, deep: true });
-
-
-  const stopPhase2 = watch(upstreamsReady, (ready) => {
-    if (ready) {
-      stopPhase2();
-
-      // console.log(`${prefix} upstreams are satisfied, running userFunc!`);
-
-      userFunc();
-      userFuncRan.value = true;
-    }
-  }, { immediate: false, deep: true });
-
-  const downstreamWatcher = watchAll(ensureTruthy);
-
-  const stopPhase3 = watch([userFuncRan, downstreamWatcher.done], () => {
-    const ready = downstreamWatcher.done.value;
-
-    if (ready) {
-      stopPhase3();
-      // console.log(`${prefix} downstreams are satisfied!`);
-    }
-  }, { immediate: false });
-
-  // console.log(`${prefix}  GO!`);
-
-  startFlag.value = true;
-}
-
-export interface ComponentState {
-  // setReady(name: string): void;
-  register(name: string): void;
-  // isRegistered(name: string): boolean;
-  // isReady: Ref<boolean>;
-  // currentState(): [ComponentName, boolean][];
-}
-
-export type StateArgs = {
-  state: ComponentState;
-};
-
-/**
- * Currently unused.
- * Implemented to track the init state of components, but I went with another
- * implementation. I'm leaving it here because I think it may be useful for other
- * things soon.
- */
-export function initState(): ComponentState {
-  const cs: ComponentInitRec[] = [];
-  const componentList = ref(cs);
-
-  function isRegistered(name: string): boolean {
-    const vs = componentList.value;
-    return _.some(vs, c => c[0] === name);
-  }
-
-  // const isReady: Readonly<Ref<Readonly<boolean>>> =
-  //   computed(() => {
-  //     const vs = componentList.value;
-  //     return _.every(vs, c => c[1]);
-  //   });
-
-  // function setReady(name: string) {
-  //   if (isRegistered(name)) {
-  //     throw new Error(`setReady() on already registered component ${name}`);
-  //   }
-  //   const vs = componentList.value;
-  //   vs.push([name, true]);
-  //   componentList.value = vs;
-  // }
-
-  function register(name: string): void {
-    if (isRegistered(name)) {
-      throw new Error(`Already registered component ${name}`);
-    }
-    const vs = componentList.value;
-    vs.push([name, false]);
-    componentList.value = vs;
-  }
-
-
-  function currentState() {
-    return componentList.value;
-  }
-
-  const st = {
-    register,
-    isRegistered,
-    currentState,
-  }
-
-  return st;
-}
 
 export async function resolveWhen<T>(t: T, ...refs: Ref<any>[]): Promise<T> {
   return new Promise((resolve) => {
     const ready = watchAll(refs);
     watchOnceFor(ready.done, () => resolve(t));
-  });
-}
-
-export async function awaitRef<T>(tref: Ref<T | null | undefined>): Promise<T> {
-  return new Promise((resolve) => {
-    watchOnceFor(tref, (t) => resolve(t));
   });
 }

@@ -1,12 +1,8 @@
 /**
- * Various Utility functions
+ * Various URL related utility functions
  */
 import _ from 'lodash'
 
-
-/**
- *
- */
 export function corpusEntry(): string {
   const entry = location.href.split('/').reverse()[0].split('?')[0]
   return entry
@@ -35,3 +31,12 @@ export function getURLQueryParam(key: string): string | undefined {
 }
 
 
+// type Dictionary<T> = { [key: string]: T }
+// type QObject = Dictionary<string | (string | null)[]>;
+// export function getQueryString(queryObject: QObject, key: string): string | undefined {
+//   const qval = queryObject[key]
+//   if (typeof qval === 'string') {
+//     return qval
+//   }
+//   return undefined
+// }

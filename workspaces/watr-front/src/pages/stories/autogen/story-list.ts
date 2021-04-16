@@ -7,8 +7,7 @@ export type StoryEntry = {
 }
 
 export const storyItems: StoryEntry[] = [
-  { title: 'Two Panel: [PageImage | Text]', to: '/stories/autogen/extractedTextViewer?id=austenite.pdf.d' },
-  { title: 'Tracelog Viewer', to: '/stories/autogen/tracelogViewer?id=austenite.pdf.d' },
+  { title: 'App[Image+Stanza+Labels]', to: '/stories/autogen/transcriptViewer?id=austenite.pdf.d' },
   { title: 'Eventlib Core', to: '/stories/autogen/eventlibCore' },
   { title: 'Superimposed Elements Story', to: '/stories/autogen/superimposedElementsStory' },
   { title: 'Text Overlay', to: '/stories/autogen/textOverlay' },

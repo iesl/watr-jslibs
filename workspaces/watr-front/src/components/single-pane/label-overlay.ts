@@ -1,6 +1,5 @@
 import _ from 'lodash';
 
-
 import { StateArgs } from '~/components/basics/component-basics'
 import * as d3 from 'd3-selection';
 import { TranscriptIndex } from '~/lib/transcript/transcript-index';

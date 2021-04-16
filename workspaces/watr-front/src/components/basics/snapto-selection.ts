@@ -21,10 +21,10 @@ import {
   watch,
 } from '@vue/composition-api';
 
-import { StateArgs, waitFor } from '~/components/basics/component-basics'
+import { StateArgs } from '~/components/basics/component-basics'
 import { EventlibSelect } from '~/components/basics/eventlib-select';
 // import { RTreeIndex } from '~/components/basics/rtree-search';
-import { tweenBBox } from '~/lib/tweening';
+// import { tweenBBox } from '~/lib/tweening';
 // import { GlyphOverlay } from './glyph-overlays';
 
 
@@ -44,41 +44,35 @@ export function useSnaptoSelection({
 }: Args): SnaptoSelection {
   const { selectionRef } = eventlibSelect;
 
-  waitFor('SnaptoSelection', {
-    state,
-    dependsOn: [],
-  }, () => {
+  // const pixiJsApp = pixiJsAppRef.value!;
 
-    // const pixiJsApp = pixiJsAppRef.value!;
+  watch(selectionRef, () => {
+    const selection = selectionRef.value!;
+    // search for glyphs in selection box...
+    // const selectedGlyphs = rtreeIndex.search(selection);
+    // const minBounds = queryHitsMBR(selectedGlyphs);
+    // const selectionRect = new PIXI.Graphics();
+    // const lineColor = chroma('blue').num();
+    // const fillColor = chroma('green').num();
 
-    watch(selectionRef, () => {
-      const selection = selectionRef.value!;
-      // search for glyphs in selection box...
-      // const selectedGlyphs = rtreeIndex.search(selection);
-      // const minBounds = queryHitsMBR(selectedGlyphs);
-      // const selectionRect = new PIXI.Graphics();
-      // const lineColor = chroma('blue').num();
-      // const fillColor = chroma('green').num();
+    // if (minBounds) {
+    //   const tweenPromise = tweenBBox(selection, minBounds, (currBBox) => {
+    //     // selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
+    //   });
 
-      // if (minBounds) {
-      //   const tweenPromise = tweenBBox(selection, minBounds, (currBBox) => {
-      //     // selectionRect.drawRect(currBBox.x, currBBox.y, currBBox.width, currBBox.height);
-      //   });
-
-      //   tweenPromise.then(() => {
-      //     // pixiJsApp.stage.removeChild(selectionRect);
-      //   });
-      // }
-    });
-
+    //   tweenPromise.then(() => {
+    //     // pixiJsApp.stage.removeChild(selectionRect);
+    //   });
+    // }
   });
+
 
   return {};
 }
 
 /** return min-bounding rect for rtree search hits */
 export function queryHitsMBR(hits: MinMaxBox[]): BBox | undefined {
-  if (hits.length === 0 ) {
+  if (hits.length === 0) {
     return undefined;
   }
   const minX = _.min(_.map(hits, 'minX'));

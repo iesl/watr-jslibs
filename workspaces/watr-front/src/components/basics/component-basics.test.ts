@@ -8,8 +8,7 @@ import VueCompositionApi, {
 } from '@vue/composition-api'
 
 import Vue from 'vue'
-import { watchAll, initState, waitFor } from './component-basics'
-import { putStrLn } from 'commonlib-shared'
+import { watchAll   } from './component-basics'
 
 describe('Component Basics', () => {
   Vue.use(VueCompositionApi)
@@ -113,73 +112,4 @@ describe('Component Basics', () => {
     dep3.value = 1
   })
 
-  it('init state should properly track readiness', () => {
-
-    // const a1 = [];
-    // const every1 = _.every(a1, a => a === 0);
-    // const some1 = _.some(a1, a => a === 0);
-    // putStrLn('every1', every1);
-    // putStrLn('some', some1);
-
-    // const state = initState();
-
-    // expect(state.isReady.value).toBe(true);
-
-    // state.register('comp-a');
-    // expect(state.isReady.value).toBe(false);
-
-    // state.setReady('comp-a');
-    // expect(state.isReady.value).toBe(true);
-
-    // state.register('comp-b');
-    // expect(state.isReady.value).toBe(false);
-    // state.register('comp-c');
-    // expect(state.isReady.value).toBe(false);
-
-    // state.setReady('comp-b');
-    // expect(state.isReady.value).toBe(false);
-    // state.setReady('comp-c');
-    // expect(state.isReady.value).toBe(true);
-
-  })
-
-  it('waitFor should should monitor upstream and downstream dependencies', () => {
-    const state = initState()
-
-    const dep1 = ref(false)
-    const dep2 = ref(false)
-
-    // putStrLn('before zero-comp')
-    waitFor('zero-comp', {
-      state,
-      dependsOn: [],
-      ensureTruthy: []
-    }, () => {
-      // putStrLn('inside zero-comp')
-    })
-    // putStrLn('after zero-comp')
-
-    // putStrLn('before one-comp')
-    waitFor('one-comp', {
-      state,
-      dependsOn: [dep1],
-      ensureTruthy: [dep2]
-    }, () => {
-      // putStrLn('inside one-comp')
-      dep2.value = true
-    })
-    // putStrLn('after one-comp')
-
-    // putStrLn('before two-comp')
-    waitFor('two-comp', {
-      state,
-      dependsOn: [dep2],
-      ensureTruthy: []
-    }, () => {
-      // putStrLn('inside two-comp')
-    })
-    // putStrLn('after two-comp')
-
-    dep1.value = true
-  })
-})
+});

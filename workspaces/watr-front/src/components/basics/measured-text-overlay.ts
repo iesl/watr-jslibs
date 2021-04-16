@@ -8,7 +8,7 @@ import _ from 'lodash';
 
 import { StateArgs } from '~/components/basics/component-basics'
 import { SuperimposedElements  } from './superimposed-elements';
-import { TextStyle, makeStyleString, LineDimensions, showText } from '~/lib/html-text-metrics';
+import { TextStyle, makeStyleString, LineDimensions, showText0 } from '~/lib/html-text-metrics';
 
 type PutText = (style: TextStyle, x: number, y: number, text: string) => LineDimensions;
 type ClearText = () => void;
@@ -43,7 +43,7 @@ export function useMeasuredTextOverlay({
     div.append(node)
     textDiv.appendChild(div);
 
-    return showText(text, div, x, y, charWidthCache);
+    return showText0(text, div, x, y, charWidthCache);
   }
 
   const clearText: ClearText = () => {

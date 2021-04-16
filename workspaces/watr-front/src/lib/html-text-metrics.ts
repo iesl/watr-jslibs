@@ -29,7 +29,38 @@ export function getTextWidth(ctx: CanvasRenderingContext2D, text: string, font: 
   return metrics.width
 }
 
-export function showText(
+export function showText0(
+  text: string,
+  div: HTMLDivElement,
+  atX: number,
+  atY: number,
+  _charWidthCache: Record<string, number>
+): LineDimensions {
+
+  div.innerText = text;
+
+  const lineWidth = div.offsetWidth;
+  const lineHeight = div.offsetHeight;
+  const sizes: Rect[] = _.map(text, (char, i) => {
+    const charWidth = 10;
+    const currX = atX + (i * charWidth);
+
+    const size: Rect = { kind: 'rect', x: currX, y: atY, width: charWidth, height: lineHeight };
+    return size;
+  });
+  const lineDimensions: LineDimensions = {
+    kind: 'rect',
+    x: 0,
+    y: 0,
+    width: lineWidth,
+    height: lineHeight,
+    charBounds: sizes
+  };
+
+  return lineDimensions;
+}
+
+export function showTextOrig(
   text: string,
   div: HTMLDivElement,
   atX: number,
@@ -53,14 +84,14 @@ export function showText(
     //   sizes.push(size);
     //   currX += charWidth;
     // } else {
-      div.innerText = text.slice(0, i+1);
+    div.innerText = text.slice(0, i + 1);
 
-      const currWidth = div.offsetWidth;
-      const charWidth = currWidth - currX + atX;
-      charWidthCache[char] = charWidth;
-      const size: Rect = { kind: 'rect', x: currX, y: atY, width: charWidth, height: lineHeight };
-      sizes.push(size);
-      currX = currWidth + atX;
+    const currWidth = div.offsetWidth;
+    const charWidth = currWidth - currX + atX;
+    charWidthCache[char] = charWidth;
+    const size: Rect = { kind: 'rect', x: currX, y: atY, width: charWidth, height: lineHeight };
+    sizes.push(size);
+    currX = currWidth + atX;
     // }
   }
   // div.innerText = text;

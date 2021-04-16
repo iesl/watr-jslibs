@@ -10,10 +10,10 @@ import {
 
 import { useSuperimposedElements, ElementTypes } from '~/components/basics/superimposed-elements';
 import { useMeasuredTextOverlay } from '~/components/basics/measured-text-overlay';
-import { initState, waitFor } from '~/components/basics/component-basics';
-import chroma from 'chroma-js';
+import { initState, awaitRef } from '~/components/basics/component-basics';
+// import chroma from 'chroma-js';
 import { TextStyle } from '~/lib/html-text-metrics';
-import { BBox } from '~/lib/coord-sys';
+// import { BBox } from '~/lib/coord-sys';
 
 export default {
   setup() {
@@ -28,16 +28,12 @@ export default {
     const textLeft = ref(20);
     const textFamily = ref('arial');
 
-    waitFor('TextOverlay', {
-      state,
-      dependsOn: [mountPoint],
-    }, () => {
-      console.log('inside...')
-
-      useSuperimposedElements({
+    awaitRef(mountPoint)
+      .then(() => useSuperimposedElements({
         includeElems: [ElementTypes.Text, ElementTypes.Img, ElementTypes.Svg],
         mountPoint, state
-      }).then(superimposedElements => {
+      }))
+      .then(superimposedElements => {
 
         // Set text size, print text, overlay canvas or svg rect, print dimensions
         // Set text color, styles, ...
@@ -95,7 +91,6 @@ export default {
         });
       })
 
-    });
 
     return {
       mountPoint,

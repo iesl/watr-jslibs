@@ -1,7 +1,7 @@
 <script lang="ts">
-// story-name=extractedTextViewer
+// story-name=transcriptViewer
 // story-args=id=austenite.pdf.d
-// story-title= Two Panel: [PageImage | Text]
+// story-title=App[Image+Stanza+Labels]
 import StoryComponent from './index.vue'
 export default {
   components: { StoryComponent }
@@ -12,7 +12,7 @@ export default {
   <story-layout>
 
     <template v-slot:title>
-      Pdf Page + Text Viewer
+      Pdf Transcript Viewer
     </template>
 
     <template v-slot:description>

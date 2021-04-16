@@ -8,6 +8,8 @@ import {
   ref
 } from '@vue/composition-api'
 
+import * as VC from '@vue/composition-api'
+
 import { divRef } from '~/lib/vue-composition-lib'
 import { initState, awaitRef } from '~/components/basics/component-basics'
 import { usePdfPageViewer } from '~/components/single-pane/page-viewer'
@@ -23,15 +25,10 @@ import * as E from 'fp-ts/lib/Either';
 import { fetchAndDecodeTranscript } from '~/lib/data-fetch'
 import { useLabelOverlay } from '~/components/single-pane/label-overlay'
 
-type Dictionary<T> = { [key: string]: T }
-type QObject = Dictionary<string | (string | null)[]>;
-
-export function getQueryString(queryObject: QObject, key: string): string | undefined {
-  const qval = queryObject[key]
-  if (typeof qval === 'string') {
-    return qval
-  }
-  return undefined
+interface AppState {
+  showStanzaPane: boolean;
+  showPageImagePane: boolean;
+  showPageOverlays: boolean;
 }
 
 export default defineComponent({
@@ -45,6 +42,20 @@ export default defineComponent({
 
     const entryId = 'austenite.pdf.d';
 
+    const choicesRef: Ref<Array<string> | null> = ref(null);
+    provide(ProvidedChoices, choicesRef);
+    const onItemsSelected = (selection: any[]) => {
+      console.log('we got items!', selection)
+    }
+
+    const appStateRef: VC.UnwrapRef<AppState> = VC.reactive({
+      showStanzaPane: true,
+      showPageImagePane: true,
+      showPageOverlays: true,
+    });
+
+    const appStateRefs: VC.ToRefs<AppState> = VC.toRefs(appStateRef);
+
     if (entryId) {
 
       const run = pipe(
@@ -53,11 +64,6 @@ export default defineComponent({
         TE.bind('stanzaListDiv', ({ }) => () => awaitRef(stanzaListDiv).then(d => E.right(d))),
         TE.bind('selectionFilterDiv', ({ }) => () => awaitRef(selectionFilterDiv).then(d => E.right(d))),
         TE.bind('transcript', ({ entryId }) => fetchAndDecodeTranscript(entryId)),
-        TE.bind('selectionChoicesRef', ({ }) => {
-          const choicesRef: Ref<Array<string> | null> = ref(null);
-          provide(ProvidedChoices, choicesRef);
-          return TE.right(choicesRef);
-        }),
         TE.bind('transcriptIndex', ({ transcript }) => TE.right(new TranscriptIndex(transcript))),
 
         TE.bind('pageViewers', ({ pageImageListDiv, transcript, transcriptIndex }) => {
@@ -81,9 +87,7 @@ export default defineComponent({
             mountPoint.value = mount
             stanzaListDiv.appendChild(mount)
             return useStanzaViewer({ mountPoint, state })
-              .then(stanzaViewer => {
-                stanzaViewer.showStanza(transcriptIndex, stanzaNumber);
-              });
+              .then(stanzaViewer => stanzaViewer.showStanza(transcriptIndex, stanzaNumber));
           });
 
           return () => Promise.all(inits).then(E.right);
@@ -95,12 +99,14 @@ export default defineComponent({
         }),
       );
 
-      run().then(() => undefined);
+      run();
     }
     return {
       pageImageListDiv,
       stanzaListDiv,
-      selectionFilterDiv
+      selectionFilterDiv,
+      onItemsSelected,
+      ...appStateRefs
     }
   }
 
