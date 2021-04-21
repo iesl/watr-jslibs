@@ -27,16 +27,16 @@ export function getURLQueryParams() {
 export function getURLQueryParam(key: string): string | undefined {
   const ps = getURLQueryParams();
   const v = ps.get(key);
-  return _.isString(v)? v : undefined;
+  return _.isString(v) ? v : undefined;
 }
 
+import * as E from 'fp-ts/lib/Either';
+export function getQueryParam(key: string): E.Either<any, string> {
+  const ps = getURLQueryParams();
+  const v = ps.get(key);
 
-// type Dictionary<T> = { [key: string]: T }
-// type QObject = Dictionary<string | (string | null)[]>;
-// export function getQueryString(queryObject: QObject, key: string): string | undefined {
-//   const qval = queryObject[key]
-//   if (typeof qval === 'string') {
-//     return qval
-//   }
-//   return undefined
-// }
+  if (v === null) {
+    return E.left(undefined)
+  }
+  return E.right(v)
+}

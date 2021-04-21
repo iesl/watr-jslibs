@@ -9,7 +9,6 @@ import {
 } from '@vue/composition-api';
 
 export interface ComponentState {
-  // register(name: string): void;
 }
 
 export type StateArgs = {
